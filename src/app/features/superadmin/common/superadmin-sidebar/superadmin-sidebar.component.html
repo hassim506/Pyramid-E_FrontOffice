@@ -1,0 +1,82 @@
+<div class="settings-sidebar mb-lg-0 ">
+    <div>
+        <h6 class="mb-3">Main Menu</h6>
+        <ul class="mb-3 pb-1">
+            <li>
+                <a [routerLink]="routes.superadmin_dashboard" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-grid-35 me-2"></i>Dashboard</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadminProfile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadminCourse" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Course</a>
+            </li>
+            <li>    
+                <a [routerLink]="routes.superadminUserList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-profile-2user5 me-2"></i>Gestion des Utilisateurs</a>
+            </li>
+             <li>
+                <a [routerLink]="routes.superadminClientList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-people5 me-2"></i>Gestion des Clients</a>
+            </li>
+             <li>
+                <a [routerLink]="routes.superadminCompanyManagement" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Entreprises</a>
+             </li>
+                <li>
+                <a [routerLink]="routes.superadminPermission" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Permission</a>
+
+            </li>
+ <li>
+                <a [routerLink]="routes.superadminRole" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Roles</a>
+
+            </li>
+
+            
+            <li>
+                <a [routerLink]="routes.superadminAnnouncements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-volume-high5 me-2"></i>Annonces</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadminAssignment" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-clipboard-text5 me-2"></i>Assignments</a>
+            </li>
+            <!-- <li>
+                <a [routerLink]="routes.studentsGrid" [ngClass]="{'active':page==='students-list' || page==='students-grid'}" class="d-inline-flex align-items-center" ><i class="isax isax-user-tag5 me-2"></i>Employee</a>
+            </li> -->
+            <li>
+                <a [routerLink]="routes.superadminQuiz" [ngClass]="{'active':page==='superadmin-quiz' || page==='superadmin-quiz-questions'}" class="d-inline-flex align-items-center"><i class="isax isax-award5 me-2"></i>Quiz</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadminQuiz" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-medal-star5 me-2"></i>Quiz Results</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadminCertificate" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-note-215 me-2"></i>Certificats</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadminEarning" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-wallet-add5 me-2"></i>Gains</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadmin_payouts" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-coin-15 me-2"></i>Paiement</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadminStatements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-shopping-cart5 me-2"></i>déclarations</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadminMessage" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-messages-35 me-2"></i>Messages</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.superadmin_tickets" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-ticket5 me-2"></i>Tickets Support</a>
+            </li>
+        </ul>
+        <hr>
+        <h6 class="mb-3">Account Settings</h6>
+        <ul>
+            <li>
+                <a [routerLink]="routes.superadminSettings" 
+                [ngClass]="{'active':last==='superadmin-settings' || last==='superadmin-change-password' || last==='superadmin-plans' 
+                || last === 'superadmin-social-profiles' || last === 'superadmin-linked-accounts' || last === 'superadmin-setting-notifications' || last === 'superadmin-integrations' || last === 'superadmin-setting-withdraw'
+                }" 
+                class="d-inline-flex align-items-center"><i class="isax isax-setting-25 me-2"></i>Settings</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.login" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-logout5 me-2"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+</div>

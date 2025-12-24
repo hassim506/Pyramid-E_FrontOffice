@@ -1,0 +1,94 @@
+<div class="page-title d-flex align-items-center justify-content-between">
+    <h5 class="fw-bold">Gestion des Entreprises</h5>
+    <div class="d-flex align-items-center list-icons">
+        <button class="btn btn-outline-primary me-2" (click)="refreshData()" [disabled]="loading">
+            <i class="isax isax-refresh" [class.fa-spin]="loading"></i>
+        </button>
+        <a href="javascript:void(0);" class="active me-2" (click)="openNew()"><i class="isax isax-add"></i></a>
+    </div>
+</div>
+
+<!-- Ajouter une alerte d'erreur si nécessaire -->
+<div class="alert alert-danger" *ngIf="error">
+    {{error}}
+</div>
+
+<!-- Ajouter un spinner de loading -->
+<div *ngIf="loading" class="d-flex justify-content-center p-4">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+    </div>
+</div>
+
+<div class="row justify-content-end">
+    <div class="col-md-4">
+        <div class="input-icon mb-3">
+            <span class="input-icon-addon">
+                <i class="isax isax-search-normal-14"></i>
+            </span>
+            <input [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }" type="search" (ngModelChange)="searchData(searchDataValue)" class="form-control form-control-md" placeholder="Rechercher...">
+        </div>
+    </div>
+</div>
+<div class="table-responsive custom-table">
+    <table matSort (matSortChange)="sortData($event)" class="table">
+        <thead class="thead-light">
+            <tr>
+                <th>SIRET</th>
+                <th>Nom de l'entreprise</th>
+                <th>Client</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Secteur</th>
+                <th>Effectif</th>
+                <th>Statut</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (data of tableData;track data){
+            <tr>
+                <td><a [routerLink]="['/superadmin/superadmin-company-details', data.id]" class="text-primary">{{data.siret}}</a></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-md avatar-rounded flex-shrink-0 me-2 bg-primary text-white d-flex align-items-center justify-content-center">
+                            <i class="isax isax-building"></i>
+                        </div>
+                        <a [routerLink]="['/superadmin/superadmin-company-details', data.id]"><p class="fs-14 mb-0">{{data.nom}}</p></a>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <p class="mb-0 fs-14 fw-medium">{{data.client?.nom}}</p>
+                        <small class="text-muted">{{data.client?.type | titlecase}}</small>
+                    </div>
+                </td>
+                <td>{{data.email}}</td>
+                <td>{{data.telephone}}</td>
+                <td>{{data.secteur_activite}}</td>
+                <td>{{data.taille_effectif}}</td>
+                <td>
+                    <span [class]="getStatusClass(data.statut)">{{data.statut | titlecase}}</span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" (click)="editCompany(data)"><i class="isax isax-edit"></i></a>
+                        <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" (click)="deleteCompany(data)"><i class="isax isax-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<!-- /pagination -->
+<app-custom-pagination/>
+<!-- /pagination -->
+ <!-- À la fin du fichier -->
+<app-company-add 
+  [visible]="companyDialog" 
+  [isEditMode]="isEditMode" 
+  [companyData]="selectedCompany"
+  (onClose)="hideDialog()"
+  (onSave)="refreshData()">
+</app-company-add>

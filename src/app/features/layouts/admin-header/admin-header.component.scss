@@ -1,0 +1,430 @@
+:root {
+  --primary-color: #006F78;
+  --secondary-color: #D4AF37;
+  --primary-light: rgba(0, 111, 120, 0.1);
+  --secondary-light: rgba(212, 175, 55, 0.1);
+}
+
+.header-wrapper {
+  background: var(--bs-white);
+  border-bottom: 1px solid var(--bs-border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  transition: all 0.3s ease;
+  
+  .header-content {
+    padding: 1rem 0;
+    min-height: 70px;
+  }
+}
+
+// Brand Section
+.header-brand {
+  .brand-logo {
+    text-decoration: none;
+    color: var(--bs-dark);
+    transition: opacity 0.3s ease;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+    
+    .logo-img {
+      height: 40px;
+      width: auto;
+    }
+    
+    .brand-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #006F78;
+    }
+  }
+}
+
+// Header Actions
+.header-actions {
+  gap: 0.5rem;
+  
+  .header-item {
+    display: flex;
+    align-items: center;
+  }
+}
+
+// Theme Switcher
+.theme-switcher {
+  background: var(--bs-light);
+  border-radius: 25px;
+  padding: 3px;
+  
+  .theme-toggle-btn {
+    background: transparent;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: var(--bs-secondary);
+    
+    &:hover {
+      background: var(--bs-white);
+      color: #006F78;
+    }
+    
+    &.active {
+      background: #006F78;
+      color: var(--bs-white);
+      box-shadow: 0 2px 4px rgba(0, 111, 120, 0.3);
+    }
+    
+    i {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+// Header Icon Buttons
+.header-icon-btn {
+  background: transparent;
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+  color: var(--bs-dark);
+  text-decoration: none;
+  
+  &:hover {
+    background: var(--primary-light);
+    color: #006F78;
+    transform: translateY(-1px);
+  }
+  
+  i {
+    font-size: 1.4rem;
+  }
+  
+  // Notification Badge
+  .notification-badge,
+  .cart-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #D4AF37;
+    color: var(--bs-white);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 2px solid var(--bs-white);
+  }
+}
+
+// Profile Section
+.profile-dropdown {
+  .profile-btn {
+    background: transparent;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 50px;
+    padding: 0.4rem 0.8rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    color: var(--bs-dark);
+    min-width: 120px;
+    
+    &:hover {
+      border-color: #006F78;
+      background: var(--primary-light);
+    }
+    
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(0, 111, 120, 0.25);
+    }
+  }
+  
+  .profile-avatar {
+    .avatar-img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #D4AF37;
+    }
+  }
+  
+  .profile-info {
+    text-align: left;
+    
+    .profile-name {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--bs-dark);
+      margin-bottom: 0;
+    }
+    
+    .profile-role {
+      display: block;
+      font-size: 0.75rem;
+      color: #D4AF37;
+      text-transform: capitalize;
+      font-weight: 500;
+    }
+  }
+}
+
+// Profile Menu Dropdown
+.profile-menu {
+  min-width: 280px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 0;
+  margin-top: 0.5rem;
+  
+  .profile-menu-header {
+    padding: 1.5rem 1.5rem 1rem;
+    background: linear-gradient(135deg, #006F78, #D4AF37);
+    border-radius: 12px 12px 0 0;
+    
+    .profile-avatar .avatar-img {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .profile-details {
+      .profile-name {
+        color: var(--bs-white);
+        font-weight: 600;
+        font-size: 1rem;
+      }
+      
+      .profile-email {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.8rem;
+      }
+      
+      .badge {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: var(--bs-white);
+      }
+    }
+  }
+  
+  .profile-menu-body {
+    padding: 0.5rem 0;
+    
+    .dropdown-item {
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      color: var(--bs-dark);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: var(--primary-light);
+        color: #006F78;
+        transform: translateX(5px);
+      }
+      
+      i {
+        width: 20px;
+        font-size: 1.1rem;
+        color: var(--bs-secondary);
+      }
+      
+      &:hover i {
+        color: #006F78;
+      }
+      
+      .badge {
+        font-size: 0.7rem;
+        background: #D4AF37 !important;
+        color: var(--bs-white);
+      }
+    }
+  }
+  
+  .profile-menu-footer {
+    padding: 1rem 1.5rem;
+    background: var(--bs-light);
+    border-radius: 0 0 12px 12px;
+    
+    .btn {
+      font-size: 0.9rem;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      border-color: #006F78;
+      
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 111, 120, 0.2);
+        background: #006F78;
+        border-color: #006F78;
+      }
+    }
+  }
+}
+
+// Auth Buttons
+.auth-buttons {
+  .btn {
+    border-radius: 25px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &.btn-outline-primary {
+      border-color: #006F78;
+      color: #006F78;
+      
+      &:hover {
+        background: #006F78;
+        border-color: #006F78;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 111, 120, 0.2);
+      }
+    }
+    
+    &.btn-primary {
+      background: #D4AF37;
+      border-color: #D4AF37;
+      
+      &:hover {
+        background: #c19b2f;
+        border-color: #c19b2f;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+      }
+    }
+    
+    i {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// Notification Dropdown
+.notification-dropdown {
+  min-width: 320px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  margin-top: 0.5rem;
+  
+  .dropdown-header {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    h6 {
+      margin: 0;
+      font-weight: 600;
+      color: #006F78;
+    }
+    
+    .badge {
+      background: #D4AF37 !important;
+      color: var(--bs-white);
+    }
+  }
+}
+
+// Dark Mode Support
+.dark-mode {
+  .header-wrapper {
+    background: #1a1a1a;
+    border-color: rgba(255, 255, 255, 0.1);
+    
+    .brand-text {
+      color: #D4AF37;
+    }
+    
+    .header-icon-btn,
+    .profile-name,
+    .profile-btn {
+      color: var(--bs-white);
+    }
+    
+    .profile-role {
+      color: #D4AF37;
+    }
+    
+    .header-icon-btn:hover {
+      background: rgba(0, 111, 120, 0.2);
+      color: #D4AF37;
+    }
+    
+    .profile-btn:hover {
+      background: rgba(0, 111, 120, 0.1);
+      border-color: #D4AF37;
+    }
+    
+    .theme-switcher {
+      background: rgba(255, 255, 255, 0.1);
+      
+      .theme-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #D4AF37;
+      }
+      
+      .theme-toggle-btn.active {
+        background: #D4AF37;
+        color: #1a1a1a;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .header-wrapper .header-content {
+    padding: 0.75rem 0;
+    
+    .brand-text {
+      display: none;
+    }
+    
+    .header-actions {
+      gap: 0.25rem;
+      
+      .header-item {
+        margin-right: 0.5rem !important;
+      }
+    }
+    
+    .auth-buttons .btn span {
+      display: none;
+    }
+  }
+  
+  .profile-menu {
+    min-width: 260px;
+    margin-right: 1rem;
+  }
+  
+  .notification-dropdown {
+    min-width: 280px;
+    margin-right: 1rem;
+  }
+}

@@ -1,0 +1,150 @@
+<div class="modal fade show d-block" [class.show]="visible" *ngIf="visible" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ isEditMode ? 'Modifier le Client' : 'Ajouter un Client' }}</h5>
+                <button type="button" class="btn-close" (click)="hideDialog()"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="clientForm">
+                    <div class="row">
+                        <!-- Nom du client -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom du client <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="nom" placeholder="Ex: Groupe TechnoSolutions">
+                            <div *ngIf="clientForm.get('nom')?.invalid && clientForm.get('nom')?.touched" class="text-danger mt-1">
+                                <small>Le nom est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Type -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="type">
+                                <option value="">Sélectionner un type</option>
+                                <option value="entreprise">Entreprise</option>
+                                <option value="groupe">Groupe</option>
+                                <option value="particulier">Particulier</option>
+                            </select>
+                            <div *ngIf="clientForm.get('type')?.invalid && clientForm.get('type')?.touched" class="text-danger mt-1">
+                                <small>Le type est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- SIRET -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">NINEA <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="siret" placeholder="Ex: 12345678901234">
+                            <div *ngIf="clientForm.get('siret')?.invalid && clientForm.get('siret')?.touched" class="text-danger mt-1">
+                                <small>Le NINEA est requis (14 chiffres)</small>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" formControlName="email" placeholder="Ex: info@technosolutions.fr">
+                            <div *ngIf="clientForm.get('email')?.invalid && clientForm.get('email')?.touched" class="text-danger mt-1">
+                                <small>Email valide requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Téléphone <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="telephone" placeholder="Ex: 04 78 90 12 34">
+                            <div *ngIf="clientForm.get('telephone')?.invalid && clientForm.get('telephone')?.touched" class="text-danger mt-1">
+                                <small>Le téléphone est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Contact principal -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contact Principal <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="contact_principal" placeholder="Ex: Marie Dubois">
+                            <div *ngIf="clientForm.get('contact_principal')?.invalid && clientForm.get('contact_principal')?.touched" class="text-danger mt-1">
+                                <small>Le contact principal est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Adresse -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Adresse <span class="text-danger">*</span></label>
+                            <textarea class="form-control" formControlName="adresse" rows="2" placeholder="Ex: 456 Rue de la République, 69002 Lyon"></textarea>
+                            <div *ngIf="clientForm.get('adresse')?.invalid && clientForm.get('adresse')?.touched" class="text-danger mt-1">
+                                <small>L'adresse est requise</small>
+                            </div>
+                        </div>
+
+                        <!-- Secteur d'activité -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Secteur d'activité <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="secteur_activite" placeholder="Ex: Conseil IT">
+                            <div *ngIf="clientForm.get('secteur_activite')?.invalid && clientForm.get('secteur_activite')?.touched" class="text-danger mt-1">
+                                <small>Le secteur d'activité est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Taille -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Taille <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="taille">
+                                <option value="">Sélectionner une taille</option>
+                                <option value="TPE">TPE (Très Petite Entreprise)</option>
+                                <option value="PME">PME (Petite et Moyenne Entreprise)</option>
+                                <option value="ETI">ETI (Entreprise de Taille Intermédiaire)</option>
+                                <option value="GE">GE (Grande Entreprise)</option>
+                            </select>
+                            <div *ngIf="clientForm.get('taille')?.invalid && clientForm.get('taille')?.touched" class="text-danger mt-1">
+                                <small>La taille est requise</small>
+                            </div>
+                        </div>
+
+                        <!-- Statut -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Statut <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="statut">
+                                <option value="">Sélectionner un statut</option>
+                                <option value="actif">Actif</option>
+                                <option value="inactif">Inactif</option>
+                                <option value="suspendu">Suspendu</option>
+                            </select>
+                            <div *ngIf="clientForm.get('statut')?.invalid && clientForm.get('statut')?.touched" class="text-danger mt-1">
+                                <small>Le statut est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Date début contrat -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date début contrat <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" formControlName="date_contrat">
+                            <div *ngIf="clientForm.get('date_contrat')?.invalid && clientForm.get('date_contrat')?.touched" class="text-danger mt-1">
+                                <small>La date de début de contrat est requise</small>
+                            </div>
+                        </div>
+
+                        <!-- Date fin contrat -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date fin contrat <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" formControlName="date_fin_contrat">
+                            <div *ngIf="clientForm.get('date_fin_contrat')?.invalid && clientForm.get('date_fin_contrat')?.touched" class="text-danger mt-1">
+                                <small>La date de fin de contrat est requise</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="hideDialog()">
+                    <i class="isax isax-close-circle me-1"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-primary" (click)="saveClient()" [disabled]="!clientForm.valid || loading">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                    <i *ngIf="!loading" class="isax isax-tick-circle me-1"></i>
+                    {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="visible"></div>

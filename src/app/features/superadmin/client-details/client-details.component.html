@@ -1,0 +1,306 @@
+<div class="page-title d-flex align-items-center justify-content-between">
+    <h5 class="fw-bold">Détails du Client</h5>
+    <div class="d-flex align-items-center">
+        <button class="btn btn-outline-primary me-2" (click)="goBack()">
+            <i class="isax isax-arrow-left me-1"></i>Retour
+        </button>
+        <button class="btn btn-primary me-2" (click)="editClient()" *ngIf="client">
+            <i class="isax isax-edit me-1"></i>Modifier
+        </button>
+        <button class="btn btn-outline-danger" (click)="deleteClient()" *ngIf="client">
+            <i class="isax isax-trash me-1"></i>Supprimer
+        </button>
+    </div>
+</div>
+
+<div *ngIf="loading" class="d-flex justify-content-center align-items-center" style="min-height: 300px;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+    </div>
+</div>
+
+<div *ngIf="!loading && error" class="alert alert-warning">
+    <i class="isax isax-info-circle me-2"></i>
+    {{error}}
+</div>
+
+<div *ngIf="!loading && client" class="row">
+    <!-- Informations principales -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="client-avatar mb-3">
+                    <div class="avatar avatar-xxl avatar-rounded bg-primary text-white d-inline-flex align-items-center justify-content-center">
+                        <i class="isax isax-people" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                <h5 class="mb-2">{{client?.nom}}</h5>
+                <p class="text-muted mb-3">{{client?.secteur_activite}}</p>
+                <span [class]="getStatusClass(client?.statut)">{{client?.statut | titlecase}}</span>
+                
+                <div class="row mt-4">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h6 class="mb-1">{{client?.taille}}</h6>
+                            <p class="text-muted mb-0 fs-12">Taille</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h6 class="mb-1">{{client?.entreprises_count || 0}}</h6>
+                            <p class="text-muted mb-0 fs-12">Entreprises</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations de contact -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Informations de Contact</h6>
+            </div>
+            <div class="card-body">
+                <div class="contact-info">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="isax isax-sms me-3 text-primary"></i>
+                        <div>
+                            <p class="mb-0 fs-14 fw-medium">Email</p>
+                            <a href="mailto:{{client?.email}}" class="text-primary">{{client?.email}}</a>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="isax isax-call me-3 text-primary"></i>
+                        <div>
+                            <p class="mb-0 fs-14 fw-medium">Téléphone</p>
+                            <a href="tel:{{client?.telephone}}" class="text-primary">{{client?.telephone}}</a>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="isax isax-location me-3 text-primary"></i>
+                        <div>
+                            <p class="mb-0 fs-14 fw-medium">Adresse</p>
+                            <p class="mb-0 text-muted">{{client?.adresse}}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="isax isax-document me-3 text-primary"></i>
+                        <div>
+                            <p class="mb-0 fs-14 fw-medium">SIRET</p>
+                            <p class="mb-0 text-muted">{{client?.siret}}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="isax isax-user me-3 text-primary"></i>
+                        <div>
+                            <p class="mb-0 fs-14 fw-medium">Contact Principal</p>
+                            <p class="mb-0 text-muted">{{client?.contact_principal}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations de contrat -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Contrat</h6>
+            </div>
+            <div class="card-body">
+                <div class="contact-info">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="isax isax-calendar me-3 text-primary"></i>
+                        <div>
+                            <p class="mb-0 fs-14 fw-medium">Date début</p>
+                            <p class="mb-0 text-muted">{{formatDate(client?.date_contrat)}}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="isax isax-calendar-edit me-3 text-primary"></i>
+                        <div>
+                            <p class="mb-0 fs-14 fw-medium">Date fin</p>
+                            <p class="mb-0 text-muted">{{formatDate(client?.date_fin_contrat)}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Détails du client -->
+    <div class="col-xl-8 col-lg-7">
+        <!-- Informations générales -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Informations Générales</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">ID Client</label>
+                            <p class="mb-0">{{client?.id}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Nom du client</label>
+                            <p class="mb-0">{{client?.nom}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Type</label>
+                            <span class="badge bg-info">{{client?.type | titlecase}}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">SIRET</label>
+                            <p class="mb-0">{{client?.siret}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Secteur d'activité</label>
+                            <p class="mb-0">{{client?.secteur_activite}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Taille</label>
+                            <p class="mb-0">{{client?.taille}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Statut</label>
+                            <span [class]="getStatusClass(client?.statut)">{{client?.statut | titlecase}}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Contact principal</label>
+                            <p class="mb-0">{{client?.contact_principal}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Date de création</label>
+                            <p class="mb-0">{{formatDate(client?.created_at)}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Dernière mise à jour</label>
+                            <p class="mb-0">{{formatDate(client?.updated_at)}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations de contrat détaillées -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Détails du Contrat</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Date début contrat</label>
+                            <p class="mb-0">{{formatDate(client?.date_contrat)}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Date fin contrat</label>
+                            <p class="mb-0">{{formatDate(client?.date_fin_contrat)}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Durée du contrat</label>
+                            <p class="mb-0">{{calculateContractDuration()}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entreprises associées -->
+<div class="card" *ngIf="client?.entreprises?.length">
+    <div class="card-header">
+        <h6 class="mb-0">Entreprises Associées ({{client?.entreprises?.length}})</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6" *ngFor="let entreprise of client.entreprises">
+                <div class="card mb-3 border-start border-3 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md avatar-rounded flex-shrink-0 me-3 bg-light text-primary d-flex align-items-center justify-content-center">
+                                <i class="isax isax-building"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">{{entreprise.nom}}</h6>
+                                <p class="mb-0 text-muted fs-12">{{entreprise.secteur_activite}}</p>
+                                <p class="mb-0 text-muted fs-12">{{entreprise.taille_effectif}} employés</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Adresse complète -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Adresse Complète</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start">
+                    <i class="isax isax-location me-3 text-primary" style="margin-top: 4px;"></i>
+                    <div>
+                        <p class="mb-0">{{client?.adresse}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historique/Activité récente -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Activité Récente</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item" *ngIf="client?.updated_at">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Profil mis à jour</h6>
+                            <p class="text-muted mb-0 fs-12">{{formatDate(client?.updated_at)}}</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" *ngIf="client?.date_contrat">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Début de contrat</h6>
+                            <p class="text-muted mb-0 fs-12">{{formatDate(client?.date_contrat)}}</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" *ngIf="client?.created_at">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Client enregistré</h6>
+                            <p class="text-muted mb-0 fs-12">{{formatDate(client?.created_at)}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

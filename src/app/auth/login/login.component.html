@@ -1,0 +1,149 @@
+<div class="main-wrapper">
+  <div class="login-content">
+      <div class="row">
+          <!-- Login Banner -->
+          <div class="col-md-6 login-bg d-none d-lg-flex">
+              <div class="login-carousel">
+                <ngx-slick-carousel [config]="authSlider">
+                  @for (slide of welcomeLogin; track slide) {
+                    <div ngxSlickItem>
+                      <div class="login-carousel-section mb-3">
+                          <div class="login-banner">
+                              <img [src]="slide.img" class="img-fluid" alt="Logo">
+                          </div>
+                          <div class="mentor-course text-center">
+                              <h3 class="mb-2">{{slide.content1}} <br>{{slide.content2}}<span class="text-secondary">{{slide.content3}}</span> {{slide.content4}}</h3>
+                              <p>{{slide.paragraph}}</p>
+                          </div>
+                      </div>
+                  </div>
+                  }
+                </ngx-slick-carousel>
+              </div>
+          </div>
+          <!-- /Login Banner -->
+
+          <div class="col-md-6 login-wrap-bg">
+              <!-- Login -->
+              <div class="login-wrapper">
+                  <div class="loginbox">
+                      <div class="w-100">
+                          <div class="d-flex align-items-center justify-content-between login-header">
+                              <img src="assets/img/logo.png" class="img-fluid" alt="Logo Pyramide">
+                              <a [routerLink]="routes.home" class="link-1">Retour à l'Accueil</a>
+                          </div>
+                          <h1 class="fs-32 fw-bold topic">Connectez-vous à Pyramide-e</h1>
+                          <p class="text-muted mb-4">Formez vous simplement</p>
+                          
+                          <!-- Message d'erreur -->
+                          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                              <i class="isax isax-close-circle me-2"></i>
+                              {{ errorMessage }}
+                              <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Fermer"></button>
+                          </div>
+                          
+                          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mb-3 pb-3">
+                              <!-- Email Field -->
+                              <div class="mb-3 position-relative">
+                                  <label class="form-label">Adresse Email<span class="text-danger ms-1">*</span></label>
+                                  <div class="position-relative">
+                                      <input 
+                                          type="email" 
+                                          class="form-control form-control-lg"
+                                          formControlName="email"
+                                          [class.is-invalid]="f['email'].invalid && f['email'].touched"
+                                          placeholder="Entrez votre adresse email">
+                                      <span><i class="isax isax-sms input-icon text-gray-7 fs-14"></i></span>
+                                  </div>
+                                  <div *ngIf="f['email'].invalid && f['email'].touched" class="invalid-feedback d-block">
+                                      <small *ngIf="f['email'].hasError('required')">L'email est requis</small>
+                                      <small *ngIf="f['email'].hasError('email')">Veuillez entrer un email valide</small>
+                                  </div>
+                              </div>
+                              
+                              <!-- Password Field -->
+                              <div class="mb-3 position-relative">
+                                  <label class="form-label">Mot de Passe <span class="text-danger ms-1">*</span></label>
+                                  <div class="position-relative" id="passwordInput">
+                                      <input 
+                                          [type]="password ? 'text' : 'password'" 
+                                          class="pass-inputs form-control form-control-lg"
+                                          formControlName="password"
+                                          [class.is-invalid]="f['password'].invalid && f['password'].touched"
+                                          placeholder="Entrez votre mot de passe">
+                                      <span 
+                                          tabindex="0" 
+                                          (click)="togglePassword()" 
+                                          (keydown.enter)="togglePassword()" 
+                                          class="isax toggle-passwords fs-14 cursor-pointer" 
+                                          [ngClass]="password ? 'isax-eye' : 'isax-eye-slash'">
+                                      </span>
+                                  </div>
+                                  <div *ngIf="f['password'].invalid && f['password'].touched" class="invalid-feedback d-block">
+                                      <small *ngIf="f['password'].hasError('required')">Le mot de passe est requis</small>
+                                      <small *ngIf="f['password'].hasError('minlength')">Le mot de passe doit contenir au moins 6 caractères</small>
+                                  </div>
+                              </div>
+                              
+                              <!-- Remember Me & Forgot Password -->
+                              <div class="d-flex align-items-center justify-content-between mb-4">
+                                  <div class="remember-me d-flex align-items-center">
+                                      <input 
+                                          class="form-check-input" 
+                                          type="checkbox" 
+                                          value="true" 
+                                          id="flexCheckDefault">
+                                      <label class="form-check-label ms-2" for="flexCheckDefault">
+                                          Se souvenir de moi
+                                      </label>
+                                  </div>
+                                  <div>
+                                      <a [routerLink]="routes.forgot_password" class="link-2">
+                                          Mot de passe oublié ?
+                                      </a>
+                                  </div>
+                              </div>
+                              
+                              <!-- Submit Button -->
+                              <div class="d-grid">
+                                  <button 
+                                      class="btn btn-secondary btn-lg" 
+                                      type="submit"
+                                      [disabled]="isLoading || loginForm.invalid">
+                                      <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                                      {{ isLoading ? 'Connexion en cours...' : 'Se Connecter' }}
+                                      <i *ngIf="!isLoading" class="isax isax-arrow-right-3 ms-1"></i>
+                                  </button>
+                              </div>
+                          </form>
+
+                          <div class="d-flex align-items-center justify-content-center or fs-14 mb-3">
+                              Ou
+                          </div>
+
+                          <div class="d-flex align-items-center justify-content-center mb-3">
+                              <a href="javascript:void(0);" class="btn btn-light me-2"><img src="assets/img/icons/google.svg" alt="img" class="me-2">Google</a>
+                              <a href="javascript:void(0);" class="btn btn-light"><img src="assets/img/icons/facebook.svg" alt="img" class="me-2">Facebook</a>
+                          </div>
+
+                          <div class="fs-14 fw-normal d-flex align-items-center justify-content-center">
+                              Vous n'avez pas de compte ?<a [routerLink]="routes.register" class="link-2 ms-1"> Inscrivez-vous</a>
+                          </div>
+
+                          <div class="fs-13 text-center text-muted mt-4">
+                              <p class="mb-1">Besoin d'aide ? Contactez notre support</p>
+                              <p class="mb-0">
+                                  <i class="isax isax-call me-1"></i> +221 XX XXX XX XX | 
+                                  <i class="isax isax-sms ms-2 me-1"></i> support@pyramide.com
+                              </p>
+                          </div>
+
+                          <!-- /Login -->
+
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

@@ -1,0 +1,115 @@
+<div class="modal fade show d-block" [class.show]="visible" *ngIf="visible" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ isEditMode ? 'Modifier l\'Entreprise' : 'Ajouter une Entreprise' }}</h5>
+                <button type="button" class="btn-close" (click)="hideDialog()"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="companyForm">
+                    <div class="row">
+                        <!-- Nom de l'entreprise -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom de l'entreprise <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="nom" placeholder="Ex: Pyramide IT">
+                            <div *ngIf="companyForm.get('nom')?.invalid && companyForm.get('nom')?.touched" class="text-danger mt-1">
+                                <small>Le nom est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- SIRET -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">NINEA <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="siret" placeholder="Ex: 12345678901234">
+                            <div *ngIf="companyForm.get('siret')?.invalid && companyForm.get('siret')?.touched" class="text-danger mt-1">
+                                <small>Le NINEA est requis (14 chiffres)</small>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" formControlName="email" placeholder="Ex: contact@pyramide-it.fr">
+                            <div *ngIf="companyForm.get('email')?.invalid && companyForm.get('email')?.touched" class="text-danger mt-1">
+                                <small>Email valide requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Téléphone <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="telephone" placeholder="Ex: 01 42 56 78 91">
+                            <div *ngIf="companyForm.get('telephone')?.invalid && companyForm.get('telephone')?.touched" class="text-danger mt-1">
+                                <small>Le téléphone est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Adresse -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Adresse <span class="text-danger">*</span></label>
+                            <textarea class="form-control" formControlName="adresse" rows="2" placeholder="Ex: 123 Avenue des Champs Élysées, 75008 Paris"></textarea>
+                            <div *ngIf="companyForm.get('adresse')?.invalid && companyForm.get('adresse')?.touched" class="text-danger mt-1">
+                                <small>L'adresse est requise</small>
+                            </div>
+                        </div>
+
+                        <!-- Secteur d'activité -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Secteur d'activité <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="secteur_activite" placeholder="Ex: Technologie">
+                            <div *ngIf="companyForm.get('secteur_activite')?.invalid && companyForm.get('secteur_activite')?.touched" class="text-danger mt-1">
+                                <small>Le secteur d'activité est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Taille effectif -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre d'employés <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" formControlName="taille_effectif" placeholder="Ex: 150">
+                            <div *ngIf="companyForm.get('taille_effectif')?.invalid && companyForm.get('taille_effectif')?.touched" class="text-danger mt-1">
+                                <small>Le nombre d'employés est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Client -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Client <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="client_id">
+                                <option value="">Sélectionner un client</option>
+                                <option *ngFor="let client of clients" [value]="client.id">{{client.nom}}</option>
+                            </select>
+                            <div *ngIf="companyForm.get('client_id')?.invalid && companyForm.get('client_id')?.touched" class="text-danger mt-1">
+                                <small>Le client est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Statut -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Statut <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="statut">
+                                <option value="">Sélectionner un statut</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="suspendue">Suspendue</option>
+                            </select>
+                            <div *ngIf="companyForm.get('statut')?.invalid && companyForm.get('statut')?.touched" class="text-danger mt-1">
+                                <small>Le statut est requis</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="hideDialog()">
+                    <i class="isax isax-close-circle me-1"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-primary" (click)="saveCompany()" [disabled]="!companyForm.valid || loading">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                    <i *ngIf="!loading" class="isax isax-tick-circle me-1"></i>
+                    {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="visible"></div>

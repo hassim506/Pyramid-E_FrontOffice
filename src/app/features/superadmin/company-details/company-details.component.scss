@@ -1,0 +1,75 @@
+.company-avatar {
+  .avatar {
+    width: 120px;
+    height: 120px;
+    font-size: 2.5rem;
+  }
+}
+
+.contact-info {
+  .isax {
+    font-size: 1.2rem;
+    width: 20px;
+  }
+}
+
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-marker {
+      position: absolute;
+      left: -2rem;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 3px #e9ecef;
+    }
+
+    .timeline-content {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      border-left: 3px solid var(--bs-primary);
+
+      h6 {
+        color: var(--bs-dark);
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
+
+  .company-avatar .avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 1.5rem;
+  }
+}

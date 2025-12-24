@@ -1,0 +1,15 @@
+<div class="mb-3">
+    <h5>Settings</h5>
+</div>				
+    <ul class="settings-nav d-flex align-items-center flex-wrap border bg-light-900 rounded">
+        <li><a [routerLink]="routes.adminrhSettings" routerLinkActive="active">Profile</a></li>
+        <li><a [routerLink]="routes.adminrhChangePassword" routerLinkActive="active">Security</a></li>
+        <li><a [routerLink]="routes.adminrhPlans" routerLinkActive="active">Plans</a></li>
+        <li><a [routerLink]="routes.adminrhSocialProfiles" routerLinkActive="active">Social Profiles</a></li>
+        <li><a [routerLink]="routes.adminrhLinkedAccounts" routerLinkActive="active">Linked Accounts</a></li>
+        <li><a [routerLink]="routes.adminrhSettingNotifications" routerLinkActive="active">Notifications</a></li>
+        <li><a [routerLink]="routes.adminrhIntegrations" routerLinkActive="active">Integrations</a></li>
+        <li><a [routerLink]="routes.adminrhSettingWithdraw" routerLinkActive="active">Withdraw</a></li>
+    </ul>
+
+<router-outlet></router-outlet> 

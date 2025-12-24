@@ -1,0 +1,304 @@
+<div class="page-content">
+  <div class="d-md-flex d-block align-items-center justify-content-between mb-4">
+    <div class="my-auto mb-2">
+      <h3 class="mb-1">Gestion des Permissions</h3>
+      <nav>
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item">
+            <a [routerLink]="routes.superadmin_dashboard">Dashboard</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">Permissions</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="d-flex my-xl-auto right-content align-items-center flex-wrap">
+      <button 
+        type="button" 
+        class="btn btn-primary"
+        (click)="openModal()">
+        <i class="isax isax-add me-2"></i>
+        Nouvelle Permission
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="isax isax-tick-circle me-2"></i>
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''" aria-label="Close"></button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="isax isax-close-circle me-2"></i>
+    {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+  </div>
+
+  <!-- Recherche et contrôles -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="isax isax-search-normal-1"></i>
+            </span>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Rechercher une permission..."
+              [(ngModel)]="searchText"
+              (keyup)="searchPermissions()">
+          </div>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+          <div class="d-flex align-items-center justify-content-md-end gap-3">
+            <div class="d-flex align-items-center">
+              <label class="form-label mb-0 me-2">Afficher:</label>
+              <select 
+                class="form-select form-select-sm"
+                style="width: auto;"
+                [(ngModel)]="itemsPerPage"
+                (change)="onItemsPerPageChange()">
+                <option *ngFor="let option of itemsPerPageOptions" [value]="option">
+                  {{ option }}
+                </option>
+              </select>
+            </div>
+            <span class="text-muted">
+              {{ getStartIndex() }} - {{ getEndIndex() }} de {{ totalItems }} permission(s)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des permissions -->
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom de la Permission</th>
+              <th>Guard</th>
+              <th>Date de Création</th>
+              <th>Date de Modification</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="6" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-2 text-muted">Chargement des permissions...</p>
+              </td>
+            </tr>
+
+            <tr *ngIf="!loading && paginatedPermissions.length === 0">
+              <td colspan="6" class="text-center py-5">
+                <i class="isax isax-box fs-48 text-muted mb-3 d-block"></i>
+                <p class="text-muted">Aucune permission trouvée</p>
+              </td>
+            </tr>
+
+            <tr *ngFor="let permission of paginatedPermissions">
+              <td>{{ permission.id }}</td>
+              <td>
+                <strong>{{ permission.name }}</strong>
+              </td>
+              <td>
+                <span class="badge bg-info">{{ permission.guard_name }}</span>
+              </td>
+              <td>{{ permission.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ permission.updated_at | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="text-end">
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-sm btn-light dropdown-toggle" 
+                    type="button" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false">
+                    Actions
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a 
+                        class="dropdown-item" 
+                        href="javascript:void(0);"
+                        (click)="openModal(permission)">
+                        <i class="isax isax-edit me-2"></i>
+                        Modifier
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <a 
+                        class="dropdown-item text-danger" 
+                        href="javascript:void(0);"
+                        (click)="deletePermission(permission)">
+                        <i class="isax isax-trash me-2"></i>
+                        Supprimer
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center mt-4" *ngIf="totalPages > 1">
+        <div class="text-muted">
+          Affichage de {{ getStartIndex() }} à {{ getEndIndex() }} sur {{ totalItems }} résultats
+        </div>
+        
+        <nav aria-label="Pagination des permissions">
+          <ul class="pagination pagination-sm mb-0">
+            <!-- Bouton Précédent -->
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a 
+                class="page-link" 
+                href="javascript:void(0);"
+                (click)="onPageChange(currentPage - 1)"
+                [attr.tabindex]="currentPage === 1 ? -1 : null">
+                <i class="isax isax-arrow-left-2"></i>
+              </a>
+            </li>
+
+            <!-- Première page -->
+            <li class="page-item" *ngIf="getPaginationArray()[0] > 1">
+              <a class="page-link" href="javascript:void(0);" (click)="onPageChange(1)">1</a>
+            </li>
+            <li class="page-item disabled" *ngIf="getPaginationArray()[0] > 2">
+              <span class="page-link">...</span>
+            </li>
+
+            <!-- Pages visibles -->
+            <li 
+              class="page-item" 
+              *ngFor="let page of getPaginationArray()"
+              [class.active]="page === currentPage">
+              <a 
+                class="page-link" 
+                href="javascript:void(0);"
+                (click)="onPageChange(page)">
+                {{ page }}
+              </a>
+            </li>
+
+            <!-- Dernière page -->
+            <li class="page-item disabled" *ngIf="getPaginationArray()[getPaginationArray().length - 1] < totalPages - 1">
+              <span class="page-link">...</span>
+            </li>
+            <li class="page-item" *ngIf="getPaginationArray()[getPaginationArray().length - 1] < totalPages">
+              <a class="page-link" href="javascript:void(0);" (click)="onPageChange(totalPages)">{{ totalPages }}</a>
+            </li>
+
+            <!-- Bouton Suivant -->
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a 
+                class="page-link" 
+                href="javascript:void(0);"
+                (click)="onPageChange(currentPage + 1)"
+                [attr.tabindex]="currentPage === totalPages ? -1 : null">
+                <i class="isax isax-arrow-right-2"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal existant reste inchangé -->
+<!-- Modal Ajout/Modification -->
+<div 
+  class="modal fade" 
+  [class.show]="showModal" 
+  [style.display]="showModal ? 'block' : 'none'"
+  tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ isEditing ? 'Modifier la Permission' : 'Nouvelle Permission' }}
+        </h5>
+        <button 
+          type="button" 
+          class="btn-close" 
+          (click)="closeModal()">
+        </button>
+      </div>
+      <form [formGroup]="permissionForm" (ngSubmit)="onSubmit()">
+        <div class="modal-body">
+          <!-- Nom de la permission -->
+          <div class="mb-3">
+            <label class="form-label">
+              Nom de la Permission <span class="text-danger">*</span>
+            </label>
+            <input 
+              type="text" 
+              class="form-control"
+              formControlName="name"
+              [class.is-invalid]="f['name'].invalid && f['name'].touched"
+              placeholder="Ex: créer-utilisateur, modifier-cours...">
+            <div class="invalid-feedback" *ngIf="f['name'].invalid && f['name'].touched">
+              <small *ngIf="f['name'].hasError('required')">Le nom est requis</small>
+              <small *ngIf="f['name'].hasError('minlength')">Le nom doit contenir au moins 3 caractères</small>
+            </div>
+            <small class="text-muted">
+              Utilisez des tirets pour séparer les mots (ex: créer-utilisateur)
+            </small>
+          </div>
+
+          <!-- Guard Name -->
+          <div class="mb-3">
+            <label class="form-label">
+              Guard <span class="text-danger">*</span>
+            </label>
+            <select 
+              class="form-select"
+              formControlName="guard_name"
+              [class.is-invalid]="f['guard_name'].invalid && f['guard_name'].touched">
+              <option value="web">Web</option>
+              <option value="api">API</option>
+            </select>
+            <div class="invalid-feedback" *ngIf="f['guard_name'].invalid && f['guard_name'].touched">
+              Le guard est requis
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button 
+            type="button" 
+            class="btn btn-secondary" 
+            (click)="closeModal()"
+            [disabled]="loading">
+            Annuler
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="permissionForm.invalid || loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isEditing ? 'Mettre à jour' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div 
+  class="modal-backdrop fade" 
+  [class.show]="showModal"
+  *ngIf="showModal">
+</div>

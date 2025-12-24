@@ -1,0 +1,82 @@
+<div class="settings-sidebar mb-lg-0 ">
+    <div>
+        <h6 class="mb-3">Main Menu</h6>
+        <ul class="mb-3 pb-1">
+            <li>
+                <a [routerLink]="routes.adminrh_dashboard" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-grid-35 me-2"></i>Dashboard</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrhProfile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrhCourse" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Course</a>
+            </li>
+            <li>    
+                <a [routerLink]="routes.adminrhUserList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-profile-2user5 me-2"></i>Gestion des Utilisateurs</a>
+            </li>
+             <li>
+                <a [routerLink]="routes.adminrhClientList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-people5 me-2"></i>Gestion des Clients</a>
+            </li>
+             <li>
+                <a [routerLink]="routes.adminrhCompanyManagement" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Entreprises</a>
+             </li>
+                <li>
+                <a [routerLink]="routes.adminrhPermission" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Permission</a>
+
+            </li>
+ <li>
+                <a [routerLink]="routes.adminrhRole" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Roles</a>
+
+            </li>
+
+            
+            <li>
+                <a [routerLink]="routes.adminrhAnnouncements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-volume-high5 me-2"></i>Annonces</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrhAssignment" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-clipboard-text5 me-2"></i>Assignments</a>
+            </li>
+            <!-- <li>
+                <a [routerLink]="routes.studentsGrid" [ngClass]="{'active':page==='students-list' || page==='students-grid'}" class="d-inline-flex align-items-center" ><i class="isax isax-user-tag5 me-2"></i>Employee</a>
+            </li> -->
+            <li>
+                <a [routerLink]="routes.adminrhQuiz" [ngClass]="{'active':page==='adminrh-quiz' || page==='adminrh-quiz-questions'}" class="d-inline-flex align-items-center"><i class="isax isax-award5 me-2"></i>Quiz</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrhQuiz" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-medal-star5 me-2"></i>Quiz Results</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrhCertificate" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-note-215 me-2"></i>Certificats</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrhEarning" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-wallet-add5 me-2"></i>Gains</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrh_payouts" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-coin-15 me-2"></i>Paiement</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrhStatements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-shopping-cart5 me-2"></i>déclarations</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrhMessage" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-messages-35 me-2"></i>Messages</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.adminrh_tickets" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-ticket5 me-2"></i>Tickets Support</a>
+            </li>
+        </ul>
+        <hr>
+        <h6 class="mb-3">Account Settings</h6>
+        <ul>
+            <li>
+                <a [routerLink]="routes.adminrhSettings" 
+                [ngClass]="{'active':last==='adminrh-settings' || last==='adminrh-change-password' || last==='adminrh-plans' 
+                || last === 'adminrh-social-profiles' || last === 'adminrh-linked-accounts' || last === 'adminrh-setting-notifications' || last === 'adminrh-integrations' || last === 'adminrh-setting-withdraw'
+                }" 
+                class="d-inline-flex align-items-center"><i class="isax isax-setting-25 me-2"></i>Settings</a>
+            </li>
+            <li>
+                <a [routerLink]="routes.login" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-logout5 me-2"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+</div>

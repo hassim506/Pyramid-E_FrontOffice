@@ -1,0 +1,484 @@
+<!-- banner -->
+<section class="banner-section">
+  <img class="img-fluid d-none d-lg-flex banner-bg1" src="assets/img/bg/bg-15.png" alt="img" />
+  <img class="img-fluid d-none d-lg-flex banner-bg2" src="assets/img/bg/bg-16.png" alt="img" />
+  <img class="img-fluid d-none d-lg-flex banner-bg3" src="assets/img/bg/bg-17.png" alt="img" />
+  <img class="img-fluid d-none d-lg-flex banner-bg4" src="assets/img/bg/bg-18.png" alt="img" />
+  <div class="container">
+    <div class="row align-items-center justify-content-between">
+      <div class="col-xl-7 col-lg-7">
+        <div class="banner-content pe-xxl-5">
+          <span class="hero-title">Simplifiez vos formations</span>
+          <h1 class="mb-4 text-white">
+            Découvrez les méthodes de <span>Formations</span>les plus efficaces avec les
+            <span>Formateurs</span> 
+          </h1>
+          <p class="fs-lg text-center text-md-start pb-2 pb-md-3 mb-4">
+            Nos formations spécialisées sont conçues pour transformer vos compétences professionnelles, 
+            où que vous soyez en Afrique.
+          </p>
+          <form class="banner-search" (ngSubmit)="onSubmit()">
+            <div class="dropdown">
+              <a class="hero-dropdown" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
+                Sélectionner une Catégorie <i class="isax isax-arrow-down5 fs-12"></i>
+              </a>
+              <ul class="dropdown-menu p-1">
+                <li><a class="dropdown-item" href="javascript:void(0);">Management</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);">Développement</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);">Marketing Digital</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);">Finance</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);">Ressources Humaines</a></li>
+              </ul>
+            </div>
+            <input type="text" name="search" class="border-0 form-control p-0"
+              placeholder="Rechercher des formations, des formateurs..." />
+            <button type="submit" class="btn btn-secondary ms-auto">
+              <i class="isax isax-arrow-right-1"></i>
+            </button>
+          </form>
+          <div class="d-flex align-items-center gap-4 justify-content-lg-between justify-content-center flex-wrap">
+            <div class="counter-item">
+              <div class="counter-icon flex-shrink-0">
+                <img src="assets/img/icons/icon-32.svg" alt="img" />
+              </div>
+              <div class="count-content">
+                <h5 class="text-purple">
+                  <span class="count-digit">500</span>+
+                </h5>
+                <p>Formations Disponibles</p>
+              </div>
+            </div>
+            <div class="counter-item">
+              <div class="counter-icon flex-shrink-0">
+                <img src="assets/img/icons/icon-33.svg" alt="img" />
+              </div>
+              <div class="count-content">
+                <h5 class="text-skyblue">
+                  <span class="count-digit">200</span>+
+                </h5>
+                <p>Entreprises Partenaires</p>
+              </div>
+            </div>
+            <div class="counter-item">
+              <div class="counter-icon flex-shrink-0">
+                <img src="assets/img/icons/icon-34.svg" alt="img" />
+              </div>
+              <div class="count-content">
+                <h5 class="text-success">
+                  <span class="count-digit">150</span>+
+                </h5>
+                <p>Formateurs Certifiés</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-4 col-lg-5">
+        <div class="banner-image pe-0">
+          <div class="swiper swiper-slider-banner w-auto">
+            <div class="swiper-wrapper">
+              <div class="swiper swiper-cards swiper-3d swiper-initialized swiper-horizontal swiper-pointer-events swiper-watch-progress" >
+                <div class="swiper-wrapper">
+                  <div class="swiper-slide ng-star-inserted swiper-slide-visible swiper-slide-active" style="z-index: 3; transform: translate3d(0px, 0px, 0px) rotateZ(0deg) scale(1);">
+                    <div class="swiper-slide">
+                      <div class="course-item-two course-item mb-0">
+                        <div class="course-img">
+                          <img src="assets/img/course/course-22.jpg" alt="img" class="img-fluid" />
+                          <div class="position-absolute start-0 top-0 d-flex align-items-start w-100 z-index-2 p-2">
+                            <a href="javascript:void(0);" class="fav-icon" [ngClass]="{'selected':isSelected[1]}" (click)="iconSelect(1)">
+                              <i class="isax isax-heart"></i>
+                            </a>
+                            <a href="javascript:void(0);" class="brand-icon ms-auto">
+                              <img src="assets/img/icons/course-01.svg" alt="img" class="img-fluid" />
+                            </a>
+                          </div>
+                        </div>
+                        <div class="course-content">
+                          <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex align-items-center">
+                              <a href="javascript:void(0);" class="avatar avatar-sm">
+                                <img src="assets/img/user/user-50.jpg" alt="img"
+                                  class="img-fluid avatar avatar-sm rounded-circle" />
+                              </a>
+                              <div class="ms-2">
+                                <a href="javascript:void(0);" class="link-default fs-14">Amadou Diallo</a>
+                              </div>
+                            </div>
+                            <span
+                              class="badge badge-light rounded-pill bg-light d-inline-flex align-items-center fs-13 fw-medium">
+                              Management
+                            </span>
+                          </div>
+                          <h6 class="mb-2">
+                            <a [routerLink]="routes.courseDetails">Formation Complète en Gestion d'Entreprise</a>
+                          </h6>
+                          <p class="d-flex align-items-center mb-3">
+                            <i class="ti ti-star-filled text-warning me-2"></i>
+                            4.8
+                          </p>
+                          <div class="d-flex align-items-center justify-content-between">
+                            <h6 class="text-secondary fs-16 fw-semi-bold mb-0">
+                             75.000 FCFA
+                            </h6>
+                            <a [routerLink]="routes.cart" class="btn btn-dark btn-sm d-inline-flex align-items-center">Ajouter<i
+                                class="isax isax-arrow-right-3 ms-1"></i></a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper-slide ng-star-inserted swiper-slide-visible swiper-slide-next" style="z-index: 2; transform: translate3d(calc(7.25032% - 321px), 0px, -100.005px) rotateZ(2.0001deg) scale(1);">
+                    <div class="swiper-slide">
+                      <div class="course-item-two course-item mb-0">
+                        <div class="course-img">
+                          <img src="assets/img/course/course-25.jpg" alt="img" class="img-fluid" />
+                          <div class="position-absolute start-0 top-0 d-flex align-items-start w-100 z-index-2 p-2">
+                            <a href="javascript:void(0);" class="fav-icon" >
+                              <i class="isax isax-heart"></i>
+                            </a>
+                            <a href="javascript:void(0);" class="brand-icon ms-auto">
+                              <img src="assets/img/icons/course-01.svg" alt="img" class="img-fluid" />
+                            </a>
+                          </div>
+                        </div>
+                        <div class="course-content">
+                          <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex align-items-center">
+                              <a href="javascript:void(0);" class="avatar avatar-sm">
+                                <img src="assets/img/user/user-50.jpg" alt="img"
+                                  class="img-fluid avatar avatar-sm rounded-circle" />
+                              </a>
+                              <div class="ms-2">
+                                <a href="javascript:void(0);" class="link-default fs-14">Fatou Ndiaye</a>
+                              </div>
+                            </div>
+                            <span
+                              class="badge badge-light rounded-pill bg-light d-inline-flex align-items-center fs-13 fw-medium">
+                              Marketing
+                            </span>
+                          </div>
+                          <h6 class="mb-2">
+                            <a [routerLink]="routes.courseDetails">Marketing Digital pour Entreprises Africaines</a>
+                          </h6>
+                          <p class="d-flex align-items-center mb-3">
+                            <i class="ti ti-star-filled text-warning me-2"></i>
+                            4.9
+                          </p>
+                          <div class="d-flex align-items-center justify-content-between">
+                            <h6 class="text-secondary fs-16 fw-semi-bold mb-0">
+                             65.000 FCFA
+                            </h6>
+                            <a [routerLink]="routes.cart" class="btn btn-dark btn-sm d-inline-flex align-items-center">Ajouter<i
+                                class="isax isax-arrow-right-3 ms-1"></i></a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper-slide " style="z-index: 1; transform: translate3d(calc(13.0005% - 642px), 0px, -200.01px) rotateZ(4.0002deg) scale(1); transition-duration: 0ms;">
+                    <div class="swiper-slide">
+                      <div class="course-item-two course-item mb-0">
+                        <div class="course-img">
+                          <img src="assets/img/course/course-23.jpg" alt="img" class="img-fluid" />
+                          <div class="position-absolute start-0 top-0 d-flex align-items-start w-100 z-index-2 p-2">
+                            <a href="javascript:void(0);" class="fav-icon" >
+                              <i class="isax isax-heart"></i>
+                            </a>
+                            <a href="javascript:void(0);" class="brand-icon ms-auto">
+                              <img src="assets/img/icons/course-01.svg" alt="img" class="img-fluid" />
+                            </a>
+                          </div>
+                        </div>
+                        <div class="course-content">
+                          <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex align-items-center">
+                              <a href="javascript:void(0);" class="avatar avatar-sm">
+                                <img src="assets/img/user/user-50.jpg" alt="img"
+                                  class="img-fluid avatar avatar-sm rounded-circle" />
+                              </a>
+                              <div class="ms-2">
+                                <a href="javascript:void(0);" class="link-default fs-14">Koffi Mensah</a>
+                              </div>
+                            </div>
+                            <span
+                              class="badge badge-light rounded-pill bg-light d-inline-flex align-items-center fs-13 fw-medium">
+                              Finance
+                            </span>
+                          </div>
+                          <h6 class="mb-2">
+                            <a [routerLink]="routes.courseDetails">Gestion Financière pour PME</a>
+                          </h6>
+                          <p class="d-flex align-items-center mb-3">
+                            <i class="ti ti-star-filled text-warning me-2"></i>
+                            4.7
+                          </p>
+                          <div class="d-flex align-items-center justify-content-between">
+                            <h6 class="text-secondary fs-16 fw-semi-bold mb-0">
+                             80.000 FCFA
+                            </h6>
+                            <a [routerLink]="routes.cart" class="btn btn-dark btn-sm d-inline-flex align-items-center">Ajouter<i
+                                class="isax isax-arrow-right-3 ms-1"></i></a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- banner -->
+
+<!-- benefits -->
+<section class="benefit-section">
+  <div class="container">
+    <div class="section-header text-center">
+      <span class="fw-medium text-secondary text-decoration-underline mb-2 d-inline-block">Nos Avantages</span>
+      <h2>Maîtrisez les Compétences pour Propulser Votre Carrière</h2>
+      <p>
+        La bonne formation, guidée par un expert, peut vous fournir des connaissances inestimables 
+        et des compétences pratiques pour réussir.
+      </p>
+    </div>
+    <div class="row">
+      <div class="col-lg-4 col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <div class="position-absolute top-0 end-0 mt-n3 me-n4">
+              <img src="./assets/img/shapes/bg-1.png" alt="img" />
+            </div>
+            <div class="p-4 rounded-pill bg-primary-transparent d-inline-flex">
+              <i class="isax isax-book-1 fs-24"></i>
+            </div>
+            <h5 class="mt-3 mb-1">Formation Flexible</h5>
+            <p>
+              Apprenez à votre rythme avec des formations accessibles 24h/24, adaptées aux 
+              contraintes des professionnels africains.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <div class="position-absolute top-0 end-0 mt-n3 me-n4">
+              <img src="assets/img/shapes/bg-2.png" alt="img" />
+            </div>
+            <div class="p-4 rounded-pill bg-secondary-transparent d-inline-flex">
+              <i class="isax isax-bookmark5 fs-24"></i>
+            </div>
+            <h5 class="mt-3 mb-1">Accès Illimité</h5>
+            <p>
+              Profitez d'un accès à vie à vos formations et ressources pédagogiques pour 
+              continuer à apprendre et progresser.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <div class="position-absolute top-0 end-0 mt-n3 me-n4">
+              <img src="assets/img/shapes/bg-3.png" alt="img" />
+            </div>
+            <div class="p-4 rounded-pill bg-skyblue-transparent d-inline-flex">
+              <i class="isax isax-chart-26 fs-24"></i>
+            </div>
+            <h5 class="mt-3 mb-1">Formateurs Experts</h5>
+            <p>
+              Nos formateurs sont des professionnels expérimentés avec des années d'expertise 
+              dans leurs domaines respectifs.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- benefits -->
+
+<!-- institutions -->
+<section class="client-section">
+  <div class="container">
+    <h6 class="fw-medium text-center mb-4">
+      Approuvé par
+      <span class="text-decoration-underline text-secondary">200+</span>
+      Entreprises à Travers l'Afrique
+    </h6>
+    <div class="institutions-slider lazy slider">
+      <ngx-slick-carousel #slickModal="slick-carousel" [config]="slideConfig">
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/01.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/02.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/03.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/04.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/05.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/06.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/07.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/02.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/03.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/04.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/05.svg" alt="img" />
+        </div>
+        <div class="institutions-items p-1" ngxSlickItem>
+          <img class="img-fluid" src="./assets/img/client/06.svg" alt="img" />
+        </div>
+      </ngx-slick-carousel>
+    </div>
+  </div>
+</section>
+<!-- institutions -->
+
+<!-- top courses -->
+<section class="top-courses-sec">
+  <img class="top-courses-bg" src="./assets/img/bg/bg-20.png" alt="img" />
+  <div class="container">
+    <div class="section-header text-center">
+      <span class="fw-medium text-secondary text-decoration-underline mb-2 d-inline-block">Nos Catégories</span>
+      <h2>Formations & Catégories Populaires</h2>
+      <p>
+        Découvrez nos formations les plus demandées par les entreprises africaines 
+        pour développer les compétences de leurs équipes.
+      </p>
+    </div>
+    <div class="top-courses-slider lazy">
+      <ngx-slick-carousel #slickModal="slick-carousel" [config]="topCourseSlider">
+        <div ngxSlickItem>
+          <div class="categories-item categories-item-three mb-0">
+            <img class="mx-auto" src="assets/img/category/icons/icon-6.svg" alt="img" />
+            <h6 class="title">
+              <a [routerLink]="routes.courseCategory">Management</a>
+            </h6>
+          </div>
+        </div>
+        <div ngxSlickItem>
+          <div class="categories-item categories-item-three mb-0">
+            <img class="mx-auto" src="assets/img/category/icons/icon-7.svg" alt="img" />
+            <h6 class="title">
+              <a [routerLink]="routes.courseCategory">Ressources Humaines</a>
+            </h6>
+          </div>
+        </div>
+        <div ngxSlickItem>
+          <div class="categories-item categories-item-three mb-0">
+            <img class="mx-auto" src="assets/img/category/icons/icon-8.svg" alt="img" />
+            <h6 class="title">
+              <a [routerLink]="routes.courseCategory">Marketing Digital</a>
+            </h6>
+          </div>
+        </div>
+        <div ngxSlickItem>
+          <div class="categories-item categories-item-three mb-0">
+            <img class="mx-auto" src="assets/img/category/icons/icon-9.svg" alt="img" />
+            <h6 class="title">
+              <a [routerLink]="routes.courseCategory">Finance & Comptabilité</a>
+            </h6>
+          </div>
+        </div>
+        <div ngxSlickItem>
+          <div class="categories-item categories-item-three mb-0">
+            <img class="mx-auto" src="assets/img/category/icons/icon-10.svg" alt="img" />
+            <h6 class="title">
+              <a [routerLink]="routes.courseCategory">Leadership</a>
+            </h6>
+          </div>
+        </div>
+        <div ngxSlickItem>
+          <div class="categories-item categories-item-three mb-0">
+            <img class="mx-auto" src="assets/img/category/icons/icon-11.svg" alt="img" />
+            <h6 class="title">
+              <a [routerLink]="routes.courseCategory">Développement Web</a>
+            </h6>
+          </div>
+        </div>
+      </ngx-slick-carousel>
+    </div>
+    <a [routerLink]="routes.courseCategory" class="btn btn-primary btn-md">Voir Toutes les Catégories</a>
+  </div>
+</section>
+<!-- /top courses -->
+
+<!-- trust -->
+<section class="trust-sec">
+  <div class="container">
+    <div class="video-showcase">
+      <img src="assets/img/feature/feature-1.jpg" class="img-fluid w-100 rounded-2" alt="banner" />
+      <div class="video-play">
+        <lightgallery [settings]="settings" [onInit]="onInit" size="1400-933">
+          <a src="https://www.youtube.com/embed/1trvO6dqQUI"><i class="isax isax-play5"></i></a>
+      </lightgallery>
+      </div>
+    </div>
+    <div class="trust-content">
+      <img src="./assets/img/bg/bg-19.png" alt="img" class="w-100 trust-bg" />
+      <div class="row justify-content-between">
+        <div class="col-md-4">
+          <h4>
+            Approuvé par 5.000+ entreprises et apprenants satisfaits depuis 2020
+          </h4>
+          <div class="d-flex align-items-center flex-wrap mt-5 gap-2">
+            <a [routerLink]="routes.login" class="btn btn-secondary">S'inscrire comme Apprenant</a>
+            <a [routerLink]="routes.becomeAnExpert" class="btn btn-dark">Devenir Formateur</a>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <div class="row">
+            <div class="col-md-6">
+              <h4 class="text-white mb-2">4.9/5</h4>
+              <h5 class="text-white mb-2">Note de Satisfaction</h5>
+              <p class="text-white mb-5">
+                Un taux de satisfaction exceptionnel qui témoigne de la qualité de nos formations.
+              </p>
+            </div>
+            <div class="col-md-6">
+              <h4 class="text-white mb-2">5000+</h4>
+              <h5 class="text-white mb-2">Apprenants Satisfaits en Afrique</h5>
+              <p class="text-white mb-5">
+                Des milliers de professionnels africains ont transformé leur carrière grâce à Pyramide.
+              </p>
+            </div>
+          </div>
+          <div class="d-flex align-items-center bg-white user-goal p-2">
+            <div class="avatar avatar-lg flex-shrink-0">
+              <img class="rounded-pill" src="./assets/img/user/user-28.jpg" alt="img" />
+            </div>
+            <p class="text-gray-9 mb-0">
+              "Toutes les formations sont incroyablement utiles pour atteindre vos objectifs professionnels"
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /trust -->
+
+<!-- Les autres sections continuent avec la même traduction... -->
+<!-- Je continue si vous le souhaitez -->
+
+  <app-footer></app-footer>

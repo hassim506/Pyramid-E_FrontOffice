@@ -1,0 +1,107 @@
+<div class="modal fade show d-block" [class.show]="visible" *ngIf="visible" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ isEditMode ? 'Modifier l\'Utilisateur' : 'Ajouter un Utilisateur' }}</h5>
+                <button type="button" class="btn-close" (click)="hideDialog()"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="userForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="nom">
+                            <div *ngIf="userForm.get('nom')?.invalid && userForm.get('nom')?.touched" class="text-danger mt-1">
+                                <small>Le nom est requis (min. 2 caractères)</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Prénom <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="prenom">
+                            <div *ngIf="userForm.get('prenom')?.invalid && userForm.get('prenom')?.touched" class="text-danger mt-1">
+                                <small>Le prénom est requis (min. 2 caractères)</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" formControlName="email">
+                            <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="text-danger mt-1">
+                                <small>Email valide requis</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Numéro</label>
+                            <input type="text" class="form-control" formControlName="numero">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fonction</label>
+                            <input type="text" class="form-control" formControlName="fonction">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Rôle <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="role_id">
+                                <option value="">Sélectionner un rôle</option>
+                                <option value="1">Super Admin</option>
+                                <option value="2">Employé</option>
+                                <option value="3">Formateur</option>
+                                <option value="4">Responsable RH</option>
+                                <option value="5">Responsable RH Groupe</option>
+                            </select>
+                            <div *ngIf="userForm.get('role_id')?.invalid && userForm.get('role_id')?.touched" class="text-danger mt-1">
+                                <small>Le rôle est requis</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Statut <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="statut">
+                                <option value="1">Actif</option>
+                                <option value="0">Inactif</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Entreprise</label>
+                            <select class="form-select" formControlName="entreprise_id">
+                                <option value="">Aucune</option>
+                                <option *ngFor="let company of companies" [value]="company.id">{{company.nom}}</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3" *ngIf="!isEditMode">
+                            <label class="form-label">Mot de passe <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" formControlName="password">
+                            <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="text-danger mt-1">
+                                <small>Mot de passe requis (min. 8 caractères)</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3" *ngIf="!isEditMode">
+                            <label class="form-label">Confirmer le mot de passe <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" formControlName="password_confirmation">
+                            <div *ngIf="userForm.get('password_confirmation')?.invalid && userForm.get('password_confirmation')?.touched" class="text-danger mt-1">
+                                <small>Confirmation du mot de passe requise</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="hideDialog()">
+                    <i class="isax isax-close-circle me-1"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-primary" (click)="saveUser()" [disabled]="!userForm.valid || loading">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                    <i *ngIf="!loading" class="isax isax-tick-circle me-1"></i>
+                    {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="visible"></div>

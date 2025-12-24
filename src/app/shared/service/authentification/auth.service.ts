@@ -1,0 +1,175 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { environment } from '../../../../environments/environment';
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+// export interface LoginResponse {
+//   success: boolean;
+//   token?: string;
+//   user?: {
+//     id: number;
+//     email: string;
+//     first_name: string;
+//     last_name: string;
+//     role: string;
+//   };
+//   message?: string;
+// }
+export interface LoginResponse {
+  success?: boolean;
+  status?: boolean;
+  message?: string;
+  access_token?: string;
+  token?: string;
+  token_type?: string;
+  user?: {
+    id: number;
+    email: string;
+    name?: string;
+    first_name?: string;
+    last_name?: string;
+    prenom?: string;
+    nom?: string;
+    role?: string;
+    role_id?: number;
+    fonction?: string;
+    avatar?: string;
+    created_at?: string;
+    updated_at?: string;
+    [key: string]: any;
+  };
+}
+export interface RegisterRequest {
+  prenom: string;
+  nom: string;
+  email: string;
+  numero: string;
+  fonction: string;
+  role_id: number;
+  entreprise_id: number;
+  password: string;
+  password_confirmation: string;
+  created_by?: number;
+  statut: number;
+}
+
+export interface RegisterResponse {
+  success?: boolean;
+  status?: boolean;
+  message?: string;
+  user?: {
+    id: number;
+    email: string;
+    prenom: string;
+    nom: string;
+    role_id: number;
+    [key: string]: any;
+  };
+}
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+
+  private apiUrl = `${environment.apiUrl}/login`;
+  private tokenKey = 'pyramide_token';
+  private userKey = 'pyramide_user';
+
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    console.log('API Login URL:', this.apiUrl);
+  }
+
+  login(credentials: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(this.apiUrl, credentials)
+      .pipe(
+        tap(response => {
+          console.log('Login response complète:', response);
+
+          const isSuccess = response?.success || response?.status;
+          const token = response?.access_token || response?.token;
+
+          if (isSuccess && token) {
+            this.setToken(token);
+            this.setUser(response?.user);
+            console.log('Token et utilisateur stockés');
+          }
+        }),
+        catchError(error => {
+          console.error('Login error details:', error);
+          return this.handleError(error);
+        })
+      );
+  }
+register(data: any): Observable<any> {
+  // Ajouter created_by automatiquement
+  const user = this.getUser();
+  const payload = {
+    ...data,
+    created_by: user?.id || 1 // ID de l'utilisateur connecté
+  };
+
+  console.log('Payload envoyé:', payload);
+  return this.http.post<any>(`${environment.apiUrl}/users`, payload)
+    .pipe(
+      tap(response => {
+        console.log('Register response:', response);
+      }),
+      catchError(error => {
+        console.error('Register error:', error);
+        return this.handleError(error);
+      })
+    );
+}
+  private setToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  private setUser(user: any): void {
+    localStorage.setItem(this.userKey, JSON.stringify(user));
+  }
+
+  getUser(): any {
+    const user = localStorage.getItem(this.userKey);
+    return user ? JSON.parse(user) : null;
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    this.router.navigate(['/auth/login']);
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'Une erreur est survenue';
+
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Erreur: ${error.error.message}`;
+    } else {
+      errorMessage = error.error?.message || error.message || 'Erreur de connexion au serveur';
+    }
+
+    console.error('Error details:', errorMessage, error);
+    return throwError(() => ({
+      message: errorMessage,
+      error: error
+    }));
+  }
+}

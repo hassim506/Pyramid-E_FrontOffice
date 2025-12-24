@@ -1,0 +1,188 @@
+<header class="header-wrapper">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col">
+        <div class="header-content d-flex align-items-center justify-content-between">
+          
+          <!-- Logo/Brand Section -->
+          <div class="header-brand">
+            <a [routerLink]="routes.home" class="brand-logo d-flex align-items-center">
+              <img src="assets/images/logo.png" alt="Logo" class="logo-img me-2">
+              <span class="brand-text">Pyramide Admin</span>
+            </a>
+          </div>
+
+          <!-- Header Actions -->
+          <div class="header-actions d-flex align-items-center">
+            
+            <!-- Theme Toggle -->
+            <div class="header-item me-3">
+              <div class="theme-switcher d-flex">
+                <button 
+                  type="button" 
+                  class="theme-toggle-btn" 
+                  [class.active]="themeColor === 'light-mode'"
+                  (click)="sidebarService.changeThemeColor('dark-mode')"
+                  title="Light Mode">
+                  <i class="isax isax-sun-15"></i>
+                </button>
+                <button 
+                  type="button" 
+                  class="theme-toggle-btn" 
+                  [class.active]="themeColor === 'dark-mode'"
+                  (click)="sidebarService.changeThemeColor('light-mode')"
+                  title="Dark Mode">
+                  <i class="isax isax-moon"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="header-item me-3">
+              <div class="dropdown">
+                <button class="header-icon-btn" type="button" data-bs-toggle="dropdown">
+                  <i class="isax isax-notification"></i>
+                  <span class="notification-badge">3</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end notification-dropdown">
+                  <div class="dropdown-header">
+                    <h6>Notifications</h6>
+                    <span class="badge bg-primary">3 New</span>
+                  </div>
+                  <!-- Notification items would go here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Shopping Cart -->
+            <div class="header-item me-3">
+              <a [routerLink]="routes.cart" class="header-icon-btn position-relative">
+                <i class="isax isax-shopping-cart5"></i>
+                <span class="cart-badge">1</span>
+              </a>
+            </div>
+
+            <!-- Profile Section -->
+            <div *ngIf="isLoggedIn" class="header-item">
+              <div class="dropdown profile-dropdown">
+                <button class="profile-btn d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                  <div class="profile-avatar me-2">
+                    <img [src]="currentUser?.avatar || getDefaultAvatar()" alt="Profile" class="avatar-img">
+                  </div>
+                  <div class="profile-info d-none d-md-block">
+                    <span class="profile-name">{{ currentUser?.prenom || 'User' }} {{ currentUser?.nom || 'Name' }}</span>
+                    <small class="profile-role">{{ getRoleLabel() }}</small>
+                  </div>
+                  <i class="isax isax-arrow-down-1 ms-2"></i>
+                </button>
+
+                <div class="dropdown-menu dropdown-menu-end profile-menu">
+                  <!-- Profile Header -->
+                  <div class="profile-menu-header">
+                    <div class="d-flex align-items-center">
+                      <div class="profile-avatar me-3">
+                        <img [src]="currentUser?.avatar || getDefaultAvatar()" alt="Profile" class="avatar-img">
+                      </div>
+                      <div class="profile-details">
+                        <h6 class="profile-name mb-0">{{ currentUser?.prenom || 'User' }} {{ currentUser?.nom || 'Name' }}</h6>
+                        <p class="profile-email mb-1">{{ currentUser?.email || 'user@example.com' }}</p>
+                        <span class="badge bg-primary">{{ getRoleLabel() }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="dropdown-divider"></div>
+
+                  <!-- Profile Menu Items -->
+                  <div class="profile-menu-body">
+                    <a class="dropdown-item" [routerLink]="getProfileRoute()">
+                      <i class="isax isax-security-user me-2"></i>
+                      <span>My Profile</span>
+                    </a>
+
+                    <!-- Admin Menu -->
+                    <ng-container *ngIf="currentUser?.role_id === 1">
+                      <a class="dropdown-item" [routerLink]="routes.register">
+                        <i class="isax isax-user-add me-2"></i>
+                        <span>Add User</span>
+                      </a>
+                      <a class="dropdown-item" [routerLink]="routes.superadmin_dashboard">
+                        <i class="isax isax-element-4 me-2"></i>
+                        <span>Admin Dashboard</span>
+                      </a>
+                    </ng-container>
+
+                    <!-- Instructor Menu -->
+                    <ng-container *ngIf="currentUser?.role_id === 2">
+                      <a class="dropdown-item" [routerLink]="routes.instructorCourse">
+                        <i class="isax isax-book-1 me-2"></i>
+                        <span>My Courses</span>
+                      </a>
+                    </ng-container>
+
+                    <!-- Student Menu -->
+                    <ng-container *ngIf="currentUser?.role_id === 3">
+                      <a class="dropdown-item" [routerLink]="routes.instructorCourse">
+                        <i class="isax isax-book-1 me-2"></i>
+                        <span>My Courses</span>
+                      </a>
+                      <a class="dropdown-item" [routerLink]="routes.studentQuiz">
+                        <i class="isax isax-award me-2"></i>
+                        <span>Quiz Attempts</span>
+                      </a>
+                    </ng-container>
+
+                    <!-- Common Menu Items -->
+                    <a class="dropdown-item" [routerLink]="routes.instructorCourse">
+                      <i class="isax isax-messages-3 me-2"></i>
+                      <span>Messages</span>
+                      <span *ngIf="currentUser?.role_id === 3" class="badge bg-danger ms-auto">2</span>
+                    </a>
+                    <a class="dropdown-item" [routerLink]="getSettingsRoute()">
+                      <i class="isax isax-setting-2 me-2"></i>
+                      <span>Settings</span>
+                    </a>
+                  </div>
+
+                  <div class="dropdown-divider"></div>
+
+                  <!-- Profile Footer -->
+                  <div class="profile-menu-footer">
+                    <!-- Switch Role -->
+                    <div *ngIf="currentUser?.role_id === 1 || currentUser?.role_id === 2" class="mb-2">
+                      <a class="dropdown-item" [routerLink]="routes.login">
+                        <i class="isax isax-arrow-2 me-2"></i>
+                        <span>{{ currentUser?.role_id === 1 ? 'View as Student' : 'Log in as Student' }}</span>
+                      </a>
+                    </div>
+
+                    <!-- Logout Button -->
+                    <button class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center" (click)="logout()">
+                      <i class="isax isax-logout me-2"></i>
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Login Buttons -->
+            <div *ngIf="!isLoggedIn" class="header-item">
+              <div class="auth-buttons d-flex align-items-center">
+                <a [routerLink]="routes.login" class="btn btn-outline-primary btn-sm me-2">
+                  <i class="isax isax-login me-1"></i>
+                  <span>Login</span>
+                </a>
+                <a [routerLink]="routes.register" class="btn btn-primary btn-sm">
+                  <i class="isax isax-user-add me-1"></i>
+                  <span>Register</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
