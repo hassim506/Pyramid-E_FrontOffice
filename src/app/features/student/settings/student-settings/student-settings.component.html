@@ -7,16 +7,16 @@
                 <div class="d-flex align-items-center">
                     <a [routerLink]="routes.studentProfile" class="avatar flex-shrink-0 avatar-xxxl avatar-rounded border me-3"><img src="assets/img/user/user-02.jpg" alt="Img" class="img-fluid"></a>
                     <div class="profile-upload-head">
-                        <h6><a [routerLink]="routes.studentProfile">Profile Photo</a></h6>
+                        <h6><a [routerLink]="routes.studentProfile">Photo de Profile</a></h6>
                         <p class="fs-14 mb-0">PNG or JPG no bigger than 800px width and height</p>
                         <div class="new-employee-field">
                             <div class="d-flex align-items-center mt-2">
                                 <div class="image-upload position-relative mb-0 me-2">
                                     <input type="file">
-                                    <a href="javascript:void(0);" class="btn bg-gray-100 btn-sm rounded-pill image-uploads">Upload</a>
+                                    <a href="javascript:void(0);" class="btn bg-gray-100 btn-sm rounded-pill image-uploads">Uploader</a>
                                 </div>
                                 <div class="img-delete">
-                                    <a href="javascript:void(0);" class="btn btn-secondary btn-sm rounded-pill">Delete</a>
+                                    <a href="javascript:void(0);" class="btn btn-secondary btn-sm rounded-pill">Supprimer</a>
                                 </div>
                             </div>
                         </div>
@@ -25,37 +25,37 @@
             </div>
                 <div>
                     <div class="edit-profile-info mb-3">
-                        <h5 class="mb-1">Personal Details</h5>
+                        <h5 class="mb-1">Informations Personnelles</h5>
                         <p>Edit your personal information</p>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">First Name <span class="text-danger"> *</span></label>
+                                <label class="form-label">Prenom <span class="text-danger"> *</span></label>
                                 <input type="text" class="form-control" value="Ronald">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Last Name <span class="text-danger"> *</span></label>
+                                <label class="form-label">Nom <span class="text-danger"> *</span></label>
                                 <input type="text" class="form-control" value="Richard">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">User Name <span class="text-danger"> *</span></label>
+                                <label class="form-label">Nom d'utilisateur <span class="text-danger"> *</span></label>
                                 <input type="text" class="form-control" value="studentdemo">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Phone Number <span class="text-danger"> *</span></label>
+                                <label class="form-label">Numéro de Téléphone  <span class="text-danger"> *</span></label>
                                 <input type="text" class="form-control" value="90154-91036">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Gender <span class="text-danger"> *</span></label>
+                                <label class="form-label">Genre <span class="text-danger"> *</span></label>
                                 <mat-select class="custom-mat-select select" placeholder="Select">
                                     <mat-option value="1">Select</mat-option>
                                     <mat-option value="1">Male</mat-option>
@@ -65,7 +65,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3 ngxdate">
-                                <label class="form-label">DOB <span class="text-danger"> *</span></label>
+                                <label class="form-label">Date de Naissance <span class="text-danger"> *</span></label>
                                 <div class="input-icon-end position-relative">
                                     <input type="text" class="form-control datetimepicker" bsDatepicker placeholder="dd/mm/yyyy" container=".ngxdate" [bsConfig]="{ adaptivePosition: true }">
                                     <span class="input-icon-addon">
@@ -81,7 +81,7 @@
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <button class="btn btn-secondary rounded-pill" type="submit">Update Profile</button>
+                            <button class="btn btn-secondary rounded-pill" type="submit">Mettre à jour le Profile</button>
                         </div>
                     </div>
                 </div>
@@ -90,10 +90,10 @@
         </div>
         <div class="card mb-0">
             <div class="card-body">	
-                <h5 class="fs-18 mb-3">Delete Account</h5>								
+                <h5 class="fs-18 mb-3">Suppression du compte</h5>								
                 <h6 class="mb-1">Are you sure you want to delete your account?</h6>
                 <p class="mb-3">Refers to the action of permanently removing a user's account and associated data from a system, service and platform.</p>
-                <a href="javascript:void(0);" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#delete_account">Delete Account</a>	
+                <a href="javascript:void(0);" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#delete_account">Supprimer le compte</a>	
             </div>
         </div>
 
