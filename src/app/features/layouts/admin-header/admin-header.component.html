@@ -7,8 +7,8 @@
           <!-- Logo/Brand Section -->
           <div class="header-brand">
             <a [routerLink]="routes.home" class="brand-logo d-flex align-items-center">
-              <img src="assets/images/logo.png" alt="Logo" class="logo-img me-2">
-              <span class="brand-text">Pyramide Admin</span>
+              <img src="assets/img/logo.png" alt="Logo" class="logo-img me-2">
+              <!-- <span class="brand-text">Pyramide Admin</span> -->
             </a>
           </div>
 
@@ -55,12 +55,12 @@
             </div>
 
             <!-- Shopping Cart -->
-            <div class="header-item me-3">
+            <!-- <div class="header-item me-3">
               <a [routerLink]="routes.cart" class="header-icon-btn position-relative">
                 <i class="isax isax-shopping-cart5"></i>
                 <span class="cart-badge">1</span>
               </a>
-            </div>
+            </div> -->
 
             <!-- Profile Section -->
             <div *ngIf="isLoggedIn" class="header-item">
@@ -94,34 +94,55 @@
                   <div class="dropdown-divider"></div>
 
                   <!-- Profile Menu Items -->
-                  <div class="profile-menu-body">
-                    <a class="dropdown-item" [routerLink]="getProfileRoute()">
+                  <div class="profile-menu-body" style="margin-left: 0;">
+                    <!-- <a class="dropdown-item" [routerLink]="getProfileRoute()">
                       <i class="isax isax-security-user me-2"></i>
-                      <span>My Profile</span>
-                    </a>
+                      <span>Mon Profil</span>
+                    </a> -->
 
                     <!-- Admin Menu -->
                     <ng-container *ngIf="currentUser?.role_id === 1">
-                      <a class="dropdown-item" [routerLink]="routes.register">
+                      <a class="dropdown-item" [routerLink]="routes.superadminUserList">
                         <i class="isax isax-user-add me-2"></i>
-                        <span>Add User</span>
+                        <span>Gestion utilisateurs</span>
+                      </a>
+                      <a class="dropdown-item" [routerLink]="routes.superadminClientList">
+                        <i class="isax isax-people5 me-2"></i>
+                        <span>Gestion des Clients</span>
+                      </a>
+                        <a class="dropdown-item" [routerLink]="routes.superadminCourse">
+                      <i class="isax isax-teacher5 me-2"></i>                   
+                        <span>Formations</span>
                       </a>
                       <a class="dropdown-item" [routerLink]="routes.superadmin_dashboard">
                         <i class="isax isax-element-4 me-2"></i>
-                        <span>Admin Dashboard</span>
+                        <span>Tableau de bords Admin</span>
                       </a>
+                      <a class="dropdown-item" [routerLink]="routes.superadminSettings">
+                      <i class="isax isax-setting-2 me-2"></i>
+                      <span>Parametres</span>
+                    </a>
                     </ng-container>
 
                     <!-- Instructor Menu -->
-                    <ng-container *ngIf="currentUser?.role_id === 2">
+                    <ng-container *ngIf="currentUser?.role_id === 3">
                       <a class="dropdown-item" [routerLink]="routes.instructorCourse">
                         <i class="isax isax-book-1 me-2"></i>
-                        <span>My Courses</span>
+                        <span>Mes Formations</span>
                       </a>
+                         <a class="dropdown-item" [routerLink]="routes.instructorProfile">
+                      <i class="isax isax-security-user me-2"></i>
+                      <span>Mon Profil</span>
+                    </a>
+
+                      <a class="dropdown-item" [routerLink]="routes.instructorSettings">
+                      <i class="isax isax-setting-2 me-2"></i>
+                      <span>Parametres</span>
+                    </a>
                     </ng-container>
 
                     <!-- Student Menu -->
-                    <ng-container *ngIf="currentUser?.role_id === 3">
+                    <ng-container *ngIf="currentUser?.role_id === 2">
                       <a class="dropdown-item" [routerLink]="routes.instructorCourse">
                         <i class="isax isax-book-1 me-2"></i>
                         <span>My Courses</span>
@@ -132,16 +153,41 @@
                       </a>
                     </ng-container>
 
+                          <!-- Rh Menu -->
+                  <ng-container *ngIf="currentUser?.role_id === 4 || currentUser?.role_id === 5 || currentUser?.role_id === 9 || currentUser?.role_id === 14">
+                      <a class="dropdown-item" [routerLink]="routes.adminrh_dashboard">
+                        <i class="isax isax-book-1 me-2"></i>
+                        <span>Tableau de bords RH</span>
+                      </a>
+                        <a class="dropdown-item" [routerLink]="routes.adminrhUserList">
+                        <i class="isax isax-user-add me-2"></i>
+                        <span>Gestion utilisateurs</span>
+                      </a>
+                     
+                        <a class="dropdown-item" [routerLink]="routes.adminrhCourse">
+                      <i class="isax isax-teacher5 me-2"></i>                   
+                        <span>Formations</span>
+                      </a>
+                      <a class="dropdown-item" [routerLink]="routes.adminrh_dashboard">
+                        <i class="isax isax-element-4 me-2"></i>
+                        <span>Tableau de bords Admin</span>
+                      </a>
+                      <a class="dropdown-item" [routerLink]="routes.adminrhSettings">
+                      <i class="isax isax-setting-2 me-2"></i>
+                      <span>Parametres</span>
+                    </a>
+                    </ng-container>
+
                     <!-- Common Menu Items -->
                     <a class="dropdown-item" [routerLink]="routes.instructorCourse">
                       <i class="isax isax-messages-3 me-2"></i>
                       <span>Messages</span>
                       <span *ngIf="currentUser?.role_id === 3" class="badge bg-danger ms-auto">2</span>
                     </a>
-                    <a class="dropdown-item" [routerLink]="getSettingsRoute()">
+                    <!-- <a class="dropdown-item" [routerLink]="getSettingsRoute()">
                       <i class="isax isax-setting-2 me-2"></i>
-                      <span>Settings</span>
-                    </a>
+                      <span>Parametres</span>
+                    </a> -->
                   </div>
 
                   <div class="dropdown-divider"></div>
@@ -171,12 +217,12 @@
               <div class="auth-buttons d-flex align-items-center">
                 <a [routerLink]="routes.login" class="btn btn-outline-primary btn-sm me-2">
                   <i class="isax isax-login me-1"></i>
-                  <span>Login</span>
+                  <span>Se connecter</span>
                 </a>
-                <a [routerLink]="routes.register" class="btn btn-primary btn-sm">
+                <!-- <a [routerLink]="routes.register" class="btn btn-primary btn-sm">
                   <i class="isax isax-user-add me-1"></i>
                   <span>Register</span>
-                </a>
+                </a> -->
               </div>
             </div>
 

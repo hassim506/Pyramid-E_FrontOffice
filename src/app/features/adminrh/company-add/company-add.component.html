@@ -20,8 +20,8 @@
                         <!-- SIRET -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">NINEA <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" formControlName="siret" placeholder="Ex: 12345678901234">
-                            <div *ngIf="companyForm.get('siret')?.invalid && companyForm.get('siret')?.touched" class="text-danger mt-1">
+                            <input type="text" class="form-control" formControlName="ninea" placeholder="Ex: 12345678901234">
+                            <div *ngIf="companyForm.get('ninea')?.invalid && companyForm.get('ninea')?.touched" class="text-danger mt-1">
                                 <small>Le NINEA est requis (14 chiffres)</small>
                             </div>
                         </div>
@@ -72,16 +72,18 @@
                         </div>
 
                         <!-- Client -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Client <span class="text-danger">*</span></label>
-                            <select class="form-select" formControlName="client_id">
-                                <option value="">Sélectionner un client</option>
-                                <option *ngFor="let client of clients" [value]="client.id">{{client.nom}}</option>
-                            </select>
-                            <div *ngIf="companyForm.get('client_id')?.invalid && companyForm.get('client_id')?.touched" class="text-danger mt-1">
-                                <small>Le client est requis</small>
-                            </div>
+                       <div class="col-md-6 mb-3">
+                    <label class="form-label">Client</label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        <div *ngIf="currentClient; else noClient">
+                            <strong>{{ currentClient.nom }}</strong>
+                            <small class="text-muted d-block">{{ currentClient.email }}</small>
                         </div>
+                        <ng-template #noClient>
+                            <span class="text-muted">Aucun client trouvé pour votre groupe</span>
+                        </ng-template>
+                    </div>
+                </div>
 
                         <!-- Statut -->
                         <div class="col-md-6 mb-3">

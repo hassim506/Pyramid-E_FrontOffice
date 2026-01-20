@@ -3,17 +3,16 @@
   class="main-wrapper"
   [ngClass]="{
      'home-3':base==='index-three','home-4':base==='index-four' ,'home-five':base==='index-five','index-six':base==='index-six'
-  }"
-  >
+  }">
 
-    @if (isuserHeader) {
+    <!-- @if (isuserHeader) {
       <app-header></app-header>
     }
   
-    @if (isAdminHeader) {
+    @if (isAdminHeader) { -->
       <app-admin-header></app-admin-header>
-    }
-    <div>
+    <!-- } -->
+    <div class="page-content">
       <router-outlet></router-outlet>
     </div>
 

@@ -199,7 +199,7 @@
   
   .profile-menu-header {
     padding: 1.5rem 1.5rem 1rem;
-    background: linear-gradient(135deg, #006F78, #D4AF37);
+    background: linear-gradient(135deg, #006F78);
     border-radius: 12px 12px 0 0;
     
     .profile-avatar .avatar-img {
@@ -221,7 +221,7 @@
       }
       
       .badge {
-        background: rgba(255, 255, 255, 0.2) !important;
+        // background: rgba(255, 255, 255, 0.2) !important;
         color: var(--bs-white);
       }
     }

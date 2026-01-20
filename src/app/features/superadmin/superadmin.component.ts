@@ -4,12 +4,13 @@ import { CommonModule } from '@angular/common';
 import { routes } from '../../shared/service/routes/routes';
 import { SuperadminSidebarComponent } from './common/superadmin-sidebar/superadmin-sidebar.component';
 import { User } from '../../shared/models/user.models';
+import { HasPermissionDirective } from '../../directive/has-permission-directive.directive';
 
 @Component({
     selector: 'app-superadmin',
     templateUrl: './superadmin.component.html',
     styleUrls: ['./superadmin.component.scss'],
-    imports: [CommonModule, RouterOutlet, RouterModule, SuperadminSidebarComponent]
+    imports: [CommonModule, RouterOutlet, RouterModule, SuperadminSidebarComponent, HasPermissionDirective]
 })
 export class SuperadminComponent implements OnInit {
   public routes = routes;
@@ -51,10 +52,23 @@ export class SuperadminComponent implements OnInit {
     return `${this.superAdminProfile.prenom} ${this.superAdminProfile.nom}`;
   }
 
-  getRoleName(): string {
-    if (!this.superAdminProfile) return 'Utilisateur';
-    return this.superAdminProfile.role || 'Super Admin';
+ public getRoleName(user: User): string {
+  if (!user.role) {
+    return 'Non défini';
   }
+  
+  // Check if role is an object with a name property
+  if (typeof user.role === 'object' && user.role !== null && 'name' in user.role) {
+    return (user.role as { name: string }).name;
+  }
+  
+  // Check if role is a string
+  if (typeof user.role === 'string') {
+    return user.role;
+  }
+  
+  return 'Non défini';
+}
 
   getInitials(): string {
     if (!this.superAdminProfile) return 'U';

@@ -2,9 +2,10 @@ export interface Client {
   id: number;
   nom: string;
   type: 'entreprise' | 'groupe' | 'particulier';
-  siret: string;
+  ninea: string;
   adresse: string;
   telephone: string;
+  pays?: string;
   email: string;
   contact_principal: string;
   secteur_activite: string;
@@ -22,10 +23,11 @@ export interface Client {
 export interface Company {
   id: number;
   nom: string;
-  siret: string;
   adresse: string;
   telephone: string;
   email: string;
+  ninea: string;
+  pays?: string;
   secteur_activite: string;
   taille_effectif: number;
   statut: 'active' | 'inactive' | 'suspendue';
@@ -114,7 +116,7 @@ export enum StatutCompany {
 export interface CreateClientRequest {
   nom: string;
   type: ClientType;
-  siret: string;
+  ninea: string;
   adresse: string;
   telephone: string;
   email: string;
@@ -127,7 +129,7 @@ export interface CreateClientRequest {
 
 export interface CreateCompanyRequest {
   nom: string;
-  siret: string;
+  ninea: string;
   adresse: string;
   telephone: string;
   email: string;

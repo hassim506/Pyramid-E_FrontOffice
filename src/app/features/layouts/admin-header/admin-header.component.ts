@@ -126,13 +126,13 @@ checkLoginStatus(): void {
     }
   }
  getDefaultAvatar(): string {
-    if (!this.currentUser?.role_id) return 'assets/img/user/user-01.jpg';
+    if (!this.currentUser?.role_id) return 'assets/img/avatar/avatar.png';
 
     switch (this.currentUser.role_id) {
-      case 1: return 'assets/img/user/user-03.jpg'; // Admin
-      case 2: return 'assets/img/user/user-01.jpg'; // Instructor
-      case 3: return 'assets/img/user/user-02.jpg'; // Student
-      default: return 'assets/img/user/user-01.jpg';
+      case 1: return 'assets/img/avatar/avatar.png'; // Admin
+      case 2: return 'assets/img/avatar/avatar.png'; // Instructor
+      case 3: return 'assets/img/avatar/avatar.png'; // Student
+      default: return 'assets/img/avatar/avatar.png';
     }
   }
 
@@ -140,9 +140,20 @@ checkLoginStatus(): void {
     if (!this.currentUser?.role_id) return 'User';
 
     switch (this.currentUser.role_id) {
-      case 1: return 'Administrator';
-      case 2: return 'Instructor';
-      case 3: return 'Student';
+      case 1: return 'Super Admin';
+      case 2: return 'Apprenant';
+      case 3: return 'Formateur';
+      case 4: return 'Responsable RH';
+      case 5: return 'Administrateur RH Holding';
+      case 6: return 'Gestionnaire de Contenu';
+      case 7: return 'Support Technique';
+      case 8: return 'Auditeur';
+      case 9: return 'Administrateur RH';
+      case 10: return 'Manageur';
+      case 11: return 'Administrateur';
+      case 13: return 'Consultant';      
+      case 14: return 'Super Admin RH Holding Groupe';      
+  
       default: return 'User';
     }
   }
@@ -151,9 +162,9 @@ checkLoginStatus(): void {
     if (!this.currentUser?.role_id) return this.routes.login;
 
     switch (this.currentUser.role_id) {
-      case 1: return this.routes.instructorProfile;
-      case 2: return this.routes.instructorProfile;
-      case 3: return this.routes.studentProfile;
+      case 1: return this.routes.superadminProfile;
+      case 2: return this.routes.studentProfile;
+      case 3: return this.routes.instructorProfile;
       default: return this.routes.login;
     }
   }

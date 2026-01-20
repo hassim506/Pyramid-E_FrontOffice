@@ -28,6 +28,8 @@
     </div>
 </div>
 
+<!-- ...existing code... -->
+
 <div class="table-responsive custom-table">
     <table matSort (matSortChange)="sortData($event)" class="table">
         <thead>
@@ -37,6 +39,7 @@
                 <th>Numéro</th>
                 <th mat-sort-header="fonction">Fonction</th>
                 <th>Entreprise</th>
+                <th>Rôle</th> <!-- Nouvelle colonne pour les rôles -->
                 <th mat-sort-header="statut">Statut</th>
                 <th>Actions</th>
             </tr>
@@ -54,6 +57,12 @@
                 <td>{{data.numero || 'N/A'}}</td>
                 <td>{{data.fonction || 'N/A'}}</td>
                 <td>{{data.entreprise?.nom || 'N/A'}}</td>
+                <td>
+                    <!-- Affichage du rôle avec badge coloré -->
+                    <span [class]="getRoleBadgeClass(getRoleName(data))">
+                        {{getRoleName(data)}}
+                    </span>
+                </td>
                 <td>
                     <span [class]="getStatutBadgeClass(data.statut)">
                         {{data.statut === 1 ? 'Actif' : 'Inactif'}}

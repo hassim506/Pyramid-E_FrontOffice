@@ -1,8 +1,10 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output,OnChanges } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Company, Client } from '../../../shared/models/client-company.models';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
+// import { Component, EventEmitter, Input, OnInit, Output, OnChanges } from '@angular/core';
+
 
 @Component({
   selector: 'app-company-add',
@@ -11,16 +13,30 @@ import { ClientCompanyService } from '../../../shared/service/client/client-comp
   templateUrl: './company-add.component.html',
   styleUrl: './company-add.component.scss'
 })
-export class CompanyAddComponent implements OnInit {
+export class CompanyAddComponent implements OnInit, OnChanges {
   @Input() visible: boolean = false;
   @Input() isEditMode: boolean = false;
-  @Input() companyData: Company | null = null;
+  @Input() companyData: any | null = null;
   @Output() onClose = new EventEmitter<void>();
   @Output() onSave = new EventEmitter<void>();
 
   companyForm!: FormGroup;
   loading: boolean = false;
-  clients: Client[] = [];
+  clients: any[] = [];
+  
+  // 🆕 Liste des pays
+  paysList = [
+    { code: 'SN', nom: 'Sénégal', flag: '🇸🇳' },
+    { code: 'FR', nom: 'France', flag: '🇫🇷' },
+    { code: 'ML', nom: 'Mali', flag: '🇲🇱' },
+    { code: 'BF', nom: 'Burkina Faso', flag: '🇧🇫' },
+    { code: 'CI', nom: 'Côte d\'Ivoire', flag: '🇨🇮' },
+    { code: 'GN', nom: 'Guinée', flag: '🇬🇳' },
+    { code: 'MR', nom: 'Mauritanie', flag: '🇲🇷' },
+    { code: 'GM', nom: 'Gambie', flag: '🇬🇲' },
+    { code: 'GW', nom: 'Guinée-Bissau', flag: '🇬🇼' },
+    { code: 'CV', nom: 'Cap-Vert', flag: '🇨🇻' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -42,15 +58,16 @@ export class CompanyAddComponent implements OnInit {
 
   initForm() {
     this.companyForm = this.fb.group({
-      nom: ['', [Validators.required, Validators.minLength(3)]],
-      siret: ['', [Validators.required, Validators.pattern(/^\d{14}$/)]],
+      nom: ['', [Validators.required, Validators.minLength(2)]],
+      ninea: ['', [Validators.required, Validators.minLength(14)]],
       email: ['', [Validators.required, Validators.email]],
       telephone: ['', Validators.required],
       adresse: ['', Validators.required],
       secteur_activite: ['', Validators.required],
       taille_effectif: ['', [Validators.required, Validators.min(1)]],
       client_id: ['', Validators.required],
-      statut: ['active', Validators.required]
+      statut: ['', Validators.required],
+      pays: ['', Validators.required] // 🆕 Nouveau champ
     });
   }
 
@@ -59,9 +76,7 @@ export class CompanyAddComponent implements OnInit {
       next: (response) => {
         this.clients = response.clients || response.data || [];
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement des clients:', error);
-      }
+      error: (error) => console.error('Erreur chargement clients:', error)
     });
   }
 
@@ -69,22 +84,29 @@ export class CompanyAddComponent implements OnInit {
     if (this.companyData) {
       this.companyForm.patchValue({
         nom: this.companyData.nom,
-        siret: this.companyData.siret,
+        ninea: this.companyData.ninea,
         email: this.companyData.email,
         telephone: this.companyData.telephone,
         adresse: this.companyData.adresse,
         secteur_activite: this.companyData.secteur_activite,
         taille_effectif: this.companyData.taille_effectif,
         client_id: this.companyData.client_id,
-        statut: this.companyData.statut
+        statut: this.companyData.statut,
+        pays: this.companyData.pays // 🆕 Nouveau champ
       });
     }
   }
 
   resetForm() {
-    this.companyForm.reset({
-      statut: 'active'
-    });
+    this.companyForm.reset();
+    // Prédéfinir le Sénégal par défaut
+    this.companyForm.patchValue({ pays: 'SN' });
+  }
+
+  // 🆕 Méthode pour obtenir le drapeau d'un pays
+  getCountryFlag(countryCode: string): string {
+    const country = this.paysList.find(p => p.code === countryCode);
+    return country ? country.flag : '🌍';
   }
 
   saveCompany() {
@@ -96,39 +118,58 @@ export class CompanyAddComponent implements OnInit {
     }
 
     this.loading = true;
-    const formData = this.companyForm.value;
+    const formData = { ...this.companyForm.value };
+
+    // Convertir les valeurs numériques
+    if (formData.client_id) {
+      formData.client_id = parseInt(formData.client_id);
+    }
+    if (formData.taille_effectif) {
+      formData.taille_effectif = parseInt(formData.taille_effectif);
+    }
+
+    console.log('===== DONNÉES ENVOYÉES =====');
+    console.log(JSON.stringify(formData, null, 2));
+    console.log('============================');
 
     if (this.isEditMode && this.companyData) {
-      // Mise à jour
       this.clientCompanyService.updateCompany(this.companyData.id, formData).subscribe({
         next: (response) => {
-          console.log('Entreprise mise à jour avec succès', response);
+          console.log('Entreprise mise à jour:', response);
           this.loading = false;
           this.onSave.emit();
           this.hideDialog();
         },
         error: (error) => {
-          console.error('Erreur lors de la mise à jour:', error);
-          this.loading = false;
-          alert('Erreur lors de la mise à jour de l\'entreprise');
+          this.handleError(error);
         }
       });
     } else {
-      // Création
       this.clientCompanyService.createCompany(formData).subscribe({
-        next: (response: any) => {
-          console.log('Entreprise créée avec succès', response);
+        next: (response) => {
+          console.log('Entreprise créée:', response);
           this.loading = false;
           this.onSave.emit();
           this.hideDialog();
         },
-        error: (error: any) => {
-          console.error('Erreur lors de la création:', error);
-          this.loading = false;
-          alert('Erreur lors de la création de l\'entreprise');
+        error: (error) => {
+          this.handleError(error);
         }
       });
     }
+  }
+
+  private handleError(error: any): void {
+    let errorMessage = 'Erreur lors de l\'opération';
+    
+    if (error.error?.errors) {
+      errorMessage = Object.values(error.error.errors).flat().join('\n');
+    } else if (error.error?.message) {
+      errorMessage = error.error.message;
+    }
+    
+    alert(errorMessage);
+    this.loading = false;
   }
 
   hideDialog() {

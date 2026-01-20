@@ -1,410 +1,939 @@
-			<!-- Course detail -->
-			<section class="course-details-two">
-				<div class="container">
-                     <div class="row">
-                        <div class="col-12">
-                            <div class="card bg-light">
-                                <div class="card-body d-lg-flex align-items-center">
-                                    <div class="position-relative">
-                                        <lightgallery [settings]="settings" [onInit]="onInit" size="1400-933">   
-                                        <a href="https://www.youtube.com/embed/1trvO6dqQUI" id="openVideoBtn" target="_blank">
-                                            <img class="img-fluid rounded-2" src="assets/img/course/video-bg.jpg" alt="img">
-                                            <div class="play-icon">
-                                                <i class="ti ti-player-play-filled fs-28"></i>
-                                            </div>
-                                        </a>
-                                        </lightgallery>
-                                    </div>
-                                    <div id="videoModal">
-                                        <div class="modal-content1">
-                                          <span class="close-btn" id="closeModal">&times;</span>
-                                          <iframe id="youtubeIframe" allowfullscreen></iframe>
+<!-- Loading State -->
+<div *ngIf="loading" class="d-flex justify-content-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Chargement...</span>
+  </div>
+</div>
+
+<!-- Error State -->
+<div *ngIf="error" class="alert alert-danger mx-3" role="alert">
+  <i class="fas fa-exclamation-triangle me-2"></i>
+  {{ error }}
+</div>
+
+<!-- Success State -->
+<div *ngIf="success" class="alert alert-success mx-3" role="alert">
+  <i class="fas fa-check-circle me-2"></i>
+  {{ success }}
+</div>
+
+<!-- Course Details -->
+<div *ngIf="formation && !loading" class="content">
+  
+  <!-- Course Header avec Media -->
+  <section class="course-content">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          
+          <!-- Media Video Section - AU CENTRE -->
+          <div class="course-video-section mb-4" *ngIf="formation.media_url">
+            <div class="video-container position-relative">
+              <video 
+                class="w-100 course-main-video" 
+                controls
+                poster="{{ formation.image_couverture || 'assets/img/course/course-01.jpg' }}"
+                style="max-height: 500px; border-radius: 12px;">
+                <source [src]="formation.media_url" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture vidéo.
+              </video>
+              
+              <!-- Video Overlay Info -->
+              <div class="video-overlay-info position-absolute bottom-0 start-0 end-0 p-3"
+                   style="background: linear-gradient(transparent, rgba(0,0,0,0.7)); border-radius: 0 0 12px 12px;">
+                <h2 class="text-white mb-2">{{ formation | json}}</h2>
+                <p class="text-white-50 mb-0">{{ formation.short_description }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image de couverture si pas de vidéo -->
+          <div class="course-image-section mb-4" *ngIf="!formation.media_url && formation.image_couverture">
+            <div class="position-relative">
+              <img 
+                [src]="formation.image_couverture" 
+                [alt]="formation.titre"
+                class="w-100 course-main-image"
+                style="max-height: 500px; object-fit: cover; border-radius: 12px;">
+              
+              <!-- Image Overlay Info -->
+              <div class="image-overlay-info position-absolute bottom-0 start-0 end-0 p-4"
+                   style="background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-radius: 0 0 12px 12px;">
+                <h2 class="text-white mb-2">{{ formation.titre }}</h2>
+                <p class="text-white-50 mb-0">{{ formation.short_description }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fallback si ni vidéo ni image -->
+          <div class="course-header-fallback mb-4" *ngIf="!formation.media_url && !formation.image_couverture">
+            <div class="bg-primary p-5 text-center text-white" style="border-radius: 12px;">
+              <h2 class="mb-3">{{ formation.titre }}</h2>
+              <p class="mb-0 fs-5">{{ formation.short_description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Course Info Row -->
+      <div class="row mt-4">
+        <div class="col-lg-8">
+          <!-- Breadcrumb -->
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item">
+                <a [routerLink]="routes.home">Accueil</a>
+              </li>
+              <li class="breadcrumb-item">
+                <a [routerLink]="routes.courseGrid">Formations</a>
+              </li>
+              <li class="breadcrumb-item active" aria-current="page">
+                {{ formation.titre }}
+              </li>
+            </ol>
+          </nav>
+          
+          <!-- Course Info -->
+          <div class="course-group d-flex align-items-center mb-4" *ngIf="formation.formateur">
+            <div class="course-group-img me-3">
+              <img 
+                [src]="formation.formateur?.avatar || 'assets/img/user/user-15.jpg'" 
+                [alt]="formation.formateur?.nom || formation.formateur?.name || 'Formateur'"
+                class="img-fluid rounded-circle"
+                style="width: 50px; height: 50px; object-fit: cover;">
+            </div>
+            <div class="course-name">
+              <h5 class="mb-1">
+                {{ formation.formateur?.nom || formation.formateur?.name || 'Formateur' }}
+              </h5>
+              <p class="text-muted mb-0">{{ formation.formateur?.fonction || 'Formateur expert' }}</p>
+            </div>
+          </div>
+          
+          <!-- Course Stats -->
+          <div class="course-stats d-flex flex-wrap gap-4 mb-4">
+            <div class="stat-item d-flex align-items-center">
+              <i class="fas fa-users text-primary me-2"></i>
+              <span>{{ formation.nb_inscrits || 0 }} Étudiants</span>
+            </div>
+            <div class="stat-item d-flex align-items-center">
+              <i class="fas fa-book text-primary me-2"></i>
+              <span>{{ formation.modules?.length || 0 }} Modules</span>
+            </div>
+            <div class="stat-item d-flex align-items-center">
+              <i class="fas fa-play-circle text-primary me-2"></i>
+              <span>{{ totalSections }} Sections</span>
+            </div>
+            <div class="stat-item d-flex align-items-center">
+              <i class="fas fa-clock text-primary me-2"></i>
+              <span>{{ formatDuration(totalDuration) }}</span>
+            </div>
+          </div>
+
+          <!-- Rating -->
+          <div class="rating mb-4" *ngIf="averageRating > 0">
+            <span *ngFor="let star of getStarsArray(5)" class="me-1">
+              <i class="fas fa-star" 
+                 [class.text-warning]="star <= averageRating"
+                 [class.text-muted]="star > averageRating"></i>
+            </span>
+            <span class="d-inline-block average-rating ms-2">
+              <span class="fw-semibold">{{ averageRating }}/5</span> 
+              <span class="text-muted">({{ formation.avis?.length || 0 }} Avis)</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Course Sidebar -->
+        <div class="col-lg-4">
+          <div class="course-booking sticky-top" style="top: 20px;">
+            <!-- Prix et actions -->
+            <div class="course-price-card bg-white border rounded-3 p-4 shadow-sm">
+              <!-- Prix -->
+              <div class="course-amount text-center mb-4">
+                <h2 *ngIf="formation.prix == 0" class="text-success mb-0 display-4">Gratuit</h2>
+                <div *ngIf="formation.prix > 0">
+                  <h2 class="mb-1 display-4 fw-bold">{{ formation.prix }}€</h2>
+                  <p *ngIf="formation.prix_original && formation.prix_original > formation.prix" 
+                     class="text-decoration-line-through text-muted">
+                    {{ formation.prix_original }}€
+                  </p>
+                  <span *ngIf="formation.prix_original && formation.prix_original > formation.prix" 
+                        class="badge bg-success">
+                    {{ calculateDiscount(formation.prix, formation.prix_original) }}% de réduction
+                  </span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="course-actions mb-4">
+                <button class="btn btn-outline-primary w-100 mb-3" (click)="shareFormation()">
+                  <i class="fas fa-share-alt me-2"></i>
+                  Partager cette formation
+                </button>
+              </div>
+
+              <!-- Course Includes -->
+              <div class="course-includes">
+                <h5 class="mb-3">Cette formation comprend :</h5>
+                <ul class="list-unstyled">
+                  <li class="d-flex align-items-center mb-2">
+                    <i class="fas fa-play-circle text-primary me-3"></i>
+                    <span>{{ totalSections }} sections de cours</span>
+                  </li>
+                  <li class="d-flex align-items-center mb-2">
+                    <i class="fas fa-clock text-primary me-3"></i>
+                    <span>{{ formatDuration(totalDuration) }} de contenu</span>
+                  </li>
+                  <li class="d-flex align-items-center mb-2">
+                    <i class="fas fa-graduation-cap text-primary me-3"></i>
+                    <span>{{ formation.modules?.length || 0 }} modules structurés</span>
+                  </li>
+                  <li class="d-flex align-items-center mb-2">
+                    <i class="fas fa-users text-primary me-3"></i>
+                    <span>Max {{ formation.nb_max_participants || 'Illimité' }} participants</span>
+                  </li>
+                  <li class="d-flex align-items-center mb-2" *ngIf="formation.est_certifiante">
+                    <i class="fas fa-certificate text-primary me-3"></i>
+                    <span>Certificat de fin de formation</span>
+                  </li>
+                  <li class="d-flex align-items-center mb-2" *ngIf="formation.langue">
+                    <i class="fas fa-language text-primary me-3"></i>
+                    <span>{{ formation.langue === 'fr' ? 'Français' : formation.langue }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="formation-stats-card bg-light border rounded-3 p-4 mt-4">
+              <h5 class="mb-3">Informations</h5>
+              <div class="stat-item d-flex justify-content-between mb-2">
+                <span class="text-muted">Niveau :</span>
+                <span class="badge bg-primary">{{ getNiveauLabel(formation.niveau) }}</span>
+              </div>
+              <div class="stat-item d-flex justify-content-between mb-2" *ngIf="formation.type">
+                <span class="text-muted">Type :</span>
+                <span class="badge bg-info">{{ getTypeLabel(formation.type) }}</span>
+              </div>
+              <div class="stat-item d-flex justify-content-between mb-2" *ngIf="formation.difficulte">
+                <span class="text-muted">Difficulté :</span>
+                <span class="badge bg-warning text-dark">{{ formation.difficulte }}</span>
+              </div>
+              <div class="stat-item d-flex justify-content-between mb-2">
+                <span class="text-muted">Certification :</span>
+                <span class="badge" [class.bg-success]="formation.est_certifiante" [class.bg-secondary]="!formation.est_certifiante">
+                  {{ formation.est_certifiante ? 'Oui' : 'Non' }}
+                </span>
+              </div>
+              <div class="stat-item d-flex justify-content-between">
+                <span class="text-muted">Inscription :</span>
+                <span class="badge" [class.bg-success]="formation.inscription_ouverte" [class.bg-danger]="!formation.inscription_ouverte">
+                  {{ formation.inscription_ouverte ? 'Ouverte' : 'Fermée' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Related Courses -->
+            <div class="related-courses-card mt-4" *ngIf="relatedCourses.length > 0">
+              <div class="bg-white border rounded-3 p-4">
+                <h5 class="mb-3">Autres formations du formateur</h5>
+                <div class="related-courses">
+                  <div class="related-course mb-3 border-bottom pb-3" *ngFor="let course of relatedCourses">
+                    <div class="d-flex">
+                      <img [src]="course.image_couverture || 'assets/img/course/course-default.jpg'" 
+                           class="related-course-img me-3" 
+                           style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;"
+                           [alt]="course.titre">
+                      <div class="flex-grow-1">
+                        <h6 class="mb-1 fs-6">
+                          <a [routerLink]="['/course-details', course.id]" class="text-decoration-none text-dark">
+                            {{ course.titre }}
+                          </a>
+                        </h6>
+                        <p class="text-muted small mb-2">{{ course.short_description | slice:0:60 }}...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span class="badge" [class.bg-success]="course.prix == 0" [class.bg-primary]="course.prix > 0">
+                            {{ course.prix == 0 ? 'Gratuit' : course.prix + '€' }}
+                          </span>
+                          <small class="text-muted">{{ formatDuration(course.duree_totale * 60 || 0) }}</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Course Content Tabs -->
+  <section class="course-content-list mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="course-tab-content">
+            
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-pills course-tab-nav justify-content-center mb-4" id="pills-tab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button 
+                  class="nav-link active px-4 py-2" 
+                  id="pills-overview-tab" 
+                  data-bs-toggle="pill" 
+                  data-bs-target="#pills-overview" 
+                  type="button" 
+                  role="tab">
+                  <i class="fas fa-info-circle me-2"></i>
+                  Aperçu
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button 
+                  class="nav-link px-4 py-2" 
+                  id="pills-curriculum-tab" 
+                  data-bs-toggle="pill" 
+                  data-bs-target="#pills-curriculum" 
+                  type="button" 
+                  role="tab">
+                  <i class="fas fa-list me-2"></i>
+                  Programme ({{ formation.modules?.length || 0 }})
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button 
+                  class="nav-link px-4 py-2" 
+                  id="pills-instructor-tab" 
+                  data-bs-toggle="pill" 
+                  data-bs-target="#pills-instructor" 
+                  type="button" 
+                  role="tab">
+                  <i class="fas fa-user-tie me-2"></i>
+                  Formateur
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button 
+                  class="nav-link px-4 py-2" 
+                  id="pills-reviews-tab" 
+                  data-bs-toggle="pill" 
+                  data-bs-target="#pills-reviews" 
+                  type="button" 
+                  role="tab">
+                  <i class="fas fa-star me-2"></i>
+                  Avis ({{ formation.avis?.length || 0 }})
+                </button>
+              </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="pills-tabContent">
+              
+              <!-- Overview Tab -->
+              <div class="tab-pane fade show active" id="pills-overview" role="tabpanel">
+                <div class="course-overview bg-white border rounded-3 p-4">
+                  
+                  <!-- Description -->
+                  <div class="course-description mb-5">
+                    <h4 class="mb-3">
+                      <i class="fas fa-align-left text-primary me-2"></i>
+                      Description
+                    </h4>
+                    <div class="description-content" [innerHTML]="formation.description"></div>
+                  </div>
+
+                  <!-- Learning Objectives -->
+                  <div class="course-objectives mb-5" *ngIf="getObjectifsList(formation.objectifs_pedagogiques).length > 0">
+                    <h4 class="mb-3">
+                      <i class="fas fa-bullseye text-success me-2"></i>
+                      Objectifs pédagogiques
+                    </h4>
+                    <div class="row">
+                      <div class="col-lg-6" *ngFor="let objectif of getObjectifsList(formation.objectifs_pedagogiques)">
+                        <div class="objective-item d-flex mb-3">
+                          <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                          <span>{{ objectif }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Competences acquises -->
+                  <div class="course-competences mb-5" *ngIf="formation.competences_acquises && formation.competences_acquises.length > 0">
+                    <h4 class="mb-3">
+                      <i class="fas fa-medal text-warning me-2"></i>
+                      Compétences acquises
+                    </h4>
+                    <div class="row">
+                      <div class="col-lg-6" *ngFor="let competence of formation.competences_acquises">
+                        <div class="competence-item d-flex mb-3">
+                          <i class="fas fa-star text-warning me-3 mt-1"></i>
+                          <span>{{ competence }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Outils requis -->
+                  <div class="course-tools mb-5" *ngIf="formation.outils_requis && formation.outils_requis.length > 0">
+                    <h4 class="mb-3">
+                      <i class="fas fa-tools text-info me-2"></i>
+                      Outils requis
+                    </h4>
+                    <div class="d-flex flex-wrap gap-2">
+                      <span class="badge bg-info fs-6 py-2 px-3" *ngFor="let outil of formation.outils_requis">
+                        <i class="fas fa-cog me-2"></i>{{ outil }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Prerequisites -->
+                  <div class="course-prerequisites mb-5" *ngIf="getPrerequisList(formation.prerequis).length > 0">
+                    <h4 class="mb-3">
+                      <i class="fas fa-list-check text-secondary me-2"></i>
+                      Prérequis
+                    </h4>
+                    <ul class="list-unstyled">
+                      <li class="d-flex mb-3" *ngFor="let prerequis of getPrerequisList(formation.prerequis)">
+                        <i class="fas fa-dot-circle text-primary me-3 mt-1"></i>
+                        <span>{{ prerequis }}</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Target Audience -->
+                  <div class="course-audience mb-5" *ngIf="formation.public_cible">
+                    <h4 class="mb-3">
+                      <i class="fas fa-users text-purple me-2"></i>
+                      Public cible
+                    </h4>
+                    <div class="alert alert-light border-start border-4 border-primary">
+                      <p class="mb-0">{{ formation.public_cible }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Tags -->
+                  <div class="course-tags" *ngIf="formation.tags && formation.tags.length > 0">
+                    <h4 class="mb-3">
+                      <i class="fas fa-tags text-muted me-2"></i>
+                      Tags
+                    </h4>
+                    <div class="d-flex flex-wrap gap-2">
+                      <span class="badge bg-light text-dark border py-2 px-3" *ngFor="let tag of formation.tags">
+                        #{{ tag }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Curriculum Tab -->
+              <div class="tab-pane fade" id="pills-curriculum" role="tabpanel">
+                <div class="course-curriculum bg-white border rounded-3 p-4">
+                  <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">
+                      <i class="fas fa-list-ul text-primary me-2"></i>
+                      Programme de la formation
+                    </h4>
+                    <div class="curriculum-summary">
+                      <span class="badge bg-primary me-2">{{ formation.modules?.length || 0 }} modules</span>
+                      <span class="badge bg-secondary">{{ totalSections }} sections</span>
+                    </div>
+                  </div>
+                  
+                  <div class="curriculum-info mb-4 p-3 bg-light rounded">
+                    <div class="row text-center">
+                      <div class="col-4">
+                        <div class="stat-number h4 text-primary mb-1">{{ formation.modules?.length || 0 }}</div>
+                        <small class="text-muted">Modules</small>
+                      </div>
+                      <div class="col-4">
+                        <div class="stat-number h4 text-primary mb-1">{{ totalSections }}</div>
+                        <small class="text-muted">Sections</small>
+                      </div>
+                      <div class="col-4">
+                        <div class="stat-number h4 text-primary mb-1">{{ formatDuration(totalDuration) }}</div>
+                        <small class="text-muted">Durée totale</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Modules List -->
+                  <div *ngIf="formation.modules && formation.modules.length > 0; else noModules">
+                    <div class="accordion" id="curriculumAccordion">
+                      <div class="accordion-item border rounded-3 mb-3" *ngFor="let module of formation.modules; let i = index">
+                        
+                        <!-- Module Header -->
+                        <h2 class="accordion-header" [id]="'heading-' + i">
+                          <button 
+                            class="accordion-button fw-semibold" 
+                            [class.collapsed]="i !== 0"
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            [attr.data-bs-target]="'#collapse-' + i"
+                            [attr.aria-expanded]="i === 0"
+                            [attr.aria-controls]="'collapse-' + i">
+                            
+                            <div class="w-100 d-flex justify-content-between align-items-center me-3">
+                              <div class="module-title-info">
+                                <div class="module-title text-primary mb-1">
+                                  <i class="fas fa-play-circle me-2"></i>
+                                  Module {{ module.ordre || (i + 1) }} : {{ module.titre }}
+                                </div>
+                                <div class="text-muted small" *ngIf="module.description">
+                                  {{ module.description }}
+                                </div>
+                              </div>
+                              <div class="module-meta text-end">
+                                <span class="badge bg-primary me-2">
+                                  {{ module.sections?.length || 0 }} sections
+                                </span>
+                                <span class="text-muted small">
+                                  {{ formatDuration(module.duree_estimee) }}
+                                </span>
+                              </div>
+                            </div>
+                          </button>
+                        </h2>
+
+                        <!-- Module Content -->
+                        <div 
+                          [id]="'collapse-' + i" 
+                          class="accordion-collapse collapse"
+                          [class.show]="i === 0"
+                          [attr.aria-labelledby]="'heading-' + i"
+                          data-bs-parent="#curriculumAccordion">
+                          
+                          <div class="accordion-body">
+                            
+                            <!-- Module Description -->
+                            <div *ngIf="module.contenu" class="module-description mb-4 p-3 bg-light rounded">
+                              <h6 class="text-muted mb-2">
+                                <i class="fas fa-info-circle me-2"></i>
+                                À propos de ce module
+                              </h6>
+                              <p class="mb-0">{{ module.contenu }}</p>
+                            </div>
+
+                            <!-- Sections List -->
+                            <div *ngIf="module.sections && module.sections.length > 0; else noSections">
+                              
+                              <div class="sections-list">
+                                <div class="section-item border rounded-2 mb-3 p-3 bg-white" 
+                                     *ngFor="let section of module.sections; let j = index">
+                                  
+                                  <div class="d-flex justify-content-between align-items-start">
+                                    
+                                    <!-- Section Info -->
+                                    <div class="section-info flex-grow-1">
+                                      <div class="d-flex align-items-start">
+                                        <!-- Section Icon -->
+                                        <div class="section-icon me-3">
+                                          <i [class]="getSectionTypeIcon(section.type)" 
+                                             [class]="getSectionTypeColor(section.type)"
+                                             style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        
+                                        <!-- Section Details -->
+                                        <div class="section-details flex-grow-1">
+                                          <div class="section-title fw-semibold mb-2 d-flex align-items-center">
+                                            <span class="section-number badge bg-light text-dark me-2">{{ j + 1 }}</span>
+                                            {{ section.titre }}
+                                          </div>
+                                          
+                                          <div class="section-description text-muted mb-3" *ngIf="section.contenu">
+                                            {{ section.contenu | slice:0:150 }}
+                                            <span *ngIf="section.contenu?.length > 150">...</span>
+                                          </div>
+                                          
+                                          <!-- Section Badges -->
+                                          <div class="section-badges d-flex flex-wrap gap-1">
+                                            <span class="badge" 
+                                                  [class.bg-primary]="section.type === 'video'"
+                                                  [class.bg-success]="section.type === 'hands-on'"
+                                                  [class.bg-info]="section.type === 'reading'"
+                                                  [class.bg-warning]="section.type === 'quiz'">
+                                              {{ getTypeLabel(section.type) }}
+                                            </span>
+                                            
+                                            <span class="badge bg-danger" *ngIf="section.obligatoire">
+                                              Obligatoire
+                                            </span>
+                                            
+                                            <span class="badge bg-secondary" *ngIf="!section.visible">
+                                              Masqué
+                                            </span>
+                                          </div>
                                         </div>
                                       </div>
-                                    <div class="w-100 ps-lg-4">
-                                        <h3 class="mb-2">The Complete Web Developer Course 2.0</h3>
-                                        <p class="fs-14 mb-3">Learn Web Development by building 25 websites and mobile apps using HTML, CSS, Javascript, PHP, Python</p>
-                                        <div class="d-flex align-items-center gap-2 gap-sm-3 gap-xl-4 flex-wrap my-3 my-sm-0">
-                                            <p class="fw-medium d-flex align-items-center mb-0"><img class="me-2" src="./assets/img/icons/book.svg" alt="img">12+ Lesson</p>
-                                            <p class="fw-medium d-flex align-items-center mb-0"><img class="me-2" src="./assets/img/icons/timer-start.svg" alt="img">9hr 30min</p>
-                                            <p class="fw-medium d-flex align-items-center mb-0"><img class="me-2" src="./assets/img/icons/people.svg" alt="img">32 students enrolled</p>
-                                            <span class="badge badge-sm rounded-pill bg-warning fs-12">Web Development</span>
-                                        </div>
-                                        <div class="d-sm-flex align-items-center justify-content-sm-between mt-3">
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar avatar-lg">
-                                                    <img class="rounded-circle" src="./assets/img/avatar/avatar10.jpg" alt="img">
-                                                </div>
-                                                <div class="ms-2">
-                                                <h5 class="fs-18 fw-semibold"><a [routerLink]="routes.instructorDetails">Nicole Brown</a></h5>
-                                                <p class="fs-14">Instructor</p>
-                                            </div>
-                                            </div>
-                                            <div class="d-flex mt-sm-0 mt-2 align-items-center">
-                                                <i class="fa-solid fa-star text-warning me-1"></i>
-                                                <i class="fa-solid fa-star text-warning me-1"></i>
-                                                <i class="fa-solid fa-star text-warning me-1"></i>
-                                                <i class="fa-solid fa-star text-warning me-1"></i>
-                                                <i class="fa-solid fa-star text-gray-1 me-1"></i>
-                                                <p class=" fs-14"><span class="text-gray-9">4.0</span> (15) </p>
-                                            </div>
-                                        </div>
                                     </div>
+                                    
+                                    <!-- Section Actions -->
+                                    <div class="section-actions d-flex flex-column align-items-end">
+                                      <div class="section-duration text-muted mb-2 small">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {{ formatDuration(section.duree_estimee) }}
+                                      </div>
+                                      
+                                      <button 
+                                        class="btn btn-sm btn-outline-primary" 
+                                        *ngIf="section.ressources && section.visible"
+                                        (click)="previewSection(section)"
+                                        [title]="'Aperçu de ' + section.titre">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        Aperçu
+                                      </button>
+                                      
+                                      <span class="text-muted small" 
+                                            *ngIf="!section.ressources || !section.visible"
+                                            title="Contenu non disponible">
+                                        <i class="fas fa-lock"></i> Verrouillé
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
+                              </div>
                             </div>
+
+                            <!-- No Sections Message -->
+                            <ng-template #noSections>
+                              <div class="text-center py-4 bg-light rounded">
+                                <i class="fas fa-folder-open fa-2x text-muted mb-3"></i>
+                                <h6 class="text-muted mb-2">Aucune section disponible</h6>
+                                <p class="text-muted mb-0 small">Ce module est en cours de préparation.</p>
+                              </div>
+                            </ng-template>
+                          </div>
                         </div>
-                     </div>
-                    <div class="row mt-4">
-                        <div class="col-lg-8">
-							<div>
-								<img src="assets/img/course/course-details-two-2.jpg" alt="img" class="img-fluid mb-4">
-							</div>
-                           <div class="course-page-content pt-0">
-                              <div class="card mb-4">
-                                <div class="card-body">
-                                    <h5 class="mb-3">Overview</h5>
-                                    <h6 class="mb-2">Course Description</h6>
-                                    <p>Embark on a transformative journey into AI with Mike Wheeler, your guide in this Udemy Best Seller course on ChatGPT and Prompt Engineering. As an experience instructor who has taught well over 300,000 students, Mike unveils the secrets of developing your own custom GPTs, ensuring your skills shine in the thriving digital marketplace. </p>
-                                    <p>This course will get your familiar with Generative AI and the effective use of ChatGPT and is perfect for the beginner. You will also learn advanced prompting techniques to take your Prompt Engineering skills to the next level!</p>
-                                    <h6 class="mb-2">What you'll learn</h6>
-                                    <ul class="custom-list mb-3">
-                                        <li class="list-item">Become a UX designer</li>
-                                        <li class="list-item">You will be able to add UX designer to your CV</li>
-                                        <li class="list-item">Become a UI designer</li>
-                                        <li class="list-item">Build & test a full website design.</li>
-                                        <li class="list-item">Build & test a full mobile app.</li>
-                                    </ul>
-                                    <h6 class="mb-2">Requirements</h6>
-                                    <ul class="custom-list mb-0">
-                                        <li class="list-item">You will need a copy of Adobe XD 2019 or above. A free trial can be downloaded from Adobe.</li>
-                                        <li class="list-item">No previous design experience is needed.</li>
-                                        <li class="list-item">No previous Adobe XD skills are needed.</li>
-                                    </ul>
-                                </div>
-                              </div>
-                              <div class="card mb-4">
-                                <div class="card-body">
-                                <div class="d-flex justify-content-between flex-wrap">
-                              <h5 class="subs-title mb-2 mb-sm-3">Course Content</h5>
-                              <h6 class="fs-16 fw-medium text-gray-7 mb-3">92 Lectures <span class="text-secondary">10:56:11</span></h6>
-                            </div>
-                            <div class="accordion accordion-customicon1 accordions-items-seperate p-0" id="accordioncustomicon1Example">
-                                <div class="accordion-item" data-aos="fade-up">
-                                    <h2 class="accordion-header" id="headingcustomicon1One">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsecustomicon1One" aria-expanded="false" aria-controls="collapsecustomicon1One">
-                                        Getting Started <i class="fa-solid fa-chevron-down"></i>
-                                        </button>
-                                    </h2>
-                                    <div id="collapsecustomicon1One" class="accordion-collapse collapse" aria-labelledby="headingcustomicon1One" data-bs-parent="#accordioncustomicon1Example">
-                                        <div class="accordion-body p-0">
-                                            <ul>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.1 Introduction to the User Experience Course</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.2 Exercise: Your first design challenge</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.3 How to solve the previous exercise</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.4 Find out why smart objects are amazing</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.5 How to use text layers effectively</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item" data-aos="fade-up" data-aos-delay="250">
-                                    <h2 class="accordion-header" id="headingcustomicon1Two">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsecustomicon1Two" aria-expanded="false" aria-controls="collapsecustomicon1Two">
-                                        The Brief<i class="fa-solid fa-chevron-down"></i>
-                                        </button>
-                                    </h2>
-                                    <div id="collapsecustomicon1Two" class="accordion-collapse collapse" aria-labelledby="headingcustomicon1Two" data-bs-parent="#accordioncustomicon1Example">
-                                        <div class="accordion-body p-0">
-                                            <ul>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.1 Introduction to the User Experience Course</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.2 Exercise: Your first design challenge</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.3 How to solve the previous exercise</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.4 Find out why smart objects are amazing</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.5 How to use text layers effectively</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item" data-aos="fade-up" data-aos-delay="300">
-                                    <h2 class="accordion-header" id="headingcustomicon1Three">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsecustomicon1Three" aria-expanded="false" aria-controls="collapsecustomicon1Three">
-                                        Wireframing Low Fidelity<i class="fa-solid fa-chevron-down"></i>
-                                        </button>
-                                    </h2>
-                                    <div id="collapsecustomicon1Three" class="accordion-collapse collapse" aria-labelledby="headingcustomicon1Three" data-bs-parent="#accordioncustomicon1Example">
-                                        <div class="accordion-body p-0">
-                                            <ul>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.1 Introduction to the User Experience Course</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.2 Exercise: Your first design challenge</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.3 How to solve the previous exercise</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.4 Find out why smart objects are amazing</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.5 How to use text layers effectively</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item mb-0" data-aos="fade-up" data-aos-delay="350">
-                                    <h2 class="accordion-header" id="headingcustomicon1Four">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsecustomicon1Four" aria-expanded="false" aria-controls="collapsecustomicon1Four">
-                                        Type, Color & Icon Introduction<i class="fa-solid fa-chevron-down"></i>
-                                        </button>
-                                    </h2>
-                                    <div id="collapsecustomicon1Four" class="accordion-collapse collapse" aria-labelledby="headingcustomicon1Four" data-bs-parent="#accordioncustomicon1Example">
-                                        <div class="accordion-body p-0">
-                                            <ul>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.1 Introduction to the User Experience Course</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.2 Exercise: Your first design challenge</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.3 How to solve the previous exercise</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.4 Find out why smart objects are amazing</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                                <li class="p-4 px-3 pb-0 d-flex justify-content-between">
-                                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">Lecture1.5 How to use text layers effectively</p>   
-                                                   <div class="d-flex gap-xl-5 gap-3">
-                                                    <a href="javascript:void(0);" class="preview-link">Preview</a>
-                                                    <p class="mb-0">02:53</p>
-                                                   </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                               
-                            </div>
-                            </div>
-                              </div>
-                              <div class="card mb-4">
-                                <div class="card-body">
-                                <h5 class="subs-title mb-4">About the instructor</h5>
-                                <div class="d-flex align-items-center justify-content-between mt-4 gap-2 flex-wrap">
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar avatar-lg">
-                                            <img class="rounded-circle" src="./assets/img/avatar/avatar10.jpg" alt="img">
-                                        </div>
-                                        <div class="ms-2">
-                                        <a [routerLink]="routes.instructorDetails" class="name-link">Nicole Brown</a>
-                                        <p class="mb-0 fs-14">UX/UI Designer</p>
-                                    </div>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa-solid fa-star text-warning me-1"></i>
-                                        <i class="fa-solid fa-star text-warning me-1"></i>
-                                        <i class="fa-solid fa-star text-warning me-1"></i>
-                                        <i class="fa-solid fa-star text-warning me-1"></i>
-                                        <i class="fa-solid fa-star text-warning me-2"></i>
-                                        <p class="mb-0 fs-14">4.5</p>
-                                    </div>
-                                </div>
-                                <div class="course-info align-items-center d-flex gap-2 gap-xl-3 mt-3 mb-3 flex-wrap">
-                                  <p class="fw-medium d-flex align-items-center fs-14 mb-0"><img class="me-2" src="./assets/img/icons/play2.svg" alt="img">5 Courses</p>
-                                  <p class="fw-medium d-flex align-items-center fs-14 mb-0"><img class="me-2" src="./assets/img/icons/book2.svg" alt="img">12+ Lesson</p>
-                                  <p class="fw-medium d-flex align-items-center fs-14 mb-0"><img class="me-2" src="./assets/img/icons/timer-start2.svg" alt="img">9hr 30min</p>
-                                  <p class="fw-medium d-flex align-items-center fs-14 mb-0"><img class="me-2" src="./assets/img/icons/people.svg" alt="img">270,866 students enrolled</p>
-                                </div>
-                                <p>UI/UX Designer, with 7+ Years Experience. Guarantee of High Quality Work.</p>
-                                <h6 class="fs-16 mb-2">Skills: </h6>
-								<p>Web Design, UI Design, UX/UI Design, Mobile Design, User Interface Design, Sketch, Photoshop, GUI, Html, Css, Grid Systems, Typography, Minimal, Template, English, Bootstrap, Responsive Web Design, Pixel Perfect, Graphic Design, Corporate, Creative, Flat, Luxury and much more.</p>
-                               <h6 class="fs-16 mb-2">Available for:</h6>
-                               <ol class="ordered-list">
-                                <li class="list-items">Full Time Office Work</li>
-                                <li class="list-items">Remote Work</li>
-                                <li class="list-items">Freelance</li>
-                                <li class="list-items">Contract</li>
-                                <li class="list-items mb-0">Worldwide</li>
-                               </ol>
-                            </div>
-                              </div>
-                              <div class="card">
-                                <div class="card-body">
-                                <h5 class="subs-title mb-3">Post A comment</h5>
-                                <form class="course-details-form">
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                        <div class="mb-3">
-                                          <label class="form-label">Name</label>
-                                          <input class="form-control" type="text">
-                                        </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                        <div class="mb-3">
-                                          <label class="form-label">Email</label>
-                                          <input class="form-control" type="email">
-                                        </div>
-                                        </div>
-                                         <div class="col-12">
-                                        <div class="mb-3">
-                                          <label class="form-label">Subject</label>
-                                          <input class="form-control" type="text">
-                                        </div>
-                                        </div>
-                                        <div class="col-12">
-                                        <div class="mb-3">
-                                          <label class="form-label">Comments</label>
-                                         <textarea class="form-control"></textarea>
-                                        </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <button type="submit" class="btn post-btn">Submit</button>
-                                        </div>
-                                    </div>
-                                </form>
-                                </div>
-                              </div>
-                           </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="course-sidebar-sec mt-0">
-                              <div class="card mb-4">
-                                <div class="card-body">
-                                 <div class="d-flex justify-content-between align-items-center mb-4">
-                                      <h2 class="text-success fs-30">FREE</h2>
-                                      <p class="fs-14 mb-0"><span class="text-decoration-line-through me-2">$99.00</span>50% off</p>
-                                    </div>
-                                    <div class="d-flex justify-content-between gap-3 wishlist-btns">
-                                       <a class="btn d-flex btn-wish" [routerLink]="routes.studentWishlist"><i class="isax isax-heart me-1 fs-18"></i>Add to Wishlist</a>
-                                       <a class="btn d-flex btn-wish" href="javascript:void(0);"><i class="ti ti-share me-1 fs-18"></i>Share</a>
-                                    </div>
-                                    <a [routerLink]="routes.cart" class="btn btn-primary w-100 mt-3 btn-enroll">Enroll Now</a>
-                                </div>
-                              </div>
-                              <div class="card mb-4">
-                                <div class="card-body">
-                                    <h5 class="subs-title mb-4">Includes</h5>
-                                    <p class="mb-3"><img class="me-2" src="./assets/img/icons/play.svg" alt="img">11 hours on-demand video</p>
-                                    <p class="mb-3"><img class="me-2" src="./assets/img/icons/import.svg" alt="img">69 downloadable resources</p>
-                                    <p class="mb-3"><img class="me-2" src="./assets/img/icons/key.svg" alt="img">Full lifetime access</p>
-                                    <p class="mb-3"><img class="me-2" src="./assets/img/icons/monitor-mobbile.svg" alt="img">Access on mobile and TV</p>
-                                    <p class="mb-3"><img class="me-2" src="./assets/img/icons/cloud-lightning.svg" alt="img">Assignments</p>
-                                    <p class="mb-0"><img class="me-2" src="./assets/img/icons/teacher.svg" alt="img">Certificate of Completion</p>
-                                </div>
-                              </div>
-                              <div class="card">
-                                <div class="card-body cou-features">
-                                    <h5 class="subs-title">Course Features</h5>
-                                    <ul>
-                                        <li><p class="mb-0"><img class="me-2" src="./assets/img/icons/people2.svg" alt="img">Enrolled: 32 students</p></li>
-                                        <li><p class="mb-0"><img class="me-2" src="./assets/img/icons/timer-start3.svg" alt="img">Duration: 20 hours</p></li>
-                                        <li><p class="mb-0"><img class="me-2" src="./assets/img/icons/note.svg" alt="img">Chapters: 15</p></li>
-                                        <li><p class="mb-0"><img class="me-2" src="./assets/img/icons/play3.svg" alt="img">Video: 12 hours</p></li>
-                                        <li><p class="mb-0"><img class="me-2" src="./assets/img/icons/chart.svg" alt="img">Level: Beginner</p></li>
-                                    </ul>
-                                </div>
-                              </div>
-                            </div>
-                        </div>
+                      </div>
                     </div>
-				</div>
-			</section>
-			<!-- /Course detail -->
+                  </div>
+
+                  <!-- No Modules Message -->
+                  <ng-template #noModules>
+                    <div class="text-center py-5">
+                      <i class="fas fa-book-open fa-4x text-muted mb-4"></i>
+                      <h5 class="text-muted mb-3">Aucun module disponible</h5>
+                      <p class="text-muted mb-0">Le contenu de cette formation est en cours de préparation.</p>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+
+              <!-- Instructor Tab -->
+              <div class="tab-pane fade" id="pills-instructor" role="tabpanel">
+                <div class="course-instructor bg-white border rounded-3 p-4">
+                  <div *ngIf="formation.formateur; else noInstructor">
+                    <div class="instructor-header d-flex align-items-start mb-4">
+                      <div class="instructor-avatar me-4">
+                        <img 
+                          [src]="formation.formateur.avatar || 'assets/img/user/user-15.jpg'" 
+                          [alt]="formation.formateur.nom || formation.formateur.name"
+                          class="img-fluid rounded-circle border"
+                          style="width: 120px; height: 120px; object-fit: cover;">
+                      </div>
+                      <div class="instructor-info flex-grow-1">
+                        <h4 class="mb-2 text-primary">
+                          {{ formation.formateur.nom || formation.formateur.name }}
+                        </h4>
+                        <p class="text-muted mb-3 fs-5">{{ formation.formateur.fonction || 'Formateur expert' }}</p>
+                        
+                        <div class="instructor-contact">
+                          <div class="contact-item d-flex align-items-center mb-2">
+                            <i class="fas fa-envelope text-primary me-3"></i>
+                            <a href="mailto:{{ formation.formateur.email }}" class="text-decoration-none">
+                              {{ formation.formateur.email }}
+                            </a>
+                          </div>
+                          <div class="contact-item d-flex align-items-center" *ngIf="formation.formateur_details?.entreprise">
+                            <i class="fas fa-building text-primary me-3"></i>
+                            <span>{{ formation.formateur_details.entreprise }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="instructor-description" *ngIf="formation.formateur.bio">
+                      <h5 class="mb-3">À propos du formateur</h5>
+                      <div class="bio-content p-3 bg-light rounded">
+                        <p class="mb-0">{{ formation.formateur.bio }}</p>
+                      </div>
+                    </div>
+
+                    <div class="instructor-stats mt-4" *ngIf="!formation.formateur.bio">
+                      <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Formateur expérimenté spécialisé dans le domaine de cette formation.
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <ng-template #noInstructor>
+                    <div class="text-center py-5">
+                      <i class="fas fa-user-tie fa-4x text-muted mb-4"></i>
+                      <h5 class="text-muted mb-2">Informations du formateur</h5>
+                      <p class="text-muted">Les détails du formateur ne sont pas disponibles.</p>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+
+              <!-- Reviews Tab -->
+              <div class="tab-pane fade" id="pills-reviews" role="tabpanel">
+                <div class="course-reviews bg-white border rounded-3 p-4">
+                  
+                  <!-- Add Comment Form -->
+                  <div class="comment-form-wrap mb-5">
+                    <h4 class="mb-4">
+                      <i class="fas fa-pen text-primary me-2"></i>
+                      Laisser un avis
+                    </h4>
+                    <form #commentForm="ngForm" (ngSubmit)="submitComment()" class="bg-light p-4 rounded-3">
+                      <div class="row">
+                        <!-- Rating Selection -->
+                        <div class="col-md-12 mb-4">
+                          <label class="form-label fw-semibold">Note *</label>
+                          <div class="rating-input d-flex align-items-center">
+                            <span *ngFor="let star of getStarsArray(5)" 
+                                  (click)="setRating(star)"
+                                  class="rating-star me-2"
+                                  [class.active]="star <= newComment.note"
+                                  style="font-size: 1.5rem; cursor: pointer;">
+                              <i class="fas fa-star" 
+                                 [class.text-warning]="star <= newComment.note"
+                                 [class.text-muted]="star > newComment.note"></i>
+                            </span>
+                            <span class="ms-3 badge bg-primary fs-6">{{ newComment.note }}/5</span>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label fw-semibold">Nom *</label>
+                          <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="newComment.nom"
+                            name="nom"
+                            placeholder="Votre nom"
+                            required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label fw-semibold">Email *</label>
+                          <input 
+                            type="email" 
+                            class="form-control" 
+                            [(ngModel)]="newComment.email"
+                            name="email"
+                            placeholder="votre@email.com"
+                            required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                          <label class="form-label fw-semibold">Sujet *</label>
+                          <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="newComment.sujet"
+                            name="sujet"
+                            placeholder="Résumé de votre avis"
+                            required>
+                        </div>
+                        <div class="col-md-12 mb-4">
+                          <label class="form-label fw-semibold">Commentaire *</label>
+                          <textarea 
+                            class="form-control" 
+                            rows="4" 
+                            [(ngModel)]="newComment.commentaire"
+                            name="commentaire"
+                            placeholder="Partagez votre expérience avec cette formation..."
+                            required></textarea>
+                        </div>
+                        <div class="col-md-12">
+                          <button 
+                            type="submit" 
+                            class="btn btn-primary btn-lg"
+                            [disabled]="submittingComment || !commentForm.valid">
+                            <span *ngIf="submittingComment" class="spinner-border spinner-border-sm me-2"></span>
+                            <i class="fas fa-paper-plane me-2" *ngIf="!submittingComment"></i>
+                            {{ submittingComment ? 'Envoi en cours...' : 'Publier l\'avis' }}
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+
+                  <!-- Existing Reviews -->
+                  <div class="reviews-list" *ngIf="formation.avis && formation.avis.length > 0; else noReviews">
+                    <h4 class="mb-4">
+                      <i class="fas fa-comments text-primary me-2"></i>
+                      Avis des étudiants ({{ formation.avis.length }})
+                    </h4>
+                    
+                    <div class="review-item border rounded-3 p-4 mb-4" *ngFor="let avis of formation.avis">
+                      <div class="review-header d-flex justify-content-between align-items-start mb-3">
+                        <div class="review-author">
+                          <h6 class="mb-1">{{ avis.nom }}</h6>
+                          <p class="text-muted mb-0">{{ avis.sujet }}</p>
+                        </div>
+                        <div class="review-meta text-end">
+                          <div class="review-rating mb-2" *ngIf="avis.note">
+                            <span *ngFor="let star of getStarsArray(5)" class="me-1">
+                              <i class="fas fa-star" 
+                                 [class.text-warning]="star <= avis.note"
+                                 [class.text-muted]="star > avis.note"></i>
+                            </span>
+                          </div>
+                          <small class="text-muted">
+                            {{ avis.created_at | date:'dd/MM/yyyy à HH:mm' }}
+                          </small>
+                        </div>
+                      </div>
+                      <div class="review-content">
+                        <p class="mb-0">{{ avis.commentaire }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ng-template #noReviews>
+                    <div class="text-center py-5">
+                      <i class="fas fa-comment-dots fa-4x text-muted mb-4"></i>
+                      <h5 class="text-muted mb-3">Aucun avis pour le moment</h5>
+                      <p class="text-muted">Soyez le premier à partager votre expérience avec cette formation !</p>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+/* Media Video Styling */
+.course-main-video {
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.course-main-image {
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.video-overlay-info,
+.image-overlay-info {
+  border-radius: 0 0 12px 12px;
+}
+
+/* Course Stats */
+.course-stats .stat-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.course-stats .stat-item:last-child {
+  border-bottom: none;
+}
+
+/* Sidebar Cards */
+.course-price-card {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.formation-stats-card {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* Navigation Tabs */
+.course-tab-nav .nav-link {
+  border-radius: 25px;
+  margin: 0 5px;
+  transition: all 0.3s ease;
+}
+
+.course-tab-nav .nav-link.active {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+/* Section Items */
+.section-item {
+  transition: all 0.2s ease;
+  border: 1px solid #e9ecef !important;
+}
+
+.section-item:hover {
+  border-color: var(--bs-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Rating Stars */
+.rating-star {
+  transition: all 0.2s ease;
+}
+
+.rating-star:hover {
+  transform: scale(1.1);
+}
+
+/* Accordion Improvements */
+.accordion-button {
+  border-radius: 8px !important;
+  background-color: #f8f9fa;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: #e3f2fd;
+  color: var(--bs-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .course-stats {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+  
+  .instructor-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .section-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+  
+  .module-meta {
+    margin-top: 0.5rem;
+  }
+  
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+}
+
+/* Custom Text Colors */
+.text-purple {
+  color: #6f42c1 !important;
+}
+
+/* Badge Improvements */
+.badge {
+  font-weight: 500;
+}
+
+/* Loading Animation */
+.spinner-border {
+  width: 2rem;
+  height: 2rem;
+}
+</style>

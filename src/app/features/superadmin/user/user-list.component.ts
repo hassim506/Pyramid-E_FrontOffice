@@ -42,6 +42,7 @@ export class UserListComponent implements OnInit {
   ngOnInit() {
     this.getUserList();
   }
+  
 
   private getUserList() {
   this.loading = true;
@@ -79,6 +80,12 @@ export class UserListComponent implements OnInit {
       (_, i) => startIndex + i + 1
     );
   }
+public getRoleName(user: User): string {
+  if (user.role && typeof user.role === 'object' && user.role.name) {
+    return user.role.name;
+  }
+  return 'Non défini';
+}
 
   public onPageChange(page: number): void {
     this.currentPage = page;
@@ -181,24 +188,26 @@ export class UserListComponent implements OnInit {
     this.getUserList();
   }
 
-  getRoleBadgeClass(role: string): string {
-    switch (role?.toLowerCase()) {
-      case 'superadmin':
-      case 'super admin':
-        return 'badge bg-danger';
-      case 'admin':
-        return 'badge bg-warning';
-      case 'formateur':
-        return 'badge bg-info';
-      case 'responsable rh':
-      case 'responsable rh groupe':
-        return 'badge bg-primary';
-      case 'employé':
-        return 'badge bg-secondary';
-      default:
-        return 'badge bg-secondary';
-    }
+public getRoleBadgeClass(roleName: string): string {
+  switch (roleName?.toLowerCase()) {
+    case 'super admin':
+    case 'superadmin':
+      return 'badge bg-danger';
+    case 'admin':
+      return 'badge bg-warning';
+    case 'formateur':
+      return 'badge bg-info';
+    case 'responsable rh':
+    case 'responsable rh groupe':
+      return 'badge bg-primary';
+    case 'employé':
+    case 'employee':
+      return 'badge bg-secondary';
+    default:
+      return 'badge bg-light text-dark';
   }
+}
+
 
   getStatutBadgeClass(statut: number): string {
     return statut === 1 ? 'badge bg-success' : 'badge bg-warning';

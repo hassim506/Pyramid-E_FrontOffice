@@ -86,10 +86,10 @@ onSubmit(): void {
       const roleId = res.user?.role_id;
       if (roleId === 2) {
         this.router.navigate(['/student/student-dashboard']);
-      } else if (roleId === 3) {
+      } else if (roleId === 3 || roleId === 10 || roleId === 6 || roleId === 13) {
         this.router.navigate(['/instructor/instructor-dashboard']);
-      }else if (roleId === 4) {
-        this.router.navigate(['/instructor/instructor-dashboard']);
+      }else if (roleId === 4 || roleId === 5 || roleId === 9|| roleId === 14) {
+        this.router.navigate(['/adminrh/adminrh-dashboard']);
       } else if (roleId === 1) {
         this.router.navigate(['/superadmin/superadmin-dashboard']);
       } else {

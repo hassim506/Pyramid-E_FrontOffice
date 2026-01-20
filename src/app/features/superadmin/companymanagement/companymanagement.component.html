@@ -34,13 +34,14 @@
     <table matSort (matSortChange)="sortData($event)" class="table">
         <thead class="thead-light">
             <tr>
-                <th>SIRET</th>
+                <th>NINEA</th>
                 <th>Nom de l'entreprise</th>
                 <th>Client</th>
                 <th>Email</th>
                 <th>Téléphone</th>
                 <th>Secteur</th>
                 <th>Effectif</th>
+                <th>Pays</th> 
                 <th>Statut</th>
                 <th></th>
             </tr>
@@ -48,7 +49,7 @@
         <tbody>
             @for (data of tableData;track data){
             <tr>
-                <td><a [routerLink]="['/superadmin/superadmin-company-details', data.id]" class="text-primary">{{data.siret}}</a></td>
+                <td><a [routerLink]="['/superadmin/superadmin-company-details', data.id]" class="text-primary">{{data?.ninea}}</a></td>
                 <td>
                     <div class="d-flex align-items-center">
                         <div class="avatar avatar-md avatar-rounded flex-shrink-0 me-2 bg-primary text-white d-flex align-items-center justify-content-center">
@@ -67,7 +68,9 @@
                 <td>{{data.telephone}}</td>
                 <td>{{data.secteur_activite}}</td>
                 <td>{{data.taille_effectif}}</td>
-                <td>
+<td>
+    {{ getCountryFlag(data?.pays || '') }} {{ getCountryName(data?.pays || '') }}
+</td>                <td>
                     <span [class]="getStatusClass(data.statut)">{{data.statut | titlecase}}</span>
                 </td>
                 <td>

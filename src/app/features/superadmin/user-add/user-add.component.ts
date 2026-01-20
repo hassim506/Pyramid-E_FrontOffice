@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { User } from '../../../shared/models/user.models';
 import { Client, Company } from '../../../shared/models/client-company.models';
 import { UserService } from '../../../shared/service/user/user.service';
+import { RoleService } from '../../../shared/service/role/role.service';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
 
 @Component({
@@ -24,10 +25,12 @@ export class UserAddComponent implements OnInit, OnChanges {
   loading: boolean = false;
   clients: Client[] = [];
   companies: Company[] = [];
+ roles: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
+    private roleService: UserService,
     private clientCompanyService: ClientCompanyService
   ) {}
 
@@ -35,31 +38,119 @@ export class UserAddComponent implements OnInit, OnChanges {
     this.initForm();
     this.loadClients();
     this.loadCompanies();
+    this.loadRoles();
   }
-
-  ngOnChanges() {
-    if (this.visible && this.userData && this.isEditMode) {
-      this.populateForm();
-    } else if (this.visible && !this.isEditMode) {
-      this.resetForm();
+loadRoles() {
+  console.log('Chargement des rôles...');
+  this.userService.getRoles().subscribe({
+    next: (response: any) => {
+      console.log('Réponse API roles:', response);
+      
+      // Gérer différents formats de réponse
+      if (Array.isArray(response)) {
+        this.roles = response;
+      } else if (response && Array.isArray(response.data)) {
+        this.roles = response.data;
+      } else if (response && Array.isArray(response.roles)) {
+        this.roles = response.roles;
+      } else if (response && typeof response === 'object') {
+        // Si c'est un objet, essayer de convertir en tableau
+        this.roles = Object.values(response);
+      } else {
+        console.error('Format de réponse inattendu pour les rôles:', response);
+        this.roles = [];
+      }
+      
+      console.log('Rôles finaux assignés:', this.roles);
+    },
+    error: (error) => {
+      console.error('Erreur chargement rôles:', error);
+      // Fallback sur une liste statique
+      this.roles = [
+        { id: 1, name: 'Super Admin' },
+        { id: 2, name: 'Employé' },
+        { id: 3, name: 'Formateur' },
+        { id: 4, name: 'Responsable RH' },
+        { id: 5, name: 'Responsable RH Groupe' },
+        
+      ];
     }
-  }
+  });
+}
+ngOnChanges() {
+  if (this.userData && this.isEditMode) {
+    // Réinitialiser le formulaire avec les bonnes validations pour le mode édition
+    this.initForm();
+    
+    // Extraire le role_id depuis l'objet role ou utiliser directement role_id
+    const roleId = this.userData.role ? 
+      (typeof this.userData.role === 'object' ? this.userData.role.id : this.userData.role_id) : 
+      this.userData.role_id;
 
-  initForm() {
-    this.userForm = this.fb.group({
-      nom: ['', [Validators.required, Validators.minLength(2)]],
-      prenom: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      numero: [''],
-      fonction: [''],
-      role_id: ['', Validators.required],
-      entreprise_id: [''],
-      statut: [1, Validators.required],
-      password: ['', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]],
-      password_confirmation: ['', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]]
+    this.userForm.patchValue({
+      nom: this.userData.nom || '',
+      prenom: this.userData.prenom || '',
+      email: this.userData.email || '',
+      numero: this.userData.numero || '',
+      fonction: this.userData.fonction || '',
+      role_id: roleId,
+      statut: this.userData.statut,
+      entreprise_id: this.userData.entreprise_id || ''
     });
-  }
 
+    console.log('Mode édition - Formulaire valide:', this.userForm.valid);
+    console.log('Erreurs du formulaire:', this.userForm.errors);
+    console.log('Statut des champs:', Object.keys(this.userForm.controls).map(key => ({
+      field: key,
+      value: this.userForm.get(key)?.value,
+      valid: this.userForm.get(key)?.valid,
+      errors: this.userForm.get(key)?.errors
+    })));
+  } else if (!this.isEditMode) {
+    // Mode création
+    this.initForm();
+  }
+}
+
+initForm() {
+  const passwordValidators = this.isEditMode ? [] : [Validators.required, Validators.minLength(8)];
+  
+  this.userForm = this.fb.group({
+    nom: ['', [Validators.required, Validators.minLength(2)]],
+    prenom: ['', [Validators.required, Validators.minLength(2)]],
+    email: ['', [Validators.required, Validators.email]],
+    numero: [''],
+    fonction: [''],
+    role_id: ['', Validators.required],
+    entreprise_id: [''],
+    statut: [1, Validators.required],
+    password: ['', passwordValidators],
+    password_confirmation: ['', passwordValidators]
+  });
+}
+
+// Ajoutez cette méthode pour debug
+isFormValid(): boolean {
+  const isValid = this.userForm.valid;
+  console.log('Formulaire valide:', isValid);
+  if (!isValid) {
+    console.log('Champs invalides:', Object.keys(this.userForm.controls)
+      .filter(key => this.userForm.get(key)?.invalid)
+      .map(key => ({
+        field: key,
+        errors: this.userForm.get(key)?.errors,
+        value: this.userForm.get(key)?.value
+      }))
+    );
+  }
+  return isValid;
+}
+getRoleName(user: any): string {
+  if (!user || !user.role) return '';
+  if (typeof user.role === 'object' && user.role.name) return user.role.name;
+  if (typeof user.role === 'string') return user.role;
+  return '';
+}
   loadClients() {
     this.clientCompanyService.getClients().subscribe({
       next: (response) => {

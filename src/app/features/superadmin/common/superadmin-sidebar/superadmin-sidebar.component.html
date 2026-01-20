@@ -9,26 +9,25 @@
                 <a [routerLink]="routes.superadminProfile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>
             </li>
             <li>
-                <a [routerLink]="routes.superadminCourse" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Course</a>
+                <a [routerLink]="routes.superadminCourse" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Formations</a>
             </li>
-            <li>    
+            <li *appHasPermission="'lister utilisateurs'">    
                 <a [routerLink]="routes.superadminUserList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-profile-2user5 me-2"></i>Gestion des Utilisateurs</a>
             </li>
-             <li>
+             <li *appHasPermission="'lister clients'">
                 <a [routerLink]="routes.superadminClientList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-people5 me-2"></i>Gestion des Clients</a>
             </li>
-             <li>
+             <li *appHasPermission="'lister entreprises'">
                 <a [routerLink]="routes.superadminCompanyManagement" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Entreprises</a>
              </li>
-                <li>
+                <li *appHasPermission="'lister permissions'">
                 <a [routerLink]="routes.superadminPermission" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Permission</a>
 
             </li>
- <li>
+         <li *appHasPermission="'lister roles'">
                 <a [routerLink]="routes.superadminRole" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Roles</a>
 
             </li>
-
             
             <li>
                 <a [routerLink]="routes.superadminAnnouncements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-volume-high5 me-2"></i>Annonces</a>
@@ -75,7 +74,7 @@
                 class="d-inline-flex align-items-center"><i class="isax isax-setting-25 me-2"></i>Settings</a>
             </li>
             <li>
-                <a [routerLink]="routes.login" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-logout5 me-2"></i>Logout</a>
+                <a (click)="logout()" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-logout5 me-2"></i>Logout</a>
             </li>
         </ul>
     </div>

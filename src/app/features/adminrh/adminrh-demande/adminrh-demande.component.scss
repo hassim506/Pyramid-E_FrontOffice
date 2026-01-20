@@ -1,0 +1,43 @@
+.avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 0.875rem;
+  
+  &.avatar-md {
+    width: 48px;
+    height: 48px;
+    font-size: 1rem;
+  }
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-group-sm .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.spinner-border-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .d-none.d-sm-inline {
+    display: none !important;
+  }
+  
+  .avatar.avatar-md {
+    width: 40px;
+    height: 40px;
+    font-size: 0.875rem;
+  }
+}

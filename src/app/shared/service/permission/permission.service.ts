@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Permission, PermissionResponse } from '../../models/permission.models';
+import { AuthService } from '../authentification/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ import { Permission, PermissionResponse } from '../../models/permission.models';
 export class PermissionService {
   private apiUrl = 'http://localhost:8000/api'; // À adapter selon la configuration
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('pyramide_token');
@@ -52,4 +53,35 @@ export class PermissionService {
       { headers: this.getHeaders() }
     );
   }
+
+   canListUsers(): boolean {
+    return this.authService.hasPermission('lister utilisateurs');
+  }
+
+  canCreateUsers(): boolean {
+    return this.authService.hasPermission('créer utilisateur');
+  }
+
+  canEditUsers(): boolean {
+    return this.authService.hasPermission('modifier utilisateur');
+  }
+
+  canDeleteUsers(): boolean {
+    return this.authService.hasPermission('supprimer utilisateur');
+  }
+
+  // Ajouter d'autres permissions selon vos besoins
+  canManageRoles(): boolean {
+    return this.authService.hasPermission('gérer rôles');
+  }
+
+  canViewReports(): boolean {
+    return this.authService.hasPermission('voir rapports');
+  }
+
+  // Méthode générale pour vérifier une permission
+  hasPermission(permission: string): boolean {
+    return this.authService.hasPermission(permission);
+  }
+
 }

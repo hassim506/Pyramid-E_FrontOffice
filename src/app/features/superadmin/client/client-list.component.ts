@@ -61,6 +61,53 @@ export class ClientListComponent {
     });
   }
 
+  private paysList = [
+    { code: 'SN', nom: 'Sénégal', flag: '🇸🇳' },
+    { code: 'FR', nom: 'France', flag: '🇫🇷' },
+    { code: 'ML', nom: 'Mali', flag: '🇲🇱' },
+    { code: 'BF', nom: 'Burkina Faso', flag: '🇧🇫' },
+    { code: 'CI', nom: 'Côte d\'Ivoire', flag: '🇨🇮' },
+    { code: 'GN', nom: 'Guinée', flag: '🇬🇳' },
+    { code: 'MR', nom: 'Mauritanie', flag: '🇲🇷' },
+    { code: 'GM', nom: 'Gambie', flag: '🇬🇲' },
+    { code: 'GW', nom: 'Guinée-Bissau', flag: '🇬🇼' },
+    { code: 'CV', nom: 'Cap-Vert', flag: '🇨🇻' }
+  ];
+
+  // ... existing methods ...
+
+  // 🆕 Méthodes pour gérer les pays
+  getCountryFlag(countryCode: string): string {
+    const country = this.paysList.find(p => p.code === countryCode);
+    return country ? country.flag : '🌍';
+  }
+
+  getCountryName(countryCode: string): string {
+    const country = this.paysList.find(p => p.code === countryCode);
+    return country ? country.nom : countryCode;
+  }
+private getCompanyList() {
+  this.loading = true;
+  this.error = '';
+  
+  this.clientCompanyService.getCompanies().subscribe({
+    next: (response) => {
+      console.log('Companies data:', response);
+      // Correction ici :
+      this.actualData = response.entreprises || [];
+      this.getTableData({ skip: 0, limit: this.pageSize });
+      this.loading = false;
+    },
+    error: (error) => {
+      console.error('Erreur lors de la récupération des entreprises:', error);
+      this.error = 'Erreur lors du chargement des données';
+      this.loading = false;
+      this.loadMockData();
+    }
+  });
+}
+
+
   private getClientList() {
   this.loading = true;
   this.error = '';
@@ -90,7 +137,7 @@ export class ClientListComponent {
         id: 1,
         nom: 'Groupe TechnoSolutions',
         type: 'groupe',
-        siret: '20240021234567',
+        ninea: '20240021234567',
         adresse: '456 Rue de la République, 69002 Lyon',
         telephone: '04 78 90 12 34',
         email: 'info@technosolutions.fr',
@@ -105,7 +152,7 @@ export class ClientListComponent {
         id: 2,
         nom: 'Startup Innovante SARL',
         type: 'entreprise',
-        siret: '20240027890123',
+        ninea: '20240027890123',
         adresse: '123 Avenue des Entrepreneurs, 75011 Paris',
         telephone: '01 42 78 90 12',
         email: 'contact@startup-innovante.com',
@@ -161,7 +208,7 @@ export class ClientListComponent {
         client.email.toLowerCase().includes(value.toLowerCase()) ||
         client.telephone.toLowerCase().includes(value.toLowerCase()) ||
         client.secteur_activite.toLowerCase().includes(value.toLowerCase()) ||
-        client.siret.toLowerCase().includes(value.toLowerCase()) ||
+        client.ninea.toLowerCase().includes(value.toLowerCase()) ||
         client.type.toLowerCase().includes(value.toLowerCase()) ||
         client.contact_principal.toLowerCase().includes(value.toLowerCase())
       );
@@ -281,7 +328,7 @@ export class ClientListComponent {
              client.telephone && 
              client.adresse && 
              client.secteur_activite && 
-             client.siret &&
+             client.ninea &&
              client.type &&
              client.contact_principal);
   }

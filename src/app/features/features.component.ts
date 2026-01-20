@@ -7,10 +7,11 @@ import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './layouts/header/header.component';
 import { AdminHeaderComponent } from './layouts/admin-header/admin-header.component';
 import { SlickCarouselModule } from 'ngx-slick-carousel';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-features',
-  imports: [CommonModule,RouterModule,HeaderComponent,AdminHeaderComponent,SlickCarouselModule],
+  imports: [CommonModule,RouterModule,HeaderComponent,AdminHeaderComponent,SlickCarouselModule,FormsModule ],
   templateUrl: './features.component.html',
   styleUrl: './features.component.scss'
 })

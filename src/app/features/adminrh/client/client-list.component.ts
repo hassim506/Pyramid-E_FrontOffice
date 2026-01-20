@@ -90,7 +90,7 @@ export class ClientListComponent {
         id: 1,
         nom: 'Groupe TechnoSolutions',
         type: 'groupe',
-        siret: '20240021234567',
+        ninea: '20240021234567',
         adresse: '456 Rue de la République, 69002 Lyon',
         telephone: '04 78 90 12 34',
         email: 'info@technosolutions.fr',
@@ -105,7 +105,7 @@ export class ClientListComponent {
         id: 2,
         nom: 'Startup Innovante SARL',
         type: 'entreprise',
-        siret: '20240027890123',
+        ninea: '20240027890123',
         adresse: '123 Avenue des Entrepreneurs, 75011 Paris',
         telephone: '01 42 78 90 12',
         email: 'contact@startup-innovante.com',
@@ -161,7 +161,7 @@ export class ClientListComponent {
         client.email.toLowerCase().includes(value.toLowerCase()) ||
         client.telephone.toLowerCase().includes(value.toLowerCase()) ||
         client.secteur_activite.toLowerCase().includes(value.toLowerCase()) ||
-        client.siret.toLowerCase().includes(value.toLowerCase()) ||
+        client.ninea.toLowerCase().includes(value.toLowerCase()) ||
         client.type.toLowerCase().includes(value.toLowerCase()) ||
         client.contact_principal.toLowerCase().includes(value.toLowerCase())
       );
@@ -281,7 +281,7 @@ export class ClientListComponent {
              client.telephone && 
              client.adresse && 
              client.secteur_activite && 
-             client.siret &&
+             client.ninea &&
              client.type &&
              client.contact_principal);
   }

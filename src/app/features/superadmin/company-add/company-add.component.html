@@ -17,11 +17,11 @@
                             </div>
                         </div>
 
-                        <!-- SIRET -->
+                        <!-- SIRET/NINEA -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">NINEA <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" formControlName="siret" placeholder="Ex: 12345678901234">
-                            <div *ngIf="companyForm.get('siret')?.invalid && companyForm.get('siret')?.touched" class="text-danger mt-1">
+                            <input type="text" class="form-control" formControlName="ninea" placeholder="Ex: 12345678901234">
+                            <div *ngIf="companyForm.get('ninea')?.invalid && companyForm.get('ninea')?.touched" class="text-danger mt-1">
                                 <small>Le NINEA est requis (14 chiffres)</small>
                             </div>
                         </div>
@@ -38,18 +38,23 @@
                         <!-- Téléphone -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Téléphone <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" formControlName="telephone" placeholder="Ex: 01 42 56 78 91">
+                            <input type="text" class="form-control" formControlName="telephone" placeholder="Ex: +221 77 123 45 67">
                             <div *ngIf="companyForm.get('telephone')?.invalid && companyForm.get('telephone')?.touched" class="text-danger mt-1">
                                 <small>Le téléphone est requis</small>
                             </div>
                         </div>
 
-                        <!-- Adresse -->
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Adresse <span class="text-danger">*</span></label>
-                            <textarea class="form-control" formControlName="adresse" rows="2" placeholder="Ex: 123 Avenue des Champs Élysées, 75008 Paris"></textarea>
-                            <div *ngIf="companyForm.get('adresse')?.invalid && companyForm.get('adresse')?.touched" class="text-danger mt-1">
-                                <small>L'adresse est requise</small>
+                        <!-- 🆕 PAYS -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Pays <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="pays">
+                                <option value="">Sélectionner un pays</option>
+                                <option *ngFor="let pays of paysList" [value]="pays.code">
+                                    {{ pays.flag }} {{ pays.nom }}
+                                </option>
+                            </select>
+                            <div *ngIf="companyForm.get('pays')?.invalid && companyForm.get('pays')?.touched" class="text-danger mt-1">
+                                <small>Le pays est requis</small>
                             </div>
                         </div>
 
@@ -59,6 +64,15 @@
                             <input type="text" class="form-control" formControlName="secteur_activite" placeholder="Ex: Technologie">
                             <div *ngIf="companyForm.get('secteur_activite')?.invalid && companyForm.get('secteur_activite')?.touched" class="text-danger mt-1">
                                 <small>Le secteur d'activité est requis</small>
+                            </div>
+                        </div>
+
+                        <!-- Adresse -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Adresse <span class="text-danger">*</span></label>
+                            <textarea class="form-control" formControlName="adresse" rows="2" placeholder="Ex: 123 Avenue Bourguiba, Dakar"></textarea>
+                            <div *ngIf="companyForm.get('adresse')?.invalid && companyForm.get('adresse')?.touched" class="text-danger mt-1">
+                                <small>L'adresse est requise</small>
                             </div>
                         </div>
 
@@ -76,7 +90,10 @@
                             <label class="form-label">Client <span class="text-danger">*</span></label>
                             <select class="form-select" formControlName="client_id">
                                 <option value="">Sélectionner un client</option>
-                                <option *ngFor="let client of clients" [value]="client.id">{{client.nom}}</option>
+                                <option *ngFor="let client of clients" [value]="client.id">
+                                    {{ client.nom }} 
+                                    <span *ngIf="client.pays" class="text-muted">({{ getCountryFlag(client.pays) }} {{ client.pays }})</span>
+                                </option>
                             </select>
                             <div *ngIf="companyForm.get('client_id')?.invalid && companyForm.get('client_id')?.touched" class="text-danger mt-1">
                                 <small>Le client est requis</small>
@@ -84,7 +101,7 @@
                         </div>
 
                         <!-- Statut -->
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label">Statut <span class="text-danger">*</span></label>
                             <select class="form-select" formControlName="statut">
                                 <option value="">Sélectionner un statut</option>

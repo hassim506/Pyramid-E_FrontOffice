@@ -15,7 +15,7 @@ export interface Client {
   id: number;
   nom: string;
   type: 'entreprise' | 'groupe' | 'particulier';
-  siret: string;
+  ninea: string;
   adresse: string;
   telephone: string;
   email: string;
@@ -35,7 +35,7 @@ export interface Client {
 export interface Company {
   id: number;
   nom: string;
-  siret: string;
+  ninea: string;
   adresse: string;
   telephone: string;
   email: string;

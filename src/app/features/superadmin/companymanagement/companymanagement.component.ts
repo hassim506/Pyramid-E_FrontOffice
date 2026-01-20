@@ -62,6 +62,31 @@ export class CompanyManagementComponent {
       }
     });
   }
+   private paysList = [
+    { code: 'SN', nom: 'Sénégal', flag: '🇸🇳' },
+    { code: 'FR', nom: 'France', flag: '🇫🇷' },
+    { code: 'ML', nom: 'Mali', flag: '🇲🇱' },
+    { code: 'BF', nom: 'Burkina Faso', flag: '🇧🇫' },
+    { code: 'CI', nom: 'Côte d\'Ivoire', flag: '🇨🇮' },
+    { code: 'GN', nom: 'Guinée', flag: '🇬🇳' },
+    { code: 'MR', nom: 'Mauritanie', flag: '🇲🇷' },
+    { code: 'GM', nom: 'Gambie', flag: '🇬🇲' },
+    { code: 'GW', nom: 'Guinée-Bissau', flag: '🇬🇼' },
+    { code: 'CV', nom: 'Cap-Vert', flag: '🇨🇻' }
+  ];
+
+  // ... existing methods ...
+
+  // 🆕 Méthodes pour gérer les pays
+  getCountryFlag(countryCode: string): string {
+    const country = this.paysList.find(p => p.code === countryCode);
+    return country ? country.flag : '🌍';
+  }
+
+  getCountryName(countryCode: string): string {
+    const country = this.paysList.find(p => p.code === countryCode);
+    return country ? country.nom : countryCode;
+  }
 private getCompanyList() {
   this.loading = true;
   this.error = '';
@@ -90,7 +115,7 @@ private getCompanyList() {
         id: 1,
         nom: 'Groupe TechnoSolutions',
         type: 'groupe',
-        siret: '20240021234567',
+        ninea: '20240021234567',
         adresse: '456 Rue de la République, 69002 Lyon',
         telephone: '04 78 90 12 34',
         email: 'info@technosolutions.fr',
@@ -107,7 +132,7 @@ private getCompanyList() {
       {
         id: 1,
         nom: 'Innovation Digital',
-        siret: '20243011234567',
+        ninea: '20243011234567',
         adresse: '789 Boulevard Saint-Germain, 75007 Paris',
         telephone: '01 45 67 89 02',
         email: 'team@innovation-digital.fr',
@@ -163,7 +188,7 @@ private getCompanyList() {
         company.telephone.toLowerCase().includes(value.toLowerCase()) ||
         company.secteur_activite.toLowerCase().includes(value.toLowerCase()) ||
         company.client?.nom.toLowerCase().includes(value.toLowerCase()) ||
-        company.siret.toLowerCase().includes(value.toLowerCase())
+        company.ninea.toLowerCase().includes(value.toLowerCase())
       );
       this.tableData = filteredData;
     }
@@ -279,7 +304,7 @@ private getCompanyList() {
              company.telephone && 
              company.adresse && 
              company.secteur_activite && 
-             company.siret &&
+             company.ninea &&
              company.client_id);
   }
 

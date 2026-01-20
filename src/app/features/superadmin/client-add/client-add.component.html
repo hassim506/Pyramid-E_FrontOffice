@@ -34,8 +34,8 @@
                         <!-- SIRET -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">NINEA <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" formControlName="siret" placeholder="Ex: 12345678901234">
-                            <div *ngIf="clientForm.get('siret')?.invalid && clientForm.get('siret')?.touched" class="text-danger mt-1">
+                            <input type="text" class="form-control" formControlName="ninea" placeholder="Ex: 12345678901234">
+                            <div *ngIf="clientForm.get('ninea')?.invalid && clientForm.get('ninea')?.touched" class="text-danger mt-1">
                                 <small>Le NINEA est requis (14 chiffres)</small>
                             </div>
                         </div>
@@ -66,7 +66,18 @@
                                 <small>Le contact principal est requis</small>
                             </div>
                         </div>
-
+                      <div class="col-md-6 mb-3">
+                            <label class="form-label">Pays <span class="text-danger">*</span></label>
+                            <select class="form-select" formControlName="pays">
+                                <option value="">Sélectionner un pays</option>
+                                <option *ngFor="let pays of paysList" [value]="pays.code">
+                                {{ pays.flag }} {{ pays.nom }}
+                                </option>
+                            </select>
+                            <div *ngIf="clientForm.get('pays')?.invalid && clientForm.get('pays')?.touched" class="text-danger mt-1">
+                                <small>Le pays est requis</small>
+                            </div>
+                            </div>
                         <!-- Adresse -->
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Adresse <span class="text-danger">*</span></label>

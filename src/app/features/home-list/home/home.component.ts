@@ -257,8 +257,8 @@ public testimonialSlider={
 				]
 }
   settings = {
-    counter: false,
-    plugins: [lgZoom, lgVideo],
+       counter: false,
+    plugins: [lgZoom, lgVideo] as any, 
   };
   private lightGallery!: LightGallery;
   private needRefresh = false;

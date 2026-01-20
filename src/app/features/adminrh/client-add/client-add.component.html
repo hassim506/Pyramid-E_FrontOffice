@@ -34,8 +34,8 @@
                         <!-- SIRET -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">NINEA <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" formControlName="siret" placeholder="Ex: 12345678901234">
-                            <div *ngIf="clientForm.get('siret')?.invalid && clientForm.get('siret')?.touched" class="text-danger mt-1">
+                            <input type="text" class="form-control" formControlName="ninea" placeholder="Ex: 12345678901234">
+                            <div *ngIf="clientForm.get('ninea')?.invalid && clientForm.get('ninea')?.touched" class="text-danger mt-1">
                                 <small>Le NINEA est requis (14 chiffres)</small>
                             </div>
                         </div>

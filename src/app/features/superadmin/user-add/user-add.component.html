@@ -43,19 +43,15 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Rôle <span class="text-danger">*</span></label>
-                            <select class="form-select" formControlName="role_id">
-                                <option value="">Sélectionner un rôle</option>
-                                <option value="1">Super Admin</option>
-                                <option value="2">Employé</option>
-                                <option value="3">Formateur</option>
-                                <option value="4">Responsable RH</option>
-                                <option value="5">Responsable RH Groupe</option>
-                            </select>
-                            <div *ngIf="userForm.get('role_id')?.invalid && userForm.get('role_id')?.touched" class="text-danger mt-1">
-                                <small>Le rôle est requis</small>
+                                <label class="form-label">Rôle <span class="text-danger">*</span></label>
+                                <select class="form-select" formControlName="role_id">
+                                    <option value="">Sélectionner un rôle</option>
+                                    <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
+                                </select>
+                                <div *ngIf="userForm.get('role_id')?.invalid && userForm.get('role_id')?.touched" class="text-danger mt-1">
+                                    <small>Le rôle est requis</small>
+                                </div>
                             </div>
-                        </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Statut <span class="text-danger">*</span></label>
@@ -91,7 +87,28 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
+                <div class="modal-footer">
+  <!-- Debug info - à supprimer après résolution -->
+  <small class="text-muted me-auto">
+    Mode: {{isEditMode ? 'Édition' : 'Création'}} | 
+    Formulaire valide: {{userForm.valid}} | 
+    Loading: {{loading}}
+  </small>
+  
+  <button type="button" class="btn btn-secondary me-2" (click)="hideDialog()" [disabled]="loading">
+    Annuler
+  </button>
+  
+  <button 
+    type="button" 
+    class="btn btn-primary" 
+    (click)="saveUser()" 
+    [disabled]="!userForm.valid || loading">
+    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+    {{isEditMode ? 'Mettre à jour' : 'Créer'}}
+  </button>
+</div>
+            <!-- <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" (click)="hideDialog()">
                     <i class="isax isax-close-circle me-1"></i>Annuler
                 </button>
@@ -100,7 +117,7 @@
                     <i *ngIf="!loading" class="isax isax-tick-circle me-1"></i>
                     {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
                 </button>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>

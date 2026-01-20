@@ -57,4 +57,5 @@ export class SidebarService {
         : 'dark-mode'
     );
   }
+  
 }
