@@ -1,12 +1,13 @@
-// src/app/features/student/student-courses/student-courses.component.ts
-
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common'; // ✅ OBLIGATOIRE
 import { Formations } from '../../../shared/models/Formations.models';
-import { FormationsService } from '../../../shared/service/Formations/Formations.service';
+import { FormationsService } from '../../../shared/service/Formations/formations.service';
 
 @Component({
   selector: 'app-student-courses',
+  standalone: true, // ✅ important
+  imports: [CommonModule], // ✅ FIX DU PROBLÈME
   templateUrl: './student-courses.component.html',
   styleUrls: ['./student-courses.component.scss'],
 })
@@ -14,8 +15,11 @@ export class StudentCoursesComponent implements OnInit {
   tableData: Formations[] = [];
   loading = true;
 
+  currentPage = 1;
+  totalPages = 1;
+
   constructor(
-    private FormationsService: FormationsService,
+    private formationsService: FormationsService,
     private router: Router
   ) {}
 
@@ -23,19 +27,30 @@ export class StudentCoursesComponent implements OnInit {
     this.loadCourses();
   }
 
-  loadCourses(): void {
+  loadCourses(page: number = 1): void {
     this.loading = true;
 
-    this.FormationsService.getAllFormations().subscribe({
-      next: (response: any) => {
-        this.tableData = response.formations;
+    this.formationsService.getAllFormations().subscribe({
+      next: (res: any) => {
+        console.log('API formations response:', res); // 🔍 debug utile
+
+        this.tableData = res.data ?? res.formations ?? [];
+        this.currentPage = res.current_page ?? 1;
+        this.totalPages = res.last_page ?? 1;
+
         this.loading = false;
       },
-      error: (error: any) => {
-        console.error('Erreur chargement formations', error);
+      error: (err) => {
+        console.error('Erreur chargement formations', err);
         this.loading = false;
       },
     });
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.loadCourses(page);
+    }
   }
 
   goToDetails(id: number): void {
@@ -44,3 +59,4 @@ export class StudentCoursesComponent implements OnInit {
     });
   }
 }
+    

@@ -8,7 +8,7 @@ import { LightGallery } from 'lightgallery/lightgallery';
 import { LightgalleryModule } from 'lightgallery/angular';
 
 import { routes } from '../../../shared/service/routes/routes';
-import { FormationsService } from '../../../shared/service/Formations/Formations.service';
+import { FormationsService } from '../../../shared/service/Formations/formations.service';
 import { Formations } from '../../../shared/models/Formations.models';
 
 @Component({
