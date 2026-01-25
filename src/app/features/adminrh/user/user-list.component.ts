@@ -47,7 +47,7 @@ export class UserListComponent implements OnInit {
   this.loading = true;
   this.error = '';
   
-  this.userService.getUsers().subscribe({
+  this.userService.getMyUsers().subscribe({
     next: (response) => {
       console.log('===== RÉPONSE COMPLÈTE API =====');
       console.log(response);

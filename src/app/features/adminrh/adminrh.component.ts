@@ -51,10 +51,23 @@ export class AdminrhComponent implements OnInit {
     return `${this.superAdminProfile.prenom} ${this.superAdminProfile.nom}`;
   }
 
-  getRoleName(): string {
-    if (!this.superAdminProfile) return 'Utilisateur';
-    return this.superAdminProfile.role || 'Super Admin';
+  public getRoleName(user: User): string {
+  if (!user.role) {
+    return 'Non défini';
   }
+  
+  // Check if role is an object with a name property
+  if (typeof user.role === 'object' && user.role !== null && 'name' in user.role) {
+    return (user.role as { name: string }).name;
+  }
+  
+  // Check if role is a string
+  if (typeof user.role === 'string') {
+    return user.role;
+  }
+  
+  return 'Non défini';
+}
 
   getInitials(): string {
     if (!this.superAdminProfile) return 'U';

@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { NavigationStart, Router, Event as RouterEvent, RouterOutlet } from '@angular/router';
+import { HasPermissionDirective } from './directive/has-permission-directive.directive';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,CommonModule],
+  imports: [RouterOutlet,CommonModule, HasPermissionDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

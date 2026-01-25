@@ -37,6 +37,7 @@ export class UserAddComponent implements OnInit, OnChanges {
     this.loadCompanies();
   }
 
+  
   ngOnChanges() {
     if (this.visible && this.userData && this.isEditMode) {
       this.populateForm();
@@ -70,7 +71,7 @@ export class UserAddComponent implements OnInit, OnChanges {
   }
 
   loadCompanies() {
-    this.clientCompanyService.getCompanies().subscribe({
+    this.clientCompanyService.getMyCompanies().subscribe({
       next: (response) => {
         this.companies = response.entreprises || response.data || [];
       },

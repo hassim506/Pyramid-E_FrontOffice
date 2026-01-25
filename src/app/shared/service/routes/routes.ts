@@ -1,3 +1,5 @@
+import { AdminrhDemandeComponent } from "../../../features/adminrh/adminrh-demande/adminrh-demande.component";
+
 export const routes = {
   // Instructor Routes
   instructor: '/instructor/',
@@ -82,7 +84,7 @@ superadmin: '/superadmin/',
   superadmin_tickets: '/superadmin/superadmin-tickets',
   superadminAnnouncements: '/superadmin/superadmin-announcements',
   superadminAssignment: '/superadmin/superadmin-assignment',
-  superadminWishlist: '/superadmin/superadmin-wishlist',
+  superadminWishliast: '/superadmin/superadmin-wishlist',
   superadminWithdraw: '/superadmin/superadmin-withdraw',
   superadminProfile: '/superadmin/superadmin-profile',
   superadminQuizQuestion: '/superadmin/superadmin-quiz-questions',
@@ -148,11 +150,13 @@ adminrh: '/adminrh/',
   adminrhRegister: '/adminrh/adminrh-register',
   adminrhCompanyAdd: '/adminrh/adminrh-company-add',
   adminrhUserList: '/adminrh/adminrh-user-list',
+  adminrhUserGroupList: '/adminrh/adminrh-user-group-list',
   adminrhUserDetails: '/adminrh/adminrh-user-details',
   adminrhUserAdd: '/adminrh/adminrh-user-add',
   adminrh_profile: '/adminrh/adminrh-profile',
   adminrhPermission: '/adminrh/adminrh-permission',
   adminrhRole: '/adminrh/adminrh-role',
+  AdminrhDemande: '/adminrh/adminrh-demande',
 
   // quiz:  'quiz',
   // studentsList: '/superadmin/students-list',
@@ -202,6 +206,8 @@ adminrh: '/adminrh/',
   blog_left_sidebar: '/blog/blog-left-sidebar',
   blog_right_sidebar: '/blog/blog-right-sidebar',
 
+
+  
   // Auth Routes
   auth: '/auth/',
   forgot_password: '/auth/forgot-password',

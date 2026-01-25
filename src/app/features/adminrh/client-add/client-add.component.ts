@@ -47,7 +47,7 @@ export class ClientAddComponent implements OnInit {
     this.clientForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(3)]],
       type: ['', Validators.required],
-      siret: ['', [Validators.required, Validators.pattern(/^\d{14}$/)]],
+      ninea: ['', [Validators.required, Validators.pattern(/^\d{14}$/)]],
       email: ['', [Validators.required, Validators.email]],
       telephone: ['', Validators.required],
       contact_principal: ['', Validators.required],
@@ -65,7 +65,7 @@ export class ClientAddComponent implements OnInit {
       this.clientForm.patchValue({
         nom: this.clientData.nom,
         type: this.clientData.type,
-        siret: this.clientData.siret,
+        ninea: this.clientData.ninea,
         email: this.clientData.email,
         telephone: this.clientData.telephone,
         contact_principal: this.clientData.contact_principal,

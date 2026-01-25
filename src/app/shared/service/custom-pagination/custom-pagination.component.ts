@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
   pageSelection,
   pageSize,
@@ -8,36 +8,28 @@ import {
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-custom-pagination',
-    templateUrl: './custom-pagination.component.html',
-    styleUrls: ['./custom-pagination.component.scss'],
-    imports : [CommonModule]
+  selector: 'app-custom-pagination',
+  templateUrl: './custom-pagination.component.html',
+  styleUrls: ['./custom-pagination.component.scss'],
+  imports: [CommonModule],
+  standalone: true
 })
 export class CustomPaginationComponent {
-  public pageSize = 10;
-  public tableData: Array<string> = [];
-  // pagination variables
-  public lastIndex = 0;
-  public totalData = 0;
-  public skip = 0;
-  public limit: number = this.pageSize;
-  public pageIndex = 0;
-  public serialNumberArray: Array<number> = [];
-  public currentPage = 1;
-  public pageNumberArray: Array<number> = [];
-  public pageSelection: Array<pageSelection> = [];
+  @Input() totalItems!: number;
+  @Input() pageSize: number = 10;
+  @Input() currentPage: number = 1;
+  @Output() pageChange = new EventEmitter<number>();
+
   public totalPages = 0;
-  //** / pagination variables
+  public pageNumberArray: number[] = [];
+  public pageSelection: pageSelection[] = [];
+    public serialNumberArray: number[] = []; 
+      public tableData: any[] = []; 
+
 
   constructor(private pagination: PaginationService) {
-    this.tableData = [];
     this.pagination.calculatePageSize.subscribe((res: pageSizeCal) => {
-      this.calculateTotalPages(
-        res.totalData,
-        res.pageSize,
-        res.tableData,
-        res.serialNumberArray
-      );
+      this.calculateTotalPages(res.totalData, res.pageSize);
       this.pageSize = res.pageSize;
     });
     this.pagination.changePagesize.subscribe((res: pageSize) => {
@@ -45,83 +37,45 @@ export class CustomPaginationComponent {
     });
   }
 
-   
-
-  public getMoreData(event: string): void {
-    if (event == 'next') {
-      this.currentPage++;
-      this.pageIndex = this.currentPage - 1;
-      this.limit += this.pageSize;
-      this.skip = this.pageSize * this.pageIndex;
-      // this.getTableData();
-      this.pagination.tablePageSize.next({
-        skip: this.skip,
-        limit: this.limit,
-        pageSize: this.pageSize,
-      });
-    } else if (event == 'previous') {
-      this.currentPage--;
-      this.pageIndex = this.currentPage - 1;
-      this.limit -= this.pageSize;
-      this.skip = this.pageSize * this.pageIndex;
-      // this.getTableData();
-      this.pagination.tablePageSize.next({
-        skip: this.skip,
-        limit: this.limit,
-        pageSize: this.pageSize,
-      });
-    }
+  ngOnChanges(): void {
+    this.calculateTotalPages(this.totalItems, this.pageSize);
   }
 
-  public moveToPage(pageNumber: number): void {
-    this.currentPage = pageNumber;
-    this.skip = this.pageSelection[pageNumber - 1].skip;
-    this.limit = this.pageSelection[pageNumber - 1].limit;
-    if (pageNumber > this.currentPage) {
-      this.pageIndex = pageNumber - 1;
-    } else if (pageNumber < this.currentPage) {
-      this.pageIndex = pageNumber + 1;
-    }
-    // this.getTableData();
-    this.pagination.tablePageSize.next({
-      skip: this.skip,
-      limit: this.limit,
-      pageSize: this.pageSize,
-    });
-  }
-
-  public changePageSize(pageSize: number): void {
-    this.pageSelection = [];
-    this.limit = pageSize;
-    this.skip = 0;
-    this.currentPage = 1;
-    // this.getTableData();
-    this.pagination.tablePageSize.next({
-      skip: this.skip,
-      limit: this.limit,
-      pageSize: this.pageSize,
-    });
-  }
-
-  public calculateTotalPages(
-    totalData: number,
-    pageSize: number,
-    tableData: Array<string>,
-    serialNumberArray: Array<number>
-  ): void {
-    this.tableData = tableData;
+  calculateTotalPages(totalItems: number, pageSize: number): void {
+    this.totalPages = Math.ceil(totalItems / pageSize);
     this.pageNumberArray = [];
-    this.serialNumberArray = serialNumberArray;
-    this.totalData = totalData;
-    this.totalPages = totalData / pageSize;
-    if (this.totalPages % 1 != 0) {
-      this.totalPages = Math.trunc(this.totalPages + 1);
-    }
+    this.pageSelection = [];
     for (let i = 1; i <= this.totalPages; i++) {
       const limit = pageSize * i;
       const skip = limit - pageSize;
       this.pageNumberArray.push(i);
-      this.pageSelection.push({ skip: skip, limit: limit });
+      this.pageSelection.push({ skip, limit });
     }
+  }
+
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.pageChange.emit(page);
+    }
+  }
+
+  getMoreData(event: string): void {
+    if (event === 'next' && this.currentPage < this.totalPages) {
+      this.onPageChange(this.currentPage + 1);
+    } else if (event === 'previous' && this.currentPage > 1) {
+      this.onPageChange(this.currentPage - 1);
+    }
+  }
+
+  moveToPage(pageNumber: number): void {
+    this.onPageChange(pageNumber);
+  }
+
+  changePageSize(pageSize: number): void {
+    this.pageSize = pageSize;
+    this.currentPage = 1;
+    this.calculateTotalPages(this.totalItems, this.pageSize);
+    this.pageChange.emit(1);
   }
 }

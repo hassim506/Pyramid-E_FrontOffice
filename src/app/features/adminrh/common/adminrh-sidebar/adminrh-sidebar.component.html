@@ -6,22 +6,30 @@
                 <a [routerLink]="routes.adminrh_dashboard" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-grid-35 me-2"></i>Dashboard</a>
             </li>
             <li>
-                <a [routerLink]="routes.adminrhProfile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>
+                <a [routerLink]="routes.adminrhProfile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>  
             </li>
             <li>
-                <a [routerLink]="routes.adminrhCourse" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Course</a>
+                <a [routerLink]="routes.adminrhCourse" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Formations</a>
             </li>
+             <li>
+                <a [routerLink]="routes.AdminrhDemande" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Demandes Formations</a>
+            </li>
+            
             <li>    
                 <a [routerLink]="routes.adminrhUserList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-profile-2user5 me-2"></i>Gestion des Utilisateurs</a>
             </li>
+             <li *ngIf="isHoldingAdmin()">    
+                <a [routerLink]="routes.adminrhUserGroupList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-profile-2user5 me-2"></i>Gestion Utilisateurs du Groupe</a>
+            </li>
+            
              <li>
-                <a [routerLink]="routes.adminrhClientList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-people5 me-2"></i>Gestion des Clients</a>
+                <!-- <a [routerLink]="routes.adminrhClientList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-people5 me-2"></i>Gestion des Clients</a> -->
             </li>
              <li>
                 <a [routerLink]="routes.adminrhCompanyManagement" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Entreprises</a>
              </li>
                 <li>
-                <a [routerLink]="routes.adminrhPermission" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Permission</a>
+                <!-- <a [routerLink]="routes.adminrhPermission" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Permission</a> -->
 
             </li>
  <li>

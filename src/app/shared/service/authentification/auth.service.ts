@@ -43,6 +43,7 @@ export interface LoginResponse {
     avatar?: string;
     created_at?: string;
     updated_at?: string;
+     permissions?: string[]; 
     [key: string]: any;
   };
 }
@@ -157,6 +158,47 @@ register(data: any): Observable<any> {
     return !!this.getToken();
   }
 
+   isAuthenticated(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      return false;
+    }
+
+    // Vérifier si le token n'est pas expiré (optionnel)
+    try {
+      const tokenData = JSON.parse(atob(token.split('.')[1])); // Décoder le JWT
+      const currentTime = Math.floor(Date.now() / 1000);
+      return tokenData.exp > currentTime;
+    } catch (error) {
+      return false;
+    }
+  }
+  
+  getUserPermissions(): string[] {
+  const user = this.getUser();
+  // Si permissions est un tableau d'objets, on mappe sur le champ 'name'
+  if (Array.isArray(user?.permissions) && user.permissions.length > 0 && typeof user.permissions[0] === 'object') {
+    return user.permissions.map((p: any) => p.name);
+  }
+  // Sinon, on retourne tel quel (tableau de string)
+  return user?.permissions || [];
+}
+  //  getUserPermissions(): string[] {
+  //   const user = this.getUser();
+  //   return user?.permissions || [];
+  // }
+
+  // Méthode pour vérifier si l'utilisateur a une permission spécifique
+  hasPermission(permission: string): boolean {
+    const permissions = this.getUserPermissions();
+    return permissions.includes(permission);
+  }
+
+  // Méthode pour vérifier si l'utilisateur a au moins une des permissions
+  hasAnyPermission(permissions: string[]): boolean {
+    const userPermissions = this.getUserPermissions();
+    return permissions.some(permission => userPermissions.includes(permission));
+  }
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Une erreur est survenue';
 

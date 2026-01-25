@@ -1,0 +1,91 @@
+.stat-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  position: relative;
+
+  .icon-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+
+  // Couleurs de fond
+  &.bg-primary-transparent {
+    background-color: rgba(13, 110, 253, 0.1); // Bleu
+  }
+
+  &.bg-info-transparent {
+    background-color: rgba(23, 162, 184, 0.1); // Cyan
+  }
+
+  &.bg-success-transparent {
+    background-color: rgba(40, 167, 69, 0.1); // Vert
+  }
+
+  &.bg-warning-transparent {
+    background-color: rgba(255, 193, 7, 0.1); // Jaune/Ambre
+  }
+}
+
+.progress {
+  background-color: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+
+  .progress-bar {
+    border-radius: 10px;
+    transition: width 0.3s ease;
+
+    &.bg-primary {
+      background-color: #0d6efd;
+    }
+
+    &.bg-info {
+      background-color: #17a2b8;
+    }
+
+    &.bg-success {
+      background-color: #28a745;
+    }
+
+    &.bg-warning {
+      background-color: #ffc107;
+    }
+  }
+}
+
+.skeleton-loader {
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    height: 28px;
+    border-radius: 4px;
+
+    &.skeleton-text {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

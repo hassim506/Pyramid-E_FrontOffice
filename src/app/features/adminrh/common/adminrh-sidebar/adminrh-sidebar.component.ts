@@ -15,7 +15,12 @@ export class AdminrhSidebarComponent {
   public base = '';
   public page = '';
   public last = '';
-
+  currentUser: any;
+isHoldingAdmin(): boolean {
+  // Adaptez selon la structure de votre user/role
+  return this.currentUser?.role_id === 4 
+    || this.currentUser?.role === 'Superadmin RH Holding';
+}
   constructor(private common: CommonService) {
     this.common.base.subscribe((base: string) => {
       this.base = base;

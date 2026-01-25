@@ -59,6 +59,9 @@ getCompany(id: number): Observable<any> {
   createCompany(company: Partial<Company>): Observable<{data: Company}> {
     return this.http.post<{data: Company}>(`${this.baseUrl}/entreprises`, company);
   }
+  createMyCompany(company: Partial<Company>): Observable<{data: Company}> {
+    return this.http.post<{data: Company}>(`${this.baseUrl}/mes-entreprises`, company);
+  }
 
   updateCompany(id: number, company: Partial<Company>): Observable<{data: Company}> {
     return this.http.put<{data: Company}>(`${this.baseUrl}/entreprises/${id}`, company);
@@ -72,4 +75,9 @@ getCompany(id: number): Observable<any> {
   getCompaniesByClient(clientId: number): Observable<CompanyApiResponse> {
     return this.http.get<CompanyApiResponse>(`${this.baseUrl}/mes-entreprises`);
   }
+
+  
+getMyCompanies(): Observable<any> {
+  return this.http.get<any>(`${this.baseUrl}/mes-entreprises`);
+}
 }

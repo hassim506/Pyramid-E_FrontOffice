@@ -1,265 +1,346 @@
-<div class="page-title d-flex align-items-center justify-content-between">
-    <h5 class="fw-bold">Détails de l'Entreprise</h5>
+<div class="container-fluid">
+  <!-- Header avec actions -->
+  <div class="page-title d-flex align-items-center justify-content-between mb-4">
     <div class="d-flex align-items-center">
-        <button class="btn btn-outline-primary me-2" (click)="goBack()">
-            <i class="isax isax-arrow-left me-1"></i>Retour
-        </button>
-        <button class="btn btn-primary me-2" (click)="editCompany()" *ngIf="company">
-            <i class="isax isax-edit me-1"></i>Modifier
-        </button>
-        <button class="btn btn-outline-danger" (click)="deleteCompany()" *ngIf="company">
-            <i class="isax isax-trash me-1"></i>Supprimer
-        </button>
+      <h4 class="fw-bold mb-0">
+        <i class="isax isax-building me-2 text-primary"></i>
+        Détails de l'Entreprise
+      </h4>
+      <span class="badge bg-light text-dark ms-3" *ngIf="company">ID: {{ company.id }}</span>
     </div>
-</div>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+        <i class="isax isax-arrow-left me-1"></i>Retour
+      </button>
+      <button class="btn btn-primary btn-sm" (click)="editCompany()" *ngIf="company">
+        <i class="isax isax-edit me-1"></i>Modifier
+      </button>
+      <button class="btn btn-outline-danger btn-sm" (click)="deleteCompany()" *ngIf="company">
+        <i class="isax isax-trash me-1"></i>Supprimer
+      </button>
+    </div>
+  </div>
 
-<div *ngIf="loading" class="d-flex justify-content-center align-items-center" style="min-height: 300px;">
-    <div class="spinner-border text-primary" role="status">
+  <!-- États de chargement et d'erreur -->
+  <div *ngIf="loading" class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+    <div class="text-center">
+      <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
         <span class="visually-hidden">Chargement...</span>
+      </div>
+      <p class="text-muted">Chargement des détails de l'entreprise...</p>
     </div>
-</div>
+  </div>
 
-<div *ngIf="!loading && error" class="alert alert-warning">
+  <div *ngIf="!loading && error" class="alert alert-danger alert-dismissible fade show" role="alert">
     <i class="isax isax-info-circle me-2"></i>
-    {{error}}
-</div>
+    {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
 
-<div *ngIf="!loading && company" class="row">
-    <!-- Informations principales -->
+  <!-- Contenu principal -->
+  <div *ngIf="!loading && company" class="row g-4">
+    <!-- Sidebar gauche - Informations principales -->
     <div class="col-xl-4 col-lg-5">
-        <div class="card">
-            <div class="card-body text-center">
-                <div class="company-avatar mb-3">
-                    <div class="avatar avatar-xxl avatar-rounded bg-primary text-white d-inline-flex align-items-center justify-content-center">
-                        <i class="isax isax-building" style="font-size: 2rem;"></i>
-                    </div>
-                </div>
-                <h5 class="mb-2">{{company?.nom}}</h5>
-                <p class="text-muted mb-3">{{company?.secteur_activite}}</p>
-                <span [class]="getStatusClass(company?.statut)">{{company?.statut | titlecase}}</span>
-                
-                <div class="row mt-4">
-                    <div class="col-6">
-                        <div class="text-center">
-                            <h6 class="mb-1">{{company?.taille_effectif || 0}}</h6>
-                            <p class="text-muted mb-0 fs-12">Employés</p>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center">
-                            <h6 class="mb-1">{{company?.client?.nom || 'N/A'}}</h6>
-                            <p class="text-muted mb-0 fs-12">Client</p>
-                        </div>
-                    </div>
-                </div>
+      <!-- Profil de l'entreprise -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body text-center">
+          <div class="company-avatar mb-4">
+            <div class="avatar avatar-xxl avatar-rounded bg-gradient-primary text-white d-inline-flex align-items-center justify-content-center shadow">
+              <i class="isax isax-building" style="font-size: 2.5rem;"></i>
             </div>
+          </div>
+          <h4 class="mb-2 fw-bold">{{ company.nom }}</h4>
+          <p class="text-muted mb-3 fs-5">{{ company.secteur_activite }}</p>
+          <span [class]="getStatusClass(company.statut)" class="px-3 py-2 fs-6">
+            {{ company.statut | titlecase }}
+          </span>
+          
+          <!-- Statistiques rapides -->
+          <div class="row mt-4 g-3">
+            <div class="col-6">
+              <div class="bg-light rounded p-3">
+                <h5 class="mb-1 text-primary fw-bold">{{ company.taille_effectif || 0 }}</h5>
+                <p class="text-muted mb-0 fs-6">Effectif déclaré</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="bg-light rounded p-3">
+                <h5 class="mb-1 text-success fw-bold" *ngIf="!loadingEmployees">{{ employeeCount }}</h5>
+                <div *ngIf="loadingEmployees" class="spinner-border spinner-border-sm text-success"></div>
+                <p class="text-muted mb-0 fs-6">Sur la plateforme</p>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Informations de contact -->
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0">Informations de Contact</h6>
-            </div>
-            <div class="card-body">
-                <div class="contact-info">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="isax isax-sms me-3 text-primary"></i>
-                        <div>
-                            <p class="mb-0 fs-14 fw-medium">Email</p>
-                            <a href="mailto:{{company?.email}}" class="text-primary">{{company?.email}}</a>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="isax isax-call me-3 text-primary"></i>
-                        <div>
-                            <p class="mb-0 fs-14 fw-medium">Téléphone</p>
-                            <a href="tel:{{company?.telephone}}" class="text-primary">{{company?.telephone}}</a>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-start mb-3">
-                        <i class="isax isax-location me-3 text-primary"></i>
-                        <div>
-                            <p class="mb-0 fs-14 fw-medium">Adresse</p>
-                            <p class="mb-0 text-muted">{{company?.adresse}}</p>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <i class="isax isax-document me-3 text-primary"></i>
-                        <div>
-                            <p class="mb-0 fs-14 fw-medium">SIRET</p>
-                            <p class="mb-0 text-muted">{{company?.siret}}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Informations de contact -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h6 class="mb-0 fw-semibold">
+            <i class="isax isax-call me-2 text-primary"></i>
+            Informations de Contact
+          </h6>
         </div>
+        <div class="card-body">
+          <div class="contact-info">
+            <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+              <i class="isax isax-sms me-3 text-primary fs-5"></i>
+              <div>
+                <p class="mb-1 fs-6 fw-medium text-muted">Email</p>
+                <a href="mailto:{{ company.email }}" class="text-primary fw-medium">{{ company.email }}</a>
+              </div>
+            </div>
+            <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+              <i class="isax isax-call me-3 text-success fs-5"></i>
+              <div>
+                <p class="mb-1 fs-6 fw-medium text-muted">Téléphone</p>
+                <a href="tel:{{ company.telephone }}" class="text-success fw-medium">{{ company.telephone }}</a>
+              </div>
+            </div>
+            <div class="d-flex align-items-start mb-3 p-2 bg-light rounded">
+              <i class="isax isax-location me-3 text-warning fs-5"></i>
+              <div>
+                <p class="mb-1 fs-6 fw-medium text-muted">Adresse</p>
+                <p class="mb-0">{{ company.adresse }}</p>
+              </div>
+            </div>
+            <div class="d-flex align-items-center p-2 bg-light rounded">
+              <i class="isax isax-document me-3 text-info fs-5"></i>
+              <div>
+                <p class="mb-1 fs-6 fw-medium text-muted">SIRET/NINEA</p>
+                <p class="mb-0 fw-medium">{{ company.ninea }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Informations du client -->
-        <div class="card" *ngIf="company.client">
-            <div class="card-header">
-                <h6 class="mb-0">Client Associé</h6>
-            </div>
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="avatar avatar-md avatar-rounded flex-shrink-0 me-3 bg-info text-white d-flex align-items-center justify-content-center">
-                        <i class="isax isax-people"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-1">{{company?.client?.nom}}</h6>
-                        <p class="mb-0 text-muted fs-12">{{company?.client?.type | titlecase}}</p>
-                        <p class="mb-0 text-muted fs-12">{{company?.client?.email}}</p>
-                    </div>
-                </div>
-            </div>
+      <!-- Client associé -->
+      <div class="card shadow-sm" *ngIf="company.client">
+        <div class="card-header bg-light">
+          <h6 class="mb-0 fw-semibold">
+            <i class="isax isax-people me-2 text-primary"></i>
+            Client Associé
+          </h6>
         </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="avatar avatar-lg avatar-rounded flex-shrink-0 me-3 bg-gradient-info text-white d-flex align-items-center justify-content-center">
+              <i class="isax isax-user fs-4"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-1 fw-semibold">{{ company.client.nom }}</h6>
+              <p class="mb-1 text-muted fs-6">{{ company.client.type | titlecase }}</p>
+              <small class="text-muted">{{ company.client.email }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Détails de l'entreprise -->
+    <!-- Contenu principal - Détails -->
     <div class="col-xl-8 col-lg-7">
-        <!-- Informations générales -->
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0">Informations Générales</h6>
-            </div>
+      <!-- Statistiques des employés -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card bg-gradient-primary text-white shadow-sm h-100">
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">ID Entreprise</label>
-                            <p class="mb-0">{{company?.id}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Nom de l'entreprise</label>
-                            <p class="mb-0">{{  company?.nom}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">SIRET</label>
-                            <p class="mb-0">{{company?.siret}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Secteur d'activité</label>
-                            <p class="mb-0">{{company?.secteur_activite}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Nombre d'employés</label>
-                            <p class="mb-0">{{company?.taille_effectif}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Statut</label>
-                            <span [class]="getStatusClass(company?.statut)">{{company?.statut | titlecase}}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Date de création</label>
-                            <p class="mb-0">{{formatDate(company?.created_at)}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Dernière mise à jour</label>
-                            <p class="mb-0">{{formatDate(company?.updated_at)}}</p>
-                        </div>
-                    </div>
+              <div class="d-flex align-items-center">
+                <div class="me-3">
+                  <i class="isax isax-people fs-1 opacity-75"></i>
                 </div>
+                <div>
+                  <h3 class="mb-1 fw-bold" *ngIf="!loadingEmployees">{{ employeeCount }}</h3>
+                  <div *ngIf="loadingEmployees" class="spinner-border spinner-border-sm" role="status"></div>
+                  <p class="mb-0 opacity-90">Employés inscrits sur la plateforme</p>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
+        <div class="col-md-6">
+          <div class="card bg-gradient-success text-white shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="me-3">
+                  <i class="isax isax-user-tick fs-1 opacity-75"></i>
+                </div>
+                <div>
+                  <h3 class="mb-1 fw-bold">{{ getActiveEmployeesCount() }}</h3>
+                  <p class="mb-0 opacity-90">Employés actifs</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Informations détaillées -->
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0">Adresse Complète</h6>
-            </div>
-            <div class="card-body">
-                <div class="d-flex align-items-start">
-                    <i class="isax isax-location me-3 text-primary" style="margin-top: 4px;"></i>
-                    <div>
-                        <p class="mb-0">{{company?.adresse}}</p>
-                    </div>
-                </div>
-            </div>
+      <!-- Informations générales -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h6 class="mb-0 fw-semibold">
+            <i class="isax isax-document me-2 text-primary"></i>
+            Informations Générales
+          </h6>
         </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Nom de l'entreprise</label>
+                <p class="mb-0 fw-medium">{{ company.nom }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">SIRET/NINEA</label>
+                <p class="mb-0 fw-medium">{{ company.ninea }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Secteur d'activité</label>
+                <p class="mb-0 fw-medium">{{ company.secteur_activite }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Effectif déclaré</label>
+                <p class="mb-0 fw-medium">{{ company.taille_effectif }} employés</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Statut</label>
+                <span [class]="getStatusClass(company.statut)" class="px-2 py-1">
+                  {{ company.statut | titlecase }}
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Date d'enregistrement</label>
+                <p class="mb-0 fw-medium">{{ formatDate(company.created_at) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Informations du client associé -->
-        <div class="card" *ngIf="company.client">
-            <div class="card-header">
-                <h6 class="mb-0">Détails du Client</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Nom du client</label>
-                            <p class="mb-0">{{company?.client?.nom}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Type de client</label>
-                            <span class="badge bg-info">{{company?.client?.type | titlecase}}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Email du client</label>
-                            <p class="mb-0">{{company?.client?.email}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Téléphone du client</label>
-                            <p class="mb-0">{{company?.client?.telephone}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Contact principal</label>
-                            <p class="mb-0">{{company?.client?.contact_principal}}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Statut du client</label>
-                            <span [class]="getStatusClass(company?.client?.statut)">{{company?.client?.statut | titlecase}}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Liste des employés -->
+      <div class="card shadow-sm mb-4" *ngIf="employees.length > 0">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 fw-semibold">
+            <i class="isax isax-profile-2user me-2 text-primary"></i>
+            Employés Inscrits ({{ employeeCount }})
+          </h6>
+          <span class="badge bg-primary">{{ employeeCount }} utilisateurs</span>
         </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="border-0 fw-semibold">Nom</th>
+                  <th class="border-0 fw-semibold">Email</th>
+                  <th class="border-0 fw-semibold">Rôle</th>
+                  <th class="border-0 fw-semibold">Statut</th>
+                  <th class="border-0 fw-semibold">Inscription</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let employee of employees">
+                  <td class="py-3">
+                    <div class="d-flex align-items-center">
+                      <div class="avatar avatar-sm bg-light text-primary me-2 d-flex align-items-center justify-content-center rounded">
+                        <i class="isax isax-user"></i>
+                      </div>
+                      <span class="fw-medium">{{ employee.prenom }} {{ employee.nom }}</span>
+                    </div>
+                  </td>
+                  <td class="py-3">{{ employee.email }}</td>
+                  <td class="py-3">
+                    <span class="badge bg-info-subtle text-info">{{ employee.role | titlecase }}</span>
+                  </td>
+                  <td class="py-3">
+                    <span [class]="employee.est_actif ? 'badge bg-success-subtle text-success' : 'badge bg-warning-subtle text-warning'">
+                      {{ employee.est_actif ? 'Actif' : 'Inactif' }}
+                    </span>
+                  </td>
+                  <td class="py-3">{{ formatDate(employee.created_at) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-        <!-- Historique/Activité récente -->
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0">Activité Récente</h6>
-            </div>
-            <div class="card-body">
-                <div class="timeline">
-                    <div class="timeline-item" *ngIf="company.updated_at">
-                        <div class="timeline-marker bg-primary"></div>
-                        <div class="timeline-content">
-                            <h6 class="mb-1">Profil mis à jour</h6>
-                            <p class="text-muted mb-0 fs-12">{{formatDate(company?.updated_at)}}</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item" *ngIf="company.created_at">
-                        <div class="timeline-marker bg-success"></div>
-                        <div class="timeline-content">
-                            <h6 class="mb-1">Entreprise enregistrée</h6>
-                            <p class="text-muted mb-0 fs-12">{{formatDate(company?.created_at)}}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Détails du client -->
+      <div class="card shadow-sm mb-4" *ngIf="company.client">
+        <div class="card-header bg-light">
+          <h6 class="mb-0 fw-semibold">
+            <i class="isax isax-briefcase me-2 text-primary"></i>
+            Détails du Client
+          </h6>
         </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Nom du client</label>
+                <p class="mb-0 fw-medium">{{ company.client.nom }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Type</label>
+                <span class="badge bg-info-subtle text-info">{{ company.client.type | titlecase }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Contact principal</label>
+                <p class="mb-0 fw-medium">{{ company.client.contact_principal }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="form-label fw-semibold text-muted mb-1">Téléphone</label>
+                <p class="mb-0 fw-medium">{{ company.client.telephone }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline d'activité -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h6 class="mb-0 fw-semibold">
+            <i class="isax isax-clock me-2 text-primary"></i>
+            Activité Récente
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="timeline-item d-flex mb-3" *ngIf="company.updated_at">
+              <div class="timeline-marker bg-primary rounded-circle me-3 mt-1" style="width: 12px; height: 12px;"></div>
+              <div class="timeline-content">
+                <h6 class="mb-1 fw-semibold">Profil mis à jour</h6>
+                <p class="text-muted mb-0 fs-6">{{ formatDate(company.updated_at) }}</p>
+              </div>
+            </div>
+            <div class="timeline-item d-flex">
+              <div class="timeline-marker bg-success rounded-circle me-3 mt-1" style="width: 12px; height: 12px;"></div>
+              <div class="timeline-content">
+                <h6 class="mb-1 fw-semibold">Entreprise enregistrée</h6>
+                <p class="text-muted mb-0 fs-6">{{ formatDate(company.created_at) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>

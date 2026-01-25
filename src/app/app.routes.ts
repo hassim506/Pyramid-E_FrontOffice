@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { UserListComponent } from './features/superadmin/user/user-list.component';
+import { PermissionGuard } from './guards/permission-guard.guard';
+import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
     { path:'',
       redirectTo:'index',
@@ -26,7 +28,7 @@ export const routes: Routes = [
         {path:'courses',loadComponent:()=>import ('./features/courses/courses.component').then((m)=>m.CoursesComponent),
             children:[
                 {path:'add-course',loadComponent:()=>import ('./features/courses/add-course/add-course.component').then((m)=>m.AddCourseComponent)},
-                {path:'course-details',loadComponent:()=>import ('./features/courses/course-details-2/course-details-2.component').then((m)=>m.CourseDetails2Component)},
+                {path:'course-details/:id',loadComponent:()=>import ('./features/courses/course-details/course-details.component').then((m)=>m.CourseDetailsComponent)},
                 {path:'course-details-2',loadComponent:()=>import ('./features/courses/course-details-2/course-details-2.component').then((m)=>m.CourseDetails2Component)},
                 {path:'course-list',loadComponent:()=>import ('./features/courses/course-list/course-list.component').then((m)=>m.CourseListComponent)},
                 {path:'course-grid',loadComponent:()=>import ('./features/courses/course-grid/course-grid.component').then((m)=>m.CourseGridComponent)},
@@ -77,9 +79,9 @@ export const routes: Routes = [
                 },
             ]
         },
-        {path : 'superadmin',loadComponent:()=>import ('./features/superadmin/superadmin.component').then((m)=>m.SuperadminComponent),
+        {path : 'superadmin',loadComponent:()=>import ('./features/superadmin/superadmin.component').then((m)=>m.SuperadminComponent), canActivate: [authGuard],
             children:[
-                {path:'superadmin-dashboard',loadComponent:()=>import ('./features/superadmin/superadmin-dashboard/superadmin-dashboard.component').then((m)=>m.SuperadminDashboardComponent)},
+                {path:'superadmin-dashboard',loadComponent:()=>import ('./features/superadmin/superadmin-dashboard/superadmin-dashboard.component').then((m)=>m.SuperAdminDashboardComponent)},
                 {path:'superadmin-profile',loadComponent:()=>import ('./features/superadmin/superadmin-profile/superadmin-profile.component').then((m)=>m.SuperadminProfileComponent)},
                 {path:'superadmin-payouts',loadComponent:()=>import ('./features/superadmin/superadmin-payouts/superadmin-payouts.component').then((m)=>m.SuperadminPayoutsComponent)},
                 {path:'superadmin-tickets',loadComponent:()=>import ('./features/superadmin/superadmin-tickets/superadmin-tickets.component').then((m)=>m.SuperadminTicketsComponent)},
@@ -93,7 +95,7 @@ export const routes: Routes = [
                 {path:'superadmin-role',loadComponent:()=>import ('./features/superadmin/superadmin-role/superadmin-role.component').then((m)=>m.SuperadminRoleComponent)},
 
                 // {path:'superadmin-register',loadComponent:()=>import ('./features/superadmin/register/register.component').then((m)=>m.RegisterComponent)},
-                {path:'superadmin-user-list',loadComponent:()=>import ('./features/superadmin/user/user-list.component').then((m)=>m.UserListComponent)},
+                {path:'superadmin-user-list',loadComponent:()=>import ('./features/superadmin/user/user-list.component').then((m)=>m.UserListComponent), canActivate: [PermissionGuard], data: { permission: 'lister utilisateurs' }},
                 {path:'superadmin-user-details/:id',loadComponent:()=>import ('./features/superadmin/user-details/user-details.component').then((m)=>m.UserDetailsComponent)},
                 {path:'superadmin-user-add',loadComponent:()=>import ('./features/superadmin/user-add/user-add.component').then((m)=>m.UserAddComponent)},
                 
@@ -127,7 +129,7 @@ export const routes: Routes = [
                 },
             ]
         },
-        {path : 'adminrh',loadComponent:()=>import ('./features/adminrh/adminrh.component').then((m)=>m.AdminrhComponent),
+        {path : 'adminrh',loadComponent:()=>import ('./features/adminrh/adminrh.component').then((m)=>m.AdminrhComponent), canActivate: [authGuard],
             children:[
                 {path:'adminrh-dashboard',loadComponent:()=>import ('./features/adminrh/adminrh-dashboard/adminrh-dashboard.component').then((m)=>m.AdminrhDashboardComponent)},
                 {path:'adminrh-profile',loadComponent:()=>import ('./features/adminrh/adminrh-profile/adminrh-profile.component').then((m)=>m.AdminrhProfileComponent)},
@@ -144,9 +146,11 @@ export const routes: Routes = [
 
                 // {path:'adminrh-register',loadComponent:()=>import ('./features/adminrh/register/register.component').then((m)=>m.RegisterComponent)},
                 {path:'adminrh-user-list',loadComponent:()=>import ('./features/adminrh/user/user-list.component').then((m)=>m.UserListComponent)},
+                {path:'adminrh-user-group-list',loadComponent:()=>import ('./features/adminrh/user-group-list/user-group-list.component').then((m)=>m.UserGroupListComponent)},
+
                 {path:'adminrh-user-details/:id',loadComponent:()=>import ('./features/adminrh/user-details/user-details.component').then((m)=>m.UserDetailsComponent)},
                 {path:'adminrh-user-add',loadComponent:()=>import ('./features/adminrh/user-add/user-add.component').then((m)=>m.UserAddComponent)},
-                
+                {path:'adminrh-demande',loadComponent:()=>import ('./features/adminrh/adminrh-demande/adminrh-demande.component').then((m)=>m.AdminrhDemandeComponent)},
                 {path:'adminrh-announcements',loadComponent:()=>import ('./features/adminrh/adminrh-announcements/adminrh-announcements.component').then((m)=>m.AdminrhAnnouncementsComponent)},
                 {path:'adminrh-quiz-questions',loadComponent:()=>import ('./features/adminrh/adminrh-quiz-questions/adminrh-quiz-questions.component').then((m)=>m.AdminrhQuizQuestionsComponent)},
                 {path:'adminrh-quiz-results',loadComponent:()=>import ('./features/adminrh/adminrh-quiz-results/adminrh-quiz-results.component').then((m)=>m.AdminrhQuizResultsComponent)},
