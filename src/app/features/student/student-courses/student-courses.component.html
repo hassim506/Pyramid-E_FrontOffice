@@ -1,58 +1,59 @@
-<!-- src/app/features/student/student-courses/student-courses.component.html -->
-
 <div class="row" *ngIf="!loading">
 
   <div
-    class="col-xl-4 col-lg-6 col-md-6 mb-4"
-    *ngFor="let formation of tableData">
+    class="col-xl-4 col-md-6 mb-4"
+    *ngFor="let formation of paginatedFormations">
 
-    <div class="course-card h-100">
+    <div class="course-item-two course-item mx-0">
 
       <!-- IMAGE -->
-      <div class="course-image">
-        <img
-          [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
-          class="img-fluid"
-          alt="course">
+      <div class="course-img">
+        <a (click)="goToDetails(formation.id)">
+          <img
+            [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
+            class="img-fluid"
+            alt="img">
+        </a>
+
+        <div class="position-absolute start-0 top-0 w-100 p-3 d-flex justify-content-between">
+          <span class="badge bg-secondary">
+            {{ formation.difficulte }}
+          </span>
+        </div>
       </div>
 
       <!-- CONTENT -->
-      <div class="course-content d-flex flex-column">
+      <div class="course-content">
 
-        <span class="badge bg-light mb-2">
-          {{ formation.difficulte }}
-        </span>
-
-        <h5 class="course-title">
-          {{ formation.titre }}
-        </h5>
-
-        <p class="course-desc flex-grow-1">
-          {{ formation.short_description }}
-        </p>
-
-        <div class="course-meta mb-3">
-          <span>
-            <i class="isax isax-clock"></i>
-            {{ formation.duree_totale }} h
-          </span>
-          <span>
-            <i class="isax isax-global"></i>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="badge bg-light text-dark rounded-pill">
             {{ formation.langue }}
+          </span>
+          <span class="text-muted fs-13">
+            {{ formation.duree_totale }} h
           </span>
         </div>
 
-        <div class="course-footer d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">
+        <h6 class="title mb-2">
+          {{ formation.titre }}
+        </h6>
+
+        <p class="course-desc mb-3">
+          {{ formation.short_description }}
+        </p>
+
+        <div class="d-flex align-items-center justify-content-between">
+          <h5 class="text-secondary mb-0">
             {{ formation.prix > 0 ? formation.prix + ' FCFA' : 'Gratuit' }}
-          </span>
+          </h5>
 
           <button
-            class="btn btn-primary btn-sm"
-            (click)="goToDetails(formation.id)">
-            Voir plus
-            <i class="isax isax-arrow-right-3 ms-1"></i>
-          </button>
+  class="btn btn-dark btn-sm"
+  (click)="goToDetails(formation.id)">
+  Voir plus
+  <i class="isax isax-arrow-right-3 ms-1"></i>
+</button>
+
         </div>
 
       </div>
@@ -60,12 +61,36 @@
   </div>
 
   <!-- EMPTY -->
-  <div *ngIf="tableData.length === 0" class="text-center py-5 w-100">
-    <p class="text-muted">Aucune formation disponible</p>
+  <div *ngIf="formations.length === 0" class="text-center py-5">
+    Aucune formation disponible
   </div>
-
 </div>
 
-<div *ngIf="loading" class="text-center py-5">
-  Chargement...
+<!-- Loader -->
+  <div class="loader" *ngIf="loading">
+    Chargement des formations...
+  </div>
+<!-- PAGINATION -->
+<div class="pagination-wrapper" *ngIf="totalPages > 1">
+  <button
+    class="page-btn"
+    [disabled]="currentPage === 1"
+    (click)="changePage(currentPage - 1)">
+    ‹
+  </button>
+
+  <button
+    class="page-btn"
+    *ngFor="let p of [].constructor(totalPages); let i = index"
+    [class.active]="currentPage === i + 1"
+    (click)="changePage(i + 1)">
+    {{ i + 1 }}
+  </button>
+
+  <button
+    class="page-btn"
+    [disabled]="currentPage === totalPages"
+    (click)="changePage(currentPage + 1)">
+    ›
+  </button>
 </div>

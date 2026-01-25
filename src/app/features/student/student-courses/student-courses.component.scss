@@ -1,0 +1,48 @@
+.course-item-two {
+  display: flex;
+  flex-direction: column;
+  height: 100%; // 🔑 toutes les cartes même hauteur
+}
+
+.course-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px;
+}
+
+/* ===== TITRE ===== */
+.course-content .title {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.4;
+  margin-bottom: 6px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2; // max 2 lignes
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===== DESCRIPTION ===== */
+.course-desc {
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 12px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2; // max 2 lignes
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===== FOOTER COLLÉ EN BAS ===== */
+.course-content > .d-flex:last-child {
+  margin-top: auto; // 🔑 pousse prix + bouton en bas
+}
+
+/* ===== IMAGE FIXE ===== */
+.course-img img {
+  height: 220px;
+  object-fit: cover;
+}

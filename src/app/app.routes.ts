@@ -28,8 +28,8 @@ export const routes: Routes = [
         {path:'courses',loadComponent:()=>import ('./features/courses/courses.component').then((m)=>m.CoursesComponent),
             children:[
                 {path:'add-course',loadComponent:()=>import ('./features/courses/add-course/add-course.component').then((m)=>m.AddCourseComponent)},
-                {path:'course-details/:id',loadComponent:()=>import ('./features/courses/course-details/course-details.component').then((m)=>m.CourseDetailsComponent)},
-                {path:'course-details-2',loadComponent:()=>import ('./features/courses/course-details-2/course-details-2.component').then((m)=>m.CourseDetails2Component)},
+                {path:'course-details/',loadComponent:()=>import ('./features/courses/course-details/course-details.component').then((m)=>m.CourseDetailsComponent)},
+                {path:'course-details-2/:id',loadComponent:()=>import ('./features/courses/course-details-2/course-details-2.component').then((m)=>m.CourseDetails2Component)},
                 {path:'course-list',loadComponent:()=>import ('./features/courses/course-list/course-list.component').then((m)=>m.CourseListComponent)},
                 {path:'course-grid',loadComponent:()=>import ('./features/courses/course-grid/course-grid.component').then((m)=>m.CourseGridComponent)},
                 {path:'course-category',loadComponent:()=>import ('./features/courses/course-category/course-category.component').then((m)=>m.CourseCategoryComponent)},

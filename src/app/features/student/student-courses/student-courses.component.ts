@@ -1,22 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common'; // ✅ OBLIGATOIRE
 import { Formations } from '../../../shared/models/Formations.models';
 import { FormationsService } from '../../../shared/service/Formations/formations.service';
 
+import { CommonModule } from '@angular/common';
+
 @Component({
+  standalone: true,
   selector: 'app-student-courses',
-  standalone: true, // ✅ important
-  imports: [CommonModule], // ✅ FIX DU PROBLÈME
+  imports: [CommonModule],
   templateUrl: './student-courses.component.html',
   styleUrls: ['./student-courses.component.scss'],
 })
+
 export class StudentCoursesComponent implements OnInit {
-  tableData: Formations[] = [];
+
+  formations: Formations[] = [];
+  paginatedFormations: Formations[] = [];
   loading = true;
 
+  // Pagination
   currentPage = 1;
-  totalPages = 1;
+  pageSize = 6;
+  totalPages = 0;
 
   constructor(
     private formationsService: FormationsService,
@@ -24,39 +30,44 @@ export class StudentCoursesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadCourses();
+    this.loadFormations();
   }
 
-  loadCourses(page: number = 1): void {
+  loadFormations(): void {
     this.loading = true;
 
     this.formationsService.getAllFormations().subscribe({
       next: (res: any) => {
-        console.log('API formations response:', res); // 🔍 debug utile
-
-        this.tableData = res.data ?? res.formations ?? [];
-        this.currentPage = res.current_page ?? 1;
-        this.totalPages = res.last_page ?? 1;
-
+        this.formations = res.formations || [];
+        this.totalPages = Math.ceil(this.formations.length / this.pageSize);
+        this.updatePagination();
         this.loading = false;
       },
       error: (err) => {
         console.error('Erreur chargement formations', err);
         this.loading = false;
-      },
+      }
     });
+  }
+
+  updatePagination(): void {
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.paginatedFormations = this.formations.slice(start, end);
   }
 
   changePage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.loadCourses(page);
-    }
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
   }
 
-  goToDetails(id: number): void {
-    this.router.navigate(['/courses/course-details'], {
-      queryParams: { id },
-    });
+goToDetails(formationId?: number): void {
+  if (!formationId) {
+    return;
   }
+
+  this.router.navigate(['/courses/course-details-2', formationId]);
 }
-    
+
+}
