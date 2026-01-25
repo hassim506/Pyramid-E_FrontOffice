@@ -1,36 +1,71 @@
 import { Component, OnInit, AfterViewChecked } from '@angular/core';
-import { LightGallery } from 'lightgallery/lightgallery';
-import { LightGallerySettings } from 'lightgallery/lg-settings';
-import { routes } from '../../../shared/service/routes/routes';
-import Aos from 'aos';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+
+import lgZoom from 'lightgallery/plugins/zoom';
+import lgVideo from 'lightgallery/plugins/video';
+import { LightGallery } from 'lightgallery/lightgallery';
 import { LightgalleryModule } from 'lightgallery/angular';
+
+import { routes } from '../../../shared/service/routes/routes';
+import { FormationsService } from '../../../shared/service/Formations/Formations.service';
+import { Formations } from '../../../shared/models/Formations.models';
 
 @Component({
   selector: 'app-course-details-2',
+  standalone: true,
   imports: [CommonModule, RouterLink, LightgalleryModule],
   templateUrl: './course-details-2.component.html',
   styleUrl: './course-details-2.component.scss'
 })
 export class CourseDetails2Component implements OnInit, AfterViewChecked {
+
   routes = routes;
-  
-  // Configuration corrigée pour éviter l'erreur TypeScript
-  settings: Partial<LightGallerySettings> = {
+
+  formation!: Formations;
+  loading = true;
+
+  settings = {
     counter: false,
-    download: false,
-    selector: '.lg-item'
+    plugins: [lgZoom, lgVideo],
   };
 
   private lightGallery!: LightGallery;
   private needRefresh = false;
 
+  constructor(
+    private route: ActivatedRoute,
+    private formationsService: FormationsService
+  ) {}
+
   ngOnInit(): void {
-    Aos.init({ duration: 1200, once: true });
-    
-    // Import dynamique des plugins pour éviter les erreurs TypeScript
-    this.loadLightGalleryPlugins();
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    if (id) {
+      this.getFormation(id);
+    }
+  }
+
+  // 🔑 APPEL BACKEND
+  getFormation(id: number): void {
+    this.loading = true;
+
+    this.formationsService.getFormationById(id).subscribe({
+      next: (res: any) => {
+        this.formation = res.formation ?? res.data ?? res;
+        this.loading = false;
+        this.needRefresh = true;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  getImage(url?: string | null): string {
+    return url
+      ? `http://localhost:8000/${url}`
+      : 'assets/img/course/course-01.jpg';
   }
 
   ngAfterViewChecked(): void {
@@ -43,28 +78,4 @@ export class CourseDetails2Component implements OnInit, AfterViewChecked {
   onInit = (detail: { instance: LightGallery }): void => {
     this.lightGallery = detail.instance;
   };
-
-  private async loadLightGalleryPlugins(): Promise<void> {
-    try {
-      // Import dynamique des plugins
-      const [{ default: lgZoom }, { default: lgVideo }] = await Promise.all([
-        import('lightgallery/plugins/zoom'),
-        import('lightgallery/plugins/video')
-      ]);
-
-      // Mise à jour de la configuration avec les plugins
-      this.settings = {
-        ...this.settings,
-        plugins: [lgZoom, lgVideo] as any
-      };
-    } catch (error) {
-      console.warn('Erreur lors du chargement des plugins LightGallery:', error);
-      // Configuration de base sans plugins en cas d'erreur
-      this.settings = {
-        counter: false,
-        download: false,
-        selector: '.lg-item'
-      };
-    }
-  }
 }
