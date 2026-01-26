@@ -3,11 +3,17 @@
   <div class="spinner-border text-primary"></div>
 </div>
 
+<!-- ❌ ERROR -->
+<div *ngIf="!loading && error" class="alert alert-danger text-center">
+  {{ error }}
+</div>
+
 <!-- ================== BANNER ================== -->
 <section class="inner-banner" *ngIf="!loading && formation">
   <div class="container">
     <div class="row">
       <div class="col-lg-8">
+
         <h1 class="text-white mb-3">{{ formation.titre }}</h1>
 
         <p class="text-white fs-14 mb-3">
@@ -17,7 +23,7 @@
         <div class="d-flex align-items-center gap-3 flex-wrap">
           <p class="fw-medium text-white mb-0">
             <img class="me-2" src="./assets/img/icons/book.svg" />
-            {{ totalLessons }} Leçons
+            {{ totalLessons }} leçons
           </p>
 
           <p class="fw-medium text-white mb-0">
@@ -31,7 +37,7 @@
           </p>
 
           <span
-            class="badge badge-sm rounded-pill"
+            class="badge rounded-pill"
             [style.background]="formation.categorie?.couleur"
           >
             {{ formation.categorie?.nom }}
@@ -43,7 +49,8 @@
             <div class="avatar avatar-lg">
               <img
                 class="rounded-circle"
-               
+                [src]="formation.image_couverture || 'assets/img/avatar-default.png'"
+                alt="Formateur"
               />
             </div>
             <div class="ms-2">
@@ -61,6 +68,7 @@
             <strong>{{ formation.niveau_display }}</strong>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -73,6 +81,7 @@
 
       <!-- CONTENU -->
       <div class="col-lg-8">
+
         <div class="card mb-4">
           <div class="card-body">
             <h5 class="subs-title mb-3">Description</h5>
@@ -105,15 +114,13 @@
                   [id]="'module' + i"
                 >
                   <div class="accordion-body p-0">
-                    <ul>
+                    <ul class="list-unstyled mb-0">
                       <li
                         *ngFor="let section of module.sections"
-                        class="p-3 d-flex justify-content-between"
+                        class="p-3 d-flex justify-content-between border-bottom"
                       >
-                        <p class="mb-0">
-                          {{ section.titre }}
-                        </p>
-                        <span>{{ section.duree_estimee }}</span>
+                        <span>{{ section.titre }}</span>
+                        <small>{{ section.duree_estimee }}</small>
                       </li>
                     </ul>
                   </div>
@@ -123,19 +130,31 @@
 
           </div>
         </div>
+
       </div>
 
       <!-- SIDEBAR -->
       <div class="col-lg-4">
+
         <div class="card">
-          <div class="card-body">
+          <div class="card-body text-center">
             <h2 class="text-success">
               {{ formation.prix === '0' ? 'GRATUIT' : formation.prix + ' FCFA' }}
             </h2>
 
-            <a class="btn btn-primary w-100 mt-3">
-              S'inscrire
-            </a>
+            <button
+              class="btn btn-primary w-100 mt-3"
+              [disabled]="!canSubscribe()"
+            >
+              Faire une demande
+            </button>
+
+            <small
+              *ngIf="!formation.inscription_ouverte"
+              class="text-danger d-block mt-2"
+            >
+              Inscriptions fermées
+            </small>
           </div>
         </div>
 
@@ -148,6 +167,7 @@
             <p>Certification : {{ formation.est_certifiante ? 'Oui' : 'Non' }}</p>
           </div>
         </div>
+
       </div>
 
     </div>
