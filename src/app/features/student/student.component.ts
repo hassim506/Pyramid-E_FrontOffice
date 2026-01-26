@@ -1,56 +1,86 @@
-import { Component } from '@angular/core';
-import { NavigationStart, Router, Event as RouterEvent } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, NavigationEnd, RouterOutlet, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { routes } from '../../shared/service/routes/routes';
 import { StudentSidebarComponent } from './common/student-sidebar/student-sidebar.component';
+import { User } from '../../shared/models/user.models';
 
 @Component({
     selector: 'app-student',
     templateUrl: './student.component.html',
     styleUrls: ['./student.component.scss'],
-    imports : [CommonModule,RouterModule,StudentSidebarComponent]
+    imports: [CommonModule, RouterOutlet, RouterModule, StudentSidebarComponent]
 })
-export class StudentComponent {
+export class StudentComponent implements OnInit {
   public routes = routes;
-  last = '';
+  public last: string = '';
+  studentProfile: User | null = null;
 
   constructor(private router: Router) {
-    this.updateLastFromUrl(this.router.url);
-    this.router.events.subscribe((data: RouterEvent) => {
-      if (data instanceof NavigationStart) {
-        this.updateLastFromUrl(data.url);
+    this.router.events.subscribe((data) => {
+      if (data instanceof NavigationEnd) {
+        this.last = data.url.split('/')[data.url.split('/').length - 1];
       }
     });
   }
 
-  private updateLastFromUrl(url: string): void {
-    const parts = url.split('/');
-    const lastPart = parts[2]?.replace('student-', '').trim();
+  ngOnInit(): void {
+    this.loadSuperAdminProfile();
+  }
 
-    if (lastPart === 'profile') {
-      this.last = 'My Profile';
-    } else if (lastPart === 'courses') {
-      this.last = 'Enrolled Courses';
-    } else if (lastPart === 'chat') {
-      this.last = 'Messages';
-    } else if (lastPart === 'quiz'){
-      this.last = 'My Quiz Attempts';
+  loadSuperAdminProfile(): void {
+    try {
+      const userDataString = localStorage.getItem('pyramide_user');
+      if (userDataString) {
+        const currentUser: any = JSON.parse(userDataString);
+        
+        // Ajouter le champ role si absent
+        if (!currentUser.role && currentUser.role_id === 2) {
+          currentUser.role = 'Student';
+        }
+        
+        this.studentProfile = currentUser as User;
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du profil:', error);
     }
-    else if (lastPart === 'qa'){
-      this.last = 'Question & Answer';
+  }
+
+  getFullName(): string {
+    if (!this.studentProfile) return 'Utilisateur';
+    return `${this.studentProfile.prenom} ${this.studentProfile.nom}`;
+  }
+
+  public getRoleName(user: User): string {
+  if (!user.role) {
+    return 'Non défini';
+  }
+  
+  // Check if role is an object with a name property
+  if (typeof user.role === 'object' && user.role !== null && 'name' in user.role) {
+    return (user.role as { name: string }).name;
+  }
+  
+  // Check if role is a string
+  if (typeof user.role === 'string') {
+    return user.role;
+  }
+  
+  return 'Non défini';
+}
+
+  getInitials(): string {
+    if (!this.studentProfile) return 'U';
+    const firstNameInitial = this.studentProfile.prenom?.charAt(0) || '';
+    const lastNameInitial = this.studentProfile.nom?.charAt(0) || '';
+    return (firstNameInitial + lastNameInitial).toUpperCase();
+  }
+
+  getUserAvatar(): string {
+    // Si vous avez un champ avatar dans votre modèle User
+    if (this.studentProfile && (this.studentProfile as any).avatar) {
+      return (this.studentProfile as any).avatar;
     }
-    else if (lastPart === 'tickets'){
-      this.last = 'Support Tickets';
-    }
-    else if (lastPart === 'certificate'){
-      this.last = 'My Certificates';
-    }
-    else if (lastPart === 'quiz-questions'){
-      this.last = 'My Quiz Attempts';
-    }
-    else {
-      this.last = lastPart;
-    }
+    return 'assets/img/user/user-01.jpg';
   }
 }

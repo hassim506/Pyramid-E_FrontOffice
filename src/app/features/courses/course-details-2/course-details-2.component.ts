@@ -3,9 +3,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Formation } from '../../../shared/models/formation.models';
-import { FormationsService } from '../../../shared/service/Formations/formations.service';
+
 import { FormationApiResponse } from '../../../shared/models/Formations.models';
 import { CommonModule } from '@angular/common';
+import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
 
 @Component({
   standalone: true,

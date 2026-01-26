@@ -1,13 +1,24 @@
-<div class="row" *ngIf="!loading">
+<!-- LOADER -->
+<div class="loader text-center py-5" *ngIf="loading">
+  Chargement des formations...
+</div>
+
+<!-- ERROR -->
+<div class="alert alert-danger text-center" *ngIf="error">
+  {{ error }}
+</div>
+
+<!-- CARTES -->
+<div class="row" *ngIf="!loading && formations.length > 0">
 
   <div
     class="col-xl-4 col-md-6 mb-4"
-    *ngFor="let formation of paginatedFormations">
+    *ngFor="let formation of formations">
 
-    <div class="course-item-two course-item mx-0">
+    <div class="course-item-two course-item mx-0 h-100 d-flex flex-column">
 
       <!-- IMAGE -->
-      <div class="course-img">
+      <div class="course-img position-relative">
         <a (click)="goToDetails(formation.id)">
           <img
             [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
@@ -23,55 +34,51 @@
       </div>
 
       <!-- CONTENT -->
-      <div class="course-content">
+      <div class="course-content d-flex flex-column flex-grow-1">
 
         <div class="d-flex justify-content-between mb-2">
           <span class="badge bg-light text-dark rounded-pill">
-            {{ formation.langue }}
+            {{ formation.langue || 'FR' }}
           </span>
           <span class="text-muted fs-13">
-            {{ formation.duree_totale }} h
+            {{ formation.duree_totale || 0 }} h
           </span>
         </div>
 
-        <h6 class="title mb-2">
+        <h6 class="title mb-2 text-truncate">
           {{ formation.titre }}
         </h6>
 
-        <p class="course-desc mb-3">
-          {{ formation.short_description }}
+        <p class="course-desc mb-3 text-muted"
+           style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+          {{ formation.short_description || formation.description }}
         </p>
 
-        <div class="d-flex align-items-center justify-content-between">
+        <div class="mt-auto d-flex align-items-center justify-content-between">
           <h5 class="text-secondary mb-0">
-            {{ formation.prix > 0 ? formation.prix + ' FCFA' : 'Gratuit' }}
+            {{ isFree(formation) ? 'Gratuit' : formation.prix + ' FCFA' }}
           </h5>
 
           <button
-  class="btn btn-dark btn-sm"
-  (click)="goToDetails(formation.id)">
-  Voir plus
-  <i class="isax isax-arrow-right-3 ms-1"></i>
-</button>
-
+            class="btn btn-dark btn-sm"
+            (click)="goToDetails(formation.id)">
+            Voir plus
+            <i class="isax isax-arrow-right-3 ms-1"></i>
+          </button>
         </div>
 
       </div>
     </div>
   </div>
-
-  <!-- EMPTY -->
-  <div *ngIf="formations.length === 0" class="text-center py-5">
-    Aucune formation disponible
-  </div>
 </div>
 
-<!-- Loader -->
-  <div class="loader" *ngIf="loading">
-    Chargement des formations...
-  </div>
+<!-- EMPTY -->
+<div *ngIf="!loading && formations.length === 0" class="text-center py-5">
+  Aucune formation disponible
+</div>
+
 <!-- PAGINATION -->
-<div class="pagination-wrapper" *ngIf="totalPages > 1">
+<div class="pagination-wrapper text-center mt-4" *ngIf="totalPages > 1">
   <button
     class="page-btn"
     [disabled]="currentPage === 1"
@@ -81,7 +88,7 @@
 
   <button
     class="page-btn"
-    *ngFor="let p of [].constructor(totalPages); let i = index"
+    *ngFor="let p of pageNumberArray; let i = index"
     [class.active]="currentPage === i + 1"
     (click)="changePage(i + 1)">
     {{ i + 1 }}

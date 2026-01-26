@@ -26,26 +26,34 @@
       <div class="profile-card-bg">
           <img src="assets/img/bg/card-bg-01.png" class="profile-card-bg-1" alt="">
       </div>
-          <div class="row align-items-center row-gap-3">
-              <div class="col-lg-6">
+	   <div class="row align-items-center row-gap-3 adminrh-profile">
+              <div class="col-md-6">
                   <div class="d-flex align-items-center">
-                      <span class="avatar avatar-xxl avatar-rounded me-3 border border-white border-2 position-relative">
-                          <img src="assets/img/user/user-02.jpg" alt="">
+                      <span class="avatar flex-shrink-0 avatar-xxl avatar-rounded me-3 border border-white border-3 position-relative">
+                          <div class="avatar-placeholder">
+                            {{ getInitials() }}
+                          </div>
                           <span class="verify-tick"><i class="isax isax-verify5"></i></span>
                       </span>
                       <div>
-                          <h5 class="mb-1 text-white d-inline-flex align-items-center"><a [routerLink]="routes.studentsDetails">Ronald Richard</a><a [routerLink]="routes.instructorProfile" class="link-light fs-16 ms-2"><i class="isax isax-edit-2"></i></a></h5>
-                          <p class="text-light">Student</p>
+                          <h5 class="mb-1 text-white d-inline-flex align-items-center">
+                            {{ getFullName() }}
+                            <a [routerLink]="routes.adminrhProfile" class="link-light fs-16 ms-2">
+                              <i class="isax isax-edit-2"></i>
+                            </a>
+                          </h5>
+                          <!-- <p class="text-light">{{ getRoleName() }}</p> -->
                       </div>
                   </div>
               </div>
-              <div class="col-lg-6">
-                  <div class="d-flex align-items-center justify-content-lg-end flex-wrap gap-2">
-                      <a [routerLink]="routes.becomeAnExpert" class="btn btn-white rounded-pill me-3">Become an Instructor</a>
-                      <a [routerLink]="routes.instructor_dashboard" class="btn btn-secondary rounded-pill">Instructor Dashboard</a>
+              <div class="col-md-6">
+                  <div class="d-flex align-items-center flex-wrap gap-3 justify-content-md-end">
+                      <a [routerLink]="routes.adminrhCompanyAdd" class="btn btn-white rounded-pill">Ajouter Entreprise  </a>
+                      <a [routerLink]="routes.adminrh_dashboard" class="btn btn-secondary rounded-pill">Tableau de bords Super Admin</a>
                   </div>
               </div>
           </div>
+          
   </div>
   <!-- profile box -->
       <div class="row">
