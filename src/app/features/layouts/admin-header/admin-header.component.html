@@ -143,13 +143,21 @@
 
                     <!-- Student Menu -->
                     <ng-container *ngIf="currentUser?.role_id === 2">
+                       <a class="dropdown-item" [routerLink]="routes.instructorCourse">
+                        <i class="isax isax-element-4 me-2"></i>
+                        <span>Tableau de Bord</span>
+                      </a> 
                       <a class="dropdown-item" [routerLink]="routes.instructorCourse">
-                        <i class="isax isax-book-1 me-2"></i>
-                        <span>My Courses</span>
+                        <i class="isax isax-security-user"></i>
+                        <span>Mon Profile</span>
                       </a>
-                      <a class="dropdown-item" [routerLink]="routes.studentQuiz">
-                        <i class="isax isax-award me-2"></i>
-                        <span>Quiz Attempts</span>
+                      <a class="dropdown-item" [routerLink]="routes.instructorCourse">
+                         <i class="isax isax-book-1 me-2"></i>
+                        <span>Mes Cours</span>
+                      </a>
+                       <a class="dropdown-item" [routerLink]="routes.instructorCourse">
+                        <i class="isax isax-setting-2 me-2"></i>
+                        <span>Parametres</span>
                       </a>
                     </ng-container>
 

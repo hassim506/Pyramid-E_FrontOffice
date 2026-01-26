@@ -9,7 +9,7 @@ import { PaginationService, tablePageSize } from '../../../shared/service/custom
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
-import { DemandeFormation, DemandeFormationResponse } from '../../../shared/models/formation';
+import { DemandeFormation, DemandeFormationResponse } from '../../../shared/models/formation.models';
 import { DemandeFormationService } from '../../../shared/service/demande/demande-formation.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { DemandeFormationResponse, ActionDemandeRequest } from '../../models/formation';
+import { DemandeFormationResponse, ActionDemandeRequest } from '../../models/formation.models';
 // import { Role, RoleResponse, AssignRoleRequest } from '../../models/role.models';
 
 import { AuthService } from '../authentification/auth.service';

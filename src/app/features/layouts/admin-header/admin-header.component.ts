@@ -119,9 +119,9 @@ checkLoginStatus(): void {
       if (this.currentUser?.role_id === 1) {
         this.base = 'admin';
       } else if (this.currentUser?.role_id === 2) {
-        this.base = 'instructor';
-      } else if (this.currentUser?.role_id === 3) {
         this.base = 'student';
+      } else if (this.currentUser?.role_id === 3) {
+        this.base = 'formateur';
       }
     }
   }
@@ -130,8 +130,8 @@ checkLoginStatus(): void {
 
     switch (this.currentUser.role_id) {
       case 1: return 'assets/img/avatar/avatar.png'; // Admin
-      case 2: return 'assets/img/avatar/avatar.png'; // Instructor
-      case 3: return 'assets/img/avatar/avatar.png'; // Student
+      case 2: return 'assets/img/avatar/avatar.png'; // Student
+      case 3: return 'assets/img/avatar/avatar.png'; //  Instructor
       default: return 'assets/img/avatar/avatar.png';
     }
   }

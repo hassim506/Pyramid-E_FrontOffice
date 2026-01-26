@@ -6,7 +6,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { routes } from '../../../shared/service/routes/routes';
 import { FormationService } from '../../../shared/service/formation/formation.service';
-import { Formation } from '../../../shared/models/formation';
+import { Formation } from '../../../shared/models/formation.models';
 
 @Component({
   selector: 'app-adminrh-course',

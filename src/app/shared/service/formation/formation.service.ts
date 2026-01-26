@@ -24,7 +24,7 @@ export class FormationService {
   // /adminrh/formations
 
   getFormationsrh(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/adminrh/formations`, { 
+    return this.http.get<any>(`${this.baseUrl}/formations`, { 
       headers: this.getHeaders() 
     });
   }

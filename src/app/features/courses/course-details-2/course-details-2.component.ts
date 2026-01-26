@@ -1,37 +1,23 @@
-import { Component, OnInit, AfterViewChecked } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+// src/app/features/courses/course-details-2/course-details-2.component.ts
 
-import lgZoom from 'lightgallery/plugins/zoom';
-import lgVideo from 'lightgallery/plugins/video';
-import { LightGallery } from 'lightgallery/lightgallery';
-import { LightgalleryModule } from 'lightgallery/angular';
-
-import { routes } from '../../../shared/service/routes/routes';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Formation } from '../../../shared/models/formation.models';
 import { FormationsService } from '../../../shared/service/Formations/formations.service';
-import { Formations } from '../../../shared/models/Formations.models';
+import { FormationApiResponse } from '../../../shared/models/Formations.models';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-course-details-2',
   standalone: true,
-  imports: [CommonModule, RouterLink, LightgalleryModule],
+  selector: 'app-course-details-2',
+  imports: [CommonModule],
   templateUrl: './course-details-2.component.html',
-  styleUrl: './course-details-2.component.scss'
+  styleUrls: ['./course-details-2.component.scss']
 })
-export class CourseDetails2Component implements OnInit, AfterViewChecked {
+export class CourseDetails2Component implements OnInit {
 
-  routes = routes;
-
-  formation!: Formations;
+  formation!: Formation;
   loading = true;
-
-  settings = {
-    counter: false,
-    plugins: [lgZoom, lgVideo],
-  };
-
-  private lightGallery!: LightGallery;
-  private needRefresh = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,42 +26,34 @@ export class CourseDetails2Component implements OnInit, AfterViewChecked {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-
     if (id) {
       this.getFormation(id);
     }
   }
 
-  // 🔑 APPEL BACKEND
-  getFormation(id: number): void {
+  getFormation(id: number) {
     this.loading = true;
-
     this.formationsService.getFormationById(id).subscribe({
-      next: (res: any) => {
-        this.formation = res.formation ?? res.data ?? res;
+      next: (res: FormationApiResponse) => {
+        this.formation = res as unknown as Formation;
         this.loading = false;
-        this.needRefresh = true;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Erreur chargement formation', err);
         this.loading = false;
       }
     });
   }
 
-  getImage(url?: string | null): string {
-    return url
-      ? `http://localhost:8000/${url}`
-      : 'assets/img/course/course-01.jpg';
+  get totalLessons(): number {
+    if (!this.formation?.modules) return 0;
+    return this.formation.modules.reduce(
+      (total, module) => total + (module.sections?.length || 0),
+      0
+    );
   }
 
-  ngAfterViewChecked(): void {
-    if (this.needRefresh && this.lightGallery) {
-      this.lightGallery.refresh();
-      this.needRefresh = false;
-    }
+  get totalDuration(): number {
+    return this.formation?.duree_totale || 0;
   }
-
-  onInit = (detail: { instance: LightGallery }): void => {
-    this.lightGallery = detail.instance;
-  };
 }
