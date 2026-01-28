@@ -1,0 +1,120 @@
+/* ===============================
+   GLOBAL
+================================ */
+.course-details {
+  padding: 60px 0;
+  background: #f9fafb;
+}
+
+.card {
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.subs-title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #111827;
+}
+
+/* ===============================
+   SIDEBAR
+================================ */
+.sidebar {
+  position: sticky;
+  top: 100px;
+}
+
+/* ===============================
+   PRICE CARD
+================================ */
+.price-card {
+  overflow: hidden;
+}
+
+/* MEDIA */
+.price-media {
+  height: 190px;
+  background: #f5c842;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.price-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-placeholder {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+/* PRICE */
+.price {
+  font-size: 34px;
+  font-weight: 700;
+  color: #f5c842;
+}
+
+/* BUTTON */
+.price-card .btn {
+  padding: 12px;
+  border-radius: 30px;
+  font-weight: 600;
+}
+
+/* INFO */
+.price-card p {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* ===============================
+   INFO CARD
+================================ */
+.info-card {
+  background: #ffffff;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px dashed #e5e7eb;
+  font-size: 14px;
+}
+
+.info-list li:last-child {
+  border-bottom: none;
+}
+
+/* ===============================
+   ACCORDION
+================================ */
+.accordion-button {
+  font-weight: 600;
+  background: #f9fafb;
+}
+
+.accordion-button:not(.collapsed) {
+  background: #f5c842;
+  color: #111827;
+}
+
+.accordion-item {
+  border: none;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+}

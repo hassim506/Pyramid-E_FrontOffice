@@ -14,44 +14,41 @@
     <div class="row">
       <div class="col-lg-8">
 
-        <h1 class="text-white mb-3">{{ formation.titre }}</h1>
+        <h1 class="text-white mb-3 mb-sm-2">
+          {{ formation.titre }}
+        </h1>
 
         <p class="text-white fs-14 mb-3">
           {{ formation.short_description }}
         </p>
 
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-          <p class="fw-medium text-white mb-0">
-            <img class="me-2" src="./assets/img/icons/book.svg" />
-            {{ totalLessons }} leçons
+        <div class="d-flex align-items-center gap-2 gap-sm-3 gap-xl-4 flex-wrap">
+          <p class="fw-medium text-white d-flex align-items-center mb-0">
+            <img class="me-2" src="./assets/img/icons/book.svg">
+            {{ formation.nombre_modules }} modules
           </p>
 
-          <p class="fw-medium text-white mb-0">
-            <img class="me-2" src="./assets/img/icons/timer-start.svg" />
-            {{ totalDuration }} h
+          <p class="fw-medium text-white d-flex align-items-center mb-0">
+            <img class="me-2" src="./assets/img/icons/timer-start.svg">
+            {{ formation.duree_totale }} h
           </p>
 
-          <p class="fw-medium text-white mb-0">
-            <img class="me-2" src="./assets/img/icons/people.svg" />
-            {{ formation.nb_max_participants }} participants max
+          <p class="fw-medium text-white d-flex align-items-center mb-0">
+            <img class="me-2" src="./assets/img/icons/people.svg">
+            {{ formation.nb_max_participants }} participants
           </p>
 
-          <span
-            class="badge rounded-pill"
-            [style.background]="formation.categorie?.couleur"
-          >
+          <span class="badge badge-sm rounded-pill"
+                [style.background]="formation.categorie?.couleur">
             {{ formation.categorie?.nom }}
           </span>
         </div>
 
-        <div class="d-sm-flex align-items-center justify-content-between mt-5">
+        <div class="d-sm-flex align-items-center justify-content-sm-between mt-5">
           <div class="d-flex align-items-center">
             <div class="avatar avatar-lg">
-              <img
-                class="rounded-circle"
-                [src]="formation.image_couverture || 'assets/img/avatar-default.png'"
-                alt="Formateur"
-              />
+              <img class="rounded-circle"
+                   [src]="formation.image_couverture || 'assets/img/avatar-default.png'">
             </div>
             <div class="ms-2">
               <h6 class="fs-18 text-white">
@@ -63,7 +60,7 @@
             </div>
           </div>
 
-          <div class="text-white">
+          <div class="text-white fs-14">
             Niveau :
             <strong>{{ formation.niveau_display }}</strong>
           </div>
@@ -74,100 +71,221 @@
   </div>
 </section>
 
-<!-- ================== DETAILS ================== -->
+<!-- ================== COURSE DETAILS ================== -->
 <section class="course-details" *ngIf="!loading && formation">
   <div class="container">
     <div class="row">
 
-      <!-- CONTENU -->
+      <!-- ================== LEFT CONTENT ================== -->
       <div class="col-lg-8">
+        <div class="course-page-content">
 
-        <div class="card mb-4">
-          <div class="card-body">
-            <h5 class="subs-title mb-3">Description</h5>
-            <p>{{ formation.description }}</p>
+          <!-- DESCRIPTION -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="subs-title mb-3">Présentation</h5>
+              <p>{{ formation.description }}</p>
+            </div>
           </div>
-        </div>
 
-        <!-- MODULES -->
-        <div class="card">
-          <div class="card-body">
-            <h5 class="subs-title mb-3">Contenu de la formation</h5>
+          <!-- CONTENU -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between flex-wrap">
+                <h5 class="subs-title mb-2">Contenu de la formation</h5>
+                <h6 class="text-muted">
+                  {{ formation.nombre_modules }} modules
+                </h6>
+              </div>
 
-            <div
-              class="accordion"
-              *ngFor="let module of formation.modules; let i = index"
-            >
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <button
-                    class="accordion-button collapsed"
-                    data-bs-toggle="collapse"
-                    [attr.data-bs-target]="'#module' + i"
-                  >
-                    {{ module.titre }}
-                  </button>
-                </h2>
+              <div class="accordion accordion-customicon1">
 
-                <div
-                  class="accordion-collapse collapse"
-                  [id]="'module' + i"
-                >
-                  <div class="accordion-body p-0">
-                    <ul class="list-unstyled mb-0">
-                      <li
-                        *ngFor="let section of module.sections"
-                        class="p-3 d-flex justify-content-between border-bottom"
-                      >
-                        <span>{{ section.titre }}</span>
-                        <small>{{ section.duree_estimee }}</small>
-                      </li>
-                    </ul>
+                <div class="accordion-item"
+                     *ngFor="let module of formation.modules; let i = index">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            data-bs-toggle="collapse"
+                            [attr.data-bs-target]="'#module'+i">
+                      {{ module.titre }}
+                    </button>
+                  </h2>
+
+                  <div class="accordion-collapse collapse"
+                       [id]="'module'+i">
+                    <div class="accordion-body p-0">
+                      <ul>
+                        <li class="p-3 px-3 d-flex justify-content-between"
+                            *ngFor="let section of module.sections">
+                          <p class="mb-0">
+                            <img class="me-2" src="./assets/img/icons/play.svg">
+                            {{ section.titre }}
+                          </p>
+                          <p class="mb-0">{{ section.duree_estimee }}</p>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
+
               </div>
             </div>
-
           </div>
+
+          <!-- FORMATEUR -->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="subs-title mb-3">À propos du formateur</h5>
+
+              <div class="d-flex align-items-center">
+                <div class="avatar avatar-lg">
+                  <img class="rounded-circle"
+                       [src]="formation.image_couverture || 'assets/img/avatar-default.png'">
+                </div>
+                <div class="ms-2">
+                  <h5 class="fs-18 fw-semibold">
+                    {{ formation.formateur_nom }}
+                  </h5>
+                  <p class="mb-0">
+                    {{ formation.formateur?.fonction }}
+                  </p>
+                </div>
+              </div>
+
+              <p class="mt-3">
+                Contact : {{ formation.formateur_email }}
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ================== SIDEBAR RIGHT ================== -->
+      <div class="col-lg-4">
+        <div class="course-sidebar-sec">
+
+          <!-- VIDEO / IMAGE -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="position-relative mb-4">
+
+                <img class="img-fluid rounded"
+                     [src]="formation.image_couverture || 'assets/img/course/video-bg.jpg'">
+
+                <div class="play-icon">
+                  <i class="ti ti-player-play-filled fs-28"></i>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-success fs-30">
+                  {{ formation.prix === '0' ? 'GRATUIT' : formation.prix + ' FCFA' }}
+                </h2>
+              </div>
+
+              <a class="btn btn-primary w-100 btn-enroll"
+              (click)="openRequestModal()">
+                Faire une demande
+              </a>
+
+            </div>
+          </div>
+
+          <!-- INCLUDES -->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="subs-title">Cette formation inclut</h5>
+              <p><img class="me-2" src="./assets/img/icons/play.svg"> Modules structurés</p>
+              <p><img class="me-2" src="./assets/img/icons/key.svg"> Accès entreprise</p>
+              <p><img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Multi-support</p>
+              <p class="mb-0">
+                <img class="me-2" src="./assets/img/icons/teacher.svg">
+                Certification : {{ formation.est_certifiante ? 'Oui' : 'Non' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- ================= MODAL DEMANDE FORMATION ================= -->
+<div class="modal fade" id="demandeFormationModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Demande de formation</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <form [formGroup]="requestForm">
+
+          <div class="mb-3">
+            <label class="form-label fw-medium">Motif de la demande *</label>
+            <textarea class="form-control"
+                      rows="2"
+                      formControlName="motif_demande"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium">Objectifs personnels *</label>
+            <textarea class="form-control"
+                      rows="2"
+                      formControlName="objectifs_personnels"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium">Priorité</label>
+            <select class="form-select" formControlName="priorite">
+              <option value="basse">Basse</option>
+              <option value="normale">Normale</option>
+              <option value="haute">Haute</option>
+              <option value="urgente">Urgente</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium">Date souhaitée de début</label>
+            <input type="date"
+                   class="form-control"
+                   formControlName="date_souhaitee_debut">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium">Commentaire</label>
+            <textarea class="form-control"
+                      rows="2"
+                      formControlName="commentaire_employe"></textarea>
+          </div>
+
+        </form>
+
+        <div *ngIf="successMessage" class="alert alert-success mt-3">
+          {{ successMessage }}
         </div>
 
       </div>
 
-      <!-- SIDEBAR -->
-      <div class="col-lg-4">
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary"
+                [disabled]="submitting"
+                (click)="closeModal()">
+          Annuler
+        </button>
 
-        <div class="card">
-          <div class="card-body text-center">
-            <h2 class="text-success">
-              {{ formation.prix === '0' ? 'GRATUIT' : formation.prix + ' FCFA' }}
-            </h2>
+        <button class="btn btn-primary"
+                [disabled]="submitting || requestForm.invalid"
+                (click)="submitRequest()">
+          <span *ngIf="!submitting">Valider la demande</span>
+          <span *ngIf="submitting" class="spinner-border spinner-border-sm"></span>
+        </button>
+      </div>
 
-            <button
-              class="btn btn-primary w-100 mt-3"
-              [disabled]="!canSubscribe()"
-            >
-              Faire une demande
-            </button>
+    </div>
+  </div>
+</div>
 
-            <small
-              *ngIf="!formation.inscription_ouverte"
-              class="text-danger d-block mt-2"
-            >
-              Inscriptions fermées
-            </small>
-          </div>
+
         </div>
-
-        <div class="card mt-4">
-          <div class="card-body">
-            <h5 class="subs-title">Informations</h5>
-            <p>Niveau : {{ formation.niveau_display }}</p>
-            <p>Type : {{ formation.type_display }}</p>
-            <p>Langue : {{ formation.langue }}</p>
-            <p>Certification : {{ formation.est_certifiante ? 'Oui' : 'Non' }}</p>
-          </div>
-        </div>
-
       </div>
 
     </div>

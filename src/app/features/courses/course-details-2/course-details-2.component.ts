@@ -2,46 +2,61 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf, NgFor } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Formation } from '../../../shared/models/formation.models';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { HttpClient } from '@angular/common/http';
+
+declare var bootstrap: any;
 
 @Component({
   standalone: true,
   selector: 'app-course-details-2',
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    NgIf,
+    NgFor,
+    ReactiveFormsModule
+  ],
   templateUrl: './course-details-2.component.html',
   styleUrls: ['./course-details-2.component.scss']
 })
 export class CourseDetails2Component implements OnInit {
 
   formation: Formation | null = null;
-  loading: boolean = true;
-  error: string = '';
+  loading = true;
+  error = '';
 
+  /** 🔹 DEMANDE FORMATION */
+  showRequestForm = false;
+  submitting = false;
+  successMessage = '';
+  requestForm!: FormGroup;
+
+    private modalInstance: any;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private formationsService: FormationsService
+    private formationsService: FormationsService,
+    private fb: FormBuilder,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const formationId = +params['id'];
-      if (formationId) {
-        this.loadFormationDetails(formationId);
-      }
-    });
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (id) {
+      this.loadFormationDetails(id);
+    }
+
+    this.initRequestForm();
   }
 
   loadFormationDetails(id: number): void {
     this.loading = true;
-    this.error = '';
-
     this.formationsService.getFormationById(id).subscribe({
-      next: (response: any) => {
-        // accepte plusieurs structures comme dans ClientDetails
-        this.formation = response.data || response.formation || response;
+      next: (res: any) => {
+        this.formation = res?.data || res?.formation || res;
         this.loading = false;
       },
       error: () => {
@@ -51,21 +66,67 @@ export class CourseDetails2Component implements OnInit {
     });
   }
 
-  goBack(): void {
-    this.router.navigate(['/formations']);
+  /** =======================
+   *  FORM DEMANDE FORMATION
+   ======================= */
+
+  initRequestForm(): void {
+    this.requestForm = this.fb.group({
+      motif_demande: ['', Validators.required],
+      objectifs_personnels: ['', Validators.required],
+      priorite: ['normale', Validators.required],
+      date_souhaitee_debut: [null],
+      commentaire_employe: ['']
+    });
   }
 
-  get totalLessons(): number {
-    if (!this.formation?.modules) return 0;
-    return this.formation.modules.reduce(
-      (total, module) => total + (module.sections?.length || 0),
-      0
-    );
+  openRequestModal(): void {
+    const modalEl = document.getElementById('demandeFormationModal');
+    if (modalEl) {
+      this.modalInstance = new bootstrap.Modal(modalEl, {
+        backdrop: 'static',
+        keyboard: false
+      });
+      this.modalInstance.show();
+    }
   }
 
-  get totalDuration(): number {
-    return this.formation?.duree_totale || 0;
+  closeModal(): void {
+    if (this.modalInstance) {
+      this.modalInstance.hide();
+      this.requestForm.reset({ priorite: 'normale' });
+      this.submitting = false;
+      this.successMessage = '';
+    }
   }
+
+  submitRequest(): void {
+    if (!this.formation || this.requestForm.invalid) return;
+
+    this.submitting = true;
+
+    const payload = {
+      formation_id: this.formation.id,
+      ...this.requestForm.value
+    };
+
+    this.http.post('/api/demande-formations', payload).subscribe({
+      next: () => {
+        this.successMessage = 'Demande envoyée avec succès';
+        this.submitting = false;
+
+        setTimeout(() => {
+          this.closeModal();
+        }, 1200);
+      },
+      error: () => {
+        this.error = 'Erreur lors de l’envoi de la demande';
+        this.submitting = false;
+      }
+    });
+  }
+
+
 
   canSubscribe(): boolean {
     return !!this.formation?.inscription_ouverte;

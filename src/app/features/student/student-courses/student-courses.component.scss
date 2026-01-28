@@ -19,7 +19,6 @@
   margin-bottom: 6px;
 
   display: -webkit-box;
-  -webkit-line-clamp: 2; // max 2 lignes
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -31,7 +30,7 @@
   margin-bottom: 12px;
 
   display: -webkit-box;
-  -webkit-line-clamp: 2; // max 2 lignes
+
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
