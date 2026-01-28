@@ -1,7 +1,7 @@
 // src/app/shared/service/formation.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -10,6 +10,7 @@ import { environment } from '../../../../environments/environment';
 
 export class FormationService {
   private baseUrl = environment.apiUrl;
+  handleError: any;
 
   constructor(private http: HttpClient) {}
 
@@ -85,6 +86,10 @@ enrollInFormation(formationId: string): Observable<any> {
 addComment(commentData: any): Observable<any> {
   return this.http.post(`${this.baseUrl}/comments`, commentData);
 }
+
+// creer une demande de formation employe
+
+
 
 
 

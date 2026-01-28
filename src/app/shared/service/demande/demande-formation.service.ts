@@ -63,6 +63,26 @@ export class DemandeFormationService {
     );
   }
 
+  // Créer une demande de formation (Employé)
+creerDemande(payload: {
+  formation_id: number;
+  motif_demande: string;
+  objectifs_personnels: string;
+  priorite: string;
+  date_souhaitee_debut?: string;
+  commentaire_employe?: string;
+}): Observable<any> {
+  return this.http.post(
+    `${this.apiUrl}/demandes-formation`,
+    payload,
+    {
+      headers: this.getHeaders()
+    }
+  ).pipe(
+    catchError(this.handleError.bind(this))
+  );
+}
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     console.error('Erreur API Demandes Formation:', error);
     return throwError(() => error);

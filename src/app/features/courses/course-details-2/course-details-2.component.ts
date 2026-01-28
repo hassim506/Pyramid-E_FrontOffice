@@ -7,6 +7,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Formation } from '../../../shared/models/formation.models';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
 import { HttpClient } from '@angular/common/http';
+import { DemandeFormationService } from '../../../shared/service/demande/demande-formation.service';
 
 declare var bootstrap: any;
 
@@ -40,7 +41,8 @@ export class CourseDetails2Component implements OnInit {
     private router: Router,
     private formationsService: FormationsService,
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private demandeFormationService: DemandeFormationService
   ) {}
 
   ngOnInit(): void {
@@ -107,13 +109,21 @@ export class CourseDetails2Component implements OnInit {
 
     const payload = {
       formation_id: this.formation.id,
-      ...this.requestForm.value
+    motif_demande: this.requestForm.value.motif_demande,
+    objectifs_personnels: this.requestForm.value.objectifs_personnels,
+    priorite: this.requestForm.value.priorite,
+    date_souhaitee_debut: this.requestForm.value.date_souhaitee_debut,
+    commentaire_employe: this.requestForm.value.commentaire_employe
     };
 
-    this.http.post('/api/demande-formations', payload).subscribe({
+    
+
+    this.demandeFormationService.creerDemande(payload).subscribe({
       next: () => {
         this.successMessage = 'Demande envoyée avec succès';
+        this.requestForm.reset({});
         this.submitting = false;
+        this.showRequestForm = false;
 
         setTimeout(() => {
           this.closeModal();
