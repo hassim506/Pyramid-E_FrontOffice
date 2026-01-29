@@ -1,0 +1,98 @@
+<div class="card border-0 shadow-sm" *ngIf="!loading">
+
+  <!-- HEADER -->
+  <div class="card-header bg-white border-bottom">
+    <div class="d-flex align-items-center justify-content-between">
+      <h6 class="mb-0 fw-medium">
+        <i class="isax isax-book me-2 text-primary"></i>
+        Mes demandes de formation ({{ totalData }})
+      </h6>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-responsive" *ngIf="demandes.length > 0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th class="ps-4">Formation</th>
+          <th>Catégorie</th>
+          <th>Date demande</th>
+          <th class="text-center">Priorité</th>
+          <th class="text-center">Statut</th>
+          <th class="text-center pe-4">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let demande of demandes" class="align-middle">
+
+          <!-- FORMATION -->
+          <td class="ps-4">
+            <div class="d-flex align-items-center">
+              <img
+                [src]="demande.formation?.image_couverture || 'assets/img/course/course-01.jpg'"
+                class="rounded me-3"
+                style="width: 110px; height: 70px; object-fit: cover;"
+              >
+              <div>
+                <h6 class="mb-1 fw-medium">
+                  {{ demande.formation?.titre }}
+                </h6>
+                <small class="text-muted">
+                  {{ demande.formation?.formateur_nom }}
+                </small>
+              </div>
+            </div>
+          </td>
+
+          <!-- CATEGORIE -->
+          <td>
+            <span class="badge rounded-pill"
+                  [style.background]="demande.formation?.categorie?.couleur">
+              {{ demande.formation?.categorie?.nom }}
+            </span>
+          </td>
+
+          <!-- DATE -->
+          <td>
+            {{ demande.created_at | date:'dd/MM/yyyy' }}
+          </td>
+
+          <!-- PRIORITE -->
+          <td class="text-center">
+            <span class="badge bg-light text-dark">
+              {{ demande.priorite_display }}
+            </span>
+          </td>
+
+          <!-- STATUT -->
+          <td class="text-center">
+            <span [class]="getStatusClass(demande.statut)">
+              {{ demande.statut_display }}
+            </span>
+          </td>
+
+          <!-- ACTION -->
+          <td class="text-center pe-4">
+            <button
+              *ngIf="demande.statut === 'en_attente'"
+              class="btn btn-sm btn-outline-danger"
+              (click)="annulerDemande(demande.id)">
+              Annuler
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- EMPTY STATE -->
+<div *ngIf="!loading && demandes.length === 0" class="text-center py-5">
+  <i class="isax isax-book text-muted fs-1 mb-3"></i>
+  <h6 class="text-muted">Aucune demande de formation</h6>
+</div>
+
+
