@@ -4,13 +4,20 @@ import { CommonModule } from '@angular/common';
   import { RouterLink } from '@angular/router';
 import { Formation } from '../../../shared/models/formation.models';
 import { FormationService } from '../../../shared/service/formation/formation.service';
-import { Sort } from '@angular/material/sort';
+//import { Sort } from '@angular/material/sort';
+import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-student-dashboard',
     templateUrl: './student-dashboard.component.html',
     styleUrl: './student-dashboard.component.scss',
-    imports : [CommonModule,RouterLink],
+    imports : [
+      CommonModule,
+      RouterLink,
+      CustomPaginationComponent,
+      FormsModule
+    ],
 })
 export class StudentDashboardComponent {
   public routes = routes;
@@ -190,7 +197,7 @@ export class StudentDashboardComponent {
     this.getTableData(this.skip, this.limit);
   }
 
-  // Tri des données
+  /* Tri des données
   sortData(sort: Sort): void {
     if (!sort.active || sort.direction === '') {
       return;
@@ -216,7 +223,7 @@ export class StudentDashboardComponent {
     });
 
     this.getTableData(this.skip, this.limit);
-  }
+  }*/
 
   private compare(a: string | number, b: string | number, isAsc: boolean): number {
     return (a < b ? -1 : 1) * (isAsc ? 1 : -1);

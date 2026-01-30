@@ -1,0 +1,185 @@
+<!-- ================= PAGE HEADER ================= -->
+<div class="page-header mb-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h3 class="page-title mb-1">
+        Mes demandes de formation
+      </h3>
+      <p class="page-subtitle mb-0">
+        Suivez l’état de vos demandes de formation soumises à l’entreprise
+      </p>
+    </div>
+
+    <div class="header-badge">
+      <i class="isax isax-briefcase"></i>
+      Espace Employé
+    </div>
+  </div>
+</div>
+
+<!-- ================= FILTRES ================= -->
+<div class="card filter-card mb-4">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+
+      <!-- STATUT -->
+      <div class="col-md-3">
+        <label class="form-label">Statut</label>
+        <select class="form-select"
+                [(ngModel)]="selectedStatus"
+                (change)="filterByStatus(selectedStatus)">
+          <option value="">Tous</option>
+          <option value="en_attente">En attente</option>
+          <option value="validee">Validée</option>
+          <option value="refusee">Refusée</option>
+          <option value="annulee">Annulée</option>
+        </select>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="col-md-6">
+        <label class="form-label">Recherche</label>
+        <div class="search-wrapper">
+          <i class="isax isax-search-normal-1"></i>
+          <input type="search"
+                 class="form-control"
+                 placeholder="Formation, formateur, catégorie..."
+                 [(ngModel)]="searchDataValue"
+                 (ngModelChange)="searchData(searchDataValue)">
+        </div>
+      </div>
+
+      <!-- RESET -->
+      <div class="col-md-3 text-end">
+        <button class="btn btn-outline-secondary w-100"
+                (click)="searchDataValue=''; selectedStatus=''; filterByStatus('')">
+          <i class="isax isax-refresh me-1"></i>
+          Réinitialiser
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= TABLE ================= -->
+<div class="card table-card" *ngIf="!loading">
+
+  <div class="card-header bg-white">
+    <h6 class="mb-0">
+      <i class="isax isax-book me-2 text-primary"></i>
+      Historique des demandes ({{ totalData }})
+    </h6>
+  </div>
+
+  <div class="table-responsive" *ngIf="demandes.length > 0">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Formation</th>
+          <th>Catégorie</th>
+          <th>Date</th>
+          <th class="text-center">Priorité</th>
+          <th class="text-center">Statut</th>
+          <th class="text-center">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let demande of demandes">
+
+          <!-- ================= FORMATION (CORRIGÉ ICI) ================= -->
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <img [src]="demande.formation?.image_couverture || 'assets/img/course/course-01.jpg'"
+                   class="formation-thumb">
+
+              <div>
+                <div class="fw-medium">
+                  {{ demande.formation?.titre }}
+                </div>
+
+                <small class="text-muted d-block">
+                  {{ demande.formation?.formateur_nom }}
+                </small>
+
+                <!-- ✅ INFOS FORMATION : NIVEAU / LANGUE / DIFFICULTÉ -->
+                <div class="d-flex flex-wrap gap-3 mt-1 text-muted small">
+
+                  <span>
+                    <i class="isax isax-flag me-1"></i>
+                    {{ demande.formation?.niveau || '—' }}
+                  </span>
+
+                  <span>
+                    <i class="isax isax-language-square me-1"></i>
+                    {{ demande.formation?.langue || 'FR' }}
+                  </span>
+
+                  <span>
+                    <i class="isax isax-star me-1"></i>
+                    {{ demande.formation?.difficulte || '—' }}
+                  </span>
+
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- ================= CATÉGORIE ================= -->
+          <td>
+            <span class="badge rounded-pill"
+                  [style.background-color]="demande.formation?.categorie?.couleur || '#6c757d'"
+                  style="color: white; font-size: 11px;">
+              {{ demande.formation?.categorie?.nom || 'Non définie' }}
+            </span>
+          </td>
+
+          <!-- DATE -->
+          <td>{{ demande.created_at | date:'dd/MM/yyyy' }}</td>
+
+          <!-- PRIORITÉ -->
+          <td class="text-center">
+            <span class="badge priority-badge">
+              {{ demande.priorite_display }}
+            </span>
+          </td>
+
+          <!-- STATUT -->
+          <td class="text-center">
+            <span class="status-badge"
+                  [ngClass]="demande.statut">
+              {{ demande.statut_display }}
+            </span>
+          </td>
+
+          <!-- ACTION -->
+          <td class="text-center">
+            <button *ngIf="demande.statut === 'en_attente'"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="annulerDemande(demande.id)">
+              Annuler
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- EMPTY -->
+<div *ngIf="!loading && demandes.length === 0" class="empty-state">
+  <i class="isax isax-book"></i>
+  <h5>Aucune demande trouvée</h5>
+  <p>Vos futures demandes apparaîtront ici.</p>
+</div>
+
+<!-- PAGINATION -->
+<app-custom-pagination
+  *ngIf="!loading && totalData > pageSize"
+  [totalItems]="totalData"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  (pageChange)="onPageChange($event)">
+</app-custom-pagination>

@@ -1,116 +1,127 @@
-/* filepath: c:\Project\Pyramide\Dev\Front-end\angular\src\app\features\superadmin\superadmin-profile\superadmin-profile.component.scss */
-.profile-header {
-  background: #fff;
-  // padding: 30px;
-  border-radius: 10px;
-  margin-bottom: 30px;
-  box-shadow: 0 0 20px #0000001a;
+.profile-page {
+  padding: 20px;
+}
 
-  .avatar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+/* HERO */
+.profile-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg,#49e8f7, #dcb183,#7e50e9);
+  border-radius: 16px;
+  padding: 24px;
+  color: #fff;
+  margin-bottom: 30px;
+
+  .hero-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .avatar-xl {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24     px;
-    font-weight: bold;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+    font-size: 28px;
+    font-weight: 700;
   }
 
-  .profile-user-info {
-    h4 {
-      margin-bottom: 5px;
-      color: #333;
-      font-weight: 600;
+  .hero-info {
+    h2 {
+      margin: 0;
+      font-weight: 700;
     }
 
-    h6 {
-      color: #6c757d;
-      margin-bottom: 10px;
-      font-weight: 500;
+    .role {
+      opacity: 0.9;
+      margin-bottom: 8px;
     }
 
-    .user-Location {
-      color: #6c757d;
-      margin-bottom: 5px;
-
-      i {
-        margin-right: 8px;
-        width: 16px;
-      }
+    .meta span {
+      margin-right: 15px;
+      font-size: 14px;
+      i { margin-right: 6px; }
     }
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
   }
 }
 
-.profile-info-item {
-  margin-bottom: 2px;
+/* STATUS */
+.status-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
 
-  label {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 5px;
-    display: block;
-  }
+.status-active { background: #22c55e; }
+.status-inactive { background: #ef4444; }
+
+/* CARD */
+.profile-card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+/* SECTION */
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+/* GRID */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  background: #f9fafb;
+  padding: 14px 16px;
+  border-radius: 12px;
 
   span {
-    color: #6c757d;
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  strong {
     font-size: 14px;
+    color: #0d1818;
   }
 }
 
-.status-active {
-  background-color: #28a745 !important;
-  color: white;
+/* FORM */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
 }
 
-.status-inactive {
-  background-color: #dc3545 !important;
-  color: white;
+.actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 12px;
 }
 
-.badge-primary {
-  background-color: #007bff;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-}
-
-.profile-menu {
-  margin-bottom: 3px;
-
-  .nav-tabs-solid {
-    border-bottom: 2px solid #f8f9fa;
-
-    .nav-link {
-      border: none;
-      background: transparent;
-      color: #6c757d;
-      font-weight: 500;
-
-      &.active {
-        background: #007bff;
-        color: white;
-        border-radius: 5px 5px 0 0;
-      }
-
-      i {
-        margin-right: 8px;
-      }
-    }
-  }
-}
-
-.card {
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  border: none;
+/* BUTTONS */
+.btn-edit {
+  background: #fff;
+  color: #4f46e5;
+  font-weight: 600;
   border-radius: 10px;
-
-  .card-title {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 20px;
-  }
-}   
+}
