@@ -16,14 +16,12 @@ export interface Formations {
   media_url?: string | null;
   image_couverture?: string | null;
   objectifs_pedagogiques?: string | null;
-  
   prerequis?: string | null;
   plan_de_formation?: string | null;
   public_cible?: string | null;
+
   date_debut?: string | Date | null;
   date_fin?: string | Date | null;
- 
-
 
   duree_totale: number;
   difficulte: string;
@@ -35,16 +33,19 @@ export interface Formations {
   inscription_ouverte: boolean;
 
   formateur_id: number;
-
-  // 🔑 utilisé pour le filtrage entreprise
   formateur?: FormateurLite;
+
+  /** 🔥 Infos employé (pivot) */
+  statut_formation?: 'en_cours' | 'termine' | 'abandonne';
+  statut_inscription?: string;
+  progression?: number;
 
   created_at?: string | Date;
   updated_at?: string | Date;
 }
 
-export interface FormationApiResponse {
-  data: Formations[];
+/** 🔥 Réponse API normalisée */
+export interface FormationsApiResponse {
   status: boolean;
   formations: Formations[];
 }

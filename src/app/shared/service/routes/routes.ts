@@ -41,6 +41,7 @@ export const routes = {
   students_profile: '/student/student-profile',
   students_Dashboard: '/student/student-dashboard',
   course_student: '/student/course-student',
+  studentMyCourses:'/student/mes-cours',
   student_Certificate: '/student/student-certificate',
   student_Wishlist: '/student/student-wishlist',
   view_invoice_student: '/student/view-invoice',

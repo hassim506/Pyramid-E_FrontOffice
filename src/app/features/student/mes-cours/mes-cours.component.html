@@ -1,0 +1,128 @@
+<div class="mes-cours-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h2>🎓 Mes cours</h2>
+    <p>Retrouvez ici toutes les formations que vous suivez</p>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="loader-wrapper">
+    <div class="spinner"></div>
+    <p>Chargement de vos formations...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!loading && error" class="error-box">
+    {{ error }}
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && !error && allFormations.length === 0" class="empty-state">
+    <i class="isax isax-book"></i>
+    <h4>Aucune formation</h4>
+    <p>Vos formations validées apparaîtront ici.</p>
+  </div>
+
+  <!-- Courses -->
+  <div *ngIf="!loading && formations.length > 0" class="courses-grid">
+
+    <div
+      class="course-card"
+      *ngFor="let formation of formations"
+      (click)="goToDetails(formation.id)"
+    >
+
+      <!-- Media -->
+      <div class="media">
+        <img
+          *ngIf="formation.image_couverture"
+          [src]="formation.image_couverture"
+          alt="formation"
+        />
+
+        <div *ngIf="!formation.image_couverture" class="media-placeholder">
+          <i class="isax isax-video"></i>
+        </div>
+
+        <span class="badge-status">
+          {{ formation.statut_formation || 'en cours' }}
+        </span>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h5 class="title">{{ formation.titre }}</h5>
+
+        <p class="description">
+          {{ formation.short_description || formation.description || 'Aucune description' }}
+        </p>
+
+        <!-- Meta -->
+        <div class="meta">
+          <span>
+            <i class="isax isax-clock"></i>
+            {{ formation.duree_totale ?? 0 }} h
+          </span>
+
+          <span>
+            <i class="isax isax-global"></i>
+            {{ formation.langue || 'FR' }}
+          </span>
+
+          <span>
+            <i class="isax isax-star-1"></i>
+            {{ formation.difficulte || '—' }}
+          </span>
+        </div>
+
+        <!-- Progression -->
+        <div *ngIf="formation.progression !== undefined" class="progress-wrapper">
+          <div class="progress-bar">
+            <div class="progress" [style.width.%]="formation.progression"></div>
+          </div>
+          <small>{{ formation.progression }}%</small>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <span class="price free">
+            {{ isFree(formation) ? 'Gratuit' : formation.prix + ' FCFA' }}
+          </span>
+
+          <button class="btn-continue">
+            Continuer
+            <i class="isax isax-arrow-right-3"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="totalPages > 1" class="pagination-wrapper">
+    <button
+      class="page-btn"
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">
+      <i class="isax isax-arrow-left-2"></i>
+    </button>
+
+    <button
+      *ngFor="let _ of pageNumberArray; let i = index"
+      class="page-btn"
+      [class.active]="currentPage === i + 1"
+      (click)="changePage(i + 1)">
+      {{ i + 1 }}
+    </button>
+
+    <button
+      class="page-btn"
+      [disabled]="currentPage === totalPages"
+      (click)="changePage(currentPage + 1)">
+      <i class="isax isax-arrow-right-2"></i>
+    </button>
+  </div>
+
+</div>

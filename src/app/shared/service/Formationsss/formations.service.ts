@@ -1,7 +1,14 @@
+// src/app/shared/service/Formationsss/formations.service.ts
+
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { FormationApiResponse } from '../../models/Formations.models';
+import {
+  
+  FormationsApiResponse,
+
+  
+} from '../../models/Formations.models';
 
 @Injectable({
   providedIn: 'root',
@@ -15,33 +22,45 @@ export class FormationsService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('pyramid_token');
 
-    return new HttpHeaders({
+    let headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
     });
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return headers;
   }
 
-  // ✅ Récupérer toutes les formations
-  getAllFormations(): Observable<FormationApiResponse> {
-    return this.http.get<FormationApiResponse>(
+  /** 🔹 Toutes les formations */
+  getAllFormations(): Observable<FormationsApiResponse> {
+    return this.http.get<FormationsApiResponse>(
       `${this.apiUrl}/formations`,
       { headers: this.getHeaders() }
     );
   }
 
-  // ✅ Envoyer une demande d'inscription
-  requestFormation(formationId: number, payload: any): Observable<any> {
-    return this.http.post(
-      `${this.apiUrl}/formations/${formationId}/request`,
-      payload,
+  /** 🔹 Détails formation */
+  getFormationById(id: number): Observable<FormationsApiResponse> {
+    return this.http.get<FormationsApiResponse>(
+      `${this.apiUrl}/formations/${id}`,
       { headers: this.getHeaders() }
     );
   }
 
-  // ✅ Récupérer les détails d'une formation par ID
-  getFormationById(formationId: number): Observable<FormationApiResponse> {
-    return this.http.get<FormationApiResponse>(
-      `${this.apiUrl}/formations/${formationId}`,
+  /** 🔥 Formations suivies par l’employé */
+  getMesFormations(): Observable<FormationsApiResponse> {
+    return this.http.get<FormationsApiResponse>(
+      `${this.apiUrl}/mes-formations`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /** 🔥 Formations par statut */
+  getMesFormationsByStatus(status: string): Observable<FormationsApiResponse> {
+    return this.http.get<FormationsApiResponse>(
+      `${this.apiUrl}/mes-formations?status=${status}`,
       { headers: this.getHeaders() }
     );
   }
