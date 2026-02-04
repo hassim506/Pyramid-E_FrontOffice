@@ -8,10 +8,13 @@ export interface FormateurLite {
 }
 
 export interface Formations {
+  statut: string;
   id: number;
   titre: string;
   description: string;
   short_description: string;
+   status: 'active' | 'pending' | 'completed';
+  categorie_id: number;
 
   media_url?: string | null;
   image_couverture?: string | null;

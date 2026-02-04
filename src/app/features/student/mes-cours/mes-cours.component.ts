@@ -99,4 +99,18 @@ export class MesCoursComponent implements OnInit {
   isFree(formation: Formations): boolean {
     return Number(formation.prix) === 0;
   }
+
+  // 🔹 etat du bouton
+  getCourseActionLabel(formation: Formations): string {
+    const progression = Number(formation.progression ?? 0);
+
+    if (progression === 100) return 'Terminé';
+    if (progression > 0) return 'Continuer';
+    return 'Commencer';
+  }
+
+  // 🔹 état du bouton si fini
+  isCourseFinished(formaion: any): boolean {
+    return Number(formaion.progression ?? 0) === 100;
+  }
 }

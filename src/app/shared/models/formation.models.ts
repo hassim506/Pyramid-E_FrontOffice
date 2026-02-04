@@ -1,5 +1,6 @@
 // src/app/shared/models/formation.models.ts
 export interface Formation {
+  image: any;
   id: number;
   titre: string;
   description: string;
