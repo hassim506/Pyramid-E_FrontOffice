@@ -30,7 +30,7 @@
     <div
   class="course-card premium"
   *ngFor="let formation of formations"
-  (click)="goToDetails(formation.id)"
+  
 >
 
   <!-- Media -->
@@ -88,11 +88,14 @@
         {{ isFree(formation) ? 'Gratuit' : formation.prix + ' FCFA' }}
       </span>
 
-      <button class="btn-continue">
-        {{getCourseActionLabel(formation)}}
-         <i class="isax isax-arrow-right-3 ms-1"></i>
-        
-      </button>
+    <button
+  class="btn-continue"
+  (click)="$event.stopPropagation(); startCourses(formation.id)"
+  [disabled]="isCourseFinished(formation)"
+>
+  {{ getCourseActionLabel(formation) }}
+  <i class="isax isax-arrow-right-3 ms-1"></i>
+</button>
     </div>
 
   </div>

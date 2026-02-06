@@ -218,8 +218,8 @@ export const routes: Routes = [
         {path:'student-courses',loadComponent:()=>import ('./features/student/student-courses/student-courses.component').then((m)=>m.StudentCoursesComponent)},
         
         {path:'mes-cours',loadComponent:()=>import ('./features/student/mes-cours/mes-cours.component').then((m)=>m.MesCoursComponent)},
-        {
-  path:'student/lecture-formation/:id',loadComponent:()=>import('./features/student/lecture-formation/lecture-formation.component').then(m=>m.LectureFormationComponent)},
+        {path:'lecture-formation/:id',loadComponent:()=>import('./features/student/lecture-formation/lecture-formation.component').then(m=>m.LectureFormationComponent)
+},
         {path:'student-tickets',loadComponent:()=>import ('./features/student/student-tickets/student-tickets.component').then((m)=>m.StudentTicketsComponent)},
         {path:'student-quiz',loadComponent:()=>import ('./features/student/student-quiz/student-quiz.component').then((m)=>m.StudentQuizComponent)},
         {path:'student-quiz-questions',loadComponent:()=>import ('./features/student/student-quiz-questions/student-quiz-questions.component').then((m)=>m.StudentQuizQuestionsComponent)},

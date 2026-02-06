@@ -64,4 +64,12 @@ export class FormationsService {
       { headers: this.getHeaders() }
     );
   }
+
+  /** Structure complète formation (modules + Sections) */
+  getFormationStructure(id: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/formations/${id}/structure`,
+      { headers: this.getHeaders() }
+    );
+  }
 }

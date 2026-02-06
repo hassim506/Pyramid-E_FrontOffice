@@ -113,4 +113,12 @@ export class MesCoursComponent implements OnInit {
   isCourseFinished(formaion: any): boolean {
     return Number(formaion.progression ?? 0) === 100;
   }
+
+ 
+  // 🔹 Redirection vers page de lecture formation
+  startCourses(id?: number): void {
+  if (!id) return;
+  this.router.navigate(['/student/lecture-formation', id]);
+}
+
 }
