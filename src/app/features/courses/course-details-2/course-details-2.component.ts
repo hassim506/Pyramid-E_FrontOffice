@@ -103,38 +103,57 @@ export class CourseDetails2Component implements OnInit {
   }
 
   submitRequest(): void {
-    if (!this.formation || this.requestForm.invalid) return;
+  if (!this.formation || this.requestForm.invalid) return;
 
-    this.submitting = true;
+  this.submitting = true;
 
-    const payload = {
-      formation_id: this.formation.id,
+  // 🔥 convertir la date au format Laravel YYYY-MM-DD
+  let formattedDate = null;
+
+  if (this.requestForm.value.date_souhaitee_debut) {
+    const d = new Date(this.requestForm.value.date_souhaitee_debut);
+    formattedDate = d.toISOString().split('T')[0];
+  }
+
+  const payload: {
+    formation_id: number;
+    motif_demande: string;
+    objectifs_personnels: string;
+    priorite: string;
+    date_souhaitee_debut?: string;
+    commentaire_employe?: string;
+  } = {
+    formation_id: this.formation.id,
     motif_demande: this.requestForm.value.motif_demande,
     objectifs_personnels: this.requestForm.value.objectifs_personnels,
     priorite: this.requestForm.value.priorite,
-    date_souhaitee_debut: this.requestForm.value.date_souhaitee_debut,
     commentaire_employe: this.requestForm.value.commentaire_employe
-    };
+  };
 
-    
-
-    this.demandeFormationService.creerDemande(payload).subscribe({
-      next: () => {
-        this.successMessage = 'Demande envoyée avec succès';
-        this.requestForm.reset({});
-        this.submitting = false;
-        this.showRequestForm = false;
-
-        setTimeout(() => {
-          this.closeModal();
-        }, 1200);
-      },
-      error: () => {
-        this.error = 'Erreur lors de l’envoi de la demande';
-        this.submitting = false;
-      }
-    });
+  if (formattedDate) {
+    payload.date_souhaitee_debut = formattedDate;
   }
+
+  console.log('Payload envoyé =>', payload); // 👈 pour debug
+
+  this.demandeFormationService.creerDemande(payload).subscribe({
+    next: () => {
+      this.successMessage = 'Demande envoyée avec succès';
+      this.requestForm.reset({ priorite: 'normale' });
+      this.submitting = false;
+
+      setTimeout(() => {
+        this.closeModal();
+      }, 1200);
+    },
+    error: (err) => {
+      console.log('Erreur Laravel =>', err.error); // 🔥 important
+      this.error = 'Erreur lors de l’envoi de la demande';
+      this.submitting = false;
+    }
+  });
+}
+
 
 
 
