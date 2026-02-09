@@ -1,204 +1,243 @@
-/* =====================================
-   ROOT DASHBOARD
-===================================== */
+/* ===============================
+   VARIABLES
+================================ */
 :host {
-  display: block;
-  background: linear-gradient(180deg, #f4f6fb 0%, #eef2f7 100%);
-  min-height: 100vh;
-  padding: 1.5rem 0 3rem;
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --primary: #2563eb;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-400: #9ca3af;
+  --gray-600: #4b5563;
+  --gray-800: #1f2937;
 }
 
-/* =====================================
+/* ===============================
    PAGE HEADER
-===================================== */
-h4 {
-  font-size: 1.55rem;
-  font-weight: 700;
-  letter-spacing: -0.6px;
-}
-
-.text-muted {
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-/* =====================================
-   KPI SECTION
-===================================== */
-.row.mb-4 > div {
-  display: flex;
-}
-
-.card {
-  width: 100%;
-  border-radius: 18px;
-  border: none;
-  box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow:
-    0 20px 45px rgba(0, 0, 0, 0.15);
-}
-
-.bg-primary {
-  background: linear-gradient(135deg, #2563eb, #1e40af) !important;
-}
-
-.bg-warning {
-  background: linear-gradient(135deg, #f59e0b, #b45309) !important;
-}
-
-.bg-success {
-  background: linear-gradient(135deg, #10b981, #047857) !important;
-}
-
-.card-body {
-  padding: 1.4rem 1.5rem;
-}
-
-.card-body h6 {
-  text-transform: uppercase;
-  font-size: 0.72rem;
-  letter-spacing: 1.2px;
-  opacity: 0.85;
-}
-
-.card-body h3 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  margin-top: 0.2rem;
-}
-
-/* =====================================
-   FILTER CARD
-===================================== */
-.card.border-0.shadow-sm {
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow:
-    0 12px 30px rgba(15, 23, 42, 0.08);
-}
-
-.form-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #475569;
-}
-
-.form-control,
-.form-select {
+================================ */
+.page-header {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
   border-radius: 14px;
-  padding: 0.75rem 1rem;
-  font-size: 0.9rem;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-}
+  border: 1px solid var(--gray-200);
 
-.form-control:focus,
-.form-select:focus {
-  background-color: #ffffff;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
-}
-
-/* =====================================
-   FORMATION CARDS
-===================================== */
-.col-lg-4 .card {
-  border-radius: 22px;
-  overflow: hidden;
-}
-
-.card-img-top {
-  height: 185px;
-  object-fit: cover;
-  filter: contrast(1.05) saturate(1.05);
-}
-
-.card.h-100::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: 22px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-}
-
-.card-body {
-  display: flex;
-  flex-direction: column;
-}
-
-.card-body h6 {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.card-body p {
-  font-size: 0.82rem;
-  color: #475569;
-  line-height: 1.5;
-}
-
-/* =====================================
-   PROGRESSION BAR
-===================================== */
-.progress {
-  height: 8px;
-  background-color: #e2e8f0;
-  border-radius: 999px;
-}
-
-.progress-bar {
-  border-radius: 999px;
-  background: linear-gradient(90deg, #22c55e, #16a34a);
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.45);
-}
-
-/* =====================================
-   EMPTY STATE
-===================================== */
-.text-center.py-5 {
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.05);
-}
-
-/* =====================================
-   PAGINATION
-===================================== */
-app-custom-pagination {
-  margin-top: 2.5rem;
-  display: flex;
-  justify-content: center;
-}
-
-/* =====================================
-   LOADING
-===================================== */
-.spinner-border {
-  width: 2.8rem;
-  height: 2.8rem;
-}
-
-/* =====================================
-   MOBILE
-===================================== */
-@media (max-width: 768px) {
-  h4 {
-    font-size: 1.3rem;
+  .page-title {
+    font-weight: 700;
+    color: var(--gray-800);
   }
 
-  .card-body h3 {
-    font-size: 1.8rem;
+  .page-subtitle {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+  }
+
+  .header-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+}
+
+/* ===============================
+   KPI CARDS
+================================ */
+.kpi-card {
+  border-radius: 14px;
+  padding: 1.4rem;
+  color: #fff;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+
+  h6 {
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+
+  h3 {
+    font-weight: 700;
+    margin-top: 0.25rem;
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  }
+
+  &.warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+  }
+
+  &.success {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+  }
+}
+
+/* ===============================
+   FILTER CARD
+================================ */
+.filter-card {
+  border-radius: 14px;
+  border: 1px solid var(--gray-200);
+  background: #fff;
+
+  .form-label {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    font-weight: 500;
+  }
+
+  .search-wrapper {
+    position: relative;
+
+    i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+      font-size: 1rem;
+    }
+
+    input {
+      padding-left: 2.2rem;
+    }
+  }
+}
+
+/* ===============================
+   TABLE CARD
+================================ */
+.table-card {
+  border-radius: 16px;
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+
+  .card-header {
+    border-bottom: 1px solid var(--gray-200);
+    padding: 1rem 1.25rem;
+    background: #fff;
+
+    h6 {
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+  }
+
+  table {
+    thead {
+      background: var(--gray-50);
+
+      th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--gray-600);
+        border-bottom: 1px solid var(--gray-200);
+      }
+    }
+
+    tbody tr {
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: var(--gray-50);
+      }
+    }
+
+    td {
+      vertical-align: middle;
+      font-size: 0.85rem;
+      color: var(--gray-800);
+    }
+  }
+}
+
+/* ===============================
+   FORMATION THUMB
+================================ */
+.formation-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--gray-200);
+}
+
+/* ===============================
+   STATUS BADGES
+================================ */
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  &.active {
+    background: rgba(22, 163, 74, 0.15);
+    color: var(--success);
+  }
+
+  &.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+  }
+
+  &.completed {
+    background: rgba(37, 99, 235, 0.15);
+    color: var(--primary);
+  }
+}
+
+/* ===============================
+   PROGRESS BAR
+================================ */
+.progress {
+  background: var(--gray-200);
+  border-radius: 999px;
+
+  .progress-bar {
+    border-radius: 999px;
+  }
+}
+
+/* ===============================
+   ALERT
+================================ */
+.alert-warning {
+  border-radius: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+/* ===============================
+   EMPTY STATE
+================================ */
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--gray-600);
+
+  i {
+    font-size: 3rem;
+    color: var(--gray-400);
+    margin-bottom: 1rem;
+  }
+
+  h5 {
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+
+  p {
+    font-size: 0.9rem;
   }
 }

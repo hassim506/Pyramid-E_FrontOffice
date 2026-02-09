@@ -7,9 +7,9 @@ import {
   Formations,
   FormationsApiResponse
 } from '../../../shared/models/Formations.models';
+
+import { DemandeFormationService } from '../../../shared/service/demande/demande-formation.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
-
-
 
 @Component({
   selector: 'app-student-dashboard',
@@ -24,33 +24,55 @@ import { CustomPaginationComponent } from '../../../shared/service/custom-pagina
 })
 export class StudentDashboardComponent implements OnInit {
 
+  /** =======================
+   *  FORMATIONS
+   * ======================= */
   formations: Formations[] = [];
   allFormations: Formations[] = [];
 
   loading = false;
 
-  /* Filtres */
+  /** =======================
+   *  FILTRES
+   * ======================= */
   searchDataValue = '';
   selectedStatus = '';
 
-  /* Pagination */
+  /** =======================
+   *  PAGINATION
+   * ======================= */
   currentPage = 1;
   pageSize = 9;
   totalData = 0;
 
-  /* KPI employé */
+  /** =======================
+   *  KPI EMPLOYÉ
+   * ======================= */
   stats = {
-    active: 0,     // formations en cours
-    pending: 0,    // en attente validation RH
-    completed: 0,  // terminées
+    active: 0,
+    pending: 0,
+    completed: 0,
   };
 
-  constructor(private formationsService: FormationsService) {}
+  /** =======================
+   *  DEMANDES EN ATTENTE
+   * ======================= */
+  hasPendingDemandes = false;
+  pendingDemandesCount = 0;
+
+  constructor(
+    private formationsService: FormationsService,
+    private demandeFormationService: DemandeFormationService
+  ) {}
 
   ngOnInit(): void {
     this.loadMesFormations();
+    this.loadPendingDemandes(); // ✅ AJOUT
   }
 
+  /** =======================
+   *  CHARGEMENT FORMATIONS
+   * ======================= */
   loadMesFormations(): void {
     this.loading = true;
 
@@ -119,6 +141,30 @@ export class StudentDashboardComponent implements OnInit {
     this.stats.completed = this.allFormations.filter(f => f.status === 'completed').length;
   }
 
+  /** =======================
+   *  DEMANDES FORMATION
+   * ======================= */
+  loadPendingDemandes(): void {
+    this.demandeFormationService.getDemandesFormation().subscribe({
+      next: (res: any) => {
+        const demandes = res.demandes ?? res;
+
+        const pending = demandes.filter(
+          (d: any) => d.statut === 'pending'
+        );
+
+        this.pendingDemandesCount = pending.length;
+        this.hasPendingDemandes = this.pendingDemandesCount > 0;
+      },
+      error: () => {
+        this.hasPendingDemandes = false;
+      }
+    });
+  }
+
+  /** =======================
+   *  HELPERS UI
+   * ======================= */
   getFormationImage(f: Formations): string {
     return f.image_couverture || f.media_url || 'assets/images/default-course.jpg';
   }
