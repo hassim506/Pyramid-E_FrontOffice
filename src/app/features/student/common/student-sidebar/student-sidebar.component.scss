@@ -1,0 +1,155 @@
+/* =====================================
+   SIDEBAR LMS ENTREPRISE – WHITE PRO
+===================================== */
+
+.settings-sidebar {
+  width: 280px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  padding: 1.5rem 1rem;
+  position: relative;
+  overflow: visible; // IMPORTANT
+  transition: width 0.3s ease;
+}
+
+/* Toggle Button */
+/* Toggle */
+.sidebar-toggle {
+  text-align: right;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+/* Main Menu */
+.main-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+.menu-item {
+  position: relative;
+  margin-bottom: 0.4rem;
+
+  > a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1e293b;
+    text-decoration: none;
+    transition: all 0.25s ease;
+
+     i:first-child {
+      font-size: 1rem;
+      color:#64748b
+    }
+
+    &:hover {
+      background: #f3f4f6;
+       color: #eea51c;
+    }
+
+    &.active {
+      background: linear-gradient(90deg,  #11a9b7, #11a9b7);
+      color: #fff;
+    }
+  }
+  &.active > a {
+    background: linear-gradient(90deg, #2563eb, #1e40af);
+    color: white;
+
+    i {
+      color: white;
+    }
+  }
+}
+
+/* Submenu Arrow */
+.submenu-arrow {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+/* =====================================
+   DROPDOWN SUBMENU RIGHT SIDE
+===================================== */
+/* =========================================
+   SUBMENU DROPDOWN RIGHT
+========================================= */
+
+.has-submenu {
+
+  .submenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    min-width: 220px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    list-style: none;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(10px);
+    transition: all 0.25s ease;
+    z-index: 999;
+  }
+
+  &:hover .submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+  .submenu li a {
+    display: block;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    color: #334155;
+    text-decoration: none;
+    transition: 0.2s ease;
+
+    &:hover {
+      background: #f8fafc;
+      color: #eea51c;
+    }
+  }
+}
+
+/* =====================================
+   COLLAPSED MODE
+===================================== */
+
+.settings-sidebar.collapsed {
+  width: 80px;
+
+  span,
+  .submenu-arrow {
+    display: none;
+  }
+
+ 
+}
+
+/* =====================================
+   LOGOUT STYLE
+===================================== */
+
+.logout a {
+  color: #ef4444;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+}

@@ -16,6 +16,7 @@ export class StudentSidebarComponent {
   public base = '';
   public page = '';
   public last = '';
+  isCollapsed = false;
 
   constructor(private common: CommonService) {
     this.common.base.subscribe((base: string) => {
