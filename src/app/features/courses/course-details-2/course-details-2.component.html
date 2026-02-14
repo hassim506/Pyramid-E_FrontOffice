@@ -3,10 +3,7 @@
   <div class="spinner-border text-primary"></div>
 </div>
 
-<!-- ❌ ERROR -->
-<div *ngIf="!loading && error" class="alert alert-danger text-center">
-  {{ error }}
-</div>
+
 
 <!-- ================== BANNER ================== -->
 <section class="inner-banner" *ngIf="!loading && formation">
@@ -207,6 +204,7 @@
 
           <!-- ================= MODAL DEMANDE FORMATION ================= -->
 <div class="modal fade" id="demandeFormationModal" tabindex="-1">
+  
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
 
@@ -214,7 +212,15 @@
         <h5 class="modal-title">Demande de formation</h5>
         <button type="button" class="btn-close" (click)="closeModal()"></button>
       </div>
+      <!-- MESSAGE ERREUR -->
+<div *ngIf="error" class="alert alert-danger custom-alert">
+  {{ error }}
+</div>
 
+<!-- MESSAGE SUCCESS -->
+<div *ngIf="successMessage" class="alert alert-success custom-alert">
+  {{ successMessage }}
+</div>
       <div class="modal-body">
 
         <form [formGroup]="requestForm">

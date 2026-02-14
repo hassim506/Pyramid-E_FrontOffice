@@ -150,6 +150,23 @@ export class CourseDetails2Component implements OnInit {
       console.log('Erreur Laravel =>', err.error); // 🔥 important
       this.error = 'Erreur lors de l’envoi de la demande';
       this.submitting = false;
+
+      // 🔥 CAS 1 : demande déjà existante
+      if (err.status === 409|| 
+        err.error?.message?.toLowerCase().includes('déjà')
+      ) {
+        this.error = 'Vous avez déjà soumis une demande pour cette formation';
+        return;
+      }
+
+      // 🔥 CAS 2 : validation Laravel échouée
+      if (err.status === 422 && err.error?.errors) {
+        this.error = 'Veuillez vérifier les champs obligatoires.';
+        return;
+      }
+
+      // 🔥 CAS GÉNÉRAL
+      this.error = 'Une erreur est survenue lors de l’envoi de la demande.';
     }
   });
 }
