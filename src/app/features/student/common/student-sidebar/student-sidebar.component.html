@@ -43,7 +43,7 @@
       <ul class="submenu">
         <li><a [routerLink]="routes.studentCourses">Catalogue complet</a></li>
         <li><a [routerLink]="routes.student_Certificate">Demande formation</a></li>
-        <li><a>Recommandations IA</a></li>
+        <!--<li><a>Recommandations IA</a></li>-->
       </ul>
     </li>
 
@@ -65,13 +65,13 @@
 
     <!-- ================= PROFIL ================= -->
     <li class="menu-item has-submenu">
-      <a [routerLink]="routes.students_profile">
+      <a>
         <i class="isax isax-user"></i>
         <span>Mon profil</span>
          <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
        <ul class="submenu">
-        <li><a >Informations personnelles</a></li>
+        <li><a  [routerLink]="routes.students_profile">Informations personnelles</a></li>
         <li><a >Compétences déclarées</a></li>
          <li><a>Historique d’activité</a></li>
           <li><a>Paramètres de notification</a></li>
@@ -97,7 +97,7 @@
       </ul>
     </li>
 
-    <!-- ================= Planning ================= -->
+    <!-- ================= FAQ ================= -->
     <li class="menu-item has-submenu">
       <a [routerLink]="routes.students_tickets">
         <i class="isax isax-ticket"></i>
