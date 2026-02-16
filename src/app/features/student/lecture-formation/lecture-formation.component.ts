@@ -17,9 +17,9 @@ export class LectureFormationComponent implements OnInit {
   error = '';
 
   formation: any = null;
-  modules: any[] = [];          // 🔒 toujours tableau
+  modules: any[] = [];
   selectedSection: any = null;
-  hasContent = false;          // pour afficher message "pas de contenu" si nécessaire
+  hasContent = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -28,51 +28,72 @@ export class LectureFormationComponent implements OnInit {
 
   ngOnInit(): void {
     this.formationId = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadStructure();
+
+    if (!this.formationId) {
+      this.error = 'Formation introuvable';
+      this.loading = false;
+      return;
+    }
+
+    this.loadStructureDirectly();
   }
 
-  loadStructure(): void {
+  /**
+   * 🔥 Charger directement formation + modules depuis la structure
+   * (Plus propre que double appel)
+   */
+  loadStructureDirectly(): void {
+
     this.loading = true;
     this.error = '';
 
     this.formationsService.getFormationStructure(this.formationId).subscribe({
+
       next: (res: any) => {
-        console.log('STRUCTURE API =>', res);
 
-        // 🔒 sécurisation backend
-        this.formation = res?.structure?.formation ?? null;
-        this.modules   = res?.structure?.modules ?? [];
+        console.log('🔥 STRUCTURE API COMPLETE =>', res);
 
-        // sécurité ultime
+        // 🔎 Adapter selon format backend
+        this.formation =
+          res?.formation ||
+          res?.structure?.formation ||
+          res?.data?.formation ||
+          null;
+
+        this.modules =
+          res?.modules ||
+          res?.structure?.modules ||
+          res?.data?.modules ||
+          [];
+
         if (!Array.isArray(this.modules)) {
           this.modules = [];
         }
 
-        // vérifier s'il y a du contenu (au moins une section avec du contenu)
-        this.hasContent = this.modules.length > 0;
+        // 🔥 Vérifier contenu réel
+        this.hasContent = false;
 
-        // sélectionner première section automatiquement
-        if (
-          this.hasContent &&
-          Array.isArray(this.modules[0].sections) &&
-          this.modules[0].sections.length > 0
-        ) {
-          this.selectedSection = this.modules[0].sections[0];
-        } 
+        for (let module of this.modules) {
+          if (Array.isArray(module.sections) && module.sections.length > 0) {
+            this.hasContent = true;
+            this.selectedSection = module.sections[0];
+            break;
+          }
+        }
 
         this.loading = false;
       },
 
       error: (err) => {
-        console.error(err);
-        this.error = 'Impossible de charger la formation';
+        console.error('❌ ERREUR API STRUCTURE', err);
+        this.error = 'Impossible de charger le contenu de la formation';
         this.loading = false;
       }
+
     });
   }
 
   selectSection(section: any): void {
     this.selectedSection = section;
   }
-
 }

@@ -31,7 +31,7 @@
 
       <ul>
         <li 
-          *ngFor="let section of module.sections"
+           *ngFor="let section of module.sections || []"
           (click)="selectSection(section)"
           [class.active]="selectedSection?.id === section.id">
           ▶ {{ section.titre }}
