@@ -119,6 +119,39 @@ export class StudentDashboardComponent implements OnInit {
     });
   }
 
+  /** ======================= ACTIONS POUR LES CERTIFICATS ======================= */
+
+viewCertificate(formationId: number): void {
+  this.formationsService.viewCertificate(formationId).subscribe({
+    next: (res: any) => {
+      const url = res.url ?? res.certificate_url;
+      if (url) {
+        window.open(url, '_blank');
+      }
+    },
+    error: (err) => {
+      console.error('Erreur visualisation certificat', err);
+    }
+  });
+}
+
+downloadCertificate(formationId: number): void {
+  this.formationsService.downloadCertificate(formationId).subscribe({
+    next: (blob: Blob) => {
+      const fileURL = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = fileURL;
+      a.download = `certificat_formation_${formationId}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(fileURL);
+    },
+    error: (err) => {
+      console.error('Erreur téléchargement certificat', err);
+    }
+  });
+}
+
+
   /** ======================= FILTRES ======================= */
   filterByStatus(status: string): void {
     this.selectedStatus = status;

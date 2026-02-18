@@ -70,6 +70,26 @@ export class FormationsService {
     );
   }
 
+    //Visualiser le certificat
+  viewCertificate(formationId: number): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiUrl}/formations/${formationId}/certificat`,
+    { headers: this.getHeaders() }
+  );
+}
+
+
+// Télécharger le certificat
+downloadCertificate(formationId: number): Observable<Blob> {
+  return this.http.get(
+    `${this.apiUrl}/formations/${formationId}/certificat/download`,
+    {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    }
+  );
+}
+
   /** Structure complète formation (modules + Sections) */
   getFormationStructure(id: number): Observable<any> {
     return this.http.get<any>(
