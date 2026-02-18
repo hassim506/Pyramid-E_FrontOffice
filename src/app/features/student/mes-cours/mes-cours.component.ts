@@ -4,13 +4,17 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
-import { Formations } from '../../../shared/models/Formations.models';
+import { Formations, FormationsApiResponse } from '../../../shared/models/Formations.models';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormsModule } from '@angular/forms';
+import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 
 @Component({
   standalone: true,
   selector: 'app-mes-cours',
-  imports: [CommonModule],
+  imports: [ CommonModule,
+    FormsModule,
+  CustomPaginationComponent],
   templateUrl: './mes-cours.component.html',
   styleUrls: ['./mes-cours.component.scss'],
 })
@@ -121,4 +125,57 @@ export class MesCoursComponent implements OnInit {
   this.router.navigate(['/student/lecture-formation', id]);
 }
 
+  // ======================= FILTRES =======================
+
+  selectedStatus: string = '';
+  searchDataValue: string = '';
+
+  filterByStatus(status: string): void {
+    this.selectedStatus = status;
+
+    if (!status) {
+      this.getMesFormations();
+      return;
+    }
+
+    this.loading = true;
+    this.formationsService.getMesFormationsByStatus(status).subscribe({
+      next: (response: FormationsApiResponse) => {
+        this.allFormations = response.formations ?? [];
+        this.applyFilters();
+        this.totalData = this.allFormations.length;
+        this.loading = false;
+      },
+      error: () => (this.loading = false),
+    });
+  }
+
+  searchData(value: string): void {
+    this.searchDataValue = value;
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.allFormations];
+
+    if (this.searchDataValue) {
+      const search = this.searchDataValue.toLowerCase();
+      filtered = filtered.filter(f =>
+        f.titre.toLowerCase().includes(search) ||
+        f.description.toLowerCase().includes(search)
+      );
+    }
+
+    this.formations = filtered.slice(
+      (this.currentPage - 1) * this.pageSize,
+      this.currentPage * this.pageSize
+    );
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.applyFilters();
+  }
+
 }
+

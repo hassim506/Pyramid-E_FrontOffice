@@ -4,10 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
-  
   FormationsApiResponse,
-
-  
 } from '../../models/Formations.models';
 
 @Injectable({
@@ -61,6 +58,14 @@ export class FormationsService {
   getMesFormationsByStatus(status: string): Observable<FormationsApiResponse> {
     return this.http.get<FormationsApiResponse>(
       `${this.apiUrl}/mes-formations?status=${status}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /** 🔥 Nombre de certificats utilisateur */
+  getMyCertificates(): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/mes-certificats`,
       { headers: this.getHeaders() }
     );
   }

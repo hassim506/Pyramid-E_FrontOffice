@@ -17,6 +17,7 @@
   </div>
 </div>
 
+
 <!-- ================= ALERTE DEMANDES ================= -->
 <div
   class="alert alert-warning d-flex justify-content-between align-items-center mb-4"
@@ -29,34 +30,46 @@
     </p>
   </div>
 
-  <a routerLink="/student/certificates" class="btn btn-sm btn-outline-warning">
+  <a routerLink="/student/demandes" class="btn btn-sm btn-outline-warning">
     Voir mes demandes
   </a>
 </div>
 
+
 <!-- ================= KPI ================= -->
 <div class="row mb-4">
-  <div class="col-md-4">
+
+  <div class="col-md-3">
     <div class="card kpi-card primary">
       <h6>Formations en cours</h6>
       <h3>{{ stats.active }}</h3>
     </div>
   </div>
 
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="card kpi-card warning">
-      <h6>En attente</h6>
+      <h6>Demandes en attente</h6>
       <h3>{{ stats.pending }}</h3>
     </div>
   </div>
 
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="card kpi-card success">
       <h6>Terminées</h6>
       <h3>{{ stats.completed }}</h3>
     </div>
   </div>
+
+  <div class="col-md-3">
+    <div class="card kpi-card objective">
+      <h6>Certificats obtenus</h6>
+      <h3>{{ stats.certificates }}</h3>
+    </div>
+  </div>
+
 </div>
+
+
 
 <!-- ================= FILTRES ================= -->
 <div class="card filter-card mb-4">
@@ -102,8 +115,10 @@
   </div>
 </div>
 
+
 <!-- ================= TABLE ================= -->
 <div class="card table-card" *ngIf="!loading">
+  
 
   <div class="card-header bg-white">
     <h6 class="mb-0">
@@ -178,6 +193,16 @@
   <h5>Aucune formation trouvée</h5>
   <p>Vos formations apparaîtront ici une fois validées.</p>
 </div>
+<!-- ================= TABLE ================= -->
+<div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-3 text-muted">Chargement des formations...</p>
+    </div>
+</div>
+
 
 <!-- PAGINATION -->
 <app-custom-pagination

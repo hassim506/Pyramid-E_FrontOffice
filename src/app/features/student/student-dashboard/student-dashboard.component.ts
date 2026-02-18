@@ -24,39 +24,29 @@ import { CustomPaginationComponent } from '../../../shared/service/custom-pagina
 })
 export class StudentDashboardComponent implements OnInit {
 
-  /** =======================
-   *  FORMATIONS
-   * ======================= */
+  /** ======================= FORMATIONS ======================= */
   formations: Formations[] = [];
   allFormations: Formations[] = [];
-
   loading = false;
 
-  /** =======================
-   *  FILTRES
-   * ======================= */
+  /** ======================= FILTRES ======================= */
   searchDataValue = '';
   selectedStatus = '';
 
-  /** =======================
-   *  PAGINATION
-   * ======================= */
+  /** ======================= PAGINATION ======================= */
   currentPage = 1;
   pageSize = 9;
   totalData = 0;
 
-  /** =======================
-   *  KPI EMPLOYÉ
-   * ======================= */
+  /** ======================= KPI ======================= */
   stats = {
     active: 0,
-    pending: 0,
+    pending: 0,       // basé sur demandes RH
     completed: 0,
+    certificates: 0   // 🔥 NOUVEAU
   };
 
-  /** =======================
-   *  DEMANDES EN ATTENTE
-   * ======================= */
+  /** ======================= DEMANDES ======================= */
   hasPendingDemandes = false;
   pendingDemandesCount = 0;
 
@@ -67,12 +57,11 @@ export class StudentDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMesFormations();
-    this.loadPendingDemandes(); // ✅ AJOUT
+    this.loadPendingDemandes();
+    this.loadCertificates();
   }
 
-  /** =======================
-   *  CHARGEMENT FORMATIONS
-   * ======================= */
+  /** ======================= FORMATIONS ======================= */
   loadMesFormations(): void {
     this.loading = true;
 
@@ -88,6 +77,49 @@ export class StudentDashboardComponent implements OnInit {
     });
   }
 
+  computeStats(): void {
+    this.stats.active = this.allFormations.filter(f => f.status === 'active').length;
+    this.stats.completed = this.allFormations.filter(f => f.status === 'completed').length;
+
+    // pending basé uniquement sur demandes RH
+    this.stats.pending = this.pendingDemandesCount;
+  }
+
+  /** ======================= DEMANDES ======================= */
+  loadPendingDemandes(): void {
+    this.demandeFormationService.getDemandesFormation().subscribe({
+      next: (res: any) => {
+        const demandes = res.demandes ?? res;
+
+        const pending = demandes.filter(
+          (d: any) => d.statut === 'pending'
+        );
+
+        this.pendingDemandesCount = pending.length;
+        this.hasPendingDemandes = this.pendingDemandesCount > 0;
+
+        this.computeStats(); // 🔥 important
+      },
+      error: () => {
+        this.hasPendingDemandes = false;
+      }
+    });
+  }
+
+  /** ======================= CERTIFICATS ======================= */
+  loadCertificates(): void {
+    this.formationsService.getMyCertificates().subscribe({
+      next: (res: any) => {
+        const certificates = res.certificats ?? res;
+        this.stats.certificates = certificates.length ?? 0;
+      },
+      error: () => {
+        this.stats.certificates = 0;
+      }
+    });
+  }
+
+  /** ======================= FILTRES ======================= */
   filterByStatus(status: string): void {
     this.selectedStatus = status;
 
@@ -135,36 +167,7 @@ export class StudentDashboardComponent implements OnInit {
     this.applyFilters();
   }
 
-  computeStats(): void {
-    this.stats.active = this.allFormations.filter(f => f.status === 'active').length;
-    this.stats.pending = this.allFormations.filter(f => f.status === 'pending').length;
-    this.stats.completed = this.allFormations.filter(f => f.status === 'completed').length;
-  }
-
-  /** =======================
-   *  DEMANDES FORMATION
-   * ======================= */
-  loadPendingDemandes(): void {
-    this.demandeFormationService.getDemandesFormation().subscribe({
-      next: (res: any) => {
-        const demandes = res.demandes ?? res;
-
-        const pending = demandes.filter(
-          (d: any) => d.statut === 'pending'
-        );
-
-        this.pendingDemandesCount = pending.length;
-        this.hasPendingDemandes = this.pendingDemandesCount > 0;
-      },
-      error: () => {
-        this.hasPendingDemandes = false;
-      }
-    });
-  }
-
-  /** =======================
-   *  HELPERS UI
-   * ======================= */
+  /** ======================= UI ======================= */
   getFormationImage(f: Formations): string {
     return f.image_couverture || f.media_url || 'assets/images/default-course.jpg';
   }
