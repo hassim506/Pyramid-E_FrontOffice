@@ -56,14 +56,23 @@ export class StudentDashboardComponent implements OnInit {
     this.loadCertificates();
   }
 
+  /**
+   * ===============================
+   * CHARGER MES FORMATIONS
+   * ===============================
+   */
   loadMesFormations(): void {
     this.loading = true;
 
     this.formationsService.getMesFormations().subscribe({
       next: (response: FormationsApiResponse) => {
+
+        // 🔥 On garde les données telles que renvoyées par l'API
         this.allFormations = response.formations ?? [];
+
         this.computeStats();
         this.applyFilters();
+
         this.totalData = this.allFormations.length;
         this.loading = false;
       },
@@ -71,27 +80,55 @@ export class StudentDashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * ===============================
+   * CALCUL KPI
+   * ===============================
+   */
   computeStats(): void {
-    this.stats.active = this.allFormations.filter(f => f.status === 'active').length;
-    this.stats.completed = this.allFormations.filter(f => f.status === 'completed').length;
-    this.stats.pending = this.pendingDemandesCount;
 
-    // 🔥 certificats disponibles (completed)
-    this.stats.certificates = this.allFormations.filter(f => f.status === 'completed').length;
+    this.stats.active =
+      this.allFormations.filter(f => f.statut_formation === 'en_cours').length;
+
+    this.stats.completed =
+      this.allFormations.filter(f => f.statut_formation === 'termine').length;
+
+    this.stats.pending =
+      this.pendingDemandesCount;
+
+    // 🔥 certificats = formations terminées
+    this.stats.certificates =
+      this.allFormations.filter(f => f.statut_formation === 'termine').length;
   }
 
+  /**
+   * ===============================
+   * DEMANDES EN ATTENTE
+   * ===============================
+   */
   loadPendingDemandes(): void {
     this.demandeFormationService.getDemandesFormation().subscribe({
       next: (res: any) => {
+
         const demandes = res.demandes ?? res;
-        const pending = demandes.filter((d: any) => d.statut === 'pending');
+
+        const pending = demandes.filter(
+          (d: any) => d.statut === 'pending'
+        );
+
         this.pendingDemandesCount = pending.length;
         this.hasPendingDemandes = this.pendingDemandesCount > 0;
+
         this.computeStats();
       }
     });
   }
 
+  /**
+   * ===============================
+   * CERTIFICATS
+   * ===============================
+   */
   loadCertificates(): void {
     this.formationsService.getMyCertificates().subscribe({
       next: (res: any) => {
@@ -113,26 +150,46 @@ export class StudentDashboardComponent implements OnInit {
   downloadCertificate(formationId: number): void {
     this.formationsService.downloadCertificate(formationId).subscribe({
       next: (blob: Blob) => {
+
         const fileURL = window.URL.createObjectURL(blob);
+
         const a = document.createElement('a');
         a.href = fileURL;
         a.download = `certificat_formation_${formationId}.pdf`;
         a.click();
+
         window.URL.revokeObjectURL(fileURL);
       }
     });
   }
 
+  /**
+   * ===============================
+   * FILTRES
+   * ===============================
+   */
   applyFilters(): void {
+
     let filtered = [...this.allFormations];
 
+    // 🔍 Recherche
     if (this.searchDataValue) {
       const search = this.searchDataValue.toLowerCase();
+
       filtered = filtered.filter(f =>
-        f.titre.toLowerCase().includes(search) ||
-        f.description.toLowerCase().includes(search)
+        f.titre?.toLowerCase().includes(search) ||
+        f.description?.toLowerCase().includes(search)
       );
     }
+
+    // 🔥 Filtre par statut (backend direct)
+    if (this.selectedStatus) {
+      filtered = filtered.filter(
+        f => f.statut_formation === this.selectedStatus
+      );
+    }
+
+    this.totalData = filtered.length;
 
     this.formations = filtered.slice(
       (this.currentPage - 1) * this.pageSize,
@@ -140,11 +197,28 @@ export class StudentDashboardComponent implements OnInit {
     );
   }
 
+  filterByStatus(status: string): void {
+    this.selectedStatus = status;
+    this.currentPage = 1;
+    this.applyFilters();
+  }
+
+  searchData(value: string): void {
+    this.searchDataValue = value;
+    this.currentPage = 1;
+    this.applyFilters();
+  }
+
   onPageChange(page: number): void {
     this.currentPage = page;
     this.applyFilters();
   }
 
+  /**
+   * ===============================
+   * UTILITAIRES
+   * ===============================
+   */
   getFormationImage(f: Formations): string {
     return f.image_couverture || f.media_url || 'assets/images/default-course.jpg';
   }
@@ -152,27 +226,4 @@ export class StudentDashboardComponent implements OnInit {
   trackByFormation(_: number, item: Formations): number {
     return item.id;
   }
-  filterByStatus(status: string): void {
-  this.selectedStatus = status;
-
-  if (!status) {
-    this.applyFilters();
-    return;
-  }
-
-  const filtered = this.allFormations.filter(f => f.status === status);
-
-  this.formations = filtered.slice(
-    (this.currentPage - 1) * this.pageSize,
-    this.currentPage * this.pageSize
-  );
-
-  this.totalData = filtered.length;
-}
-
-searchData(value: string): void {
-  this.searchDataValue = value;
-  this.currentPage = 1;
-  this.applyFilters();
-}
 }

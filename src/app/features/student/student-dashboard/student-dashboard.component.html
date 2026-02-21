@@ -83,9 +83,9 @@
                 [(ngModel)]="selectedStatus"
                 (change)="filterByStatus(selectedStatus)">
           <option value="">Tous</option>
-          <option value="active">En cours</option>
-          <option value="pending">En attente</option>
-          <option value="completed">Terminée</option>
+          <option value="en_cours">En cours</option>
+          
+          <option value="termine">Terminée</option>
         </select>
       </div>
 
@@ -118,7 +118,6 @@
 
 <!-- ================= TABLE ================= -->
 <div class="card table-card" *ngIf="!loading">
-  
 
   <div class="card-header bg-white">
     <h6 class="mb-0">
@@ -130,116 +129,120 @@
   <div class="table-responsive" *ngIf="formations.length > 0">
     <table class="table align-middle mb-0 premium-table">
 
-  <thead>
-    <tr>
-      <th><i class="isax isax-book me-2"></i>Formation</th>
-      <th><i class="isax isax-chart me-2"></i>Progression</th>
-      <th><i class="isax isax-verify me-2"></i>Statut</th>
-      <th><i class="isax isax-award me-2"></i>Certificat</th>
-    </tr>
-  </thead>
+      <thead>
+        <tr>
+          <th>Formation</th>
+          <th>Progression</th>
+          <th>Statut</th>
+          <th>Certificat</th>
+        </tr>
+      </thead>
 
-  <tbody>
-    <tr *ngFor="let formation of formations; trackBy: trackByFormation">
+      <tbody>
+        <tr *ngFor="let formation of formations; trackBy: trackByFormation">
 
-      <!-- FORMATION -->
-      <td>
-        <div class="d-flex gap-3">
-          <img [src]="getFormationImage(formation)"
-               class="formation-thumb">
+          <!-- FORMATION -->
+          <td>
+            <div class="d-flex gap-3">
+              <img [src]="getFormationImage(formation)"
+                   class="formation-thumb">
 
-          <div>
-            <div class="fw-semibold">
-              {{ formation.titre }}
+              <div>
+                <div class="fw-semibold">
+                  {{ formation.titre }}
+                </div>
+
+                <div class="meta-badges mt-2">
+                  <span class="badge badge-language">
+                    {{ formation.langue || 'Français' }}
+                  </span>
+
+                  <span class="badge badge-difficulty">
+                    {{ formation.difficulte || 'Moyenne' }}
+                  </span>
+                </div>
+              </div>
             </div>
+          </td>
 
-            <div class="meta-badges mt-2">
-
-              <span class="badge badge-level">
-                <i class="isax isax-teacher me-1"></i>
-                {{ formation['niveau'] || 'Intermédiaire' }}
-              </span>
-
-              <span class="badge badge-language">
-                <i class="isax isax-global me-1"></i>
-                {{ formation.langue || 'Français' }}
-              </span>
-
-              <span class="badge badge-difficulty">
-                <i class="isax isax-flash me-1"></i>
-                {{ formation.difficulte || 'Moyenne' }}
-              </span>
-
+          <!-- PROGRESSION -->
+          <td style="width: 220px">
+            <div *ngIf="formation.progression !== null">
+              <div class="progress-value">{{ formation.progression }}%</div>
+              <div class="progress premium-progress">
+                <div class="progress-bar"
+                     [style.width.%]="formation.progression">
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </td>
+          </td>
 
-      <!-- PROGRESSION -->
-      <td style="width: 220px">
-        <div *ngIf="formation.progression !== null">
-          <div class="progress-value">{{ formation.progression }}%</div>
-          <div class="progress premium-progress">
-            <div class="progress-bar"
-                 [style.width.%]="formation.progression">
-            </div>
-          </div>
-        </div>
-      </td>
+          <!-- STATUT -->
+          <td>
+            <span class="status-badge"
+                  [ngClass]="{
+                    'badge-active': formation.statut_formation === 'en_cours',
+                    'badge-completed': formation.statut_formation === 'termine',
+                   
+                  }">
 
-      <!-- STATUT 
-      <td>
-        <span class="status-badge" [ngClass]="formation.status">
-          <i class="isax"
-             [ngClass]="{
-               'isax-clock': formation.status === 'active',
-               'isax-tick-circle': formation.status === 'completed',
-               'isax-warning-2': formation.status === 'pending'
-             }"></i>
-          {{ formation.status }}
-        </span>
-      </td>
-      -->
-      <!-- CERTIFICAT -->
-      <td>
-        <ng-container *ngIf="formation.status === 'completed'; else noCert">
+              <i class="isax"
+                 [ngClass]="{
+                   'isax-clock': formation.statut_formation === 'en_cours',
+                   'isax-tick-circle': formation.statut_formation === 'termine',
+                   
+                 }">
+              </i>
 
-          <div class="certificate-wrapper">
+              {{
+                formation.statut_formation === 'en_cours' ? 'En cours' :
+                formation.statut_formation === 'termine' ? 'Terminée' :
+                'Non commencée'
+              }}
 
-            <span class="badge badge-certificate">
-              <i class="isax isax-award"></i>
-              Certificat disponible
             </span>
+          </td>
 
-            <div class="cert-actions">
-              <button class="icon-btn primary"
-                      (click)="viewCertificate(formation.id)">
-                <i class="isax isax-eye"></i>
-              </button>
+          <!-- CERTIFICAT -->
+          <td>
+            <ng-container *ngIf="formation.statut_formation === 'termine'; else noCert">
 
-              <button class="icon-btn success"
-                      (click)="downloadCertificate(formation.id)">
-                <i class="isax isax-document-download"></i>
-              </button>
-            </div>
+              <div class="certificate-wrapper">
 
-          </div>
+                <span class="badge badge-certificate">
+                  <i class="isax isax-award"></i>
+                  Certificat disponible
+                </span>
 
-        </ng-container>
+                <div class="cert-actions">
+                  <button class="icon-btn primary"
+                          (click)="viewCertificate(formation.id)">
+                    <i class="isax isax-eye"></i>
+                  </button>
 
-        <ng-template #noCert>
-          <span class="text-muted">—</span>
-        </ng-template>
+                  <button class="icon-btn success"
+                          (click)="downloadCertificate(formation.id)">
+                    <i class="isax isax-document-download"></i>
+                  </button>
+                </div>
 
-      </td>
+              </div>
 
-    </tr>
-  </tbody>
+            </ng-container>
 
-</table>
+            <ng-template #noCert>
+              <span class="text-muted">—</span>
+            </ng-template>
 
+          </td>
+
+        </tr>
+      </tbody>
+
+    </table>
   </div>
 </div>
+
 
 <!-- EMPTY STATE -->
 <div *ngIf="!loading && formations.length === 0" class="empty-state">
@@ -247,14 +250,16 @@
   <h5>Aucune formation trouvée</h5>
   <p>Vos formations apparaîtront ici une fois validées.</p>
 </div>
-<!-- ================= TABLE ================= -->
+
+
+<!-- LOADING -->
 <div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
-    <div class="text-center">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Chargement...</span>
-        </div>
-        <p class="mt-3 text-muted">Chargement des formations...</p>
+  <div class="text-center">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Chargement...</span>
     </div>
+    <p class="mt-3 text-muted">Chargement des formations...</p>
+  </div>
 </div>
 
 
