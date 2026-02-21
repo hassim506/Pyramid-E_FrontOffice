@@ -30,6 +30,7 @@ export interface Formations {
   difficulte: string;
   langue: string;
   prix: number;
+  niveau: string;
 
   est_certifiante: boolean;
   est_publie: boolean;

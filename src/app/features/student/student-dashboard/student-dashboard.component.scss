@@ -241,3 +241,126 @@
     font-size: 0.9rem;
   }
 }
+.premium-table thead {
+  background: #f8f9fc;
+  font-weight: 600;
+  color: #344054;
+}
+
+.premium-table th {
+  padding: 16px;
+  font-size: 14px;
+}
+
+.premium-table td {
+  padding: 18px 16px;
+  vertical-align: middle;
+}
+
+.formation-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.meta-badges .badge {
+  font-size: 11px;
+  margin-right: 6px;
+  padding: 6px 10px;
+  border-radius: 20px;
+}
+
+.badge-level {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.badge-language {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.badge-difficulty {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.premium-progress {
+  height: 6px;
+  background: #edf2f7;
+  border-radius: 6px;
+}
+
+.premium-progress .progress-bar {
+  background: linear-gradient(90deg,#6366f1,#4f46e5);
+  border-radius: 6px;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-badge.active {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.status-badge.completed {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.badge-certificate {
+  background: #ede9fe;
+  color: #6d28d9;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.cert-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.icon-btn {
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.icon-btn.primary {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.icon-btn.success {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}

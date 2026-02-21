@@ -128,97 +128,116 @@
   </div>
 
   <div class="table-responsive" *ngIf="formations.length > 0">
-    <table class="table align-middle mb-0">
-     <thead>
-  <tr>
-    <th>Formation</th>
-    <th>Progression</th>
-    <th class="text-center">Statut</th>
-    <th class="text-center">Certificat</th>
-  </tr>
-</thead>
+    <table class="table align-middle mb-0 premium-table">
 
-<tbody>
-  <tr *ngFor="let formation of formations; trackBy: trackByFormation">
+  <thead>
+    <tr>
+      <th><i class="isax isax-book me-2"></i>Formation</th>
+      <th><i class="isax isax-chart me-2"></i>Progression</th>
+      <th><i class="isax isax-verify me-2"></i>Statut</th>
+      <th><i class="isax isax-award me-2"></i>Certificat</th>
+    </tr>
+  </thead>
 
-    <!-- FORMATION -->
-    <td>
-      <div class="d-flex align-items-center gap-3">
-        <img [src]="getFormationImage(formation)"
-             class="formation-thumb">
+  <tbody>
+    <tr *ngFor="let formation of formations; trackBy: trackByFormation">
 
-        <div>
-          <div class="fw-medium">
-            {{ formation.titre }}
+      <!-- FORMATION -->
+      <td>
+        <div class="d-flex gap-3">
+          <img [src]="getFormationImage(formation)"
+               class="formation-thumb">
+
+          <div>
+            <div class="fw-semibold">
+              {{ formation.titre }}
+            </div>
+
+            <div class="meta-badges mt-2">
+
+              <span class="badge badge-level">
+                <i class="isax isax-teacher me-1"></i>
+                {{ formation['niveau'] || 'Intermédiaire' }}
+              </span>
+
+              <span class="badge badge-language">
+                <i class="isax isax-global me-1"></i>
+                {{ formation.langue || 'Français' }}
+              </span>
+
+              <span class="badge badge-difficulty">
+                <i class="isax isax-flash me-1"></i>
+                {{ formation.difficulte || 'Moyenne' }}
+              </span>
+
+            </div>
           </div>
-          <small class="text-muted">
-            {{ formation.short_description }}
-          </small>
         </div>
-      </div>
-    </td>
+      </td>
 
-    <!-- PROGRESSION -->
-    <td style="width: 220px">
-      <div *ngIf="formation.progression !== null">
-        <div class="d-flex justify-content-between small">
-          <span>{{ formation.progression }}%</span>
-        </div>
-        <div class="progress" style="height:6px">
-          <div class="progress-bar bg-success"
-               [style.width.%]="formation.progression">
+      <!-- PROGRESSION -->
+      <td style="width: 220px">
+        <div *ngIf="formation.progression !== null">
+          <div class="progress-value">{{ formation.progression }}%</div>
+          <div class="progress premium-progress">
+            <div class="progress-bar"
+                 [style.width.%]="formation.progression">
+            </div>
           </div>
         </div>
-      </div>
-      <span *ngIf="formation.progression === null" class="text-muted">
-        —
-      </span>
-    </td>
+      </td>
 
-    <!-- STATUT -->
-    <td class="text-center">
-      <span class="status-badge" [ngClass]="formation.status">
-        {{ formation.status }}
-      </span>
-    </td>
+      <!-- STATUT 
+      <td>
+        <span class="status-badge" [ngClass]="formation.status">
+          <i class="isax"
+             [ngClass]="{
+               'isax-clock': formation.status === 'active',
+               'isax-tick-circle': formation.status === 'completed',
+               'isax-warning-2': formation.status === 'pending'
+             }"></i>
+          {{ formation.status }}
+        </span>
+      </td>
+      -->
+      <!-- CERTIFICAT -->
+      <td>
+        <ng-container *ngIf="formation.status === 'completed'; else noCert">
 
-    <!-- CERTIFICAT -->
-    <td class="text-center">
+          <div class="certificate-wrapper">
 
-      <!-- Si formation terminée -->
-      <ng-container *ngIf="formation.status === 'completed'; else noCertificate">
+            <span class="badge badge-certificate">
+              <i class="isax isax-award"></i>
+              Certificat disponible
+            </span>
 
-        <div class="d-flex justify-content-center gap-3">
+            <div class="cert-actions">
+              <button class="icon-btn primary"
+                      (click)="viewCertificate(formation.id)">
+                <i class="isax isax-eye"></i>
+              </button>
 
-          <!-- Voir -->
-          <button class="btn btn-sm btn-outline-primary"
-                  (click)="viewCertificate(formation.id)"
-                  title="Visualiser">
-            <i class="isax isax-eye"></i>
-          </button>
+              <button class="icon-btn success"
+                      (click)="downloadCertificate(formation.id)">
+                <i class="isax isax-document-download"></i>
+              </button>
+            </div>
 
-          <!-- Télécharger -->
-          <button class="btn btn-sm btn-outline-success"
-                  (click)="downloadCertificate(formation.id)"
-                  title="Télécharger">
-            <i class="isax isax-document-download"></i>
-          </button>
+          </div>
 
-        </div>
+        </ng-container>
 
-      </ng-container>
+        <ng-template #noCert>
+          <span class="text-muted">—</span>
+        </ng-template>
 
-      <!-- Sinon -->
-      <ng-template #noCertificate>
-        <span class="text-muted">—</span>
-      </ng-template>
+      </td>
 
-    </td>
+    </tr>
+  </tbody>
 
-  </tr>
-</tbody>
+</table>
 
-    </table>
   </div>
 </div>
 
