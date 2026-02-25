@@ -86,6 +86,7 @@
           <option value="en_cours">En cours</option>
           
           <option value="termine">Terminée</option>
+          <option value="abandonne">Abandonnée</option>
         </select>
       </div>
 
@@ -183,14 +184,14 @@
                   [ngClass]="{
                     'badge-active': formation.statut_formation === 'en_cours',
                     'badge-completed': formation.statut_formation === 'termine',
-                   
+                   'badge-pending': formation.statut_formation === 'abandonne'
                   }">
 
               <i class="isax"
                  [ngClass]="{
                    'isax-clock': formation.statut_formation === 'en_cours',
                    'isax-tick-circle': formation.statut_formation === 'termine',
-                   
+                   'isax-warning-2': formation.statut_formation === 'abandonne'
                  }">
               </i>
 
