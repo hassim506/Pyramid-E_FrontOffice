@@ -56,7 +56,7 @@ export class StudentCertificateComponent {
   loadDemandes(): void {
     this.loading = true;
 
-    this.demandeFormationService.getDemandesFormation().subscribe({
+    this.demandeFormationService.getMesDemandes().subscribe({
       next: (res: any) => {
         const demandes = res.demandes ?? res;
 

@@ -107,11 +107,11 @@ export class StudentDashboardComponent implements OnInit {
    * ===============================
    */
   loadPendingDemandes(): void {
-    this.demandeFormationService.getDemandesFormation().subscribe({
+    this.demandeFormationService.getMesDemandes().subscribe({
       next: (res: any) => {
-
+           console.log('✅ RÉPONSE DEMANDES:', res); // ← ajoutez ceci
         const demandes = res.demandes ?? res;
-
+        
         const pending = demandes.filter(
           (d: any) => d.statut === 'pending'
         );
