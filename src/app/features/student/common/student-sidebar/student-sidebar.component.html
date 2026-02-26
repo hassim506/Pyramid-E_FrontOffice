@@ -28,55 +28,10 @@
         <li><a [routerLink]="routes.student_Certificate">Formations en attente</a></li>
         <li><a >Formations Terminées</a></li>
         <li><a>Formations Obligatoires</a></li>
+         <li><a [routerLink]="routes.studentCourses">Catalogue assignés</a></li>
         <li><a>Parcours assignés</a></li>
-      </ul>
-    </li>
-
-    <!-- ================= CATALOGUE ================= -->
-    <li class="menu-item has-submenu">
-      <a>
-        <i class="isax isax-book"></i>
-        <span>Catalogue</span>
-        <i class="submenu-arrow isax isax-arrow-right-3"></i>
-      </a>
-
-      <ul class="submenu">
-        <li><a [routerLink]="routes.studentCourses">Catalogue complet</a></li>
-        <li><a [routerLink]="routes.student_Certificate">Demande formation</a></li>
-        <!--<li><a>Recommandations IA</a></li>-->
-      </ul>
-    </li>
-
-    <!-- ================= PERFORMANCE ================= -->
-    <li class="menu-item has-submenu">
-      <a>
-        <i class="isax isax-chart"></i>
-        <span>Mes performances</span>
-        <i class="submenu-arrow isax isax-arrow-right-3"></i>
-      </a>
-
-      <ul class="submenu">
-        <li><a>Classement</a></li>
-        <li><a [routerLink]="routes.studentQuiz">Scores & Quiz</a></li>
-        <li><a>Taux complétion</a></li>
-        <li><a>Compétences</a></li>
-      </ul>
-    </li>
-
-    <!-- ================= PROFIL ================= -->
-    <li class="menu-item has-submenu">
-      <a>
-        <i class="isax isax-user"></i>
-        <span>Mon profil</span>
-         <i class="submenu-arrow isax isax-arrow-right-3"></i>
-      </a>
-       <ul class="submenu">
-        <li><a  [routerLink]="routes.students_profile">Informations personnelles</a></li>
-        <li><a >Compétences déclarées</a></li>
-         <li><a>Historique d’activité</a></li>
-          <li><a>Paramètres de notification</a></li>
-          
-        
+        <li><a [routerLink]="routes.student_Certificate">Mes demandes de formations</a></li>
+         <li><a>Feeddback Formateur</a></li>
       </ul>
     </li>
 
@@ -96,6 +51,73 @@
         
       </ul>
     </li>
+
+    <!-- ================= CATALOGUE ================= 
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-book"></i>
+        <span>Catalogue</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+
+      <ul class="submenu">
+        <li><a [routerLink]="routes.studentCourses">Catalogue complet</a></li>
+        <li><a [routerLink]="routes.student_Certificate">Demande formation</a></li>
+        <li><a>Recommandations IA</a></li>
+      </ul>
+    </li>
+    -->
+
+    <!-- ================= PERFORMANCE ================= -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-chart"></i>
+        <span>Mes Compétences</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+
+      <ul class="submenu">
+       
+        
+        <li><a>Compétences Acquises</a></li>
+        <li><a>Compétences Recommandées</a></li>
+      </ul>
+    </li>
+
+    <!-- ================= Palmeres============== -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-chart"></i>
+        <span>Mes palmarés</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+
+      <ul class="submenu">
+        <li><a>Mes certificats</a></li>
+        <li><a>Mes habilitations</a></li>
+        <li><a>Gamification/Mes badges</a></li>
+      </ul>
+    </li>
+
+    <!-- ================= PROFIL ================= 
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-user"></i>
+        <span>Mon profil</span>
+         <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+       <ul class="submenu">
+        <li><a  [routerLink]="routes.students_profile">Informations personnelles</a></li>
+        <li><a >Compétences déclarées</a></li>
+         <li><a>Historique d’activité</a></li>
+          <li><a>Paramètres de notification</a></li>
+          
+        
+      </ul>
+    </li>
+    -->
+
+    
 
     <!-- ================= FAQ ================= 
     <li class="menu-item has-submenu">
@@ -123,10 +145,11 @@
          <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
        <ul class="submenu">
-        <li><a >Premiers pas sur la plateforme</a></li>
+       
         <li><a >Guide d’utilisation</a></li>
          <li><a>Tutoriels vidéo</a></li>
-          <li><a>Supports et Tickets</a></li>
+          <li><a>Soumettre un ticket</a></li>
+           <li><a >Annonces et mise à jours</a></li>
           
         
       </ul>
