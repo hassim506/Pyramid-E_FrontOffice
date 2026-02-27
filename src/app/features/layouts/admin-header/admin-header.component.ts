@@ -110,6 +110,12 @@ export class AdminHeaderComponent implements OnInit {
 
   }
 checkLoginStatus(): void {
+   this.isLoggedIn = this.authService.isLoggedIn();
+    if (this.isLoggedIn) {
+      this.currentUser = this.authService.getUser();
+      console.log('currentUser complet:', JSON.stringify(this.currentUser)); // ← TOUT l'objet
+      console.log('role_id:', this.currentUser?.role_id);
+    }
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
       this.currentUser = this.authService.getUser();

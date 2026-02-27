@@ -60,9 +60,11 @@ export class StudentCoursesComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Erreur chargement formations', err);
-        this.error = 'Erreur lors du chargement des formations';
-        this.loading = false;
+         console.error('Erreur chargement formations', err);
+  console.error('DETAIL ERREUR:', err.error);        // ← message Laravel exact
+  console.error('STATUS:', err.status);              // ← code HTTP
+  this.error = 'Erreur lors du chargement des formations';
+  this.loading = false;
       }
     });
   }

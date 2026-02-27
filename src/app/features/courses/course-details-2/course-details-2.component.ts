@@ -76,6 +76,7 @@ export class CourseDetails2Component implements OnInit {
     this.requestForm = this.fb.group({
       motif_demande: ['', Validators.required],
       objectifs_personnels: ['', Validators.required],
+      session_formation_id: null,  // ← ajouter ça
       priorite: ['normale', Validators.required],
       date_souhaitee_debut: [null],
       commentaire_employe: ['']
@@ -118,13 +119,16 @@ export class CourseDetails2Component implements OnInit {
   const payload: {
     formation_id: number;
     motif_demande: string;
+    
     objectifs_personnels: string;
     priorite: string;
     date_souhaitee_debut?: string;
     commentaire_employe?: string;
   } = {
     formation_id: this.formation.id,
+
     motif_demande: this.requestForm.value.motif_demande,
+   
     objectifs_personnels: this.requestForm.value.objectifs_personnels,
     priorite: this.requestForm.value.priorite,
     commentaire_employe: this.requestForm.value.commentaire_employe
