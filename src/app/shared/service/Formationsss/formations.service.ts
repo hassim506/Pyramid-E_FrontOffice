@@ -97,4 +97,39 @@ downloadCertificate(formationId: number): Observable<Blob> {
       { headers: this.getHeaders() }
     );
   }
+  getSessionsOuvertes(): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiUrl}/sessions-formation/ouvertes`,
+    { headers: this.getHeaders() }
+  );
+}
+
+getCatalogues(): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiUrl}/catalogues`,
+    { headers: this.getHeaders() }
+  );
+}
+
+getCategories(): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiUrl}/categories-formation`,
+    { headers: this.getHeaders() }
+  );
+}
+
+getFormationsByCategorie(categorieId: number): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiUrl}/formations?categorie_id=${categorieId}`,
+    { headers: this.getHeaders() }
+  );
+}
+
+//
+getParcoursParCategorie(categorieId: number): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiUrl}/parcours/par-categorie/${categorieId}`,
+    { headers: this.getHeaders() }
+  );
+}
 }

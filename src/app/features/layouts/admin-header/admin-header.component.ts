@@ -115,8 +115,16 @@ checkLoginStatus(): void {
       this.currentUser = this.authService.getUser();
       console.log('currentUser complet:', JSON.stringify(this.currentUser)); // ← TOUT l'objet
       console.log('role_id:', this.currentUser?.role_id);
+      // Définir le base selon le role_id de l'utilisateur
+      if (this.currentUser?.role_id === 1) {
+        this.base = 'admin';
+      } else if (this.currentUser?.role_id === 2) {
+        this.base = 'student';
+      } else if (this.currentUser?.role_id === 3) {
+        this.base = 'formateur';
+      }
     }
-    this.isLoggedIn = this.authService.isLoggedIn();
+    /*this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
       this.currentUser = this.authService.getUser();
       console.log('Current user in header:', this.currentUser);
@@ -130,6 +138,7 @@ checkLoginStatus(): void {
         this.base = 'formateur';
       }
     }
+      */
   }
  getDefaultAvatar(): string {
     if (!this.currentUser?.role_id) return 'assets/img/avatar/avatar.png';
@@ -147,7 +156,7 @@ checkLoginStatus(): void {
 
     switch (this.currentUser.role_id) {
       case 1: return 'Super Admin';
-      case 2: return 'Apprenant';
+      case 2: return 'Employe';
       case 3: return 'Formateur';
       case 4: return 'Responsable RH';
       case 5: return 'Administrateur RH Holding';

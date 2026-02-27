@@ -1,9 +1,32 @@
+<!-- ================================================= -->
+<!-- TOAST NOTIFICATION GLOBAL                        -->
+<!-- Succès → modal fermé + toast affiché             -->
+<!-- Erreur → modal reste ouvert + toast affiché      -->
+<!-- ================================================= -->
+<div class="lms-toast-container" [class.visible]="toast.visible">
+  <div class="lms-toast" [class]="'lms-toast--' + toast.type">
+    <div class="lms-toast__icon">
+      <i *ngIf="toast.type === 'success'" class="ti ti-circle-check-filled"></i>
+      <i *ngIf="toast.type === 'error'"   class="ti ti-alert-circle-filled"></i>
+      <i *ngIf="toast.type === 'warning'" class="ti ti-alert-triangle-filled"></i>
+    </div>
+    <div class="lms-toast__body">
+      <span class="lms-toast__label">
+        {{ toast.type === 'success' ? 'Succès' : toast.type === 'warning' ? 'Attention' : 'Erreur' }}
+      </span>
+      <p class="lms-toast__message">{{ toast.message }}</p>
+    </div>
+    <button class="lms-toast__close" (click)="closeToast()">
+      <i class="ti ti-x"></i>
+    </button>
+    <div class="lms-toast__progress"></div>
+  </div>
+</div>
+
 <!-- 🔄 LOADING -->
 <div *ngIf="loading" class="text-center py-5">
   <div class="spinner-border text-primary"></div>
 </div>
-
-
 
 <!-- ================== BANNER ================== -->
 <section class="inner-banner" *ngIf="!loading && formation">
@@ -11,32 +34,23 @@
     <div class="row">
       <div class="col-lg-8">
 
-        <h1 class="text-white mb-3 mb-sm-2">
-          {{ formation.titre }}
-        </h1>
-
-        <p class="text-white fs-14 mb-3">
-          {{ formation.short_description }}
-        </p>
+        <h1 class="text-white mb-3 mb-sm-2">{{ formation.titre }}</h1>
+        <p class="text-white fs-14 mb-3">{{ formation.short_description }}</p>
 
         <div class="d-flex align-items-center gap-2 gap-sm-3 gap-xl-4 flex-wrap">
           <p class="fw-medium text-white d-flex align-items-center mb-0">
             <img class="me-2" src="./assets/img/icons/book.svg">
             {{ formation.nombre_modules }} modules
           </p>
-
           <p class="fw-medium text-white d-flex align-items-center mb-0">
             <img class="me-2" src="./assets/img/icons/timer-start.svg">
             {{ formation.duree_totale }} h
           </p>
-
           <p class="fw-medium text-white d-flex align-items-center mb-0">
             <img class="me-2" src="./assets/img/icons/people.svg">
             {{ formation.nb_max_participants }} participants
           </p>
-
-          <span class="badge badge-sm rounded-pill"
-                [style.background]="formation.categorie?.couleur">
+          <span class="badge badge-sm rounded-pill" [style.background]="formation.categorie?.couleur">
             {{ formation.categorie?.nom }}
           </span>
         </div>
@@ -48,18 +62,12 @@
                    [src]="formation.image_couverture || 'assets/img/avatar-default.png'">
             </div>
             <div class="ms-2">
-              <h6 class="fs-18 text-white">
-                {{ formation.formateur_nom }}
-              </h6>
-              <p class="text-white fs-14">
-                {{ formation.formateur?.fonction }}
-              </p>
+              <h6 class="fs-18 text-white">{{ formation.formateur_nom }}</h6>
+              <p class="text-white fs-14">{{ formation.formateur?.fonction }}</p>
             </div>
           </div>
-
           <div class="text-white fs-14">
-            Niveau :
-            <strong>{{ formation.niveau_display }}</strong>
+            Niveau : <strong>{{ formation.niveau_display }}</strong>
           </div>
         </div>
 
@@ -73,11 +81,10 @@
   <div class="container">
     <div class="row">
 
-      <!-- ================== LEFT CONTENT ================== -->
+      <!-- ===== LEFT CONTENT ===== -->
       <div class="col-lg-8">
         <div class="course-page-content">
 
-          <!-- DESCRIPTION -->
           <div class="card mb-4">
             <div class="card-body">
               <h5 class="subs-title mb-3">Présentation</h5>
@@ -85,20 +92,14 @@
             </div>
           </div>
 
-          <!-- CONTENU -->
           <div class="card mb-4">
             <div class="card-body">
               <div class="d-flex justify-content-between flex-wrap">
                 <h5 class="subs-title mb-2">Contenu de la formation</h5>
-                <h6 class="text-muted">
-                  {{ formation.nombre_modules }} modules
-                </h6>
+                <h6 class="text-muted">{{ formation.nombre_modules }} modules</h6>
               </div>
-
               <div class="accordion accordion-customicon1">
-
-                <div class="accordion-item"
-                     *ngFor="let module of formation.modules; let i = index">
+                <div class="accordion-item" *ngFor="let module of formation.modules; let i = index">
                   <h2 class="accordion-header">
                     <button class="accordion-button collapsed"
                             data-bs-toggle="collapse"
@@ -106,9 +107,7 @@
                       {{ module.titre }}
                     </button>
                   </h2>
-
-                  <div class="accordion-collapse collapse"
-                       [id]="'module'+i">
+                  <div class="accordion-collapse collapse" [id]="'module'+i">
                     <div class="accordion-body p-0">
                       <ul>
                         <li class="p-3 px-3 d-flex justify-content-between"
@@ -123,173 +122,79 @@
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
 
-          <!-- FORMATEUR -->
           <div class="card">
             <div class="card-body">
               <h5 class="subs-title mb-3">À propos du formateur</h5>
-
               <div class="d-flex align-items-center">
                 <div class="avatar avatar-lg">
                   <img class="rounded-circle"
                        [src]="formation.image_couverture || 'assets/img/avatar-default.png'">
                 </div>
                 <div class="ms-2">
-                  <h5 class="fs-18 fw-semibold">
-                    {{ formation.formateur_nom }}
-                  </h5>
-                  <p class="mb-0">
-                    {{ formation.formateur?.fonction }}
-                  </p>
+                  <h5 class="fs-18 fw-semibold">{{ formation.formateur_nom }}</h5>
+                  <p class="mb-0">{{ formation.formateur?.fonction }}</p>
                 </div>
               </div>
-
-              <p class="mt-3">
-                Contact : {{ formation.formateur_email }}
-              </p>
+              <p class="mt-3">Contact : {{ formation.formateur_email }}</p>
             </div>
           </div>
 
         </div>
       </div>
 
-      <!-- ================== SIDEBAR RIGHT ================== -->
+      <!-- ===== SIDEBAR RIGHT ===== -->
       <div class="col-lg-4">
-        <div class="course-sidebar-sec">
+        <div class="course-sidebar-sticky">
 
-          <!-- VIDEO / IMAGE -->
           <div class="card mb-4">
-            <div class="card-body">
-              <div class="position-relative mb-4">
-
-                <img class="img-fluid rounded"
+            <div class="card-body p-0">
+              <div class="course-cover position-relative">
+                <img class="img-fluid w-100"
                      [src]="formation.image_couverture || 'assets/img/course/video-bg.jpg'">
-
                 <div class="play-icon">
                   <i class="ti ti-player-play-filled fs-28"></i>
                 </div>
               </div>
-
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-success fs-30">
-                  {{ formation.prix === '0' ? 'GRATUIT' : formation.prix + ' FCFA' }}
-                </h2>
+              <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <h2 class="price-display mb-0">
+                    {{ formation.prix === '0' ? 'GRATUIT' : formation.prix + ' FCFA' }}
+                  </h2>
+                </div>
+                <button class="btn btn-primary w-100 btn-demande" (click)="openRequestModal()">
+                  <i class="ti ti-send me-2"></i>Faire une demande
+                </button>
               </div>
-
-              <a class="btn btn-primary w-100 btn-enroll"
-              (click)="openRequestModal()">
-                Faire une demande
-              </a>
-
             </div>
           </div>
 
-          <!-- INCLUDES -->
           <div class="card">
             <div class="card-body">
-              <h5 class="subs-title">Cette formation inclut</h5>
-              <p><img class="me-2" src="./assets/img/icons/play.svg"> Modules structurés</p>
-              <p><img class="me-2" src="./assets/img/icons/key.svg"> Accès entreprise</p>
-              <p><img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Multi-support</p>
-              <p class="mb-0">
-                <img class="me-2" src="./assets/img/icons/teacher.svg">
-                Certification : {{ formation.est_certifiante ? 'Oui' : 'Non' }}
-              </p>
+              <h5 class="subs-title mb-3">Cette formation inclut</h5>
+              <ul class="includes-list">
+                <li>
+                  <img class="me-2" src="./assets/img/icons/play.svg">
+                  Modules structurés
+                </li>
+                <li>
+                  <img class="me-2" src="./assets/img/icons/key.svg">
+                  Accès entreprise
+                </li>
+                <li>
+                  <img class="me-2" src="./assets/img/icons/monitor-mobbile.svg">
+                  Multi-support
+                </li>
+                <li>
+                  <img class="me-2" src="./assets/img/icons/teacher.svg">
+                  Certification : {{ formation.est_certifiante ? 'Oui' : 'Non' }}
+                </li>
+              </ul>
             </div>
           </div>
-
-          <!-- ================= MODAL DEMANDE FORMATION ================= -->
-<div class="modal fade" id="demandeFormationModal" tabindex="-1">
-  
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Demande de formation</h5>
-        <button type="button" class="btn-close" (click)="closeModal()"></button>
-      </div>
-      <!-- MESSAGE ERREUR -->
-<div *ngIf="error" class="alert alert-danger custom-alert">
-  {{ error }}
-</div>
-
-<!-- MESSAGE SUCCESS -->
-<div *ngIf="successMessage" class="alert alert-success custom-alert">
-  {{ successMessage }}
-</div>
-      <div class="modal-body">
-
-        <form [formGroup]="requestForm">
-
-          <div class="mb-3">
-            <label class="form-label fw-medium">Motif de la demande *</label>
-            <textarea class="form-control"
-                      rows="2"
-                      formControlName="motif_demande"></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-medium">Objectifs personnels *</label>
-            <textarea class="form-control"
-                      rows="2"
-                      formControlName="objectifs_personnels"></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-medium">Priorité</label>
-            <select class="form-select" formControlName="priorite">
-              <option value="basse">Basse</option>
-              <option value="normale">Normale</option>
-              <option value="haute">Haute</option>
-              <option value="urgente">Urgente</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-medium">Date souhaitée de début</label>
-            <input type="date"
-                   class="form-control"
-                   formControlName="date_souhaitee_debut">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-medium">Commentaire</label>
-            <textarea class="form-control"
-                      rows="2"
-                      formControlName="commentaire_employe"></textarea>
-          </div>
-
-        </form>
-
-        <div *ngIf="successMessage" class="alert alert-success mt-3">
-          {{ successMessage }}
-        </div>
-
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary"
-                [disabled]="submitting"
-                (click)="closeModal()">
-          Annuler
-        </button>
-
-        <button class="btn btn-primary"
-                [disabled]="submitting || requestForm.invalid"
-                (click)="submitRequest()">
-          <span *ngIf="!submitting">Valider la demande</span>
-          <span *ngIf="submitting" class="spinner-border spinner-border-sm"></span>
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
 
         </div>
       </div>
@@ -297,3 +202,327 @@
     </div>
   </div>
 </section>
+
+<!-- ================================================= -->
+<!-- MODAL DEMANDE DE FORMATION                        -->
+<!-- ================================================= -->
+<div class="modal fade" id="demandeFormationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content lms-modal">
+
+      <!-- HEADER -->
+      <div class="modal-header lms-modal__header">
+        <div class="d-flex align-items-center">
+          <div class="lms-modal__icon">
+            <i class="ti ti-files"></i>
+          </div>
+          <h5 class="modal-title ms-3 mb-0">Nouvelle demande de formation</h5>
+        </div>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+      </div>
+
+      <div class="modal-body lms-modal__body">
+
+        <!-- ÉTAPE 1 : TYPE -->
+        <div class="lms-step mb-4">
+          <div class="lms-step__header">
+            <span class="lms-step__number">1</span>
+            <p class="lms-step__title">Type de demande <span class="text-danger">*</span></p>
+          </div>
+          <div class="row g-2">
+            <div class="col-6 col-md-3" *ngFor="let type of typesDemande">
+              <div class="lms-type-card"
+                   [class.lms-type-card--active]="typeDemande === type.value"
+                   (click)="onTypeChange(type.value)">
+                <i class="{{ type.icon }} lms-type-card__icon"></i>
+                <div class="lms-type-card__label">{{ type.label }}</div>
+                <small class="lms-type-card__desc">{{ type.description }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Placeholder -->
+        <div *ngIf="!typeDemande" class="lms-placeholder">
+          <i class="ti ti-hand-click lms-placeholder__icon"></i>
+          <p>Sélectionnez un type de demande pour continuer</p>
+        </div>
+
+        <ng-container *ngIf="typeDemande">
+
+          <!-- CAS 1 : SESSION -->
+          <div *ngIf="typeDemande === 'session'" class="mb-4">
+            <div class="lms-step__header mb-3">
+              <span class="lms-step__number lms-step__number--blue">2</span>
+              <p class="lms-step__title">Choisir une session <span class="text-danger">*</span></p>
+            </div>
+
+            <div *ngIf="loadingSessions" class="lms-loading">
+              <div class="spinner-border text-primary"></div>
+              <span>Chargement des sessions...</span>
+            </div>
+
+            <div *ngIf="!loadingSessions">
+              <div class="lms-session-card"
+                   *ngFor="let session of sessions"
+                   [class.lms-session-card--active]="selectedSessionId === session.id"
+                   (click)="selectedSessionId = session.id; selectedFormationIds = [session.formation.id]">
+                <div class="lms-session-card__info">
+                  <div class="lms-session-card__title">{{ session.formation.titre }}</div>
+                  <div class="lms-session-card__meta">
+                    <i class="ti ti-calendar me-1"></i>
+                    {{ session.titre }} — {{ session.date_debut | date:'dd/MM/yyyy' }}
+                    <span class="badge bg-info ms-2">{{ session.type_display }}</span>
+                    <span *ngIf="session.lieu" class="ms-2">
+                      <i class="ti ti-map-pin me-1"></i>{{ session.lieu }}
+                    </span>
+                  </div>
+                </div>
+                <span class="lms-session-card__places">{{ session.places_restantes }} places</span>
+              </div>
+
+              <div *ngIf="sessions.length === 0" class="lms-empty">
+                <i class="ti ti-calendar-off lms-empty__icon"></i>
+                <p>Aucune session disponible actuellement</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- CAS 2 : CATALOGUE -->
+          <div *ngIf="typeDemande === 'catalogue'" class="mb-4">
+            <div class="lms-step__header mb-1">
+              <span class="lms-step__number lms-step__number--green">2</span>
+              <p class="lms-step__title">Choisir un ou plusieurs catalogues <span class="text-danger">*</span></p>
+            </div>
+            <p class="lms-hint">
+              <i class="ti ti-info-circle me-1"></i>
+              La demande inclut automatiquement toutes les formations du catalogue.
+            </p>
+
+            <div *ngIf="loadingCatalogues" class="lms-loading">
+              <div class="spinner-border text-primary"></div>
+            </div>
+
+            <div class="row g-2" *ngIf="!loadingCatalogues">
+              <div class="col-md-6" *ngFor="let cat of catalogues">
+                <div class="lms-select-card lms-select-card--green"
+                     [class.lms-select-card--active]="isCatalogueSelected(cat.id)"
+                     (click)="toggleCatalogue(cat.id)">
+                  <i *ngIf="isCatalogueSelected(cat.id)"
+                     class="ti ti-circle-check-filled lms-select-card__check"></i>
+                  <div class="lms-select-card__title">{{ cat.titre }}</div>
+                  <div class="lms-select-card__sub">
+                    <i class="ti ti-books me-1"></i>{{ cat.nombre_formations }} formation(s)
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="catalogues.length === 0" class="col-12">
+                <div class="lms-empty">
+                  <i class="ti ti-book-off lms-empty__icon"></i>
+                  <p>Aucun catalogue disponible</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="selectedCatalogueIds.length > 0" class="lms-selection-badge lms-selection-badge--green">
+              <i class="ti ti-check me-1"></i>
+              {{ selectedCatalogueIds.length }} catalogue(s) sélectionné(s)
+            </div>
+          </div>
+
+          <!-- CAS 3 : PARCOURS -->
+          <div *ngIf="typeDemande === 'parcours'" class="mb-4">
+
+            <div class="lms-step__header mb-2">
+              <span class="lms-step__number lms-step__number--purple">2</span>
+              <p class="lms-step__title">Choisir une catégorie <span class="text-danger">*</span></p>
+            </div>
+            <select class="form-select mb-4"
+                    [(ngModel)]="selectedCategorieId"
+                    (change)="onCategorieChange()">
+              <option value="">-- Sélectionner une catégorie --</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.nom }}</option>
+            </select>
+
+            <div *ngIf="selectedCategorieId">
+              <div class="lms-step__header mb-1">
+                <span class="lms-step__number lms-step__number--purple">3</span>
+                <p class="lms-step__title">Choisir un ou plusieurs parcours <span class="text-danger">*</span></p>
+              </div>
+              <p class="lms-hint">
+                <i class="ti ti-info-circle me-1"></i>
+                La demande inclut automatiquement toutes les formations du parcours.
+              </p>
+
+              <div *ngIf="loadingParcours" class="lms-loading">
+                <div class="spinner-border text-primary"></div>
+              </div>
+
+              <div class="row g-2" *ngIf="!loadingParcours">
+                <div class="col-md-6" *ngFor="let p of parcours">
+                  <div class="lms-select-card lms-select-card--purple"
+                       [class.lms-select-card--active]="isParcoursSelected(p.id)"
+                       (click)="toggleParcours(p.id)">
+                    <i *ngIf="isParcoursSelected(p.id)"
+                       class="ti ti-circle-check-filled lms-select-card__check"></i>
+                    <div class="lms-select-card__title">{{ p.titre }}</div>
+                    <div class="lms-select-card__sub">
+                      <i class="ti ti-route me-1"></i>{{ p.nombre_formations }} formation(s)
+                    </div>
+                    <p *ngIf="p.description" class="lms-select-card__desc">{{ p.description }}</p>
+                  </div>
+                </div>
+                <div *ngIf="parcours.length === 0" class="col-12">
+                  <div class="lms-empty">
+                    <i class="ti ti-route-off lms-empty__icon"></i>
+                    <p>Aucun parcours dans cette catégorie</p>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="selectedParcoursIds.length > 0"
+                   class="lms-selection-badge lms-selection-badge--purple">
+                <i class="ti ti-check me-1"></i>
+                {{ selectedParcoursIds.length }} parcours sélectionné(s)
+              </div>
+            </div>
+          </div>
+
+          <!-- CAS 4 : FORMATION -->
+          <div *ngIf="typeDemande === 'formation'" class="mb-4">
+
+            <div class="lms-step__header mb-2">
+              <span class="lms-step__number lms-step__number--orange">2</span>
+              <p class="lms-step__title">Choisir une catégorie <span class="text-danger">*</span></p>
+            </div>
+            <select class="form-select mb-4"
+                    [(ngModel)]="selectedCategorieId"
+                    (change)="onCategorieChange()">
+              <option value="">-- Sélectionner une catégorie --</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.nom }}</option>
+            </select>
+
+            <div *ngIf="selectedCategorieId">
+              <div class="lms-step__header mb-2">
+                <span class="lms-step__number lms-step__number--orange">3</span>
+                <p class="lms-step__title">Choisir une ou plusieurs formations
+                  <span class="text-muted small fw-normal">(optionnel)</span>
+                </p>
+              </div>
+
+              <div *ngIf="loadingFormations" class="lms-loading">
+                <div class="spinner-border text-primary"></div>
+              </div>
+
+              <div class="row g-2" *ngIf="!loadingFormations">
+                <div class="col-md-6" *ngFor="let f of formations">
+                  <div class="lms-select-card lms-select-card--orange"
+                       [class.lms-select-card--active]="isFormationSelected(f.id)"
+                       (click)="toggleFormation(f.id)">
+                    <i *ngIf="isFormationSelected(f.id)"
+                       class="ti ti-circle-check-filled lms-select-card__check"></i>
+                    <div class="lms-select-card__title">{{ f.titre }}</div>
+                    <div class="lms-select-card__sub">
+                      <span class="badge bg-secondary me-1">{{ f.niveau }}</span>
+                      <i class="ti ti-clock me-1"></i>{{ f.duree_totale }}h
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="formations.length === 0" class="col-12">
+                  <div class="lms-empty">
+                    <i class="ti ti-school-off lms-empty__icon"></i>
+                    <p>Aucune formation dans cette catégorie</p>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="selectedFormationIds.length > 0"
+                   class="lms-selection-badge lms-selection-badge--orange">
+                <i class="ti ti-check me-1"></i>
+                {{ selectedFormationIds.length }} formation(s) sélectionnée(s)
+              </div>
+            </div>
+          </div>
+
+          <!-- FORMULAIRE COMMUN -->
+          <hr class="lms-divider">
+          <div class="lms-step__header mb-3">
+            <span class="lms-step__number">
+              {{ (typeDemande === 'session' || typeDemande === 'catalogue') ? '2' : '4' }}
+            </span>
+            <p class="lms-step__title">Informations complémentaires</p>
+          </div>
+
+          <form [formGroup]="form">
+            <div class="row g-3">
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">
+                  Motif de la demande <span class="text-danger">*</span>
+                </label>
+                <textarea class="form-control lms-input"
+                          formControlName="motif_demande"
+                          rows="3"
+                          placeholder="Pourquoi souhaitez-vous cette formation ?"></textarea>
+                <div *ngIf="form.get('motif_demande')?.invalid && form.get('motif_demande')?.touched"
+                     class="lms-field-error">
+                  <i class="ti ti-alert-circle me-1"></i>Le motif est obligatoire.
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Objectifs personnels</label>
+                <textarea class="form-control lms-input"
+                          formControlName="objectifs_personnels"
+                          rows="2"
+                          placeholder="Qu'espérez-vous acquérir ?"></textarea>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Priorité</label>
+                <select class="form-select lms-input" formControlName="priorite">
+                  <option value="basse">🟢 Basse</option>
+                  <option value="normale">🟡 Normale</option>
+                  <option value="haute">🟠 Haute</option>
+                  <option value="urgente">🔴 Urgente</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Date souhaitée de début</label>
+                <input type="date" class="form-control lms-input"
+                       formControlName="date_souhaitee_debut">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Commentaire <span class="text-muted small">(optionnel)</span></label>
+                <textarea class="form-control lms-input"
+                          formControlName="commentaire_employe"
+                          rows="2"
+                          placeholder="Informations complémentaires..."></textarea>
+              </div>
+
+            </div>
+          </form>
+
+        </ng-container>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer lms-modal__footer">
+        <button class="btn lms-btn-cancel" (click)="closeModal()">
+          <i class="ti ti-x me-1"></i>Annuler
+        </button>
+        <button class="btn lms-btn-submit"
+                [disabled]="submitting || !canSubmit()"
+                (click)="submitRequest()">
+          <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!submitting" class="ti ti-send me-2"></i>
+          {{ submitting ? 'Envoi en cours...' : 'Valider la demande' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -113,7 +113,7 @@ export class StudentDashboardComponent implements OnInit {
         const demandes = res.demandes ?? res;
         
         const pending = demandes.filter(
-          (d: any) => d.statut === 'pending'
+          (d: any) => d.statut === 'en_attente'
         );
 
         this.pendingDemandesCount = pending.length;

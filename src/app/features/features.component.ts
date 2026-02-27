@@ -112,7 +112,7 @@ export class FeaturesComponent  {
       this.common.mainFooter.next(true);
     }
     if (
-      this.routeStatus == 'instructor' ||
+      this.routeStatus == 'adminrh' ||
       this.routeStatus == 'student'
     ) {
       this.common.isuserHeader.next(false);
