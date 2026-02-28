@@ -382,7 +382,7 @@ export class CourseDetails2Component implements OnInit {
     }
   }
 
-  // ================================
+  // ===============================
   // MODAL
   // ================================
   openRequestModal(): void {

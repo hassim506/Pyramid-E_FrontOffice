@@ -24,141 +24,133 @@
       </a>
 
       <ul class="submenu">
-        <li><a [routerLink]="routes.studentMyCourses">Formations en cours</a></li>
-        <li><a [routerLink]="routes.student_Certificate">Formations en attente</a></li>
-        <li><a >Formations Terminées</a></li>
-        <li><a>Formations Obligatoires</a></li>
-         <li><a [routerLink]="routes.studentCourses">Catalogue assignés</a></li>
+        <li><a [routerLink]="routes.studentMyCourses" routerLinkActive="active">Formations en cours</a></li>
+        <li><a>Formations en attente</a></li>
+        <li><a>Formations terminées</a></li>
+        <li><a>Formations obligatoires</a></li>
+        <li><a [routerLink]="routes.studentCourses" routerLinkActive="active">Formations en accès libre</a></li>
+        <li><a>Catalogues assignés</a></li>
         <li><a>Parcours assignés</a></li>
-        <li><a [routerLink]="routes.student_Certificate">Mes demandes de formations</a></li>
-         <li><a>Feeddback Formateur</a></li>
+        <li><a>Feedback formateur</a></li>
       </ul>
     </li>
 
-    <!-- ================= Planning ================= -->
+    <!-- ================= MES DEMANDES ================= -->
     <li class="menu-item has-submenu">
-      <a [routerLink]="routes.students_tickets">
+      <a>
+        <i class="isax isax-send-2"></i>
+        <span>Mes demandes</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+
+      <ul class="submenu">
+        <!-- Formations en accès libre -->
+        <li>
+          <a [routerLink]="routes.student_Certificate" routerLinkActive="active">
+            <span class="demande-dot demande-dot--orange"></span>
+            <span class="demande-info">
+              <span class="demande-label">Formations </span>
+              <small class="demande-desc">Demande directe d'une formation</small>
+            </span>
+          </a>
+        </li>
+        <!-- Sessions -->
+        <li>
+          <a routerLinkActive="active">
+            <span class="demande-dot demande-dot--blue"></span>
+            <span class="demande-info">
+              <span class="demande-label">Sessions</span>
+              <small class="demande-desc">Formations planifiées à date fixe</small>
+            </span>
+          </a>
+        </li>
+
+        <!-- Parcours -->
+        <li>
+          <a routerLinkActive="active">
+            <span class="demande-dot demande-dot--purple"></span>
+            <span class="demande-info">
+              <span class="demande-label">Parcours</span>
+              <small class="demande-desc">Ensemble structuré de formations</small>
+            </span>
+          </a>
+        </li>
+
+        <!-- Catalogues -->
+        <li>
+          <a routerLinkActive="active">
+            <span class="demande-dot demande-dot--green"></span>
+            <span class="demande-info">
+              <span class="demande-label">Catalogues</span>
+              <small class="demande-desc">Groupes de formations disponibles</small>
+            </span>
+          </a>
+        </li>
+
+        
+
+      </ul>
+    </li>
+
+    <!-- ================= MON PLANNING ================= -->
+    <li class="menu-item has-submenu">
+      <a>
         <i class="isax isax-ticket"></i>
         <span>Mon planning</span>
-         <i class="submenu-arrow isax isax-arrow-right-3"></i>
-      </a>
-       <ul class="submenu">
-        <li><a> Formations présentielles planifiées</a></li>
-        <li><a >Webinaires à venir</a></li>
-         <li><a>Sessions passées</a></li>
-          <li><a>Nouvelles Invitations reçues</a></li>
-          
-        
-      </ul>
-    </li>
-
-    <!-- ================= CATALOGUE ================= 
-    <li class="menu-item has-submenu">
-      <a>
-        <i class="isax isax-book"></i>
-        <span>Catalogue</span>
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
-
       <ul class="submenu">
-        <li><a [routerLink]="routes.studentCourses">Catalogue complet</a></li>
-        <li><a [routerLink]="routes.student_Certificate">Demande formation</a></li>
-        <li><a>Recommandations IA</a></li>
+        <li><a>Formations présentielles planifiées</a></li>
+        <li><a>Webinaires à venir</a></li>
+        <li><a>Sessions passées</a></li>
+        <li><a>Nouvelles invitations reçues</a></li>
       </ul>
     </li>
-    -->
 
-    <!-- ================= PERFORMANCE ================= -->
+    <!-- ================= MES COMPÉTENCES ================= -->
     <li class="menu-item has-submenu">
       <a>
         <i class="isax isax-chart"></i>
-        <span>Mes Compétences</span>
+        <span>Mes compétences</span>
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
-
       <ul class="submenu">
-       
-        
-        <li><a>Compétences Acquises</a></li>
-        <li><a>Compétences Recommandées</a></li>
+        <li><a>Compétences acquises</a></li>
+        <li><a>Compétences recommandées</a></li>
       </ul>
     </li>
 
-    <!-- ================= Palmeres============== -->
+    <!-- ================= MES PALMARÈS ================= -->
     <li class="menu-item has-submenu">
       <a>
-        <i class="isax isax-chart"></i>
-        <span>Mes palmarés</span>
+        <i class="isax isax-medal"></i>
+        <span>Mes palmarès</span>
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
-
       <ul class="submenu">
         <li><a>Mes certificats</a></li>
         <li><a>Mes habilitations</a></li>
-        <li><a>Gamification/Mes badges</a></li>
+        <li><a>Gamification / Mes badges</a></li>
       </ul>
     </li>
 
-    <!-- ================= PROFIL ================= 
+    <!-- ================= CENTRE D'AIDE ================= -->
     <li class="menu-item has-submenu">
       <a>
-        <i class="isax isax-user"></i>
-        <span>Mon profil</span>
-         <i class="submenu-arrow isax isax-arrow-right-3"></i>
-      </a>
-       <ul class="submenu">
-        <li><a  [routerLink]="routes.students_profile">Informations personnelles</a></li>
-        <li><a >Compétences déclarées</a></li>
-         <li><a>Historique d’activité</a></li>
-          <li><a>Paramètres de notification</a></li>
-          
-        
-      </ul>
-    </li>
-    -->
-
-    
-
-    <!-- ================= FAQ ================= 
-    <li class="menu-item has-submenu">
-      <a [routerLink]="routes.students_tickets">
-        <i class="isax isax-ticket"></i>
-        <span>FAQ</span>
-         <i class="submenu-arrow isax isax-arrow-right-3"></i>
-      </a>
-       <ul class="submenu">
-        <li><a> Forums</a></li>
-        <li><a >Questions aux formateurs</a></li>
-         <li><a>Sessions passées</a></li>
-          <li><a>Nouvelles Invitations reçues</a></li>
-          
-        
-      </ul>
-    </li> 
-    -->
-
-    <!-- ================= AIDE ================= -->
-    <li class="menu-item has-submenu">
-      <a [routerLink]="routes.students_tickets">
         <i class="isax isax-ticket"></i>
         <span>Centre d'aide</span>
-         <i class="submenu-arrow isax isax-arrow-right-3"></i>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
-       <ul class="submenu">
-       
-        <li><a >Guide d’utilisation</a></li>
-         <li><a>Tutoriels vidéo</a></li>
-          <li><a>Soumettre un ticket</a></li>
-           <li><a >Annonces et mise à jours</a></li>
-          
-        
+      <ul class="submenu">
+        <li><a>Guide d'utilisation</a></li>
+        <li><a>Tutoriels vidéo</a></li>
+        <li><a>Soumettre un ticket</a></li>
+        <li><a>Annonces et mises à jour</a></li>
       </ul>
     </li>
 
-     
-
-    <!-- ================= LOGOUT ================= -->
-    <li class="menu-item has-submenu" logout>
+    <!-- ================= DÉCONNEXION ================= -->
+    <li class="menu-item">
       <a [routerLink]="routes.login">
         <i class="isax isax-logout"></i>
         <span>Déconnexion</span>

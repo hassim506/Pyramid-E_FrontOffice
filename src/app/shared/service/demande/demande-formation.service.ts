@@ -80,6 +80,10 @@ export class DemandeFormationService {
     ).pipe(catchError(this.handleError.bind(this)));
   }
 
+  relancerDemande(id: number): Observable<any> {
+  return this.http.post(`${this.apiUrl}/demandes/${id}/relancer`, {});
+}
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     console.error('Erreur API Demandes Formation:', error);
     return throwError(() => error);
