@@ -1,0 +1,89 @@
+<!-- RETOUR -->
+<div class="mb-4">
+  <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+    <i class="isax isax-arrow-left-2 me-1"></i> Retour aux catalogues
+  </button>
+</div>
+
+<!-- HEADER CATALOGUE -->
+<div class="catalogue-header-banner rounded-3 p-4 mb-4 text-white"
+     [style.background]="catalogue?.couleur || '#6c63ff'"
+     *ngIf="catalogue">
+  <h3 class="fw-bold mb-1">{{ catalogue.titre }}</h3>
+  <p class="mb-0 opacity-75">{{ catalogue.description }}</p>
+  <span class="badge bg-white text-dark mt-2">{{ formations.length }} formation(s)</span>
+</div>
+
+<!-- LOADER -->
+<div *ngIf="loading" class="d-flex justify-content-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Chargement...</span>
+  </div>
+</div>
+
+<!-- ERROR -->
+<div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+
+<!-- FORMATIONS -->
+<div class="row g-4" *ngIf="!loading && paginatedFormations.length > 0">
+  <div class="col-xl-4 col-md-6" *ngFor="let formation of paginatedFormations">
+    <div class="card h-100 border-0 shadow-sm">
+
+      <!-- IMAGE -->
+      <div class="position-relative">
+        <img [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
+             class="card-img-top" style="height:180px; object-fit:cover;" alt="img">
+        <span *ngIf="formation.est_obligatoire"
+              class="badge bg-danger position-absolute top-0 start-0 m-2">Obligatoire</span>
+        <span *ngIf="formation.est_featured"
+              class="badge bg-warning position-absolute top-0 end-0 m-2">⭐ Mis en avant</span>
+      </div>
+
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="badge bg-light text-dark">{{ formation.niveau_display }}</span>
+          <span class="text-muted small">{{ formation.duree_totale }} h</span>
+        </div>
+
+        <h6 class="fw-bold mb-2">{{ formation.titre }}</h6>
+
+        <p class="text-muted small mb-3"
+           style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+          {{ formation.short_description || formation.description }}
+        </p>
+
+        <div class="mt-auto d-flex align-items-center justify-content-between">
+          <span class="fw-bold text-primary" *ngIf="!isFree(formation)">
+            {{ formation.prix | number:'1.0-0' }} FCFA
+          </span>
+          <span class="badge bg-success" *ngIf="isFree(formation)">Gratuit</span>
+
+          <button class="btn btn-dark btn-sm" (click)="goToDetails(formation.id)">
+            Voir détails <i class="isax isax-arrow-right-3 ms-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMPTY -->
+<div *ngIf="!loading && formations.length === 0" class="text-center py-5">
+  <i class="isax isax-book-1" style="font-size: 3rem; color: #ccc;"></i>
+  <p class="mt-3 text-muted">Aucune formation dans ce catalogue</p>
+</div>
+
+<!-- PAGINATION -->
+<div class="d-flex justify-content-center mt-4" *ngIf="totalPages > 1">
+  <button class="btn btn-outline-secondary btn-sm mx-1"
+          [disabled]="currentPage === 1"
+          (click)="changePage(currentPage - 1)">‹</button>
+  <button *ngFor="let p of pages"
+          class="btn btn-sm mx-1"
+          [class.btn-primary]="currentPage === p"
+          [class.btn-outline-secondary]="currentPage !== p"
+          (click)="changePage(p)">{{ p }}</button>
+  <button class="btn btn-outline-secondary btn-sm mx-1"
+          [disabled]="currentPage === totalPages"
+          (click)="changePage(currentPage + 1)">›</button>
+</div>

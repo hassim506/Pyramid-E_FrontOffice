@@ -1,106 +1,230 @@
-<!-- LOADER -->
-
-
-<!-- ERROR -->
-<div class="alert alert-danger text-center" *ngIf="error">
-  {{ error }}
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<div class="sc-header">
+  <div class="sc-header__left">
+    <h1 class="sc-header__title">Mes Catalogues</h1>
+    <p class="sc-header__subtitle">
+      Explorez les catalogues de formations disponibles pour votre entreprise
+    </p>
+  </div>
+  <div class="sc-header__right" *ngIf="!loading && allCatalogues.length > 0">
+    <span class="sc-header__count">
+      <i class="isax isax-book-1"></i>
+      {{ totalItems }} catalogue{{ totalItems > 1 ? 's' : '' }}
+    </span>
+  </div>
 </div>
 
-<!-- CARTES -->
-<div class="row" *ngIf="!loading && formations.length > 0">
+<!-- ══════════════════════════════════════════
+     BARRE DE FILTRES
+══════════════════════════════════════════ -->
+<div class="sc-filters" *ngIf="!loading && allCatalogues.length > 0">
 
-  <div
-    class="col-xl-4 col-md-6 mb-4"
-    *ngFor="let formation of formations">
+  <!-- Recherche -->
+  <div class="sc-filters__search">
+    <i class="isax isax-search-normal sc-filters__search-icon"></i>
+    <input
+      type="text"
+      class="sc-filters__search-input"
+      placeholder="Rechercher un catalogue..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearchChange()">
+    <button
+      *ngIf="searchTerm"
+      class="sc-filters__search-clear"
+      (click)="searchTerm = ''; onSearchChange()">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
 
-    <div class="course-item-two course-item mx-0 h-100 d-flex flex-column">
+  <!-- Filtres type -->
+  <div class="sc-filters__types">
+    <button
+      *ngFor="let t of types"
+      class="sc-filters__type-btn"
+      [class.sc-filters__type-btn--active]="selectedType === t.value"
+      (click)="onTypeChange(t.value)">
+      {{ t.label }}
+    </button>
+  </div>
 
-      <!-- IMAGE -->
-      <div class="course-img position-relative">
-        <a (click)="goToDetails(formation.id)">
-          <img
-            [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
-            class="img-fluid"
-            alt="img">
-        </a>
+  <!-- Reset -->
+  <button
+    class="sc-filters__reset"
+    *ngIf="hasActiveFilters"
+    (click)="clearFilters()">
+    <i class="isax isax-refresh"></i>
+    Réinitialiser
+  </button>
 
-        <div class="position-absolute start-0 top-0 w-100 p-3 d-flex justify-content-between">
-          <span class="badge bg-secondary">
-            {{ formation.difficulte }}
-          </span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     RÉSULTAT FILTRE
+══════════════════════════════════════════ -->
+<div class="sc-results-info"
+     *ngIf="!loading && hasActiveFilters && allCatalogues.length > 0">
+  <i class="isax isax-filter"></i>
+  <span>{{ totalItems }} résultat{{ totalItems > 1 ? 's' : '' }} trouvé{{ totalItems > 1 ? 's' : '' }}</span>
+  <button class="sc-results-info__clear" (click)="clearFilters()">Effacer les filtres</button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LOADER
+══════════════════════════════════════════ -->
+<div class="sc-loading" *ngIf="loading">
+  <div class="sc-loading__spinner"></div>
+  <p>Chargement des catalogues...</p>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ERREUR
+══════════════════════════════════════════ -->
+<div class="sc-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2 sc-error__icon"></i>
+  <p>{{ error }}</p>
+  <button class="sc-error__retry" (click)="loadCatalogues()">
+    <i class="isax isax-refresh me-1"></i> Réessayer
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     GRILLE CATALOGUES
+══════════════════════════════════════════ -->
+<div class="row g-4" *ngIf="!loading && displayedCatalogues.length > 0">
+  <div class="col-xl-4 col-md-6" *ngFor="let catalogue of displayedCatalogues">
+
+    <div class="catalogue-card" (click)="goToCatalogue(catalogue.id)">
+
+      <!-- BANNIÈRE -->
+      <div class="catalogue-card__banner">
+        <div
+          class="catalogue-card__banner-bg"
+          [style.background-image]="catalogue.image_couverture ? 'url(' + catalogue.image_couverture + ')' : 'none'"
+          [style.background-color]="!catalogue.image_couverture ? (catalogue.couleur || '#069b8f') : 'transparent'">
         </div>
+        <div class="catalogue-card__banner-overlay"></div>
+        <i [class]="(catalogue.icone || 'isax isax-book-1') + ' catalogue-card__banner-icon'"></i>
+        <span class="catalogue-card__banner-badge"
+              [style.background-color]="getTypeColor(catalogue.type)">
+          {{ getTypeLabel(catalogue.type) }}
+        </span>
       </div>
 
-      <!-- CONTENT -->
-      <div class="course-content d-flex flex-column flex-grow-1">
-
-        <div class="d-flex justify-content-between mb-2">
-          <span class="badge bg-light text-dark rounded-pill">
-            {{ formation.langue || 'FR' }}
-          </span>
-          <span class="text-muted fs-13">
-            {{ formation.duree_totale || 0 }} h
-          </span>
-        </div>
-
-        <h6 class="title mb-2 text-truncate">
-          {{ formation.titre }}
-        </h6>
-
-        <p class="course-desc mb-3 text-muted"
-           style="display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-          {{ formation.short_description || formation.description }}
+      <!-- BODY -->
+      <div class="catalogue-card__body">
+        <h5 class="catalogue-card__title">{{ catalogue.titre }}</h5>
+        <p class="catalogue-card__description">
+          {{ catalogue.short_description || catalogue.description || 'Aucune description disponible' }}
         </p>
 
-        <div class="mt-auto d-flex align-items-center justify-content-between">
-          
-
-          <button
-            class="btn btn-dark btn-sm"
-            (click)="goToDetails(formation.id)">
-            Voir plus
-            <i class="isax isax-arrow-right-3 ms-1"></i>
-          </button>
+        <!-- STATS -->
+        <div class="catalogue-card__stats">
+          <div class="catalogue-card__stat">
+            <i class="isax isax-book-1"></i>
+            <span>{{ catalogue.nombre_formations }} formation{{ catalogue.nombre_formations > 1 ? 's' : '' }}</span>
+          </div>
+          <div class="catalogue-card__stat" *ngIf="catalogue.duree_totale">
+            <i class="isax isax-clock"></i>
+            <span>{{ catalogue.duree_totale }} h</span>
+          </div>
         </div>
 
+        <!-- FOOTER -->
+        <div class="catalogue-card__footer">
+          <button class="catalogue-card__btn">
+            Voir les formations
+            <i class="isax isax-arrow-right-3"></i>
+          </button>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
-<div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
-    <div class="text-center">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Chargement...</span>
-        </div>
-        <p class="mt-3 text-muted">Chargement des formations...</p>
-    </div>
-</div>
-<!-- EMPTY -->
-<div *ngIf="!loading && formations.length === 0" class="text-center py-5">
-  Aucune formation disponible
+
+<!-- ══════════════════════════════════════════
+     EMPTY — aucun catalogue
+══════════════════════════════════════════ -->
+<div class="sc-empty" *ngIf="!loading && !error && allCatalogues.length === 0">
+  <i class="isax isax-book-1 sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun catalogue disponible</h6>
+  <p>Votre entreprise n'a pas encore de catalogue de formations.</p>
 </div>
 
-<!-- PAGINATION -->
-<div class="pagination-wrapper text-center mt-4" *ngIf="totalPages > 1">
-  <button
-    class="page-btn"
-    [disabled]="currentPage === 1"
-    (click)="changePage(currentPage - 1)">
-    ‹
+<!-- ══════════════════════════════════════════
+     EMPTY — aucun résultat filtre
+══════════════════════════════════════════ -->
+<div class="sc-empty" *ngIf="!loading && !error && allCatalogues.length > 0 && filteredCatalogues.length === 0">
+  <i class="isax isax-search-normal sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun résultat</h6>
+  <p>Aucun catalogue ne correspond à votre recherche.</p>
+  <button class="sc-empty__btn" (click)="clearFilters()">
+    <i class="isax isax-refresh me-1"></i> Réinitialiser les filtres
   </button>
+</div>
 
-  <button
-    class="page-btn"
-    *ngFor="let p of pageNumberArray; let i = index"
-    [class.active]="currentPage === i + 1"
-    (click)="changePage(i + 1)">
-    {{ i + 1 }}
-  </button>
+<!-- ══════════════════════════════════════════
+     PAGINATION
+══════════════════════════════════════════ -->
+<div class="sc-pagination" *ngIf="!loading && totalPages > 1">
 
-  <button
-    class="page-btn"
-    [disabled]="currentPage === totalPages"
-    (click)="changePage(currentPage + 1)">
-    ›
-  </button>
+  <!-- Info -->
+  <span class="sc-pagination__info">
+    Page {{ currentPage }} / {{ totalPages }}
+    <span class="sc-pagination__info-total">({{ totalItems }} catalogues)</span>
+  </span>
+
+  <!-- Boutons -->
+  <div class="sc-pagination__controls">
+
+    <!-- Première page -->
+    <button class="sc-pagination__btn"
+            [disabled]="currentPage === 1"
+            (click)="changePage(1)"
+            title="Première page">
+      <i class="isax isax-arrow-left-3"></i>
+    </button>
+
+    <!-- Précédent -->
+    <button class="sc-pagination__btn"
+            [disabled]="currentPage === 1"
+            (click)="changePage(currentPage - 1)"
+            title="Page précédente">
+      <i class="isax isax-arrow-left-2"></i>
+    </button>
+
+    <!-- Ellipsis gauche -->
+    <span class="sc-pagination__ellipsis" *ngIf="pages[0] > 1">…</span>
+
+    <!-- Pages -->
+    <button
+      *ngFor="let p of pages"
+      class="sc-pagination__btn"
+      [class.sc-pagination__btn--active]="currentPage === p"
+      (click)="changePage(p)">
+      {{ p }}
+    </button>
+
+    <!-- Ellipsis droite -->
+    <span class="sc-pagination__ellipsis" *ngIf="pages[pages.length - 1] < totalPages">…</span>
+
+    <!-- Suivant -->
+    <button class="sc-pagination__btn"
+            [disabled]="currentPage === totalPages"
+            (click)="changePage(currentPage + 1)"
+            title="Page suivante">
+      <i class="isax isax-arrow-right-2"></i>
+    </button>
+
+    <!-- Dernière page -->
+    <button class="sc-pagination__btn"
+            [disabled]="currentPage === totalPages"
+            (click)="changePage(totalPages)"
+            title="Dernière page">
+      <i class="isax isax-arrow-right-3"></i>
+    </button>
+
+  </div>
 </div>

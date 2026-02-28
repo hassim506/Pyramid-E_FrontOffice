@@ -1,36 +1,44 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Formations } from '../../../shared/models/Formations.models';
+import { FormsModule } from '@angular/forms';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
 
 @Component({
   standalone: true,
   selector: 'app-student-courses',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './student-courses.component.html',
   styleUrls: ['./student-courses.component.scss'],
 })
 export class StudentCoursesComponent implements OnInit {
 
-  // Source principale (comme Admin RH)
-  allFormations: Formations[] = [];
-
-  // Données affichées
-  formations: Formations[] = [];
+  // Données sources
+  allCatalogues: any[] = [];
+  filteredCatalogues: any[] = [];
+  displayedCatalogues: any[] = [];
 
   loading = false;
   error = '';
 
-  // Pagination (même logique Admin RH)
-  currentPage = 1;
-  pageSize = 6;
-  totalData = 0;
-  totalPages = 0;
-  skip = 0;
-  limit = this.pageSize;
+  // Filtres
+  searchTerm = '';
+  selectedType = '';
+  types = [
+    { value: '',            label: 'Tous les types' },
+    { value: 'technique',   label: 'Technique'      },
+    { value: 'management',  label: 'Management'     },
+    { value: 'soft_skills', label: 'Soft Skills'    },
+    { value: 'certifiant',  label: 'Certifiant'     },
+    { value: 'specialise',  label: 'Spécialisé'     },
+    { value: 'general',     label: 'Général'        },
+  ];
 
-  pageNumberArray: { skip: number; limit: number }[] = [];
+  // Pagination
+  currentPage  = 1;
+  pageSize     = 6;
+  totalPages   = 0;
+  totalItems   = 0;
 
   constructor(
     private formationsService: FormationsService,
@@ -38,80 +46,121 @@ export class StudentCoursesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getFormations();
+    this.loadCatalogues();
   }
 
-  // 🔹 Récupération des formations
-  getFormations(): void {
+  loadCatalogues(): void {
     this.loading = true;
-    this.error = '';
+    this.error   = '';
 
-    this.formationsService.getAllFormations().subscribe({
+    this.formationsService.getCataloguesEmploye().subscribe({
       next: (res: any) => {
-        if (res?.formations) {
-          this.allFormations = res.formations;
-          this.totalData = this.allFormations.length;
-          this.calculateTotalPages(this.totalData, this.pageSize);
-          this.getTableData(this.skip, this.limit);
-        } else {
-          this.allFormations = [];
-          this.formations = [];
-        }
+        this.allCatalogues = res.catalogues ?? [];
+        this.applyFilters();
         this.loading = false;
       },
       error: (err) => {
-         console.error('Erreur chargement formations', err);
-  console.error('DETAIL ERREUR:', err.error);        // ← message Laravel exact
-  console.error('STATUS:', err.status);              // ← code HTTP
-  this.error = 'Erreur lors du chargement des formations';
-  this.loading = false;
+        console.error('Erreur catalogues:', err.error);
+        this.error   = 'Erreur lors du chargement des catalogues';
+        this.loading = false;
       }
     });
   }
 
-  // 🔹 Pagination centrale (copiée Admin RH)
-  calculateTotalPages(totalData: number, pageSize: number): void {
-    this.pageNumberArray = [];
-    this.totalPages = totalData / pageSize;
+  // ── FILTRES ────────────────────────────────
+  applyFilters(): void {
+    let result = [...this.allCatalogues];
 
-    if (this.totalPages % 1 !== 0) {
-      this.totalPages = Math.trunc(this.totalPages + 1);
+    // Filtre recherche
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(c =>
+        c.titre?.toLowerCase().includes(term) ||
+        c.description?.toLowerCase().includes(term) ||
+        c.short_description?.toLowerCase().includes(term)
+      );
     }
 
-    for (let i = 1; i <= this.totalPages; i++) {
-      const limit = pageSize * i;
-      const skip = limit - pageSize;
-      this.pageNumberArray.push({ skip, limit });
+    // Filtre type
+    if (this.selectedType) {
+      result = result.filter(c => c.type === this.selectedType);
     }
+
+    this.filteredCatalogues = result;
+    this.totalItems         = result.length;
+    this.totalPages         = Math.ceil(this.totalItems / this.pageSize);
+    this.currentPage        = 1;
+    this.paginate();
   }
 
-  getTableData(skip: number, limit: number): void {
-    this.formations = [];
-
-    const start = skip;
-    const end = Math.min(skip + limit, this.totalData);
-
-    this.formations = this.allFormations.slice(start, end);
+  onSearchChange(): void {
+    this.applyFilters();
   }
 
-  // 🔹 Navigation pagination
+  onTypeChange(type: string): void {
+    this.selectedType = type;
+    this.applyFilters();
+  }
+
+  clearFilters(): void {
+    this.searchTerm   = '';
+    this.selectedType = '';
+    this.applyFilters();
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!this.searchTerm || !!this.selectedType;
+  }
+
+  // ── PAGINATION ─────────────────────────────
+  paginate(): void {
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.displayedCatalogues = this.filteredCatalogues.slice(start, start + this.pageSize);
+  }
+
   changePage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
-
     this.currentPage = page;
-    this.skip = (page - 1) * this.pageSize;
-    this.limit = this.pageSize;
-    this.getTableData(this.skip, this.limit);
+    this.paginate();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // 🔹 Navigation vers détails
-  goToDetails(formationId?: number): void {
-    if (!formationId) return;
-    this.router.navigate(['/courses/course-details-2', formationId]);
+  get pages(): number[] {
+    const delta   = 2;
+    const range: number[] = [];
+    const left  = Math.max(1, this.currentPage - delta);
+    const right = Math.min(this.totalPages, this.currentPage + delta);
+    for (let i = left; i <= right; i++) range.push(i);
+    return range;
   }
 
-  // 🔹 Helpers UI
-  isFree(formation: Formations): boolean {
-    return Number(formation.prix) === 0;
+  // ── NAVIGATION ─────────────────────────────
+  goToCatalogue(catalogueId: number): void {
+    this.router.navigate(['/student/catalogue', catalogueId]);
+  }
+
+  // ── HELPERS ────────────────────────────────
+  getTypeColor(type: string): string {
+    const colors: any = {
+      'technique'  : '#069b8f',
+      'management' : '#16a34a',
+      'soft_skills': '#d97706',
+      'certifiant' : '#dc2626',
+      'specialise' : '#7c3aed',
+      'general'    : '#6b7280',
+    };
+    return colors[type] ?? '#6b7280';
+  }
+
+  getTypeLabel(type: string): string {
+    const labels: any = {
+      'technique'  : 'Technique',
+      'management' : 'Management',
+      'soft_skills': 'Soft Skills',
+      'certifiant' : 'Certifiant',
+      'specialise' : 'Spécialisé',
+      'general'    : 'Général',
+    };
+    return labels[type] ?? type;
   }
 }

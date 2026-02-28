@@ -216,7 +216,7 @@ export const routes: Routes = [
         {path:'student-dashboard',loadComponent:()=>import ('./features/student/student-dashboard/student-dashboard.component').then((m)=>m.StudentDashboardComponent)},
         {path:'student-profile',loadComponent:()=>import ('./features/student/student-profile/student-profile.component').then((m)=>m.StudentProfileComponent)},
         {path:'student-courses',loadComponent:()=>import ('./features/student/student-courses/student-courses.component').then((m)=>m.StudentCoursesComponent)},
-        
+        { path: 'catalogue/:id', loadComponent: () => import('./features/student/catalogue-detail/catalogue-detail.component').then(m => m.CatalogueDetailComponent) },
         {path:'mes-cours',loadComponent:()=>import ('./features/student/mes-cours/mes-cours.component').then((m)=>m.MesCoursComponent)},
         {path:'lecture-formation/:id',loadComponent:()=>import('./features/student/lecture-formation/lecture-formation.component').then(m=>m.LectureFormationComponent)
 },

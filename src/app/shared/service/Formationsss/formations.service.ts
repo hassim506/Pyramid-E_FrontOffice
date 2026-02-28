@@ -125,11 +125,28 @@ getFormationsByCategorie(categorieId: number): Observable<any> {
   );
 }
 
-//
+//PArcours par categorie
 getParcoursParCategorie(categorieId: number): Observable<any> {
   return this.http.get<any>(
     `${this.apiUrl}/parcours/par-categorie/${categorieId}`,
     { headers: this.getHeaders() }
   );
 }
+
+// Catalogues de l'employé (filtrés par entreprise)
+getCataloguesEmploye(): Observable<any> {
+    return this.http.get<any>(
+        `${this.apiUrl}/employe/catalogues`,
+        { headers: this.getHeaders() }
+    );
+}
+
+// Détail d'un catalogue avec ses formations
+getCatalogueDetail(id: number): Observable<any> {
+    return this.http.get<any>(
+        `${this.apiUrl}/employe/catalogues/${id}`,
+        { headers: this.getHeaders() }
+    );
+}
+
 }
