@@ -127,7 +127,7 @@ export class FormationsService {
   /** 🔹 Catégories */
   getCategories(): Observable<any> {
     return this.http.get<any>(
-      `${this.apiUrl}/demandes-formation/listes/categories`,
+      `${this.apiUrl}/demandes-formation/listes/categories-formation`,
       { headers: this.getHeaders() }
     );
   }
@@ -143,7 +143,7 @@ export class FormationsService {
   /** 🔹 Formations par catégorie */
   getFormationsByCategorie(categorieId: number): Observable<any> {
     return this.http.get<any>(
-      `${this.apiUrl}/demandes-formation/listes/formations/${categorieId}`,
+      `${this.apiUrl}/demandes-formation/listes/formations/categories-formation/${categorieId}`,
       { headers: this.getHeaders() }
     );
   }
