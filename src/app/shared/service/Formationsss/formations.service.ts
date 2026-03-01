@@ -1,11 +1,7 @@
-// src/app/shared/service/Formationsss/formations.service.ts
-
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import {
-  FormationsApiResponse,
-} from '../../models/Formations.models';
+import { FormationsApiResponse } from '../../models/Formations.models';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +12,9 @@ export class FormationsService {
 
   constructor(private http: HttpClient) {}
 
+  // ===============================
+  // 🔐 HEADERS AUTH
+  // ===============================
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('pyramid_token');
 
@@ -30,6 +29,10 @@ export class FormationsService {
     return headers;
   }
 
+  // ===============================
+  // 📚 FORMATIONS
+  // ===============================
+
   /** 🔹 Toutes les formations */
   getAllFormations(): Observable<FormationsApiResponse> {
     return this.http.get<FormationsApiResponse>(
@@ -39,12 +42,24 @@ export class FormationsService {
   }
 
   /** 🔹 Détails formation */
-  getFormationById(id: number): Observable<FormationsApiResponse> {
-    return this.http.get<FormationsApiResponse>(
+  getFormationById(id: number): Observable<any> {
+    return this.http.get<any>(
       `${this.apiUrl}/formations/${id}`,
       { headers: this.getHeaders() }
     );
   }
+
+  /** 🔹 Structure complète formation */
+  getFormationStructure(id: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/formations/${id}/structure`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // ===============================
+  // 🎓 FORMATIONS EMPLOYÉ
+  // ===============================
 
   /** 🔥 Formations suivies par l’employé */
   getMesFormations(): Observable<FormationsApiResponse> {
@@ -62,7 +77,7 @@ export class FormationsService {
     );
   }
 
-  /** 🔥 Nombre de certificats utilisateur */
+  /** 🔥 Nombre de certificats */
   getMyCertificates(): Observable<any> {
     return this.http.get<any>(
       `${this.apiUrl}/mes-certificats`,
@@ -70,83 +85,99 @@ export class FormationsService {
     );
   }
 
-    //Visualiser le certificat
+  /** 🔥 Visualiser certificat */
   viewCertificate(formationId: number): Observable<any> {
-  return this.http.get<any>(
-    `${this.apiUrl}/formations/${formationId}/certificat`,
-    { headers: this.getHeaders() }
-  );
-}
-
-
-// Télécharger le certificat
-downloadCertificate(formationId: number): Observable<Blob> {
-  return this.http.get(
-    `${this.apiUrl}/formations/${formationId}/certificat/download`,
-    {
-      headers: this.getHeaders(),
-      responseType: 'blob'
-    }
-  );
-}
-
-  /** Structure complète formation (modules + Sections) */
-  getFormationStructure(id: number): Observable<any> {
     return this.http.get<any>(
-      `${this.apiUrl}/formations/${id}/structure`,
+      `${this.apiUrl}/formations/${formationId}/certificat`,
       { headers: this.getHeaders() }
     );
   }
+
+  /** 🔥 Télécharger certificat */
+  downloadCertificate(formationId: number): Observable<Blob> {
+    return this.http.get(
+      `${this.apiUrl}/formations/${formationId}/certificat/download`,
+      {
+        headers: this.getHeaders(),
+        responseType: 'blob'
+      }
+    );
+  }
+
+  // ===============================
+  // 📝 DEMANDES FORMATION - LISTES FILTRÉES
+  // ===============================
+
+  /** 🔹 Sessions ouvertes */
   getSessionsOuvertes(): Observable<any> {
-  return this.http.get<any>(
-    `${this.apiUrl}/sessions-formation/ouvertes`,
-    { headers: this.getHeaders() }
-  );
-}
-
-getCatalogues(): Observable<any> {
-  return this.http.get<any>(
-    `${this.apiUrl}/catalogues`,
-    { headers: this.getHeaders() }
-  );
-}
-
-getCategories(): Observable<any> {
-  return this.http.get<any>(
-    `${this.apiUrl}/categories-formation`,
-    { headers: this.getHeaders() }
-  );
-}
-
-getFormationsByCategorie(categorieId: number): Observable<any> {
-  return this.http.get<any>(
-    `${this.apiUrl}/formations?categorie_id=${categorieId}`,
-    { headers: this.getHeaders() }
-  );
-}
-
-//PArcours par categorie
-getParcoursParCategorie(categorieId: number): Observable<any> {
-  return this.http.get<any>(
-    `${this.apiUrl}/parcours/par-categorie/${categorieId}`,
-    { headers: this.getHeaders() }
-  );
-}
-
-// Catalogues de l'employé (filtrés par entreprise)
-getCataloguesEmploye(): Observable<any> {
     return this.http.get<any>(
-        `${this.apiUrl}/employe/catalogues`,
-        { headers: this.getHeaders() }
+      `${this.apiUrl}/demandes-formation/listes/sessions`,
+      { headers: this.getHeaders() }
     );
-}
+  }
 
-// Détail d'un catalogue avec ses formations
-getCatalogueDetail(id: number): Observable<any> {
+  /** 🔹 Catalogues */
+  getCatalogues(): Observable<any> {
     return this.http.get<any>(
-        `${this.apiUrl}/employe/catalogues/${id}`,
-        { headers: this.getHeaders() }
+      `${this.apiUrl}/demandes-formation/listes/catalogues`,
+      { headers: this.getHeaders() }
     );
-}
+  }
 
+  /** 🔹 Catégories */
+  getCategories(): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/demandes-formation/listes/categories`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /** 🔹 Parcours par catégorie */
+  getParcoursParCategorie(categorieId: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/demandes-formation/listes/parcours/${categorieId}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /** 🔹 Formations par catégorie */
+  getFormationsByCategorie(categorieId: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/demandes-formation/listes/formations/${categorieId}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // ===============================
+  // 🏢 CATALOGUES EMPLOYÉ
+  // ===============================
+
+  /** 🔹 Catalogues filtrés par entreprise */
+  getCataloguesEmploye(): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/employe/catalogues`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /** 🔹 Détail catalogue */
+  getCatalogueDetail(id: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/employe/catalogues/${id}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // ===============================
+  // 🔁 DEMANDES
+  // ===============================
+
+  /** 🔹 Relancer une demande */
+  relancerDemande(id: number): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/demandes/${id}/relancer`,
+      {},
+      { headers: this.getHeaders() }
+    );
+  }
 }
