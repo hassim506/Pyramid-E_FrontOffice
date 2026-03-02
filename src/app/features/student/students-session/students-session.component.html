@@ -1,6 +1,4 @@
-<!-- =============================================================== -->
-<!-- TOAST                                                            -->
-<!-- =============================================================== -->
+<!-- TOAST -->
 <div class="lms-toast-container" [class.visible]="toast.visible">
   <div class="lms-toast" [class]="'lms-toast--' + toast.type">
     <div class="lms-toast__icon">
@@ -21,9 +19,7 @@
   </div>
 </div>
 
-<!-- =============================================================== -->
-<!-- PAGE HEADER                                                      -->
-<!-- =============================================================== -->
+<!-- PAGE HEADER -->
 <div class="sc-header mb-4">
   <div class="sc-header__left">
     <h3 class="sc-header__title">Mes demandes de sessions</h3>
@@ -37,43 +33,32 @@
   </div>
 </div>
 
-<!-- =============================================================== -->
-<!-- FILTRES                                                          -->
-<!-- =============================================================== -->
+<!-- FILTRES -->
 <div class="sc-filters mb-4">
   <div class="sc-filters__search">
     <i class="isax isax-search-normal-1 sc-filters__search-icon"></i>
-    <input type="search"
-           class="sc-filters__search-input"
-           placeholder="Rechercher une session..."
-           [(ngModel)]="searchDataValue"
-           (ngModelChange)="searchData(searchDataValue)">
+    <input type="search" class="sc-filters__search-input" placeholder="Rechercher une session..."
+           [(ngModel)]="searchDataValue" (ngModelChange)="searchData(searchDataValue)">
   </div>
-
   <div class="sc-filters__pills">
-    <button class="sc-filters__pill"               [class.sc-filters__pill--active]="selectedStatus === ''"          (click)="filterByStatus('')">Tous</button>
-    <button class="sc-filters__pill sc-filters__pill--attente" [class.sc-filters__pill--active]="selectedStatus === 'en_attente'" (click)="filterByStatus('en_attente')"> En attente</button>
-    <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'"    (click)="filterByStatus('validee')"> Validée</button>
-    <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'"    (click)="filterByStatus('refusee')"> Refusée</button>
-    <button class="sc-filters__pill sc-filters__pill--annulee" [class.sc-filters__pill--active]="selectedStatus === 'annulee'"    (click)="filterByStatus('annulee')"> Annulée</button>
+    <button class="sc-filters__pill"                           [class.sc-filters__pill--active]="selectedStatus === ''"          (click)="filterByStatus('')">Tous</button>
+    <button class="sc-filters__pill sc-filters__pill--attente" [class.sc-filters__pill--active]="selectedStatus === 'en_attente'" (click)="filterByStatus('en_attente')">En attente</button>
+    <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'"    (click)="filterByStatus('validee')">Validée</button>
+    <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'"    (click)="filterByStatus('refusee')">Refusée</button>
+    <button class="sc-filters__pill sc-filters__pill--annulee" [class.sc-filters__pill--active]="selectedStatus === 'annulee'"    (click)="filterByStatus('annulee')">Annulée</button>
   </div>
-
   <button class="sc-filters__reset" (click)="resetFilters()">
     <i class="isax isax-refresh"></i> Réinitialiser
   </button>
 </div>
 
-<!-- =============================================================== -->
-<!-- LOADING                                                          -->
-<!-- =============================================================== -->
+<!-- LOADING -->
 <div *ngIf="loading" class="sc-loading">
   <div class="sc-loading__spinner"></div>
   <p>Chargement de vos demandes de sessions...</p>
 </div>
 
-<!-- =============================================================== -->
-<!-- TABLEAU                                                          -->
-<!-- =============================================================== -->
+<!-- TABLEAU -->
 <div class="card sc-table-card" *ngIf="!loading">
   <div class="card-header sc-table-card__header">
     <div class="sc-table-card__title">
@@ -98,16 +83,12 @@
         <tr *ngFor="let demande of demandes"
             [class.sc-row--refusee]="demande.statut === 'refusee'"
             [class.sc-row--validee]="demande.statut === 'validee'">
-
-          <!-- SESSION -->
           <td>
             <div class="sc-formation">
               <img [src]="demande.image_affiche" class="sc-formation__thumb" alt="">
               <div class="sc-formation__info">
                 <div class="sc-formation__title">{{ demande.titre_affiche }}</div>
-                <small class="sc-formation__sub" *ngIf="demande.sous_titre_affiche">
-                  {{ demande.sous_titre_affiche }}
-                </small>
+                <small class="sc-formation__sub" *ngIf="demande.sous_titre_affiche">{{ demande.sous_titre_affiche }}</small>
                 <div class="sc-formation__details">
                   <span class="sc-detail-chip" *ngIf="demande.session_formation?.type_display">
                     <i class="isax isax-calendar-1 me-1"></i>{{ demande.session_formation.type_display }}
@@ -122,100 +103,67 @@
               </div>
             </div>
           </td>
-
-          <!-- DATE -->
           <td>
             <span class="sc-date">{{ demande.created_at | date:'dd/MM/yyyy' }}</span>
             <span class="sc-date sc-date--time d-block">{{ demande.created_at | date:'HH:mm' }}</span>
           </td>
-
-          <!-- PRIORITÉ -->
           <td class="text-center">
-            <span class="sc-priorite" [ngClass]="getPrioriteClass(demande.priorite)">
-              {{ demande.priorite_display }}
-            </span>
+            <span class="sc-priorite" [ngClass]="getPrioriteClass(demande.priorite)">{{ demande.priorite_display }}</span>
           </td>
-
-          <!-- STATUT + MOTIF REFUS -->
           <td class="text-center">
             <div class="sc-statut-cell">
-              <span class="sc-statut" [ngClass]="getStatutClass(demande.statut)">
-                {{ demande.statut_display }}
-              </span>
-
+              <span class="sc-statut" [ngClass]="getStatutClass(demande.statut)">{{ demande.statut_display }}</span>
               <div class="sc-motif-wrapper"
                    *ngIf="demande.statut === 'refusee' && demande.motif_refus"
-                   (mouseenter)="showMotif(demande.id)"
-                   (mouseleave)="hideMotif()">
-                <button class="sc-motif-btn">
-                  <i class="isax isax-info-circle"></i> Motif
-                </button>
+                   (mouseenter)="showMotif(demande.id)" (mouseleave)="hideMotif()">
+                <button class="sc-motif-btn"><i class="isax isax-info-circle"></i> Motif</button>
                 <div class="sc-motif-tooltip" *ngIf="isMotifVisible(demande.id)">
-                  <div class="sc-motif-tooltip__header">
-                    <i class="isax isax-close-circle me-1"></i>Motif de refus
-                  </div>
+                  <div class="sc-motif-tooltip__header"><i class="isax isax-close-circle me-1"></i>Motif de refus</div>
                   <p class="sc-motif-tooltip__body">{{ demande.motif_refus }}</p>
-                  <div class="sc-motif-tooltip__responsable"
-                       *ngIf="showRefusePerson && demande.traite_par_nom">
-                    <i class="isax isax-user me-1"></i>
-                    Refusé par : <strong>{{ demande.traite_par_nom }}</strong>
+                  <div class="sc-motif-tooltip__responsable" *ngIf="showRefusePerson && demande.traite_par_nom">
+                    <i class="isax isax-user me-1"></i>Refusé par : <strong>{{ demande.traite_par_nom }}</strong>
                   </div>
                   <div class="sc-motif-tooltip__footer" *ngIf="demande.commentaire_rh">
-                    <i class="isax isax-message-text me-1"></i>
-                    <em>{{ demande.commentaire_rh }}</em>
+                    <i class="isax isax-message-text me-1"></i><em>{{ demande.commentaire_rh }}</em>
                   </div>
                 </div>
               </div>
             </div>
           </td>
-
-          <!-- ACTION -->
           <td class="text-center">
             <div class="d-flex flex-column align-items-center gap-1">
-              <button *ngIf="demande.statut === 'en_attente'"
-                      class="sc-btn-annuler"
-                      (click)="annulerDemande(demande.id)">
+              <button *ngIf="demande.statut === 'en_attente'" class="sc-btn-annuler" (click)="annulerDemande(demande.id)">
                 <i class="isax isax-close-circle me-1"></i>Annuler
               </button>
-              <button *ngIf="demande.statut === 'en_attente'"
-                      class="sc-btn-relancer"
-                      (click)="relancerDemande(demande.id)">
+              <button *ngIf="demande.statut === 'en_attente'" class="sc-btn-relancer" (click)="relancerDemande(demande.id)">
                 <i class="isax isax-refresh me-1"></i>Relancer
               </button>
               <span *ngIf="demande.statut !== 'en_attente'" class="text-muted small">—</span>
             </div>
           </td>
-
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- =============================================================== -->
-<!-- EMPTY                                                            -->
-<!-- =============================================================== -->
+<!-- EMPTY -->
 <div *ngIf="!loading && demandes.length === 0" class="sc-empty">
   <div class="sc-empty__icon"><i class="isax isax-calendar-1"></i></div>
   <h5 class="sc-empty__title">Aucune demande de session trouvée</h5>
   <p>Vos futures demandes de sessions apparaîtront ici.</p>
- 
 </div>
 
-<!-- =============================================================== -->
-<!-- PAGINATION                                                       -->
-<!-- =============================================================== -->
+<!-- PAGINATION -->
 <app-custom-pagination
   *ngIf="!loading && totalData > pageSize"
-  [totalItems]="totalData"
-  [pageSize]="pageSize"
-  [currentPage]="currentPage"
+  [totalItems]="totalData" [pageSize]="pageSize" [currentPage]="currentPage"
   (pageChange)="onPageChange($event)">
 </app-custom-pagination>
 
-<!-- =============================================================== -->
-<!-- MODAL NOUVELLE DEMANDE (modal complet avec les 4 types)          -->
-<!-- =============================================================== -->
+<!-- ============================================================= -->
+<!-- MODAL — SESSION UNIQUEMENT (pas de choix de type)             -->
+<!-- ============================================================= -->
 <div class="modal fade" id="demandeSessionModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content lms-modal">
@@ -225,8 +173,8 @@
         <div class="d-flex align-items-center gap-3">
           <div class="lms-modal__icon"><i class="isax isax-calendar-1"></i></div>
           <div>
-            <h5 class="modal-title mb-0">Formulaire de demande de formations</h5>
-            <small>Choisissez le type et complétez le formulaire</small>
+            <h5 class="modal-title mb-0">Demande de session</h5>
+            <small>Sélectionnez une session disponible</small>
           </div>
         </div>
         <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
@@ -235,220 +183,80 @@
       <!-- BODY -->
       <div class="modal-body lms-modal__body">
 
-        <!-- ═══ ÉTAPE 1 : TYPE ═══════════════════════════════════ -->
+        <!-- ÉTAPE 1 : CHOIX SESSION -->
         <div class="lms-step mb-4">
           <div class="lms-step__header mb-3">
-            <span class="lms-step__number">1</span>
-            <p class="lms-step__title">Type de demande <span class="text-danger">*</span></p>
+            <span class="lms-step__number lms-step__number--blue">1</span>
+            <p class="lms-step__title">Choisir une session <span class="text-danger">*</span></p>
           </div>
 
-          <div class="row g-2" *ngIf="!typeDemande">
-            <div class="col-6 col-md-3" *ngFor="let type of typesDemande">
-              <div class="lms-type-card" (click)="onTypeChange(type.value)">
-                <i [class]="type.icon + ' lms-type-card__icon'"></i>
-                <div class="lms-type-card__label">{{ type.label }}</div>
-                <small class="lms-type-card__desc">{{ type.description }}</small>
+          <div *ngIf="loadingSessions" class="lms-loading">
+            <div class="spinner-border text-primary"></div><span>Chargement des sessions...</span>
+          </div>
+
+          <div *ngIf="!loadingSessions">
+            <div class="lms-session-card"
+                 *ngFor="let session of sessions"
+                 [class.lms-session-card--active]="selectedSessionId === session.id"
+                 (click)="selectedSessionId = session.id">
+              <div class="lms-session-card__info">
+                <div class="lms-session-card__title">{{ session.formation?.titre }}</div>
+                <div class="lms-session-card__meta">
+                  <i class="isax isax-calendar-1 me-1"></i>
+                  {{ session.titre }} — {{ session.date_debut | date:'dd/MM/yyyy' }}
+                  <span class="badge bg-info ms-2">{{ session.type_display }}</span>
+                  <span *ngIf="session.lieu" class="ms-2">
+                    <i class="isax isax-location me-1"></i>{{ session.lieu }}
+                  </span>
+                </div>
               </div>
+              <span class="lms-session-card__places">{{ session.places_restantes }} places</span>
             </div>
-          </div>
-
-          <div *ngIf="typeDemande" class="lms-type-selected">
-            <div class="lms-type-selected__chip">
-              <i [class]="getTypeIcon(typeDemande) + ' me-2'"></i>
-              <span>{{ getTypeLabel(typeDemande) }}</span>
+            <div *ngIf="sessions.length === 0" class="lms-empty-inline">
+              <i class="isax isax-calendar-remove"></i><span>Aucune session disponible</span>
             </div>
-            <button class="lms-type-selected__change" (click)="resetType()">
-              <i class="isax isax-refresh me-1"></i>Changer
-            </button>
           </div>
         </div>
 
-        <!-- ═══ CONTENU SELON LE TYPE ════════════════════════════ -->
-        <ng-container *ngIf="typeDemande">
+        <hr class="lms-divider">
 
-          <!-- SESSION -->
-          <div *ngIf="typeDemande === 'session'" class="mb-4">
-            <div class="lms-step__header mb-3">
-              <span class="lms-step__number lms-step__number--blue">2</span>
-              <p class="lms-step__title">Choisir une session <span class="text-danger">*</span></p>
-            </div>
-            <div *ngIf="loadingSessions" class="lms-loading">
-              <div class="spinner-border text-primary"></div><span>Chargement...</span>
-            </div>
-            <div *ngIf="!loadingSessions">
-              <div class="lms-session-card"
-                   *ngFor="let session of sessions"
-                   [class.lms-session-card--active]="selectedSessionId === session.id"
-                   (click)="selectedSessionId = session.id">
-                <div class="lms-session-card__info">
-                  <div class="lms-session-card__title">{{ session.formation?.titre }}</div>
-                  <div class="lms-session-card__meta">
-                    <i class="isax isax-calendar-1 me-1"></i>
-                    {{ session.titre }} — {{ session.date_debut | date:'dd/MM/yyyy' }}
-                    <span class="badge bg-info ms-2">{{ session.type_display }}</span>
-                    <span *ngIf="session.lieu" class="ms-2">
-                      <i class="isax isax-location me-1"></i>{{ session.lieu }}
-                    </span>
-                  </div>
-                </div>
-                <span class="lms-session-card__places">{{ session.places_restantes }} places</span>
+        <!-- ÉTAPE 2 : INFOS COMPLÉMENTAIRES -->
+        <div class="lms-step__header mb-3">
+          <span class="lms-step__number lms-step__number--blue">2</span>
+          <p class="lms-step__title">Informations complémentaires</p>
+        </div>
+
+        <form [formGroup]="form">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Motif de la demande <span class="text-danger">*</span></label>
+              <textarea class="form-control lms-input" formControlName="motif_demande" rows="3"
+                        placeholder="Pourquoi souhaitez-vous cette session ?"></textarea>
+              <div *ngIf="form.get('motif_demande')?.invalid && form.get('motif_demande')?.touched" class="lms-field-error">
+                <i class="isax isax-info-circle me-1"></i>Le motif est obligatoire.
               </div>
-              <div *ngIf="sessions.length === 0" class="lms-empty-inline">
-                <i class="isax isax-calendar-remove"></i><span>Aucune session disponible</span>
-              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Objectifs personnels</label>
+              <textarea class="form-control lms-input" formControlName="objectifs_personnels" rows="2"
+                        placeholder="Qu'espérez-vous acquérir ?"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Priorité</label>
+              <select class="form-select lms-input" formControlName="priorite">
+                <option value="basse">🟢 Basse</option>
+                <option value="normale">🟡 Normale</option>
+                <option value="haute">🟠 Haute</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Commentaire <span class="text-muted small">(optionnel)</span></label>
+              <textarea class="form-control lms-input" formControlName="commentaire_employe" rows="2"
+                        placeholder="Informations complémentaires..."></textarea>
             </div>
           </div>
+        </form>
 
-          <!-- CATALOGUE 
-          <div *ngIf="typeDemande === 'catalogue'" class="mb-4">
-            <div class="lms-step__header mb-1">
-              <span class="lms-step__number lms-step__number--green">2</span>
-              <p class="lms-step__title">Choisir un ou plusieurs catalogues <span class="text-danger">*</span></p>
-            </div>
-            <p class="lms-hint"><i class="isax isax-info-circle me-1"></i>La demande inclut toutes les formations du catalogue sélectionné.</p>
-            <div *ngIf="loadingCatalogues" class="lms-loading"><div class="spinner-border text-primary"></div></div>
-            <div class="row g-2" *ngIf="!loadingCatalogues">
-              <div class="col-md-6" *ngFor="let cat of catalogues">
-                <div class="lms-select-card lms-select-card--green"
-                     [class.lms-select-card--active]="isCatalogueSelected(cat.id)"
-                     (click)="toggleCatalogue(cat.id)">
-                  <i *ngIf="isCatalogueSelected(cat.id)" class="isax isax-tick-circle lms-select-card__check"></i>
-                  <div class="lms-select-card__title">{{ cat.titre }}</div>
-                  <div class="lms-select-card__sub"><i class="isax isax-book-1 me-1"></i>{{ cat.nombre_formations }} formation(s)</div>
-                </div>
-              </div>
-              <div *ngIf="catalogues.length === 0" class="col-12">
-                <div class="lms-empty-inline"><i class="isax isax-book-saved"></i><span>Aucun catalogue disponible</span></div>
-              </div>
-            </div>
-            <div *ngIf="selectedCatalogueIds.length > 0" class="lms-selection-badge lms-selection-badge--green mt-2">
-              <i class="isax isax-tick-circle me-1"></i>{{ selectedCatalogueIds.length }} catalogue(s) sélectionné(s)
-            </div>
-          </div>
-          -->
-          <!-- PARCOURS 
-          <div *ngIf="typeDemande === 'parcours'" class="mb-4">
-            <div class="lms-step__header mb-2">
-              <span class="lms-step__number lms-step__number--purple">2</span>
-              <p class="lms-step__title">Choisir une catégorie <span class="text-danger">*</span></p>
-            </div>
-            <select class="form-select lms-input mb-4" [(ngModel)]="selectedCategorieId" (change)="onCategorieChange()">
-              <option value="">-- Sélectionner une catégorie --</option>
-              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.nom }}</option>
-            </select>
-            <ng-container *ngIf="selectedCategorieId">
-              <div class="lms-step__header mb-2">
-                <span class="lms-step__number lms-step__number--purple">3</span>
-                <p class="lms-step__title">Choisir un ou plusieurs parcours <span class="text-danger">*</span></p>
-              </div>
-              <div *ngIf="loadingParcours" class="lms-loading"><div class="spinner-border text-primary"></div></div>
-              <div class="row g-2" *ngIf="!loadingParcours">
-                <div class="col-md-6" *ngFor="let p of parcours">
-                  <div class="lms-select-card lms-select-card--purple"
-                       [class.lms-select-card--active]="isParcoursSelected(p.id)"
-                       (click)="toggleParcours(p.id)">
-                    <i *ngIf="isParcoursSelected(p.id)" class="isax isax-tick-circle lms-select-card__check"></i>
-                    <div class="lms-select-card__title">{{ p.titre }}</div>
-                    <div class="lms-select-card__sub"><i class="isax isax-routing me-1"></i>{{ p.nombre_formations }} formation(s)</div>
-                  </div>
-                </div>
-                <div *ngIf="parcours.length === 0" class="col-12">
-                  <div class="lms-empty-inline"><i class="isax isax-routing"></i><span>Aucun parcours dans cette catégorie</span></div>
-                </div>
-              </div>
-            </ng-container>
-          </div>
-          -->
-          <!-- FORMATION SPÉCIFIQUE 
-          <div *ngIf="typeDemande === 'formation'" class="mb-4">
-            <div class="lms-step__header mb-2">
-              <span class="lms-step__number lms-step__number--orange">2</span>
-              <p class="lms-step__title">Choisir une catégorie <span class="text-danger">*</span></p>
-            </div>
-            <select class="form-select lms-input mb-4" [(ngModel)]="selectedCategorieId" (change)="onCategorieChange()">
-              <option value="">-- Sélectionner une catégorie --</option>
-              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.nom }}</option>
-            </select>
-            <ng-container *ngIf="selectedCategorieId">
-              <div class="lms-step__header mb-2">
-                <span class="lms-step__number lms-step__number--orange">3</span>
-                <p class="lms-step__title">Choisir une ou plusieurs formations <span class="text-muted small">(optionnel)</span></p>
-              </div>
-              <div *ngIf="loadingFormations" class="lms-loading"><div class="spinner-border text-primary"></div></div>
-              <div class="row g-2" *ngIf="!loadingFormations">
-                <div class="col-md-6" *ngFor="let f of formations">
-                  <div class="lms-select-card lms-select-card--orange"
-                       [class.lms-select-card--active]="isFormationSelected(f.id)"
-                       (click)="toggleFormation(f.id)">
-                    <i *ngIf="isFormationSelected(f.id)" class="isax isax-tick-circle lms-select-card__check"></i>
-                    <div class="lms-select-card__title">{{ f.titre }}</div>
-                    <div class="lms-select-card__sub">
-                      <span class="badge bg-secondary me-1">{{ f.niveau }}</span>
-                      <i class="isax isax-clock me-1"></i>{{ f.duree_totale }}h
-                    </div>
-                  </div>
-                </div>
-                <div *ngIf="formations.length === 0" class="col-12">
-                  <div class="lms-empty-inline"><i class="isax isax-teacher"></i><span>Aucune formation dans cette catégorie</span></div>
-                </div>
-              </div>
-            </ng-container>
-          </div>
-          -->
-
-          <!-- DIVIDER -->
-          <hr class="lms-divider">
-
-          <!-- ÉTAPE INFOS COMPLÉMENTAIRES -->
-          <div class="lms-step__header mb-3">
-            <span class="lms-step__number">
-              {{ (typeDemande === 'session' || typeDemande === 'catalogue') ? '3' : '4' }}
-            </span>
-            <p class="lms-step__title">Informations complémentaires</p>
-          </div>
-
-          <form [formGroup]="form">
-            <div class="row g-3">
-              <div class="col-12">
-                <label class="form-label fw-semibold">
-                  Motif de la demande <span class="text-danger">*</span>
-                </label>
-                <textarea class="form-control lms-input"
-                          formControlName="motif_demande"
-                          rows="3"
-                          placeholder="Pourquoi souhaitez-vous cette formation ?"></textarea>
-                <div *ngIf="form.get('motif_demande')?.invalid && form.get('motif_demande')?.touched"
-                     class="lms-field-error">
-                  <i class="isax isax-info-circle me-1"></i>Le motif est obligatoire.
-                </div>
-              </div>
-              <div class="col-12">
-                <label class="form-label fw-semibold">Objectifs personnels</label>
-                <textarea class="form-control lms-input"
-                          formControlName="objectifs_personnels"
-                          rows="2"
-                          placeholder="Qu'espérez-vous acquérir ?"></textarea>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Priorité</label>
-                <select class="form-select lms-input" formControlName="priorite">
-                  <option value="basse">🟢 Basse</option>
-                  <option value="normale">🟡 Normale</option>
-                  <option value="haute">🟠 Haute</option>
-                </select>
-              </div>
-             
-              <div class="col-12">
-                <label class="form-label">Commentaire <span class="text-muted small">(optionnel)</span></label>
-                <textarea class="form-control lms-input"
-                          formControlName="commentaire_employe"
-                          rows="2"
-                          placeholder="Informations complémentaires..."></textarea>
-              </div>
-            </div>
-          </form>
-
-        </ng-container>
       </div>
 
       <!-- FOOTER -->
