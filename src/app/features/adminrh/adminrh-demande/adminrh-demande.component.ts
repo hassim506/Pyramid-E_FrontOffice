@@ -419,20 +419,24 @@ export class AdminrhDemandeComponent implements OnInit {
     return statutMap[statut] || 'badge bg-secondary';
   }
 
-  getPrioriteClass(priorite: string): string {
+  // ============================================================
+// REMPLACE ces 3 méthodes dans adminrh-demande.component.ts
+// ============================================================
+
+  // ✅ Corrigé : priorite peut être undefined
+  getPrioriteClass(priorite: string | undefined): string {
     const prioriteMap: Record<string, string> = {
-      'basse': 'badge bg-light text-dark',
+      'basse':   'badge bg-light text-dark',
       'normale': 'badge bg-info',
-      'haute': 'badge bg-warning',
+      'haute':   'badge bg-warning',
       'urgente': 'badge bg-danger'
     };
-
-    return prioriteMap[priorite] || 'badge bg-secondary';
+    return prioriteMap[priorite ?? ''] || 'badge bg-secondary';
   }
 
-  formatDate(date: string | undefined): string {
+  // ✅ Corrigé : date peut être string | null | undefined
+  formatDate(date: string | null | undefined): string {
     if (!date) return 'Non spécifié';
-    
     try {
       return new Date(date).toLocaleDateString('fr-FR');
     } catch {
@@ -440,9 +444,9 @@ export class AdminrhDemandeComponent implements OnInit {
     }
   }
 
-  formatDateTime(date: string | undefined): string {
+  // ✅ Corrigé : date peut être string | null | undefined
+  formatDateTime(date: string | null | undefined): string {
     if (!date) return 'Non spécifié';
-    
     try {
       return new Date(date).toLocaleString('fr-FR');
     } catch {

@@ -18,15 +18,15 @@ interface Toast {
 
 @Component({
   standalone: true,
-  selector: 'app-student-certificate',
-  templateUrl: './student-certificate.component.html',
-  styleUrl: './student-certificate.component.scss',
+  selector: 'app-students-sessions',
+  templateUrl: './students-session.component.html',
+  styleUrl: './students-session.component.scss',
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, CustomPaginationComponent]
 })
-export class StudentCertificateComponent implements OnInit {
+export class StudentsSessionsComponent implements OnInit {
 
   // ================================
-  // LISTE DEMANDES
+  // LISTE DEMANDES (filtrée sessions)
   // ================================
   loading      = true;
   allDemandes: any[] = [];
@@ -50,8 +50,8 @@ export class StudentCertificateComponent implements OnInit {
   // ================================
   // UI STATE
   // ================================
-  hoveredMotifId:   number | null = null;
-  showRefusePerson  = false;
+  hoveredMotifId:  number | null = null;
+  showRefusePerson = false;
 
   // ================================
   // TOAST
@@ -62,16 +62,18 @@ export class StudentCertificateComponent implements OnInit {
   // ================================
   // MODAL DEMANDE
   // ================================
-  submitting          = false;
+  submitting           = false;
   private modalInstance: any;
 
-  // Type de demande
+  // Type de demande (modal complet avec les 4 types)
   typeDemande: TypeDemande | null = null;
 
   typesDemande: { value: TypeDemande; label: string; icon: string; description: string }[] = [
-   
-    { value: 'formation', label: 'Formation', icon: 'isax isax-teacher',     description: 'Demande d\'une formation spécifique'      },
-  ];
+    { value: 'session',   label: 'Session',   icon: 'isax isax-calendar-1', description: 'Formation planifiée à une date précise' }
+   /* { value: 'catalogue', label: 'Catalogue', icon: 'isax isax-book-1',     description: 'Ensemble de formations groupées'         },
+    { value: 'parcours',  label: 'Parcours',  icon: 'isax isax-routing',    description: 'Parcours structuré par domaine métier'   },
+    { value: 'formation', label: 'Formation', icon: 'isax isax-teacher',    description: 'Demande d\'une formation spécifique'      },
+  */];
 
   // Données dynamiques modal
   sessions:   any[] = [];
@@ -123,15 +125,18 @@ export class StudentCertificateComponent implements OnInit {
   get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length;    }
 
   // ================================
-  // CHARGEMENT LISTE
+  // CHARGEMENT LISTE — filtré sur 'session'
   // ================================
   loadDemandes(): void {
     this.loading = true;
     this.demandeFormationService.getMesDemandes().subscribe({
       next: (res: any) => {
-        const raw        = res.demandes ?? res;
-        this.allDemandes = raw.map((d: any) => this.normaliserDemande(d));
-        this.totalData   = this.allDemandes.length;
+        const raw = res.demandes ?? res;
+        // ⚡ Filtre : uniquement les demandes de type 'session'
+        this.allDemandes = raw
+          .filter((d: any) => d.type_demande === 'session')
+          .map((d: any) => this.normaliserDemande(d));
+        this.totalData = this.allDemandes.length;
         this.getTableData(this.skip, this.limit);
         this.loading = false;
       },
@@ -210,26 +215,25 @@ export class StudentCertificateComponent implements OnInit {
       filtered = filtered.filter(d =>
         d.titre_affiche?.toLowerCase().includes(s) ||
         d.sous_titre_affiche?.toLowerCase().includes(s) ||
-        d.catalogue?.titre?.toLowerCase().includes(s) ||
-        d.parcours?.titre?.toLowerCase().includes(s)
+        d.session_formation?.titre?.toLowerCase().includes(s)
       );
     }
     this.totalData = filtered.length;
     this.demandes  = filtered.slice(skip, skip + limit);
   }
 
-  searchData(value: string): void    { this.searchDataValue = value; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  searchData(value: string): void      { this.searchDataValue = value; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
   filterByStatus(status: string): void { this.selectedStatus = status; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  resetFilters(): void               { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  onPageChange(page: number): void   { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
+  resetFilters(): void                 { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  onPageChange(page: number): void     { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
 
   // ================================
   // TOOLTIP MOTIF REFUS
   // ================================
-  showMotif(id: number): void              { this.hoveredMotifId = id; }
-  hideMotif(): void                        { this.hoveredMotifId = null; }
-  isMotifVisible(id: number): boolean      { return this.hoveredMotifId === id; }
-  toggleShowRefusePerson(): void           { this.showRefusePerson = !this.showRefusePerson; }
+  showMotif(id: number): void         { this.hoveredMotifId = id; }
+  hideMotif(): void                   { this.hoveredMotifId = null; }
+  isMotifVisible(id: number): boolean { return this.hoveredMotifId === id; }
+  toggleShowRefusePerson(): void      { this.showRefusePerson = !this.showRefusePerson; }
 
   // ================================
   // ACTIONS TABLEAU
@@ -261,7 +265,7 @@ export class StudentCertificateComponent implements OnInit {
   // MODAL — OUVERTURE / FERMETURE
   // ================================
   openRequestModal(): void {
-    const el = document.getElementById('demandeFormationModal');
+    const el = document.getElementById('demandeSessionModal');
     if (el) {
       this.modalInstance = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
       this.modalInstance.show();
@@ -273,7 +277,6 @@ export class StudentCertificateComponent implements OnInit {
     this.resetModal();
   }
 
-  // Remet uniquement le type à null → réaffiche les 4 cards
   resetType(): void {
     this.typeDemande          = null;
     this.selectedSessionId    = null;
@@ -285,13 +288,8 @@ export class StudentCertificateComponent implements OnInit {
     this.formations           = [];
   }
 
-  getTypeIcon(type: TypeDemande): string {
-    return this.typesDemande.find(t => t.value === type)?.icon ?? 'isax isax-book';
-  }
-
-  getTypeLabel(type: TypeDemande): string {
-    return this.typesDemande.find(t => t.value === type)?.label ?? type;
-  }
+  getTypeIcon(type: TypeDemande): string  { return this.typesDemande.find(t => t.value === type)?.icon  ?? 'isax isax-book'; }
+  getTypeLabel(type: TypeDemande): string { return this.typesDemande.find(t => t.value === type)?.label ?? type; }
 
   private resetModal(): void {
     this.typeDemande          = null;
@@ -334,7 +332,7 @@ export class StudentCertificateComponent implements OnInit {
     });
   }
 
-     loadCatalogues(): void {
+  loadCatalogues(): void {
     this.loadingCatalogues = true;
     this.formationsService.getCatalogues().subscribe({
       next: (res: any) => { this.catalogues = res.catalogues ?? []; this.loadingCatalogues = false; },
@@ -377,13 +375,13 @@ export class StudentCertificateComponent implements OnInit {
   // ================================
   // MODAL — TOGGLES SÉLECTION
   // ================================
-  toggleCatalogue(id: number): void { const i = this.selectedCatalogueIds.indexOf(id); i === -1 ? this.selectedCatalogueIds.push(id) : this.selectedCatalogueIds.splice(i, 1); }
+  toggleCatalogue(id: number): void        { const i = this.selectedCatalogueIds.indexOf(id); i === -1 ? this.selectedCatalogueIds.push(id) : this.selectedCatalogueIds.splice(i, 1); }
   isCatalogueSelected(id: number): boolean { return this.selectedCatalogueIds.includes(id); }
 
-  toggleParcours(id: number): void  { const i = this.selectedParcoursIds.indexOf(id);  i === -1 ? this.selectedParcoursIds.push(id)  : this.selectedParcoursIds.splice(i, 1);  }
+  toggleParcours(id: number): void         { const i = this.selectedParcoursIds.indexOf(id);  i === -1 ? this.selectedParcoursIds.push(id)  : this.selectedParcoursIds.splice(i, 1);  }
   isParcoursSelected(id: number): boolean  { return this.selectedParcoursIds.includes(id);  }
 
-  toggleFormation(id: number): void { const i = this.selectedFormationIds.indexOf(id); i === -1 ? this.selectedFormationIds.push(id) : this.selectedFormationIds.splice(i, 1); }
+  toggleFormation(id: number): void        { const i = this.selectedFormationIds.indexOf(id); i === -1 ? this.selectedFormationIds.push(id) : this.selectedFormationIds.splice(i, 1); }
   isFormationSelected(id: number): boolean { return this.selectedFormationIds.includes(id); }
 
   // ================================

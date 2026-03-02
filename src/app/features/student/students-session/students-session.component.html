@@ -26,47 +26,16 @@
 <!-- =============================================================== -->
 <div class="sc-header mb-4">
   <div class="sc-header__left">
-    <h3 class="sc-header__title">Mes demandes de formation</h3>
-    <p class="sc-header__subtitle">Suivez l'état de vos demandes soumises à l'entreprise</p>
+    <h3 class="sc-header__title">Mes demandes de sessions</h3>
+    <p class="sc-header__subtitle">Suivez l'état de vos demandes de sessions soumises à l'entreprise</p>
   </div>
   <div class="sc-header__actions">
-    <!--button class="sc-header__toggle-btn"
-            [class.sc-header__toggle-btn--active]="showRefusePerson"
-            (click)="toggleShowRefusePerson()"
-            title="Afficher / masquer le responsable du refus">
-      <i class="isax isax-eye"       *ngIf="!showRefusePerson"></i>
-      <i class="isax isax-eye-slash" *ngIf="showRefusePerson"></i>
-      {{ showRefusePerson ? 'Masquer responsable' : 'Voir responsable' }}
-    </button>-->
     <button class="sc-header__new-btn" (click)="openRequestModal()">
       <i class="isax isax-add-circle"></i>
       Nouvelle demande
     </button>
   </div>
 </div>
-
-<!-- =============================================================== -->
-<!-- STATS                                                            -->
-<!-- =============================================================== 
-<div class="sc-stats mb-4" *ngIf="!loading">
-  <div class="sc-stat sc-stat--total">
-    <span class="sc-stat__value">{{ allDemandes.length }}</span>
-    <span class="sc-stat__label">Total</span>
-  </div>
-  <div class="sc-stat sc-stat--attente">
-    <span class="sc-stat__value">{{ totalEnAttente }}</span>
-    <span class="sc-stat__label">En attente</span>
-  </div>
-  <div class="sc-stat sc-stat--validee">
-    <span class="sc-stat__value">{{ totalValidees }}</span>
-    <span class="sc-stat__label">Validées</span>
-  </div>
-  <div class="sc-stat sc-stat--refusee">
-    <span class="sc-stat__value">{{ totalRefusees }}</span>
-    <span class="sc-stat__label">Refusées</span>
-  </div>
-</div>
--->
 
 <!-- =============================================================== -->
 <!-- FILTRES                                                          -->
@@ -76,17 +45,17 @@
     <i class="isax isax-search-normal-1 sc-filters__search-icon"></i>
     <input type="search"
            class="sc-filters__search-input"
-           placeholder="Rechercher une formation, catalogue, parcours..."
+           placeholder="Rechercher une session..."
            [(ngModel)]="searchDataValue"
            (ngModelChange)="searchData(searchDataValue)">
   </div>
 
   <div class="sc-filters__pills">
-    <button class="sc-filters__pill" [class.sc-filters__pill--active]="selectedStatus === ''" (click)="filterByStatus('')">Tous</button>
+    <button class="sc-filters__pill"               [class.sc-filters__pill--active]="selectedStatus === ''"          (click)="filterByStatus('')">Tous</button>
     <button class="sc-filters__pill sc-filters__pill--attente" [class.sc-filters__pill--active]="selectedStatus === 'en_attente'" (click)="filterByStatus('en_attente')"> En attente</button>
-    <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'" (click)="filterByStatus('validee')"> Validée</button>
-    <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'" (click)="filterByStatus('refusee')"> Refusée</button>
-    <button class="sc-filters__pill sc-filters__pill--annulee" [class.sc-filters__pill--active]="selectedStatus === 'annulee'" (click)="filterByStatus('annulee')"> Annulée</button>
+    <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'"    (click)="filterByStatus('validee')"> Validée</button>
+    <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'"    (click)="filterByStatus('refusee')"> Refusée</button>
+    <button class="sc-filters__pill sc-filters__pill--annulee" [class.sc-filters__pill--active]="selectedStatus === 'annulee'"    (click)="filterByStatus('annulee')"> Annulée</button>
   </div>
 
   <button class="sc-filters__reset" (click)="resetFilters()">
@@ -99,7 +68,7 @@
 <!-- =============================================================== -->
 <div *ngIf="loading" class="sc-loading">
   <div class="sc-loading__spinner"></div>
-  <p>Chargement de vos demandes...</p>
+  <p>Chargement de vos demandes de sessions...</p>
 </div>
 
 <!-- =============================================================== -->
@@ -108,8 +77,8 @@
 <div class="card sc-table-card" *ngIf="!loading">
   <div class="card-header sc-table-card__header">
     <div class="sc-table-card__title">
-      <i class="isax isax-book text-primary me-2"></i>
-      Historique des demandes
+      <i class="isax isax-calendar-1 text-primary me-2"></i>
+      Historique des demandes de sessions
       <span class="sc-table-card__count">{{ totalData }}</span>
     </div>
   </div>
@@ -118,8 +87,7 @@
     <table class="table sc-table align-middle mb-0">
       <thead>
         <tr>
-          <th style="min-width:280px;">Demande</th>
-          
+          <th style="min-width:280px;">Session</th>
           <th>Date de soumission</th>
           <th class="text-center">Priorité</th>
           <th class="text-center" style="min-width:160px;">Statut</th>
@@ -131,7 +99,7 @@
             [class.sc-row--refusee]="demande.statut === 'refusee'"
             [class.sc-row--validee]="demande.statut === 'validee'">
 
-          <!-- DEMANDE -->
+          <!-- SESSION -->
           <td>
             <div class="sc-formation">
               <img [src]="demande.image_affiche" class="sc-formation__thumb" alt="">
@@ -141,27 +109,19 @@
                   {{ demande.sous_titre_affiche }}
                 </small>
                 <div class="sc-formation__details">
-                  <span class="sc-detail-chip" *ngIf="demande.formation?.niveau">
-                    <i class="isax isax-chart me-1"></i>{{ demande.formation.niveau }}
+                  <span class="sc-detail-chip" *ngIf="demande.session_formation?.type_display">
+                    <i class="isax isax-calendar-1 me-1"></i>{{ demande.session_formation.type_display }}
                   </span>
-                  <span class="sc-detail-chip" *ngIf="demande.formation?.duree_totale">
-                    <i class="isax isax-clock me-1"></i>{{ demande.formation.duree_totale }}h
+                  <span class="sc-detail-chip" *ngIf="demande.session_formation?.lieu">
+                    <i class="isax isax-location me-1"></i>{{ demande.session_formation.lieu }}
                   </span>
-                   <!--<span class="sc-detail-chip" *ngIf="demande.catalogue?.nombre_formations">
-                    <i class="isax isax-book-1 me-1"></i>{{ demande.catalogue.nombre_formations }} formations
-                  </span>-->
+                  <span class="sc-detail-chip" *ngIf="demande.session_formation?.places_restantes != null">
+                    <i class="isax isax-people me-1"></i>{{ demande.session_formation.places_restantes }} places
+                  </span>
                 </div>
               </div>
             </div>
           </td>
-
-          <!-- TYPE 
-          <td>
-            <span class="sc-type-badge" [ngClass]="getTypeBadgeClass(demande.type_demande)">
-              <i [class]="demande.icone_type + ' me-1'"></i>{{ demande.label_type }}
-            </span>
-          </td>
-          -->
 
           <!-- DATE -->
           <td>
@@ -208,24 +168,20 @@
               </div>
             </div>
           </td>
-        
 
           <!-- ACTION -->
-          <td class="text-end">
-            <div class="btn-group btn-group-sm" role="group">
-              <button *ngIf="demande.statut === 'en_attente'"
-                      class="sc-btn-relancer"
-                      title="Relancer l'administration"
-                      (click)="relancerDemande(demande.id)">
-                <i class="isax isax-refresh me-1"></i>
-              </button>
+          <td class="text-center">
+            <div class="d-flex flex-column align-items-center gap-1">
               <button *ngIf="demande.statut === 'en_attente'"
                       class="sc-btn-annuler"
-                      title="Annuler demande"
                       (click)="annulerDemande(demande.id)">
-                <i class="isax isax-close-circle me-1"></i>
+                <i class="isax isax-close-circle me-1"></i>Annuler
               </button>
-              
+              <button *ngIf="demande.statut === 'en_attente'"
+                      class="sc-btn-relancer"
+                      (click)="relancerDemande(demande.id)">
+                <i class="isax isax-refresh me-1"></i>Relancer
+              </button>
               <span *ngIf="demande.statut !== 'en_attente'" class="text-muted small">—</span>
             </div>
           </td>
@@ -240,9 +196,9 @@
 <!-- EMPTY                                                            -->
 <!-- =============================================================== -->
 <div *ngIf="!loading && demandes.length === 0" class="sc-empty">
-  <div class="sc-empty__icon"><i class="isax isax-book"></i></div>
-  <h5 class="sc-empty__title">Aucune demande trouvée</h5>
-  <p>Vos futures demandes de formation apparaîtront ici.</p>
+  <div class="sc-empty__icon"><i class="isax isax-calendar-1"></i></div>
+  <h5 class="sc-empty__title">Aucune demande de session trouvée</h5>
+  <p>Vos futures demandes de sessions apparaîtront ici.</p>
  
 </div>
 
@@ -258,16 +214,16 @@
 </app-custom-pagination>
 
 <!-- =============================================================== -->
-<!-- MODAL NOUVELLE DEMANDE                                           -->
+<!-- MODAL NOUVELLE DEMANDE (modal complet avec les 4 types)          -->
 <!-- =============================================================== -->
-<div class="modal fade" id="demandeFormationModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="demandeSessionModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content lms-modal">
 
       <!-- HEADER -->
       <div class="modal-header lms-modal__header">
         <div class="d-flex align-items-center gap-3">
-          <div class="lms-modal__icon"><i class="isax isax-document-text"></i></div>
+          <div class="lms-modal__icon"><i class="isax isax-calendar-1"></i></div>
           <div>
             <h5 class="modal-title mb-0">Formulaire de demande de formations</h5>
             <small>Choisissez le type et complétez le formulaire</small>
@@ -286,7 +242,6 @@
             <p class="lms-step__title">Type de demande <span class="text-danger">*</span></p>
           </div>
 
-          <!-- A. Grille des 4 options — masquée dès qu'un type est choisi -->
           <div class="row g-2" *ngIf="!typeDemande">
             <div class="col-6 col-md-3" *ngFor="let type of typesDemande">
               <div class="lms-type-card" (click)="onTypeChange(type.value)">
@@ -297,7 +252,6 @@
             </div>
           </div>
 
-          <!-- B. Chip du type sélectionné + bouton changer -->
           <div *ngIf="typeDemande" class="lms-type-selected">
             <div class="lms-type-selected__chip">
               <i [class]="getTypeIcon(typeDemande) + ' me-2'"></i>
@@ -345,7 +299,7 @@
             </div>
           </div>
 
-          <!-- CATALOGUE -->
+          <!-- CATALOGUE 
           <div *ngIf="typeDemande === 'catalogue'" class="mb-4">
             <div class="lms-step__header mb-1">
               <span class="lms-step__number lms-step__number--green">2</span>
@@ -371,8 +325,8 @@
               <i class="isax isax-tick-circle me-1"></i>{{ selectedCatalogueIds.length }} catalogue(s) sélectionné(s)
             </div>
           </div>
-
-          <!-- PARCOURS -->
+          -->
+          <!-- PARCOURS 
           <div *ngIf="typeDemande === 'parcours'" class="mb-4">
             <div class="lms-step__header mb-2">
               <span class="lms-step__number lms-step__number--purple">2</span>
@@ -404,8 +358,8 @@
               </div>
             </ng-container>
           </div>
-
-          <!-- FORMATION SPÉCIFIQUE -->
+          -->
+          <!-- FORMATION SPÉCIFIQUE 
           <div *ngIf="typeDemande === 'formation'" class="mb-4">
             <div class="lms-step__header mb-2">
               <span class="lms-step__number lms-step__number--orange">2</span>
@@ -440,6 +394,7 @@
               </div>
             </ng-container>
           </div>
+          -->
 
           <!-- DIVIDER -->
           <hr class="lms-divider">
@@ -480,13 +435,9 @@
                   <option value="basse">🟢 Basse</option>
                   <option value="normale">🟡 Normale</option>
                   <option value="haute">🟠 Haute</option>
-                  
                 </select>
               </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Date souhaitée de début</label>
-                <input type="date" class="form-control lms-input" formControlName="date_souhaitee_debut">
-              </div>
+             
               <div class="col-12">
                 <label class="form-label">Commentaire <span class="text-muted small">(optionnel)</span></label>
                 <textarea class="form-control lms-input"

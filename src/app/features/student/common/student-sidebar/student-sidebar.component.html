@@ -22,7 +22,6 @@
         <span>Mes formations</span>
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
-
       <ul class="submenu">
         <li><a [routerLink]="routes.studentMyCourses" routerLinkActive="active">Formations en cours</a></li>
         <li><a>Formations en attente</a></li>
@@ -42,21 +41,25 @@
         <span>Mes demandes</span>
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
-
       <ul class="submenu">
-        <!-- Formations en accès libre -->
+           <!-- Formations en accès libre -->
         <li>
-          <a [routerLink]="routes.student_Certificate" routerLinkActive="active">
+          <a [routerLink]="routes.student_DemandeFormation" routerLinkActive="active">
             <span class="demande-dot demande-dot--orange"></span>
             <span class="demande-info">
-              <span class="demande-label">Formations </span>
+              <span class="demande-label">Formations</span>
               <small class="demande-desc">Demande directe d'une formation</small>
             </span>
           </a>
         </li>
+
+
+
+
+
         <!-- Sessions -->
         <li>
-          <a routerLinkActive="active">
+          <a [routerLink]="routes.student_DemandeSession" routerLinkActive="active">
             <span class="demande-dot demande-dot--blue"></span>
             <span class="demande-info">
               <span class="demande-label">Sessions</span>
@@ -67,7 +70,7 @@
 
         <!-- Parcours -->
         <li>
-          <a routerLinkActive="active">
+          <a [routerLink]="routes.student_DemandeParcours" routerLinkActive="active">
             <span class="demande-dot demande-dot--purple"></span>
             <span class="demande-info">
               <span class="demande-label">Parcours</span>
@@ -78,7 +81,7 @@
 
         <!-- Catalogues -->
         <li>
-          <a routerLinkActive="active">
+          <a [routerLink]="routes.student_DemandeCatalogue" routerLinkActive="active">
             <span class="demande-dot demande-dot--green"></span>
             <span class="demande-info">
               <span class="demande-label">Catalogues</span>
@@ -87,8 +90,7 @@
           </a>
         </li>
 
-        
-
+     
       </ul>
     </li>
 

@@ -41,7 +41,7 @@ export const routes = {
   students_profile: '/student/student-profile',
   students_Dashboard: '/student/student-dashboard',
   course_student: '/student/course-student',
-  studentMyCourses:'/student/mes-cours',
+  studentMyCourses: '/student/mes-cours',
   student_Certificate: '/student/student-certificate',
   student_Wishlist: '/student/student-wishlist',
   view_invoice_student: '/student/view-invoice',
@@ -60,10 +60,10 @@ export const routes = {
   students_message: '/student/student-message',
   students_quiz_question: '/student/student-quiz-questions',
   students_quiz: '/student/student-quiz',
-  studentsQuizQuestion :'/student/student-quiz-questions',
-  studentsQuiz :'/student/student-quiz',
-  studentProfile :'/student/student-profile',
-  studentMessages :'/student/student-message',
+  studentsQuizQuestion: '/student/student-quiz-questions',
+  studentsQuiz: '/student/student-quiz',
+  studentProfile: '/student/student-profile',
+  studentMessages: '/student/student-message',
   studentsMessage: '/student/student-message',
   studentOrderHistory: '/student/student-order-history',
   studentWishlist: '/student/student-wishlist',
@@ -78,8 +78,14 @@ export const routes = {
   studentSettings: '/student/settings/student-settings',
   studentBillingAddress: '/student/settings/student-billing-address',
 
+  // ✅ Demandes — alignées sur app.routes.ts
+  student_DemandeSession:   '/student/students-session',    // ← path: 'students-session' ✓
+  student_DemandeCatalogue: '/student/students-catalogue',  // ← à ajouter dans app.routes.ts
+  student_DemandeParcours:  '/student/students-parcours',   // ← à ajouter dans app.routes.ts
+  student_DemandeFormation: '/student/student-certificate', // ← path: 'student-certificate' ✓
+
   // SuperAdmin Routes
-superadmin: '/superadmin/',
+  superadmin: '/superadmin/',
   superadmin_dashboard: '/superadmin/superadmin-dashboard',
   superadmin_payouts: '/superadmin/superadmin-payouts',
   superadmin_tickets: '/superadmin/superadmin-tickets',
@@ -106,12 +112,6 @@ superadmin: '/superadmin/',
   superadmin_profile: '/superadmin/superadmin-profile',
   superadminPermission: '/superadmin/superadmin-permission',
   superadminRole: '/superadmin/superadmin-role',
-
-  // quiz:  'quiz',
-  // studentsList: '/superadmin/students-list',
-  // studentsGrid: '/superadmin/students-grid',
-  // studentsDetails: '/superadmin/students-details',
-  // superadminQuizResult: '/superadmin/superadmin-quiz-results',
   superadminCourse: '/superadmin/superadmin-course',
   superadminCourseGrid: '/superadmin/superadmin-course-grid',
   superadminTickets: '/superadmin/superadmin-tickets',
@@ -126,10 +126,9 @@ superadmin: '/superadmin/',
   superadminDeleteAccount: '/superadmin/settings/superadmin-delete-account',
   superadminChangePassword: '/superadmin/settings/superadmin-change-password',
   superadminSettings: '/superadmin/settings/superadmin-settings',
-  
 
   // Adminrh Routes
-adminrh: '/adminrh/',
+  adminrh: '/adminrh/',
   adminrh_dashboard: '/adminrh/adminrh-dashboard',
   adminrh_payouts: '/adminrh/adminrh-payouts',
   adminrh_tickets: '/adminrh/adminrh-tickets',
@@ -158,12 +157,6 @@ adminrh: '/adminrh/',
   adminrhPermission: '/adminrh/adminrh-permission',
   adminrhRole: '/adminrh/adminrh-role',
   AdminrhDemande: '/adminrh/adminrh-demande',
-
-  // quiz:  'quiz',
-  // studentsList: '/superadmin/students-list',
-  // studentsGrid: '/superadmin/students-grid',
-  // studentsDetails: '/superadmin/students-details',
-  // superadminQuizResult: '/superadmin/superadmin-quiz-results',
   adminrhCourse: '/adminrh/adminrh-course',
   adminrhCourseGrid: '/adminrh/adminrh-course-grid',
   adminrhTickets: '/adminrh/adminrh-tickets',
@@ -178,7 +171,7 @@ adminrh: '/adminrh/',
   adminrhDeleteAccount: '/adminrh/settings/adminrh-delete-account',
   adminrhChangePassword: '/adminrh/settings/adminrh-change-password',
   adminrhSettings: '/adminrh/settings/adminrh-settings',
-  
+
   // Pages Routes
   pages: '/pages/',
   page_notifications: '/pages/notifications',
@@ -207,8 +200,6 @@ adminrh: '/adminrh/',
   blog_left_sidebar: '/blog/blog-left-sidebar',
   blog_right_sidebar: '/blog/blog-right-sidebar',
 
-
-  
   // Auth Routes
   auth: '/auth/',
   forgot_password: '/auth/forgot-password',

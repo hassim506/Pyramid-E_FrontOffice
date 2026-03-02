@@ -208,7 +208,7 @@
                   </small>
                   <div *ngIf="demande.formation?.prix" class="mt-1">
                     <span class="badge bg-success bg-opacity-10 text-success">
-                      {{ demande.formation.prix }}€
+                      {{ demande.formation?.prix }}€
                     </span>
                   </div>
                 </div>
@@ -239,7 +239,7 @@
 
             <!-- Priorité -->
             <td>
-              <span [class]="getPrioriteClass(demande.priorite)">
+              <span [class]="getPrioriteClass(demande.priorite ?? undefined)">
                 {{ demande.priorite_display }}
               </span>
             </td>
@@ -256,7 +256,7 @@
             <td>
               <div class="d-flex align-items-center">
                 <i class="isax isax-clock text-muted me-2"></i>
-                <span>{{ formatDate(demande.date_souhaitee_debut) }}</span>
+                <span>{{ formatDate(demande.date_souhaitee_debut ?? undefined) }}</span>
               </div>
             </td>
 

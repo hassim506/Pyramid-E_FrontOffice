@@ -111,7 +111,7 @@
         </div>
         -->
 
-        <!-- GRILLE INFOS -->
+        <!-- GRILLE INFOS 
         <div class="cd-hero__info-grid">
           <div class="cd-hero__info-item" *ngIf="formation.difficulte">
             <div class="cd-hero__info-icon"><i class="ti ti-adjustments"></i></div>
@@ -120,13 +120,7 @@
               <span class="cd-hero__info-value text-capitalize">{{ formation.difficulte }}</span>
             </div>
           </div>
-          <div class="cd-hero__info-item" *ngIf="formation.public_cible">
-            <div class="cd-hero__info-icon"><i class="ti ti-target-arrow"></i></div>
-            <div>
-              <span class="cd-hero__info-label">Public cible</span>
-              <span class="cd-hero__info-value">{{ formation.public_cible }}</span>
-            </div>
-          </div>
+          
           <div class="cd-hero__info-item" *ngIf="formation.prerequis">
             <div class="cd-hero__info-icon"><i class="ti ti-list-check"></i></div>
             <div>
@@ -134,17 +128,8 @@
               <span class="cd-hero__info-value">{{ formation.prerequis }}</span>
             </div>
           </div>
-          <div class="cd-hero__info-item">
-            <div class="cd-hero__info-icon"><i class="ti ti-certificate"></i></div>
-            <div>
-              <span class="cd-hero__info-label">Certification</span>
-              <span class="cd-hero__info-value"
-                    [class.cd-hero__info-value--success]="formation.est_certifiante">
-                {{ formation.est_certifiante ? '✓ Incluse' : 'Non incluse' }}
-              </span>
-            </div>
-          </div>
-        </div>
+          
+        </div>-->
 
       </div>
 
@@ -245,17 +230,31 @@
         <div class="card mb-4" *ngIf="formation.objectifs_pedagogiques">
           <div class="card-body">
             <h5 class="subs-title mb-3">
-              <i class="ti ti-target me-2 text-primary"></i>Objectifs pédagogiques
+              <i class="ti ti-target me-2 text-primary"></i>Objectifs de la formation
             </h5>
             <p class="text-muted" style="line-height:1.7;">{{ formation.objectifs_pedagogiques }}</p>
           </div>
         </div>
 
-        <!-- Compétences acquises -->
+        <!-- Compétences visées -->
         <div class="card mb-4" *ngIf="formation.competences_acquises?.length">
           <div class="card-body">
             <h5 class="subs-title mb-3">
-              <i class="ti ti-star me-2 text-warning"></i>Compétences acquises
+              <i class="ti ti-star me-2 text-warning"></i>Compétences visées
+            </h5>
+            <ul class="competences-list">
+              <li *ngFor="let comp of formation.competences_acquises">
+                <i class="ti ti-circle-check text-success me-2"></i>{{ comp }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Prérequis -->
+        <div class="card mb-4" *ngIf="formation.prerequis">
+          <div class="card-body">
+            <h5 class="subs-title mb-3">
+              <i class="ti ti-tool me-2 text-warning"></i>Prérequis
             </h5>
             <ul class="competences-list">
               <li *ngFor="let comp of formation.competences_acquises">
@@ -302,18 +301,17 @@
           </div>
         </div>
 
-        <!-- Outils requis -->
-        <div class="card mb-4" *ngIf="formation.outils_requis?.length">
+        <!-- Populations-->
+        <div class="card mb-4" *ngIf="formation.public_cible">
           <div class="card-body">
             <h5 class="subs-title mb-3">
-              <i class="ti ti-tool me-2 text-info"></i>Outils requis
+              <i class="ti ti-users me-2 text-info"></i>Populations 
             </h5>
-            <div class="d-flex flex-wrap gap-2">
-              <span class="badge bg-light text-dark border px-3 py-2"
-                    *ngFor="let outil of formation.outils_requis">
-                {{ outil }}
-              </span>
+             <div>
+              
+              <span class="cd-Hero__info-value">{{ formation.public_cible }}</span>
             </div>
+            
           </div>
         </div>
 
@@ -348,9 +346,7 @@
           <div class="card mb-4">
             <div class="card-body text-center">
               <p class="text-muted small mb-3">Intéressé(e) par cette formation ?</p>
-              <button class="btn btn-primary w-100 btn-demande" (click)="openRequestModal()">
-                <i class="ti ti-send me-2"></i>Faire une demande
-              </button>
+              
             </div>
           </div>
 
@@ -364,16 +360,7 @@
                   <span>Durée</span>
                   <strong>{{ formation.duree_totale }} heures</strong>
                 </li>
-                <li>
-                  <i class="ti ti-chart-bar text-warning"></i>
-                  <span>Niveau</span>
-                  <strong>{{ formation.niveau_display }}</strong>
-                </li>
-                <li>
-                  <i class="ti ti-device-laptop text-info"></i>
-                  <span>Type</span>
-                  <strong>{{ formation.type_display }}</strong>
-                </li>
+                
                 <li>
                   <i class="ti ti-language text-success"></i>
                   <span>Langue</span>
@@ -381,18 +368,11 @@
                 </li>
                 <li>
                   <i class="ti ti-users text-secondary"></i>
-                  <span>Places max</span>
+                  <span>Nombre de participants</span>
                   <strong>{{ formation.nb_max_participants }}</strong>
                 </li>
-                <li>
-                  <i class="ti ti-certificate"
-                     [class.text-success]="formation.est_certifiante"
-                     [class.text-muted]="!formation.est_certifiante"></i>
-                  <span>Certification</span>
-                  <strong [class.text-success]="formation.est_certifiante">
-                    {{ formation.est_certifiante ? 'Oui' : 'Non' }}
-                  </strong>
-                </li>
+                
+                  
               </ul>
             </div>
           </div>
@@ -422,7 +402,7 @@
 
 <!-- ================================================= -->
 <!-- MODAL DEMANDE                                     -->
-<!-- ================================================= -->
+<!-- ================================================= 
 <div class="modal fade" id="demandeFormationModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content lms-modal">
@@ -650,4 +630,4 @@
 
     </div>
   </div>
-</div>
+</div>-->

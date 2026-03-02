@@ -221,6 +221,9 @@ export const routes: Routes = [
         {path:'lecture-formation/:id',loadComponent:()=>import('./features/student/lecture-formation/lecture-formation.component').then(m=>m.LectureFormationComponent)
 },
         {path:'student-tickets',loadComponent:()=>import ('./features/student/student-tickets/student-tickets.component').then((m)=>m.StudentTicketsComponent)},
+        {path:'students-session',loadComponent:()=>import ('./features/student/students-session/students-session.component').then((m)=>m.StudentsSessionsComponent)},
+        { path: 'students-catalogue', loadComponent: () => import('./features/student/students-catalogue/students-catalogue.component').then(m => m.StudentsCatalogueComponent) },
+        { path: 'students-parcours',  loadComponent: () => import('./features/student/students-parcours/students-parcours.component').then(m => m.StudentsParcoursComponent) },
         {path:'student-quiz',loadComponent:()=>import ('./features/student/student-quiz/student-quiz.component').then((m)=>m.StudentQuizComponent)},
         {path:'student-quiz-questions',loadComponent:()=>import ('./features/student/student-quiz-questions/student-quiz-questions.component').then((m)=>m.StudentQuizQuestionsComponent)},
         {path:'student-certificate',loadComponent:()=>import ('./features/student/student-certificate/student-certificate.component').then((m)=>m.StudentCertificateComponent)},

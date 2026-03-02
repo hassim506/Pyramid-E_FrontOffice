@@ -811,6 +811,16 @@ $transition:  all .2s ease;
     &__info-grid { grid-template-columns: 1fr; }
     &__quick-stats { gap: 14px; }
   }
+}
+   
+  @media (max-width: 767px) {
+   .cd-Hero{
+    padding: 40px 0 32px;
+    &__title     { font-size: 22px; }
+    &__info-grid { grid-template-columns: 1fr; }
+    &__quick-stats { gap: 14px; }
+  }
+ 
 
   .lms-toast-container {
     top: auto; bottom: 20px; right: 16px; left: 16px;
