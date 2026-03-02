@@ -82,15 +82,19 @@
       </thead>
       <tbody>
         <tr *ngFor="let demande of demandes"
-            [class.sc-row--refusee]="demande.statut === 'refusee'"
-            [class.sc-row--validee]="demande.statut === 'validee'">
+    [class.sc-row--refusee]="demande.statut === 'refusee'"
+    [class.sc-row--validee]="demande.statut === 'validee'"
+    class="sc-row--clickable"
+    (click)="gotoDetails(demande.formation_id_nav, $event)"
+    [title]="demande.formation_id_nav ? 'Voir les détails de la formation' : ''">
 
-          <!-- FORMATION -->
+          <!-- FORMATION (cliquable → détails) -->
           <td>
-            <div class="sc-formation">
+            <div class="sc-formation sc-formation--clickable"
+                 [routerLink]="demande.formation?.id ? ['/student/course-details-2', demande.formation.id] : null">
               <img [src]="demande.image_affiche" class="sc-formation__thumb" alt="">
               <div class="sc-formation__info">
-                <div class="sc-formation__title">{{ demande.titre_affiche }}</div>
+                <div class="sc-formation__title sc-formation__title--link">{{ demande.titre_affiche }}</div>
                 <small class="sc-formation__sub" *ngIf="demande.sous_titre_affiche">{{ demande.sous_titre_affiche }}</small>
                 <div class="sc-formation__details">
                   <span class="sc-detail-chip" *ngIf="demande.formation?.niveau">

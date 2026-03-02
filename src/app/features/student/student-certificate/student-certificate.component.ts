@@ -1,6 +1,6 @@
 import { Component, OnInit }                                          from '@angular/core';
 import { CommonModule }                                               from '@angular/common';
-import { RouterModule }                                               from '@angular/router';
+import { Router, RouterModule }                                               from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DemandeFormationService }   from '../../../shared/service/demande/demande-formation.service';
 import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
@@ -65,7 +65,8 @@ export class StudentCertificateComponent implements OnInit {
   constructor(
     private demandeFormationService: DemandeFormationService,
     private formationsService: FormationsService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -107,19 +108,34 @@ export class StudentCertificateComponent implements OnInit {
   }
 
   private normaliserDemande(d: any): any {
-    const fallback = 'assets/img/course/course-01.jpg';
-    return {
-      ...d,
-      titre_affiche:      d.formation?.titre         ?? `Formation #${d.formation_id}`,
-      sous_titre_affiche: d.formation?.formateur_nom ?? d.formation?.categorie?.nom ?? '',
-      image_affiche:      d.formation?.image_couverture || fallback,
-      formation: d.formation ? {
-        ...d.formation,
-        niveau:     d.formation.niveau     ?? '—',
-        duree_totale: d.formation.duree_totale ?? null,
-      } : null,
-    };
-  }
+  const fallback = 'assets/img/course/course-01.jpg';
+  return {
+    ...d,
+    titre_affiche:      d.formation?.titre         ?? `Formation #${d.formation_id}`,
+    sous_titre_affiche: d.formation?.formateur_nom ?? d.formation?.categorie?.nom ?? '',
+    image_affiche:      d.formation?.image_couverture || fallback,
+    // ⚡ ID fiable pour la navigation
+    formation_id_nav:   d.formation?.id ?? d.formation_id ?? null,
+    formation: d.formation ? {
+      ...d.formation,
+      niveau:       d.formation.niveau       ?? '—',
+      duree_totale: d.formation.duree_totale ?? null,
+    } : null,
+  };
+}
+
+// ================================
+// NAVIGATION — ouvre course-details-2/:id
+// ================================
+gotoDetails(formationId: number | null | undefined, event: Event): void {
+  if (!formationId) return;
+
+  // Ne pas déclencher si le clic vient d'un bouton d'action dans la ligne
+  const target = event.target as HTMLElement;
+  if (target.closest('.sc-btn-annuler, .sc-btn-relancer, .sc-motif-wrapper')) return;
+
+  this.router.navigate(['/courses/course-details-2', formationId]);
+}
 
   // ================================
   // FILTRES + PAGINATION

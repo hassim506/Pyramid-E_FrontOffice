@@ -1156,3 +1156,11 @@ $transition:  all .2s ease;
   .lms-type-card__desc { display: none; }
   .lms-modal__body { max-height: 65vh; }
 }
+
+// Ligne cliquable
+.sc-row--clickable {
+  cursor: pointer;
+  transition: $transition;
+
+  &:hover td { background: rgba($primary, .04) !important; }
+}
