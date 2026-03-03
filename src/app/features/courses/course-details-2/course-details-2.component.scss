@@ -472,3 +472,31 @@ $transition:   all .2s ease;
   .lms-type-card__desc { display: none; }
   .lms-modal__body     { max-height: 65vh; }
 }
+.cd-info-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; background: #f8f9fa; border-radius: 10px;
+  &__icon { font-size: 1.4rem; }
+}
+
+.cd-demande-detail { display: flex; flex-direction: column; gap: 12px; }
+.cd-demande-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid #f0f0f0;
+  &:last-child { border-bottom: none; }
+}
+.cd-demande-label { font-weight: 600; color: #6b7280; font-size: .875rem; }
+
+.cd-card--refus { border-left: 4px solid #ef4444; }
+
+.cd-breadcrumb {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  &__back { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+             color: #fff; border-radius: 8px; padding: 4px 12px; cursor: pointer;
+             &:hover { background: rgba(255,255,255,.25); } }
+  &__sep, &__current { color: rgba(255,255,255,.7); font-size: .875rem; }
+}
+
+.badge-attente { background: #f59e0b; color: #fff; }
+.badge-validee { background: #10b981; color: #fff; }
+.badge-refusee { background: #ef4444; color: #fff; }
+.badge-annulee { background: #6b7280; color: #fff; }

@@ -86,7 +86,7 @@
     [class.sc-row--validee]="demande.statut === 'validee'"
     class="sc-row--clickable"
     (click)="gotoDetails(demande.formation_id_nav, $event)"
-    [title]="demande.formation_id_nav ? 'Voir les détails de la formation' : ''">
+    [title]="demande.formation_id_nav ? 'Relancer' : ''">
 
           <!-- FORMATION (cliquable → détails) -->
           <td>

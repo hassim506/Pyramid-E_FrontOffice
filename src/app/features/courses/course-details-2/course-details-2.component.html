@@ -1,212 +1,431 @@
-<!-- LOADER -->
+<!-- ============================================================
+     LOADER
+     ============================================================ -->
 <div *ngIf="loading" class="cd-loader">
   <div class="cd-loader__spinner"></div>
-  <p>Chargement de la formation...</p>
+  <p>Chargement...</p>
 </div>
 
-<!-- ERREUR -->
+<!-- ============================================================
+     ERREUR
+     ============================================================ -->
 <div *ngIf="!loading && error" class="cd-error">
   <i class="ti ti-alert-circle cd-error__icon"></i>
   <p>{{ error }}</p>
 </div>
 
-<!-- HERO -->
-<section class="cd-hero" *ngIf="!loading && formation">
-  <div class="cd-hero__bg"
-       [style.background-image]="formation.image_couverture ? 'url(' + formation.image_couverture + ')' : 'none'">
-  </div>
-  <div class="cd-hero__overlay"></div>
 
-  <div class="container position-relative" style="z-index:2;">
-    <div class="row">
-      <div class="col-lg-8">
-        <div class="cd-hero__badges">
-          <span class="cd-badge cd-badge--certifiant" *ngIf="formation.est_certifiante">
-            <i class="ti ti-certificate"></i> Certifiante
-          </span>
-          <span class="cd-badge cd-badge--habilitant" *ngIf="!formation.est_certifiante">
-            <i class="ti ti-shield-check"></i> Habilitante
-          </span>
-          <span class="cd-badge cd-badge--niveau">
-            <i class="ti ti-chart-bar"></i> {{ formation.niveau_display }}
-          </span>
-          <span class="cd-badge cd-badge--type">
-            <i class="ti ti-device-laptop"></i> {{ formation.type_display }}
-          </span>
-          <span class="cd-badge cd-badge--categorie"
-                *ngIf="formation.categorie"
-                [style.background-color]="formation.categorie?.couleur || '#6b7280'">
-            {{ formation.categorie?.nom }}
-          </span>
-        </div>
-        <h1 class="cd-hero__title">{{ formation.titre }}</h1>
-        <p class="cd-hero__subtitle">{{ formation.short_description }}</p>
-        <div class="cd-hero__divider"></div>
-      </div>
-      <div class="col-lg-4 d-none d-lg-block"></div>
+<!-- ============================================================
+     MODE SESSION
+     ============================================================ -->
+<ng-container *ngIf="!loading && mode === 'session' && session">
+
+  <!-- HERO SESSION -->
+  <section class="cd-hero">
+    <div class="cd-hero__bg"
+         [style.background-image]="session.image_couverture ? 'url(' + session.image_couverture + ')' : 'none'">
     </div>
-  </div>
-</section>
+    <div class="cd-hero__overlay"></div>
 
-<!-- CONTENU -->
-<section class="course-details" *ngIf="!loading && formation">
-  <div class="container">
-    <div class="row">
+    <div class="container position-relative" style="z-index:2;">
+      <div class="row">
+        <div class="col-lg-8">
 
-      <!-- GAUCHE -->
-      <div class="col-lg-8">
+          <!-- Fil d'ariane -->
+          <nav class="cd-breadcrumb mb-3">
+            <button class="cd-breadcrumb__back" (click)="goBack()">
+              <i class="ti ti-arrow-left me-1"></i>Mes demandes
+            </button>
+            <span class="cd-breadcrumb__sep">/</span>
+            <span class="cd-breadcrumb__current">Détail session</span>
+          </nav>
 
-        <div class="card cd-card mb-4">
-          <div class="card-body">
-            <h5 class="subs-title mb-3"><i class="ti ti-file-description me-2 text-primary"></i>Présentation</h5>
-            <p class="text-muted" style="line-height:1.7;">{{ formation.description }}</p>
+          <!-- Badges -->
+          <div class="cd-hero__badges">
+            <span class="cd-badge cd-badge--type">
+              <i class="ti {{ getTypeIcon(session.type) }} me-1"></i>{{ session.type_display }}
+            </span>
+            <span class="cd-badge" [ngClass]="getStatutClass(demande.statut)">
+              {{ demande.statut_display }}
+            </span>
+            <span class="cd-badge cd-badge--niveau" *ngIf="demande.priorite_display">
+              <i class="ti ti-flag me-1"></i>Priorité {{ demande.priorite_display }}
+            </span>
           </div>
-        </div>
 
-        <div class="card cd-card mb-4" *ngIf="formation.objectifs_pedagogiques">
-          <div class="card-body">
-            <h5 class="subs-title mb-3"><i class="ti ti-target me-2 text-primary"></i>Objectifs de la formation</h5>
-            <p class="text-muted" style="line-height:1.7;">{{ formation.objectifs_pedagogiques }}</p>
-          </div>
-        </div>
+          <h1 class="cd-hero__title">{{ session.titre }}</h1>
+          <p class="cd-hero__subtitle" *ngIf="session.formation_titre">
+            Formation parente : <strong>{{ session.formation_titre }}</strong>
+          </p>
+          <div class="cd-hero__divider"></div>
 
-        <div class="card cd-card mb-4" *ngIf="formation.competences_acquises?.length">
-          <div class="card-body">
-            <h5 class="subs-title mb-3"><i class="ti ti-star me-2 text-warning"></i>Compétences visées</h5>
-            <ul class="competences-list">
-              <li *ngFor="let comp of formation.competences_acquises">
-                <i class="ti ti-circle-check text-success me-2"></i>{{ comp }}
-              </li>
-            </ul>
-          </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="card cd-card mb-4" *ngIf="formation.prerequis">
-          <div class="card-body">
-            <h5 class="subs-title mb-3"><i class="ti ti-tool me-2 text-warning"></i>Prérequis</h5>
-            <p class="text-muted" style="line-height:1.7;">{{ formation.prerequis }}</p>
-          </div>
-        </div>
+  <!-- CONTENU SESSION -->
+  <section class="course-details">
+    <div class="container">
+      <div class="row">
 
-        <div class="card cd-card mb-4">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="subs-title mb-0"><i class="ti ti-layout-list me-2 text-primary"></i>Contenu de la formation</h5>
-              <span class="badge bg-primary rounded-pill">{{ formation.nombre_modules }} modules</span>
-            </div>
-            <div class="accordion accordion-customicon1">
-              <div class="accordion-item" *ngFor="let module of formation.modules; let i = index">
-                <h2 class="accordion-header">
-                  <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                          [attr.data-bs-target]="'#module'+i">{{ module.titre }}</button>
-                </h2>
-                <div class="accordion-collapse collapse" [id]="'module'+i">
-                  <div class="accordion-body p-0">
-                    <ul>
-                      <li class="p-3 d-flex justify-content-between align-items-center"
-                          *ngFor="let section of module.sections">
-                        <span><img class="me-2" src="./assets/img/icons/play.svg">{{ section.titre }}</span>
-                        <span class="text-muted small">{{ section.duree_estimee }}</span>
-                      </li>
-                    </ul>
+        <!-- GAUCHE -->
+        <div class="col-lg-8">
+
+          <!-- Infos pratiques -->
+          <div class="card cd-card mb-4">
+            <div class="card-body">
+              <h5 class="subs-title mb-3">
+                <i class="ti ti-info-circle me-2 text-primary"></i>Informations de la session
+              </h5>
+              <div class="row g-3">
+                
+                
+                <div class="col-md-6" *ngIf="session.lieu">
+                  <div class="cd-info-item">
+                    <i class="ti ti-map-pin text-danger cd-info-item__icon"></i>
+                    <div>
+                      <small class="text-muted d-block">Lieu</small>
+                      <strong>{{ session.lieu }}</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="cd-info-item">
+                    <i class="ti ti-users text-info cd-info-item__icon"></i>
+                    <div>
+                      <small class="text-muted d-block">Places restantes</small>
+                      <strong>{{ session.places_restantes }} places</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="cd-info-item">
+                    <i class="ti ti-clock text-warning cd-info-item__icon"></i>
+                    <div>
+                      <small class="text-muted d-block">Durée</small>
+                      <strong>{{ getDureeJours() }} jour(s)</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="cd-info-item">
+                    <i class="ti {{ getTypeIcon(session.type) }} text-secondary cd-info-item__icon"></i>
+                    <div>
+                      <small class="text-muted d-block">Format</small>
+                      <strong>{{ session.type_display }}</strong>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="card cd-card mb-4" *ngIf="formation.public_cible">
-          <div class="card-body">
-            <h5 class="subs-title mb-3"><i class="ti ti-users me-2 text-info"></i>Population cible</h5>
-            <p class="text-muted">{{ formation.public_cible }}</p>
-          </div>
-        </div>
-
-        <div class="card cd-card">
-          <div class="card-body">
-            <h5 class="subs-title mb-3"><i class="ti ti-user-circle me-2 text-primary"></i>À propos du formateur</h5>
-            <div class="d-flex align-items-center gap-3">
-              <img class="rounded-circle" style="width:60px;height:60px;object-fit:cover;"
-                   [src]="formation.image_couverture || 'assets/img/avatar-default.png'">
-              <div>
-                <h5 class="fs-18 fw-semibold mb-1">{{ formation.formateur_nom }}</h5>
-                <p class="mb-0 text-muted small">{{ formation.formateur?.fonction }}</p>
-                <p class="mb-0 fs-13 text-muted"><i class="ti ti-mail me-1"></i>{{ formation.formateur_email }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- DROITE -->
-      <div class="col-lg-4">
-
-        <!--
-          ⚡ RÈGLE CSS : sticky doit être sur un élément SANS overflow:hidden
-          → Le wrapper est sticky, les cartes intérieures ont overflow:hidden pour leurs bords arrondis
-          → flex + gap = espace entre carte résumé et carte "inclut"
-        -->
-        <div class="cd-sidebar-wrapper">
-
-          <!-- Carte 1 : vidéo + résumé -->
-          <div class="cd-sidebar-float">
-
-            <div class="cd-video-block">
-              <img [src]="formation.image_couverture || 'assets/img/course/video-bg.jpg'"
-                   alt="{{ formation.titre }}" class="cd-video-block__thumb">
-              <div class="cd-video-block__overlay">
-                <div class="cd-video-block__play-btn">
-                  <i class="ti ti-player-play-filled"></i>
+          <!-- Ma demande -->
+          <div class="card cd-card mb-4">
+            <div class="card-body">
+              <h5 class="subs-title mb-3">
+                <i class="ti ti-file-text me-2 text-primary"></i>Ma demande
+              </h5>
+              <div class="cd-demande-detail">
+                <div class="cd-demande-row">
+                  <span class="cd-demande-label">Statut</span>
+                  <span class="badge" [ngClass]="getStatutClass(demande.statut)">
+                    {{ demande.statut_display }}
+                  </span>
                 </div>
-                <span class="cd-video-block__label">Aperçu de la formation</span>
+                <div class="cd-demande-row">
+                  <span class="cd-demande-label">Priorité</span>
+                  <span>{{ demande.priorite_display }}</span>
+                </div>
+                <div class="cd-demande-row">
+                  <span class="cd-demande-label">Date de soumission</span>
+                  <span>{{ demande.created_at | date:'dd/MM/yyyy à HH:mm' }}</span>
+                </div>
+                <div class="cd-demande-row" *ngIf="demande.motif_demande">
+                  <span class="cd-demande-label">Motif</span>
+                  <span>{{ demande.motif_demande }}</span>
+                </div>
+                <div class="cd-demande-row" *ngIf="demande.objectifs_personnels">
+                  <span class="cd-demande-label">Objectifs personnels</span>
+                  <span>{{ demande.objectifs_personnels }}</span>
+                </div>
+                <div class="cd-demande-row" *ngIf="demande.commentaire_employe">
+                  <span class="cd-demande-label">Commentaire</span>
+                  <span>{{ demande.commentaire_employe }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Motif de refus -->
+          <div class="card cd-card cd-card--refus mb-4"
+               *ngIf="demande.statut === 'refusee' && demande.motif_refus">
+            <div class="card-body">
+              <h5 class="subs-title mb-3">
+                <i class="ti ti-circle-x me-2 text-danger"></i>Motif de refus
+              </h5>
+              <p class="text-muted mb-2">{{ demande.motif_refus }}</p>
+              <p class="text-muted small fst-italic" *ngIf="demande.commentaire_rh">
+                <i class="ti ti-message me-1"></i>{{ demande.commentaire_rh }}
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- DROITE -->
+        <div class="col-lg-4">
+          <div class="cd-sidebar-wrapper">
+
+            <!-- Carte résumé session -->
+            <div class="cd-sidebar-float">
+
+              <div class="cd-video-block">
+                <img [src]="session.image_couverture || 'assets/img/course/course-01.jpg'"
+                     [alt]="session.titre" class="cd-video-block__thumb">
+                <div class="cd-video-block__overlay">
+                  <span class="cd-video-block__label">{{ session.type_display }}</span>
+                </div>
+              </div>
+
+              <div class="cd-sidebar-float__body">
+                <h5 class="cd-sidebar-float__title">Résumé de la session</h5>
+                <ul class="formation-summary-list">
+                  <li>
+                    <i class="ti ti-calendar text-primary"></i>
+                    <span>Date de Début</span>
+                    <strong>{{ session.date_debut | date:'dd/MM/yyyy' }}</strong>
+                  </li>
+                  <li>
+                    <i class="ti ti-calendar-check text-success"></i>
+                    <span>Date de fin</span>
+                    <strong>{{ session.date_fin | date:'dd/MM/yyyy' }}</strong>
+                  </li>
+                 
+                  
+                
+                </ul>
               </div>
             </div>
 
-            <div class="cd-sidebar-float__body">
-              <h5 class="cd-sidebar-float__title">Résumé</h5>
-              <ul class="formation-summary-list">
-                <li>
-                  <i class="ti ti-clock text-primary"></i>
-                  <span>Durée</span>
-                  <strong>{{ formation.duree_totale }} heures</strong>
+            <!-- Cette session inclut -->
+            <div class="cd-sidebar-includes">
+              <h6 class="cd-sidebar-includes__title">Cette session inclut</h6>
+              <ul class="includes-list">
+                <li><img class="me-2" src="./assets/img/icons/play.svg"> Accès à la session</li>
+                <li><img class="me-2" src="./assets/img/icons/key.svg"> Accès entreprise</li>
+                <li *ngIf="session.type === 'presentiel'">
+                  <img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Formation en salle
                 </li>
-               
-                <li>
-                  <i class="ti ti-language text-success"></i>
-                  <span>Langue</span>
-                  <strong>{{ formation.langue === 'fr' ? 'Français' : formation.langue }}</strong>
+                <li *ngIf="session.type === 'distanciel'">
+                  <img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Accès en ligne
                 </li>
-                <li>
-                  <i class="ti ti-users text-secondary"></i>
-                  <span>Participants max</span>
-                  <strong>{{ formation.nb_max_participants }}</strong>
+                <li *ngIf="session.type === 'hybride'">
+                  <img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Présentiel + Distanciel
                 </li>
-                
+                <li><img class="me-2" src="./assets/img/icons/teacher.svg"> Encadrement formateur</li>
               </ul>
             </div>
 
           </div>
+        </div>
 
-          <!-- Carte 2 : cette formation inclut (carte séparée, gap géré par le wrapper) -->
-          <div class="cd-sidebar-includes">
-            <h6 class="cd-sidebar-includes__title">Cette formation inclut</h6>
-            <ul class="includes-list">
-              <li><img class="me-2" src="./assets/img/icons/play.svg"> Modules structurés</li>
-              <li><img class="me-2" src="./assets/img/icons/key.svg"> Accès entreprise</li>
-              <li><img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Multi-support</li>
-              <li>
-                <img class="me-2" src="./assets/img/icons/teacher.svg">
-                Certification : {{ formation.est_certifiante ? 'Incluse' : 'Non incluse' }}
-              </li>
-            </ul>
+      </div>
+    </div>
+  </section>
+
+</ng-container>
+
+
+<!-- ============================================================
+     MODE FORMATION (existant — inchangé)
+     ============================================================ -->
+<ng-container *ngIf="!loading && mode === 'formation' && formation">
+
+  <!-- HERO -->
+  <section class="cd-hero">
+    <div class="cd-hero__bg"
+         [style.background-image]="formation.image_couverture ? 'url(' + formation.image_couverture + ')' : 'none'">
+    </div>
+    <div class="cd-hero__overlay"></div>
+    <div class="container position-relative" style="z-index:2;">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="cd-hero__badges">
+            <span class="cd-badge cd-badge--certifiant" *ngIf="formation.est_certifiante">
+              <i class="ti ti-certificate"></i> Certifiante
+            </span>
+            <span class="cd-badge cd-badge--habilitant" *ngIf="!formation.est_certifiante">
+              <i class="ti ti-shield-check"></i> Habilitante
+            </span>
+            <span class="cd-badge cd-badge--niveau">
+              <i class="ti ti-chart-bar"></i> {{ formation.niveau_display }}
+            </span>
+            <span class="cd-badge cd-badge--type">
+              <i class="ti ti-device-laptop"></i> {{ formation.type_display }}
+            </span>
+            <span class="cd-badge cd-badge--categorie"
+                  *ngIf="formation.categorie"
+                  [style.background-color]="formation.categorie?.couleur || '#6b7280'">
+              {{ formation.categorie?.nom }}
+            </span>
+          </div>
+          <h1 class="cd-hero__title">{{ formation.titre }}</h1>
+          <p class="cd-hero__subtitle">{{ formation.short_description }}</p>
+          <div class="cd-hero__divider"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENU -->
+  <section class="course-details">
+    <div class="container">
+      <div class="row">
+
+        <!-- GAUCHE -->
+        <div class="col-lg-8">
+
+          <div class="card cd-card mb-4">
+            <div class="card-body">
+              <h5 class="subs-title mb-3"><i class="ti ti-file-description me-2 text-primary"></i>Présentation</h5>
+              <p class="text-muted" style="line-height:1.7;">{{ formation.description }}</p>
+            </div>
+          </div>
+
+          <div class="card cd-card mb-4" *ngIf="formation.objectifs_pedagogiques">
+            <div class="card-body">
+              <h5 class="subs-title mb-3"><i class="ti ti-target me-2 text-primary"></i>Objectifs de la formation</h5>
+              <p class="text-muted" style="line-height:1.7;">{{ formation.objectifs_pedagogiques }}</p>
+            </div>
+          </div>
+
+          <div class="card cd-card mb-4" *ngIf="formation.competences_acquises?.length">
+            <div class="card-body">
+              <h5 class="subs-title mb-3"><i class="ti ti-star me-2 text-warning"></i>Compétences visées</h5>
+              <ul class="competences-list">
+                <li *ngFor="let comp of formation.competences_acquises">
+                  <i class="ti ti-circle-check text-success me-2"></i>{{ comp }}
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card cd-card mb-4" *ngIf="formation.prerequis">
+            <div class="card-body">
+              <h5 class="subs-title mb-3"><i class="ti ti-tool me-2 text-warning"></i>Prérequis</h5>
+              <p class="text-muted" style="line-height:1.7;">{{ formation.prerequis }}</p>
+            </div>
+          </div>
+
+          <div class="card cd-card mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="subs-title mb-0"><i class="ti ti-layout-list me-2 text-primary"></i>Contenu de la formation</h5>
+                <span class="badge bg-primary rounded-pill">{{ formation.nombre_modules }} modules</span>
+              </div>
+              <div class="accordion accordion-customicon1">
+                <div class="accordion-item" *ngFor="let module of formation.modules; let i = index">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" data-bs-toggle="collapse"
+                            [attr.data-bs-target]="'#module'+i">{{ module.titre }}</button>
+                  </h2>
+                  <div class="accordion-collapse collapse" [id]="'module'+i">
+                    <div class="accordion-body p-0">
+                      <ul>
+                        <li class="p-3 d-flex justify-content-between align-items-center"
+                            *ngFor="let section of module.sections">
+                          <span><img class="me-2" src="./assets/img/icons/play.svg">{{ section.titre }}</span>
+                          <span class="text-muted small">{{ section.duree_estimee }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card cd-card mb-4" *ngIf="formation.public_cible">
+            <div class="card-body">
+              <h5 class="subs-title mb-3"><i class="ti ti-users me-2 text-info"></i>Population cible</h5>
+              <p class="text-muted">{{ formation.public_cible }}</p>
+            </div>
+          </div>
+
+          <div class="card cd-card">
+            <div class="card-body">
+              <h5 class="subs-title mb-3"><i class="ti ti-user-circle me-2 text-primary"></i>À propos du formateur</h5>
+              <div class="d-flex align-items-center gap-3">
+                <img class="rounded-circle" style="width:60px;height:60px;object-fit:cover;"
+                     [src]="formation.image_couverture || 'assets/img/avatar-default.png'">
+                <div>
+                  <h5 class="fs-18 fw-semibold mb-1">{{ formation.formateur_nom }}</h5>
+                  <p class="mb-0 text-muted small">{{ formation.formateur?.fonction }}</p>
+                  <p class="mb-0 fs-13 text-muted"><i class="ti ti-mail me-1"></i>{{ formation.formateur_email }}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
 
-      </div>
+        <!-- DROITE -->
+        <div class="col-lg-4">
+          <div class="cd-sidebar-wrapper">
 
+            <div class="cd-sidebar-float">
+              <div class="cd-video-block">
+                <img [src]="formation.image_couverture || 'assets/img/course/video-bg.jpg'"
+                     alt="{{ formation.titre }}" class="cd-video-block__thumb">
+                <div class="cd-video-block__overlay">
+                  <div class="cd-video-block__play-btn">
+                    <i class="ti ti-player-play-filled"></i>
+                  </div>
+                  <span class="cd-video-block__label">Aperçu de la formation</span>
+                </div>
+              </div>
+              <div class="cd-sidebar-float__body">
+                <h5 class="cd-sidebar-float__title">Résumé</h5>
+                <ul class="formation-summary-list">
+                  <li>
+                    <i class="ti ti-clock text-primary"></i>
+                    <span>Durée</span>
+                    <strong>{{ formation.duree_totale }} heures</strong>
+                  </li>
+                  <li>
+                    <i class="ti ti-language text-success"></i>
+                    <span>Langue</span>
+                    <strong>{{ formation.langue === 'fr' ? 'Français' : formation.langue }}</strong>
+                  </li>
+                  <li>
+                    <i class="ti ti-users text-secondary"></i>
+                    <span>Participants max</span>
+                    <strong>{{ formation.nb_max_participants }}</strong>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="cd-sidebar-includes">
+              <h6 class="cd-sidebar-includes__title">Cette formation inclut</h6>
+              <ul class="includes-list">
+                <li><img class="me-2" src="./assets/img/icons/play.svg"> Modules structurés</li>
+                <li><img class="me-2" src="./assets/img/icons/key.svg"> Accès entreprise</li>
+                <li><img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Multi-support</li>
+                <li>
+                  <img class="me-2" src="./assets/img/icons/teacher.svg">
+                  Certification : {{ formation.est_certifiante ? 'Incluse' : 'Non incluse' }}
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+
+</ng-container>

@@ -26,6 +26,20 @@
     <p class="sc-header__subtitle">Suivez l'état de vos demandes de sessions soumises à l'entreprise</p>
   </div>
   <div class="sc-header__actions">
+    <!-- Toggle vue -->
+    <button class="sc-header__toggle-btn"
+            [class.sc-header__toggle-btn--active]="viewMode === 'table'"
+            (click)="setView('table')"
+            title="Vue tableau">
+      <i class="isax isax-row-vertical"></i>
+    </button>
+    <button class="sc-header__toggle-btn"
+            [class.sc-header__toggle-btn--active]="viewMode === 'grid'"
+            (click)="setView('grid')"
+            title="Vue grille">
+      <i class="isax isax-element-3"></i>
+    </button>
+    <!-- Nouvelle demande -->
     <button class="sc-header__new-btn" (click)="openRequestModal()">
       <i class="isax isax-add-circle"></i>
       Nouvelle demande
@@ -41,7 +55,7 @@
            [(ngModel)]="searchDataValue" (ngModelChange)="searchData(searchDataValue)">
   </div>
   <div class="sc-filters__pills">
-    <button class="sc-filters__pill"                           [class.sc-filters__pill--active]="selectedStatus === ''"          (click)="filterByStatus('')">Tous</button>
+    <button class="sc-filters__pill"                           [class.sc-filters__pill--active]="selectedStatus === ''"           (click)="filterByStatus('')">Tous</button>
     <button class="sc-filters__pill sc-filters__pill--attente" [class.sc-filters__pill--active]="selectedStatus === 'en_attente'" (click)="filterByStatus('en_attente')">En attente</button>
     <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'"    (click)="filterByStatus('validee')">Validée</button>
     <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'"    (click)="filterByStatus('refusee')">Refusée</button>
@@ -58,94 +72,166 @@
   <p>Chargement de vos demandes de sessions...</p>
 </div>
 
-<!-- TABLEAU -->
-<div class="card sc-table-card" *ngIf="!loading">
-  <div class="card-header sc-table-card__header">
-    <div class="sc-table-card__title">
-      <i class="isax isax-calendar-1 text-primary me-2"></i>
-      Historique des demandes de sessions
-      <span class="sc-table-card__count">{{ totalData }}</span>
+<!-- ═══════════════════════════════════════════ -->
+<!-- VUE TABLEAU                                -->
+<!-- ═══════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && viewMode === 'table'">
+  <div class="card sc-table-card" *ngIf="demandes.length > 0">
+    <div class="card-header sc-table-card__header">
+      <div class="sc-table-card__title">
+        <i class="isax isax-calendar-1 text-primary me-2"></i>
+        Historique des demandes de sessions
+        <span class="sc-table-card__count">{{ totalData }}</span>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table sc-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="min-width:280px;">Session</th>
+            <th>Date de soumission</th>
+            <th class="text-center">Priorité</th>
+            <th class="text-center" style="min-width:160px;">Statut</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let demande of demandes"
+              class="sc-table-row"
+              [class.sc-row--refusee]="demande.statut === 'refusee'"
+              [class.sc-row--validee]="demande.statut === 'validee'"
+              (click)="voirDetails(demande)">
+            <td>
+              <div class="sc-formation">
+                <img [src]="demande.image_affiche" class="sc-formation__thumb" alt="">
+                <div class="sc-formation__info">
+                  <div class="sc-formation__title">{{ demande.titre_affiche }}</div>
+                  <small class="sc-formation__sub" *ngIf="demande.sous_titre_affiche">{{ demande.sous_titre_affiche }}</small>
+                  <div class="sc-formation__details">
+                    <span class="sc-detail-chip" *ngIf="demande.session_formation?.type_display">
+                      <i class="isax isax-calendar-1 me-1"></i>{{ demande.session_formation.type_display }}
+                    </span>
+                    <span class="sc-detail-chip" *ngIf="demande.session_formation?.lieu">
+                      <i class="isax isax-location me-1"></i>{{ demande.session_formation.lieu }}
+                    </span>
+                    <span class="sc-detail-chip" *ngIf="demande.session_formation?.places_restantes != null">
+                      <i class="isax isax-people me-1"></i>{{ demande.session_formation.places_restantes }} participants
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="sc-date">{{ demande.created_at | date:'dd/MM/yyyy' }}</span>
+              <span class="sc-date sc-date--time d-block">{{ demande.created_at | date:'HH:mm' }}</span>
+            </td>
+            <td class="text-center">
+              <span class="sc-priorite" [ngClass]="getPrioriteClass(demande.priorite)">{{ demande.priorite_display }}</span>
+            </td>
+            <td class="text-center">
+              <div class="sc-statut-cell">
+                <span class="sc-statut" [ngClass]="getStatutClass(demande.statut)">{{ demande.statut_display }}</span>
+                <div class="sc-motif-wrapper"
+                     *ngIf="demande.statut === 'refusee' && demande.motif_refus"
+                     (mouseenter)="showMotif(demande.id)" (mouseleave)="hideMotif()"
+                     (click)="$event.stopPropagation()">
+                  <button class="sc-motif-btn"><i class="isax isax-info-circle"></i> Motif</button>
+                  <div class="sc-motif-tooltip" *ngIf="isMotifVisible(demande.id)">
+                    <div class="sc-motif-tooltip__header"><i class="isax isax-close-circle me-1"></i>Motif de refus</div>
+                    <p class="sc-motif-tooltip__body">{{ demande.motif_refus }}</p>
+                    <div class="sc-motif-tooltip__responsable" *ngIf="showRefusePerson && demande.traite_par_nom">
+                      <i class="isax isax-user me-1"></i>Refusé par : <strong>{{ demande.traite_par_nom }}</strong>
+                    </div>
+                    <div class="sc-motif-tooltip__footer" *ngIf="demande.commentaire_rh">
+                      <i class="isax isax-message-text me-1"></i><em>{{ demande.commentaire_rh }}</em>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="text-center" (click)="$event.stopPropagation()">
+              <div class="d-flex flex-column align-items-center gap-1">
+                <button *ngIf="demande.statut === 'en_attente'" class="sc-btn-annuler" (click)="annulerDemande(demande.id)">
+                  <i class="isax isax-close-circle me-1"></i>Annuler
+                </button>
+                <button *ngIf="demande.statut === 'en_attente'" class="sc-btn-relancer" (click)="relancerDemande(demande.id)">
+                  <i class="isax isax-refresh me-1"></i>Relancer
+                </button>
+                <span *ngIf="demande.statut !== 'en_attente'" class="text-muted small">—</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
+</ng-container>
 
-  <div class="table-responsive" *ngIf="demandes.length > 0">
-    <table class="table sc-table align-middle mb-0">
-      <thead>
-        <tr>
-          <th style="min-width:280px;">Session</th>
-          <th>Date de soumission</th>
-          <th class="text-center">Priorité</th>
-          <th class="text-center" style="min-width:160px;">Statut</th>
-          <th class="text-center">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let demande of demandes"
-            [class.sc-row--refusee]="demande.statut === 'refusee'"
-            [class.sc-row--validee]="demande.statut === 'validee'">
-          <td>
-            <div class="sc-formation">
-              <img [src]="demande.image_affiche" class="sc-formation__thumb" alt="">
-              <div class="sc-formation__info">
-                <div class="sc-formation__title">{{ demande.titre_affiche }}</div>
-                <small class="sc-formation__sub" *ngIf="demande.sous_titre_affiche">{{ demande.sous_titre_affiche }}</small>
-                <div class="sc-formation__details">
-                  <span class="sc-detail-chip" *ngIf="demande.session_formation?.type_display">
-                    <i class="isax isax-calendar-1 me-1"></i>{{ demande.session_formation.type_display }}
-                  </span>
-                  <span class="sc-detail-chip" *ngIf="demande.session_formation?.lieu">
-                    <i class="isax isax-location me-1"></i>{{ demande.session_formation.lieu }}
-                  </span>
-                  <span class="sc-detail-chip" *ngIf="demande.session_formation?.places_restantes != null">
-                    <i class="isax isax-people me-1"></i>{{ demande.session_formation.places_restantes }} participants
-                  </span>
-                </div>
-              </div>
-            </div>
-          </td>
-          <td>
-            <span class="sc-date">{{ demande.created_at | date:'dd/MM/yyyy' }}</span>
-            <span class="sc-date sc-date--time d-block">{{ demande.created_at | date:'HH:mm' }}</span>
-          </td>
-          <td class="text-center">
-            <span class="sc-priorite" [ngClass]="getPrioriteClass(demande.priorite)">{{ demande.priorite_display }}</span>
-          </td>
-          <td class="text-center">
-            <div class="sc-statut-cell">
-              <span class="sc-statut" [ngClass]="getStatutClass(demande.statut)">{{ demande.statut_display }}</span>
-              <div class="sc-motif-wrapper"
-                   *ngIf="demande.statut === 'refusee' && demande.motif_refus"
-                   (mouseenter)="showMotif(demande.id)" (mouseleave)="hideMotif()">
-                <button class="sc-motif-btn"><i class="isax isax-info-circle"></i> Motif</button>
-                <div class="sc-motif-tooltip" *ngIf="isMotifVisible(demande.id)">
-                  <div class="sc-motif-tooltip__header"><i class="isax isax-close-circle me-1"></i>Motif de refus</div>
-                  <p class="sc-motif-tooltip__body">{{ demande.motif_refus }}</p>
-                  <div class="sc-motif-tooltip__responsable" *ngIf="showRefusePerson && demande.traite_par_nom">
-                    <i class="isax isax-user me-1"></i>Refusé par : <strong>{{ demande.traite_par_nom }}</strong>
-                  </div>
-                  <div class="sc-motif-tooltip__footer" *ngIf="demande.commentaire_rh">
-                    <i class="isax isax-message-text me-1"></i><em>{{ demande.commentaire_rh }}</em>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </td>
-          <td class="text-center">
-            <div class="d-flex flex-column align-items-center gap-1">
-              <button *ngIf="demande.statut === 'en_attente'" class="sc-btn-annuler" (click)="annulerDemande(demande.id)">
-                <i class="isax isax-close-circle me-1"></i>Annuler
-              </button>
-              <button *ngIf="demande.statut === 'en_attente'" class="sc-btn-relancer" (click)="relancerDemande(demande.id)">
-                <i class="isax isax-refresh me-1"></i>Relancer
-              </button>
-              <span *ngIf="demande.statut !== 'en_attente'" class="text-muted small">—</span>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+<!-- ═══════════════════════════════════════════ -->
+<!-- VUE GRILLE                                 -->
+<!-- ═══════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && viewMode === 'grid'">
+  <div class="sc-grid" *ngIf="demandes.length > 0">
+    <div class="sc-grid-card"
+         *ngFor="let demande of demandes"
+         [class.sc-grid-card--refusee]="demande.statut === 'refusee'"
+         [class.sc-grid-card--validee]="demande.statut === 'validee'"
+         (click)="voirDetails(demande)">
+
+      <!-- Thumbnail + statut overlay -->
+      <div class="sc-grid-card__cover">
+        <img [src]="demande.image_affiche" alt="{{ demande.titre_affiche }}" class="sc-grid-card__img">
+        <div class="sc-grid-card__cover-overlay">
+          <span class="sc-statut" [ngClass]="getStatutClass(demande.statut)">{{ demande.statut_display }}</span>
+        </div>
+        <span class="sc-priorite sc-grid-card__priorite" [ngClass]="getPrioriteClass(demande.priorite)">
+          {{ demande.priorite_display }}
+        </span>
+      </div>
+
+      <!-- Corps -->
+      <div class="sc-grid-card__body">
+        <h6 class="sc-grid-card__title">{{ demande.titre_affiche }}</h6>
+        <p class="sc-grid-card__sub" *ngIf="demande.sous_titre_affiche">{{ demande.sous_titre_affiche }}</p>
+
+        <div class="sc-grid-card__chips">
+          <span class="sc-detail-chip" *ngIf="demande.session_formation?.type_display">
+            <i class="isax isax-calendar-1 me-1"></i>{{ demande.session_formation.type_display }}
+          </span>
+          <span class="sc-detail-chip" *ngIf="demande.session_formation?.lieu">
+            <i class="isax isax-location me-1"></i>{{ demande.session_formation.lieu }}
+          </span>
+          <span class="sc-detail-chip" *ngIf="demande.session_formation?.places_restantes != null">
+            <i class="isax isax-people me-1"></i>{{ demande.session_formation.places_restantes }} participants
+          </span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="sc-grid-card__footer" (click)="$event.stopPropagation()">
+  <span class="sc-grid-card__date">
+    <i class="isax isax-calendar-1"></i>
+    {{ demande.created_at | date:'dd/MM/yyyy' }}
+  </span>
+  <div class="sc-grid-card__actions">
+    <button *ngIf="demande.statut === 'en_attente'"
+            class="sc-btn-annuler sc-btn--xs"
+            title="Annuler"
+            (click)="annulerDemande(demande.id)">
+      <i class="isax isax-close-circle"></i>
+    </button>
+    <button *ngIf="demande.statut === 'en_attente'"
+            class="sc-btn-relancer sc-btn--xs"
+            title="Relancer"
+            (click)="relancerDemande(demande.id)">
+      <i class="isax isax-refresh"></i>
+    </button>
   </div>
 </div>
+
+    </div>
+  </div>
+</ng-container>
 
 <!-- EMPTY -->
 <div *ngIf="!loading && demandes.length === 0" class="sc-empty">
@@ -161,14 +247,12 @@
   (pageChange)="onPageChange($event)">
 </app-custom-pagination>
 
-<!-- ============================================================= -->
-<!-- MODAL — SESSION UNIQUEMENT (pas de choix de type)             -->
-<!-- ============================================================= -->
+<!-- ═══════════════════════════════════════════ -->
+<!-- MODAL SESSION                              -->
+<!-- ═══════════════════════════════════════════ -->
 <div class="modal fade" id="demandeSessionModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content lms-modal">
-
-      <!-- HEADER -->
       <div class="modal-header lms-modal__header">
         <div class="d-flex align-items-center gap-3">
           <div class="lms-modal__icon"><i class="isax isax-calendar-1"></i></div>
@@ -180,20 +264,16 @@
         <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
       </div>
 
-      <!-- BODY -->
       <div class="modal-body lms-modal__body">
 
-        <!-- ÉTAPE 1 : CHOIX SESSION -->
         <div class="lms-step mb-4">
           <div class="lms-step__header mb-3">
             <span class="lms-step__number lms-step__number--blue">1</span>
             <p class="lms-step__title">Choisir une session <span class="text-danger">*</span></p>
           </div>
-
           <div *ngIf="loadingSessions" class="lms-loading">
             <div class="spinner-border text-primary"></div><span>Chargement des sessions...</span>
           </div>
-
           <div *ngIf="!loadingSessions">
             <div class="lms-session-card"
                  *ngFor="let session of sessions"
@@ -210,7 +290,7 @@
                   </span>
                 </div>
               </div>
-              <span class="lms-session-card__places">{{ session.places_restantes }} places</span>
+              <span class="lms-session-card__places">{{ session.places_restantes }} participants</span>
             </div>
             <div *ngIf="sessions.length === 0" class="lms-empty-inline">
               <i class="isax isax-calendar-remove"></i><span>Aucune session disponible</span>
@@ -220,7 +300,6 @@
 
         <hr class="lms-divider">
 
-        <!-- ÉTAPE 2 : INFOS COMPLÉMENTAIRES -->
         <div class="lms-step__header mb-3">
           <span class="lms-step__number lms-step__number--blue">2</span>
           <p class="lms-step__title">Informations complémentaires</p>
@@ -259,7 +338,6 @@
 
       </div>
 
-      <!-- FOOTER -->
       <div class="modal-footer lms-modal__footer">
         <button class="btn lms-btn-cancel" (click)="closeModal()">
           <i class="isax isax-close-square me-1"></i>Annuler
@@ -272,7 +350,6 @@
           {{ submitting ? 'Envoi en cours...' : 'Valider la demande' }}
         </button>
       </div>
-
     </div>
   </div>
 </div>

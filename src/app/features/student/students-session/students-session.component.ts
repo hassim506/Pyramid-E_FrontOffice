@@ -1,6 +1,6 @@
-import { Component, OnInit }                                          from '@angular/core';
-import { CommonModule }                                               from '@angular/common';
-import { RouterModule }                                               from '@angular/router';
+import { Component, OnInit }        from '@angular/core';
+import { CommonModule }             from '@angular/common';
+import { RouterModule, Router }     from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DemandeFormationService }   from '../../../shared/service/demande/demande-formation.service';
 import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
@@ -23,9 +23,10 @@ interface Toast {
 })
 export class StudentsSessionsComponent implements OnInit {
 
-  // ================================
-  // LISTE DEMANDES (filtrée session)
-  // ================================
+  // ── VUE ─────────────────────────────────────────
+  viewMode: 'table' | 'grid' = 'table';
+
+  // ── DONNÉES ─────────────────────────────────────
   loading      = true;
   allDemandes: any[] = [];
   demandes:    any[] = [];
@@ -42,28 +43,23 @@ export class StudentsSessionsComponent implements OnInit {
   hoveredMotifId:  number | null = null;
   showRefusePerson = false;
 
-  // ================================
-  // TOAST
-  // ================================
+  // ── TOAST ────────────────────────────────────────
   toast: Toast = { type: 'success', message: '', visible: false };
   private toastTimer: any;
 
-  // ================================
-  // MODAL — SESSION UNIQUEMENT
-  // ================================
-  submitting            = false;
+  // ── MODAL ────────────────────────────────────────
+  submitting             = false;
   private modalInstance: any;
-
-  sessions:        any[]         = [];
+  sessions:         any[]         = [];
   selectedSessionId: number | null = null;
-  loadingSessions  = false;
-
+  loadingSessions   = false;
   form!: FormGroup;
 
   constructor(
     private demandeFormationService: DemandeFormationService,
     private formationsService: FormationsService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -76,16 +72,22 @@ export class StudentsSessionsComponent implements OnInit {
     });
   }
 
-  // ================================
-  // STATS
-  // ================================
+  // ── TOGGLE VUE ───────────────────────────────────
+  setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
+
+  // ── NAVIGATION → course-details-2 (mode session) ─
+  voirDetails(demande: any): void {
+    this.router.navigate(['/courses/course-details-2', 0], {
+      state: { demande, mode: 'session' }
+    });
+  }
+
+  // ── STATS ────────────────────────────────────────
   get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
   get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length;    }
   get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length;    }
 
-  // ================================
-  // CHARGEMENT — filtré sur 'session'
-  // ================================
+  // ── CHARGEMENT ───────────────────────────────────
   loadDemandes(): void {
     this.loading = true;
     this.demandeFormationService.getMesDemandes().subscribe({
@@ -113,9 +115,7 @@ export class StudentsSessionsComponent implements OnInit {
     };
   }
 
-  // ================================
-  // FILTRES + PAGINATION
-  // ================================
+  // ── FILTRES + PAGINATION ─────────────────────────
   getTableData(skip: number, limit: number): void {
     let filtered = [...this.allDemandes];
     if (this.selectedStatus)  filtered = filtered.filter(d => d.statut === this.selectedStatus);
@@ -136,19 +136,15 @@ export class StudentsSessionsComponent implements OnInit {
   resetFilters(): void                 { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
   onPageChange(page: number): void     { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
 
-  // ================================
-  // TOOLTIP
-  // ================================
+  // ── TOOLTIP ──────────────────────────────────────
   showMotif(id: number): void         { this.hoveredMotifId = id; }
   hideMotif(): void                   { this.hoveredMotifId = null; }
   isMotifVisible(id: number): boolean { return this.hoveredMotifId === id; }
   toggleShowRefusePerson(): void      { this.showRefusePerson = !this.showRefusePerson; }
 
-  // ================================
-  // ACTIONS TABLEAU
-  // ================================
+  // ── ACTIONS ──────────────────────────────────────
   annulerDemande(id: number): void {
-    if (!confirm('Confirmer l\'annulation de cette demande ?')) return;
+    if (!confirm("Confirmer l'annulation de cette demande ?")) return;
     this.demandeFormationService.annulerDemande(id).subscribe({ next: () => this.loadDemandes() });
   }
 
@@ -159,20 +155,15 @@ export class StudentsSessionsComponent implements OnInit {
     });
   }
 
-  // ================================
-  // TOAST
-  // ================================
+  // ── TOAST ────────────────────────────────────────
   showToast(type: 'success' | 'error' | 'warning', message: string): void {
     clearTimeout(this.toastTimer);
     this.toast = { type, message, visible: true };
     this.toastTimer = setTimeout(() => this.toast.visible = false, 4000);
   }
-
   closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
-  // ================================
-  // MODAL
-  // ================================
+  // ── MODAL ────────────────────────────────────────
   openRequestModal(): void {
     this.loadSessions();
     const el = document.getElementById('demandeSessionModal');
@@ -182,10 +173,7 @@ export class StudentsSessionsComponent implements OnInit {
     }
   }
 
-  closeModal(): void {
-    this.modalInstance?.hide();
-    this.resetModal();
-  }
+  closeModal(): void { this.modalInstance?.hide(); this.resetModal(); }
 
   private resetModal(): void {
     this.selectedSessionId = null;
@@ -202,17 +190,12 @@ export class StudentsSessionsComponent implements OnInit {
     });
   }
 
-  // ================================
-  // VALIDATION + SOUMISSION
-  // ================================
-  canSubmit(): boolean {
-    return !!this.selectedSessionId && this.form.valid;
-  }
+  // ── SOUMISSION ───────────────────────────────────
+  canSubmit(): boolean { return !!this.selectedSessionId && this.form.valid; }
 
   submitRequest(): void {
     if (!this.canSubmit()) return;
     this.submitting = true;
-
     const fv = this.form.value;
     const payload: any = {
       type_demande:         'session',
@@ -222,15 +205,11 @@ export class StudentsSessionsComponent implements OnInit {
       priorite:             fv.priorite,
       commentaire_employe:  fv.commentaire_employe,
     };
-
     this.demandeFormationService.creerDemande(payload).subscribe({
       next: () => {
         this.submitting = false;
         this.closeModal();
-        setTimeout(() => {
-          this.showToast('success', '✅ Votre demande a été envoyée avec succès !');
-          this.loadDemandes();
-        }, 300);
+        setTimeout(() => { this.showToast('success', '✅ Votre demande a été envoyée avec succès !'); this.loadDemandes(); }, 300);
       },
       error: (err) => this.handleError(err)
     });
@@ -243,14 +222,11 @@ export class StudentsSessionsComponent implements OnInit {
     else                         this.showToast('error', '❌ Une erreur est survenue. Veuillez réessayer.');
   }
 
-  // ================================
-  // HELPERS CSS
-  // ================================
-  getPrioriteClass(priorite: string): string {
-    return ({ urgente: 'priorite-urgente', haute: 'priorite-haute', normale: 'priorite-normale', basse: 'priorite-basse' } as any)[priorite] ?? 'priorite-normale';
+  // ── HELPERS CSS ──────────────────────────────────
+  getPrioriteClass(p: string): string {
+    return ({ urgente: 'priorite-urgente', haute: 'priorite-haute', normale: 'priorite-normale', basse: 'priorite-basse' } as any)[p] ?? 'priorite-normale';
   }
-
-  getStatutClass(statut: string): string {
-    return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[statut] ?? '';
+  getStatutClass(s: string): string {
+    return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[s] ?? '';
   }
-}
+}  // ← accolade fermante de la classe
