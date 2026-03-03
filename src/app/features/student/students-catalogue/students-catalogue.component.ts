@@ -1,9 +1,10 @@
-import { Component, OnInit }                                          from '@angular/core';
-import { CommonModule }                                               from '@angular/common';
-import { RouterModule }                                               from '@angular/router';
+import { Component, OnInit }        from '@angular/core';
+import { CommonModule }             from '@angular/common';
+import { RouterModule }             from '@angular/router';
+import { Router }                   from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DemandeFormationService }   from '../../../shared/service/demande/demande-formation.service';
-import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
+import { DemandeFormationService }  from '../../../shared/service/demande/demande-formation.service';
+import { FormationsService }        from '../../../shared/service/Formationsss/formations.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 
 declare var bootstrap: any;
@@ -23,47 +24,47 @@ interface Toast {
 })
 export class StudentsCatalogueComponent implements OnInit {
 
-  // ================================
-  // LISTE DEMANDES (filtrée catalogue)
-  // ================================
-  loading      = true;
-  allDemandes: any[] = [];
-  demandes:    any[] = [];
+  // ── VUE ─────────────────────────────────────────
+  viewMode: 'table' | 'grid' = 'table';
 
+  // ── LISTE DEMANDES ───────────────────────────────
+  loading         = true;
+  allDemandes:    any[] = [];
+  demandes:       any[] = [];
   searchDataValue = '';
   selectedStatus  = '';
+  totalData       = 0;
+  pageSize        = 10;
+  currentPage     = 1;
+  skip            = 0;
+  limit           = 10;
+  hoveredMotifId: number | null = null;
 
-  totalData   = 0;
-  pageSize    = 10;
-  currentPage = 1;
-  skip        = 0;
-  limit       = 10;
-
-  hoveredMotifId:  number | null = null;
-  showRefusePerson = false;
-
-  // ================================
-  // TOAST
-  // ================================
+  // ── TOAST ────────────────────────────────────────
   toast: Toast = { type: 'success', message: '', visible: false };
   private toastTimer: any;
 
-  // ================================
-  // MODAL — CATALOGUE UNIQUEMENT
-  // ================================
-  submitting            = false;
+  // ── MODAL DÉTAIL DEMANDE ─────────────────────────
+  demandeSelectionnee:  any = null;
+  catalogueDetail:      any = null;
+  formationsCatalogue:  any[] = [];
+  loadingFormations     = false;
+  private detailDemandeModal: any;
+
+  // ── MODAL NOUVELLE DEMANDE ───────────────────────
+  submitting           = false;
   private modalInstance: any;
-
-  catalogues:          any[] = [];
-  selectedCatalogueIds: number[] = [];
+  catalogues:          any[]         = [];
   loadingCatalogues    = false;
-
+  selectedCatalogueId: number | null = null;
+  selectedCatalogue:   any           = null;
   form!: FormGroup;
 
   constructor(
     private demandeFormationService: DemandeFormationService,
-    private formationsService: FormationsService,
-    private fb: FormBuilder
+    private formationsService:       FormationsService,
+    private fb:                      FormBuilder,
+    private router:                  Router
   ) {}
 
   ngOnInit(): void {
@@ -77,16 +78,15 @@ export class StudentsCatalogueComponent implements OnInit {
     });
   }
 
-  // ================================
-  // STATS
-  // ================================
+  // ── TOGGLE VUE ───────────────────────────────────
+  setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
+
+  // ── STATS ────────────────────────────────────────
   get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
   get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length;    }
   get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length;    }
 
-  // ================================
-  // CHARGEMENT — filtré sur 'catalogue'
-  // ================================
+  // ── CHARGEMENT DEMANDES ──────────────────────────
   loadDemandes(): void {
     this.loading = true;
     this.demandeFormationService.getMesDemandes().subscribe({
@@ -106,18 +106,13 @@ export class StudentsCatalogueComponent implements OnInit {
   private normaliserDemande(d: any): any {
     return {
       ...d,
-      titre_affiche:      d.catalogue?.titre         ?? `Catalogue #${d.catalogue_id}`,
-      sous_titre_affiche: (() => {
-        const nb = d.catalogue?.nombre_formations ?? '?';
-        return `${nb} formation(s)${d.catalogue?.type_display ? ' · ' + d.catalogue.type_display : ''}`;
-      })(),
-      image_affiche: d.catalogue?.image_couverture || 'assets/img/course/course-01.jpg',
+      titre_affiche:      d.catalogue?.titre       ?? `Catalogue #${d.catalogue_id}`,
+      sous_titre_affiche: d.catalogue?.description ?? '',
+      image_affiche:      d.catalogue?.image_couverture || 'assets/img/course/course-01.jpg',
     };
   }
 
-  // ================================
-  // FILTRES + PAGINATION
-  // ================================
+  // ── FILTRES + PAGINATION ─────────────────────────
   getTableData(skip: number, limit: number): void {
     let filtered = [...this.allDemandes];
     if (this.selectedStatus)  filtered = filtered.filter(d => d.statut === this.selectedStatus);
@@ -132,49 +127,89 @@ export class StudentsCatalogueComponent implements OnInit {
     this.demandes  = filtered.slice(skip, skip + limit);
   }
 
-  searchData(value: string): void      { this.searchDataValue = value; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  filterByStatus(status: string): void { this.selectedStatus = status; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  resetFilters(): void                 { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  onPageChange(page: number): void     { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
+  searchData(v: string): void      { this.searchDataValue = v; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  filterByStatus(s: string): void  { this.selectedStatus = s; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  resetFilters(): void             { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  onPageChange(page: number): void { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
 
-  // ================================
-  // TOOLTIP
-  // ================================
+  // ── TOOLTIP ──────────────────────────────────────
   showMotif(id: number): void         { this.hoveredMotifId = id; }
   hideMotif(): void                   { this.hoveredMotifId = null; }
   isMotifVisible(id: number): boolean { return this.hoveredMotifId === id; }
-  toggleShowRefusePerson(): void      { this.showRefusePerson = !this.showRefusePerson; }
 
-  // ================================
-  // ACTIONS TABLEAU
-  // ================================
-  annulerDemande(id: number): void {
-    if (!confirm('Confirmer l\'annulation de cette demande ?')) return;
+  // ── ACTIONS TABLE ────────────────────────────────
+  annulerDemande(id: number, event: Event): void {
+    event.stopPropagation();
+    if (!confirm("Confirmer l'annulation de cette demande ?")) return;
     this.demandeFormationService.annulerDemande(id).subscribe({ next: () => this.loadDemandes() });
   }
 
-  relancerDemande(id: number): void {
+  relancerDemande(id: number, event: Event): void {
+    event.stopPropagation();
     this.demandeFormationService.relancerDemande(id).subscribe({
       next: () => this.loadDemandes(),
       error: () => this.showToast('error', '❌ Impossible de relancer cette demande.')
     });
   }
 
-  // ================================
-  // TOAST
-  // ================================
+  // ── TOAST ────────────────────────────────────────
   showToast(type: 'success' | 'error' | 'warning', message: string): void {
     clearTimeout(this.toastTimer);
     this.toast = { type, message, visible: true };
     this.toastTimer = setTimeout(() => this.toast.visible = false, 4000);
   }
-
   closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
-  // ================================
-  // MODAL
-  // ================================
+  // ════════════════════════════════════════════════
+  // MODAL DÉTAIL DEMANDE
+  // ════════════════════════════════════════════════
+  ouvrirDetailDemande(demande: any): void {
+    this.demandeSelectionnee = demande;
+    this.catalogueDetail     = null;
+    this.formationsCatalogue = [];
+
+    if (demande.catalogue_id) {
+      this.loadingFormations = true;
+      this.formationsService.getCatalogueDetail(demande.catalogue_id).subscribe({
+        next: (res: any) => {
+          this.catalogueDetail     = res.catalogue ?? res;
+          this.formationsCatalogue = res.formations ?? [];
+          this.loadingFormations   = false;
+        },
+        error: () => { this.loadingFormations = false; }
+      });
+    }
+
+    const el = document.getElementById('catalogueDemandeDetailModal');
+    if (el) {
+      this.detailDemandeModal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
+      this.detailDemandeModal.show();
+    }
+  }
+
+  fermerDetailDemande(): void {
+    this.detailDemandeModal?.hide();
+    this.demandeSelectionnee  = null;
+    this.catalogueDetail      = null;
+    this.formationsCatalogue  = [];
+  }
+
+  voirFormation(formation: any): void {
+    this.detailDemandeModal?.hide();
+    this.router.navigate(['/courses/course-details-2', formation.id], {
+      state: {
+        fromCatalogue:  true,
+        catalogueId:    this.demandeSelectionnee?.catalogue_id,
+        catalogueTitre: this.demandeSelectionnee?.titre_affiche,
+      }
+    });
+  }
+
+  // ════════════════════════════════════════════════
+  // MODAL NOUVELLE DEMANDE
+  // ════════════════════════════════════════════════
   openRequestModal(): void {
+    this.resetModal();
     this.loadCatalogues();
     const el = document.getElementById('demandeCatalogueModal');
     if (el) {
@@ -183,35 +218,36 @@ export class StudentsCatalogueComponent implements OnInit {
     }
   }
 
-  closeModal(): void {
-    this.modalInstance?.hide();
-    this.resetModal();
-  }
+  closeModal(): void { this.modalInstance?.hide(); this.resetModal(); }
 
   private resetModal(): void {
-    this.selectedCatalogueIds = [];
-    this.catalogues           = [];
-    this.submitting           = false;
+    this.catalogues          = [];
+    this.selectedCatalogueId = null;
+    this.selectedCatalogue   = null;
+    this.submitting          = false;
     this.form.reset({ priorite: 'normale' });
   }
 
   loadCatalogues(): void {
     this.loadingCatalogues = true;
     this.formationsService.getCatalogues().subscribe({
-      next: (res: any) => { this.catalogues = res.catalogues ?? []; this.loadingCatalogues = false; },
-      error: () => { this.loadingCatalogues = false; }
+      next: (res: any) => {
+        this.catalogues        = res.catalogues ?? [];
+        this.loadingCatalogues = false;
+      },
+      error: () => {
+        this.loadingCatalogues = false;
+        this.showToast('error', '❌ Erreur lors du chargement des catalogues.');
+      }
     });
   }
 
-  toggleCatalogue(id: number): void        { const i = this.selectedCatalogueIds.indexOf(id); i === -1 ? this.selectedCatalogueIds.push(id) : this.selectedCatalogueIds.splice(i, 1); }
-  isCatalogueSelected(id: number): boolean { return this.selectedCatalogueIds.includes(id); }
-
-  // ================================
-  // VALIDATION + SOUMISSION
-  // ================================
-  canSubmit(): boolean {
-    return this.selectedCatalogueIds.length > 0 && this.form.valid;
+  selectCatalogue(catalogue: any): void {
+    this.selectedCatalogueId = catalogue.id;
+    this.selectedCatalogue   = catalogue;
   }
+
+  canSubmit(): boolean { return !!this.selectedCatalogueId && this.form.valid; }
 
   submitRequest(): void {
     if (!this.canSubmit()) return;
@@ -222,29 +258,22 @@ export class StudentsCatalogueComponent implements OnInit {
       ? new Date(fv.date_souhaitee_debut).toISOString().split('T')[0]
       : undefined;
 
-    const base: any = {
+    const payload: any = {
       type_demande:         'catalogue',
+      catalogue_id:         this.selectedCatalogueId,
       motif_demande:        fv.motif_demande,
       objectifs_personnels: fv.objectifs_personnels,
       priorite:             fv.priorite,
       commentaire_employe:  fv.commentaire_employe,
     };
-    if (date) base.date_souhaitee_debut = date;
+    if (date) payload.date_souhaitee_debut = date;
 
-    if (this.selectedCatalogueIds.length === 1) {
-      this.envoyerDemande({ ...base, catalogue_id: this.selectedCatalogueIds[0] });
-    } else {
-      this.envoyerDemandesMultiples(base);
-    }
-  }
-
-  private envoyerDemande(payload: any): void {
     this.demandeFormationService.creerDemande(payload).subscribe({
       next: () => {
         this.submitting = false;
         this.closeModal();
         setTimeout(() => {
-          this.showToast('success', '✅ Votre demande a été envoyée avec succès !');
+          this.showToast('success', '✅ Votre demande de catalogue a été envoyée avec succès !');
           this.loadDemandes();
         }, 300);
       },
@@ -252,41 +281,17 @@ export class StudentsCatalogueComponent implements OnInit {
     });
   }
 
-  private envoyerDemandesMultiples(base: any): void {
-    let completed = 0; let hasError = false;
-    this.selectedCatalogueIds.forEach(id => {
-      this.demandeFormationService.creerDemande({ ...base, catalogue_id: id }).subscribe({
-        next: () => {
-          completed++;
-          if (completed === this.selectedCatalogueIds.length && !hasError) {
-            this.submitting = false;
-            this.closeModal();
-            setTimeout(() => {
-              this.showToast('success', `✅ ${completed} demande(s) envoyée(s) avec succès !`);
-              this.loadDemandes();
-            }, 300);
-          }
-        },
-        error: (err) => { if (!hasError) { hasError = true; this.handleError(err); } }
-      });
-    });
-  }
-
   private handleError(err: any): void {
     this.submitting = false;
-    if (err.status === 409)      this.showToast('warning', '⚠️ Vous avez déjà une demande en cours pour cet élément.');
+    if (err.status === 409)      this.showToast('warning', '⚠️ Vous avez déjà une demande en cours pour ce catalogue.');
     else if (err.status === 422) this.showToast('error', '❌ Veuillez vérifier les champs obligatoires.');
     else                         this.showToast('error', '❌ Une erreur est survenue. Veuillez réessayer.');
   }
 
-  // ================================
-  // HELPERS CSS
-  // ================================
-  getPrioriteClass(priorite: string): string {
-    return ({ urgente: 'priorite-urgente', haute: 'priorite-haute', normale: 'priorite-normale', basse: 'priorite-basse' } as any)[priorite] ?? 'priorite-normale';
+  getPrioriteClass(p: string): string {
+    return ({ urgente: 'priorite-urgente', haute: 'priorite-haute', normale: 'priorite-normale', basse: 'priorite-basse' } as any)[p] ?? 'priorite-normale';
   }
-
-  getStatutClass(statut: string): string {
-    return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[statut] ?? '';
+  getStatutClass(s: string): string {
+    return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[s] ?? '';
   }
 }

@@ -13,13 +13,11 @@ import { FormationsService }         from '../../../shared/service/Formationsss/
 })
 export class CourseDetails2Component implements OnInit {
 
-  // ── Mode formation (existant) ──────────────────────────────
   formation: Formation | null = null;
 
-  // ── Mode session ───────────────────────────────────────────
   mode: 'formation' | 'session' = 'formation';
-  demande:  any = null;   // objet demande complet passé via router state
-  session:  any = null;   // raccourci → demande.session_formation
+  demande:  any = null;
+  session:  any = null;
 
   loading = true;
   error   = '';
@@ -31,9 +29,9 @@ export class CourseDetails2Component implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // ✅ history.state est fiable même après que la navigation est terminée
-    const state = history.state as { demande?: any; mode?: string };
+    const state = history.state as { demande?: any; mode?: string; fromCatalogue?: boolean };
 
+    // ── Mode session ──────────────────────────────────────
     if (state?.mode === 'session' && state?.demande) {
       this.mode    = 'session';
       this.demande = state.demande;
@@ -42,12 +40,11 @@ export class CourseDetails2Component implements OnInit {
       return;
     }
 
-    // ── Mode formation classique (par route :id) ──────────────
+    // ── Mode catalogue ou formation classique ─────────────
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (id && id !== 0) this.loadFormationDetails(id);
   }
 
-  // ── Chargement formation ──────────────────────────────────
   loadFormationDetails(id: number): void {
     this.loading = true;
     this.formationsService.getFormationById(id).subscribe({
@@ -62,7 +59,6 @@ export class CourseDetails2Component implements OnInit {
     });
   }
 
-  // ── Helpers session ───────────────────────────────────────
   getStatutClass(statut: string): string {
     return ({
       en_attente: 'badge-attente',
@@ -82,12 +78,16 @@ export class CourseDetails2Component implements OnInit {
     return Math.ceil(ms / (1000 * 60 * 60 * 24));
   }
 
-  // ── Helper formation ──────────────────────────────────────
   canSubscribe(): boolean {
     return !!this.formation?.inscription_ouverte;
   }
 
   goBack(): void {
-    this.router.navigate(['/student/students-session']);
+    const state = history.state;
+    if (state?.fromCatalogue) {
+      this.router.navigate(['/student/students-catalogue']);
+    } else {
+      this.router.navigate(['/student/students-session']);
+    }
   }
 }

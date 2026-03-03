@@ -1,9 +1,9 @@
-import { Component, OnInit }                                          from '@angular/core';
-import { CommonModule }                                               from '@angular/common';
-import { RouterModule }                                               from '@angular/router';
+import { Component, OnInit }        from '@angular/core';
+import { CommonModule }             from '@angular/common';
+import { RouterModule }             from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DemandeFormationService }   from '../../../shared/service/demande/demande-formation.service';
-import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
+import { DemandeFormationService }  from '../../../shared/service/demande/demande-formation.service';
+import { FormationsService }        from '../../../shared/service/Formationsss/formations.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 
 declare var bootstrap: any;
@@ -23,45 +23,43 @@ interface Toast {
 })
 export class StudentsParcoursComponent implements OnInit {
 
-  // ================================
-  // LISTE DEMANDES (filtrée parcours)
-  // ================================
-  loading      = true;
-  allDemandes: any[] = [];
-  demandes:    any[] = [];
-
+  // ── LISTE DEMANDES ───────────────────────────────
+  loading         = true;
+  allDemandes:    any[] = [];
+  demandes:       any[] = [];
   searchDataValue = '';
   selectedStatus  = '';
-
-  totalData   = 0;
-  pageSize    = 10;
-  currentPage = 1;
-  skip        = 0;
-  limit       = 10;
-
-  hoveredMotifId:  number | null = null;
+  totalData       = 0;
+  pageSize        = 10;
+  currentPage     = 1;
+  skip            = 0;
+  limit           = 10;
+  hoveredMotifId: number | null = null;
   showRefusePerson = false;
 
-  // ================================
-  // TOAST
-  // ================================
+  // ── TOAST ────────────────────────────────────────
   toast: Toast = { type: 'success', message: '', visible: false };
   private toastTimer: any;
 
-  // ================================
-  // MODAL — PARCOURS UNIQUEMENT
-  // ================================
+  // ── MODAL DÉTAIL DEMANDE ─────────────────────────
+  demandeSelectionnee: any = null;
+  private detailDemandeModal: any;
+
+  // ── MODAL DEMANDE — FLUX 3 NIVEAUX ───────────────
   submitting            = false;
   private modalInstance: any;
+  showFormations        = false;
 
-  categories:           any[]   = [];
-  parcours:             any[]   = [];
-  private _tousLesParcours: any[] = []; // ✅ cache de tous les parcours chargés
-  domaine:              string | null = null; // ✅ domaine de l'utilisateur
+  parcours:         any[] = [];
+  loadingParcours   = false;
+  selectedParcours: any   = null;
 
-  selectedCategorieId:  number | string = '';
-  selectedParcoursIds:  number[]        = [];
-  loadingParcours       = false;
+  categories:        any[] = [];
+  loadingCategories  = false;
+  selectedCategorie: any   = null;
+
+  formations:       any[] = [];
+  loadingFormations = false;
 
   form!: FormGroup;
 
@@ -73,8 +71,6 @@ export class StudentsParcoursComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDemandes();
-    this.loadCategories();
-    this.loadParcoursDisponibles(); // ✅ chargement filtré domaine + entreprise
     this.form = this.fb.group({
       motif_demande:        ['', Validators.required],
       objectifs_personnels: [''],
@@ -84,16 +80,12 @@ export class StudentsParcoursComponent implements OnInit {
     });
   }
 
-  // ================================
-  // STATS
-  // ================================
+  // ── STATS ────────────────────────────────────────
   get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
   get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length;    }
   get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length;    }
 
-  // ================================
-  // CHARGEMENT — filtré sur 'parcours'
-  // ================================
+  // ── CHARGEMENT DEMANDES ──────────────────────────
   loadDemandes(): void {
     this.loading = true;
     this.demandeFormationService.getMesDemandes().subscribe({
@@ -119,9 +111,7 @@ export class StudentsParcoursComponent implements OnInit {
     };
   }
 
-  // ================================
-  // FILTRES + PAGINATION
-  // ================================
+  // ── FILTRES + PAGINATION ─────────────────────────
   getTableData(skip: number, limit: number): void {
     let filtered = [...this.allDemandes];
     if (this.selectedStatus)  filtered = filtered.filter(d => d.statut === this.selectedStatus);
@@ -136,49 +126,63 @@ export class StudentsParcoursComponent implements OnInit {
     this.demandes  = filtered.slice(skip, skip + limit);
   }
 
-  searchData(value: string): void      { this.searchDataValue = value; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  filterByStatus(status: string): void { this.selectedStatus = status; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  resetFilters(): void                 { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  onPageChange(page: number): void     { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
+  searchData(v: string): void      { this.searchDataValue = v; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  filterByStatus(s: string): void  { this.selectedStatus = s; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  resetFilters(): void             { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  onPageChange(page: number): void { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
 
-  // ================================
-  // TOOLTIP
-  // ================================
+  // ── TOOLTIP ──────────────────────────────────────
   showMotif(id: number): void         { this.hoveredMotifId = id; }
   hideMotif(): void                   { this.hoveredMotifId = null; }
   isMotifVisible(id: number): boolean { return this.hoveredMotifId === id; }
   toggleShowRefusePerson(): void      { this.showRefusePerson = !this.showRefusePerson; }
 
-  // ================================
-  // ACTIONS TABLEAU
-  // ================================
-  annulerDemande(id: number): void {
-    if (!confirm('Confirmer l\'annulation de cette demande ?')) return;
+  // ── ACTIONS TABLE ────────────────────────────────
+  annulerDemande(id: number, event: Event): void {
+    event.stopPropagation(); // empêche l'ouverture du modal détail
+    if (!confirm("Confirmer l'annulation de cette demande ?")) return;
     this.demandeFormationService.annulerDemande(id).subscribe({ next: () => this.loadDemandes() });
   }
 
-  relancerDemande(id: number): void {
+  relancerDemande(id: number, event: Event): void {
+    event.stopPropagation(); // empêche l'ouverture du modal détail
     this.demandeFormationService.relancerDemande(id).subscribe({
       next: () => this.loadDemandes(),
       error: () => this.showToast('error', '❌ Impossible de relancer cette demande.')
     });
   }
 
-  // ================================
-  // TOAST
-  // ================================
+  // ── TOAST ────────────────────────────────────────
   showToast(type: 'success' | 'error' | 'warning', message: string): void {
     clearTimeout(this.toastTimer);
     this.toast = { type, message, visible: true };
     this.toastTimer = setTimeout(() => this.toast.visible = false, 4000);
   }
-
   closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
-  // ================================
-  // MODAL
-  // ================================
+  // ════════════════════════════════════════════════
+  // MODAL DÉTAIL DEMANDE — clic sur ligne tableau
+  // ════════════════════════════════════════════════
+  ouvrirDetailDemande(demande: any): void {
+    this.demandeSelectionnee = demande;
+    const el = document.getElementById('demandeDetailModal');
+    if (el) {
+      this.detailDemandeModal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
+      this.detailDemandeModal.show();
+    }
+  }
+
+  fermerDetailDemande(): void {
+    this.detailDemandeModal?.hide();
+    this.demandeSelectionnee = null;
+  }
+
+  // ════════════════════════════════════════════════
+  // MODAL NOUVELLE DEMANDE — FLUX 3 NIVEAUX
+  // ════════════════════════════════════════════════
   openRequestModal(): void {
+    this.resetModal();
+    this.loadParcoursDisponibles();
     const el = document.getElementById('demandeParcoursModal');
     if (el) {
       this.modalInstance = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
@@ -186,43 +190,26 @@ export class StudentsParcoursComponent implements OnInit {
     }
   }
 
-  closeModal(): void {
-    this.modalInstance?.hide();
-    this.resetModal();
-  }
+  closeModal(): void { this.modalInstance?.hide(); this.resetModal(); }
 
   private resetModal(): void {
-    this.selectedCategorieId = '';
-    this.selectedParcoursIds = [];
-    this.parcours            = [...this._tousLesParcours]; // ✅ remet tous les parcours au lieu de vider
-    this.submitting          = false;
+    this.parcours          = [];
+    this.categories        = [];
+    this.formations        = [];
+    this.selectedParcours  = null;
+    this.selectedCategorie = null;
+    this.showFormations    = false;
+    this.submitting        = false;
     this.form.reset({ priorite: 'normale' });
   }
 
-  // ================================
-  // CHARGEMENT CATÉGORIES
-  // ================================
-  loadCategories(): void {
-    this.formationsService.getCategories().subscribe({
-      next: (res: any) => this.categories = res.categories ?? []
-    });
-  }
-
-  // ================================
-  // ✅ NOUVEAU : chargement parcours filtrés domaine + entreprise
-  // ================================
   loadParcoursDisponibles(): void {
     this.loadingParcours = true;
     this.formationsService.getParcoursDisponibles().subscribe({
       next: (res: any) => {
-        this._tousLesParcours = res.parcours ?? [];
-        this.parcours         = [...this._tousLesParcours];
-        this.domaine          = res.domaine ?? null;
-        this.loadingParcours  = false;
-
-        if (!res.status && res.message) {
-          this.showToast('warning', '⚠️ ' + res.message);
-        }
+        this.parcours        = res.parcours ?? [];
+        this.loadingParcours = false;
+        if (!res.status && res.message) this.showToast('warning', '⚠️ ' + res.message);
       },
       error: () => {
         this.loadingParcours = false;
@@ -231,33 +218,67 @@ export class StudentsParcoursComponent implements OnInit {
     });
   }
 
-  // ================================
-  // FILTRE LOCAL PAR CATÉGORIE (optionnel)
-  // ================================
-  onCategorieChange(): void {
-    this.selectedParcoursIds = [];
-    if (!this.selectedCategorieId) {
-      // Réaffiche tous les parcours si aucune catégorie sélectionnée
-      this.parcours = [...this._tousLesParcours];
-      return;
-    }
-    // Filtre local sur les parcours déjà chargés
-    this.parcours = this._tousLesParcours.filter(
-      (p: any) => p.categorie_id === +this.selectedCategorieId
-    );
+  selectParcours(parcours: any): void {
+    this.selectedParcours  = parcours;
+    this.selectedCategorie = null;
+    this.formations        = [];
+    this.showFormations    = false;
+    this.loadCategoriesDuParcours(parcours.id);
   }
 
-  // ================================
-  // SÉLECTION PARCOURS
-  // ================================
-  toggleParcours(id: number): void        { const i = this.selectedParcoursIds.indexOf(id); i === -1 ? this.selectedParcoursIds.push(id) : this.selectedParcoursIds.splice(i, 1); }
-  isParcoursSelected(id: number): boolean { return this.selectedParcoursIds.includes(id); }
+  loadCategoriesDuParcours(parcoursId: number): void {
+    this.loadingCategories = true;
+    this.categories        = [];
+    this.formationsService.getCategoriesDuParcours(parcoursId).subscribe({
+      next: (res: any) => {
+        this.categories        = res.categories ?? [];
+        this.loadingCategories = false;
+        if (this.categories.length === 1) this.selectCategorie(this.categories[0]);
+      },
+      error: () => {
+        this.loadingCategories = false;
+        this.showToast('error', '❌ Erreur lors du chargement des catégories.');
+      }
+    });
+  }
 
-  // ================================
-  // VALIDATION + SOUMISSION
-  // ================================
+  selectCategorie(categorie: any): void {
+    this.selectedCategorie = categorie;
+    this.formations        = [];
+    this.showFormations    = false;
+    this.loadFormationsDuParcours(this.selectedParcours.id, categorie.id);
+  }
+
+  loadFormationsDuParcours(parcoursId: number, categorieId: number): void {
+    this.loadingFormations = true;
+    this.formationsService.getFormationsDuParcoursParCategorie(parcoursId, categorieId).subscribe({
+      next: (res: any) => {
+        this.formations        = res.formations ?? [];
+        this.loadingFormations = false;
+      },
+      error: () => {
+        this.loadingFormations = false;
+        this.showToast('error', '❌ Erreur lors du chargement des formations.');
+      }
+    });
+  }
+
+  retourParcours(): void {
+    this.selectedParcours  = null;
+    this.selectedCategorie = null;
+    this.categories        = [];
+    this.formations        = [];
+    this.showFormations    = false;
+  }
+
+  retourCategories(): void {
+    this.selectedCategorie = null;
+    this.formations        = [];
+    this.showFormations    = false;
+  }
+
   canSubmit(): boolean {
-    return this.selectedParcoursIds.length > 0 && this.form.valid;
+    return !!this.selectedParcours && !!this.selectedCategorie && this.form.valid;
   }
 
   submitRequest(): void {
@@ -269,29 +290,22 @@ export class StudentsParcoursComponent implements OnInit {
       ? new Date(fv.date_souhaitee_debut).toISOString().split('T')[0]
       : undefined;
 
-    const base: any = {
+    const payload: any = {
       type_demande:         'parcours',
+      parcours_id:          this.selectedParcours.id,
       motif_demande:        fv.motif_demande,
       objectifs_personnels: fv.objectifs_personnels,
       priorite:             fv.priorite,
       commentaire_employe:  fv.commentaire_employe,
     };
-    if (date) base.date_souhaitee_debut = date;
+    if (date) payload.date_souhaitee_debut = date;
 
-    if (this.selectedParcoursIds.length === 1) {
-      this.envoyerDemande({ ...base, parcours_id: this.selectedParcoursIds[0] });
-    } else {
-      this.envoyerDemandesMultiples(base);
-    }
-  }
-
-  private envoyerDemande(payload: any): void {
     this.demandeFormationService.creerDemande(payload).subscribe({
       next: () => {
         this.submitting = false;
         this.closeModal();
         setTimeout(() => {
-          this.showToast('success', '✅ Votre demande a été envoyée avec succès !');
+          this.showToast('success', '✅ Votre demande de parcours a été envoyée avec succès !');
           this.loadDemandes();
         }, 300);
       },
@@ -299,41 +313,21 @@ export class StudentsParcoursComponent implements OnInit {
     });
   }
 
-  private envoyerDemandesMultiples(base: any): void {
-    let completed = 0; let hasError = false;
-    this.selectedParcoursIds.forEach(id => {
-      this.demandeFormationService.creerDemande({ ...base, parcours_id: id }).subscribe({
-        next: () => {
-          completed++;
-          if (completed === this.selectedParcoursIds.length && !hasError) {
-            this.submitting = false;
-            this.closeModal();
-            setTimeout(() => {
-              this.showToast('success', `✅ ${completed} demande(s) envoyée(s) avec succès !`);
-              this.loadDemandes();
-            }, 300);
-          }
-        },
-        error: (err) => { if (!hasError) { hasError = true; this.handleError(err); } }
-      });
-    });
-  }
-
   private handleError(err: any): void {
     this.submitting = false;
-    if (err.status === 409)      this.showToast('warning', '⚠️ Vous avez déjà une demande en cours pour cet élément.');
+    if (err.status === 409)      this.showToast('warning', '⚠️ Vous avez déjà une demande en cours pour ce parcours.');
     else if (err.status === 422) this.showToast('error', '❌ Veuillez vérifier les champs obligatoires.');
     else                         this.showToast('error', '❌ Une erreur est survenue. Veuillez réessayer.');
   }
 
-  // ================================
-  // HELPERS CSS
-  // ================================
-  getPrioriteClass(priorite: string): string {
-    return ({ urgente: 'priorite-urgente', haute: 'priorite-haute', normale: 'priorite-normale', basse: 'priorite-basse' } as any)[priorite] ?? 'priorite-normale';
+  // ── HELPERS CSS ──────────────────────────────────
+  getPrioriteClass(p: string): string {
+    return ({ urgente: 'priorite-urgente', haute: 'priorite-haute', normale: 'priorite-normale', basse: 'priorite-basse' } as any)[p] ?? 'priorite-normale';
   }
-
-  getStatutClass(statut: string): string {
-    return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[statut] ?? '';
+  getStatutClass(s: string): string {
+    return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[s] ?? '';
+  }
+  getNiveauClass(niveau: string): string {
+    return ({ debutant: 'niveau-debutant', intermediaire: 'niveau-inter', avance: 'niveau-avance' } as any)[niveau] ?? '';
   }
 }
