@@ -61,7 +61,7 @@ export class FormationsService {
   // 🎓 FORMATIONS EMPLOYÉ
   // ===============================
 
-  /** 🔥 Formations suivies par l’employé */
+  /** 🔥 Formations suivies par l'employé */
   getMesFormations(): Observable<FormationsApiResponse> {
     return this.http.get<FormationsApiResponse>(
       `${this.apiUrl}/mes-formations`,
@@ -132,7 +132,15 @@ export class FormationsService {
     );
   }
 
-  /** 🔹 Parcours par catégorie */
+  /** 🔹 Parcours disponibles filtrés par domaine + entreprise de l'utilisateur */
+  getParcoursDisponibles(): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/demandes-formation/listes/parcours`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /** 🔹 Parcours par catégorie (gardé pour usage optionnel) */
   getParcoursParCategorie(categorieId: number): Observable<any> {
     return this.http.get<any>(
       `${this.apiUrl}/demandes-formation/listes/parcours/${categorieId}`,

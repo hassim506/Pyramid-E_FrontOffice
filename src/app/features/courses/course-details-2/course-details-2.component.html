@@ -1,24 +1,17 @@
-<!-- ================================================= -->
-<!-- LOADER                                            -->
-<!-- ================================================= -->
+<!-- LOADER -->
 <div *ngIf="loading" class="cd-loader">
   <div class="cd-loader__spinner"></div>
   <p>Chargement de la formation...</p>
 </div>
 
-<!-- ================================================= -->
-<!-- ERREUR                                            -->
-<!-- ================================================= -->
+<!-- ERREUR -->
 <div *ngIf="!loading && error" class="cd-error">
   <i class="ti ti-alert-circle cd-error__icon"></i>
   <p>{{ error }}</p>
 </div>
 
-<!-- ================================================= -->
-<!-- HERO BANNER                                       -->
-<!-- ================================================= -->
+<!-- HERO -->
 <section class="cd-hero" *ngIf="!loading && formation">
-
   <div class="cd-hero__bg"
        [style.background-image]="formation.image_couverture ? 'url(' + formation.image_couverture + ')' : 'none'">
   </div>
@@ -27,8 +20,6 @@
   <div class="container position-relative" style="z-index:2;">
     <div class="row">
       <div class="col-lg-8">
-
-        <!-- BADGES -->
         <div class="cd-hero__badges">
           <span class="cd-badge cd-badge--certifiant" *ngIf="formation.est_certifiante">
             <i class="ti ti-certificate"></i> Certifiante
@@ -48,54 +39,40 @@
             {{ formation.categorie?.nom }}
           </span>
         </div>
-
-        <!-- TITRE + SOUS-TITRE -->
         <h1 class="cd-hero__title">{{ formation.titre }}</h1>
         <p class="cd-hero__subtitle">{{ formation.short_description }}</p>
-
         <div class="cd-hero__divider"></div>
-
       </div>
+      <div class="col-lg-4 d-none d-lg-block"></div>
     </div>
   </div>
 </section>
 
-<!-- ================================================= -->
-<!-- CONTENU PRINCIPAL                                 -->
-<!-- ================================================= -->
+<!-- CONTENU -->
 <section class="course-details" *ngIf="!loading && formation">
   <div class="container">
     <div class="row">
 
-      <!-- ── GAUCHE ── -->
+      <!-- GAUCHE -->
       <div class="col-lg-8">
 
-        <!-- Présentation -->
-        <div class="card mb-4">
+        <div class="card cd-card mb-4">
           <div class="card-body">
-            <h5 class="subs-title mb-3">
-              <i class="ti ti-file-description me-2 text-primary"></i>Présentation
-            </h5>
+            <h5 class="subs-title mb-3"><i class="ti ti-file-description me-2 text-primary"></i>Présentation</h5>
             <p class="text-muted" style="line-height:1.7;">{{ formation.description }}</p>
           </div>
         </div>
 
-        <!-- Objectifs pédagogiques -->
-        <div class="card mb-4" *ngIf="formation.objectifs_pedagogiques">
+        <div class="card cd-card mb-4" *ngIf="formation.objectifs_pedagogiques">
           <div class="card-body">
-            <h5 class="subs-title mb-3">
-              <i class="ti ti-target me-2 text-primary"></i>Objectifs de la formation
-            </h5>
+            <h5 class="subs-title mb-3"><i class="ti ti-target me-2 text-primary"></i>Objectifs de la formation</h5>
             <p class="text-muted" style="line-height:1.7;">{{ formation.objectifs_pedagogiques }}</p>
           </div>
         </div>
 
-        <!-- Compétences visées -->
-        <div class="card mb-4" *ngIf="formation.competences_acquises?.length">
+        <div class="card cd-card mb-4" *ngIf="formation.competences_acquises?.length">
           <div class="card-body">
-            <h5 class="subs-title mb-3">
-              <i class="ti ti-star me-2 text-warning"></i>Compétences visées
-            </h5>
+            <h5 class="subs-title mb-3"><i class="ti ti-star me-2 text-warning"></i>Compétences visées</h5>
             <ul class="competences-list">
               <li *ngFor="let comp of formation.competences_acquises">
                 <i class="ti ti-circle-check text-success me-2"></i>{{ comp }}
@@ -104,43 +81,31 @@
           </div>
         </div>
 
-        <!-- Prérequis -->
-        <div class="card mb-4" *ngIf="formation.prerequis">
+        <div class="card cd-card mb-4" *ngIf="formation.prerequis">
           <div class="card-body">
-            <h5 class="subs-title mb-3">
-              <i class="ti ti-tool me-2 text-warning"></i>Prérequis
-            </h5>
+            <h5 class="subs-title mb-3"><i class="ti ti-tool me-2 text-warning"></i>Prérequis</h5>
             <p class="text-muted" style="line-height:1.7;">{{ formation.prerequis }}</p>
           </div>
         </div>
 
-        <!-- Contenu / Modules -->
-        <div class="card mb-4">
+        <div class="card cd-card mb-4">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="subs-title mb-0">
-                <i class="ti ti-layout-list me-2 text-primary"></i>Contenu de la formation
-              </h5>
+              <h5 class="subs-title mb-0"><i class="ti ti-layout-list me-2 text-primary"></i>Contenu de la formation</h5>
               <span class="badge bg-primary rounded-pill">{{ formation.nombre_modules }} modules</span>
             </div>
             <div class="accordion accordion-customicon1">
               <div class="accordion-item" *ngFor="let module of formation.modules; let i = index">
                 <h2 class="accordion-header">
-                  <button class="accordion-button collapsed"
-                          data-bs-toggle="collapse"
-                          [attr.data-bs-target]="'#module'+i">
-                    {{ module.titre }}
-                  </button>
+                  <button class="accordion-button collapsed" data-bs-toggle="collapse"
+                          [attr.data-bs-target]="'#module'+i">{{ module.titre }}</button>
                 </h2>
                 <div class="accordion-collapse collapse" [id]="'module'+i">
                   <div class="accordion-body p-0">
                     <ul>
                       <li class="p-3 d-flex justify-content-between align-items-center"
                           *ngFor="let section of module.sections">
-                        <span>
-                          <img class="me-2" src="./assets/img/icons/play.svg">
-                          {{ section.titre }}
-                        </span>
+                        <span><img class="me-2" src="./assets/img/icons/play.svg">{{ section.titre }}</span>
                         <span class="text-muted small">{{ section.duree_estimee }}</span>
                       </li>
                     </ul>
@@ -151,32 +116,23 @@
           </div>
         </div>
 
-        <!-- Populations -->
-        <div class="card mb-4" *ngIf="formation.public_cible">
+        <div class="card cd-card mb-4" *ngIf="formation.public_cible">
           <div class="card-body">
-            <h5 class="subs-title mb-3">
-              <i class="ti ti-users me-2 text-info"></i>Populations
-            </h5>
+            <h5 class="subs-title mb-3"><i class="ti ti-users me-2 text-info"></i>Population cible</h5>
             <p class="text-muted">{{ formation.public_cible }}</p>
           </div>
         </div>
 
-        <!-- À propos du formateur -->
-        <div class="card">
+        <div class="card cd-card">
           <div class="card-body">
-            <h5 class="subs-title mb-3">
-              <i class="ti ti-user-circle me-2 text-primary"></i>À propos du formateur
-            </h5>
+            <h5 class="subs-title mb-3"><i class="ti ti-user-circle me-2 text-primary"></i>À propos du formateur</h5>
             <div class="d-flex align-items-center gap-3">
-              <img class="rounded-circle"
-                   style="width:60px;height:60px;object-fit:cover;"
+              <img class="rounded-circle" style="width:60px;height:60px;object-fit:cover;"
                    [src]="formation.image_couverture || 'assets/img/avatar-default.png'">
               <div>
                 <h5 class="fs-18 fw-semibold mb-1">{{ formation.formateur_nom }}</h5>
                 <p class="mb-0 text-muted small">{{ formation.formateur?.fonction }}</p>
-                <p class="mb-0 fs-13 text-muted">
-                  <i class="ti ti-mail me-1"></i>{{ formation.formateur_email }}
-                </p>
+                <p class="mb-0 fs-13 text-muted"><i class="ti ti-mail me-1"></i>{{ formation.formateur_email }}</p>
               </div>
             </div>
           </div>
@@ -184,25 +140,39 @@
 
       </div>
 
-      <!-- ── DROITE sticky ── -->
+      <!-- DROITE -->
       <div class="col-lg-4">
-        <div class="course-sidebar-sticky">
 
-          <!-- Résumé -->
-          <div class="card mb-4">
-            <div class="card-body">
-              <h5 class="subs-title mb-3">Résumé</h5>
+        <!--
+          ⚡ RÈGLE CSS : sticky doit être sur un élément SANS overflow:hidden
+          → Le wrapper est sticky, les cartes intérieures ont overflow:hidden pour leurs bords arrondis
+          → flex + gap = espace entre carte résumé et carte "inclut"
+        -->
+        <div class="cd-sidebar-wrapper">
+
+          <!-- Carte 1 : vidéo + résumé -->
+          <div class="cd-sidebar-float">
+
+            <div class="cd-video-block">
+              <img [src]="formation.image_couverture || 'assets/img/course/video-bg.jpg'"
+                   alt="{{ formation.titre }}" class="cd-video-block__thumb">
+              <div class="cd-video-block__overlay">
+                <div class="cd-video-block__play-btn">
+                  <i class="ti ti-player-play-filled"></i>
+                </div>
+                <span class="cd-video-block__label">Aperçu de la formation</span>
+              </div>
+            </div>
+
+            <div class="cd-sidebar-float__body">
+              <h5 class="cd-sidebar-float__title">Résumé</h5>
               <ul class="formation-summary-list">
                 <li>
                   <i class="ti ti-clock text-primary"></i>
                   <span>Durée</span>
                   <strong>{{ formation.duree_totale }} heures</strong>
                 </li>
-                <li>
-                  <i class="ti ti-chart-bar text-warning"></i>
-                  <span>Niveau</span>
-                  <strong>{{ formation.niveau_display }}</strong>
-                </li>
+               
                 <li>
                   <i class="ti ti-language text-success"></i>
                   <span>Langue</span>
@@ -213,36 +183,28 @@
                   <span>Participants max</span>
                   <strong>{{ formation.nb_max_participants }}</strong>
                 </li>
-                <li>
-                  <i class="ti ti-certificate"
-                     [class.text-success]="formation.est_certifiante"
-                     [class.text-muted]="!formation.est_certifiante"></i>
-                  <span>Certification</span>
-                  <strong [class.text-success]="formation.est_certifiante">
-                    {{ formation.est_certifiante ? 'Incluse' : 'Non incluse' }}
-                  </strong>
-                </li>
+                
               </ul>
             </div>
+
           </div>
 
-          <!-- Inclus -->
-          <div class="card">
-            <div class="card-body">
-              <h5 class="subs-title mb-3">Cette formation inclut</h5>
-              <ul class="includes-list">
-                <li><img class="me-2" src="./assets/img/icons/play.svg"> Modules structurés</li>
-                <li><img class="me-2" src="./assets/img/icons/key.svg"> Accès entreprise</li>
-                <li><img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Multi-support</li>
-                <li>
-                  <img class="me-2" src="./assets/img/icons/teacher.svg">
-                  Certification : {{ formation.est_certifiante ? 'Incluse' : 'Non incluse' }}
-                </li>
-              </ul>
-            </div>
+          <!-- Carte 2 : cette formation inclut (carte séparée, gap géré par le wrapper) -->
+          <div class="cd-sidebar-includes">
+            <h6 class="cd-sidebar-includes__title">Cette formation inclut</h6>
+            <ul class="includes-list">
+              <li><img class="me-2" src="./assets/img/icons/play.svg"> Modules structurés</li>
+              <li><img class="me-2" src="./assets/img/icons/key.svg"> Accès entreprise</li>
+              <li><img class="me-2" src="./assets/img/icons/monitor-mobbile.svg"> Multi-support</li>
+              <li>
+                <img class="me-2" src="./assets/img/icons/teacher.svg">
+                Certification : {{ formation.est_certifiante ? 'Incluse' : 'Non incluse' }}
+              </li>
+            </ul>
           </div>
 
         </div>
+
       </div>
 
     </div>

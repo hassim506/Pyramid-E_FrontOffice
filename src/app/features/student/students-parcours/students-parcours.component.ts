@@ -54,11 +54,14 @@ export class StudentsParcoursComponent implements OnInit {
   submitting            = false;
   private modalInstance: any;
 
-  categories:          any[] = [];
-  parcours:            any[] = [];
-  selectedCategorieId: number | string = '';
-  selectedParcoursIds: number[]        = [];
-  loadingParcours      = false;
+  categories:           any[]   = [];
+  parcours:             any[]   = [];
+  private _tousLesParcours: any[] = []; // ✅ cache de tous les parcours chargés
+  domaine:              string | null = null; // ✅ domaine de l'utilisateur
+
+  selectedCategorieId:  number | string = '';
+  selectedParcoursIds:  number[]        = [];
+  loadingParcours       = false;
 
   form!: FormGroup;
 
@@ -71,6 +74,7 @@ export class StudentsParcoursComponent implements OnInit {
   ngOnInit(): void {
     this.loadDemandes();
     this.loadCategories();
+    this.loadParcoursDisponibles(); // ✅ chargement filtré domaine + entreprise
     this.form = this.fb.group({
       motif_demande:        ['', Validators.required],
       objectifs_personnels: [''],
@@ -190,32 +194,62 @@ export class StudentsParcoursComponent implements OnInit {
   private resetModal(): void {
     this.selectedCategorieId = '';
     this.selectedParcoursIds = [];
-    this.parcours            = [];
+    this.parcours            = [...this._tousLesParcours]; // ✅ remet tous les parcours au lieu de vider
     this.submitting          = false;
     this.form.reset({ priorite: 'normale' });
   }
 
+  // ================================
+  // CHARGEMENT CATÉGORIES
+  // ================================
   loadCategories(): void {
     this.formationsService.getCategories().subscribe({
       next: (res: any) => this.categories = res.categories ?? []
     });
   }
 
-  onCategorieChange(): void {
-    this.selectedParcoursIds = [];
-    this.parcours            = [];
-    if (!this.selectedCategorieId) return;
-    this.loadParcours(+this.selectedCategorieId);
-  }
-
-  loadParcours(categorieId: number): void {
+  // ================================
+  // ✅ NOUVEAU : chargement parcours filtrés domaine + entreprise
+  // ================================
+  loadParcoursDisponibles(): void {
     this.loadingParcours = true;
-    this.formationsService.getParcoursParCategorie(categorieId).subscribe({
-      next: (res: any) => { this.parcours = res.parcours ?? []; this.loadingParcours = false; },
-      error: () => { this.loadingParcours = false; }
+    this.formationsService.getParcoursDisponibles().subscribe({
+      next: (res: any) => {
+        this._tousLesParcours = res.parcours ?? [];
+        this.parcours         = [...this._tousLesParcours];
+        this.domaine          = res.domaine ?? null;
+        this.loadingParcours  = false;
+
+        if (!res.status && res.message) {
+          this.showToast('warning', '⚠️ ' + res.message);
+        }
+      },
+      error: () => {
+        this.loadingParcours = false;
+        this.showToast('error', '❌ Erreur lors du chargement des parcours.');
+      }
     });
   }
 
+  // ================================
+  // FILTRE LOCAL PAR CATÉGORIE (optionnel)
+  // ================================
+  onCategorieChange(): void {
+    this.selectedParcoursIds = [];
+    if (!this.selectedCategorieId) {
+      // Réaffiche tous les parcours si aucune catégorie sélectionnée
+      this.parcours = [...this._tousLesParcours];
+      return;
+    }
+    // Filtre local sur les parcours déjà chargés
+    this.parcours = this._tousLesParcours.filter(
+      (p: any) => p.categorie_id === +this.selectedCategorieId
+    );
+  }
+
+  // ================================
+  // SÉLECTION PARCOURS
+  // ================================
   toggleParcours(id: number): void        { const i = this.selectedParcoursIds.indexOf(id); i === -1 ? this.selectedParcoursIds.push(id) : this.selectedParcoursIds.splice(i, 1); }
   isParcoursSelected(id: number): boolean { return this.selectedParcoursIds.includes(id); }
 
@@ -223,7 +257,7 @@ export class StudentsParcoursComponent implements OnInit {
   // VALIDATION + SOUMISSION
   // ================================
   canSubmit(): boolean {
-    return !!this.selectedCategorieId && this.selectedParcoursIds.length > 0 && this.form.valid;
+    return this.selectedParcoursIds.length > 0 && this.form.valid;
   }
 
   submitRequest(): void {
