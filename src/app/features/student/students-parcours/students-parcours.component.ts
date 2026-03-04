@@ -45,6 +45,11 @@ export class StudentsParcoursComponent implements OnInit {
   demandeSelectionnee: any = null;
   private detailDemandeModal: any;
 
+  // ── DÉTAIL — FORMATIONS COLLAPSIBLE ─────────────
+  showFormationsDetail      = false;
+  formationsDetail: any[]   = [];
+  loadingFormationsDetail   = false;
+
   // ── MODAL DEMANDE — FLUX 3 NIVEAUX ───────────────
   submitting            = false;
   private modalInstance: any;
@@ -139,13 +144,13 @@ export class StudentsParcoursComponent implements OnInit {
 
   // ── ACTIONS TABLE ────────────────────────────────
   annulerDemande(id: number, event: Event): void {
-    event.stopPropagation(); // empêche l'ouverture du modal détail
+    event.stopPropagation();
     if (!confirm("Confirmer l'annulation de cette demande ?")) return;
     this.demandeFormationService.annulerDemande(id).subscribe({ next: () => this.loadDemandes() });
   }
 
   relancerDemande(id: number, event: Event): void {
-    event.stopPropagation(); // empêche l'ouverture du modal détail
+    event.stopPropagation();
     this.demandeFormationService.relancerDemande(id).subscribe({
       next: () => this.loadDemandes(),
       error: () => this.showToast('error', '❌ Impossible de relancer cette demande.')
@@ -164,7 +169,26 @@ export class StudentsParcoursComponent implements OnInit {
   // MODAL DÉTAIL DEMANDE — clic sur ligne tableau
   // ════════════════════════════════════════════════
   ouvrirDetailDemande(demande: any): void {
-    this.demandeSelectionnee = demande;
+    this.demandeSelectionnee      = demande;
+    this.showFormationsDetail     = false;
+    this.formationsDetail         = [];
+    this.loadingFormationsDetail  = false;
+
+    // ✅ Charger les formations du parcours pour le collapsible
+    if (demande.parcours?.id && demande.parcours?.categorie_id) {
+      this.loadingFormationsDetail = true;
+      this.formationsService.getFormationsDuParcoursParCategorie(
+        demande.parcours.id,
+        demande.parcours.categorie_id
+      ).subscribe({
+        next: (res: any) => {
+          this.formationsDetail        = res.formations ?? [];
+          this.loadingFormationsDetail = false;
+        },
+        error: () => { this.loadingFormationsDetail = false; }
+      });
+    }
+
     const el = document.getElementById('demandeDetailModal');
     if (el) {
       this.detailDemandeModal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
@@ -174,7 +198,9 @@ export class StudentsParcoursComponent implements OnInit {
 
   fermerDetailDemande(): void {
     this.detailDemandeModal?.hide();
-    this.demandeSelectionnee = null;
+    this.demandeSelectionnee  = null;
+    this.formationsDetail     = [];
+    this.showFormationsDetail = false;
   }
 
   // ════════════════════════════════════════════════

@@ -82,7 +82,6 @@
         </tr>
       </thead>
       <tbody>
-        <!-- ✅ Ligne cliquable → ouvrirDetailDemande -->
         <tr *ngFor="let demande of demandes"
             class="sc-row--clickable"
             [class.sc-row--refusee]="demande.statut === 'refusee'"
@@ -98,8 +97,8 @@
                   <span class="sc-detail-chip sc-detail-chip--purple" *ngIf="demande.parcours?.nombre_formations != null">
                     <i class="isax isax-routing me-1"></i>{{ demande.parcours.nombre_formations }} formation(s)
                   </span>
-                  <span class="sc-detail-chip" *ngIf="demande.parcours?.categorie?.nom">
-                    <i class="isax isax-category me-1"></i>{{ demande.parcours.categorie.nom }}
+                  <span class="sc-detail-chip" *ngIf="demande.parcours?.categorie">
+                    <i class="isax isax-category me-1"></i>{{ demande.parcours.categorie }}
                   </span>
                 </div>
               </div>
@@ -171,7 +170,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content lms-modal" *ngIf="demandeSelectionnee">
 
-      <!-- Header vert uniforme -->
+      <!-- Header -->
       <div class="modal-header lms-modal__header">
         <div class="d-flex align-items-center gap-3">
           <div class="lms-modal__icon"><i class="isax isax-routing"></i></div>
@@ -218,9 +217,54 @@
                 <span class="lms-meta-chip lms-meta-chip--purple" *ngIf="demandeSelectionnee.parcours?.nombre_formations">
                   <i class="isax isax-book me-1"></i>{{ demandeSelectionnee.parcours.nombre_formations }} formation(s)
                 </span>
-                <span class="lms-meta-chip" *ngIf="demandeSelectionnee.parcours?.categorie?.nom">
-                  <i class="isax isax-category me-1"></i>{{ demandeSelectionnee.parcours.categorie.nom }}
+                <span class="lms-meta-chip" *ngIf="demandeSelectionnee.parcours?.categorie">
+                  <i class="isax isax-category me-1"></i>{{ demandeSelectionnee.parcours.categorie }}
                 </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ Formations incluses — collapsible -->
+        <div class="lms-collapsible mb-3"
+             *ngIf="formationsDetail.length > 0 || loadingFormationsDetail">
+          <button class="lms-collapsible__trigger" type="button"
+                  (click)="showFormationsDetail = !showFormationsDetail">
+            <span>
+              <i class="isax isax-book me-1"></i>Formations incluses
+              <span class="lms-meta-chip lms-meta-chip--purple ms-2"
+                    *ngIf="!loadingFormationsDetail">
+                {{ formationsDetail.length }}
+              </span>
+            </span>
+            <i class="isax"
+               [class.isax-arrow-down]="!showFormationsDetail"
+               [class.isax-arrow-up]="showFormationsDetail"></i>
+          </button>
+          <div class="lms-collapsible__body" *ngIf="showFormationsDetail">
+            <div *ngIf="loadingFormationsDetail" class="lms-loading py-3">
+              <div class="spinner-border spinner-border-sm" style="color:#7c3aed"></div>
+              <span>Chargement...</span>
+            </div>
+            <div *ngIf="!loadingFormationsDetail" class="lms-formations-list">
+              <div class="lms-formation-item" *ngFor="let f of formationsDetail">
+                <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+                     class="lms-formation-item__img" alt="">
+                <div class="lms-formation-item__body">
+                  <div class="lms-formation-item__title">{{ f.titre }}</div>
+                  <div class="lms-formation-item__meta">
+                    <span class="lms-meta-chip"
+                          *ngIf="f.niveau_display && f.niveau_display !== 'Non défini'">
+                      {{ f.niveau_display }}
+                    </span>
+                    <span class="lms-meta-chip" *ngIf="f.duree_totale">
+                      <i class="isax isax-clock me-1"></i>{{ f.duree_totale }} min
+                    </span>
+                    <span class="lms-meta-chip lms-meta-chip--warning" *ngIf="f.est_certifiante">
+                      <i class="isax isax-award me-1"></i>Certifiante
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -250,7 +294,7 @@
           <p class="lms-detail-section__body">{{ demandeSelectionnee.commentaire_employe }}</p>
         </div>
 
-        <!-- Motif de refus (si refusée) -->
+        <!-- Motif de refus -->
         <div class="lms-detail-section lms-detail-section--danger mb-3"
              *ngIf="demandeSelectionnee.statut === 'refusee' && demandeSelectionnee.motif_refus">
           <div class="lms-detail-section__title">
@@ -262,7 +306,7 @@
           </p>
         </div>
 
-        <!-- Date de validation (si validée) -->
+        <!-- Date de validation -->
         <div class="lms-detail-section lms-detail-section--success mb-3"
              *ngIf="demandeSelectionnee.statut === 'validee' && demandeSelectionnee.date_validation">
           <div class="lms-detail-section__title">
@@ -439,7 +483,10 @@
                   <div class="lms-formation-item__body">
                     <div class="lms-formation-item__title">{{ f.titre }}</div>
                     <div class="lms-formation-item__meta">
-                      <span class="lms-meta-chip" *ngIf="f.niveau_display">{{ f.niveau_display }}</span>
+                      <span class="lms-meta-chip"
+                            *ngIf="f.niveau_display && f.niveau_display !== 'Non défini'">
+                        {{ f.niveau_display }}
+                      </span>
                       <span class="lms-meta-chip" *ngIf="f.duree_totale"><i class="isax isax-clock me-1"></i>{{ f.duree_totale }} min</span>
                       <span class="lms-meta-chip lms-meta-chip--warning" *ngIf="f.est_certifiante"><i class="isax isax-award me-1"></i>Certifiante</span>
                     </div>
