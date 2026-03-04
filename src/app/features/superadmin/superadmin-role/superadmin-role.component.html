@@ -85,7 +85,7 @@
             <tr>
               <th scope="col">#</th>
               <th scope="col">Nom du Rôle</th>
-              <th scope="col">Description</th>
+              <!-- <th scope="col">Description</th> -->
               <th scope="col">Guard</th>
               <th scope="col">Permissions</th>
               <th scope="col">Utilisateurs</th>
@@ -139,11 +139,11 @@
                   </div>
                 </div>
               </td>
-              <td>
+              <!-- <td>
                 <span [title]="role.description">
                   {{ role.description ? (role.description.length > 50 ? (role.description | slice:0:50) + '...' : role.description) : '-' }}
                 </span>
-              </td>
+              </td> -->
               <td>
                 <span class="badge" 
                       [class]="role.guard_name === 'web' ? 'bg-info' : 'bg-warning'">
@@ -327,7 +327,7 @@
               </div>
             </div>
 
-            <div class="col-md-6">
+            <!-- <div class="col-md-6">
               <div class="mb-3">
                 <label for="roleDescription" class="form-label">Description</label>
                 <textarea 
@@ -340,7 +340,7 @@
                   Description optionnelle pour clarifier le rôle
                 </small>
               </div>
-            </div>
+            </div> -->
           </div>
 
           <!-- Section des permissions -->

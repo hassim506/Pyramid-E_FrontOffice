@@ -510,7 +510,89 @@ export class CompanyManagementComponent implements OnInit {
       this.performDelete(company, companyName);
     }
   }
+archiveCompany(company: any) {
+  if (confirm('Êtes-vous sûr de vouloir archiver cette entreprise ?')) {
+    const updatedCompany = { ...company, statut: 'inactive' };
+    
+    this.clientCompanyService.updateCompany(company.id, updatedCompany).subscribe({
+      next: () => {
+        console.log('Entreprise archivée avec succès');
+        this.successMessage = 'Entreprise archivée avec succès';
+        this.refreshData();
+        setTimeout(() => this.clearMessages(), 3000);
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de l\'archivage:', error);
+        this.error = 'Erreur lors de l\'archivage de l\'entreprise';
+      }
+    });
+  }
+}
 
+// suspendCompany(company: any) {
+//   if (confirm('Êtes-vous sûr de vouloir suspendre cette entreprise ?')) {
+//     const updatedCompany = { ...company, statut: 'suspendue' };
+    
+//     this.clientCompanyService.updateCompany(company.id, updatedCompany).subscribe({
+//       next: () => {
+//         console.log('Entreprise suspendue avec succès');
+//         this.successMessage = 'Entreprise suspendue avec succès';
+//         this.refreshData();
+//         setTimeout(() => this.clearMessages(), 3000);
+//       },
+//       error: (error: any) => {
+//         console.error('Erreur lors de la suspension:', error);
+//         this.error = 'Erreur lors de la suspension de l\'entreprise';
+//       }
+//     });
+//   }
+// }
+
+reactivateCompany(company: any) {
+  const message = company.statut === 'inactive' ? 'réactiver' : 'réactiver';
+  if (confirm(`Êtes-vous sûr de vouloir ${message} cette entreprise ?`)) {
+    const updatedCompany = { ...company, statut: 'active' };
+    
+    this.clientCompanyService.updateCompany(company.id, updatedCompany).subscribe({
+      next: () => {
+        console.log('Entreprise réactivée avec succès');
+        this.successMessage = 'Entreprise réactivée avec succès';
+        this.refreshData();
+        setTimeout(() => this.clearMessages(), 3000);
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de la réactivation:', error);
+        this.error = 'Erreur lors de la réactivation de l\'entreprise';
+      }
+    });
+  }
+}
+
+// getStatusClass(statut: string): string {
+//   switch (statut) {
+//     case 'active':
+//       return 'badge bg-success';
+//     case 'inactive':
+//       return 'badge bg-secondary';
+//     case 'suspendue':
+//       return 'badge bg-warning';
+//     default:
+//       return 'badge bg-light';
+//   }
+// }
+
+// getStatusLabel(statut: string): string {
+//   switch (statut) {
+//     case 'active':
+//       return 'Active';
+//     case 'inactive':
+//       return 'Inactive';
+//     case 'suspendue':
+//       return 'Suspendue';
+//     default:
+//       return 'Inconnu';
+//   }
+// }
   private performDelete(company: Company, companyName: string): void {
     this.loading = true;
     this.clearMessages();

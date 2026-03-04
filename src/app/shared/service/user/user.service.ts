@@ -10,7 +10,8 @@ export class UserService {
   private baseUrl = 'http://localhost:8000/api';
 
   constructor(private http: HttpClient) {}
-private getHeaders(): HttpHeaders {
+
+  private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('pyramide_token');
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
@@ -19,36 +20,62 @@ private getHeaders(): HttpHeaders {
   }
   
   getUsers(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/users`);
+    return this.http.get<any>(`${this.baseUrl}/users`, { headers: this.getHeaders() });
   }
 
   getMyUsers(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/mes-utilisateurs-rh`);
+    return this.http.get<any>(`${this.baseUrl}/mes-utilisateurs-rh`, { headers: this.getHeaders() });
   }
 
   getMyUsersgroup(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/mes-utilisateurs-rhg`);
+    return this.http.get<any>(`${this.baseUrl}/mes-utilisateurs-rhg`, { headers: this.getHeaders() });
   }
+
   getUser(id: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/users/${id}`);
+    return this.http.get<any>(`${this.baseUrl}/users/${id}`, { headers: this.getHeaders() });
   }
 
   createUser(data: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/users`, data);
+    return this.http.post<any>(`${this.baseUrl}/users`, data, { headers: this.getHeaders() });
   }
 
   updateUser(id: number, data: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/users/${id}`, data);
+    return this.http.put<any>(`${this.baseUrl}/users/${id}`, data, { headers: this.getHeaders() });
   }
 
   deleteUser(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/users/${id}`);
+    return this.http.delete<any>(`${this.baseUrl}/users/${id}`, { headers: this.getHeaders() });
   }
   
-getRoles(): Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/roles`, { headers: this.getHeaders() });
-}
+  getRoles(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/roles`, { headers: this.getHeaders() });
+  }
 
   
-
+  // Import d'utilisateurs via fichier Excel/CSV
+  importUsers(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return this.http.post<any>(`${this.baseUrl}/users/import`, formData, { 
+      headers: this.getHeadersForFileUpload() 
+    });
+  }
+  
+  // Télécharger le template d'import
+  downloadTemplate(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/import-template/users`, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    });
+  }
+  
+  // Headers pour l'upload de fichier (sans Content-Type)
+  private getHeadersForFileUpload(): HttpHeaders {
+    const token = localStorage.getItem('pyramide_token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // Pas de Content-Type pour FormData
+    });
+  }
 }

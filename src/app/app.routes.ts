@@ -40,6 +40,11 @@ export const routes: Routes = [
                 {path:'cart',loadComponent:()=>import ('./features/courses/course-cart/course-cart.component').then((m)=>m.CourseCartComponent)},
                 {path:'checkout',loadComponent:()=>import ('./features/courses/course-checkout/course-checkout.component').then((m)=>m.CourseCheckoutComponent)},
                 {path:'add-course',loadComponent:()=>import ('./features/courses/add-course/add-course.component').then((m)=>m.AddCourseComponent)},
+              {path:'instructor-course-add',loadComponent:()=>import ('./features/courses/instructor-course-add/instructor-course-add.component').then((m)=>m.InstructorCourseAddComponent)},
+              {path:'instructor-course-edit/:id',loadComponent:()=>import ('./features/courses/instructor-course-edit/instructor-course-edit.component').then((m)=>m.InstructorCourseEditComponent)},
+              {path:'instructor-course-details/:id',loadComponent:()=>import ('./features/courses/instructor-course-details/instructor-course-details.component').then((m)=>m.InstructorCourseDetailsComponent)},
+
+
         
             ]
         },
@@ -59,6 +64,8 @@ export const routes: Routes = [
                 {path:'instructor-statements',loadComponent:()=>import ('./features/instructor/instructor-statements/instructor-statements.component').then((m)=>m.InstructorStatementsComponent)},
                 {path:'instructor-course',loadComponent:()=>import ('./features/instructor/instructor-course/instructor-course.component').then((m)=>m.InstructorCourseComponent)},
                 {path:'instructor-course-grid',loadComponent:()=>import ('./features/instructor/instructor-course-grid/instructor-course-grid.component').then((m)=>m.InstructorCourseGridComponent)},
+
+
                 {path:'instructor-message',loadComponent:()=>import ('./features/instructor/instructor-message/instructor-message.component').then((m)=>m.InstructorMessageComponent)},
                 {path:'instructor-assignment',loadComponent:()=>import ('./features/instructor/instructor-assignment/instructor-assignment.component').then((m)=>m.InstructorAssignmentComponent)},
                 {path:'students-list',loadComponent:()=>import ('./features/instructor/students-list/students-list.component').then((m)=>m.StudentsListComponent)},
@@ -157,10 +164,18 @@ export const routes: Routes = [
                 {path:'adminrh-quiz-details',loadComponent:()=>import ('./features/adminrh/adminrh-quiz-details/adminrh-quiz-details.component').then((m)=>m.AdminrhQuizDetailsComponent)},
                 {path:'adminrh-quiz',loadComponent:()=>import ('./features/adminrh/adminrh-quiz/adminrh-quiz.component').then((m)=>m.AdminrhQuizComponent)},
                 {path:'adminrh-certificate',loadComponent:()=>import ('./features/adminrh/adminrh-certificate/adminrh-certificate.component').then((m)=>m.AdminrhCertificateComponent)},
+                {path:'adminrh-certifier',loadComponent:()=>import ('./features/adminrh/adminrh-certifier/adminrh-certifier.component').then((m)=>m.AdminrhCertifierComponent)},
+                {path:'adminrh-categorie',loadComponent:()=>import ('./features/adminrh/adminrh-categorie/adminrh-categorie.component').then((m)=>m.AdminrhCategorieComponent)},
+
+                {path:'adminrh-catalogue',loadComponent:()=>import ('./features/adminrh/adminrh-catalogue/adminrh-catalogue.component').then((m)=>m.AdminrhCatalogueComponent)},
+                {path:'adminrh-parcours',loadComponent:()=>import ('./features/adminrh/adminrh-parcours/adminrh-parcours.component').then((m)=>m.AdminrhParcoursComponent)},
+
                 {path:'adminrh-earnings',loadComponent:()=>import ('./features/adminrh/adminrh-earnings/adminrh-earnings.component').then((m)=>m.AdminrhEarningsComponent)},
                 {path:'adminrh-statements',loadComponent:()=>import ('./features/adminrh/adminrh-statements/adminrh-statements.component').then((m)=>m.AdminrhStatementsComponent)},
                 {path:'adminrh-course',loadComponent:()=>import ('./features/adminrh/adminrh-course/adminrh-course.component').then((m)=>m.AdminrhCourseComponent)},
                 {path:'adminrh-course-grid',loadComponent:()=>import ('./features/adminrh/adminrh-course-grid/adminrh-course-grid.component').then((m)=>m.AdminrhCourseGridComponent)},
+                {path:'adminrh-session',loadComponent:()=>import ('./features/adminrh/adminrh-session/adminrh-session.component').then((m)=>m.AdminrhSessionComponent)},
+
                 {path:'adminrh-message',loadComponent:()=>import ('./features/adminrh/adminrh-message/adminrh-message.component').then((m)=>m.AdminrhMessageComponent)},
                 {path:'adminrh-assignment',loadComponent:()=>import ('./features/adminrh/adminrh-assignment/adminrh-assignment.component').then((m)=>m.AdminrhAssignmentComponent)},
                 {path:'students-list',loadComponent:()=>import ('./features/adminrh/students-list/students-list.component').then((m)=>m.StudentsListComponent)},

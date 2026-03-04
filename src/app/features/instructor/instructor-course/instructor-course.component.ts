@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
+import * as bootstrap from 'bootstrap';
 
 @Component({
     selector: 'app-instructor-course',
@@ -40,7 +41,8 @@ export class InstructorCourseComponent implements OnInit {
   // Nouvelles propriétés
   public formations: any[] = [];
   public loading = false;
-  public error = '';
+public error = '';
+public selectedFormation: any = null;
 
   constructor(
     private data: DataService,
@@ -54,6 +56,46 @@ export class InstructorCourseComponent implements OnInit {
     this.loadFormations();
   }
 
+  
+
+togglePublishStatus(formation: any): void {
+  // Debug pour voir la valeur actuelle
+  console.log('Avant toggle - est_publie:', formation.est_publie);
+  
+  this.selectedFormation = formation;
+  const modal = new bootstrap.Modal(document.getElementById('publish_modal')!);
+  modal.show();
+}
+
+confirmTogglePublish(): void {
+  if (!this.selectedFormation) return;
+  
+  const isCurrentlyPublished = this.selectedFormation.est_publie === true || this.selectedFormation.est_publie === 1;
+  
+  const action = isCurrentlyPublished ? 
+    this.formationService.unpublishFormation(this.selectedFormation.id) :
+    this.formationService.publishFormation(this.selectedFormation.id);
+  
+  action.subscribe({
+    next: (response) => {
+      console.log('Réponse du serveur:', response);
+      
+      // Mettre à jour localement avec la valeur inverse
+      this.selectedFormation.est_publie = !isCurrentlyPublished;
+      
+      const message = this.selectedFormation.est_publie ? 
+        'Formation publiée avec succès' : 
+        'Formation dépubliée avec succès';
+      
+      console.log(message);
+      this.selectedFormation = null;
+    },
+    error: (error) => {
+      console.error('Erreur:', error);
+      this.selectedFormation = null;
+    }
+  });
+}
   loadFormations() {
     this.loading = true;
     this.error = '';
@@ -171,38 +213,45 @@ export class InstructorCourseComponent implements OnInit {
     return formation.image || formation.photo || 'assets/img/course/course-01.jpg';
   }
 
-  getStatusClass(formation: any): string {
-    switch(formation.statut) {
-      case 'active':
-      case 'actif':
-        return 'bg-success';
-      case 'pending':
-      case 'en_attente':
-        return 'bg-warning';
-      case 'draft':
-      case 'brouillon':
-        return 'bg-info';
-      default:
-        return 'bg-secondary';
-    }
-  }
+  // getStatusClass(formation: any): string {
+  //   switch(formation.statut) {
+  //     case 'active':
+  //     case 'actif':
+  //       return 'bg-success';
+  //     case 'pending':
+  //     case 'en_attente':
+  //       return 'bg-warning';
+  //     case 'draft':
+  //     case 'brouillon':
+  //       return 'bg-info';
+  //     default:
+  //       return 'bg-secondary';
+  //   }
+  // }
 
-  getStatusText(formation: any): string {
-    switch(formation.statut) {
-      case 'active':
-      case 'actif':
-        return 'Actif';
-      case 'pending':
-      case 'en_attente':
-        return 'En attente';
-      case 'draft':
-      case 'brouillon':
-        return 'Brouillon';
-      default:
-        return 'Inconnu';
-    }
-  }
 
+getStatusText(formation: any): string {
+  if (formation.est_publie === true || formation.est_publie === 1) {
+    return 'Publié';
+  } else {
+    return 'Brouillon';
+  }
+}
+
+getStatusClass(formation: any): string {
+  if (formation.est_publie === true || formation.est_publie === 1) {
+    return 'bg-success'; // Vert pour publié
+  } else {
+    return 'bg-secondary'; // Gris pour brouillon/non publié
+  }
+}
+
+// Méthode pour débugger - à ajouter temporairement
+logFormationStatus(formation: any): void {
+  console.log('Formation:', formation.titre);
+  console.log('est_publie value:', formation.est_publie);
+  console.log('typeof est_publie:', typeof formation.est_publie);
+}
   trackByFormation(index: number, formation: any): number {
     return formation.id || index;
   }
@@ -218,7 +267,7 @@ export class InstructorCourseComponent implements OnInit {
   }
 
   // Modal de suppression
-  selectedFormation: any = null;
+  // selectedFormation: any = null;
 
   openDeleteModal(formation: any): void {
     this.selectedFormation = formation;

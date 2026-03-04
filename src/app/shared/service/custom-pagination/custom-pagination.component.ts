@@ -18,6 +18,8 @@ export class CustomPaginationComponent {
   @Input() totalItems!: number;
   @Input() pageSize: number = 10;
   @Input() currentPage: number = 1;
+   @Input() itemsPerPage!: number;
+  @Input() totalData!: number;
   @Output() pageChange = new EventEmitter<number>();
 
   public totalPages = 0;

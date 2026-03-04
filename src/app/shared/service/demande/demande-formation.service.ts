@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { DemandeFormationResponse, ActionDemandeRequest } from '../../models/formation';
 // import { Role, RoleResponse, AssignRoleRequest } from '../../models/role.models';
 
-import { AuthService } from '../authentification/auth.service';
+import { AuthService } from '../../service/authentification/auth.service';
 
 @Injectable({
   providedIn: 'root'

@@ -51,7 +51,7 @@
                     </div>
                 </td>
                 <td>{{data.email}}</td>
-                <td>{{data.numero || 'N/A'}}</td>
+                <td>{{data.numero || 'N/A'}}</td>   
                 <td>{{data.fonction || 'N/A'}}</td>
                 <td>{{data.entreprise?.nom || 'N/A'}}</td>
                 <td>
@@ -60,15 +60,29 @@
                     </span>
                 </td>
                 <td>
-                    <div class="d-flex align-items-center">
-                        <button class="btn btn-sm btn-light me-2" (click)="editUser(data)">
-                            <i class="isax isax-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" (click)="deleteUser(data.id)">
-                            <i class="isax isax-trash"></i>
-                        </button>
-                    </div>
-                </td>
+    <div class="d-flex align-items-center">
+        <button class="btn btn-sm btn-light me-2" (click)="editUser(data)">
+            <i class="isax isax-edit"></i>
+        </button>
+        <!-- <button class="btn btn-sm btn-danger me-2" (click)="deleteUser(data.id)">
+            <i class="isax isax-trash"></i>
+        </button> -->
+        <!-- Bouton Archiver pour les utilisateurs actifs -->
+        <button 
+            *ngIf="data.statut === 1" 
+            class="btn btn-outline-warning" 
+            (click)="archiveUser(data)">
+            <i class="isax isax-archive"></i> Archiver
+        </button>
+        <!-- Bouton Réactiver pour les utilisateurs inactifs -->
+        <button 
+            *ngIf="data.statut === 0" 
+            class="btn btn-sm btn-success" 
+            (click)="reactivateUser(data)">
+            <i class="isax isax-refresh"></i> Réactiver
+        </button>
+    </div>
+</td>
             </tr>
         </tbody>
     </table>

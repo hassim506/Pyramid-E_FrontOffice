@@ -1,0 +1,271 @@
+
+
+.content {
+  padding: 20px 0;
+}
+
+.add-course-item {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+// Wizard Steps
+.wizard {
+  .wizard-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #e9ecef;
+      z-index: 1;
+    }
+
+    .wizard-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+
+      .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .step-label {
+        font-size: 14px;
+        color: #6c757d;
+        font-weight: 500;
+      }
+
+      &.active {
+        .step-icon {
+          background: var(--primary-color);
+          color: white;
+          transform: scale(1.1);
+        }
+        .step-label {
+          color: var(--primary-color);
+          font-weight: 600;
+        }
+      }
+
+      &.completed {
+        .step-icon {
+          background: var(--success-color);
+          color: white;
+        }
+        .step-label {
+          color: var(--success-color);
+        }
+      }
+    }
+  }
+}
+
+// Upload Zone
+.upload-zone {
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover, &.drag-over {
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-rgb), 0.05);
+  }
+
+  .btn {
+    margin-top: 10px;
+  }
+}
+
+.image-preview-zone {
+  position: relative;
+  display: inline-block;
+
+  img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+  }
+
+  .remove-image {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Video Preview
+.video-preview {
+  margin-top: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+// Module & Section Cards
+.module-item {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+  }
+
+  .section-item {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    
+    &:hover {
+      background: #f8f9fa;
+    }
+  }
+}
+
+// Stats Cards
+.stat-card {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+// Form Styles
+.form-step {
+  min-height: 400px;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 12px 15px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+  }
+
+  &.is-invalid {
+    border-color: var(--danger-color);
+  }
+}
+
+.btn {
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &.btn-primary {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+
+    &:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+  }
+
+  &.btn-success {
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// Alerts
+.alert {
+  border-radius: 8px;
+  border: none;
+  padding: 15px 20px;
+
+  &.alert-info {
+    background: rgba(var(--info-rgb), 0.1);
+    color: var(--info-color);
+  }
+
+  &.alert-success {
+    background: rgba(var(--success-rgb), 0.1);
+    color: var(--success-color);
+  }
+
+  &.alert-danger {
+    background: rgba(var(--danger-rgb), 0.1);
+    color: var(--danger-color);
+  }
+}
+
+// Loading State
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .add-course-item {
+    padding: 20px;
+  }
+
+  .wizard-steps {
+    flex-wrap: wrap;
+    
+    .wizard-step {
+      flex: 0 0 50%;
+      margin-bottom: 20px;
+    }
+  }
+
+  .upload-zone {
+    padding: 20px;
+  }
+}

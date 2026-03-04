@@ -37,7 +37,8 @@ export class CompanyManagementComponent {
   public pageSelection: pageSelection[] = [];
   dataSource!: MatTableDataSource<Company>;
   public searchDataValue = '';
-  
+    successMessage: string = '';
+
   // Variables pour le modal/dialog
   // companyDialog: boolean = false;
   // isEditMode: boolean = false;
@@ -261,6 +262,10 @@ private getCompanyList() {
     this.submitted = false;
     this.selectedCompany = null;
   }
+clearMessages(): void {
+    this.error = '';
+    this.successMessage = '';
+  }
 
   saveCompany() {
     this.submitted = true;
@@ -298,6 +303,169 @@ private getCompanyList() {
     }
   }
 
+  archiveCompany(company: any) {
+  if (confirm('Êtes-vous sûr de vouloir archiver cette entreprise ?')) {
+    const updatedCompany = { ...company, statut: 'inactive' };
+    
+    this.clientCompanyService.updateCompany(company.id, updatedCompany).subscribe({
+      next: () => {
+        console.log('Entreprise archivée avec succès');
+        this.successMessage = 'Entreprise archivée avec succès';
+        this.refreshData();
+        setTimeout(() => this.clearMessages(), 3000);
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de l\'archivage:', error);
+        this.error = 'Erreur lors de l\'archivage de l\'entreprise';
+      }
+    });
+  }
+}
+
+suspendCompany(company: any) {
+  if (confirm('Êtes-vous sûr de vouloir suspendre cette entreprise ?')) {
+    const updatedCompany = { ...company, statut: 'suspendue' };
+    
+    this.clientCompanyService.updateCompany(company.id, updatedCompany).subscribe({
+      next: () => {
+        console.log('Entreprise suspendue avec succès');
+        this.successMessage = 'Entreprise suspendue avec succès';
+        this.refreshData();
+        setTimeout(() => this.clearMessages(), 3000);
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de la suspension:', error);
+        this.error = 'Erreur lors de la suspension de l\'entreprise';
+      }
+    });
+  }
+}
+
+reactivateCompany(company: any) {
+  const message = company.statut === 'inactive' ? 'réactiver' : 'réactiver';
+  if (confirm(`Êtes-vous sûr de vouloir ${message} cette entreprise ?`)) {
+    const updatedCompany = { ...company, statut: 'active' };
+    
+    this.clientCompanyService.updateCompany(company.id, updatedCompany).subscribe({
+      next: () => {
+        console.log('Entreprise réactivée avec succès');
+        this.successMessage = 'Entreprise réactivée avec succès';
+        this.refreshData();
+        setTimeout(() => this.clearMessages(), 3000);
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de la réactivation:', error);
+        this.error = 'Erreur lors de la réactivation de l\'entreprise';
+      }
+    });
+  }
+}
+
+// getStatusClass(statut: string): string {
+//   switch (statut) {
+//     case 'active':
+//       return 'badge bg-success';
+//     case 'inactive':
+//       return 'badge bg-secondary';
+//     case 'suspendue':
+//       return 'badge bg-warning';
+//     default:
+//       return 'badge bg-light';
+//   }
+// }
+public onPageChange(page: number): void {
+  this.currentPage = page;
+  const skip = (page - 1) * this.pageSize;
+  this.skip = skip;
+  this.getTableData({ skip: skip, limit: this.pageSize });
+}
+
+// Méthode appelée après la sauvegarde d'une entreprise
+onCompanySaved(): void {
+  this.successMessage = this.isEditMode ? 'Entreprise modifiée avec succès' : 'Entreprise créée avec succès';
+  this.refreshData();
+  this.hideDialog();
+  setTimeout(() => this.clearMessages(), 3000);
+}
+
+// Méthodes manquantes pour les permissions et utilitaires
+canEditCompany(company: Company | null | undefined): boolean {
+  // Ajoutez votre logique de permissions ici
+  return !!company;
+}
+
+canDeleteCompany(company: Company | null | undefined): boolean {
+  // Ajoutez votre logique de permissions ici
+  return !!company;
+}
+
+getCompanyField(company: Company | null | undefined, field: string): string {
+  if (!company) return 'N/A';
+  const value = (company as any)[field];
+  return value || 'N/A';
+}
+
+getClientName(client: any): string {
+  if (!client) return 'Aucun client';
+  return typeof client === 'string' ? client : client.nom || 'Client inconnu';
+}
+
+getStatusCompanyClass(statut: string): string {
+  switch (statut?.toLowerCase()) {
+    case 'active':
+      return 'badge bg-success';
+    case 'inactive':
+      return 'badge bg-warning';
+    case 'suspendue':
+      return 'badge bg-danger';
+    default:
+      return 'badge bg-secondary';
+  }
+}
+
+
+// getStatusClass(statut: string): string {
+//   switch (statut) {
+//     case 'active':
+//       return 'badge bg-success';
+//     case 'inactive':
+//       return 'badge bg-secondary';
+//     case 'suspendue':
+//       return 'badge bg-warning';
+//     default:
+//       return 'badge bg-light';
+//   }
+// }
+
+// getStatusLabel(statut: string): string {
+//   switch (statut) {
+//     case 'active':
+//       return 'Active';
+//     case 'inactive':
+//       return 'Inactive';
+//     case 'suspendue':
+//       return 'Suspendue';
+//     default:
+//       return 'Inconnu';
+//   }
+// }
+// TrackBy function pour optimiser les performances
+trackByCompanyId(index: number, company: Company): number {
+  return company.id;
+}
+
+getStatusLabel(statut: string): string {
+  switch (statut) {
+    case 'active':
+      return 'Active';
+    case 'inactive':
+      return 'Inactive';
+    case 'suspendue':
+      return 'Suspendue';
+    default:
+      return 'Inconnu';
+  }
+}
   private validateCompany(company: Company): boolean {
     return !!(company.nom && 
              company.email && 

@@ -54,6 +54,7 @@ getUsersByCompany(companyId: number): Observable<any> {
   });
 }
 
+
 // Méthode alternative pour récupérer seulement le nombre
 getEmployeeCount(companyId: number): Observable<any> {
   return this.http.get(`${this.baseUrl}/users/count?entreprise_id=${companyId}`, {
