@@ -1323,3 +1323,103 @@ $transition:  all .2s ease;
 @media (max-width: 575px) {
   .sc-grid { grid-template-columns: 1fr; }
 }
+// ════════════════════════════════════════════════
+// MODAL DÉTAIL SESSION
+// ════════════════════════════════════════════════
+.lms-detail-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lms-detail-section {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  padding: 16px 18px;
+
+  &__title {
+    font-size: 13px;
+    font-weight: 700;
+    color: $gray-600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+    i { font-size: 15px; }
+  }
+
+  &__body {
+    font-size: 14px;
+    color: $gray-600;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  &--danger {
+    background: $danger-lt;
+    border-color: rgba($danger, .2);
+    .lms-detail-section__title { color: $danger; }
+  }
+
+  &--success {
+    background: $success-lt;
+    border-color: rgba($success, .2);
+    .lms-detail-section__title { color: $success; }
+  }
+
+  &--info {
+    background: #eff6ff;
+    border-color: rgba(#3b82f6, .2);
+    .lms-detail-section__title { color: #3b82f6; }
+  }
+}
+
+.lms-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: $gray-50;
+  border-radius: $radius-sm;
+  border: 1px solid $gray-100;
+
+  i      { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  small  { font-size: 11px; font-weight: 600; letter-spacing: .2px; }
+  strong { font-size: 13px; font-weight: 700; color: $gray-900; }
+}
+
+.lms-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  background: $gray-100;
+  color: $gray-600;
+  border: 1px solid $gray-200;
+  i { font-size: 11px; }
+}
+
+.cd-demande-detail { display: flex; flex-direction: column; }
+
+.cd-demande-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid $gray-100;
+  font-size: 13px;
+  &:last-child { border-bottom: none; }
+}
+
+.cd-demande-label {
+  font-weight: 600;
+  color: $gray-400;
+  white-space: nowrap;
+  flex-shrink: 0;
+}

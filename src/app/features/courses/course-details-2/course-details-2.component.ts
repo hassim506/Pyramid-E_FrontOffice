@@ -1,13 +1,13 @@
 import { Component, OnInit }        from '@angular/core';
 import { ActivatedRoute, Router }    from '@angular/router';
-import { CommonModule, NgIf, NgFor } from '@angular/common';
-import { Formation }                 from '../../../shared/models/formation.models';
-import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
+import { CommonModule }             from '@angular/common';
+import { Formation }                from '../../../shared/models/formation.models';
+import { FormationsService }        from '../../../shared/service/Formationsss/formations.service';
 
 @Component({
   standalone: true,
   selector: 'app-course-details-2',
-  imports: [CommonModule, NgIf, NgFor],
+  imports: [CommonModule],
   templateUrl: './course-details-2.component.html',
   styleUrls: ['./course-details-2.component.scss']
 })
@@ -17,7 +17,7 @@ export class CourseDetails2Component implements OnInit {
 
   mode: 'formation' | 'session' = 'formation';
   demande:  any = null;
-  session:  any = null;
+  session:  any = null;  // = demande.session_formation (camelCase côté API normalisé)
 
   loading = true;
   error   = '';
@@ -35,7 +35,8 @@ export class CourseDetails2Component implements OnInit {
     if (state?.mode === 'session' && state?.demande) {
       this.mode    = 'session';
       this.demande = state.demande;
-      this.session = state.demande.session_formation;
+      // la relation peut arriver en snake_case ou camelCase selon la normalisation Angular
+      this.session = state.demande.session_formation ?? state.demande.sessionFormation;
       this.loading = false;
       return;
     }
@@ -59,6 +60,7 @@ export class CourseDetails2Component implements OnInit {
     });
   }
 
+  // ── Helpers ───────────────────────────────────────────
   getStatutClass(statut: string): string {
     return ({
       en_attente: 'badge-attente',
@@ -68,8 +70,29 @@ export class CourseDetails2Component implements OnInit {
     } as any)[statut] ?? 'badge-secondary';
   }
 
+  getStatutIcon(statut: string): string {
+    return ({
+      en_attente: 'ti ti-clock',
+      validee:    'ti ti-circle-check',
+      refusee:    'ti ti-circle-x',
+      annulee:    'ti ti-ban',
+    } as any)[statut] ?? 'ti ti-help';
+  }
+
   getTypeIcon(type: string): string {
-    return ({ presentiel: 'ti-building', distanciel: 'ti-wifi', hybride: 'ti-layout-distribute-horizontal' } as any)[type] ?? 'ti-calendar';
+    return ({
+      presentiel: 'ti-building',
+      distanciel: 'ti-wifi',
+      hybride:    'ti-layout-distribute-horizontal'
+    } as any)[type] ?? 'ti-calendar';
+  }
+
+  getTypeLabel(type: string): string {
+    return ({
+      presentiel: 'Présentiel',
+      distanciel: 'Distanciel',
+      hybride:    'Hybride'
+    } as any)[type] ?? type;
   }
 
   getDureeJours(): number {
@@ -78,9 +101,17 @@ export class CourseDetails2Component implements OnInit {
     return Math.ceil(ms / (1000 * 60 * 60 * 24));
   }
 
-  canSubscribe(): boolean {
-    return !!this.formation?.inscription_ouverte;
+  getPlacesRestantes(): number {
+    const cap = this.session?.capacite_max ?? 0;
+    // places_restantes peut être calculé côté API ou estimé
+    return this.session?.places_restantes ?? cap;
   }
+
+  isSessionDistanciel(): boolean { return this.session?.type === 'distanciel'; }
+  isSessionPresentiel(): boolean { return this.session?.type === 'presentiel'; }
+  isSessionHybride():    boolean { return this.session?.type === 'hybride'; }
+
+  canSubscribe(): boolean { return !!this.formation?.inscription_ouverte; }
 
   goBack(): void {
     const state = history.state;

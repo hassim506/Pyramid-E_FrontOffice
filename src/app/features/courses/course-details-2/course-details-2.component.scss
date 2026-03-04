@@ -500,3 +500,15 @@ $transition:   all .2s ease;
 .badge-validee { background: #10b981; color: #fff; }
 .badge-refusee { background: #ef4444; color: #fff; }
 .badge-annulee { background: #6b7280; color: #fff; }
+
+// ════════════════════════════════════════════════
+// CARTES STATUT COLORÉES
+// ════════════════════════════════════════════════
+.cd-card--validee {
+  border-left: 4px solid $success;
+  background: $success-lt;
+}
+.cd-card--attente {
+  border-left: 4px solid $warning;
+  background: $warning-lt;
+}

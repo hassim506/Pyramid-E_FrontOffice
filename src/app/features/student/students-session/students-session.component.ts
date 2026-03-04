@@ -1,6 +1,6 @@
 import { Component, OnInit }        from '@angular/core';
 import { CommonModule }             from '@angular/common';
-import { RouterModule, Router }     from '@angular/router';
+import { RouterModule }             from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DemandeFormationService }   from '../../../shared/service/demande/demande-formation.service';
 import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
@@ -47,7 +47,11 @@ export class StudentsSessionsComponent implements OnInit {
   toast: Toast = { type: 'success', message: '', visible: false };
   private toastTimer: any;
 
-  // ── MODAL ────────────────────────────────────────
+  // ── MODAL DÉTAIL DEMANDE ─────────────────────────
+  demandeSelectionnee: any = null;
+  private detailModal: any;
+
+  // ── MODAL NOUVELLE DEMANDE ───────────────────────
   submitting             = false;
   private modalInstance: any;
   sessions:         any[]         = [];
@@ -59,7 +63,6 @@ export class StudentsSessionsComponent implements OnInit {
     private demandeFormationService: DemandeFormationService,
     private formationsService: FormationsService,
     private fb: FormBuilder,
-    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -74,13 +77,6 @@ export class StudentsSessionsComponent implements OnInit {
 
   // ── TOGGLE VUE ───────────────────────────────────
   setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
-
-  // ── NAVIGATION → course-details-2 (mode session) ─
-  voirDetails(demande: any): void {
-    this.router.navigate(['/courses/course-details-2', 0], {
-      state: { demande, mode: 'session' }
-    });
-  }
 
   // ── STATS ────────────────────────────────────────
   get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
@@ -107,11 +103,14 @@ export class StudentsSessionsComponent implements OnInit {
   private normaliserDemande(d: any): any {
     const fallback = 'assets/img/course/course-01.jpg';
     const date     = d.session_formation?.date_debut;
+    const cap      = d.session_formation?.capacite_max ?? 0;
+  const inscrits = d.session_formation?.nombre_inscrits ?? 0;
     return {
       ...d,
       titre_affiche:      d.session_formation?.titre ?? `Session #${d.session_formation_id}`,
       sous_titre_affiche: date ? `Début : ${new Date(date).toLocaleDateString('fr-FR')}` : '',
       image_affiche:      d.session_formation?.image_couverture || fallback,
+       places_restantes:   Math.max(0, cap - inscrits),
     };
   }
 
@@ -142,17 +141,55 @@ export class StudentsSessionsComponent implements OnInit {
   isMotifVisible(id: number): boolean { return this.hoveredMotifId === id; }
   toggleShowRefusePerson(): void      { this.showRefusePerson = !this.showRefusePerson; }
 
-  // ── ACTIONS ──────────────────────────────────────
-  annulerDemande(id: number): void {
-    if (!confirm("Confirmer l'annulation de cette demande ?")) return;
-    this.demandeFormationService.annulerDemande(id).subscribe({ next: () => this.loadDemandes() });
+  // ════════════════════════════════════════════════
+  // MODAL DÉTAIL DEMANDE
+  // ════════════════════════════════════════════════
+  ouvrirDetail(demande: any): void {
+    this.demandeSelectionnee = demande;
+    const el = document.getElementById('sessionDemandeDetailModal');
+    if (el) {
+      this.detailModal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
+      this.detailModal.show();
+    }
   }
 
-  relancerDemande(id: number): void {
+  fermerDetail(): void {
+    this.detailModal?.hide();
+    this.demandeSelectionnee = null;
+  }
+
+  // ── ACTIONS ──────────────────────────────────────
+  annulerDemande(id: number, event?: Event): void {
+    event?.stopPropagation();
+    if (!confirm("Confirmer l'annulation de cette demande ?")) return;
+    this.demandeFormationService.annulerDemande(id).subscribe({
+      next: () => {
+        this.fermerDetail();
+        this.loadDemandes();
+      }
+    });
+  }
+
+  relancerDemande(id: number, event?: Event): void {
+    event?.stopPropagation();
     this.demandeFormationService.relancerDemande(id).subscribe({
-      next: () => this.loadDemandes(),
+      next: () => {
+        this.fermerDetail();
+        this.loadDemandes();
+      },
       error: () => this.showToast('error', '❌ Impossible de relancer cette demande.')
     });
+  }
+
+  // ── HELPERS SESSION ───────────────────────────────
+  getTypeLabel(type: string): string {
+    return ({ presentiel: 'Présentiel', distanciel: 'Distanciel', hybride: 'Hybride' } as any)[type] ?? type;
+  }
+
+  getDureeJours(session: any): number {
+    if (!session?.date_debut || !session?.date_fin) return 0;
+    const ms = new Date(session.date_fin).getTime() - new Date(session.date_debut).getTime();
+    return Math.ceil(ms / (1000 * 60 * 60 * 24));
   }
 
   // ── TOAST ────────────────────────────────────────
@@ -163,7 +200,9 @@ export class StudentsSessionsComponent implements OnInit {
   }
   closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
-  // ── MODAL ────────────────────────────────────────
+  // ════════════════════════════════════════════════
+  // MODAL NOUVELLE DEMANDE
+  // ════════════════════════════════════════════════
   openRequestModal(): void {
     this.loadSessions();
     const el = document.getElementById('demandeSessionModal');
@@ -229,4 +268,4 @@ export class StudentsSessionsComponent implements OnInit {
   getStatutClass(s: string): string {
     return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[s] ?? '';
   }
-}  // ← accolade fermante de la classe
+}
