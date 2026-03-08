@@ -1,0 +1,195 @@
+// ══════════════════════════════════════════
+// VARIABLES — identité Parcours (violet)
+// ══════════════════════════════════════════
+$primary:     #069b8f;
+$primary-lt:  #e6f7f5;
+$success:     #16a34a;
+$warning:     #d97706;
+$danger:      #dc2626;
+$gray-50:     #f9fafb;
+$gray-100:    #f3f4f6;
+$gray-200:    #e5e7eb;
+$gray-400:    #9ca3af;
+$gray-600:    #4b5563;
+$gray-900:    #111827;
+$radius-sm:   8px;
+$radius-md:   12px;
+$shadow-sm:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+$shadow-lg:   0 10px 30px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.06);
+$transition:  all .2s ease;
+
+.sc-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+  &__title { font-size: 22px; font-weight: 800; color: $gray-900; letter-spacing: -.3px; margin-bottom: 4px; }
+  &__subtitle { font-size: 13px; color: $gray-400; margin: 0; }
+  &__count {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: $primary-lt; color: $primary; font-size: 13px; font-weight: 600;
+    padding: 6px 14px; border-radius: 50px;
+    i { font-size: 15px; }
+  }
+}
+
+.sc-filters {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: #fff; border: 1px solid $gray-200; border-radius: $radius-md;
+  padding: 14px 18px; margin-bottom: 20px; box-shadow: $shadow-sm;
+
+  &__search {
+    position: relative; flex: 1; min-width: 200px;
+    &-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: $gray-400; font-size: 15px; pointer-events: none; }
+    &-input {
+      width: 100%; padding: 9px 36px 9px 36px; border: 1.5px solid $gray-200; border-radius: 50px;
+      font-size: 13px; color: $gray-900; background: $gray-50; transition: $transition; outline: none;
+      &::placeholder { color: $gray-400; }
+      &:focus { border-color: $primary; background: #fff; box-shadow: 0 0 0 3px rgba($primary, .1); }
+    }
+    &-clear {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: $gray-400; cursor: pointer; font-size: 16px; padding: 2px; transition: $transition;
+      &:hover { color: $danger; }
+    }
+  }
+  &__types { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  &__type-btn {
+    padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 600;
+    border: 1.5px solid $gray-200; background: #fff; color: $gray-600; cursor: pointer; transition: $transition; white-space: nowrap;
+    &:hover { border-color: $primary; color: $primary; background: $primary-lt; }
+    &--active { background: $primary !important; border-color: $primary !important; color: #fff !important; box-shadow: 0 2px 8px rgba($primary, .3); }
+  }
+  &__reset {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 50px;
+    font-size: 12px; font-weight: 600; color: $danger; background: rgba($danger, .06);
+    border: 1.5px solid rgba($danger, .2); cursor: pointer; transition: $transition; white-space: nowrap;
+    &:hover { background: rgba($danger, .12); border-color: $danger; }
+  }
+}
+
+.sc-results-info {
+  display: flex; align-items: center; gap: 8px; font-size: 13px; color: $gray-600;
+  margin-bottom: 16px; padding: 8px 14px; background: rgba($primary, .05);
+  border-radius: $radius-sm; border-left: 3px solid $primary;
+  i { color: $primary; font-size: 14px; }
+  &__clear {
+    margin-left: auto; background: none; border: none; color: $primary;
+    font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;
+    &:hover { color: darken($primary, 10%); }
+  }
+}
+
+.parcours-card {
+  border-radius: $radius-md; border: 1px solid $gray-200; box-shadow: $shadow-sm;
+  cursor: pointer; transition: $transition; overflow: hidden; background: #fff;
+  height: 100%; display: flex; flex-direction: column;
+
+  &:hover { transform: translateY(-4px); box-shadow: $shadow-lg; border-color: rgba($primary, .3); }
+
+  &__banner {
+    position: relative; height: 150px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+    background: linear-gradient(135deg, #034d47 0%, #067a70 100%);
+
+    &-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .2; transition: transform .4s ease; }
+    &-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(3,77,71,.85) 0%, rgba(6,155,143,.6) 100%); }
+    &-icon { position: relative; z-index: 2; font-size: 2.8rem; color: #fff; filter: drop-shadow(0 2px 6px rgba(0,0,0,.3)); }
+    &-badge {
+      position: absolute; top: 12px; right: 12px; z-index: 3;
+      font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 50px;
+      background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.25); letter-spacing: .3px;
+    }
+    &-assigned {
+      position: absolute; top: 12px; left: 12px; z-index: 3;
+      font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 50px;
+      background: rgba(22,163,74,.25); color: #86efac; border: 1px solid rgba(134,239,172,.3);
+      display: inline-flex; align-items: center;
+    }
+  }
+  &:hover &__banner-bg { transform: scale(1.05); }
+
+  &__body { padding: 18px 20px; display: flex; flex-direction: column; flex: 1; }
+  &__title { font-size: 15px; font-weight: 700; color: $gray-900; margin-bottom: 8px; letter-spacing: -.15px; line-height: 1.3; }
+  &__description {
+    font-size: 13px; color: $gray-400; line-height: 1.5; margin-bottom: 16px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  &__stats { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+  &__stat { display: flex; align-items: center; gap: 5px; font-size: 12px; color: $gray-600; i { font-size: 14px; color: $primary; } }
+
+  &__assignation {
+    padding: 10px 12px; background: $gray-50; border-radius: $radius-sm;
+    border: 1px solid $gray-200; margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;
+  }
+  &__assignation-date { font-size: 11px; color: $gray-600; display: flex; align-items: center; i { color: $primary; margin-right: 4px; } }
+  &__assignation-expiry {
+    font-size: 11px; color: $gray-600; display: flex; align-items: center;
+    &--warning   { color: $warning; font-weight: 600; }
+    &--permanent { color: $success; font-weight: 500; }
+  }
+  &__notes { font-size: 11px; color: $gray-400; font-style: italic; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 4px; i { color: $gray-400; flex-shrink: 0; margin-top: 1px; } }
+  &__footer { margin-top: auto; }
+  &__btn {
+    width: 100%; padding: 10px; border-radius: 50px; font-weight: 600; font-size: 13px;
+    background: linear-gradient(135deg, $primary 0%, darken($primary, 8%) 100%);
+    color: #fff; border: none; box-shadow: 0 3px 10px rgba($primary, .28);
+    transition: $transition; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+    &:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba($primary, .4); color: #fff; }
+    i { font-size: 14px; }
+  }
+}
+
+.sc-loading {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; color: $gray-400;
+  &__spinner { width: 44px; height: 44px; border: 3px solid $gray-200; border-top-color: $primary; border-radius: 50%; animation: spin .7s linear infinite; }
+  p { margin-top: 16px; font-size: 13px; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.sc-error {
+  display: flex; flex-direction: column; align-items: center; padding: 60px 20px; text-align: center;
+  &__icon { font-size: 3rem; color: $danger; opacity: .5; margin-bottom: 12px; }
+  p { font-size: 14px; color: $gray-600; margin-bottom: 16px; }
+  &__retry {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 20px; border-radius: 50px;
+    border: 1.5px solid $primary; background: $primary-lt; color: $primary; font-size: 13px; font-weight: 600; cursor: pointer; transition: $transition;
+    &:hover { background: $primary; color: #fff; }
+  }
+}
+
+.sc-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 72px 20px; text-align: center;
+  &__icon { font-size: 3.5rem; color: rgba($primary, .2); margin-bottom: 16px; display: block; }
+  &__title { font-size: 16px; font-weight: 700; color: $gray-600; margin-bottom: 8px; }
+  p { font-size: 13px; color: $gray-400; margin-bottom: 20px; }
+  &__btn {
+    display: inline-flex; align-items: center; padding: 9px 22px; border-radius: 50px;
+    font-size: 13px; font-weight: 600; background: $primary; color: #fff; border: none;
+    cursor: pointer; transition: $transition; box-shadow: 0 3px 10px rgba($primary, .3);
+    &:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba($primary, .4); }
+  }
+}
+
+.sc-pagination {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  margin-top: 36px; padding: 14px 18px; background: #fff; border: 1px solid $gray-200; border-radius: $radius-md; box-shadow: $shadow-sm;
+  &__info { font-size: 13px; color: $gray-600; font-weight: 500; }
+  &__info-total { color: $gray-400; font-weight: 400; margin-left: 4px; }
+  &__controls { display: flex; align-items: center; gap: 4px; }
+  &__btn {
+    width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid $gray-200; background: #fff;
+    color: $gray-600; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: $transition;
+    &:hover:not(:disabled) { border-color: $primary; color: $primary; background: $primary-lt; }
+    &--active { background: $primary !important; border-color: $primary !important; color: #fff !important; box-shadow: 0 3px 10px rgba($primary, .3); }
+    &:disabled { opacity: .3; cursor: not-allowed; }
+    i { font-size: 14px; }
+  }
+  &__ellipsis { width: 30px; text-align: center; color: $gray-400; font-size: 14px; font-weight: 700; letter-spacing: 1px; }
+}
+
+@media (max-width: 767px) {
+  .sc-header { &__title { font-size: 18px; } }
+  .sc-filters { padding: 12px; gap: 8px; &__types { gap: 4px; } &__type-btn { padding: 5px 10px; font-size: 11px; } }
+  .sc-pagination { flex-direction: column; align-items: center; text-align: center; }
+  .parcours-card { &__banner { height: 120px; } &__title { font-size: 14px; } }
+}

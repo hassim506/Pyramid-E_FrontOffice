@@ -1,0 +1,161 @@
+<!-- LOADER -->
+<div class="sc-loading" *ngIf="loading">
+  <div class="sc-loading__spinner"></div>
+  <p>Chargement du parcours...</p>
+</div>
+
+<!-- ERREUR -->
+<div class="sc-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2 sc-error__icon"></i>
+  <p>{{ error }}</p>
+  <button class="sc-error__retry" (click)="goBack()">
+    <i class="isax isax-arrow-left me-1"></i> Retour
+  </button>
+</div>
+
+<!-- CONTENU -->
+<ng-container *ngIf="!loading && !error && parcours">
+
+  <!-- HERO -->
+  <div class="pad-hero">
+    <div class="pad-hero__bg"
+         [style.background-image]="parcours.image_couverture ? 'url(' + parcours.image_couverture + ')' : 'none'">
+    </div>
+    <div class="pad-hero__overlay"></div>
+    <div class="container position-relative" style="z-index:2">
+      <div class="row">
+        <div class="col-lg-8">
+
+          <!-- Breadcrumb -->
+          <nav class="pad-breadcrumb mb-3">
+            <button class="pad-breadcrumb__back" (click)="goBack()">
+              <i class="isax isax-arrow-left-2 me-1"></i>Mes parcours
+            </button>
+            <span class="pad-breadcrumb__sep">/</span>
+            <span class="pad-breadcrumb__current">{{ parcours.titre }}</span>
+          </nav>
+
+          <!-- ✅ Badge dynamique selon source -->
+          <div class="pad-hero__badges mb-3">
+
+            <span class="pad-badge"
+                  [class.pad-badge--assigned]="parcours.source !== 'demande'"
+                  [class.pad-badge--demande]="parcours.source === 'demande'">
+              <i class="isax me-1"
+                 [class.isax-tick-circle]="parcours.source !== 'demande'"
+                 [class.isax-send-2]="parcours.source === 'demande'"></i>
+              {{ parcours.badge_label || 'Assigné' }}
+            </span>
+
+            <span class="pad-badge pad-badge--cat" *ngIf="parcours.categorie">
+              <i class="isax isax-category me-1"></i>{{ parcours.categorie }}
+            </span>
+            <span class="pad-badge pad-badge--count">
+              <i class="isax isax-book-1 me-1"></i>{{ parcours.nombre_formations }} formation(s)
+            </span>
+          </div>
+
+          <h1 class="pad-hero__title">{{ parcours.titre }}</h1>
+          <p class="pad-hero__subtitle" *ngIf="parcours.description">{{ parcours.description }}</p>
+
+          <!-- ✅ Infos date contextuelles selon source -->
+          <div class="pad-hero__assignation mt-3">
+            <span *ngIf="parcours.date_assignation">
+              <i class="isax me-1"
+                 [class.isax-calendar-add]="parcours.source !== 'demande'"
+                 [class.isax-tick-circle]="parcours.source === 'demande'"></i>
+              {{ parcours.source === 'demande' ? 'Validée le' : 'Assigné le' }}
+              {{ parcours.date_assignation | date:'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="!parcours.date_expiration" class="pad-permanent">
+              <i class="isax isax-infinity me-1"></i>Accès permanent
+            </span>
+            <span *ngIf="parcours.date_expiration && !isExpiringSoon(parcours.date_expiration)">
+              <i class="isax isax-calendar-remove me-1"></i>
+              Expire le {{ parcours.date_expiration | date:'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="isExpiringSoon(parcours.date_expiration)" class="pad-warning">
+              <i class="isax isax-warning-2 me-1"></i>
+              Expire dans {{ getJoursRestants(parcours.date_expiration) }} jour(s) !
+            </span>
+          </div>
+
+          <div class="pad-hero__divider mt-4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMATIONS -->
+  <section class="pad-section">
+    <div class="container">
+
+      <div class="pad-section__header">
+        <div class="pad-section__header-left">
+          <h4 class="pad-section__title">
+            <i class="isax isax-book-1 me-2" style="color:#7c3aed"></i>
+            Formations incluses
+          </h4>
+          <span class="pad-count-chip">{{ formations.length }} formation(s)</span>
+        </div>
+      </div>
+
+      <div class="sc-loading py-4" *ngIf="loading">
+        <div class="sc-loading__spinner"></div>
+      </div>
+
+      <div class="row g-4" *ngIf="!loading && formations.length > 0">
+        <div class="col-xl-4 col-md-6" *ngFor="let formation of formations; let i = index">
+
+          <div class="pad-formation-card" (click)="goToFormation(formation.id)">
+
+            <div class="pad-formation-card__order">{{ i + 1 }}</div>
+
+            <div class="pad-formation-card__img-wrap">
+              <img [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
+                   class="pad-formation-card__img" alt="">
+              <div class="pad-formation-card__img-overlay">
+                <i class="isax isax-play-circle"></i>
+              </div>
+            </div>
+
+            <div class="pad-formation-card__body">
+              <h5 class="pad-formation-card__title">{{ formation.titre }}</h5>
+              <div class="pad-formation-card__meta">
+                <span class="pad-meta-chip" *ngIf="formation.niveau_display && formation.niveau_display !== 'Non défini'">
+                  <i class="isax isax-chart me-1"></i>{{ formation.niveau_display }}
+                </span>
+                <span class="pad-meta-chip" *ngIf="formation.duree_totale">
+                  <i class="isax isax-clock me-1"></i>{{ formation.duree_totale }} min
+                </span>
+                <span class="pad-meta-chip pad-meta-chip--cert" *ngIf="formation.est_certifiante">
+                  <i class="isax isax-award me-1"></i>Certifiante
+                </span>
+              </div>
+            </div>
+
+            <div class="pad-formation-card__footer">
+              <button class="pad-formation-card__detail-btn">
+                Voir le détail
+                <i class="isax isax-arrow-right-3 ms-1"></i>
+              </button>
+              <button class="pad-formation-card__start-btn"
+                      (click)="commencerFormation(formation.id, $event)">
+                <i class="isax isax-play me-1"></i>Commencer
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="sc-empty" *ngIf="!loading && formations.length === 0">
+        <i class="isax isax-book-1 sc-empty__icon"></i>
+        <h6 class="sc-empty__title">Aucune formation disponible</h6>
+        <p>Ce parcours ne contient pas encore de formations publiées.</p>
+      </div>
+
+    </div>
+  </section>
+
+</ng-container>

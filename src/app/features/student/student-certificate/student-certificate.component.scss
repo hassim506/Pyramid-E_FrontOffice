@@ -16,8 +16,11 @@ $orange-lt:   #fff7ed;
 $gray-50:     #f9fafb;
 $gray-100:    #f3f4f6;
 $gray-200:    #e5e7eb;
+$gray-300:    #d1d5db;
 $gray-400:    #9ca3af;
+$gray-500:    #6b7280;
 $gray-600:    #4b5563;
+$gray-700:    #374151;
 $gray-900:    #111827;
 $radius-sm:   8px;
 $radius-md:   12px;
@@ -27,7 +30,7 @@ $shadow-md:   0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
 $shadow-lg:   0 10px 30px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.06);
 $transition:  all .2s ease;
 
-@keyframes spin          { to { transform: rotate(360deg); } }
+@keyframes spin           { to { transform: rotate(360deg); } }
 @keyframes toast-progress { from { width: 100%; } to { width: 0%; } }
 @keyframes fadeIn         { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -104,51 +107,6 @@ $transition:  all .2s ease;
 }
 
 // ════════════════════════════════════════════════
-// STATS
-// ════════════════════════════════════════════════
-.sc-stats {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.sc-stat {
-  flex: 1;
-  min-width: 100px;
-  background: #fff;
-  border: 1px solid $gray-200;
-  border-radius: $radius-md;
-  padding: 16px;
-  text-align: center;
-  box-shadow: $shadow-sm;
-  transition: $transition;
-
-  &:hover { transform: translateY(-2px); box-shadow: $shadow-md; }
-
-  &__value {
-    display: block;
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -.5px;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  &__label {
-    font-size: 12px;
-    color: $gray-400;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: .3px;
-  }
-
-  &--total   { border-top: 3px solid $primary; .sc-stat__value { color: $primary; } }
-  &--attente { border-top: 3px solid $warning; .sc-stat__value { color: $warning; } }
-  &--validee { border-top: 3px solid $success; .sc-stat__value { color: $success; } }
-  &--refusee { border-top: 3px solid $danger;  .sc-stat__value { color: $danger;  } }
-}
-
-// ════════════════════════════════════════════════
 // FILTRES
 // ════════════════════════════════════════════════
 .sc-filters {
@@ -217,6 +175,7 @@ $transition:  all .2s ease;
     &--attente:hover { border-color: $warning; color: $warning; background: $warning-lt; }
     &--validee:hover { border-color: $success; color: $success; background: $success-lt; }
     &--refusee:hover { border-color: $danger;  color: $danger;  background: $danger-lt;  }
+    &--annulee:hover { border-color: $gray-400; color: $gray-600; background: $gray-100; }
   }
 
   &__reset {
@@ -266,7 +225,7 @@ $transition:  all .2s ease;
   border-radius: $radius-md;
   border: 1px solid $gray-200;
   box-shadow: $shadow-sm;
-  overflow: visible; // tooltip dépasse
+  overflow: visible;
 
   &__header {
     display: flex;
@@ -325,11 +284,20 @@ $transition:  all .2s ease;
   }
 
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: $gray-50; }
 }
 
 .sc-row--refusee { background: rgba($danger, .025) !important; }
 .sc-row--validee { background: rgba($success, .025) !important; }
+
+// Ligne cliquable — style sessions
+.sc-table-row {
+  cursor: pointer;
+  transition: $transition;
+
+  td:first-child { border-left: 3px solid transparent; transition: border-color .2s; }
+  &:hover td { background: $primary-lt !important; }
+  &:hover td:first-child { border-left-color: $primary; }
+}
 
 // ════════════════════════════════════════════════
 // FORMATION CELL
@@ -371,25 +339,6 @@ $transition:  all .2s ease;
     flex-wrap: wrap;
     gap: 5px;
   }
-}
-
-// ════════════════════════════════════════════════
-// TYPE BADGE
-// ════════════════════════════════════════════════
-.sc-type-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 50px;
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-
-  &.type-formation { background: #ede9fe; color: #6d28d9; }
-  &.type-catalogue { background: #dbeafe; color: #1d4ed8; }
-  &.type-parcours  { background: #fce7f3; color: #be185d; }
-  &.type-session   { background: $success-lt; color: $success; }
 }
 
 // ════════════════════════════════════════════════
@@ -450,7 +399,7 @@ $transition:  all .2s ease;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  position: relative; // pour le tooltip
+  position: relative;
 }
 
 .sc-statut {
@@ -509,7 +458,6 @@ $transition:  all .2s ease;
   overflow: hidden;
   animation: fadeIn .15s ease;
 
-  // Flèche
   &::after {
     content: '';
     position: absolute;
@@ -530,7 +478,6 @@ $transition:  all .2s ease;
     color: $danger;
     font-size: 12px;
     font-weight: 700;
-
     i { font-size: 14px; }
   }
 
@@ -569,7 +516,197 @@ $transition:  all .2s ease;
 }
 
 // ════════════════════════════════════════════════
-// BOUTONS ACTIONS
+// ICÔNE STATUT — colonne action tableau
+// ════════════════════════════════════════════════
+.sc-statut-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  i { font-size: 22px; }
+
+  &--validee { color: $success; }
+  &--refusee { color: $danger;  }
+  &--annulee { color: $gray-400; }
+}
+
+// ════════════════════════════════════════════════
+// GRILLE — bouton Motif (refusée) + Commencer (validée)
+// ════════════════════════════════════════════════
+.sc-grid-motif-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1.5px solid rgba($danger, .3);
+  background: $danger-lt;
+  color: $danger;
+  cursor: pointer;
+  transition: $transition;
+  white-space: nowrap;
+
+  i { font-size: 12px; }
+  &:hover { background: $danger; color: #fff; border-color: $danger; }
+}
+
+.sc-grid-commencer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1.5px solid rgba($success, .3);
+  background: $success-lt;
+  color: $success;
+  cursor: pointer;
+  transition: $transition;
+  white-space: nowrap;
+
+  i { font-size: 12px; }
+  &:hover { background: $success; color: #fff; border-color: $success; }
+}
+
+// ════════════════════════════════════════════════
+// FORMATEUR CARD — section modal détail
+// ════════════════════════════════════════════════
+.lms-formateur-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: $gray-50;
+  border: 1px solid $gray-100;
+  border-radius: $radius-sm;
+  transition: $transition;
+
+  &:hover { border-color: rgba($primary, .2); background: $primary-lt; }
+
+  &__avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid rgba($primary, .2);
+  }
+
+  &__body { flex: 1; min-width: 0; }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: $gray-900;
+    margin-bottom: 2px;
+  }
+
+  &__fonction {
+    font-size: 12px;
+    color: $gray-500;
+    margin-bottom: 3px;
+  }
+
+  &__email {
+    font-size: 11px;
+    color: $primary;
+    display: flex;
+    align-items: center;
+
+    i { font-size: 12px; }
+  }
+}
+
+// ════════════════════════════════════════════════
+// BOUTONS ACTION TABLEAU — cercle icône + tooltip
+// ════════════════════════════════════════════════
+.sc-action-btn {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: $transition;
+  flex-shrink: 0;
+
+  i { font-size: 17px; transition: $transition; }
+
+  // Tooltip
+  &__tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: $gray-900;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 5px 10px;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s ease, transform .15s ease;
+    transform: translateX(-50%) translateY(4px);
+    z-index: 100;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: $gray-900;
+    }
+  }
+
+  &:hover &__tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  // Variante danger (annuler)
+  &--danger {
+    background: $danger-lt;
+    border-color: rgba($danger, .25);
+    i { color: $danger; }
+
+    &:hover {
+      background: $danger;
+      border-color: $danger;
+      box-shadow: 0 4px 12px rgba($danger, .35);
+      i { color: #fff; }
+    }
+  }
+
+  // Variante teal (relancer)
+  &--teal {
+    background: $primary-lt;
+    border-color: rgba($primary, .25);
+    i { color: $primary; }
+
+    &:hover {
+      background: $primary;
+      border-color: $primary;
+      box-shadow: 0 4px 12px rgba($primary, .35);
+      i { color: #fff; }
+    }
+  }
+}
+
+// ════════════════════════════════════════════════
+// BOUTONS ACTIONS (texte — modal + grille)
 // ════════════════════════════════════════════════
 .sc-btn-annuler {
   display: inline-flex;
@@ -587,8 +724,8 @@ $transition:  all .2s ease;
   white-space: nowrap;
 
   i { font-size: 13px; }
-
-  &:hover { background: $danger; color: #fff; border-color: $danger; }
+  &:hover:not(:disabled) { background: $danger; color: #fff; border-color: $danger; }
+  &:disabled { opacity: .4; cursor: not-allowed; }
 }
 
 .sc-btn-relancer {
@@ -607,8 +744,8 @@ $transition:  all .2s ease;
   white-space: nowrap;
 
   i { font-size: 13px; }
-
-  &:hover { background: $primary; color: #fff; border-color: $primary; }
+  &:hover:not(:disabled) { background: $primary; color: #fff; border-color: $primary; }
+  &:disabled { opacity: .4; cursor: not-allowed; }
 }
 
 // ════════════════════════════════════════════════
@@ -641,27 +778,153 @@ $transition:  all .2s ease;
   }
 
   p { font-size: 13px; color: $gray-400; margin-bottom: 20px; }
-
-  &__btn {
-    display: inline-flex;
-    align-items: center;
-    padding: 10px 24px;
-    border-radius: 50px;
-    font-size: 13px;
-    font-weight: 700;
-    background: linear-gradient(135deg, $primary 0%, darken($primary, 8%) 100%);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba($primary, .3);
-    transition: $transition;
-
-    &:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba($primary, .4); }
-  }
 }
 
 // ════════════════════════════════════════════════
-// MODAL LMS (repris de course-details-2)
+// VUE GRILLE — conteneur
+// ════════════════════════════════════════════════
+.sc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
+  animation: fadeIn .2s ease;
+}
+
+// ════════════════════════════════════════════════
+// CARTE FORMATION (vue grille)
+// ════════════════════════════════════════════════
+.sc-grid-card {
+  background: #fff;
+  border-radius: $radius-lg;
+  border: 1px solid $gray-200;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.04);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .2s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 36px rgba(0,0,0,.13), 0 4px 12px rgba(0,0,0,.07);
+    border-color: $primary;
+  }
+
+  &--validee { border-top: 3px solid $success; }
+  &--refusee { border-top: 3px solid $danger;  }
+  &--attente { border-top: 3px solid $warning; }
+
+  // Cover
+  &__cover {
+    position: relative;
+    height: 155px;
+    overflow: hidden;
+    background: $gray-100;
+  }
+
+  &__img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .4s ease;
+  }
+
+  &:hover &__img { transform: scale(1.05); }
+
+  &__cover-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.6) 0%, rgba(0,0,0,.1) 55%, transparent 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 12px 14px;
+  }
+
+  &__priorite {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 10px !important;
+    padding: 3px 9px !important;
+  }
+
+  // Corps
+  &__body {
+    padding: 14px 16px 12px;
+    flex: 1;
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: $gray-900;
+    margin-bottom: 4px;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__sub {
+    font-size: 12px;
+    color: $gray-400;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    i { font-size: 12px; }
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  // Footer
+  &__footer {
+    padding: 10px 16px;
+    border-top: 1px solid $gray-100;
+    background: $gray-50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  &__date {
+    font-size: 11px;
+    color: $gray-400;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    i { font-size: 12px; }
+  }
+}
+
+// Boutons icône compacts pour la grille
+.sc-btn--xs {
+  width: 30px;
+  height: 30px;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important;
+  i { font-size: 14px; margin: 0 !important; }
+}
+
+// ════════════════════════════════════════════════
+// MODAL LMS
 // ════════════════════════════════════════════════
 .lms-modal {
   border-radius: $radius-lg;
@@ -710,48 +973,554 @@ $transition:  all .2s ease;
     justify-content: flex-end;
     gap: 12px;
   }
+
 }
 
 // ════════════════════════════════════════════════
-// TYPE SÉLECTIONNÉ — chip + bouton changer
+// MODAL DÉTAIL — chips + sections
 // ════════════════════════════════════════════════
-.lms-type-selected {
+.lms-detail-chips {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
 
-  &__chip {
-    display: inline-flex;
+  &__left {
+    display: flex;
     align-items: center;
-    padding: 8px 18px;
-    border-radius: 50px;
-    background: $primary;
-    color: #fff;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+.lms-btn-commencer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(135deg, $primary, darken($primary, 8%));
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba($primary, .35);
+  transition: $transition;
+  flex-shrink: 0;
+
+  i { font-size: 15px; }
+  &:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba($primary, .45); }
+  &:active { transform: translateY(0); }
+}
+
+.lms-detail-section {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  padding: 16px 18px;
+
+  &__title {
     font-size: 13px;
     font-weight: 700;
-    box-shadow: 0 3px 10px rgba($primary, .3);
+    color: $gray-700;
+    display: flex;
+    align-items: center;
+    margin-bottom: 2px;
 
-    i { font-size: 16px; }
+    i { font-size: 15px; color: $primary; }
   }
 
-  &__change {
-    display: inline-flex;
+  &__body {
+    font-size: 13px;
+    color: $gray-600;
+    line-height: 1.6;
+    margin: 8px 0 0 0;
+  }
+
+  &--danger {
+    border-color: rgba($danger, .3);
+    background: $danger-lt;
+
+    .lms-detail-section__title { color: $danger; i { color: $danger; } }
+  }
+
+  &--success {
+    border-color: rgba($success, .3);
+    background: $success-lt;
+
+    .lms-detail-section__title { color: $success; i { color: $success; } }
+  }
+}
+
+// ════════════════════════════════════════════════
+// CHIP CERTIFIANTE — variante award
+// ════════════════════════════════════════════════
+.sc-detail-chip--award {
+  background: $warning-lt;
+  color: $warning;
+  border-color: rgba($warning, .25);
+}
+
+// ════════════════════════════════════════════════
+// FORMATION BANNER — modal détail
+// ════════════════════════════════════════════════
+.lms-formation-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px;
+  background: $gray-50;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+
+  &__img {
+    width: 80px;
+    height: 80px;
+    border-radius: $radius-sm;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid $gray-200;
+    box-shadow: $shadow-sm;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-weight: 800;
+    font-size: 15px;
+    color: $gray-900;
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+
+  &__sub {
+    font-size: 12px;
+    color: $gray-500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+
+    i { font-size: 13px; color: $primary; }
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+// ════════════════════════════════════════════════
+// INFO ITEMS — grille infos clés formation
+// ════════════════════════════════════════════════
+.lms-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: $gray-50;
+  border-radius: $radius-sm;
+  border: 1px solid $gray-100;
+  height: 100%;
+  transition: $transition;
+
+  &:hover { border-color: rgba($primary, .25); background: $primary-lt; box-shadow: $shadow-sm; }
+
+  i {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: $primary; // toujours teal
+  }
+
+  small {
+    font-size: 11px;
+    font-weight: 600;
+    color: $gray-400;
+    letter-spacing: .2px;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  strong {
+    font-size: 13px;
+    font-weight: 700;
+    color: $gray-900;
+    display: block;
+  }
+}
+
+// ════════════════════════════════════════════════
+// FORMATION DESC — blocs texte riches
+// ════════════════════════════════════════════════
+.lms-formation-desc {
+  padding: 12px 14px;
+  background: $gray-50;
+  border-radius: $radius-sm;
+  border-left: 3px solid $primary; // teal par défaut
+
+  &__label {
+    font-size: 11px;
+    font-weight: 700;
+    color: $primary;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    display: flex;
     align-items: center;
     gap: 5px;
-    padding: 7px 14px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 600;
-    color: $gray-600;
-    background: $gray-100;
-    border: 1.5px solid $gray-200;
-    cursor: pointer;
-    transition: $transition;
+    margin-bottom: 6px;
 
     i { font-size: 13px; }
-
-    &:hover { border-color: $primary; color: $primary; background: $primary-lt; }
   }
+
+  &__text {
+    font-size: 13px;
+    color: $gray-600;
+    line-height: 1.65;
+    margin: 0;
+    white-space: pre-line;
+  }
+
+  // Description — teal (défaut, pas de modifier)
+
+  // Contenu — bleu indigo
+  &--contenu {
+    border-left-color: #4f46e5;
+    background: #eef2ff;
+    .lms-formation-desc__label { color: #4f46e5; }
+  }
+
+  // Prérequis — orange
+  &--prerequis {
+    border-left-color: $orange;
+    background: $orange-lt;
+    .lms-formation-desc__label { color: $orange; }
+  }
+
+  // Public cible — violet
+  &--public {
+    border-left-color: $purple;
+    background: $purple-lt;
+    .lms-formation-desc__label { color: $purple; }
+  }
+
+  // Compétences visées — vert
+  &--competences {
+    border-left-color: $success;
+    background: $success-lt;
+    .lms-formation-desc__label { color: $success; }
+  }
+
+  // Objectifs pédagogiques — warning
+  &--objectifs {
+    border-left-color: $warning;
+    background: $warning-lt;
+    .lms-formation-desc__label { color: $warning; }
+  }
+}
+
+// ════════════════════════════════════════════════
+// META CHIP — variante orange
+// ════════════════════════════════════════════════
+.lms-meta-chip--orange {
+  background: $orange-lt;
+  color: $orange;
+  border-color: rgba($orange, .2);
+}
+
+// ════════════════════════════════════════════════
+// MODULES — header + fil d'ariane
+// ════════════════════════════════════════════════
+.lms-modules-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lms-modules-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: $gray-500;
+    background: $gray-100;
+    border: 1px solid $gray-200;
+    border-radius: 50px;
+    padding: 3px 10px;
+
+    i { font-size: 11px; color: $primary; }
+  }
+
+  &__sep {
+    font-size: 12px;
+    color: $gray-300;
+    font-weight: 400;
+  }
+}
+
+// ════════════════════════════════════════════════
+// ACCORDÉON MODULES — custom (sans Bootstrap JS)
+// ════════════════════════════════════════════════
+.lms-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &__item {
+    border: 1px solid $gray-200;
+    border-radius: $radius-sm;
+    overflow: hidden;
+    background: #fff;
+    transition: box-shadow .2s ease;
+
+    &:hover { box-shadow: $shadow-sm; }
+  }
+
+  &__header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: $gray-50;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background .15s ease;
+    gap: 12px;
+
+    &:hover { background: $primary-lt; }
+
+    &--open {
+      background: $primary-lt;
+      border-bottom: 1px solid rgba($primary, .15);
+    }
+
+    &-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    &-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: $primary;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 700;
+    color: $gray-900;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__count {
+    font-size: 11px;
+    font-weight: 600;
+    color: $primary;
+    background: rgba($primary, .1);
+    border-radius: 50px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+
+  &__chevron {
+    font-size: 16px;
+    color: $primary;
+    transition: transform .2s ease;
+  }
+
+  &__body {
+    animation: fadeIn .15s ease;
+  }
+}
+
+// ════════════════════════════════════════════════
+// LISTE SECTIONS — à l'intérieur d'un module
+// ════════════════════════════════════════════════
+.lms-sections-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid $gray-100;
+    gap: 12px;
+    transition: background .15s ease;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: $gray-50; }
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__index {
+    font-size: 11px;
+    font-weight: 700;
+    color: $gray-400;
+    min-width: 28px;
+    flex-shrink: 0;
+  }
+
+  &__icon {
+    font-size: 15px;
+    color: $primary;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 13px;
+    color: $gray-700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__duree {
+    font-size: 11px;
+    color: $gray-400;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    i { font-size: 11px; }
+  }
+
+  &__empty {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: $gray-400;
+    font-style: italic;
+
+    i { font-size: 14px; }
+  }
+}
+
+// ════════════════════════════════════════════════
+// COMPÉTENCES LISTE (tableau)
+// ════════════════════════════════════════════════
+.lms-competences-list {
+  list-style: none;
+  margin: 4px 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: $gray-600;
+    line-height: 1.5;
+
+    i {
+      font-size: 15px;
+      color: $success;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+  }
+}
+
+// ════════════════════════════════════════════════
+// ÉTAT DEMANDE — tableau de lignes
+// ════════════════════════════════════════════════
+.cd-demande-detail { display: flex; flex-direction: column; }
+
+.cd-demande-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid $gray-100;
+  font-size: 13px;
+
+  &:last-child { border-bottom: none; }
+}
+
+.cd-demande-label {
+  font-weight: 600;
+  color: $gray-400;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+// ════════════════════════════════════════════════
+// META CHIPS
+// ════════════════════════════════════════════════
+.lms-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  background: $gray-100;
+  color: $gray-600;
+  border: 1px solid $gray-200;
+  white-space: nowrap;
+
+  i { font-size: 11px; }
+
+  &--teal    { background: $primary-lt; color: $primary; border-color: rgba($primary, .2); }
+  &--warning { background: $warning-lt; color: $warning; border-color: rgba($warning, .2); }
+  &--success { background: $success-lt; color: $success; border-color: rgba($success, .2); }
+  &--purple  { background: $purple-lt;  color: $purple;  border-color: rgba($purple,  .2); }
 }
 
 // ════════════════════════════════════════════════
@@ -792,91 +1561,6 @@ $transition:  all .2s ease;
 }
 
 // ════════════════════════════════════════════════
-// TYPE CARDS MODAL
-// ════════════════════════════════════════════════
-.lms-type-card {
-  background: #fff;
-  border: 2px solid $gray-200;
-  border-radius: $radius-md;
-  padding: 16px 10px;
-  text-align: center;
-  cursor: pointer;
-  transition: $transition;
-  height: 100%;
-
-  &__icon {
-    font-size: 28px;
-    display: block;
-    margin-bottom: 8px;
-    color: $gray-400;
-    transition: $transition;
-  }
-
-  &__label { font-weight: 700; font-size: 13px; color: $gray-900; }
-  &__desc  { font-size: 10px; color: $gray-400; line-height: 1.3; margin-top: 4px; display: block; }
-
-  &:hover {
-    border-color: $primary;
-    background: $primary-lt;
-    transform: translateY(-2px);
-    box-shadow: $shadow-sm;
-
-    .lms-type-card__icon { color: $primary; }
-  }
-
-  &--active {
-    border-color: $primary !important;
-    background: $primary !important;
-
-    .lms-type-card__icon,
-    .lms-type-card__label { color: #fff !important; }
-    .lms-type-card__desc  { color: rgba(#fff, .7) !important; }
-  }
-}
-
-// ════════════════════════════════════════════════
-// SESSION CARDS MODAL
-// ════════════════════════════════════════════════
-.lms-session-card {
-  background: #fff;
-  border: 2px solid $gray-200;
-  border-radius: $radius-md;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
-  margin-bottom: 8px;
-  transition: $transition;
-
-  &__title { font-weight: 600; font-size: 14px; color: $gray-900; margin-bottom: 4px; }
-  &__meta  { font-size: 12px; color: $gray-400; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
-
-  &__places {
-    background: $success-lt;
-    color: $success;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 50px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  &:hover { border-color: $primary; background: $primary-lt; }
-
-  &--active {
-    border-color: $primary !important;
-    background: $primary !important;
-
-    .lms-session-card__title,
-    .lms-session-card__meta { color: #fff !important; }
-    .lms-session-card__places { background: rgba(#fff, .25); color: #fff; }
-  }
-}
-
-// ════════════════════════════════════════════════
 // SELECT CARDS MODAL
 // ════════════════════════════════════════════════
 .lms-select-card {
@@ -894,28 +1578,6 @@ $transition:  all .2s ease;
   &__sub   { font-size: 12px; color: $gray-400; }
 
   &:hover { transform: translateY(-2px); box-shadow: $shadow-sm; }
-
-  &--green {
-    &:hover { border-color: $success; background: $success-lt; }
-    &.lms-select-card--active {
-      border-color: $success !important;
-      background: $success !important;
-      .lms-select-card__title,
-      .lms-select-card__sub,
-      .lms-select-card__check { color: #fff !important; }
-    }
-  }
-
-  &--purple {
-    &:hover { border-color: $purple; background: $purple-lt; }
-    &.lms-select-card--active {
-      border-color: $purple !important;
-      background: $purple !important;
-      .lms-select-card__title,
-      .lms-select-card__sub,
-      .lms-select-card__check { color: #fff !important; }
-    }
-  }
 
   &--orange {
     &:hover { border-color: $orange; background: $orange-lt; }
@@ -941,10 +1603,9 @@ $transition:  all .2s ease;
   align-items: center;
   gap: 4px;
 
-  &--green  { background: $success-lt; color: $success; }
+  &--orange { background: $orange-lt; color: $orange; }
+  &--teal   { background: $primary-lt; color: $primary; }
   &--purple { background: $purple-lt;  color: $purple;  }
-  &--orange { background: $orange-lt;  color: $orange;  }
-  &--blue   { background: $primary-lt; color: $primary; }
 }
 
 // ════════════════════════════════════════════════
@@ -974,15 +1635,6 @@ $transition:  all .2s ease;
   margin: 24px 0;
 }
 
-.lms-hint {
-  font-size: 12px;
-  color: $gray-400;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .lms-empty-inline {
   display: flex;
   align-items: center;
@@ -1005,21 +1657,6 @@ $transition:  all .2s ease;
   padding: 32px;
   color: $gray-400;
   font-size: 13px;
-}
-
-.lms-placeholder {
-  text-align: center;
-  padding: 40px 20px;
-  color: $gray-400;
-
-  &__icon {
-    font-size: 52px;
-    display: block;
-    margin-bottom: 12px;
-    color: rgba($primary, .3);
-  }
-
-  p { margin: 0; font-size: 14px; }
 }
 
 // ════════════════════════════════════════════════
@@ -1130,37 +1767,25 @@ $transition:  all .2s ease;
 // ════════════════════════════════════════════════
 // RESPONSIVE
 // ════════════════════════════════════════════════
+@media (max-width: 991px) {
+  .sc-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 767px) {
-  .sc-header        { flex-direction: column; }
-  .sc-stats .sc-stat { min-width: calc(50% - 6px); }
-  .sc-filters       { flex-direction: column; align-items: stretch; }
+  .sc-header  { flex-direction: column; }
+  .sc-filters { flex-direction: column; align-items: stretch; }
+  .sc-grid    { grid-template-columns: 1fr; }
 
-  // Tooltip motif — alignement mobile
   .sc-motif-tooltip {
-    left: auto;
-    right: 0;
-    transform: none;
-
+    left: auto; right: 0; transform: none;
     &::after { left: auto; right: 20px; transform: rotate(45deg); }
   }
 
-  // Toast mobile
   .lms-toast-container {
-    top: auto;
-    bottom: 20px;
-    right: 16px;
-    left: 16px;
+    top: auto; bottom: 20px;
+    right: 16px; left: 16px;
   }
 
-  .lms-toast { min-width: unset; width: 100%; }
-  .lms-type-card__desc { display: none; }
+  .lms-toast       { min-width: unset; width: 100%; }
   .lms-modal__body { max-height: 65vh; }
-}
-
-// Ligne cliquable
-.sc-row--clickable {
-  cursor: pointer;
-  transition: $transition;
-
-  &:hover td { background: rgba($primary, .04) !important; }
 }

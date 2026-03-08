@@ -1,188 +1,235 @@
 <div class="mes-cours-page">
 
- <!-- ================= PAGE HEADER ================= -->
-<div class="page-header mb-4">
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-    <div>
-      <h3 class="page-title mb-1">
-        Mes Cours
-      </h3>
-      <p class="page-subtitle mb-0">
-        Suivez vos cours en cours, votre progression et votre statut
-      </p>
+<!-- ═══════════════════════════════════════════════════════
+     MODE PLAYER
+═══════════════════════════════════════════════════════ -->
+<ng-container *ngIf="viewMode === 'player'">
+  <div class="mc-player-shell">
+    <div class="mc-player-bar">
+      <button class="mc-player-bar__back" (click)="closePlayerView()">
+        <i class="isax isax-arrow-left-2"></i>
+        Retour à Mes Cours
+      </button>
+      <div class="mc-player-bar__sep"></div>
+      <span class="mc-player-bar__title" *ngIf="activeItemTitle">
+        <i class="isax isax-play-circle"></i>
+        {{ activeItemTitle }}
+      </span>
+    </div>
+    <app-lecture-formation
+      [embeddedFormationId]="activeFormationId"
+      (closePlayer)="closePlayerView()">
+    </app-lecture-formation>
+  </div>
+</ng-container>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODE LISTE
+═══════════════════════════════════════════════════════ -->
+<ng-container *ngIf="viewMode === 'list'">
+
+  <!-- ── PAGE HEADER ──────────────────────────────────── -->
+  <div class="page-header mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <h3 class="page-title mb-1">Mes Cours</h3>
+        <p class="page-subtitle mb-0">Suivez votre progression dans vos formations</p>
+      </div>
+      <div class="header-badge">
+        <i class="isax isax-book"></i>
+        Espace Employé
+      </div>
     </div>
 
-    <div class="header-badge">
-      <i class="isax isax-book"></i>
-      Espace Employé
+    <!-- Stats globales -->
+    <div class="mc-global-stats mt-3">
+      <div class="mc-global-stat mc-global-stat--blue">
+        <div class="mc-global-stat__num">
+          <span *ngIf="!loading; else statLoader">{{ allFormations.length }}</span>
+        </div>
+        <span class="mc-global-stat__label">Formations</span>
+      </div>
+      <div class="mc-global-stat mc-global-stat--green">
+        <div class="mc-global-stat__num">
+          <span *ngIf="!loading; else statLoader">{{ totalCompleted }}</span>
+        </div>
+        <span class="mc-global-stat__label">Terminées</span>
+      </div>
+      <div class="mc-global-stat mc-global-stat--orange">
+        <div class="mc-global-stat__num">
+          <span *ngIf="!loading; else statLoader">{{ totalInProgress }}</span>
+        </div>
+        <span class="mc-global-stat__label">En cours</span>
+      </div>
+      <div class="mc-global-stat mc-global-stat--progress">
+        <div class="mc-global-progress">
+          <div class="mc-global-progress__bar">
+            <div [style.width.%]="globalProgress"></div>
+          </div>
+          <span class="mc-global-progress__pct">{{ globalProgress }}%</span>
+        </div>
+        <span class="mc-global-stat__label">Progression globale</span>
+      </div>
+    </div>
+
+    <ng-template #statLoader><span class="mc-stat-dot"></span></ng-template>
+  </div>
+
+  <!-- ── FILTRES ───────────────────────────────────────── -->
+  <div class="card filter-card mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">Statut</label>
+          <select class="form-select" [(ngModel)]="selectedStatus"
+                  (change)="filterByStatus(selectedStatus)">
+            <option value="">Tous</option>
+            <option value="active">En cours</option>
+            <option value="pending">Non commencé</option>
+            <option value="completed">Terminé</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Recherche</label>
+          <div class="search-wrapper">
+            <i class="isax isax-search-normal-1"></i>
+            <input type="search" class="form-control"
+                   placeholder="Titre ou description de formation"
+                   [(ngModel)]="searchDataValue"
+                   (ngModelChange)="searchData($event)">
+          </div>
+        </div>
+        <div class="col-md-3 text-end">
+          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="isax isax-refresh me-1"></i>Réinitialiser
+          </button>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
- 
-
-  <!-- Error -->
-  <div *ngIf="!loading && error" class="error-box">
-    {{ error }}
+  <!-- ── LOADING ───────────────────────────────────────── -->
+  <div *ngIf="loading" class="mc-loading">
+    <div class="mc-loading__spinner"></div>
+    <p>Chargement de vos formations...</p>
   </div>
 
-  <!-- Empty -->
-  <div *ngIf="!loading && !error && allFormations.length === 0" class="empty-state">
-    <i class="isax isax-book"></i>
-    <h4>Aucune formation</h4>
-    <p>Vos formations validées apparaîtront ici.</p>
+  <!-- ── ERREUR ────────────────────────────────────────── -->
+  <div *ngIf="error && !loading" class="mc-error">
+    <i class="isax isax-warning-2 me-2"></i>{{ error }}
   </div>
-  <!-- ================= FILTRES ================= -->
-<div class="card filter-card mb-4">
-  <div class="card-body">
-    <div class="row g-3 align-items-end">
 
-      <!-- STATUT -->
-      <div class="col-md-3">
-        <label class="form-label">Statut</label>
-        <select class="form-select"
-                [(ngModel)]="selectedStatus"
-                (change)="filterByStatus(selectedStatus)">
-          <option value="">Tous</option>
-          <option value="active">En cours</option>
-          <option value="pending">En attente</option>
-          <option value="completed">Terminée</option>
-        </select>
-      </div>
+  <!-- ── GRILLE FORMATIONS ─────────────────────────────── -->
+  <ng-container *ngIf="!loading && !error">
 
-      <!-- SEARCH -->
-      <div class="col-md-6">
-        <label class="form-label">Recherche</label>
-        <div class="search-wrapper">
-          <i class="isax isax-search-normal-1"></i>
-          <input type="search"
-                 class="form-control"
-                 placeholder="Titre ou description de formation"
-                 [(ngModel)]="searchDataValue"
-                 (ngModelChange)="searchData(searchDataValue)">
-        </div>
-      </div>
-
-      <!-- RESET -->
-      <div class="col-md-3 text-end">
-        <button class="btn btn-outline-secondary w-100"
-                (click)="searchDataValue=''; selectedStatus=''; filterByStatus('')">
-          <i class="isax isax-refresh me-1"></i>
-          Réinitialiser
-        </button>
-      </div>
-
+    <!-- Empty state -->
+    <div *ngIf="filteredFormations.length === 0" class="mc-empty">
+      <div class="mc-empty__icon"><i class="isax isax-book-1"></i></div>
+      <h5 class="mc-empty__title">Aucune formation trouvée</h5>
+      <p>Vos formations apparaîtront ici dès qu'elles vous seront assignées.</p>
     </div>
-  </div>
-</div>
 
-<!-- ================= TABLE ================= -->
-<div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
-    <div class="text-center">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Chargement...</span>
-        </div>
-        <p class="mt-3 text-muted">Chargement des formations...</p>
-    </div>
-</div>
- <!-- Courses -->
-<div class="row" *ngIf="!loading && formations.length > 0">
-  
+    <!-- Cartes -->
+    <div class="row g-3" *ngIf="formations.length > 0">
+      <div class="col-xl-4 col-md-6" *ngFor="let f of formations">
+        <div class="mc-card course-item-two course-item mx-0 h-100">
 
-  <div
-    class="col-xl-4 col-md-6 mb-4"
-    *ngFor="let formation of formations">
+          <!-- Image -->
+          <div class="course-img position-relative" (click)="openPlayer(f)" style="cursor:pointer">
+            <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+                 [alt]="f.titre" class="img-fluid w-100">
 
-    <div class="course-item-two course-item mx-0 h-100 d-flex flex-column">
+            <!-- Overlay play -->
+            <div class="mc-card__overlay">
+              <div class="mc-card__play">
+                <i class="isax isax-play"></i>
+              </div>
+            </div>
 
-      <!-- IMAGE -->
-      <div class="course-img position-relative">
+            <!-- Badges top -->
+            <div class="position-absolute start-0 top-0 w-100 p-2
+                        d-flex justify-content-between align-items-start">
+              <span class="badge bg-light text-dark" *ngIf="f.difficulte">
+                {{ f.difficulte }}
+              </span>
+              <span class="badge"
+                    [class.bg-success]="f.progression === 100"
+                    [class.bg-primary]="(f.progression ?? 0) > 0 && f.progression !== 100"
+                    [class.bg-secondary]="!f.progression || f.progression === 0">
+                {{ f.progression === 100 ? 'Terminé' : (f.progression ?? 0) > 0 ? 'En cours' : 'À commencer' }}
+              </span>
+            </div>
 
-        <a (click)="startCourses(formation.id)">
-          <img
-            [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
-            class="img-fluid"
-            alt="img">
-        </a>
-
-        <div class="position-absolute start-0 top-0 w-100 p-3 d-flex justify-content-between">
-          
-          <!-- Difficulté -->
-          <span class="badge bg-secondary">
-            {{ formation.difficulte || '—' }}
-          </span>
-
-          <!-- Statut -->
-          <span
-            class="badge"
-            [ngClass]="{
-              'bg-success': formation.statut_formation === 'termine',
-              'bg-warning text-dark': formation.statut_formation !== 'termine'
-            }">
-            {{ formation.statut_formation || 'En cours' }}
-          </span>
-
-        </div>
-      </div>
-
-      <!-- CONTENT -->
-      <div class="course-content d-flex flex-column flex-grow-1">
-
-        <div class="d-flex justify-content-between mb-2">
-          <span class="badge bg-light text-dark rounded-pill">
-            {{ formation.langue || 'FR' }}
-          </span>
-          <span class="text-muted fs-13">
-            {{ formation.duree_totale || 0 }} h
-          </span>
-        </div>
-
-        <h6 class="title mb-2 text-truncate">
-          {{ formation.titre }}
-        </h6>
-
-        <p class="course-desc mb-3 text-muted"
-           style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-          {{ formation.short_description || formation.description }}
-        </p>
-
-        <!-- Progression -->
-        <div *ngIf="formation.progression !== undefined" class="mb-3">
-          <div class="progress" style="height: 6px;">
-            <div
-              class="progress-bar bg-dark"
-              role="progressbar"
-              [style.width.%]="formation.progression">
+            <!-- Sceau terminé -->
+            <div class="mc-done-seal" *ngIf="isCourseFinished(f)">
+              <i class="isax isax-tick-circle"></i>
             </div>
           </div>
-          <small class="text-muted">
-            {{ formation.progression }}% complété
-          </small>
+
+          <!-- Contenu -->
+          <div class="course-content d-flex flex-column flex-grow-1">
+
+            <!-- Méta -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-light text-dark rounded-pill fs-12"
+                    *ngIf="f.langue">{{ f.langue }}</span>
+              <span class="text-muted fs-13" *ngIf="f.duree_totale">
+                {{ f.duree_totale }} h
+              </span>
+            </div>
+
+            <!-- Titre -->
+            <h6 class="title mb-1" (click)="openPlayer(f)" style="cursor:pointer">
+              {{ f.titre }}
+            </h6>
+
+            <!-- Description courte -->
+            <p class="course-desc mb-2" *ngIf="f.short_description || f.description">
+              {{ f.short_description || f.description }}
+            </p>
+
+            <!-- Progression -->
+            <div class="mb-3">
+              <div class="progress" style="height:5px; border-radius:99px;">
+                <div class="progress-bar"
+                     [class]="getProgressClass(f.progression ?? 0)"
+                     [style.width.%]="f.progression ?? 0"
+                     role="progressbar"></div>
+              </div>
+              <small class="text-muted">{{ f.progression ?? 0 }}% complété</small>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+              <button class="btn btn-sm mc-btn-details"
+                      (click)="goToDetails(f.id)">
+                <i class="isax isax-info-circle me-1"></i>Détails
+              </button>
+              <button class="btn btn-sm mc-btn-start"
+                      [class.mc-btn-start--done]="isCourseFinished(f)"
+                      (click)="openPlayer(f)">
+                <i class="isax me-1" [ngClass]="getCourseActionIcon(f)"></i>
+                {{ getCourseActionLabel(f) }}
+              </button>
+            </div>
+
+          </div>
         </div>
-
-        <!-- Footer -->
-        <div class="mt-auto d-flex justify-content-between align-items-center">
-
-          <button
-            class="btn btn-dark btn-sm"
-            (click)="startCourses(formation.id)"
-            [disabled]="isCourseFinished(formation)">
-            
-            {{ getCourseActionLabel(formation) }}
-            <i class="isax isax-arrow-right-3 ms-1"></i>
-          </button>
-
-        </div>
-
       </div>
     </div>
-  </div>
+
+    <!-- Pagination -->
+    <app-custom-pagination
+      *ngIf="totalData > pageSize"
+      [totalItems]="totalData"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      (pageChange)="onPageChange($event)">
+    </app-custom-pagination>
+
+  </ng-container>
+
+</ng-container>
+
 </div>
-<!-- PAGINATION -->
-<app-custom-pagination
-  *ngIf="!loading && totalData > pageSize"
-  [totalItems]="totalData"
-  [pageSize]="pageSize"
-  [currentPage]="currentPage"
-  (pageChange)="onPageChange($event)">
-</app-custom-pagination>

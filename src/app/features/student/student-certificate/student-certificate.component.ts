@@ -1,6 +1,6 @@
-import { Component, OnInit }                                          from '@angular/core';
-import { CommonModule }                                               from '@angular/common';
-import { Router, RouterModule }                                               from '@angular/router';
+import { Component, OnInit }        from '@angular/core';
+import { CommonModule }             from '@angular/common';
+import { Router, RouterModule }     from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DemandeFormationService }   from '../../../shared/service/demande/demande-formation.service';
 import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
@@ -23,9 +23,10 @@ interface Toast {
 })
 export class StudentCertificateComponent implements OnInit {
 
-  // ================================
-  // LISTE DEMANDES (filtrée formation)
-  // ================================
+  // ── VUE ─────────────────────────────────────────
+  viewMode: 'table' | 'grid' = 'table';
+
+  // ── LISTE DEMANDES ───────────────────────────────
   loading      = true;
   allDemandes: any[] = [];
   demandes:    any[] = [];
@@ -39,23 +40,23 @@ export class StudentCertificateComponent implements OnInit {
   skip        = 0;
   limit       = 10;
 
-  hoveredMotifId:  number | null = null;
-  showRefusePerson = false;
+  hoveredMotifId:   number | null = null;
+  showRefusePerson  = false;
 
-  // ================================
-  // TOAST
-  // ================================
+  // ── TOAST ────────────────────────────────────────
   toast: Toast = { type: 'success', message: '', visible: false };
   private toastTimer: any;
 
-  // ================================
-  // MODAL — FORMATION UNIQUEMENT
-  // ================================
+  // ── MODAL DÉTAIL DEMANDE ─────────────────────────
+  demandeSelectionnee:      any   = null;
+  private detailDemandeModal: any;
+
+  // ── MODAL NOUVELLE DEMANDE ───────────────────────
   submitting            = false;
   private modalInstance: any;
 
-  categories:          any[]          = [];
-  formations:          any[]          = [];
+  categories:          any[]           = [];
+  formations:          any[]           = [];
   selectedCategorieId: number | string = '';
   selectedFormationIds: number[]       = [];
   loadingFormations    = false;
@@ -64,9 +65,9 @@ export class StudentCertificateComponent implements OnInit {
 
   constructor(
     private demandeFormationService: DemandeFormationService,
-    private formationsService: FormationsService,
-    private fb: FormBuilder,
-    private router: Router
+    private formationsService:       FormationsService,
+    private fb:                      FormBuilder,
+    private router:                  Router
   ) {}
 
   ngOnInit(): void {
@@ -81,16 +82,15 @@ export class StudentCertificateComponent implements OnInit {
     });
   }
 
-  // ================================
-  // STATS
-  // ================================
-  get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
-  get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length;    }
-  get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length;    }
+  // ── TOGGLE VUE ───────────────────────────────────
+  setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
 
-  // ================================
-  // CHARGEMENT — filtré sur 'formation' uniquement (pas catalogue, pas session, pas parcours)
-  // ================================
+  // ── STATS ────────────────────────────────────────
+  get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
+  get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length; }
+  get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length; }
+
+  // ── CHARGEMENT DEMANDES ──────────────────────────
   loadDemandes(): void {
     this.loading = true;
     this.demandeFormationService.getMesDemandes().subscribe({
@@ -108,38 +108,21 @@ export class StudentCertificateComponent implements OnInit {
   }
 
   private normaliserDemande(d: any): any {
-  const fallback = 'assets/img/course/course-01.jpg';
-  return {
-    ...d,
-    titre_affiche:      d.formation?.titre         ?? `Formation #${d.formation_id}`,
-    sous_titre_affiche: d.formation?.formateur_nom ?? d.formation?.categorie?.nom ?? '',
-    image_affiche:      d.formation?.image_couverture || fallback,
-    // ⚡ ID fiable pour la navigation
-    formation_id_nav:   d.formation?.id ?? d.formation_id ?? null,
-    formation: d.formation ? {
-      ...d.formation,
-      niveau:       d.formation.niveau       ?? '—',
-      duree_totale: d.formation.duree_totale ?? null,
-    } : null,
-  };
-}
+    const fallback = 'assets/img/course/course-01.jpg';
+    return {
+      ...d,
+      titre_affiche:      d.formation?.titre         ?? `Formation #${d.formation_id}`,
+      sous_titre_affiche: d.formation?.formateur_nom ?? d.formation?.categorie?.nom ?? '',
+      image_affiche:      d.formation?.image_couverture || fallback,
+      formation: d.formation ? {
+        ...d.formation,
+        niveau:       d.formation.niveau       ?? '—',
+        duree_totale: d.formation.duree_totale ?? null,
+      } : null,
+    };
+  }
 
-// ================================
-// NAVIGATION — ouvre course-details-2/:id
-// ================================
-gotoDetails(formationId: number | null | undefined, event: Event): void {
-  if (!formationId) return;
-
-  // Ne pas déclencher si le clic vient d'un bouton d'action dans la ligne
-  const target = event.target as HTMLElement;
-  if (target.closest('.sc-btn-annuler, .sc-btn-relancer, .sc-motif-wrapper')) return;
-
-  this.router.navigate(['/courses/course-details-2', formationId]);
-}
-
-  // ================================
-  // FILTRES + PAGINATION
-  // ================================
+  // ── FILTRES + PAGINATION ─────────────────────────
   getTableData(skip: number, limit: number): void {
     let filtered = [...this.allDemandes];
     if (this.selectedStatus)  filtered = filtered.filter(d => d.statut === this.selectedStatus);
@@ -155,37 +138,41 @@ gotoDetails(formationId: number | null | undefined, event: Event): void {
     this.demandes  = filtered.slice(skip, skip + limit);
   }
 
-  searchData(value: string): void      { this.searchDataValue = value; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  filterByStatus(status: string): void { this.selectedStatus = status; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  searchData(value: string): void      { this.searchDataValue = value;  this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  filterByStatus(status: string): void { this.selectedStatus  = status; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
   resetFilters(): void                 { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
   onPageChange(page: number): void     { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
 
-  // ================================
-  // TOOLTIP
-  // ================================
+  // ── TOOLTIP MOTIF ────────────────────────────────
   showMotif(id: number): void         { this.hoveredMotifId = id; }
   hideMotif(): void                   { this.hoveredMotifId = null; }
   isMotifVisible(id: number): boolean { return this.hoveredMotifId === id; }
   toggleShowRefusePerson(): void      { this.showRefusePerson = !this.showRefusePerson; }
 
-  // ================================
-  // ACTIONS TABLEAU
-  // ================================
-  annulerDemande(id: number): void {
+  // ── ACTIONS ──────────────────────────────────────
+  annulerDemande(id: number, event?: Event): void {
+    event?.stopPropagation();
     if (!confirm('Confirmer l\'annulation de cette demande ?')) return;
-    this.demandeFormationService.annulerDemande(id).subscribe({ next: () => this.loadDemandes() });
+    this.demandeFormationService.annulerDemande(id).subscribe({
+      next: () => {
+        this.fermerDetailDemande();
+        this.loadDemandes();
+      }
+    });
   }
 
-  relancerDemande(id: number): void {
+  relancerDemande(id: number, event?: Event): void {
+    event?.stopPropagation();
     this.demandeFormationService.relancerDemande(id).subscribe({
-      next: () => this.loadDemandes(),
+      next: () => {
+        this.fermerDetailDemande();
+        this.loadDemandes();
+      },
       error: () => this.showToast('error', '❌ Impossible de relancer cette demande.')
     });
   }
 
-  // ================================
-  // TOAST
-  // ================================
+  // ── TOAST ────────────────────────────────────────
   showToast(type: 'success' | 'error' | 'warning', message: string): void {
     clearTimeout(this.toastTimer);
     this.toast = { type, message, visible: true };
@@ -194,10 +181,59 @@ gotoDetails(formationId: number | null | undefined, event: Event): void {
 
   closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
-  // ================================
-  // MODAL
-  // ================================
+  // ── CHARGEMENT DÉTAIL FORMATION ──────────────────
+  loadingFormationDetail = false;
+
+  // ════════════════════════════════════════════════
+  // MODAL DÉTAIL DEMANDE — clic ligne tableau ou carte grille
+  // ════════════════════════════════════════════════
+  ouvrirDetailDemande(demande: any, event: Event): void {
+    const target = event.target as HTMLElement;
+    if (target.closest('.sc-btn-annuler, .sc-btn-relancer, .sc-motif-wrapper')) return;
+
+    // Afficher le modal immédiatement avec les données de base
+    this.demandeSelectionnee = { ...demande };
+    this.openModules.clear();
+
+    const el = document.getElementById('demandeDetailModal');
+    if (el) {
+      this.detailDemandeModal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
+      this.detailDemandeModal.show();
+    }
+
+    // Charger les détails complets (modules, sections...) si formation_id disponible
+    const formationId = demande.formation_id ?? demande.formation?.id;
+    if (formationId) {
+      this.loadingFormationDetail = true;
+      this.formationsService.getFormationById(formationId).subscribe({
+        next: (res: any) => {
+          const full = res?.data ?? res?.formation ?? res;
+          // Fusionner les données complètes dans demandeSelectionnee
+          this.demandeSelectionnee = {
+            ...this.demandeSelectionnee,
+            formation: {
+              ...this.demandeSelectionnee.formation,
+              ...full,
+            }
+          };
+          this.loadingFormationDetail = false;
+        },
+        error: () => { this.loadingFormationDetail = false; }
+      });
+    }
+  }
+
+  fermerDetailDemande(): void {
+    this.detailDemandeModal?.hide();
+    this.demandeSelectionnee = null;
+    this.openModules.clear();
+  }
+
+  // ════════════════════════════════════════════════
+  // MODAL NOUVELLE DEMANDE
+  // ════════════════════════════════════════════════
   openRequestModal(): void {
+    this.resetModal();
     const el = document.getElementById('demandeFormationModal');
     if (el) {
       this.modalInstance = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
@@ -205,10 +241,7 @@ gotoDetails(formationId: number | null | undefined, event: Event): void {
     }
   }
 
-  closeModal(): void {
-    this.modalInstance?.hide();
-    this.resetModal();
-  }
+  closeModal(): void { this.modalInstance?.hide(); this.resetModal(); }
 
   private resetModal(): void {
     this.selectedCategorieId  = '';
@@ -234,20 +267,15 @@ gotoDetails(formationId: number | null | undefined, event: Event): void {
   loadFormations(categorieId: number): void {
     this.loadingFormations = true;
     this.formationsService.getFormationsByCategorie(categorieId).subscribe({
-      next: (res: any) => { this.formations = res.formations ?? []; this.loadingFormations = false; },
-      error: () => { this.loadingFormations = false; }
+      next:  (res: any) => { this.formations = res.formations ?? []; this.loadingFormations = false; },
+      error: ()         => { this.loadingFormations = false; }
     });
   }
 
   toggleFormation(id: number): void        { const i = this.selectedFormationIds.indexOf(id); i === -1 ? this.selectedFormationIds.push(id) : this.selectedFormationIds.splice(i, 1); }
   isFormationSelected(id: number): boolean { return this.selectedFormationIds.includes(id); }
 
-  // ================================
-  // VALIDATION + SOUMISSION
-  // ================================
-  canSubmit(): boolean {
-    return !!this.selectedCategorieId && this.form.valid;
-  }
+  canSubmit(): boolean { return !!this.selectedCategorieId && this.form.valid; }
 
   submitRequest(): void {
     if (!this.canSubmit()) return;
@@ -268,7 +296,6 @@ gotoDetails(formationId: number | null | undefined, event: Event): void {
     if (date) base.date_souhaitee_debut = date;
 
     if (this.selectedFormationIds.length === 0) {
-      // Demande de catégorie sans formation spécifique
       this.envoyerDemande(base);
     } else if (this.selectedFormationIds.length === 1) {
       this.envoyerDemande({ ...base, formation_id: this.selectedFormationIds[0] });
@@ -282,10 +309,7 @@ gotoDetails(formationId: number | null | undefined, event: Event): void {
       next: () => {
         this.submitting = false;
         this.closeModal();
-        setTimeout(() => {
-          this.showToast('success', '✅ Votre demande a été envoyée avec succès !');
-          this.loadDemandes();
-        }, 300);
+        setTimeout(() => { this.showToast('success', '✅ Votre demande a été envoyée avec succès !'); this.loadDemandes(); }, 300);
       },
       error: (err) => this.handleError(err)
     });
@@ -300,10 +324,7 @@ gotoDetails(formationId: number | null | undefined, event: Event): void {
           if (completed === this.selectedFormationIds.length && !hasError) {
             this.submitting = false;
             this.closeModal();
-            setTimeout(() => {
-              this.showToast('success', `✅ ${completed} demande(s) envoyée(s) avec succès !`);
-              this.loadDemandes();
-            }, 300);
+            setTimeout(() => { this.showToast('success', `✅ ${completed} demande(s) envoyée(s) avec succès !`); this.loadDemandes(); }, 300);
           }
         },
         error: (err) => { if (!hasError) { hasError = true; this.handleError(err); } }
@@ -318,9 +339,38 @@ gotoDetails(formationId: number | null | undefined, event: Event): void {
     else                         this.showToast('error', '❌ Une erreur est survenue. Veuillez réessayer.');
   }
 
-  // ================================
-  // HELPERS CSS
-  // ================================
+  // ── NAVIGATION — commencer formation ────────────
+  commencerFormation(demande: any, event?: Event): void {
+    event?.stopPropagation();
+    const formationId = demande.formation_id ?? demande.formation?.id;
+    if (formationId) {
+      this.fermerDetailDemande();
+      this.router.navigate(['/student/lecture-formation', formationId], {
+        state: {
+          fromPage: 'demandes',
+          demande: demande
+        }
+      });
+    }
+  }
+
+  // ── ACCORDÉON MODULES ────────────────────────────
+  openModules = new Set<string>();
+
+  toggleModule(demandeId: number, moduleIndex: number): void {
+    const key = `${demandeId}_${moduleIndex}`;
+    this.openModules.has(key) ? this.openModules.delete(key) : this.openModules.add(key);
+  }
+
+  isModuleOpen(demandeId: number, moduleIndex: number): boolean {
+    return this.openModules.has(`${demandeId}_${moduleIndex}`);
+  }
+
+  // ── HELPERS CSS ──────────────────────────────────
+  getTotalSections(modules: any[]): number {
+    return modules?.reduce((acc, m) => acc + (m.sections?.length ?? 0), 0) ?? 0;
+  }
+
   getPrioriteClass(priorite: string): string {
     return ({ urgente: 'priorite-urgente', haute: 'priorite-haute', normale: 'priorite-normale', basse: 'priorite-basse' } as any)[priorite] ?? 'priorite-normale';
   }

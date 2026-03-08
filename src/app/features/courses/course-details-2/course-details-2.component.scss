@@ -512,3 +512,18 @@ $transition:   all .2s ease;
   border-left: 4px solid $warning;
   background: $warning-lt;
 }
+// ════════════════════════════════════════════════
+// BOUTON COMMENCER LA FORMATION
+// ════════════════════════════════════════════════
+.btn-success {
+  background: linear-gradient(135deg, $primary 0%, darken($primary, 8%) 100%) !important;
+  border-color: $primary !important;
+  box-shadow: 0 3px 10px rgba($primary, .35) !important;
+  color: #fff !important;
+  transition: $transition;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba($primary, .45) !important;
+  }
+}

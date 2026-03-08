@@ -17,6 +17,17 @@ export const routes: Routes = [
             { path: 'lock-screen', loadComponent: () => import('./auth/lock-screen/lock-screen.component').then(m => m.LockScreenComponent) }
         ]
 },
+
+// ══════════════════════════════════════════════════════════════════════
+// ✅ PAGE LECTEUR PLEIN ÉCRAN — EN DEHORS de tout layout back-office
+// ══════════════════════════════════════════════════════════════════════
+{
+    path: 'student/lecture-formation/:id',
+    loadComponent: () => import('./features/student/lecture-formation/lecture-formation.component')
+        .then(m => m.LectureFormationComponent),
+    canActivate: [authGuard]
+},
+
 {path:'',loadComponent:()=>import ('./features/features.component').then((m)=>m.FeaturesComponent),
     children:[
         {path:'index',loadComponent:()=>import ('./features/home-list/home/home.component').then((m)=>m.HomeComponent)},
@@ -93,12 +104,9 @@ export const routes: Routes = [
                 {path:'superadmin-client-details/:id',loadComponent:()=>import ('./features/superadmin/client-details/client-details.component').then((m)=>m.ClientDetailsComponent)},
                 {path:'superadmin-permission',loadComponent:()=>import ('./features/superadmin/superadmin-permission/superadmin-permission.component').then((m)=>m.SuperadminPermissionComponent)},
                 {path:'superadmin-role',loadComponent:()=>import ('./features/superadmin/superadmin-role/superadmin-role.component').then((m)=>m.SuperadminRoleComponent)},
-
-                // {path:'superadmin-register',loadComponent:()=>import ('./features/superadmin/register/register.component').then((m)=>m.RegisterComponent)},
                 {path:'superadmin-user-list',loadComponent:()=>import ('./features/superadmin/user/user-list.component').then((m)=>m.UserListComponent), canActivate: [PermissionGuard], data: { permission: 'lister utilisateurs' }},
                 {path:'superadmin-user-details/:id',loadComponent:()=>import ('./features/superadmin/user-details/user-details.component').then((m)=>m.UserDetailsComponent)},
                 {path:'superadmin-user-add',loadComponent:()=>import ('./features/superadmin/user-add/user-add.component').then((m)=>m.UserAddComponent)},
-                
                 {path:'superadmin-announcements',loadComponent:()=>import ('./features/superadmin/superadmin-announcements/superadmin-announcements.component').then((m)=>m.SuperadminAnnouncementsComponent)},
                 {path:'superadmin-quiz-questions',loadComponent:()=>import ('./features/superadmin/superadmin-quiz-questions/superadmin-quiz-questions.component').then((m)=>m.SuperadminQuizQuestionsComponent)},
                 {path:'superadmin-quiz-results',loadComponent:()=>import ('./features/superadmin/superadmin-quiz-results/superadmin-quiz-results.component').then((m)=>m.SuperadminQuizResultsComponent)},
@@ -124,7 +132,6 @@ export const routes: Routes = [
                         {path:'superadmin-social-profiles',loadComponent:()=>import ('./features/superadmin/settings/superadmin-social-profiles/superadmin-social-profiles.component').then((m)=>m.SuperadminSocialProfilesComponent)},
                         {path:'superadmin-change-password',loadComponent:()=>import ('./features/superadmin/settings/superadmin-change-password/superadmin-change-password.component').then((m)=>m.SuperadminChangePasswordComponent)},
                         {path:'superadmin-settings',loadComponent:()=>import ('./features/superadmin/settings/superadmin-settings/superadmin-settings.component').then((m)=>m.SuperadminSettingsComponent)}
-                        
                     ]
                 },
             ]
@@ -143,11 +150,8 @@ export const routes: Routes = [
                 {path:'adminrh-client-details/:id',loadComponent:()=>import ('./features/adminrh/client-details/client-details.component').then((m)=>m.ClientDetailsComponent)},
                 {path:'adminrh-permission',loadComponent:()=>import ('./features/adminrh/adminrh-permission/adminrh-permission.component').then((m)=>m.AdminrhPermissionComponent)},
                 {path:'adminrh-role',loadComponent:()=>import ('./features/adminrh/adminrh-role/adminrh-role.component').then((m)=>m.AdminrhRoleComponent)},
-
-                // {path:'adminrh-register',loadComponent:()=>import ('./features/adminrh/register/register.component').then((m)=>m.RegisterComponent)},
                 {path:'adminrh-user-list',loadComponent:()=>import ('./features/adminrh/user/user-list.component').then((m)=>m.UserListComponent)},
                 {path:'adminrh-user-group-list',loadComponent:()=>import ('./features/adminrh/user-group-list/user-group-list.component').then((m)=>m.UserGroupListComponent)},
-
                 {path:'adminrh-user-details/:id',loadComponent:()=>import ('./features/adminrh/user-details/user-details.component').then((m)=>m.UserDetailsComponent)},
                 {path:'adminrh-user-add',loadComponent:()=>import ('./features/adminrh/user-add/user-add.component').then((m)=>m.UserAddComponent)},
                 {path:'adminrh-demande',loadComponent:()=>import ('./features/adminrh/adminrh-demande/adminrh-demande.component').then((m)=>m.AdminrhDemandeComponent)},
@@ -176,7 +180,6 @@ export const routes: Routes = [
                         {path:'adminrh-social-profiles',loadComponent:()=>import ('./features/adminrh/settings/adminrh-social-profiles/adminrh-social-profiles.component').then((m)=>m.AdminrhSocialProfilesComponent)},
                         {path:'adminrh-change-password',loadComponent:()=>import ('./features/adminrh/settings/adminrh-change-password/adminrh-change-password.component').then((m)=>m.AdminrhChangePasswordComponent)},
                         {path:'adminrh-settings',loadComponent:()=>import ('./features/adminrh/settings/adminrh-settings/adminrh-settings.component').then((m)=>m.AdminrhSettingsComponent)}
-                        
                     ]
                 },
             ]
@@ -216,14 +219,15 @@ export const routes: Routes = [
         {path:'student-dashboard',loadComponent:()=>import ('./features/student/student-dashboard/student-dashboard.component').then((m)=>m.StudentDashboardComponent)},
         {path:'student-profile',loadComponent:()=>import ('./features/student/student-profile/student-profile.component').then((m)=>m.StudentProfileComponent)},
         {path:'student-courses',loadComponent:()=>import ('./features/student/student-courses/student-courses.component').then((m)=>m.StudentCoursesComponent)},
-        { path: 'catalogue/:id', loadComponent: () => import('./features/student/catalogue-detail/catalogue-detail.component').then(m => m.CatalogueDetailComponent) },
+        { path: 'catalogue-detail/:id', loadComponent: () => import('./features/student/catalogue-detail/catalogue-detail.component').then(m => m.CatalogueDetailComponent) },
         {path:'mes-cours',loadComponent:()=>import ('./features/student/mes-cours/mes-cours.component').then((m)=>m.MesCoursComponent)},
-        {path:'lecture-formation/:id',loadComponent:()=>import('./features/student/lecture-formation/lecture-formation.component').then(m=>m.LectureFormationComponent)
-},
+        // ⛔ lecture-formation retiré d'ici — maintenant route racine plein écran
         {path:'student-tickets',loadComponent:()=>import ('./features/student/student-tickets/student-tickets.component').then((m)=>m.StudentTicketsComponent)},
         {path:'students-session',loadComponent:()=>import ('./features/student/students-session/students-session.component').then((m)=>m.StudentsSessionsComponent)},
         { path: 'students-catalogue', loadComponent: () => import('./features/student/students-catalogue/students-catalogue.component').then(m => m.StudentsCatalogueComponent) },
         { path: 'students-parcours',  loadComponent: () => import('./features/student/students-parcours/students-parcours.component').then(m => m.StudentsParcoursComponent) },
+        { path: 'parcours-assignes', loadComponent: () => import('./features/student/parcours-assignes/parcours-assignes.component').then(m => m.ParcoursAssignesComponent) },
+        { path: 'parcours-assigne/:id', loadComponent: () => import('./features/student/parcours-assigne-detail/parcours-assigne-detail.component').then(m => m.ParcoursAssigneDetailComponent) },
         {path:'student-quiz',loadComponent:()=>import ('./features/student/student-quiz/student-quiz.component').then((m)=>m.StudentQuizComponent)},
         {path:'student-quiz-questions',loadComponent:()=>import ('./features/student/student-quiz-questions/student-quiz-questions.component').then((m)=>m.StudentQuizQuestionsComponent)},
         {path:'student-certificate',loadComponent:()=>import ('./features/student/student-certificate/student-certificate.component').then((m)=>m.StudentCertificateComponent)},
@@ -245,14 +249,11 @@ export const routes: Routes = [
         },
     ]
 },
-
-
     ]
-
 },
+
 { path: 'under-construction', loadComponent: () => import('./features/pages/under-construction/under-construction.component').then(m => m.UnderConstructionComponent) },
 { path: 'coming-soon', loadComponent: () => import('./features/pages/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent) },
-
 { path: 'error-500', loadComponent: () => import('./error/error500/error500.component').then(m => m.Error500Component) },
 { path: 'error-404', loadComponent: () => import('./error/error404/error404.component').then(m => m.Error404Component) },
 {   
@@ -260,9 +261,4 @@ export const routes: Routes = [
     redirectTo:'error-404',
     pathMatch:'full'
 }
-
-
-
-
-      
-]as const;
+] as const;

@@ -1,89 +1,199 @@
-<!-- RETOUR -->
-<div class="mb-4">
-  <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
-    <i class="isax isax-arrow-left-2 me-1"></i> Retour aux catalogues
+<!-- LOADER -->
+<div class="sc-loading" *ngIf="loading">
+  <div class="sc-loading__spinner"></div>
+  <p>Chargement du catalogue...</p>
+</div>
+
+<!-- ERREUR -->
+<div class="sc-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2 sc-error__icon"></i>
+  <p>{{ error }}</p>
+  <button class="sc-error__retry" (click)="goBack()">
+    <i class="isax isax-arrow-left me-1"></i> Retour
   </button>
 </div>
 
-<!-- HEADER CATALOGUE -->
-<div class="catalogue-header-banner rounded-3 p-4 mb-4 text-white"
-     [style.background]="catalogue?.couleur || '#6c63ff'"
-     *ngIf="catalogue">
-  <h3 class="fw-bold mb-1">{{ catalogue.titre }}</h3>
-  <p class="mb-0 opacity-75">{{ catalogue.description }}</p>
-  <span class="badge bg-white text-dark mt-2">{{ formations.length }} formation(s)</span>
+<!-- CONTENU -->
+<ng-container *ngIf="!loading && !error && catalogue">
+
+  <!-- HERO BANNER -->
+  <div class="pad-hero">
+    <div class="pad-hero__bg"
+         [style.background-image]="catalogue.image_couverture ? 'url(' + catalogue.image_couverture + ')' : 'none'">
+    </div>
+    <div class="pad-hero__overlay"
+         [style.background]="catalogue.couleur
+           ? 'linear-gradient(135deg,' + catalogue.couleur + 'e6 0%,' + catalogue.couleur + 'aa 100%)'
+           : null">
+    </div>
+
+    <div class="container position-relative" style="z-index:2">
+      <div class="row">
+        <div class="col-lg-8">
+
+          <!-- Breadcrumb -->
+          <nav class="pad-breadcrumb mb-3">
+            <button class="pad-breadcrumb__back" (click)="goBack()">
+              <i class="isax isax-arrow-left-2 me-1"></i>Mes catalogues
+            </button>
+            <span class="pad-breadcrumb__sep">/</span>
+            <span class="pad-breadcrumb__current">{{ catalogue.titre }}</span>
+          </nav>
+
+          <!-- Badges -->
+          <!-- Badges -->
+<div class="pad-hero__badges mb-3">
+
+  <!-- ✅ Badge source assigné/demande -->
+  <span class="pad-badge"
+        [class.pad-badge--assigned]="source !== 'demande'"
+        [class.pad-badge--demande]="source === 'demande'">
+    <i class="isax me-1"
+       [class.isax-tick-circle]="source !== 'demande'"
+       [class.isax-send-2]="source === 'demande'"></i>
+    {{ badgeLabel }}
+  </span>
+
+  <span class="pad-badge pad-badge--cat" *ngIf="catalogue.type_display">
+    <i class="isax isax-category me-1"></i>{{ catalogue.type_display }}
+  </span>
+  <span class="pad-badge pad-badge--count">
+    <i class="isax isax-book-1 me-1"></i>{{ formations.length }} formation(s)
+  </span>
 </div>
 
-<!-- LOADER -->
-<div *ngIf="loading" class="d-flex justify-content-center py-5">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Chargement...</span>
-  </div>
-</div>
+          <h1 class="pad-hero__title">{{ catalogue.titre }}</h1>
+          <p class="pad-hero__subtitle" *ngIf="catalogue.description">{{ catalogue.description }}</p>
 
-<!-- ERROR -->
-<div class="alert alert-danger" *ngIf="error">{{ error }}</div>
-
-<!-- FORMATIONS -->
-<div class="row g-4" *ngIf="!loading && paginatedFormations.length > 0">
-  <div class="col-xl-4 col-md-6" *ngFor="let formation of paginatedFormations">
-    <div class="card h-100 border-0 shadow-sm">
-
-      <!-- IMAGE -->
-      <div class="position-relative">
-        <img [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
-             class="card-img-top" style="height:180px; object-fit:cover;" alt="img">
-        <span *ngIf="formation.est_obligatoire"
-              class="badge bg-danger position-absolute top-0 start-0 m-2">Obligatoire</span>
-        <span *ngIf="formation.est_featured"
-              class="badge bg-warning position-absolute top-0 end-0 m-2">⭐ Mis en avant</span>
-      </div>
-
-      <div class="card-body d-flex flex-column">
-        <div class="d-flex justify-content-between mb-2">
-          <span class="badge bg-light text-dark">{{ formation.niveau_display }}</span>
-          <span class="text-muted small">{{ formation.duree_totale }} h</span>
-        </div>
-
-        <h6 class="fw-bold mb-2">{{ formation.titre }}</h6>
-
-        <p class="text-muted small mb-3"
-           style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
-          {{ formation.short_description || formation.description }}
-        </p>
-
-        <div class="mt-auto d-flex align-items-center justify-content-between">
-          <span class="fw-bold text-primary" *ngIf="!isFree(formation)">
-            {{ formation.prix | number:'1.0-0' }} FCFA
-          </span>
-          <span class="badge bg-success" *ngIf="isFree(formation)">Gratuit</span>
-
-          <button class="btn btn-dark btn-sm" (click)="goToDetails(formation.id)">
-            Voir détails <i class="isax isax-arrow-right-3 ms-1"></i>
-          </button>
+          <div class="pad-hero__divider mt-4"></div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- EMPTY -->
-<div *ngIf="!loading && formations.length === 0" class="text-center py-5">
-  <i class="isax isax-book-1" style="font-size: 3rem; color: #ccc;"></i>
-  <p class="mt-3 text-muted">Aucune formation dans ce catalogue</p>
-</div>
+  <!-- SECTION FORMATIONS -->
+  <section class="pad-section">
+    <div class="container">
 
-<!-- PAGINATION -->
-<div class="d-flex justify-content-center mt-4" *ngIf="totalPages > 1">
-  <button class="btn btn-outline-secondary btn-sm mx-1"
-          [disabled]="currentPage === 1"
-          (click)="changePage(currentPage - 1)">‹</button>
-  <button *ngFor="let p of pages"
-          class="btn btn-sm mx-1"
-          [class.btn-primary]="currentPage === p"
-          [class.btn-outline-secondary]="currentPage !== p"
-          (click)="changePage(p)">{{ p }}</button>
-  <button class="btn btn-outline-secondary btn-sm mx-1"
-          [disabled]="currentPage === totalPages"
-          (click)="changePage(currentPage + 1)">›</button>
-</div>
+      <!-- En-tête section -->
+      <div class="pad-section__header">
+        <div class="pad-section__header-left">
+          <h4 class="pad-section__title">
+            <i class="isax isax-book-1 me-2" style="color:#069b8f"></i>
+            Formations incluses
+          </h4>
+          <span class="pad-count-chip">{{ filteredFormations.length }} / {{ formations.length }}</span>
+        </div>
+      </div>
+
+      <!-- Barre de recherche -->
+      <div class="cd-filters mb-4">
+        <div class="cd-filters__search">
+          <i class="isax isax-search-normal-1 cd-filters__search-icon"></i>
+          <input type="search" class="cd-filters__search-input"
+                 placeholder="Rechercher une formation..."
+                 [(ngModel)]="searchQuery"
+                 (input)="onSearch()">
+          <button *ngIf="searchQuery" class="cd-filters__search-clear" (click)="clearSearch()">
+            <i class="isax isax-close-circle"></i>
+          </button>
+        </div>
+        <span class="cd-filters__count">
+          <strong>{{ filteredFormations.length }}</strong> résultat(s)
+        </span>
+      </div>
+
+      <!-- Grille formations -->
+      <div class="row g-4" *ngIf="paginatedFormations.length > 0">
+        <div class="col-xl-4 col-md-6" *ngFor="let formation of paginatedFormations">
+
+          <div class="pad-formation-card" (click)="goToDetails(formation.id)">
+
+            <!-- Image -->
+            <div class="pad-formation-card__img-wrap">
+              <img [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
+                   class="pad-formation-card__img" alt="{{ formation.titre }}">
+              <div class="pad-formation-card__img-overlay">
+                <i class="isax isax-play-circle"></i>
+              </div>
+              <span class="pad-formation-card__badge pad-formation-card__badge--obligatoire"
+                    *ngIf="formation.est_obligatoire">Obligatoire</span>
+              <span class="pad-formation-card__badge pad-formation-card__badge--featured"
+                    *ngIf="formation.est_featured">⭐ Mis en avant</span>
+              <span class="pad-formation-card__badge pad-formation-card__badge--gratuit"
+                    *ngIf="isFree(formation)">Gratuit</span>
+            </div>
+
+            <!-- Body -->
+            <div class="pad-formation-card__body">
+              <div class="pad-formation-card__meta">
+                <span class="pad-meta-chip"
+                      *ngIf="formation.niveau_display && formation.niveau_display !== 'Non défini'">
+                  <i class="isax isax-chart me-1"></i>{{ formation.niveau_display }}
+                </span>
+                <span class="pad-meta-chip" *ngIf="formation.duree_totale">
+                  <i class="isax isax-clock me-1"></i>{{ formation.duree_totale }} h
+                </span>
+                <span class="pad-meta-chip pad-meta-chip--cert" *ngIf="formation.est_certifiante">
+                  <i class="isax isax-award me-1"></i>Certifiante
+                </span>
+              </div>
+
+              <h5 class="pad-formation-card__title">{{ formation.titre }}</h5>
+
+              <p class="pad-formation-card__desc"
+                 *ngIf="formation.short_description || formation.description">
+                {{ formation.short_description || formation.description }}
+              </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="pad-formation-card__footer">
+              <span class="pad-formation-card__price" *ngIf="!isFree(formation)">
+                {{ formation.prix | number:'1.0-0' }} FCFA
+              </span>
+              <span class="pad-formation-card__price pad-formation-card__price--free"
+                    *ngIf="isFree(formation)">Gratuit</span>
+
+              <button class="pad-formation-card__detail-btn">
+                Voir le détail
+                <i class="isax isax-arrow-right-3 ms-1"></i>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty -->
+      <div class="sc-empty" *ngIf="paginatedFormations.length === 0 && !loading">
+        <i class="isax isax-book-1 sc-empty__icon"></i>
+        <h6 class="sc-empty__title">Aucune formation trouvée</h6>
+        <p>{{ searchQuery ? 'Essayez un autre terme de recherche.' : 'Ce catalogue ne contient pas encore de formations publiées.' }}</p>
+      </div>
+
+      <!-- Pagination -->
+      <div class="cd-pagination" *ngIf="totalPages > 1">
+        <span class="cd-pagination__info">Page {{ currentPage }} sur {{ totalPages }}</span>
+        <div class="cd-pagination__controls">
+          <button class="cd-pagination__btn"
+                  [disabled]="currentPage === 1"
+                  (click)="changePage(currentPage - 1)">
+            <i class="isax isax-arrow-left-2"></i>
+          </button>
+          <button *ngFor="let p of pages"
+                  class="cd-pagination__btn"
+                  [class.cd-pagination__btn--active]="currentPage === p"
+                  (click)="changePage(p)">{{ p }}</button>
+          <button class="cd-pagination__btn"
+                  [disabled]="currentPage === totalPages"
+                  (click)="changePage(currentPage + 1)">
+            <i class="isax isax-arrow-right-2"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</ng-container>

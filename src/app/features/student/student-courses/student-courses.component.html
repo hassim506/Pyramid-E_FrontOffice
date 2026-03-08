@@ -1,12 +1,8 @@
-<!-- ══════════════════════════════════════════
-     HEADER
-══════════════════════════════════════════ -->
+<!-- HEADER -->
 <div class="sc-header">
   <div class="sc-header__left">
     <h1 class="sc-header__title">Mes Catalogues</h1>
-    <p class="sc-header__subtitle">
-      Explorez les catalogues de formations disponibles pour votre entreprise
-    </p>
+    <p class="sc-header__subtitle">Catalogues assignés et demandes acceptées par votre entreprise</p>
   </div>
   <div class="sc-header__right" *ngIf="!loading && allCatalogues.length > 0">
     <span class="sc-header__count">
@@ -16,71 +12,61 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     BARRE DE FILTRES
-══════════════════════════════════════════ -->
+<!-- FILTRES -->
 <div class="sc-filters" *ngIf="!loading && allCatalogues.length > 0">
 
-  <!-- Recherche -->
   <div class="sc-filters__search">
     <i class="isax isax-search-normal sc-filters__search-icon"></i>
-    <input
-      type="text"
-      class="sc-filters__search-input"
-      placeholder="Rechercher un catalogue..."
-      [(ngModel)]="searchTerm"
-      (ngModelChange)="onSearchChange()">
-    <button
-      *ngIf="searchTerm"
-      class="sc-filters__search-clear"
-      (click)="searchTerm = ''; onSearchChange()">
+    <input type="text" class="sc-filters__search-input"
+           placeholder="Rechercher un catalogue..."
+           [(ngModel)]="searchTerm"
+           (ngModelChange)="onSearchChange()">
+    <button *ngIf="searchTerm" class="sc-filters__search-clear"
+            (click)="searchTerm = ''; onSearchChange()">
       <i class="isax isax-close-circle"></i>
     </button>
   </div>
 
-  <!-- Filtres type -->
+  <!-- ✅ Filtre unique combiné -->
   <div class="sc-filters__types">
-    <button
-      *ngFor="let t of types"
-      class="sc-filters__type-btn"
-      [class.sc-filters__type-btn--active]="selectedType === t.value"
-      (click)="onTypeChange(t.value)">
-      {{ t.label }}
+    <button *ngFor="let f of filtres"
+            class="sc-filters__type-btn"
+            [class.sc-filters__type-btn--active]="selectedFiltre === f.value"
+            (click)="onFiltreChange(f.value)">
+      <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
     </button>
   </div>
 
-  <!-- Reset -->
-  <button
-    class="sc-filters__reset"
-    *ngIf="hasActiveFilters"
-    (click)="clearFilters()">
-    <i class="isax isax-refresh"></i>
-    Réinitialiser
-  </button>
+  <!-- Filtre par type 
+  <div class="sc-filters__types">
+    <button *ngFor="let t of types"
+            class="sc-filters__type-btn"
+            [class.sc-filters__type-btn--active]="selectedType === t.value"
+            (click)="onTypeChange(t.value)">
+      {{ t.label }}
+    </button>
+  </div>
+  -->
 
+  <button class="sc-filters__reset" *ngIf="hasActiveFilters" (click)="clearFilters()">
+    <i class="isax isax-refresh"></i> Réinitialiser
+  </button>
 </div>
 
-<!-- ══════════════════════════════════════════
-     RÉSULTAT FILTRE
-══════════════════════════════════════════ -->
-<div class="sc-results-info"
-     *ngIf="!loading && hasActiveFilters && allCatalogues.length > 0">
+<!-- RÉSULTAT FILTRE -->
+<div class="sc-results-info" *ngIf="!loading && hasActiveFilters && filteredCatalogues.length > 0">
   <i class="isax isax-filter"></i>
-  <span>{{ totalItems }} résultat{{ totalItems > 1 ? 's' : '' }} trouvé{{ totalItems > 1 ? 's' : '' }}</span>
+  <span>{{ totalItems }} résultat{{ totalItems > 1 ? 's' : '' }}</span>
   <button class="sc-results-info__clear" (click)="clearFilters()">Effacer les filtres</button>
 </div>
 
-<!-- ══════════════════════════════════════════
-     LOADER
-══════════════════════════════════════════ -->
+<!-- LOADER -->
 <div class="sc-loading" *ngIf="loading">
   <div class="sc-loading__spinner"></div>
-  <p>Chargement des catalogues...</p>
+  <p>Chargement de vos catalogues...</p>
 </div>
 
-<!-- ══════════════════════════════════════════
-     ERREUR
-══════════════════════════════════════════ -->
+<!-- ERREUR -->
 <div class="sc-error" *ngIf="error && !loading">
   <i class="isax isax-warning-2 sc-error__icon"></i>
   <p>{{ error }}</p>
@@ -89,23 +75,28 @@
   </button>
 </div>
 
-<!-- ══════════════════════════════════════════
-     GRILLE CATALOGUES
-══════════════════════════════════════════ -->
+<!-- GRILLE CATALOGUES -->
 <div class="row g-4" *ngIf="!loading && displayedCatalogues.length > 0">
   <div class="col-xl-4 col-md-6" *ngFor="let catalogue of displayedCatalogues">
-
     <div class="catalogue-card" (click)="goToCatalogue(catalogue.id)">
 
       <!-- BANNIÈRE -->
       <div class="catalogue-card__banner">
-        <div
-          class="catalogue-card__banner-bg"
-          [style.background-image]="catalogue.image_couverture ? 'url(' + catalogue.image_couverture + ')' : 'none'"
-          [style.background-color]="!catalogue.image_couverture ? (catalogue.couleur || '#069b8f') : 'transparent'">
+        <div class="catalogue-card__banner-bg"
+             [style.background-image]="catalogue.image_couverture ? 'url(' + catalogue.image_couverture + ')' : 'none'"
+             [style.background-color]="!catalogue.image_couverture ? (catalogue.couleur || '#069b8f') : 'transparent'">
         </div>
         <div class="catalogue-card__banner-overlay"></div>
         <i [class]="(catalogue.icone || 'isax isax-book-1') + ' catalogue-card__banner-icon'"></i>
+
+        <span class="catalogue-card__banner-assigned"
+              [class.catalogue-card__banner-assigned--demande]="catalogue.source === 'demande'">
+          <i class="isax me-1"
+             [class.isax-tick-circle]="catalogue.source !== 'demande'"
+             [class.isax-send-2]="catalogue.source === 'demande'"></i>
+          {{ catalogue.badge_label || 'Assigné' }}
+        </span>
+
         <span class="catalogue-card__banner-badge"
               [style.background-color]="getTypeColor(catalogue.type)">
           {{ getTypeLabel(catalogue.type) }}
@@ -119,7 +110,6 @@
           {{ catalogue.short_description || catalogue.description || 'Aucune description disponible' }}
         </p>
 
-        <!-- STATS -->
         <div class="catalogue-card__stats">
           <div class="catalogue-card__stat">
             <i class="isax isax-book-1"></i>
@@ -131,10 +121,38 @@
           </div>
         </div>
 
-        <!-- FOOTER -->
+        <div class="catalogue-card__assignation">
+          <span class="catalogue-card__assignation-item" *ngIf="catalogue.date_assignation">
+            <i class="isax me-1"
+               [class.isax-calendar-add]="catalogue.source !== 'demande'"
+               [class.isax-tick-circle]="catalogue.source === 'demande'"></i>
+            {{ catalogue.source === 'demande' ? 'Validée le' : 'Assigné le' }}
+            {{ catalogue.date_assignation | date:'dd/MM/yyyy' }}
+          </span>
+          <span class="catalogue-card__assignation-item catalogue-card__assignation-item--permanent"
+                *ngIf="!catalogue.date_expiration">
+            <i class="isax isax-infinity me-1"></i>Accès permanent
+          </span>
+          <span class="catalogue-card__assignation-item catalogue-card__assignation-item--warning"
+                *ngIf="isExpiringSoon(catalogue.date_expiration)">
+            <i class="isax isax-warning-2 me-1"></i>
+            Expire dans {{ getJoursRestants(catalogue.date_expiration) }} jour(s) !
+          </span>
+          <span class="catalogue-card__assignation-item"
+                *ngIf="catalogue.date_expiration && !isExpiringSoon(catalogue.date_expiration)">
+            <i class="isax isax-calendar-remove me-1"></i>
+            Expire le {{ catalogue.date_expiration | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+
+        <div class="catalogue-card__notes" *ngIf="catalogue.notes">
+          <i class="isax isax-note-text me-1"></i>
+          <em>{{ catalogue.notes }}</em>
+        </div>
+
         <div class="catalogue-card__footer">
           <button class="catalogue-card__btn">
-            Voir les formations
+            Accéder aux formations
             <i class="isax isax-arrow-right-3"></i>
           </button>
         </div>
@@ -144,19 +162,16 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     EMPTY — aucun catalogue
-══════════════════════════════════════════ -->
+<!-- EMPTY — aucun catalogue -->
 <div class="sc-empty" *ngIf="!loading && !error && allCatalogues.length === 0">
   <i class="isax isax-book-1 sc-empty__icon"></i>
   <h6 class="sc-empty__title">Aucun catalogue disponible</h6>
-  <p>Votre entreprise n'a pas encore de catalogue de formations.</p>
+  <p>Vous n'avez pas encore de catalogues assignés ou de demandes acceptées.</p>
 </div>
 
-<!-- ══════════════════════════════════════════
-     EMPTY — aucun résultat filtre
-══════════════════════════════════════════ -->
-<div class="sc-empty" *ngIf="!loading && !error && allCatalogues.length > 0 && filteredCatalogues.length === 0">
+<!-- EMPTY — aucun résultat filtre -->
+<div class="sc-empty"
+     *ngIf="!loading && !error && allCatalogues.length > 0 && filteredCatalogues.length === 0">
   <i class="isax isax-search-normal sc-empty__icon"></i>
   <h6 class="sc-empty__title">Aucun résultat</h6>
   <p>Aucun catalogue ne correspond à votre recherche.</p>
@@ -165,66 +180,30 @@
   </button>
 </div>
 
-<!-- ══════════════════════════════════════════
-     PAGINATION
-══════════════════════════════════════════ -->
+<!-- PAGINATION -->
 <div class="sc-pagination" *ngIf="!loading && totalPages > 1">
-
-  <!-- Info -->
   <span class="sc-pagination__info">
     Page {{ currentPage }} / {{ totalPages }}
     <span class="sc-pagination__info-total">({{ totalItems }} catalogues)</span>
   </span>
-
-  <!-- Boutons -->
   <div class="sc-pagination__controls">
-
-    <!-- Première page -->
-    <button class="sc-pagination__btn"
-            [disabled]="currentPage === 1"
-            (click)="changePage(1)"
-            title="Première page">
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(1)">
       <i class="isax isax-arrow-left-3"></i>
     </button>
-
-    <!-- Précédent -->
-    <button class="sc-pagination__btn"
-            [disabled]="currentPage === 1"
-            (click)="changePage(currentPage - 1)"
-            title="Page précédente">
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
       <i class="isax isax-arrow-left-2"></i>
     </button>
-
-    <!-- Ellipsis gauche -->
     <span class="sc-pagination__ellipsis" *ngIf="pages[0] > 1">…</span>
-
-    <!-- Pages -->
-    <button
-      *ngFor="let p of pages"
-      class="sc-pagination__btn"
-      [class.sc-pagination__btn--active]="currentPage === p"
-      (click)="changePage(p)">
-      {{ p }}
-    </button>
-
-    <!-- Ellipsis droite -->
+    <button *ngFor="let p of pages"
+            class="sc-pagination__btn"
+            [class.sc-pagination__btn--active]="currentPage === p"
+            (click)="changePage(p)">{{ p }}</button>
     <span class="sc-pagination__ellipsis" *ngIf="pages[pages.length - 1] < totalPages">…</span>
-
-    <!-- Suivant -->
-    <button class="sc-pagination__btn"
-            [disabled]="currentPage === totalPages"
-            (click)="changePage(currentPage + 1)"
-            title="Page suivante">
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
       <i class="isax isax-arrow-right-2"></i>
     </button>
-
-    <!-- Dernière page -->
-    <button class="sc-pagination__btn"
-            [disabled]="currentPage === totalPages"
-            (click)="changePage(totalPages)"
-            title="Dernière page">
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
       <i class="isax isax-arrow-right-3"></i>
     </button>
-
   </div>
 </div>

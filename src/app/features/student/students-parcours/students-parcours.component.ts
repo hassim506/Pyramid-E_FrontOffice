@@ -23,18 +23,21 @@ interface Toast {
 })
 export class StudentsParcoursComponent implements OnInit {
 
+  // ── VUE ─────────────────────────────────────────
+  viewMode: 'table' | 'grid' = 'table';
+
   // ── LISTE DEMANDES ───────────────────────────────
-  loading         = true;
-  allDemandes:    any[] = [];
-  demandes:       any[] = [];
-  searchDataValue = '';
-  selectedStatus  = '';
-  totalData       = 0;
-  pageSize        = 10;
-  currentPage     = 1;
-  skip            = 0;
-  limit           = 10;
-  hoveredMotifId: number | null = null;
+  loading          = true;
+  allDemandes:     any[] = [];
+  demandes:        any[] = [];
+  searchDataValue  = '';
+  selectedStatus   = '';
+  totalData        = 0;
+  pageSize         = 10;
+  currentPage      = 1;
+  skip             = 0;
+  limit            = 10;
+  hoveredMotifId:  number | null = null;
   showRefusePerson = false;
 
   // ── TOAST ────────────────────────────────────────
@@ -42,18 +45,21 @@ export class StudentsParcoursComponent implements OnInit {
   private toastTimer: any;
 
   // ── MODAL DÉTAIL DEMANDE ─────────────────────────
-  demandeSelectionnee: any = null;
+  demandeSelectionnee:    any = null;
   private detailDemandeModal: any;
 
-  // ── DÉTAIL — FORMATIONS COLLAPSIBLE ─────────────
-  showFormationsDetail      = false;
-  formationsDetail: any[]   = [];
-  loadingFormationsDetail   = false;
+  // ── DÉTAIL — FORMATIONS DU PARCOURS ─────────────
+  formationsDetail:       any[] = [];
+  loadingFormationsDetail = false;
 
-  // ── MODAL DEMANDE — FLUX 3 NIVEAUX ───────────────
+  // ── ACCORDÉON FORMATIONS (modal détail) ──────────
+  // Clé composite "demandeId_index" — Angular-safe avec Set
+  openFormations = new Set<string>();
+
+  // ── MODAL NOUVELLE DEMANDE ───────────────────────
   submitting            = false;
   private modalInstance: any;
-  showFormations        = false;
+  showFormations        = false;    // collapsible étape 3
 
   parcours:         any[] = [];
   loadingParcours   = false;
@@ -70,8 +76,8 @@ export class StudentsParcoursComponent implements OnInit {
 
   constructor(
     private demandeFormationService: DemandeFormationService,
-    private formationsService: FormationsService,
-    private fb: FormBuilder
+    private formationsService:       FormationsService,
+    private fb:                      FormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -85,10 +91,13 @@ export class StudentsParcoursComponent implements OnInit {
     });
   }
 
+  // ── TOGGLE VUE ───────────────────────────────────
+  setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
+
   // ── STATS ────────────────────────────────────────
   get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
-  get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length;    }
-  get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length;    }
+  get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length; }
+  get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length; }
 
   // ── CHARGEMENT DEMANDES ──────────────────────────
   loadDemandes(): void {
@@ -110,8 +119,8 @@ export class StudentsParcoursComponent implements OnInit {
   private normaliserDemande(d: any): any {
     return {
       ...d,
-      titre_affiche:      d.parcours?.titre       ?? `Parcours #${d.parcours_id}`,
-      sous_titre_affiche: d.parcours?.description ?? '',
+      titre_affiche:      d.parcours?.titre            ?? `Parcours #${d.parcours_id}`,
+      sous_titre_affiche: d.parcours?.description      ?? '',
       image_affiche:      d.parcours?.image_couverture || 'assets/img/course/course-01.jpg',
     };
   }
@@ -132,27 +141,37 @@ export class StudentsParcoursComponent implements OnInit {
   }
 
   searchData(v: string): void      { this.searchDataValue = v; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
-  filterByStatus(s: string): void  { this.selectedStatus = s; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
+  filterByStatus(s: string): void  { this.selectedStatus  = s; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
   resetFilters(): void             { this.searchDataValue = ''; this.selectedStatus = ''; this.currentPage = 1; this.skip = 0; this.getTableData(0, this.limit); }
   onPageChange(page: number): void { this.currentPage = page; this.skip = (page - 1) * this.pageSize; this.getTableData(this.skip, this.pageSize); }
 
-  // ── TOOLTIP ──────────────────────────────────────
+  // ── TOOLTIP MOTIF ────────────────────────────────
   showMotif(id: number): void         { this.hoveredMotifId = id; }
   hideMotif(): void                   { this.hoveredMotifId = null; }
   isMotifVisible(id: number): boolean { return this.hoveredMotifId === id; }
-  toggleShowRefusePerson(): void      { this.showRefusePerson = !this.showRefusePerson; }
 
-  // ── ACTIONS TABLE ────────────────────────────────
-  annulerDemande(id: number, event: Event): void {
-    event.stopPropagation();
+  // ── ACTIONS ──────────────────────────────────────
+  annulerDemande(id: number, event?: Event): void {
+    event?.stopPropagation();
     if (!confirm("Confirmer l'annulation de cette demande ?")) return;
-    this.demandeFormationService.annulerDemande(id).subscribe({ next: () => this.loadDemandes() });
+    this.demandeFormationService.annulerDemande(id).subscribe({
+      next: () => {
+        this.fermerDetailDemande();
+        this.showToast('success', '✅ Demande annulée avec succès.');
+        this.loadDemandes();
+      },
+      error: () => this.showToast('error', '❌ Impossible d\'annuler cette demande.')
+    });
   }
 
-  relancerDemande(id: number, event: Event): void {
-    event.stopPropagation();
+  relancerDemande(id: number, event?: Event): void {
+    event?.stopPropagation();
     this.demandeFormationService.relancerDemande(id).subscribe({
-      next: () => this.loadDemandes(),
+      next: () => {
+        this.fermerDetailDemande();
+        this.showToast('success', '✅ Demande relancée avec succès.');
+        this.loadDemandes();
+      },
       error: () => this.showToast('error', '❌ Impossible de relancer cette demande.')
     });
   }
@@ -166,21 +185,30 @@ export class StudentsParcoursComponent implements OnInit {
   closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
   // ════════════════════════════════════════════════
-  // MODAL DÉTAIL DEMANDE — clic sur ligne tableau
+  // MODAL DÉTAIL DEMANDE
   // ════════════════════════════════════════════════
-  ouvrirDetailDemande(demande: any): void {
-    this.demandeSelectionnee      = demande;
-    this.showFormationsDetail     = false;
-    this.formationsDetail         = [];
-    this.loadingFormationsDetail  = false;
+  ouvrirDetailDemande(demande: any, event?: Event): void {
+    const target = event?.target as HTMLElement;
+    if (target?.closest('.sc-btn-annuler, .sc-btn-relancer, .sc-motif-wrapper')) return;
 
-    // ✅ Charger les formations du parcours pour le collapsible
-    if (demande.parcours?.id && demande.parcours?.categorie_id) {
+    // Afficher immédiatement avec données de base
+    this.demandeSelectionnee     = { ...demande };
+    this.formationsDetail        = [];
+    this.loadingFormationsDetail = false;
+    this.openFormations.clear();
+
+    const el = document.getElementById('demandeDetailModal');
+    if (el) {
+      this.detailDemandeModal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
+      this.detailDemandeModal.show();
+    }
+
+    // Charger les formations complètes du parcours
+    const parcoursId  = demande.parcours_id ?? demande.parcours?.id;
+    const categorieId = demande.parcours?.categorie_id;
+    if (parcoursId && categorieId) {
       this.loadingFormationsDetail = true;
-      this.formationsService.getFormationsDuParcoursParCategorie(
-        demande.parcours.id,
-        demande.parcours.categorie_id
-      ).subscribe({
+      this.formationsService.getFormationsDuParcoursParCategorie(parcoursId, categorieId).subscribe({
         next: (res: any) => {
           this.formationsDetail        = res.formations ?? [];
           this.loadingFormationsDetail = false;
@@ -188,19 +216,24 @@ export class StudentsParcoursComponent implements OnInit {
         error: () => { this.loadingFormationsDetail = false; }
       });
     }
-
-    const el = document.getElementById('demandeDetailModal');
-    if (el) {
-      this.detailDemandeModal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
-      this.detailDemandeModal.show();
-    }
   }
 
   fermerDetailDemande(): void {
     this.detailDemandeModal?.hide();
-    this.demandeSelectionnee  = null;
-    this.formationsDetail     = [];
-    this.showFormationsDetail = false;
+    this.demandeSelectionnee     = null;
+    this.formationsDetail        = [];
+    this.loadingFormationsDetail = false;
+    this.openFormations.clear();
+  }
+
+  // ── ACCORDÉON FORMATIONS MODAL ───────────────────
+  toggleFormation(demandeId: number, index: number): void {
+    const key = `${demandeId}_${index}`;
+    this.openFormations.has(key) ? this.openFormations.delete(key) : this.openFormations.add(key);
+  }
+
+  isFormationOpen(demandeId: number, index: number): boolean {
+    return this.openFormations.has(`${demandeId}_${index}`);
   }
 
   // ════════════════════════════════════════════════
@@ -335,7 +368,7 @@ export class StudentsParcoursComponent implements OnInit {
           this.loadDemandes();
         }, 300);
       },
-      error: (err) => this.handleError(err)
+      error: (err: any) => this.handleError(err)
     });
   }
 
@@ -352,8 +385,5 @@ export class StudentsParcoursComponent implements OnInit {
   }
   getStatutClass(s: string): string {
     return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[s] ?? '';
-  }
-  getNiveauClass(niveau: string): string {
-    return ({ debutant: 'niveau-debutant', intermediaire: 'niveau-inter', avance: 'niveau-avance' } as any)[niveau] ?? '';
   }
 }

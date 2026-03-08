@@ -141,6 +141,10 @@ export class FormationsService {
     );
   }
 
+  getMesParcoursAssignes(): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/demandes-formation/parcours/assignes`, { headers: this.getHeaders() });
+}
+
   // ===============================
   // 🏢 CATALOGUES EMPLOYÉ
   // ===============================
@@ -152,7 +156,10 @@ export class FormationsService {
   getCatalogueDetail(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/employe/catalogues/${id}`, { headers: this.getHeaders() });
   }
-
+  
+  getMesCataloguesAssignes(): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/catalogues/assignes`, { headers: this.getHeaders() });
+}
   // ===============================
   // 🔁 DEMANDES
   // ===============================

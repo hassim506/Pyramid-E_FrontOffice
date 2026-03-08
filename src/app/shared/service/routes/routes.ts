@@ -84,6 +84,10 @@ export const routes = {
   student_DemandeParcours:  '/student/students-parcours',   // ← à ajouter dans app.routes.ts
   student_DemandeFormation: '/student/student-certificate', // ← path: 'student-certificate' ✓
 
+  // Mes parcours et catalogues assignés
+  student_CataloguesAssignes: '/student/student-courses',
+  student_ParcoursAssignes:   '/student/parcours-assignes',
+
   // SuperAdmin Routes
   superadmin: '/superadmin/',
   superadmin_dashboard: '/superadmin/superadmin-dashboard',

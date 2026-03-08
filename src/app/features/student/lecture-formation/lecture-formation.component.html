@@ -1,59 +1,497 @@
-<!-- LOADING -->
-<div *ngIf="loading" class="loader d-flex justify-content-center align-items-center py-5">
- 
-   <div class="text-center">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Chargement...</span>
+<!-- ══════════════════════════════════════════════
+     LOADER
+══════════════════════════════════════════════ -->
+<div *ngIf="loading" class="lp-loader">
+  <div class="lp-loader__ring"></div>
+  <p class="lp-loader__text">Chargement de la formation...</p>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ERREUR
+══════════════════════════════════════════════ -->
+<div *ngIf="!loading && error" class="lp-error">
+  <div class="lp-error__icon"><i class="isax isax-warning-2"></i></div>
+  <h3>Impossible de charger la formation</h3>
+  <p>{{ error }}</p>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SANS CONTENU
+══════════════════════════════════════════════ -->
+<div *ngIf="!loading && !error && !hasContent" class="lp-empty">
+  <div class="lp-empty__icon"><i class="isax isax-book-1"></i></div>
+  <h2 class="lp-empty__title">{{ formation?.titre }}</h2>
+  <p class="lp-empty__sub">Le contenu de cette formation n'est pas encore disponible.</p>
+  <p class="lp-empty__hint">
+    <i class="isax isax-notification me-2"></i>
+    Vous serez notifié dès que le contenu sera publié.
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PLAYER PRINCIPAL
+══════════════════════════════════════════════ -->
+<div class="lp-shell" *ngIf="!loading && !error && hasContent">
+
+  <!-- ── TOP BAR ─────────────────────────────── -->
+  <header class="lp-topbar">
+    <div class="lp-topbar__left">
+      <button class="lp-topbar__back" (click)="goBack()">
+        <i class="isax isax-arrow-left-2"></i>
+      </button>
+      <div class="lp-topbar__info">
+        <span class="lp-topbar__label">Formation</span>
+        <h1 class="lp-topbar__title">{{ formation?.titre }}</h1>
+      </div>
+    </div>
+
+    <div class="lp-topbar__right">
+      <div class="lp-topbar__progress">
+        <div class="lp-topbar__progress-track">
+          <div class="lp-topbar__progress-fill" [style.width.%]="progressPercent"></div>
         </div>
-        <p class="mt-3 text-muted">Chargement du contenu de la Formation...</p>
+        <span class="lp-topbar__progress-label">
+          {{ completedCount }}/{{ totalSections }}
+          <strong>{{ progressPercent }}%</strong>
+        </span>
+      </div>
+      <button class="lp-topbar__menu-btn" (click)="toggleSidebar()">
+        <i class="isax isax-sidebar-right"></i>
+      </button>
     </div>
-</div>
+  </header>
 
-<!-- ERREUR -->
-<div *ngIf="!loading && error" class="error">
-  {{ error }}
-</div>
+  <!-- ── BODY ───────────────────────────────── -->
+  <div class="lp-body">
 
-<!-- FORMATION SANS CONTENU -->
-<div *ngIf="!loading && !error && !hasContent" class="empty-course">
-  <h2>{{ formation?.titre }}</h2>
-  <p>Le contenu de cette formation n'est pas encore disponible.</p>
-  <p>Une fois que le contenu sera disponible, vous serez notifié par email.</p>
-</div>
-<div class="player" *ngIf="!loading && !error && hasContent">
+    <!-- ══ MAIN ══════════════════════════════ -->
+    <main class="lp-main" [class.lp-main--sidebar-closed]="!sidebarOpen">
+      <ng-container *ngIf="selectedSection && !quizMode">
 
-  <!-- Sidebar modules -->
-  <div class="sidebar">
-    <h3>{{ formation?.titre }}</h3>
+        <!-- Breadcrumb -->
+        <div class="lp-breadcrumb">
+          <button class="lp-breadcrumb__back" (click)="goBack()">
+            <i class="isax isax-arrow-left-2 me-1"></i>Retour
+          </button>
+          <i class="isax isax-arrow-right-3 lp-breadcrumb__sep"></i>
+          <span class="lp-breadcrumb__module">{{ getModuleOfSection(selectedSection) }}</span>
+          <i class="isax isax-arrow-right-3 lp-breadcrumb__sep"></i>
+          <span class="lp-breadcrumb__current">{{ selectedSection.titre }}</span>
+        </div>
 
-    <div *ngFor="let module of modules" class="module">
-      <h4>{{ module.titre }}</h4>
+        <!-- ── SECTION HEADER ─────────────── -->
+        <div class="lp-section-header">
+          <div class="lp-section-header__type-badge" [attr.data-type]="selectedSection.type || 'texte'">
+            <i class="isax {{ getSectionIcon(selectedSection) }}"></i>
+            <span>{{ getSectionTypeLabel(selectedSection) }}</span>
+          </div>
+          <h2 class="lp-section-header__title">{{ selectedSection.titre }}</h2>
+          <div class="lp-section-header__meta">
+            <span *ngIf="selectedSection.duree_estimee" class="lp-meta-tag">
+              <i class="isax isax-clock me-1"></i>{{ selectedSection.duree_estimee }}
+            </span>
+            <span *ngIf="isCompleted(selectedSection.id)" class="lp-meta-tag lp-meta-tag--done">
+              <i class="isax isax-tick-circle me-1"></i>Complétée
+            </span>
+            <span *ngIf="hasQuiz(selectedSection)" class="lp-meta-tag lp-meta-tag--quiz">
+              <i class="isax isax-task-square me-1"></i>Quiz disponible
+            </span>
+          </div>
+        </div>
 
-      <ul>
-        <li 
-           *ngFor="let section of module.sections || []"
-          (click)="selectSection(section)"
-          [class.active]="selectedSection?.id === section.id">
-          ▶ {{ section.titre }}
-        </li>
-      </ul>
-    </div>
+        <!-- ══════════════════════════════════
+             CONTENU — VIDEO
+        ══════════════════════════════════ -->
+        <ng-container *ngIf="selectedSection.type === 'video'">
+
+          <!-- YouTube embed -->
+          <div class="lp-media-wrap lp-media-wrap--video" *ngIf="isYoutube(selectedSection.media_url)">
+            <div class="lp-embed-wrap">
+              <iframe [src]="getYoutubeEmbed(selectedSection.media_url)"
+                      frameborder="0"
+                      allowfullscreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+              </iframe>
+            </div>
+          </div>
+
+          <!-- Vimeo embed -->
+          <div class="lp-media-wrap lp-media-wrap--video" *ngIf="isVimeo(selectedSection.media_url)">
+            <div class="lp-embed-wrap">
+              <iframe [src]="getVimeoEmbed(selectedSection.media_url)"
+                      frameborder="0"
+                      allowfullscreen>
+              </iframe>
+            </div>
+          </div>
+
+          <!-- Vidéo native -->
+          <div class="lp-media-wrap lp-media-wrap--video"
+               *ngIf="!isYoutube(selectedSection.media_url) && !isVimeo(selectedSection.media_url)">
+            <video class="lp-video-native" controls preload="metadata"
+                   [src]="selectedSection.media_url"
+                   (ended)="markCompleted(selectedSection.id)"
+                   (error)="videoError = true">
+              Votre navigateur ne supporte pas la lecture vidéo.
+            </video>
+            <div class="lp-video-error" *ngIf="videoError">
+              <i class="isax isax-video-slash"></i>
+              <p>Impossible de charger la vidéo.</p>
+              <a [href]="selectedSection.media_url" target="_blank" class="lp-btn-link">
+                <i class="isax isax-export me-1"></i>Ouvrir dans un nouvel onglet
+              </a>
+            </div>
+          </div>
+
+          <!-- Description vidéo -->
+          <div class="lp-video-description" *ngIf="selectedSection.description">
+            <p>{{ selectedSection.description }}</p>
+          </div>
+
+        </ng-container>
+
+        <!-- ══════════════════════════════════
+             CONTENU — IMAGE
+        ══════════════════════════════════ -->
+        <ng-container *ngIf="selectedSection.type === 'image'">
+          <div class="lp-media-wrap lp-media-wrap--image">
+            <img [src]="selectedSection.media_url || selectedSection.image_url"
+                 [alt]="selectedSection.titre"
+                 class="lp-image-content">
+            <div class="lp-image-caption" *ngIf="selectedSection.legende || selectedSection.caption">
+              <i class="isax isax-gallery me-2"></i>
+              {{ selectedSection.legende || selectedSection.caption }}
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ══════════════════════════════════
+             CONTENU — TEXTE ENRICHI
+        ══════════════════════════════════ -->
+        <ng-container *ngIf="selectedSection.type === 'texte' || !selectedSection.type">
+
+          <!-- Image d'illustration en tête (si présente) -->
+          <div class="lp-content-hero" *ngIf="selectedSection.image_url || selectedSection.image_couverture">
+            <img [src]="selectedSection.image_url || selectedSection.image_couverture"
+                 [alt]="selectedSection.titre"
+                 class="lp-content-hero__img">
+          </div>
+
+          <!-- Contenu texte -->
+          <div class="lp-text-card">
+            <!-- Résumé / intro (si présent) -->
+            <div class="lp-text-intro" *ngIf="selectedSection.resume || selectedSection.intro">
+              <i class="isax isax-info-circle lp-text-intro__icon"></i>
+              <p>{{ selectedSection.resume || selectedSection.intro }}</p>
+            </div>
+
+            <!-- Corps HTML -->
+            <div class="lp-text-body" [innerHTML]="selectedSection.contenu"></div>
+
+            <!-- Ressources annexes -->
+            <div class="lp-resources" *ngIf="selectedSection.ressources?.length">
+              <h4 class="lp-resources__title">
+                <i class="isax isax-folder-2 me-2"></i>Ressources complémentaires
+              </h4>
+              <div class="lp-resources__list">
+                <a *ngFor="let r of selectedSection.ressources"
+                   [href]="r.url" target="_blank"
+                   class="lp-resource-item">
+                  <div class="lp-resource-item__icon">
+                    <i class="isax"
+                       [class.isax-document-text]="r.type === 'pdf' || !r.type"
+                       [class.isax-link]="r.type === 'lien'"
+                       [class.isax-video]="r.type === 'video'"></i>
+                  </div>
+                  <div class="lp-resource-item__body">
+                    <span class="lp-resource-item__name">{{ r.nom || r.titre }}</span>
+                    <span class="lp-resource-item__type">{{ r.type || 'document' }}</span>
+                  </div>
+                  <i class="isax isax-export lp-resource-item__arrow"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ══════════════════════════════════
+             CONTENU — AUDIO
+        ══════════════════════════════════ -->
+        <ng-container *ngIf="selectedSection.type === 'audio'">
+          <div class="lp-audio-wrap">
+            <div class="lp-audio-cover">
+              <img [src]="formation?.image_couverture || 'assets/img/course/course-01.jpg'"
+                   [alt]="selectedSection.titre" class="lp-audio-cover__img">
+              <div class="lp-audio-cover__overlay">
+                <i class="isax isax-voice-cricle"></i>
+              </div>
+            </div>
+            <div class="lp-audio-player">
+              <p class="lp-audio-player__title">{{ selectedSection.titre }}</p>
+              <audio controls class="lp-audio-native"
+                     [src]="selectedSection.media_url"
+                     (ended)="markCompleted(selectedSection.id)">
+              </audio>
+            </div>
+          </div>
+          <div class="lp-text-card" *ngIf="selectedSection.contenu">
+            <div class="lp-text-body" [innerHTML]="selectedSection.contenu"></div>
+          </div>
+        </ng-container>
+
+        <!-- ══════════════════════════════════
+             CONTENU — PDF
+        ══════════════════════════════════ -->
+        <ng-container *ngIf="selectedSection.type === 'pdf'">
+          <div class="lp-pdf-wrap">
+            <div class="lp-pdf-header">
+              <div class="lp-pdf-header__icon"><i class="isax isax-document-text"></i></div>
+              <div>
+                <p class="lp-pdf-header__name">{{ selectedSection.titre }}</p>
+                <p class="lp-pdf-header__hint">Consultez le document ci-dessous ou téléchargez-le.</p>
+              </div>
+              <a [href]="selectedSection.media_url" target="_blank"
+                 class="lp-btn lp-btn--outline" download>
+                <i class="isax isax-import me-1"></i>Télécharger
+              </a>
+            </div>
+            <div class="lp-pdf-viewer">
+              <iframe [src]="getSafeUrl(selectedSection.media_url + '#toolbar=1')"
+                      class="lp-pdf-frame">
+              </iframe>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ══════════════════════════════════
+             ACTIONS BAS DE PAGE
+        ══════════════════════════════════ -->
+        <div class="lp-actions-bar">
+
+          <!-- Bouton compléter -->
+          <button class="lp-btn lp-btn--complete"
+                  *ngIf="!isCompleted(selectedSection.id)"
+                  (click)="markCompleted(selectedSection.id)">
+            <i class="isax isax-tick-circle me-2"></i>
+            Marquer comme complété
+          </button>
+
+          <div class="lp-done-badge" *ngIf="isCompleted(selectedSection.id)">
+            <i class="isax isax-tick-circle me-2"></i>
+            Section complétée
+          </div>
+
+          <!-- Bouton quiz -->
+          <button class="lp-btn lp-btn--quiz"
+                  *ngIf="hasQuiz(selectedSection) && isCompleted(selectedSection.id)"
+                  (click)="startQuiz()">
+            <i class="isax isax-task-square me-2"></i>
+            {{ quizResults[selectedSection.id] ? 'Voir résultats / Refaire' : 'Passer le quiz' }}
+          </button>
+
+          <!-- Nav prev / next -->
+          <div class="lp-nav-btns">
+            <button class="lp-btn lp-btn--prev" [disabled]="!hasPrev()" (click)="goToPrev()">
+              <i class="isax isax-arrow-left-2 me-1"></i>Précédent
+            </button>
+            <button class="lp-btn lp-btn--next" [disabled]="!hasNext()" (click)="goToNext()">
+              Suivant<i class="isax isax-arrow-right-2 ms-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Félicitations -->
+        <div class="lp-congrats" *ngIf="progressPercent === 100">
+          <div class="lp-congrats__sparkles">
+            <span>✦</span><span>✦</span><span>✦</span>
+          </div>
+          <div class="lp-congrats__icon"><i class="isax isax-award"></i></div>
+          <h3 class="lp-congrats__title">Formation terminée !</h3>
+          <p class="lp-congrats__sub">
+            Félicitations ! Vous avez complété toutes les sections de cette formation.
+          </p>
+        </div>
+
+      </ng-container>
+
+      <!-- ══════════════════════════════════════
+           MODE QUIZ
+      ══════════════════════════════════════ -->
+      <ng-container *ngIf="selectedSection && quizMode">
+
+        <div class="lp-quiz-shell">
+
+          <!-- Header quiz -->
+          <div class="lp-quiz-header">
+            <button class="lp-quiz-header__back" (click)="exitQuiz()">
+              <i class="isax isax-arrow-left-2 me-1"></i>Retour au contenu
+            </button>
+            <div class="lp-quiz-header__info">
+              <div class="lp-quiz-header__badge">
+                <i class="isax isax-task-square me-1"></i>Quiz
+              </div>
+              <h2 class="lp-quiz-header__title">{{ selectedSection.titre }}</h2>
+              <p class="lp-quiz-header__count">
+                {{ selectedSection.quiz.questions.length }} question(s)
+                · Score minimum : 60%
+              </p>
+            </div>
+          </div>
+
+          <!-- Résultat si soumis -->
+          <div class="lp-quiz-result" *ngIf="quizSubmitted && getQuizResult() as result">
+            <div class="lp-quiz-result__card" [class.lp-quiz-result__card--pass]="result.passed" [class.lp-quiz-result__card--fail]="!result.passed">
+              <div class="lp-quiz-result__icon">
+                <i class="isax" [class.isax-award]="result.passed" [class.isax-close-circle]="!result.passed"></i>
+              </div>
+              <div class="lp-quiz-result__score">{{ result.score }}/{{ result.total }}</div>
+              <div class="lp-quiz-result__label">{{ result.passed ? 'Quiz réussi !' : 'Quiz non réussi' }}</div>
+              <p class="lp-quiz-result__sub">
+                {{ result.passed
+                  ? 'Bravo ! Vous pouvez continuer vers la section suivante.'
+                  : 'Révisez le contenu et réessayez pour valider la section.' }}
+              </p>
+              <div class="lp-quiz-result__actions">
+                <button class="lp-btn lp-btn--outline" (click)="retryQuiz()">
+                  <i class="isax isax-refresh me-1"></i>Réessayer
+                </button>
+                <button class="lp-btn lp-btn--next" (click)="exitQuiz()" *ngIf="result.passed">
+                  Continuer<i class="isax isax-arrow-right-2 ms-1"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Questions -->
+          <div class="lp-quiz-questions">
+            <div class="lp-quiz-question"
+                 *ngFor="let question of selectedSection.quiz.questions; let qi = index">
+
+              <div class="lp-quiz-question__header">
+                <span class="lp-quiz-question__num">Q{{ qi + 1 }}</span>
+                <p class="lp-quiz-question__text">{{ question.question }}</p>
+              </div>
+
+              <!-- QCM / Vrai-Faux -->
+              <div class="lp-quiz-opts"
+                   *ngIf="question.type === 'qcm' || question.type === 'vrai_faux'">
+                <button class="lp-quiz-opt"
+                        *ngFor="let option of (question.options || ['Vrai', 'Faux'])"
+                        [class]="getAnswerClass(question, option)"
+                        [disabled]="quizSubmitted"
+                        (click)="selectAnswer(question.id, option)">
+                  <span class="lp-quiz-opt__indicator">
+                    <i class="isax"
+                       [class.isax-tick-circle]="quizSubmitted && isCorrectAnswer(question, option)"
+                       [class.isax-close-circle]="quizSubmitted && currentAnswers[question.id] === option && !isCorrectAnswer(question, option)"
+                       [class.isax-record]="!quizSubmitted && currentAnswers[question.id] === option"
+                       [class.isax-radio]="!quizSubmitted && currentAnswers[question.id] !== option"></i>
+                  </span>
+                  <span class="lp-quiz-opt__text">{{ option }}</span>
+                </button>
+              </div>
+
+              <!-- Explication après soumission -->
+              <div class="lp-quiz-explication"
+                   *ngIf="quizSubmitted && question.explication">
+                <i class="isax isax-info-circle me-2"></i>
+                <span>{{ question.explication }}</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Bouton soumettre -->
+          <div class="lp-quiz-footer" *ngIf="!quizSubmitted">
+            <button class="lp-btn lp-btn--complete"
+                    [disabled]="!canSubmitQuiz()"
+                    (click)="submitQuiz()">
+              <i class="isax isax-send-2 me-2"></i>
+              Valider mes réponses
+            </button>
+            <span class="lp-quiz-footer__hint">
+              {{ getAnsweredCount() }} / {{ selectedSection.quiz.questions.length }} réponses
+            </span>
+          </div>
+
+        </div>
+      </ng-container>
+
+    </main>
+
+    <!-- ══ SIDEBAR ════════════════════════════ -->
+    <aside class="lp-sidebar" [class.lp-sidebar--open]="sidebarOpen">
+
+      <!-- Progression globale -->
+      <div class="lp-sidebar__progress">
+        <div class="lp-sidebar__progress-info">
+          <span>Progression</span>
+          <strong>{{ progressPercent }}%</strong>
+        </div>
+        <div class="lp-sidebar__progress-bar">
+          <div class="lp-sidebar__progress-fill" [style.width.%]="progressPercent"></div>
+        </div>
+      </div>
+
+      <!-- Modules -->
+      <div class="lp-sidebar__content">
+        <div class="lp-sidebar__module" *ngFor="let module of modules; let mi = index">
+
+          <!-- Header module -->
+          <button class="lp-module-header" (click)="toggleModule(mi)"
+                  [class.lp-module-header--open]="openModules[mi]">
+            <div class="lp-module-header__left">
+              <span class="lp-module-header__num">{{ mi + 1 }}</span>
+              <span class="lp-module-header__title">{{ module.titre }}</span>
+            </div>
+            <div class="lp-module-header__right">
+              <!-- Barre progression module -->
+              <div class="lp-module-header__mini-bar">
+                <div [style.width.%]="getModuleProgress(module)"></div>
+              </div>
+              <i class="isax"
+                 [class.isax-arrow-up-2]="openModules[mi]"
+                 [class.isax-arrow-down-2]="!openModules[mi]"></i>
+            </div>
+          </button>
+
+          <!-- Sections -->
+          <ul class="lp-section-list" *ngIf="openModules[mi]">
+            <li class="lp-section-item"
+                *ngFor="let section of module.sections || []"
+                (click)="selectSection(section)"
+                [class.lp-section-item--active]="selectedSection?.id === section.id"
+                [class.lp-section-item--done]="isCompleted(section.id)">
+
+              <!-- Icône état -->
+              <div class="lp-section-item__status">
+                <i class="isax"
+                   [class.isax-tick-circle]="isCompleted(section.id)"
+                   [class.isax-play-circle]="!isCompleted(section.id) && section.type === 'video'"
+                   [class.isax-document-text]="!isCompleted(section.id) && section.type === 'texte'"
+                   [class.isax-gallery]="!isCompleted(section.id) && section.type === 'image'"
+                   [class.isax-voice-cricle]="!isCompleted(section.id) && section.type === 'audio'"
+                   [class.isax-document]="!isCompleted(section.id) && (section.type === 'pdf' || !section.type)"></i>
+              </div>
+
+              <div class="lp-section-item__body">
+                <span class="lp-section-item__title">{{ section.titre }}</span>
+                <div class="lp-section-item__footer">
+                  <span *ngIf="section.duree_estimee" class="lp-section-item__duration">
+                    <i class="isax isax-clock me-1"></i>{{ section.duree_estimee }}
+                  </span>
+                  <span *ngIf="hasQuiz(section)" class="lp-section-item__quiz-badge">
+                    <i class="isax isax-task-square me-1"></i>Quiz
+                  </span>
+                </div>
+              </div>
+            </li>
+          </ul>
+
+        </div>
+      </div>
+
+    </aside>
+
   </div>
-
-  <!-- Contenu -->
-  <div class="content" *ngIf="selectedSection">
-    <h2>{{ selectedSection.titre }}</h2>
-
-    <div *ngIf="selectedSection.type === 'video'">
-      <video width="100%" controls [src]="selectedSection.media_url"></video>
-    </div>
-
-    <div *ngIf="selectedSection.type === 'texte'">
-      <div [innerHTML]="selectedSection.contenu"></div>
-    </div>
-
-  </div>
-
 </div>
-
-

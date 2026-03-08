@@ -1,8 +1,8 @@
-import { Component, OnInit }        from '@angular/core';
-import { ActivatedRoute, Router }    from '@angular/router';
-import { CommonModule }             from '@angular/common';
-import { Formation }                from '../../../shared/models/formation.models';
-import { FormationsService }        from '../../../shared/service/Formationsss/formations.service';
+import { Component, OnInit }     from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule }           from '@angular/common';
+import { Formation }              from '../../../shared/models/formation.models';
+import { FormationsService }      from '../../../shared/service/Formationsss/formations.service';
 
 @Component({
   standalone: true,
@@ -13,11 +13,19 @@ import { FormationsService }        from '../../../shared/service/Formationsss/f
 })
 export class CourseDetails2Component implements OnInit {
 
-  formation: Formation | null = null;
+  formation:   Formation | null = null;
+  mode:        string           = 'formation';
+  demande:     any              = null;
+  session:     any              = null;
+  catalogueId: number | null    = null;
+  parcoursId:  number | null    = null;
 
-  mode: 'formation' | 'session' = 'formation';
-  demande:  any = null;
-  session:  any = null;  // = demande.session_formation (camelCase côté API normalisé)
+  // ✅ fromPage : source de navigation
+  // 'demandes'  → /student/mes-cours
+  // 'catalogue' → /student/catalogue/:id ou /student/students-catalogue
+  // 'parcours'  → /student/students-parcours
+  // 'session'   → /student/students-session
+  fromPage: string | null = null;
 
   loading = true;
   error   = '';
@@ -29,21 +37,52 @@ export class CourseDetails2Component implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const state = history.state as { demande?: any; mode?: string; fromCatalogue?: boolean };
+    const state = history.state as {
+      demande?:       any;
+      mode?:          string;
+      fromPage?:      string;
+      // rétrocompat anciens marqueurs
+      fromCatalogue?: boolean;
+      catalogueId?:   number;
+      fromParcours?:  boolean;
+      parcoursId?:    number;
+    };
 
-    // ── Mode session ──────────────────────────────────────
+    // ── Résoudre fromPage ─────────────────────────────────────
+    this.fromPage = state?.fromPage ?? null;
+
+    // Rétrocompatibilité si fromPage absent
+    if (!this.fromPage) {
+      if (state?.fromCatalogue) this.fromPage = 'catalogue';
+      else if (state?.fromParcours) this.fromPage = 'parcours';
+    }
+
+    this.catalogueId = state?.catalogueId ?? null;
+    this.parcoursId  = state?.parcoursId  ?? null;
+
+    // ── Mode SESSION ──────────────────────────────────────────
     if (state?.mode === 'session' && state?.demande) {
-      this.mode    = 'session';
-      this.demande = state.demande;
-      // la relation peut arriver en snake_case ou camelCase selon la normalisation Angular
-      this.session = state.demande.session_formation ?? state.demande.sessionFormation;
-      this.loading = false;
+      this.mode     = 'session';
+      this.demande  = state.demande;
+      this.fromPage = this.fromPage ?? 'session';
+      this.session  = state.demande.session_formation ?? state.demande.sessionFormation;
+      this.loading  = false;
       return;
     }
 
-    // ── Mode catalogue ou formation classique ─────────────
+    // ── Mode FORMATION / CATALOGUE / PARCOURS ─────────────────
+    // Récupérer la demande si elle existe (cas 'demandes')
+    if (state?.demande) {
+      this.demande = state.demande;
+    }
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id && id !== 0) this.loadFormationDetails(id);
+    if (id && id !== 0) {
+      this.loadFormationDetails(id);
+    } else {
+      this.error   = 'Formation introuvable';
+      this.loading = false;
+    }
   }
 
   loadFormationDetails(id: number): void {
@@ -60,7 +99,99 @@ export class CourseDetails2Component implements OnInit {
     });
   }
 
-  // ── Helpers ───────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════
+  // BOUTON COMMENCER
+  // ════════════════════════════════════════════════════════════
+  canCommencer(): boolean {
+
+    // Catalogue assigné → accès direct, pas de demande requise
+    if (this.fromPage === 'catalogue') return true;
+
+    // Parcours assigné → accès direct
+    if (this.fromPage === 'parcours') return true;
+
+    // Session → validée + en ligne + date atteinte
+    if (this.mode === 'session') {
+      if (this.demande?.statut !== 'validee') return false;
+      const isEnLigne = this.session?.type === 'distanciel' || this.session?.type === 'hybride';
+      const dateDebut = this.session?.date_debut ? new Date(this.session.date_debut) : null;
+      const dateOk    = dateDebut ? dateDebut <= new Date() : false;
+      return isEnLigne && dateOk;
+    }
+
+    // Demande formation → statut validée obligatoire
+    return this.demande?.statut === 'validee';
+  }
+
+  getLabelBouton(): string {
+    if (this.canCommencer()) return 'Commencer la formation';
+
+    // Session
+    if (this.mode === 'session') {
+      if (this.isSessionPresentiel())          return 'Formation en présentiel';
+      if (this.demande?.statut === 'validee')  return 'Session pas encore ouverte';
+      if (this.demande?.statut === 'en_attente') return 'En attente de validation';
+      if (this.demande?.statut === 'refusee')    return 'Demande refusée';
+      if (this.demande?.statut === 'annulee')    return 'Demande annulée';
+    }
+
+    // Formation
+    if (this.demande?.statut === 'en_attente') return 'En attente de validation';
+    if (this.demande?.statut === 'refusee')    return 'Demande refusée';
+    if (this.demande?.statut === 'annulee')    return 'Demande annulée';
+
+    return 'Accès non disponible';
+  }
+
+  commencerFormation(): void {
+    if (!this.canCommencer()) return;
+    const id = this.formation?.id ?? Number(this.route.snapshot.paramMap.get('id'));
+    if (id) {
+      this.router.navigate(['/student/lecture-formation', id]);
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // RETOUR — switch sur fromPage
+  // ════════════════════════════════════════════════════════════
+  goBack(): void {
+    switch (this.fromPage) {
+
+      case 'demandes':
+        // Vient de "Mes demandes de formation"
+        this.router.navigate(['/student/mes-cours']);
+        break;
+
+      case 'catalogue':
+        // Vient d'un catalogue assigné
+        if (this.catalogueId) {
+          this.router.navigate(['/student/catalogue', this.catalogueId]);
+        } else {
+          this.router.navigate(['/student/students-catalogue']);
+        }
+        break;
+
+      case 'parcours':
+        // Vient d'un parcours assigné
+        if (this.parcoursId) {
+          this.router.navigate(['/student/parcours-assigne', this.parcoursId]);
+        } else {
+          this.router.navigate(['/student/students-parcours']);
+        }
+        break;
+
+      case 'session':
+        // Vient de "Mes sessions"
+        this.router.navigate(['/student/students-session']);
+        break;
+
+      default:
+        this.router.navigate(['/student/mes-cours']);
+        break;
+    }
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
   getStatutClass(statut: string): string {
     return ({
       en_attente: 'badge-attente',
@@ -102,23 +233,11 @@ export class CourseDetails2Component implements OnInit {
   }
 
   getPlacesRestantes(): number {
-    const cap = this.session?.capacite_max ?? 0;
-    // places_restantes peut être calculé côté API ou estimé
-    return this.session?.places_restantes ?? cap;
+    return this.session?.places_restantes ?? this.session?.capacite_max ?? 0;
   }
 
   isSessionDistanciel(): boolean { return this.session?.type === 'distanciel'; }
   isSessionPresentiel(): boolean { return this.session?.type === 'presentiel'; }
   isSessionHybride():    boolean { return this.session?.type === 'hybride'; }
-
-  canSubscribe(): boolean { return !!this.formation?.inscription_ouverte; }
-
-  goBack(): void {
-    const state = history.state;
-    if (state?.fromCatalogue) {
-      this.router.navigate(['/student/students-catalogue']);
-    } else {
-      this.router.navigate(['/student/students-session']);
-    }
-  }
+  canSubscribe():        boolean { return !!this.formation?.inscription_ouverte; }
 }

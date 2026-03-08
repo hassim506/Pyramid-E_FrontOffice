@@ -34,7 +34,7 @@
           <!-- Fil d'ariane -->
           <nav class="cd-breadcrumb mb-3">
             <button class="cd-breadcrumb__back" (click)="goBack()">
-              <i class="ti ti-arrow-left me-1"></i>Mes demandes
+              <i class="ti ti-arrow-left me-1"></i>Mes sessions
             </button>
             <span class="cd-breadcrumb__sep">/</span>
             <span class="cd-breadcrumb__current">Détail session</span>
@@ -104,7 +104,7 @@
         <!-- ═══ GAUCHE ════════════════════════════════════ -->
         <div class="col-lg-8">
 
-          <!-- Bloc statut demande — affiché en premier, toujours visible -->
+          <!-- Bloc statut demande -->
           <div class="card cd-card mb-4"
                [class.cd-card--validee]="demande.statut === 'validee'"
                [class.cd-card--refus]="demande.statut === 'refusee'"
@@ -148,7 +148,7 @@
             </div>
           </div>
 
-          <!-- Motif de refus — si refusée -->
+          <!-- Motif de refus -->
           <div class="card cd-card cd-card--refus mb-4"
                *ngIf="demande.statut === 'refusee' && demande.motif_refus">
             <div class="card-body">
@@ -227,7 +227,7 @@
             </div>
           </div>
 
-          <!-- Matériel requis — si disponible -->
+          <!-- Matériel requis -->
           <div class="card cd-card mb-4" *ngIf="session.materiel_requis">
             <div class="card-body">
               <h5 class="subs-title mb-3">
@@ -237,7 +237,7 @@
             </div>
           </div>
 
-          <!-- Instructions accès distanciel — si validée -->
+          <!-- Instructions accès distanciel -->
           <div class="card cd-card cd-card--validee mb-4"
                *ngIf="demande.statut === 'validee' && session.instructions_acces && isSessionDistanciel()">
             <div class="card-body">
@@ -254,7 +254,6 @@
         <div class="col-lg-4">
           <div class="cd-sidebar-wrapper">
 
-            <!-- Carte résumé -->
             <div class="cd-sidebar-float">
               <div class="cd-video-block">
                 <img [src]="session.image_couverture || 'assets/img/course/course-01.jpg'"
@@ -293,6 +292,22 @@
                     <strong>{{ session.code_session }}</strong>
                   </li>
                 </ul>
+
+                <!-- ✅ BOUTON COMMENCER — SESSION -->
+                <div class="mt-3">
+                  <button
+                    class="btn w-100 fw-semibold"
+                    [class.btn-success]="canCommencer()"
+                    [class.btn-secondary]="!canCommencer()"
+                    [disabled]="!canCommencer()"
+                    (click)="commencerFormation()">
+                    <i class="ti me-2"
+                       [class.ti-player-play]="canCommencer()"
+                       [class.ti-lock]="!canCommencer()"></i>
+                    {{ getLabelBouton() }}
+                  </button>
+                </div>
+
               </div>
             </div>
 
@@ -346,7 +361,7 @@
 
 
 <!-- ============================================================
-     MODE FORMATION (inchangé)
+     MODE FORMATION
      ============================================================ -->
 <ng-container *ngIf="!loading && mode === 'formation' && formation">
 
@@ -360,7 +375,10 @@
         <div class="col-lg-8">
           <nav class="cd-breadcrumb mb-3">
             <button class="cd-breadcrumb__back" (click)="goBack()">
-              <i class="ti ti-arrow-left me-1"></i>Mes demandes
+              <i class="ti ti-arrow-left me-1"></i>
+              <ng-container *ngIf="catalogueId">Retour au catalogue</ng-container>
+              <ng-container *ngIf="parcoursId && !catalogueId">Retour au parcours</ng-container>
+              <ng-container *ngIf="!catalogueId && !parcoursId">Mes formations</ng-container>
             </button>
             <span class="cd-breadcrumb__sep">/</span>
             <span class="cd-breadcrumb__current">Détail formation</span>
@@ -511,6 +529,22 @@
                     <strong>{{ formation.nb_max_participants }}</strong>
                   </li>
                 </ul>
+
+                <!-- ✅ BOUTON COMMENCER — FORMATION -->
+                <div class="mt-3">
+                  <button
+                    class="btn w-100 fw-semibold"
+                    [class.btn-success]="canCommencer()"
+                    [class.btn-secondary]="!canCommencer()"
+                    [disabled]="!canCommencer()"
+                    (click)="commencerFormation()">
+                    <i class="ti me-2"
+                       [class.ti-player-play]="canCommencer()"
+                       [class.ti-lock]="!canCommencer()"></i>
+                    {{ getLabelBouton() }}
+                  </button>
+                </div>
+
               </div>
             </div>
 

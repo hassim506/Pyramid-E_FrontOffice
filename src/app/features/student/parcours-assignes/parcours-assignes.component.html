@@ -1,0 +1,202 @@
+<!-- HEADER -->
+<div class="sc-header">
+  <div class="sc-header__left">
+    <h1 class="sc-header__title">Mes Parcours</h1>
+    <p class="sc-header__subtitle">Parcours assignés et demandes acceptées par votre entreprise</p>
+  </div>
+  <div class="sc-header__right" *ngIf="!loading && allParcours.length > 0">
+    <span class="sc-header__count">
+      <i class="isax isax-routing"></i>
+      {{ totalItems }} parcours
+    </span>
+  </div>
+</div>
+
+<!-- FILTRES -->
+<div class="sc-filters" *ngIf="!loading && allParcours.length > 0">
+
+  <div class="sc-filters__search">
+    <i class="isax isax-search-normal sc-filters__search-icon"></i>
+    <input type="text" class="sc-filters__search-input"
+           placeholder="Rechercher un parcours..."
+           [(ngModel)]="searchTerm"
+           (ngModelChange)="onSearchChange()">
+    <button *ngIf="searchTerm" class="sc-filters__search-clear"
+            (click)="searchTerm = ''; onSearchChange()">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+
+  <!-- ✅ Filtre unique combiné -->
+  <div class="sc-filters__types">
+    <button *ngFor="let f of filtres"
+            class="sc-filters__type-btn"
+            [class.sc-filters__type-btn--active]="selectedFiltre === f.value"
+            (click)="onFiltreChange(f.value)">
+      <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
+    </button>
+  </div>
+
+  <!-- Filtre par catégorie 
+  <div class="sc-filters__types" *ngIf="categories.length > 0">
+    <button class="sc-filters__type-btn"
+            [class.sc-filters__type-btn--active]="selectedCategorie === ''"
+            (click)="onCategorieChange('')">Toutes catégories</button>
+    <button *ngFor="let cat of categories"
+            class="sc-filters__type-btn"
+            [class.sc-filters__type-btn--active]="selectedCategorie === cat"
+            (click)="onCategorieChange(cat)">{{ cat }}</button>
+  </div>
+  -->
+
+  <button class="sc-filters__reset" *ngIf="hasActiveFilters" (click)="clearFilters()">
+    <i class="isax isax-refresh"></i> Réinitialiser
+  </button>
+
+</div>
+
+<!-- RÉSULTAT FILTRE -->
+<div class="sc-results-info" *ngIf="!loading && hasActiveFilters && allParcours.length > 0">
+  <i class="isax isax-filter"></i>
+  <span>{{ totalItems }} résultat{{ totalItems > 1 ? 's' : '' }} trouvé{{ totalItems > 1 ? 's' : '' }}</span>
+  <button class="sc-results-info__clear" (click)="clearFilters()">Effacer les filtres</button>
+</div>
+
+<!-- LOADER -->
+<div class="sc-loading" *ngIf="loading">
+  <div class="sc-loading__spinner"></div>
+  <p>Chargement de vos parcours...</p>
+</div>
+
+<!-- ERREUR -->
+<div class="sc-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2 sc-error__icon"></i>
+  <p>{{ error }}</p>
+  <button class="sc-error__retry" (click)="loadParcours()">
+    <i class="isax isax-refresh me-1"></i> Réessayer
+  </button>
+</div>
+
+<!-- GRILLE PARCOURS -->
+<div class="row g-4" *ngIf="!loading && displayedParcours.length > 0">
+  <div class="col-xl-4 col-md-6" *ngFor="let parcours of displayedParcours">
+    <div class="parcours-card" (click)="goToDetail(parcours.id)">
+
+      <div class="parcours-card__banner">
+        <div class="parcours-card__banner-bg"
+             [style.background-image]="parcours.image_couverture ? 'url(' + parcours.image_couverture + ')' : 'none'">
+        </div>
+        <div class="parcours-card__banner-overlay"></div>
+        <i class="isax isax-routing parcours-card__banner-icon"></i>
+
+        <span class="parcours-card__banner-assigned"
+              [class.parcours-card__banner-assigned--demande]="parcours.source === 'demande'">
+          <i class="isax me-1"
+             [class.isax-tick-circle]="parcours.source === 'assigne'"
+             [class.isax-send-2]="parcours.source === 'demande'"></i>
+          {{ parcours.badge_label }}
+        </span>
+
+        <span class="parcours-card__banner-badge" *ngIf="parcours.categorie">
+          {{ parcours.categorie }}
+        </span>
+      </div>
+
+      <div class="parcours-card__body">
+        <h5 class="parcours-card__title">{{ parcours.titre }}</h5>
+        <p class="parcours-card__description">
+          {{ parcours.description || 'Aucune description disponible' }}
+        </p>
+
+        <div class="parcours-card__stats">
+          <div class="parcours-card__stat">
+            <i class="isax isax-book-1"></i>
+            <span>{{ parcours.nombre_formations }} formation{{ parcours.nombre_formations > 1 ? 's' : '' }}</span>
+          </div>
+        </div>
+
+        <div class="parcours-card__assignation">
+          <div class="parcours-card__assignation-date" *ngIf="parcours.date_assignation">
+            <i class="isax me-1"
+               [class.isax-calendar-add]="parcours.source === 'assigne'"
+               [class.isax-tick-circle]="parcours.source === 'demande'"></i>
+            {{ parcours.source === 'demande' ? 'Validée le' : 'Assigné le' }}
+            {{ parcours.date_assignation | date:'dd/MM/yyyy' }}
+          </div>
+          <div class="parcours-card__assignation-expiry"
+               *ngIf="parcours.date_expiration && !isExpiringSoon(parcours.date_expiration)">
+            <i class="isax isax-calendar-remove me-1"></i>
+            Expire le {{ parcours.date_expiration | date:'dd/MM/yyyy' }}
+          </div>
+          <div class="parcours-card__assignation-expiry parcours-card__assignation-expiry--warning"
+               *ngIf="isExpiringSoon(parcours.date_expiration)">
+            <i class="isax isax-warning-2 me-1"></i>
+            Expire dans {{ getJoursRestants(parcours.date_expiration) }} jour(s) !
+          </div>
+          <div class="parcours-card__assignation-expiry parcours-card__assignation-expiry--permanent"
+               *ngIf="!parcours.date_expiration">
+            <i class="isax isax-infinity me-1"></i>
+            Accès permanent
+          </div>
+        </div>
+
+        <div class="parcours-card__notes" *ngIf="parcours.notes">
+          <i class="isax isax-note-text me-1"></i>
+          <em>{{ parcours.notes }}</em>
+        </div>
+
+        <div class="parcours-card__footer">
+          <button class="parcours-card__btn">
+            Voir le parcours
+            <i class="isax isax-arrow-right-3"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EMPTY — aucun parcours -->
+<div class="sc-empty" *ngIf="!loading && !error && allParcours.length === 0">
+  <i class="isax isax-routing sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun parcours disponible</h6>
+  <p>Vous n'avez pas encore de parcours assignés ou de demandes acceptées.</p>
+</div>
+
+<!-- EMPTY — aucun résultat filtre -->
+<div class="sc-empty" *ngIf="!loading && !error && allParcours.length > 0 && filteredParcours.length === 0">
+  <i class="isax isax-search-normal sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun résultat</h6>
+  <p>Aucun parcours ne correspond à votre recherche.</p>
+  <button class="sc-empty__btn" (click)="clearFilters()">
+    <i class="isax isax-refresh me-1"></i> Réinitialiser les filtres
+  </button>
+</div>
+
+<!-- PAGINATION -->
+<div class="sc-pagination" *ngIf="!loading && totalPages > 1">
+  <span class="sc-pagination__info">
+    Page {{ currentPage }} / {{ totalPages }}
+    <span class="sc-pagination__info-total">({{ totalItems }} parcours)</span>
+  </span>
+  <div class="sc-pagination__controls">
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(1)">
+      <i class="isax isax-arrow-left-3"></i>
+    </button>
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+      <i class="isax isax-arrow-left-2"></i>
+    </button>
+    <span class="sc-pagination__ellipsis" *ngIf="pages[0] > 1">…</span>
+    <button *ngFor="let p of pages" class="sc-pagination__btn"
+            [class.sc-pagination__btn--active]="currentPage === p"
+            (click)="changePage(p)">{{ p }}</button>
+    <span class="sc-pagination__ellipsis" *ngIf="pages[pages.length - 1] < totalPages">…</span>
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+      <i class="isax isax-arrow-right-2"></i>
+    </button>
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+      <i class="isax isax-arrow-right-3"></i>
+    </button>
+  </div>
+</div>
