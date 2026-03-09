@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FormationsApiResponse } from '../../models/Formations.models';
@@ -167,4 +167,18 @@ export class FormationsService {
   relancerDemande(id: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/demandes/${id}/relancer`, {}, { headers: this.getHeaders() });
   }
+  /**
+ * Récupère les statistiques complètes pour le dashboard employé.
+ * Endpoint : GET /api/mes-statistiques-dashboard
+ *
+ * @param params { periode: 'mois'|'annee', annee: number, mois: number }
+ */
+getDashboardStats(params: { periode: string; annee: number; mois: number }): Observable<any> {
+  const httpParams = new HttpParams()
+    .set('periode', params.periode)
+    .set('annee',   String(params.annee))
+    .set('mois',    String(params.mois));
+
+  return this.http.get(`${this.apiUrl}/mes-statistiques-dashboard`, { params: httpParams });
+}
 }

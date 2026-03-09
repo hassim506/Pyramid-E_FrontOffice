@@ -1,274 +1,583 @@
-<!-- ================= PAGE HEADER ================= -->
-<div class="page-header mb-4">
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+<!-- ══════════════════════════════════════════════════ -->
+<!-- LOADING                                           -->
+<!-- ══════════════════════════════════════════════════ -->
+<div *ngIf="loading" class="db-loading">
+  <div class="db-loading__spinner"></div>
+  <p>Chargement de votre tableau de bord...</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- DASHBOARD                                         -->
+<!-- ══════════════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && stats">
+
+  <!-- ── PAGE HEADER ─────────────────────────────── -->
+  <div class="db-page-header mb-4">
     <div>
-      <h3 class="page-title mb-1">
-        Mes formations
-      </h3>
-      <p class="page-subtitle mb-0">
-        Suivez vos formations, votre progression et votre statut
+      <h3 class="db-page-header__title">Mon tableau de bord</h3>
+      <p class="db-page-header__sub">
+        {{ nomMoisSelectionne }} {{ selectedAnnee }} —
+        Suivez vos formations, votre progression et vos objectifs
       </p>
     </div>
-
-    <div class="header-badge">
-      <i class="isax isax-book"></i>
-      Espace Employé
-    </div>
-  </div>
-</div>
-
-
-<!-- ================= ALERTE DEMANDES ================= -->
-<div
-  class="alert alert-warning d-flex justify-content-between align-items-center mb-4"
-  *ngIf="hasPendingDemandes"
->
-  <div>
-    <strong>⏳ Demande de formation en attente</strong>
-    <p class="mb-0">
-      Vous avez {{ pendingDemandesCount }} demande(s) en attente de validation RH.
-    </p>
-  </div>
-
-  <a routerLink="/student/demandes" class="btn btn-sm btn-outline-warning">
-    Voir mes demandes
-  </a>
-</div>
-
-
-<!-- ================= KPI ================= -->
-<div class="row mb-4">
-
-  <div class="col-md-3">
-    <div class="card kpi-card primary">
-      <h6>Formations en cours</h6>
-      <h3>{{ stats.active }}</h3>
+    <div class="db-header-actions">
+      <a routerLink="/student/demandes" class="db-header-link">
+        <i class="isax isax-document-text me-1"></i>Mes demandes
+        <span class="db-header-link__badge" *ngIf="stats.kpi.demandes.en_attente > 0">
+          {{ stats.kpi.demandes.en_attente }}
+        </span>
+      </a>
     </div>
   </div>
 
-  <div class="col-md-3">
-    <div class="card kpi-card warning">
-      <h6>Demandes en attente</h6>
-      <h3>{{ stats.pending }}</h3>
+  <!-- ── FILTRES PÉRIODE ─────────────────────────── -->
+  <div class="db-filters mb-4">
+    <div class="db-filters__toggle">
+      <button [class.active]="periodeMode === 'mois'" (click)="periodeMode='mois'; onPeriodeChange()">
+        <i class="isax isax-calendar me-1"></i>Mensuel
+      </button>
+      <button [class.active]="periodeMode === 'annee'" (click)="periodeMode='annee'; onPeriodeChange()">
+        <i class="isax isax-calendar-2 me-1"></i>Annuel
+      </button>
+    </div>
+    <div class="db-filters__selects" *ngIf="periodeMode === 'mois'">
+      <select [(ngModel)]="selectedAnnee" (change)="onAnneeChange()" class="db-select">
+        <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
+      </select>
+      <select [(ngModel)]="selectedMois" (change)="onMoisChange()" class="db-select">
+        <option *ngFor="let m of moisLabels; let i = index" [value]="i + 1">{{ m }}</option>
+      </select>
+    </div>
+    <div class="db-filters__selects" *ngIf="periodeMode === 'annee'">
+      <span class="db-filters__label">5 dernières années</span>
     </div>
   </div>
 
-  <div class="col-md-3">
-    <div class="card kpi-card success">
-      <h6>Terminées</h6>
-      <h3>{{ stats.completed }}</h3>
-    </div>
+  <!-- ── ONGLETS ─────────────────────────────────── -->
+  <div class="db-tabs mb-4">
+    <button class="db-tabs__tab" [class.active]="activeTab === 'aujourdhui'" (click)="setTab('aujourdhui')">
+      <i class="isax isax-sun me-1"></i>Aujourd'hui
+      <span class="db-tabs__alert" *ngIf="hasUrgences">{{ echeancesUrgentes.length }}</span>
+    </button>
+    <button class="db-tabs__tab" [class.active]="activeTab === 'progression'" (click)="setTab('progression')">
+      <i class="isax isax-chart-2 me-1"></i>Ma progression
+    </button>
+    <button class="db-tabs__tab" [class.active]="activeTab === 'objectifs'" (click)="setTab('objectifs')">
+      <i class="isax isax-flag me-1"></i>Mes objectifs
+    </button>
   </div>
 
-  <div class="col-md-3">
-    <div class="card kpi-card objective">
-      <h6>Certificats obtenus</h6>
-      <h3>{{ stats.certificates }}</h3>
-    </div>
-  </div>
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- ONGLET 1 — AUJOURD'HUI                         -->
+  <!-- ════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'aujourdhui'">
 
-</div>
-
-
-
-<!-- ================= FILTRES ================= -->
-<div class="card filter-card mb-4">
-  <div class="card-body">
-    <div class="row g-3 align-items-end">
-
-      <!-- STATUT -->
-      <div class="col-md-3">
-        <label class="form-label">Statut</label>
-        <select class="form-select"
-                [(ngModel)]="selectedStatus"
-                (change)="filterByStatus(selectedStatus)">
-          <option value="">Tous</option>
-          <option value="en_cours">En cours</option>
-          
-          <option value="termine">Terminée</option>
-          <option value="abandonne">Abandonnée</option>
-        </select>
+    <!-- ALERTE URGENCES -->
+    <div class="db-alert-banner mb-4" *ngIf="hasUrgences">
+      <div class="db-alert-banner__icon"><i class="isax isax-warning-2"></i></div>
+      <div class="db-alert-banner__body">
+        <strong>{{ echeancesUrgentes.length }} échéance(s) urgente(s)</strong>
+        <span>Certaines formations arrivent à terme dans moins de 7 jours</span>
       </div>
+      <span class="db-alert-banner__count">⚠ Action requise</span>
+    </div>
 
-      <!-- SEARCH -->
-      <div class="col-md-6">
-        <label class="form-label">Recherche</label>
-        <div class="search-wrapper">
-          <i class="isax isax-search-normal-1"></i>
-          <input type="search"
-                 class="form-control"
-                 placeholder="Titre ou description de formation"
-                 [(ngModel)]="searchDataValue"
-                 (ngModelChange)="searchData(searchDataValue)">
+    <!-- RADIALS — TAUX CLÉS -->
+    <div class="db-radial-row mb-4">
+
+      <!-- Taux de complétion -->
+      <div class="db-radial-card">
+        <div class="db-radial-card__chart" id="chart-radial-completion"></div>
+        <div class="db-radial-card__label">Taux de complétion</div>
+        <div class="db-radial-card__sub">
+          {{ stats.kpi.formations.terminees }} / {{ stats.kpi.formations.total }} formations
         </div>
       </div>
 
-      <!-- RESET -->
-      <div class="col-md-3 text-end">
-        <button class="btn btn-outline-secondary w-100"
-                (click)="searchDataValue=''; selectedStatus=''; filterByStatus('')">
-          <i class="isax isax-refresh me-1"></i>
-          Réinitialiser
-        </button>
+      <!-- Objectif heures -->
+      <div class="db-radial-card">
+        <div class="db-radial-card__chart" id="chart-radial-heures"></div>
+        <div class="db-radial-card__label">Objectif heures</div>
+        <div class="db-radial-card__sub">
+          {{ stats.kpi.heures.total_cumulees }}h / {{ stats.kpi.heures.objectif_annuel }}h
+          <span *ngIf="heuresRestantes > 0"> · {{ heuresRestantes }}h restantes</span>
+        </div>
+      </div>
+
+      <!-- Formations obligatoires -->
+      <div class="db-radial-card" *ngIf="stats.kpi.formations.obligatoires_total > 0">
+        <div class="db-radial-card__chart" id="chart-radial-oblig"></div>
+        <div class="db-radial-card__label">Formations obligatoires</div>
+        <div class="db-radial-card__sub">
+          {{ stats.kpi.formations.obligatoires_terminees }} /
+          {{ stats.kpi.formations.obligatoires_total }} terminées
+        </div>
+      </div>
+
+      <!-- PDI si disponible -->
+      <div class="db-radial-card" *ngIf="stats.kpi.pdi.disponible">
+        <div class="db-radial-card__placeholder">
+          <span class="db-radial-card__value">{{ stats.kpi.pdi.taux_completion }}%</span>
+        </div>
+        <div class="db-radial-card__label">Avancement PDI</div>
+        <div class="db-radial-card__sub">
+          {{ stats.kpi.pdi.objectifs_atteints }} / {{ stats.kpi.pdi.objectifs_total }} objectifs
+        </div>
       </div>
 
     </div>
-  </div>
-</div>
 
+    <!-- GRILLE KPI RAPIDE -->
+    <div class="db-kpi-grid mb-4">
 
-<!-- ================= TABLE ================= -->
-<div class="card table-card" *ngIf="!loading">
+      <div class="db-kpi-card db-kpi-card--teal">
+        <div class="db-kpi-card__icon"><i class="isax isax-book-1"></i></div>
+        <div class="db-kpi-card__body">
+          <div class="db-kpi-card__label">En cours</div>
+          <div class="db-kpi-card__value">{{ stats.kpi.formations.en_cours }}</div>
+          <div class="db-kpi-card__sub">formations actives</div>
+        </div>
+      </div>
 
-  <div class="card-header bg-white">
-    <h6 class="mb-0">
-      <i class="isax isax-book me-2 text-primary"></i>
-      Mes formations ({{ totalData }})
-    </h6>
-  </div>
+      <div class="db-kpi-card db-kpi-card--green">
+        <div class="db-kpi-card__icon"><i class="isax isax-tick-circle"></i></div>
+        <div class="db-kpi-card__body">
+          <div class="db-kpi-card__label">Terminées</div>
+          <div class="db-kpi-card__value">{{ stats.kpi.formations.terminees }}</div>
+          <div class="db-kpi-card__sub">formations complétées</div>
+        </div>
+      </div>
 
-  <div class="table-responsive" *ngIf="formations.length > 0">
-    <table class="table align-middle mb-0 premium-table">
-
-      <thead>
-        <tr>
-          <th>Formation</th>
-          <th>Progression</th>
-          <th>Statut</th>
-          <th>Certificat</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let formation of formations; trackBy: trackByFormation">
-
-          <!-- FORMATION -->
-          <td>
-            <div class="d-flex gap-3">
-              <img [src]="getFormationImage(formation)"
-                   class="formation-thumb">
-
-              <div>
-                <div class="fw-semibold">
-                  {{ formation.titre }}
-                </div>
-
-                <div class="meta-badges mt-2">
-                  <span class="badge badge-language">
-                    {{ formation.langue || 'Français' }}
-                  </span>
-
-                  <span class="badge badge-difficulty">
-                    {{ formation.difficulte || 'Moyenne' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </td>
-
-          <!-- PROGRESSION -->
-          <td style="width: 220px">
-            <div *ngIf="formation.progression !== null">
-              <div class="progress-value">{{ formation.progression }}%</div>
-              <div class="progress premium-progress">
-                <div class="progress-bar"
-                     [style.width.%]="formation.progression">
-                </div>
-              </div>
-            </div>
-          </td>
-
-          <!-- STATUT -->
-          <td>
-            <span class="status-badge"
-                  [ngClass]="{
-                    'badge-active': formation.statut_formation === 'en_cours',
-                    'badge-completed': formation.statut_formation === 'termine',
-                   'badge-pending': formation.statut_formation === 'abandonne'
-                  }">
-
-              <i class="isax"
-                 [ngClass]="{
-                   'isax-clock': formation.statut_formation === 'en_cours',
-                   'isax-tick-circle': formation.statut_formation === 'termine',
-                   'isax-warning-2': formation.statut_formation === 'abandonne'
-                 }">
-              </i>
-
-              {{
-                formation.statut_formation === 'en_cours' ? 'En cours' :
-                formation.statut_formation === 'termine' ? 'Terminée' :
-                'Non commencée'
-              }}
-
+      <div class="db-kpi-card db-kpi-card--purple">
+        <div class="db-kpi-card__icon"><i class="isax isax-award"></i></div>
+        <div class="db-kpi-card__body">
+          <div class="db-kpi-card__label">Certifications</div>
+          <div class="db-kpi-card__value">{{ stats.kpi.certifications.total }}</div>
+          <div class="db-kpi-card__sub">
+            <span *ngIf="stats.kpi.certifications.cette_annee > 0">
+              +{{ stats.kpi.certifications.cette_annee }} cette année
             </span>
-          </td>
+            <span *ngIf="stats.kpi.certifications.cette_annee === 0">obtenues</span>
+          </div>
+        </div>
+      </div>
 
-          <!-- CERTIFICAT -->
-          <td>
-            <ng-container *ngIf="formation.statut_formation === 'termine'; else noCert">
+      <div class="db-kpi-card db-kpi-card--orange">
+        <div class="db-kpi-card__icon"><i class="isax isax-clock"></i></div>
+        <div class="db-kpi-card__body">
+          <div class="db-kpi-card__label">Heures cumulées</div>
+          <div class="db-kpi-card__value">{{ stats.kpi.heures.total_cumulees }}h</div>
+          <div class="db-kpi-card__sub">sur {{ stats.kpi.heures.objectif_annuel }}h objectif</div>
+        </div>
+        <div class="db-kpi-card__bar">
+          <div class="db-kpi-bar">
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--orange"
+                 [style.width.%]="stats.kpi.heures.taux_objectif"></div>
+          </div>
+        </div>
+      </div>
 
-              <div class="certificate-wrapper">
-
-                <span class="badge badge-certificate">
-                  <i class="isax isax-award"></i>
-                  Certificat disponible
-                </span>
-
-                <div class="cert-actions">
-                  <button class="icon-btn primary"
-                          (click)="viewCertificate(formation.id)">
-                    <i class="isax isax-eye"></i>
-                  </button>
-
-                  <button class="icon-btn success"
-                          (click)="downloadCertificate(formation.id)">
-                    <i class="isax isax-document-download"></i>
-                  </button>
-                </div>
-
-              </div>
-
-            </ng-container>
-
-            <ng-template #noCert>
-              <span class="text-muted">—</span>
-            </ng-template>
-
-          </td>
-
-        </tr>
-      </tbody>
-
-    </table>
-  </div>
-</div>
-
-
-<!-- EMPTY STATE -->
-<div *ngIf="!loading && formations.length === 0" class="empty-state">
-  <i class="isax isax-book"></i>
-  <h5>Aucune formation trouvée</h5>
-  <p>Vos formations apparaîtront ici une fois validées.</p>
-</div>
-
-
-<!-- LOADING -->
-<div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
-  <div class="text-center">
-    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-      <span class="visually-hidden">Chargement...</span>
     </div>
-    <p class="mt-3 text-muted">Chargement des formations...</p>
-  </div>
-</div>
 
+    <!-- DEUX COLONNES : ÉCHÉANCES + SESSIONS -->
+    <div class="db-today-grid">
 
-<!-- PAGINATION -->
-<app-custom-pagination
-  *ngIf="!loading && totalData > pageSize"
-  [totalItems]="totalData"
-  [pageSize]="pageSize"
-  [currentPage]="currentPage"
-  (pageChange)="onPageChange($event)">
-</app-custom-pagination>
+      <!-- ÉCHÉANCES -->
+      <div class="db-panel">
+        <div class="db-panel__header">
+          <div class="db-panel__title">
+            <i class="isax isax-timer me-2"></i>Échéances à venir
+          </div>
+          <span class="db-panel__count" *ngIf="stats.echeances.length > 0">
+            {{ stats.echeances.length }}
+          </span>
+        </div>
+
+        <div class="db-panel__body">
+
+          <!-- Urgentes -->
+          <div *ngFor="let e of echeancesUrgentes" class="db-echeance db-echeance--urgent" [ngClass]="getUrgenceClass(e)">
+            <div class="db-echeance__left">
+              <div class="db-echeance__type-icon">
+                <i class="isax" [ngClass]="e.type === 'obligatoire' ? 'isax-shield-tick' : 'isax-book-1'"></i>
+              </div>
+              <div>
+                <div class="db-echeance__titre">{{ e.titre }}</div>
+                <div class="db-echeance__meta">
+                  <span class="db-echeance__badge" *ngIf="e.type === 'obligatoire'">Obligatoire</span>
+                  Progression {{ e.progression }}%
+                </div>
+              </div>
+            </div>
+            <div class="db-echeance__right">
+              <div class="db-echeance__deadline" [ngClass]="getUrgenceClass(e)">
+                {{ getUrgenceLabel(e.joursRestants) }}
+              </div>
+              <div class="db-echeance__prog-bar">
+                <div [style.width.%]="e.progression"
+                     [style.background]="getProgressionColor(e.progression)"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Normales -->
+          <div *ngFor="let e of echeancesNormales" class="db-echeance">
+            <div class="db-echeance__left">
+              <div class="db-echeance__type-icon db-echeance__type-icon--blue">
+                <i class="isax isax-book-1"></i>
+              </div>
+              <div>
+                <div class="db-echeance__titre">{{ e.titre }}</div>
+                <div class="db-echeance__meta">Progression {{ e.progression }}%</div>
+              </div>
+            </div>
+            <div class="db-echeance__right">
+              <div class="db-echeance__deadline db-echeance__deadline--normal">
+                {{ getUrgenceLabel(e.joursRestants) }}
+              </div>
+              <div class="db-echeance__prog-bar">
+                <div [style.width.%]="e.progression"
+                     [style.background]="getProgressionColor(e.progression)"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div class="db-empty-mini" *ngIf="stats.echeances.length === 0">
+            <i class="isax isax-tick-circle"></i>
+            <span>Aucune échéance proche</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SESSIONS PLANIFIÉES -->
+      <div class="db-panel">
+        <div class="db-panel__header">
+          <div class="db-panel__title">
+            <i class="isax isax-calendar-tick me-2"></i>Sessions planifiées
+          </div>
+        </div>
+        <div class="db-panel__body">
+
+          <div *ngFor="let s of stats.sessions_planifiees" class="db-session-item">
+            <div class="db-session-item__date">
+              <span class="db-session-item__day">
+                {{ s.date_debut | date:'dd' }}
+              </span>
+              <span class="db-session-item__month">
+                {{ s.date_debut | date:'MMM' }}
+              </span>
+            </div>
+            <div class="db-session-item__body">
+              <div class="db-session-item__titre">{{ s.titre }}</div>
+              <div class="db-session-item__meta">
+                <i class="isax isax-location me-1"></i>{{ s.lieu || 'En ligne' }}
+                &nbsp;·&nbsp;
+                <i class="isax isax-clock me-1"></i>
+                {{ s.date_debut | date:'HH:mm' }} – {{ s.date_fin | date:'HH:mm' }}
+              </div>
+            </div>
+            <span class="db-session-item__badge">{{ s.type }}</span>
+          </div>
+
+          <div class="db-empty-mini" *ngIf="stats.sessions_planifiees.length === 0">
+            <i class="isax isax-calendar"></i>
+            <span>Aucune session planifiée</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- ONGLET 2 — MA PROGRESSION                      -->
+  <!-- ════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'progression'">
+
+    <div class="db-charts-header mb-3">
+      <h5 class="db-charts-header__title">
+        Courbes — {{ periodeMode === 'mois' ? '12 derniers mois' : '5 dernières années' }}
+      </h5>
+      <p class="db-charts-header__sub">Évolution calculée depuis vos activités de formation</p>
+    </div>
+
+    <!-- TAUX DE COMPLÉTION — graphique principal -->
+    <div class="db-chart-card db-chart-card--highlight mb-4">
+      <div class="db-chart-card__label">
+        <span class="db-chart-card__badge db-chart-card__badge--teal">KPI Principal</span>
+        Taux de complétion global
+        <span class="db-chart-card__current">
+          {{ tauxCompletionGlobal }}% actuellement
+        </span>
+      </div>
+      <div id="chart-completion"></div>
+    </div>
+
+    <div class="db-chart-grid">
+      <div class="db-chart-card">
+        <div id="chart-heures"></div>
+      </div>
+      <div class="db-chart-card">
+        <div id="chart-formations-terminees"></div>
+      </div>
+      <div class="db-chart-card">
+        <div id="chart-certifications"></div>
+      </div>
+
+      <!-- KPI PARCOURS -->
+      <div class="db-chart-card db-kpi-stat-card">
+        <div class="db-kpi-stat">
+          <div class="db-kpi-stat__icon db-kpi-stat__icon--blue">
+            <i class="isax isax-routing"></i>
+          </div>
+          <div>
+            <div class="db-kpi-stat__label">Parcours actifs</div>
+            <div class="db-kpi-stat__value">{{ stats.kpi.parcours.total }}</div>
+          </div>
+        </div>
+        <div class="db-kpi-stat__bar-wrap">
+          <div class="db-kpi-bar">
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--blue"
+                 [style.width.%]="stats.kpi.parcours.progression"></div>
+          </div>
+          <span class="db-kpi-stat__pct">{{ stats.kpi.parcours.progression }}% progression moy.</span>
+        </div>
+
+        <div class="db-kpi-stat mt-3">
+          <div class="db-kpi-stat__icon db-kpi-stat__icon--teal">
+            <i class="isax isax-chart"></i>
+          </div>
+          <div>
+            <div class="db-kpi-stat__label">Progression formations</div>
+            <div class="db-kpi-stat__value">{{ (stats.kpi.formations.progression_moy ?? 0) | number:'1.0-1' }}%</div>
+          </div>
+        </div>
+        <div class="db-kpi-stat__bar-wrap">
+          <div class="db-kpi-bar">
+            <div class="db-kpi-bar__fill"
+                 [style.width.%]="stats.kpi.formations.progression_moy ?? 0"
+                 [style.background]="getProgressionColor(stats.kpi.formations.progression_moy ?? 0)"></div>
+          </div>
+          <span class="db-kpi-stat__pct">moyenne sur toutes les formations</span>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- ONGLET 3 — MES OBJECTIFS                       -->
+  <!-- ════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'objectifs'">
+
+    <!-- PDI -->
+    <div class="db-objectif-section mb-4">
+      <div class="db-objectif-header">
+        <div class="db-objectif-header__icon db-objectif-header__icon--teal">
+          <i class="isax isax-task-square"></i>
+        </div>
+        <div>
+          <h6 class="db-objectif-header__title">Plan de Développement Individuel (PDI)</h6>
+          <p class="db-objectif-header__sub">Objectifs fixés avec votre manager</p>
+        </div>
+      </div>
+
+      <div *ngIf="stats.kpi.pdi.disponible" class="db-pdi-grid">
+        <div class="db-pdi-kpi">
+          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.taux_completion }}%</div>
+          <div class="db-pdi-kpi__label">Taux d'achèvement PDI</div>
+          <div class="db-kpi-bar mt-2">
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--teal"
+                 [style.width.%]="stats.kpi.pdi.taux_completion"></div>
+          </div>
+        </div>
+        <div class="db-pdi-kpi">
+          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.objectifs_atteints }}/{{ stats.kpi.pdi.objectifs_total }}</div>
+          <div class="db-pdi-kpi__label">Objectifs atteints</div>
+        </div>
+        <div class="db-pdi-kpi" *ngIf="stats.kpi.pdi.prochain_entretien">
+          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.prochain_entretien | date:'dd/MM/yyyy' }}</div>
+          <div class="db-pdi-kpi__label">Prochain entretien</div>
+        </div>
+      </div>
+
+      <div *ngIf="!stats.kpi.pdi.disponible" class="db-coming-inline">
+        <i class="isax isax-flash-1 me-2"></i>
+        Fonctionnalité à venir — Le PDI sera intégré dans une prochaine version
+      </div>
+    </div>
+
+    <!-- OBJECTIF HEURES -->
+    <div class="db-objectif-section mb-4">
+      <div class="db-objectif-header">
+        <div class="db-objectif-header__icon db-objectif-header__icon--orange">
+          <i class="isax isax-clock"></i>
+        </div>
+        <div>
+          <h6 class="db-objectif-header__title">Objectif heures de formation</h6>
+          <p class="db-objectif-header__sub">Heures réalisées vs objectif annuel</p>
+        </div>
+      </div>
+      <div class="db-objectif-progress">
+        <div class="db-objectif-progress__values">
+          <span class="db-objectif-progress__done">{{ stats.kpi.heures.total_cumulees }}h réalisées</span>
+          <span class="db-objectif-progress__target">objectif {{ stats.kpi.heures.objectif_annuel }}h</span>
+        </div>
+        <div class="db-objectif-progress__bar">
+          <div class="db-objectif-progress__fill"
+               [style.width.%]="stats.kpi.heures.taux_objectif"
+               [style.background]="getProgressionColor(stats.kpi.heures.taux_objectif)"></div>
+          <span class="db-objectif-progress__pct">{{ stats.kpi.heures.taux_objectif }}%</span>
+        </div>
+        <p class="db-objectif-progress__note" *ngIf="heuresRestantes > 0">
+          Il vous reste <strong>{{ heuresRestantes }}h</strong> pour atteindre l'objectif
+        </p>
+        <p class="db-objectif-progress__note db-objectif-progress__note--success" *ngIf="heuresRestantes === 0">
+          ✅ Objectif annuel atteint !
+        </p>
+      </div>
+    </div>
+
+    <!-- FORMATIONS OBLIGATOIRES -->
+    <div class="db-objectif-section mb-4" *ngIf="stats.kpi.formations.obligatoires_total > 0">
+      <div class="db-objectif-header">
+        <div class="db-objectif-header__icon db-objectif-header__icon--red">
+          <i class="isax isax-shield-tick"></i>
+        </div>
+        <div>
+          <h6 class="db-objectif-header__title">Formations obligatoires</h6>
+          <p class="db-objectif-header__sub">Formations réglementaires ou imposées par l'entreprise</p>
+        </div>
+      </div>
+      <div class="db-objectif-progress">
+        <div class="db-objectif-progress__values">
+          <span class="db-objectif-progress__done">
+            {{ stats.kpi.formations.obligatoires_terminees }} terminées
+          </span>
+          <span class="db-objectif-progress__target">
+            sur {{ stats.kpi.formations.obligatoires_total }} obligatoires
+          </span>
+        </div>
+        <div class="db-objectif-progress__bar">
+          <div class="db-objectif-progress__fill"
+               [style.width.%]="stats.kpi.formations.taux_obligatoires"
+               [style.background]="getProgressionColor(stats.kpi.formations.taux_obligatoires)"></div>
+          <span class="db-objectif-progress__pct">{{ stats.kpi.formations.taux_obligatoires }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCORES ÉVALUATIONS -->
+    <div class="db-objectif-section mb-4">
+      <div class="db-objectif-header">
+        <div class="db-objectif-header__icon db-objectif-header__icon--blue">
+          <i class="isax isax-chart-2"></i>
+        </div>
+        <div>
+          <h6 class="db-objectif-header__title">Score moyen aux évaluations</h6>
+          <p class="db-objectif-header__sub">Résultats de vos quiz et évaluations de fin de formation</p>
+        </div>
+      </div>
+      <div *ngIf="stats.kpi.evaluations.disponible" class="db-pdi-grid">
+        <div class="db-pdi-kpi">
+          <div class="db-pdi-kpi__value">{{ stats.kpi.evaluations.score_moyen }}/100</div>
+          <div class="db-pdi-kpi__label">Score moyen</div>
+        </div>
+        <div class="db-pdi-kpi">
+          <div class="db-pdi-kpi__value">{{ stats.kpi.evaluations.nb_passees }}</div>
+          <div class="db-pdi-kpi__label">Évaluations passées</div>
+        </div>
+      </div>
+      <div *ngIf="!stats.kpi.evaluations.disponible" class="db-coming-inline">
+        <i class="isax isax-flash-1 me-2"></i>
+        Fonctionnalité à venir — Les scores d'évaluation seront disponibles prochainement
+      </div>
+    </div>
+
+    <!-- GRAPHIQUES OBJECTIFS -->
+    <div class="db-chart-grid">
+      <div class="db-chart-card">
+        <div id="chart-demandes"></div>
+      </div>
+      <div class="db-chart-card">
+        <div id="chart-donut-formations"></div>
+        <div class="db-chart-card__donut-label">Répartition formations</div>
+      </div>
+    </div>
+
+    <!-- KPI FUTURS -->
+    <div class="db-future-grid mt-4">
+
+      <div class="db-future-card">
+        <div class="db-future-card__header">
+          <div class="db-future-card__icon db-future-card__icon--purple">
+            <i class="isax isax-medal-star"></i>
+          </div>
+          <span class="db-future-badge">À venir</span>
+        </div>
+        <div class="db-future-card__title">Compétences validées</div>
+        <p class="db-future-card__desc">{{ stats.kpi_futurs.competences_validees.message }}</p>
+        <div class="db-future-card__placeholder">
+          <div class="db-placeholder-bar" style="width:70%"></div>
+          <div class="db-placeholder-bar" style="width:50%"></div>
+          <div class="db-placeholder-bar" style="width:85%"></div>
+        </div>
+      </div>
+
+      <div class="db-future-card">
+        <div class="db-future-card__header">
+          <div class="db-future-card__icon db-future-card__icon--orange">
+            <i class="isax isax-award"></i>
+          </div>
+          <span class="db-future-badge">À venir</span>
+        </div>
+        <div class="db-future-card__title">Badges obtenus</div>
+        <p class="db-future-card__desc">{{ stats.kpi_futurs.badges_obtenus.message }}</p>
+        <div class="db-future-card__placeholder db-future-card__placeholder--circles">
+          <div class="db-placeholder-circle"></div>
+          <div class="db-placeholder-circle"></div>
+          <div class="db-placeholder-circle"></div>
+          <div class="db-placeholder-circle db-placeholder-circle--ghost"></div>
+          <div class="db-placeholder-circle db-placeholder-circle--ghost"></div>
+        </div>
+      </div>
+
+      <div class="db-future-card">
+        <div class="db-future-card__header">
+          <div class="db-future-card__icon db-future-card__icon--teal">
+            <i class="isax isax-ranking"></i>
+          </div>
+          <span class="db-future-badge">À venir</span>
+        </div>
+        <div class="db-future-card__title">Classement</div>
+        <p class="db-future-card__desc">{{ stats.kpi_futurs.classement.message }}</p>
+        <div class="db-future-card__placeholder">
+          <div class="db-placeholder-rank">#—</div>
+        </div>
+      </div>
+
+      <div class="db-future-card">
+        <div class="db-future-card__header">
+          <div class="db-future-card__icon db-future-card__icon--red">
+            <i class="isax isax-radar-2"></i>
+          </div>
+          <span class="db-future-badge">À venir</span>
+        </div>
+        <div class="db-future-card__title">Écart compétences cible</div>
+        <p class="db-future-card__desc">{{ stats.kpi_futurs.ecart_competences.message }}</p>
+        <div class="db-future-card__placeholder">
+          <div class="db-placeholder-bar" style="width:60%"></div>
+          <div class="db-placeholder-bar" style="width:80%"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</ng-container>
