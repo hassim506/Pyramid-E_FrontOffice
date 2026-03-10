@@ -182,8 +182,13 @@ getDashboardStats(params: { periode: string; annee: number; mois: number }): Obs
   return this.http.get(`${this.apiUrl}/mes-statistiques-dashboard`, { params: httpParams });
 }
 
-//progression
+//progressionParcours
 getParcoursProgression(parcoursId: number): Observable<any> {
   return this.http.get(`${this.apiUrl}/parcours/${parcoursId}/progression`);
+}
+
+//progressionCatalogue
+getCatalogueProgression(catalogueId: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/catalogues/${catalogueId}/progression`);
 }
 }
