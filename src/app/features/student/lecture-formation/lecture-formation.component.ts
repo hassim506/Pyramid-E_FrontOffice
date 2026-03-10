@@ -1,9 +1,11 @@
-import { Component, OnInit, OnChanges, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, OnChanges, OnDestroy, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { ProgressionService } from '../../../shared/service/progression/progression.service';
 
 export interface QuizQuestion {
   id: number; question: string; type: 'qcm' | 'vrai_faux';
@@ -21,9 +23,9 @@ export interface QuizResult {
   templateUrl: './lecture-formation.component.html',
   styleUrls: ['./lecture-formation.component.scss']
 })
-export class LectureFormationComponent implements OnInit, OnChanges {
+export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
 
-  // ── Mode embarqué (depuis mes-cours) ─────────────
+  // ── Mode embarqué ────────────────────────────────
   @Input()  embeddedFormationId: number | null = null;
   @Output() closePlayer = new EventEmitter<void>();
   get isEmbedded(): boolean { return this.embeddedFormationId !== null; }
@@ -33,24 +35,43 @@ export class LectureFormationComponent implements OnInit, OnChanges {
   formation: any = null; modules: any[] = [];
   selectedSection: any = null; hasContent = false;
   sidebarOpen = true; openModules: boolean[] = [];
-  completedIds = new Set<number>();
   private flatSections: any[] = [];
+
+  // ── Progression via service partagé ─────────────
+  // On délègue completedIds au service
+  get completedIds(): Set<number>  { return this.progressionService.getCompleted(this.formationId); }
+  get completedCount(): number     { return this.completedIds.size; }
+  get totalSections(): number      { return this.flatSections.length; }
+  get progressPercent(): number    { return this.progressionService.getPercent(this.formationId); }
 
   quizMode = false; quizSubmitted = false;
   currentAnswers: { [key: number]: string } = {};
   quizResults: { [sectionId: number]: QuizResult } = {};
   videoError = false;
 
+  private sub?: Subscription;
+
   constructor(
-    private router: Router,
-    private formationsService: FormationsService,
-    private sanitizer: DomSanitizer
+    private route:              ActivatedRoute,
+    private router:             Router,
+    private formationsService:  FormationsService,
+    private sanitizer:          DomSanitizer,
+    public  progressionService: ProgressionService   // public pour template si besoin
   ) {}
 
   ngOnInit(): void {
     if (this.embeddedFormationId) {
       this.formationId = this.embeddedFormationId;
       this.loadStructure();
+    } else {
+      const idFromRoute = this.route.snapshot.paramMap.get('id');
+      if (idFromRoute) {
+        this.formationId = Number(idFromRoute);
+        this.loadStructure();
+      } else {
+        this.error   = 'Formation introuvable';
+        this.loading = false;
+      }
     }
   }
 
@@ -62,16 +83,23 @@ export class LectureFormationComponent implements OnInit, OnChanges {
     }
   }
 
+  ngOnDestroy(): void { this.sub?.unsubscribe(); }
+
   private resetState(): void {
     this.loading = true; this.error = ''; this.formation = null; this.modules = [];
     this.selectedSection = null; this.hasContent = false; this.openModules = [];
-    this.completedIds = new Set(); this.flatSections = [];
+    this.flatSections = [];
     this.quizMode = false; this.quizSubmitted = false;
     this.currentAnswers = {}; this.quizResults = {}; this.videoError = false; this.sidebarOpen = true;
   }
 
   loadStructure(): void {
     this.loading = true; this.error = '';
+
+    // ✅ 1. Charger la progression depuis l'API (source de vérité persistée)
+    this.progressionService.loadFromApi(this.formationId).subscribe();
+
+    // 2. Charger la structure de la formation
     this.formationsService.getFormationStructure(this.formationId).subscribe({
       next: (res: any) => {
         this.formation = res?.formation || res?.structure?.formation || res?.data?.formation || null;
@@ -85,6 +113,15 @@ export class LectureFormationComponent implements OnInit, OnChanges {
             if (!this.hasContent) { this.hasContent = true; this.selectedSection = s; }
           }
         }
+
+        // 3. Init locale en fallback (si loadFromApi n'a pas encore répondu)
+        if (!this.progressionService.hasData(this.formationId)) {
+          this.progressionService.init(this.formationId, this.flatSections.length, []);
+        } else {
+          // Mettre à jour le total sections (connu après chargement structure)
+          this.progressionService.init(this.formationId, this.flatSections.length);
+        }
+
         this.loading = false;
       },
       error: () => { this.error = 'Impossible de charger le contenu'; this.loading = false; }
@@ -105,14 +142,15 @@ export class LectureFormationComponent implements OnInit, OnChanges {
   goToPrev(): void { const i = this.getCurrentIndex(); if (i > 0) this.selectSection(this.flatSections[i - 1]); }
   goToNext(): void { const i = this.getCurrentIndex(); if (i < this.flatSections.length - 1) this.selectSection(this.flatSections[i + 1]); }
 
+  // ✅ markCompleted — délègue au service partagé
   markCompleted(sectionId: number): void {
-    this.completedIds.add(sectionId);
-    if (this.hasQuiz(this.selectedSection) && !this.quizResults[sectionId]) setTimeout(() => this.startQuiz(), 400);
+    this.progressionService.markCompleted(this.formationId, sectionId);
+    if (this.hasQuiz(this.selectedSection) && !this.quizResults[sectionId]) {
+      setTimeout(() => this.startQuiz(), 400);
+    }
   }
-  isCompleted(id: number): boolean { return this.completedIds.has(id); }
-  get completedCount(): number { return this.completedIds.size; }
-  get totalSections():  number { return this.flatSections.length; }
-  get progressPercent(): number { return this.totalSections ? Math.round((this.completedCount / this.totalSections) * 100) : 0; }
+
+  isCompleted(id: number): boolean { return this.progressionService.isCompleted(this.formationId, id); }
 
   hasQuiz(s: any): boolean  { return s?.quiz?.questions?.length > 0; }
   startQuiz(): void { this.quizMode = true; this.quizSubmitted = false; this.currentAnswers = {}; }
@@ -131,9 +169,20 @@ export class LectureFormationComponent implements OnInit, OnChanges {
       else { if (ua?.toLowerCase() === q.reponse_correcte?.toLowerCase()) score++; }
     });
     const passed = score >= Math.ceil(questions.length * 0.6);
-    this.quizResults[this.selectedSection.id] = { sectionId: this.selectedSection.id, score, total: questions.length, passed, answers: { ...this.currentAnswers } };
+    this.quizResults[this.selectedSection.id] = {
+      sectionId: this.selectedSection.id, score, total: questions.length, passed,
+      answers: { ...this.currentAnswers }
+    };
     this.quizSubmitted = true;
-    if (passed) this.completedIds.add(this.selectedSection.id);
+    if (passed) this.progressionService.markCompleted(this.formationId, this.selectedSection.id);
+  }
+
+  retryQuiz(): void {
+    this.quizSubmitted = false; this.currentAnswers = {};
+    if (this.selectedSection?.id) {
+      delete this.quizResults[this.selectedSection.id];
+      this.progressionService.markUncompleted(this.formationId, this.selectedSection.id);
+    }
   }
 
   isCorrectAnswer(q: QuizQuestion, opt: string): boolean {
@@ -147,7 +196,6 @@ export class LectureFormationComponent implements OnInit, OnChanges {
     return '';
   }
   getQuizResult(): QuizResult | null { return this.quizResults[this.selectedSection?.id] ?? null; }
-  retryQuiz(): void { this.quizSubmitted = false; this.currentAnswers = {}; if (this.selectedSection?.id) delete this.quizResults[this.selectedSection.id]; }
 
   getSafeUrl(url: string): SafeResourceUrl { return this.sanitizer.bypassSecurityTrustResourceUrl(url); }
   isYoutube(url: string): boolean { return /youtube\.com|youtu\.be/.test(url || ''); }
@@ -167,17 +215,25 @@ export class LectureFormationComponent implements OnInit, OnChanges {
   }
   getModuleProgress(module: any): number {
     const s = module.sections || [];
-    return s.length ? Math.round(s.filter((x: any) => this.completedIds.has(x.id)).length / s.length * 100) : 0;
+    return s.length ? Math.round(
+      s.filter((x: any) => this.progressionService.isCompleted(this.formationId, x.id)).length / s.length * 100
+    ) : 0;
   }
 
-  // ✅ goBack : embedded → émet close | route → navigate
   goBack(): void {
-    if (this.isEmbedded) { this.closePlayer.emit(); return; }
-    const state = history.state;
-    if (state?.fromPage === 'catalogue' && state?.catalogueId) this.router.navigate(['/student/catalogue', state.catalogueId]);
-    else if (state?.fromPage === 'parcours' && state?.parcoursId) this.router.navigate(['/student/parcours-assigne', state.parcoursId]);
-    else this.router.navigate(['/student/mes-cours']);
+  if (this.isEmbedded) { this.closePlayer.emit(); return; }
+  const state = history.state;
+  if (state?.fromPage === 'parcours' && state?.parcoursId) {
+    // Force la recréation du composant → ngOnInit rappelé → données fraîches
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate(['/student/parcours-assigne', state.parcoursId]);
+    });
+  } else if (state?.fromPage === 'catalogue' && state?.catalogueId) {
+    this.router.navigate(['/student/catalogue', state.catalogueId]);
+  } else {
+    this.router.navigate(['/student/mes-cours']);
   }
+}
 
   getSectionIcon(s: any): string {
     return ({ video: 'isax-video-play', texte: 'isax-document-text', image: 'isax-gallery', pdf: 'isax-document', audio: 'isax-voice-cricle' } as any)[s?.type] ?? 'isax-document-text';

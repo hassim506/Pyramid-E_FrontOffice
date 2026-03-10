@@ -1,235 +1,284 @@
-<div class="mes-cours-page">
-
-<!-- ═══════════════════════════════════════════════════════
-     MODE PLAYER
-═══════════════════════════════════════════════════════ -->
-<ng-container *ngIf="viewMode === 'player'">
-  <div class="mc-player-shell">
-    <div class="mc-player-bar">
-      <button class="mc-player-bar__back" (click)="closePlayerView()">
-        <i class="isax isax-arrow-left-2"></i>
-        Retour à Mes Cours
-      </button>
-      <div class="mc-player-bar__sep"></div>
-      <span class="mc-player-bar__title" *ngIf="activeItemTitle">
-        <i class="isax isax-play-circle"></i>
-        {{ activeItemTitle }}
+<!-- TOAST -->
+<div class="mc-toast-container" [class.visible]="toast.visible">
+  <div class="mc-toast" [class]="'mc-toast--' + toast.type">
+    <div class="mc-toast__icon">
+      <i *ngIf="toast.type === 'success'" class="isax isax-tick-circle-filled"></i>
+      <i *ngIf="toast.type === 'error'"   class="isax isax-close-circle-filled"></i>
+      <i *ngIf="toast.type === 'warning'" class="isax isax-warning-2-filled"></i>
+    </div>
+    <div class="mc-toast__body">
+      <span class="mc-toast__label">
+        {{ toast.type === 'success' ? 'Succès' : toast.type === 'warning' ? 'Attention' : 'Erreur' }}
       </span>
+      <p class="mc-toast__message">{{ toast.message }}</p>
     </div>
-    <app-lecture-formation
-      [embeddedFormationId]="activeFormationId"
-      (closePlayer)="closePlayerView()">
-    </app-lecture-formation>
+    <button class="mc-toast__close" (click)="closeToast()">
+      <i class="isax isax-close-square"></i>
+    </button>
   </div>
-</ng-container>
+</div>
 
+<!-- PAGE HEADER -->
+<div class="mc-header mb-4">
+  <div class="mc-header__left">
+    <h3 class="mc-header__title">Mes Cours</h3>
+    <p class="mc-header__subtitle">Accédez à l'ensemble de vos formations assignées</p>
+  </div>
+  <div class="mc-header__actions">
+    <button class="mc-header__toggle-btn"
+            [class.mc-header__toggle-btn--active]="viewMode === 'table'"
+            (click)="setView('table')" title="Vue tableau">
+      <i class="isax isax-row-vertical"></i>
+    </button>
+    <button class="mc-header__toggle-btn"
+            [class.mc-header__toggle-btn--active]="viewMode === 'grid'"
+            (click)="setView('grid')" title="Vue grille">
+      <i class="isax isax-element-3"></i>
+    </button>
+  </div>
+</div>
 
-<!-- ═══════════════════════════════════════════════════════
-     MODE LISTE
-═══════════════════════════════════════════════════════ -->
-<ng-container *ngIf="viewMode === 'list'">
+<!-- FILTRES -->
+<div class="mc-filters mb-4">
+  <div class="mc-filters__search">
+    <i class="isax isax-search-normal-1 mc-filters__search-icon"></i>
+    <input type="search" class="mc-filters__search-input"
+           placeholder="Rechercher une formation..."
+           [(ngModel)]="searchDataValue"
+           (ngModelChange)="searchData($event)">
+    <button *ngIf="searchDataValue" class="mc-filters__search-clear"
+            (click)="searchData('')">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+  <div class="mc-filters__pills">
+    <button class="mc-filters__pill"
+            [class.mc-filters__pill--active]="selectedTab === ''"
+            (click)="selectTab('')">Tous</button>
+    <button class="mc-filters__pill mc-filters__pill--progress"
+            [class.mc-filters__pill--active]="selectedTab === 'en_cours'"
+            (click)="selectTab('en_cours')">En cours</button>
+    <button class="mc-filters__pill mc-filters__pill--pending"
+            [class.mc-filters__pill--active]="selectedTab === 'a_commencer'"
+            (click)="selectTab('a_commencer')">À commencer</button>
+    <button class="mc-filters__pill mc-filters__pill--done"
+            [class.mc-filters__pill--active]="selectedTab === 'termines'"
+            (click)="selectTab('termines')">Terminées</button>
+  </div>
+  <button class="mc-filters__reset" (click)="resetFilters()">
+    <i class="isax isax-refresh"></i> Réinitialiser
+  </button>
+</div>
 
-  <!-- ── PAGE HEADER ──────────────────────────────────── -->
-  <div class="page-header mb-4">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-      <div>
-        <h3 class="page-title mb-1">Mes Cours</h3>
-        <p class="page-subtitle mb-0">Suivez votre progression dans vos formations</p>
+<!-- LOADING -->
+<div *ngIf="loading" class="mc-loading">
+  <div class="mc-loading__spinner"></div>
+  <p>Chargement de vos formations...</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VUE TABLEAU                                -->
+<!-- ═══════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && viewMode === 'table'">
+  <div class="card mc-table-card" *ngIf="formations.length > 0">
+    <div class="card-header mc-table-card__header">
+      <div class="mc-table-card__title">
+        <i class="isax isax-book text-primary me-2"></i>
+        Mes formations
+        <span class="mc-table-card__count">{{ totalData }}</span>
       </div>
-      <div class="header-badge">
-        <i class="isax isax-book"></i>
-        Espace Employé
-      </div>
+      <small class="text-muted" style="font-size:11px">
+        <i class="isax isax-mouse-circle me-1"></i>Cliquez sur une ligne pour démarrer
+      </small>
     </div>
+    <div class="table-responsive">
+      <table class="table mc-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="min-width:300px;">Formation</th>
+            <th>Durée</th>
+            <th class="text-center">Niveau</th>
+            <th class="text-center" style="min-width:140px;">Statut</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let f of formations"
+              class="mc-table-row"
+              [class.mc-row--done]="isCourseFinished(f)"
+              (click)="openPlayer(f)">
 
-    <!-- Stats globales -->
-    <div class="mc-global-stats mt-3">
-      <div class="mc-global-stat mc-global-stat--blue">
-        <div class="mc-global-stat__num">
-          <span *ngIf="!loading; else statLoader">{{ allFormations.length }}</span>
-        </div>
-        <span class="mc-global-stat__label">Formations</span>
-      </div>
-      <div class="mc-global-stat mc-global-stat--green">
-        <div class="mc-global-stat__num">
-          <span *ngIf="!loading; else statLoader">{{ totalCompleted }}</span>
-        </div>
-        <span class="mc-global-stat__label">Terminées</span>
-      </div>
-      <div class="mc-global-stat mc-global-stat--orange">
-        <div class="mc-global-stat__num">
-          <span *ngIf="!loading; else statLoader">{{ totalInProgress }}</span>
-        </div>
-        <span class="mc-global-stat__label">En cours</span>
-      </div>
-      <div class="mc-global-stat mc-global-stat--progress">
-        <div class="mc-global-progress">
-          <div class="mc-global-progress__bar">
-            <div [style.width.%]="globalProgress"></div>
-          </div>
-          <span class="mc-global-progress__pct">{{ globalProgress }}%</span>
-        </div>
-        <span class="mc-global-stat__label">Progression globale</span>
-      </div>
-    </div>
-
-    <ng-template #statLoader><span class="mc-stat-dot"></span></ng-template>
-  </div>
-
-  <!-- ── FILTRES ───────────────────────────────────────── -->
-  <div class="card filter-card mb-4">
-    <div class="card-body">
-      <div class="row g-3 align-items-end">
-        <div class="col-md-3">
-          <label class="form-label">Statut</label>
-          <select class="form-select" [(ngModel)]="selectedStatus"
-                  (change)="filterByStatus(selectedStatus)">
-            <option value="">Tous</option>
-            <option value="active">En cours</option>
-            <option value="pending">Non commencé</option>
-            <option value="completed">Terminé</option>
-          </select>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Recherche</label>
-          <div class="search-wrapper">
-            <i class="isax isax-search-normal-1"></i>
-            <input type="search" class="form-control"
-                   placeholder="Titre ou description de formation"
-                   [(ngModel)]="searchDataValue"
-                   (ngModelChange)="searchData($event)">
-          </div>
-        </div>
-        <div class="col-md-3 text-end">
-          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
-            <i class="isax isax-refresh me-1"></i>Réinitialiser
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── LOADING ───────────────────────────────────────── -->
-  <div *ngIf="loading" class="mc-loading">
-    <div class="mc-loading__spinner"></div>
-    <p>Chargement de vos formations...</p>
-  </div>
-
-  <!-- ── ERREUR ────────────────────────────────────────── -->
-  <div *ngIf="error && !loading" class="mc-error">
-    <i class="isax isax-warning-2 me-2"></i>{{ error }}
-  </div>
-
-  <!-- ── GRILLE FORMATIONS ─────────────────────────────── -->
-  <ng-container *ngIf="!loading && !error">
-
-    <!-- Empty state -->
-    <div *ngIf="filteredFormations.length === 0" class="mc-empty">
-      <div class="mc-empty__icon"><i class="isax isax-book-1"></i></div>
-      <h5 class="mc-empty__title">Aucune formation trouvée</h5>
-      <p>Vos formations apparaîtront ici dès qu'elles vous seront assignées.</p>
-    </div>
-
-    <!-- Cartes -->
-    <div class="row g-3" *ngIf="formations.length > 0">
-      <div class="col-xl-4 col-md-6" *ngFor="let f of formations">
-        <div class="mc-card course-item-two course-item mx-0 h-100">
-
-          <!-- Image -->
-          <div class="course-img position-relative" (click)="openPlayer(f)" style="cursor:pointer">
-            <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
-                 [alt]="f.titre" class="img-fluid w-100">
-
-            <!-- Overlay play -->
-            <div class="mc-card__overlay">
-              <div class="mc-card__play">
-                <i class="isax isax-play"></i>
+            <!-- FORMATION -->
+            <td>
+              <div class="mc-formation">
+                <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+                     class="mc-formation__thumb" alt="">
+                <div class="mc-formation__info">
+                  <div class="mc-formation__title">{{ f.titre }}</div>
+                  <small class="mc-formation__sub"
+                         *ngIf="f.formateur_nom || f.formateur?.nom_complet || f.categorie?.nom">
+                    <i class="isax isax-teacher me-1"></i>
+                    {{ f.formateur_nom || f.formateur?.nom_complet || f.categorie?.nom }}
+                  </small>
+                  <div class="mc-formation__chips">
+                    <span class="mc-chip" *ngIf="f.langue">
+                      <i class="isax isax-language-square me-1"></i>{{ f.langue }}
+                    </span>
+                    <span class="mc-chip mc-chip--award" *ngIf="f.est_certifiante">
+                      <i class="isax isax-award me-1"></i>Certifiante
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            </td>
 
-            <!-- Badges top -->
-            <div class="position-absolute start-0 top-0 w-100 p-2
-                        d-flex justify-content-between align-items-start">
-              <span class="badge bg-light text-dark" *ngIf="f.difficulte">
-                {{ f.difficulte }}
+            <!-- DURÉE -->
+            <td>
+              <span class="mc-meta" *ngIf="f.duree_totale">
+                <i class="isax isax-clock me-1"></i>{{ f.duree_totale }}h
               </span>
-              <span class="badge"
-                    [class.bg-success]="f.progression === 100"
-                    [class.bg-primary]="(f.progression ?? 0) > 0 && f.progression !== 100"
-                    [class.bg-secondary]="!f.progression || f.progression === 0">
-                {{ f.progression === 100 ? 'Terminé' : (f.progression ?? 0) > 0 ? 'En cours' : 'À commencer' }}
+              <span class="mc-meta mc-meta--muted" *ngIf="!f.duree_totale">—</span>
+            </td>
+
+            <!-- NIVEAU -->
+            <td class="text-center">
+              <span class="mc-niveau" [ngClass]="getNiveauClass(f.niveau)">
+                {{ f.niveau_display || f.niveau || '—' }}
               </span>
-            </div>
+            </td>
 
-            <!-- Sceau terminé -->
-            <div class="mc-done-seal" *ngIf="isCourseFinished(f)">
-              <i class="isax isax-tick-circle"></i>
-            </div>
-          </div>
+            <!-- STATUT -->
+            <td class="text-center">
+              <span class="mc-statut" [ngClass]="getStatusClass(f)">{{ getStatusLabel(f) }}</span>
+            </td>
 
-          <!-- Contenu -->
-          <div class="course-content d-flex flex-column flex-grow-1">
-
-            <!-- Méta -->
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="badge bg-light text-dark rounded-pill fs-12"
-                    *ngIf="f.langue">{{ f.langue }}</span>
-              <span class="text-muted fs-13" *ngIf="f.duree_totale">
-                {{ f.duree_totale }} h
-              </span>
-            </div>
-
-            <!-- Titre -->
-            <h6 class="title mb-1" (click)="openPlayer(f)" style="cursor:pointer">
-              {{ f.titre }}
-            </h6>
-
-            <!-- Description courte -->
-            <p class="course-desc mb-2" *ngIf="f.short_description || f.description">
-              {{ f.short_description || f.description }}
-            </p>
-
-            <!-- Progression -->
-            <div class="mb-3">
-              <div class="progress" style="height:5px; border-radius:99px;">
-                <div class="progress-bar"
-                     [class]="getProgressClass(f.progression ?? 0)"
-                     [style.width.%]="f.progression ?? 0"
-                     role="progressbar"></div>
-              </div>
-              <small class="text-muted">{{ f.progression ?? 0 }}% complété</small>
-            </div>
-
-            <!-- Footer -->
-            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-              <button class="btn btn-sm mc-btn-details"
-                      (click)="goToDetails(f.id)">
-                <i class="isax isax-info-circle me-1"></i>Détails
-              </button>
-              <button class="btn btn-sm mc-btn-start"
-                      [class.mc-btn-start--done]="isCourseFinished(f)"
+            <!-- ACTION -->
+            <td class="text-center" (click)="$event.stopPropagation()">
+              <button class="mc-action-btn"
+                      [class.mc-action-btn--done]="isCourseFinished(f)"
                       (click)="openPlayer(f)">
                 <i class="isax me-1" [ngClass]="getCourseActionIcon(f)"></i>
                 {{ getCourseActionLabel(f) }}
               </button>
-            </div>
+            </td>
 
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VUE GRILLE                                 -->
+<!-- ═══════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && viewMode === 'grid'">
+  <div class="mc-grid" *ngIf="formations.length > 0">
+    <div class="mc-grid-card"
+         *ngFor="let f of formations"
+         [class.mc-grid-card--done]="isCourseFinished(f)"
+         [class.mc-grid-card--progress]="isInProgress(f)"
+         (click)="openPlayer(f)">
+
+      <!-- Cover -->
+      <div class="mc-grid-card__cover">
+        <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+             alt="{{ f.titre }}" class="mc-grid-card__img">
+        <div class="mc-grid-card__cover-overlay">
+          <span class="mc-statut" [ngClass]="getStatusClass(f)">{{ getStatusLabel(f) }}</span>
+        </div>
+        <span class="mc-niveau mc-grid-card__niveau"
+              [ngClass]="getNiveauClass(f.niveau)"
+              *ngIf="f.niveau">
+          {{ f.niveau_display || f.niveau }}
+        </span>
+        <!-- Sceau terminé -->
+        <div class="mc-grid-card__seal" *ngIf="isCourseFinished(f)">
+          <i class="isax isax-tick-circle"></i>
+        </div>
+      </div>
+
+      <!-- Corps -->
+      <div class="mc-grid-card__body">
+        <h6 class="mc-grid-card__title">{{ f.titre }}</h6>
+        <p class="mc-grid-card__sub"
+           *ngIf="f.formateur_nom || f.formateur?.nom_complet || f.categorie?.nom">
+          <i class="isax isax-teacher"></i>
+          {{ f.formateur_nom || f.formateur?.nom_complet || f.categorie?.nom }}
+        </p>
+        <div class="mc-grid-card__chips">
+          <span class="mc-chip" *ngIf="f.duree_totale">
+            <i class="isax isax-clock me-1"></i>{{ f.duree_totale }}h
+          </span>
+          <span class="mc-chip" *ngIf="f.langue">
+            <i class="isax isax-language-square me-1"></i>{{ f.langue }}
+          </span>
+          <span class="mc-chip mc-chip--award" *ngIf="f.est_certifiante">
+            <i class="isax isax-award me-1"></i>Certifiante
+          </span>
+        </div>
+      </div>
+
+      <!-- Progression -->
+      <div class="mc-grid-card__progress">
+        <div class="mc-progress-header">
+          <span class="mc-progress-label">Progression</span>
+          <span class="mc-progress-pct"
+                [class.mc-progress-pct--done]="isCourseFinished(f)"
+                [class.mc-progress-pct--active]="isInProgress(f)">
+            {{ getProgression(f) }}%
+          </span>
+        </div>
+        <div class="mc-progress-track">
+          <div class="mc-progress-fill"
+               [style.width.%]="getProgression(f)"
+               [class.mc-progress-fill--done]="isCourseFinished(f)"
+               [class.mc-progress-fill--active]="isInProgress(f)">
           </div>
         </div>
       </div>
+
+      <!-- Footer -->
+      <div class="mc-grid-card__footer" (click)="$event.stopPropagation()">
+        <span class="mc-grid-card__date" *ngIf="f.date_inscription">
+          <i class="isax isax-calendar-1"></i>
+          {{ f.date_inscription | date:'dd/MM/yyyy' }}
+        </span>
+        <button class="mc-btn-action"
+                [class.mc-btn-action--done]="isCourseFinished(f)"
+                (click)="openPlayer(f)">
+          <i class="isax me-1" [ngClass]="getCourseActionIcon(f)"></i>
+          {{ getCourseActionLabel(f) }}
+        </button>
+      </div>
+
     </div>
-
-    <!-- Pagination -->
-    <app-custom-pagination
-      *ngIf="totalData > pageSize"
-      [totalItems]="totalData"
-      [pageSize]="pageSize"
-      [currentPage]="currentPage"
-      (pageChange)="onPageChange($event)">
-    </app-custom-pagination>
-
-  </ng-container>
-
+  </div>
 </ng-container>
 
+<!-- EMPTY -->
+<div *ngIf="!loading && formations.length === 0" class="mc-empty">
+  <div class="mc-empty__icon"><i class="isax isax-book-1"></i></div>
+  <h5 class="mc-empty__title">Aucune formation trouvée</h5>
+  <p>
+    <ng-container *ngIf="searchDataValue || selectedTab !== ''">
+      Aucun résultat pour vos filtres actuels.
+    </ng-container>
+    <ng-container *ngIf="!searchDataValue && selectedTab === ''">
+      Vos formations apparaîtront ici dès qu'elles vous seront assignées.
+    </ng-container>
+  </p>
+  <button *ngIf="searchDataValue || selectedTab !== ''"
+          class="mc-btn-retry" (click)="resetFilters()">
+    <i class="isax isax-refresh me-1"></i>Réinitialiser les filtres
+  </button>
 </div>
+
+<!-- PAGINATION -->
+<app-custom-pagination
+  *ngIf="!loading && totalData > pageSize"
+  [totalItems]="totalData"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  (pageChange)="onPageChange($event)">
+</app-custom-pagination>

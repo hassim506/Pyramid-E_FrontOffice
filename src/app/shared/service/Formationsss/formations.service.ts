@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { FormationsApiResponse } from '../../models/Formations.models';
+import { FormationsApiResponse } from '../../models/formation.models';
 
 @Injectable({
   providedIn: 'root',
@@ -180,5 +180,10 @@ getDashboardStats(params: { periode: string; annee: number; mois: number }): Obs
     .set('mois',    String(params.mois));
 
   return this.http.get(`${this.apiUrl}/mes-statistiques-dashboard`, { params: httpParams });
+}
+
+//progression
+getParcoursProgression(parcoursId: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/parcours/${parcoursId}/progression`);
 }
 }

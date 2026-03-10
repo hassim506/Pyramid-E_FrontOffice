@@ -1,6 +1,7 @@
 $primary:     #069b8f;
 $primary-lt:  #e6f7f5;
 $success:     #16a34a;
+$success-lt:  #dcfce7;
 $warning:     #d97706;
 $danger:      #dc2626;
 $gray-50:     #f9fafb;
@@ -15,20 +16,95 @@ $shadow-sm:   0 1px 3px rgba(0,0,0,.08);
 $shadow-lg:   0 10px 30px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.06);
 $transition:  all .2s ease;
 
+// ══════════════════════════════════════════════
+// HERO
+// ══════════════════════════════════════════════
 .pad-hero {
   position: relative; padding: 60px 0 40px; overflow: hidden;
   background: linear-gradient(135deg, #034d47 0%, #067a70 100%);
-  &__bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .15; }
+
+  &__bg      { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .15; }
   &__overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(3,77,71,.9) 0%, rgba(6,122,112,.6) 100%); }
-  &__badges { display: flex; gap: 8px; flex-wrap: wrap; }
-  &__title { font-size: 32px; font-weight: 800; color: #fff; margin: 12px 0 8px; line-height: 1.2; @media (max-width: 767px) { font-size: 24px; } }
+  &__badges  { display: flex; gap: 8px; flex-wrap: wrap; }
+  &__title   { font-size: 32px; font-weight: 800; color: #fff; margin: 12px 0 8px; line-height: 1.2; @media (max-width: 767px) { font-size: 24px; } }
   &__subtitle { font-size: 15px; color: rgba(255,255,255,.75); margin: 0; line-height: 1.6; }
   &__assignation { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: rgba(255,255,255,.7); margin-top: 12px; }
   &__divider { height: 1px; background: rgba(255,255,255,.15); margin-top: 32px; }
 }
 
+// ══════════════════════════════════════════════
+// PROGRESSION GLOBALE
+// ══════════════════════════════════════════════
+.pad-progression-globale {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: $radius-md;
+  padding: 16px 20px;
+  backdrop-filter: blur(8px);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,.85);
+    display: flex;
+    align-items: center;
+  }
+
+  &__pct {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    &--done { color: #86efac; }
+  }
+
+  &__bar {
+    height: 8px;
+    background: rgba(255,255,255,.15);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: 99px;
+    background: rgba(255,255,255,.4);
+    transition: width .6s cubic-bezier(.4,0,.2,1);
+
+    &--ongoing { background: linear-gradient(90deg, #34d399, #059669); }
+    &--done    { background: linear-gradient(90deg, #86efac, #16a34a); }
+  }
+
+  &__detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: rgba(255,255,255,.65);
+  }
+
+  &__complete {
+    color: #86efac;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+  }
+}
+
+// ══════════════════════════════════════════════
+// BREADCRUMB
+// ══════════════════════════════════════════════
 .pad-breadcrumb {
   display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,.6);
+
   &__back {
     background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
     color: #fff; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 500;
@@ -39,25 +115,36 @@ $transition:  all .2s ease;
   &__current { color: rgba(255,255,255,.9); font-weight: 500; }
 }
 
+// ══════════════════════════════════════════════
+// BADGES
+// ══════════════════════════════════════════════
 .pad-badge {
   display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;
-  &--assigned { background: rgba(22,163,74,.25); color: #86efac; border: 1px solid rgba(134,239,172,.3); }
-  &--cat      { background: rgba(255,255,255,.12); color: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.2); }
-  &--count    { background: rgba(6,155,143,.3); color: #a7f3d0; border: 1px solid rgba(167,243,208,.3); }
-  &--demande {
-  background: rgba(6, 155, 143, .35);
-  color: #a7f3d0;
-  border: 1px solid rgba(167, 243, 208, .4);
-}
+
+  &--assigned    { background: rgba(22,163,74,.25); color: #86efac; border: 1px solid rgba(134,239,172,.3); }
+  &--cat         { background: rgba(255,255,255,.12); color: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.2); }
+  &--count       { background: rgba(6,155,143,.3); color: #a7f3d0; border: 1px solid rgba(167,243,208,.3); }
+  &--demande     { background: rgba(6,155,143,.35); color: #a7f3d0; border: 1px solid rgba(167,243,208,.4); }
+  &--prog-done   { background: rgba(22,163,74,.3); color: #86efac; border: 1px solid rgba(134,239,172,.4); }
+  &--prog-ongoing{ background: rgba(6,155,143,.3); color: #a7f3d0; border: 1px solid rgba(167,243,208,.3); }
+  &--prog-todo   { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.15); }
 }
 
 .pad-permanent { color: #86efac; }
 .pad-warning   { color: #fbbf24; }
 
+// ══════════════════════════════════════════════
+// SECTION FORMATIONS
+// ══════════════════════════════════════════════
 .pad-section {
   padding: 40px 0 60px;
-  &__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; &-left { display: flex; align-items: center; gap: 12px; } }
-  &__title  { font-size: 18px; font-weight: 700; color: $gray-900; margin: 0; }
+
+  &__header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+    &-left { display: flex; align-items: center; gap: 12px; }
+  }
+  &__title { font-size: 18px; font-weight: 700; color: $gray-900; margin: 0; }
 }
 
 .pad-count-chip {
@@ -65,6 +152,27 @@ $transition:  all .2s ease;
   padding: 3px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;
 }
 
+// ── Légende ────────────────────────────────────────────────
+.pad-legende {
+  display: flex; gap: 16px; align-items: center;
+
+  &__item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: $gray-600;
+  }
+
+  &__dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+
+  &__item--done    .pad-legende__dot { background: $success; }
+  &__item--ongoing .pad-legende__dot { background: $primary; }
+  &__item--todo    .pad-legende__dot { background: $gray-200; border: 1px solid $gray-400; }
+}
+
+// ══════════════════════════════════════════════
+// CARTE FORMATION
+// ══════════════════════════════════════════════
 .pad-formation-card {
   background: #fff; border: 1px solid $gray-200; border-radius: $radius-lg;
   overflow: hidden; cursor: pointer; transition: $transition; position: relative;
@@ -72,14 +180,26 @@ $transition:  all .2s ease;
 
   &:hover { transform: translateY(-4px); box-shadow: $shadow-lg; border-color: rgba($primary, .3); }
 
+  // Variantes par statut
+  &--done    { border-color: rgba($success, .3); background: linear-gradient(180deg, #fff 0%, #f0fdf4 100%); }
+  &--ongoing { border-color: rgba($primary, .3); }
+
+  // Numéro ordre
   &__order {
-    position: absolute; top: 12px; left: 12px; z-index: 2;
+    position: absolute; top: 12px; left: 12px; z-index: 3;
     width: 28px; height: 28px; background: $primary; color: #fff;
     border-radius: 50%; font-size: 12px; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 2px 8px rgba($primary, .4);
+
+    &--done {
+      background: $success;
+      box-shadow: 0 2px 8px rgba($success, .4);
+      font-size: 14px;
+    }
   }
 
+  // Image
   &__img-wrap { position: relative; height: 160px; overflow: hidden; flex-shrink: 0; }
   &__img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
   &:hover &__img { transform: scale(1.04); }
@@ -91,10 +211,18 @@ $transition:  all .2s ease;
   }
   &:hover &__img-overlay { background: rgba($primary, .35); i { opacity: 1; } }
 
-  &__body   { padding: 16px 16px 8px; flex: 1; }
-  &__title  { font-size: 15px; font-weight: 700; color: $gray-900; margin: 0 0 10px; line-height: 1.4; }
-  &__meta   { display: flex; gap: 6px; flex-wrap: wrap; }
+  // Badge statut sur l'image
+  &__statut-badge {
+    position: absolute; bottom: 10px; right: 10px; z-index: 2;
+    padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  }
 
+  // Body
+  &__body  { padding: 16px 16px 8px; flex: 1; }
+  &__title { font-size: 15px; font-weight: 700; color: $gray-900; margin: 0 0 10px; line-height: 1.4; }
+  &__meta  { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  // Footer
   &__footer {
     padding: 12px 16px 16px; display: flex; gap: 8px; align-items: center;
     border-top: 1px solid $gray-200; margin-top: 12px;
@@ -113,15 +241,57 @@ $transition:  all .2s ease;
     border: none; font-size: 12px; font-weight: 600; cursor: pointer; transition: $transition;
     white-space: nowrap; box-shadow: 0 2px 8px rgba($primary, .3);
     &:hover { background: darken($primary, 8%); transform: translateY(-1px); }
+
+    &--resume {
+      background: #0284c7;
+      box-shadow: 0 2px 8px rgba(2,132,199,.3);
+      &:hover { background: darken(#0284c7, 8%); }
+    }
+
+    &--done {
+      background: $success;
+      box-shadow: 0 2px 8px rgba($success, .3);
+      &:hover { background: darken($success, 8%); }
+    }
   }
 }
 
+// ── Badge statut ───────────────────────────────────────────
+.pad-statut {
+  &--done    { background: rgba($success, .9); color: #fff; }
+  &--ongoing { background: rgba($primary, .9); color: #fff; }
+  &--todo    { background: rgba(0,0,0,.45); color: rgba(255,255,255,.8); }
+}
+
+// ── Barre progression par formation ───────────────────────
+.pad-formation-progress {
+  &__header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+  }
+  &__label { font-size: 11px; color: $gray-400; font-weight: 500; }
+  &__pct   { font-size: 12px; font-weight: 700; }
+
+  &__bar {
+    height: 5px; background: $gray-200; border-radius: 99px; overflow: hidden;
+  }
+  &__fill {
+    height: 100%; border-radius: 99px;
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+}
+
+// ══════════════════════════════════════════════
+// META CHIPS
+// ══════════════════════════════════════════════
 .pad-meta-chip {
   display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 99px;
   font-size: 11px; font-weight: 500; background: $gray-50; color: $gray-600; border: 1px solid $gray-200;
   &--cert { background: #fef9c3; color: #92400e; border-color: #fde047; }
 }
 
+// ══════════════════════════════════════════════
+// ÉTATS GLOBAUX
+// ══════════════════════════════════════════════
 .sc-loading {
   display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; color: $gray-400;
   &__spinner { width: 44px; height: 44px; border: 3px solid $gray-200; border-top-color: $primary; border-radius: 50%; animation: spin .7s linear infinite; }
@@ -142,14 +312,24 @@ $transition:  all .2s ease;
 
 .sc-empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 72px 20px; text-align: center;
-  &__icon { font-size: 3.5rem; color: rgba($primary, .2); margin-bottom: 16px; display: block; }
+  &__icon  { font-size: 3.5rem; color: rgba($primary, .2); margin-bottom: 16px; display: block; }
   &__title { font-size: 16px; font-weight: 700; color: $gray-600; margin-bottom: 8px; }
   p { font-size: 13px; color: $gray-400; margin-bottom: 20px; }
 }
 
+// ══════════════════════════════════════════════
+// RESPONSIVE
+// ══════════════════════════════════════════════
 @media (max-width: 767px) {
-  .pad-hero { padding: 40px 0 24px; &__title { font-size: 22px; } }
-  .pad-formation-card { &__img-wrap { height: 130px; } &__title { font-size: 14px; } &__footer { flex-direction: column; } &__detail-btn, &__start-btn { width: 100%; } }
+  .pad-hero {
+    padding: 40px 0 24px;
+    &__title { font-size: 22px; }
+  }
+  .pad-legende { display: none; }
+  .pad-formation-card {
+    &__img-wrap { height: 130px; }
+    &__title    { font-size: 14px; }
+    &__footer   { flex-direction: column; }
+    &__detail-btn, &__start-btn { width: 100%; }
+  }
 }
-// Ajouter dans .pad-badge, après &--assigned :
-

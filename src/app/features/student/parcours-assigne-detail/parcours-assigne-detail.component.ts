@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { Subscription, filter } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -10,13 +11,20 @@ import { FormationsService } from '../../../shared/service/Formationsss/formatio
   templateUrl: './parcours-assigne-detail.component.html',
   styleUrls: ['./parcours-assigne-detail.component.scss'],
 })
-export class ParcoursAssigneDetailComponent implements OnInit {
+export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
 
-  parcoursId!: number;
-  parcours:    any   = null;
-  formations:  any[] = [];
-  loading      = true;
-  error        = '';
+  parcoursId!:          number;
+  parcours:             any    = null;
+  formations:           any[]  = [];
+  loading               = true;
+  error                 = '';
+
+  // ── Progression ────────────────────────────────────────────
+  progressionGlobale    = 0;
+  totalFormations       = 0;
+  formationsTerminees   = 0;
+
+  private routerSub?: Subscription;
 
   constructor(
     private route:             ActivatedRoute,
@@ -32,6 +40,20 @@ export class ParcoursAssigneDetailComponent implements OnInit {
       return;
     }
     this.loadDetail();
+
+    // ✅ Recharger les progressions à chaque retour sur cette page
+    this.routerSub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e: NavigationEnd) => {
+        const url = e.urlAfterRedirects || e.url;
+        if (url.includes('parcours') && url.includes(String(this.parcoursId))) {
+          this.refreshProgressions();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
   }
 
   loadDetail(): void {
@@ -55,40 +77,91 @@ export class ParcoursAssigneDetailComponent implements OnInit {
     });
   }
 
+  // ✅ Chargement initial avec loader
   loadFormations(): void {
-    this.formationsService.getFormationsDuParcoursParCategorie(
-      this.parcoursId,
-      this.parcours.categorie_id
-    ).subscribe({
-      next:  (res: any) => { this.formations = res.formations ?? []; this.loading = false; },
-      error: ()         => { this.formations = []; this.loading = false; }
-    });
-  }
-
-  // ── Navigation ─────────────────────────────────────────────
-  // ✅ Ouvre les détails de la formation (bouton "Voir détails")
-  // Parcours assigné → fromPage: 'parcours', accès direct autorisé
-  goToFormation(formationId: number): void {
-    this.router.navigate(['/courses/course-details-2', formationId], {
-      state: {
-        fromPage:     'parcours',      // ✅ remplace fromParcours: true
-        fromParcours: true,            // rétrocompat
-        parcoursId:   this.parcoursId,
-        // pas de demande → canCommencer() basé sur fromPage === 'parcours'
+    this.formationsService.getParcoursProgression(this.parcoursId).subscribe({
+      next: (res: any) => {
+        this.formations          = res.formations          ?? [];
+        this.progressionGlobale  = res.progression_globale ?? 0;
+        this.totalFormations     = res.total_formations    ?? 0;
+        this.formationsTerminees = res.formations_terminees ?? 0;
+        this.loading             = false;
+      },
+      error: () => {
+        // Fallback sur l'ancienne méthode
+        this.formationsService.getFormationsDuParcoursParCategorie(
+          this.parcoursId,
+          this.parcours.categorie_id
+        ).subscribe({
+          next:  (res: any) => { this.formations = res.formations ?? []; this.loading = false; },
+          error: ()         => { this.formations = []; this.loading = false; }
+        });
       }
     });
   }
 
-  // ✅ Accès direct à la lecture (bouton "Commencer" sur la carte)
-  // Pas besoin de passer par course-details-2
-  commencerFormation(formationId: number, event: Event): void {
-    event.stopPropagation();
-    this.router.navigate(['/student/lecture-formation', formationId]);
+  // ✅ Refresh silencieux — pas de loader, juste mise à jour des données
+  refreshProgressions(): void {
+    this.formationsService.getParcoursProgression(this.parcoursId).subscribe({
+      next: (res: any) => {
+        this.formations          = res.formations          ?? [];
+        this.progressionGlobale  = res.progression_globale ?? 0;
+        this.totalFormations     = res.total_formations    ?? 0;
+        this.formationsTerminees = res.formations_terminees ?? 0;
+      },
+      error: () => {} // silencieux
+    });
   }
 
-  // ✅ Retour vers la liste des parcours assignés
+  // ── Navigation ─────────────────────────────────────────────
+  goToFormation(formationId: number): void {
+    this.router.navigate(['/courses/course-details-2', formationId], {
+      state: {
+        fromPage:     'parcours',
+        fromParcours: true,
+        parcoursId:   this.parcoursId,
+      }
+    });
+  }
+
+ // ✅ Corrigé
+commencerFormation(formationId: number, event: Event): void {
+  event.stopPropagation();
+  this.router.navigate(['/student/lecture-formation', formationId], {
+    state: {
+      fromPage:  'parcours',
+      parcoursId: this.parcoursId,
+    }
+  });
+}
+
   goBack(): void {
     this.router.navigate(['/student/students-parcours']);
+  }
+
+  // ── Helpers progression ────────────────────────────────────
+  getStatutLabel(statut: string): string {
+    return ({
+      termine:      '✅ Terminé',
+      en_cours:     '▶ En cours',
+      non_commence: '○ À commencer',
+    } as any)[statut] ?? '○ À commencer';
+  }
+
+  getStatutClass(statut: string): string {
+    return ({
+      termine:      'pad-statut--done',
+      en_cours:     'pad-statut--ongoing',
+      non_commence: 'pad-statut--todo',
+    } as any)[statut] ?? 'pad-statut--todo';
+  }
+
+  getProgressionColor(statut: string): string {
+    return ({
+      termine:      '#16a34a',
+      en_cours:     '#069b8f',
+      non_commence: '#e5e7eb',
+    } as any)[statut] ?? '#e5e7eb';
   }
 
   // ── Helpers expiration ─────────────────────────────────────

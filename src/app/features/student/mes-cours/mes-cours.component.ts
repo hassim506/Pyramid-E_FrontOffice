@@ -1,59 +1,76 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
-import { Formations } from '../../../shared/models/Formations.models';
+import { Formation } from '../../../shared/models/formation.models';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { ProgressionService } from '../../../shared/service/progression/progression.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
-import { LectureFormationComponent } from '../lecture-formation/lecture-formation.component';
+
+interface Toast {
+  type: 'success' | 'error' | 'warning';
+  message: string;
+  visible: boolean;
+}
 
 @Component({
   standalone: true,
   selector: 'app-mes-cours',
-  imports: [CommonModule, FormsModule, CustomPaginationComponent, LectureFormationComponent],
+  imports: [CommonModule, FormsModule, CustomPaginationComponent],
   templateUrl: './mes-cours.component.html',
   styleUrls: ['./mes-cours.component.scss'],
 })
-export class MesCoursComponent implements OnInit {
+export class MesCoursComponent implements OnInit, OnDestroy {
 
-  // ── Player ───────────────────────────────────────────────
-  viewMode: 'list' | 'player' = 'list';
-  activeFormationId: number | null = null;
-  activeItemTitle = '';
+  // ── Vue ─────────────────────────────────────────
+  viewMode: 'grid' | 'table' = 'grid';
 
-  // ── Données formations ───────────────────────────────────
-  allFormations: Formations[] = [];
-  formations:    Formations[] = [];
-
+  // ── Données ──────────────────────────────────────
+  allFormations: Formation[] = [];
+  formations:    Formation[] = [];
   loading = false;
   error   = '';
 
-  // ── Pagination ───────────────────────────────────────────
+  // ── Pagination ───────────────────────────────────
   currentPage = 1;
-  pageSize    = 6;
+  pageSize    = 10;
   totalData   = 0;
   skip        = 0;
-  limit       = 6;
+  limit       = 10;
 
-  // ── Filtres ──────────────────────────────────────────────
-  selectedStatus  = '';
+  // ── Filtres ──────────────────────────────────────
+  selectedTab     = '';
   searchDataValue = '';
 
-  // ── Stats ────────────────────────────────────────────────
-  get totalCompleted():  number { return this.allFormations.filter(f => Number(f.progression ?? 0) === 100).length; }
-  get totalInProgress(): number { return this.allFormations.filter(f => { const p = Number(f.progression ?? 0); return p > 0 && p < 100; }).length; }
-  get globalProgress():  number {
-    if (!this.allFormations.length) return 0;
-    return Math.round(this.allFormations.reduce((a, f) => a + Number(f.progression ?? 0), 0) / this.allFormations.length);
-  }
+  // ── Toast ────────────────────────────────────────
+  toast: Toast = { type: 'success', message: '', visible: false };
+  private toastTimer: any;
+
+  // ── Abonnement progression ───────────────────────
+  private progressionSub?: Subscription;
 
   constructor(
     private formationsService: FormationsService,
+    public  progressionService: ProgressionService,  // public → accessible dans le template
     private router: Router
   ) {}
 
-  ngOnInit(): void { this.loadFormations(); }
+  ngOnInit(): void {
+    this.loadFormations();
+
+    // ✅ Écouter les changements de progression en temps réel
+    this.progressionSub = this.progressionService.change$.subscribe(() => {
+      // Force la détection de changements — Angular met à jour les cartes
+      this.formations = [...this.formations];
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.progressionSub?.unsubscribe();
+    clearTimeout(this.toastTimer);
+  }
 
   // ════════════════════════════════════════════
   // CHARGEMENT
@@ -64,7 +81,6 @@ export class MesCoursComponent implements OnInit {
     this.formationsService.getMesFormations().subscribe({
       next: (res) => {
         this.allFormations = res.formations ?? [];
-        this.totalData     = this.allFormations.length;
         this.applyFilters();
         this.loading = false;
       },
@@ -76,19 +92,34 @@ export class MesCoursComponent implements OnInit {
   }
 
   // ════════════════════════════════════════════
+  // PROGRESSION — lit depuis le service partagé
+  // Fallback : f.progression (valeur API initiale)
+  // ════════════════════════════════════════════
+  getProgression(f: Formation): number {
+    const fromService = this.progressionService.getPercent(f.id);
+    // Si le service a une valeur > 0 (sections cochées) on l'utilise
+    // Sinon on utilise la valeur initiale de l'API
+    return fromService > 0 ? fromService : Number(f.progression ?? 0);
+  }
+
+  // ════════════════════════════════════════════
   // FILTRES
   // ════════════════════════════════════════════
-  get filteredFormations(): Formations[] {
+  get filteredFormations(): Formation[] {
     return this.allFormations.filter(f => {
-      const p  = Number(f.progression ?? 0);
-      const ms = !this.searchDataValue ||
+      const p = this.getProgression(f);
+
+      const matchSearch = !this.searchDataValue ||
         f.titre.toLowerCase().includes(this.searchDataValue.toLowerCase()) ||
         (f.description ?? '').toLowerCase().includes(this.searchDataValue.toLowerCase());
-      const mf = !this.selectedStatus ||
-        (this.selectedStatus === 'completed' && p === 100) ||
-        (this.selectedStatus === 'active'    && p > 0 && p < 100) ||
-        (this.selectedStatus === 'pending'   && p === 0);
-      return ms && mf;
+
+      const matchTab =
+        this.selectedTab === ''            ? true :
+        this.selectedTab === 'en_cours'    ? (p > 0 && p < 100) :
+        this.selectedTab === 'a_commencer' ? p === 0 :
+        this.selectedTab === 'termines'    ? p === 100 : true;
+
+      return matchSearch && matchTab;
     });
   }
 
@@ -100,74 +131,79 @@ export class MesCoursComponent implements OnInit {
     this.formations  = filtered.slice(0, this.limit);
   }
 
-  filterByStatus(s: string): void { this.selectedStatus  = s; this.applyFilters(); }
-  searchData(v: string):     void { this.searchDataValue = v; this.applyFilters(); }
-  resetFilters():            void { this.searchDataValue = ''; this.selectedStatus = ''; this.applyFilters(); }
+  selectTab(tab: string): void           { this.selectedTab     = tab; this.applyFilters(); }
+  searchData(v: string): void            { this.searchDataValue = v;   this.applyFilters(); }
+  resetFilters(): void                   { this.searchDataValue = ''; this.selectedTab = ''; this.applyFilters(); }
+  setView(mode: 'grid' | 'table'): void  { this.viewMode = mode; }
 
   // ════════════════════════════════════════════
   // PAGINATION
   // ════════════════════════════════════════════
-  getTableData(skip: number, limit: number): void {
-    this.formations = this.filteredFormations.slice(skip, skip + limit);
-  }
-
   onPageChange(page: number): void {
     this.currentPage = page;
     this.skip        = (page - 1) * this.pageSize;
-    this.getTableData(this.skip, this.pageSize);
+    this.formations  = this.filteredFormations.slice(this.skip, this.skip + this.pageSize);
   }
 
   // ════════════════════════════════════════════
-  // PLAYER
+  // NAVIGATION
   // ════════════════════════════════════════════
-  openPlayer(f: Formations): void {
-    this.activeFormationId = f.id ?? null;
-    this.activeItemTitle   = f.titre;
-    this.viewMode          = 'player';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  openPlayer(f: Formation): void {
+    this.router.navigate(['/student/lecture-formation', f.id]);
   }
 
-  closePlayerView(): void {
-    this.viewMode          = 'list';
-    this.activeFormationId = null;
-    this.activeItemTitle   = '';
+  // ════════════════════════════════════════════
+  // TOAST
+  // ════════════════════════════════════════════
+  showToast(type: 'success' | 'error' | 'warning', message: string): void {
+    clearTimeout(this.toastTimer);
+    this.toast = { type, message, visible: true };
+    this.toastTimer = setTimeout(() => this.toast.visible = false, 4000);
   }
 
-  startCourses(id?: number): void {
-    if (!id) return;
-    const found = this.allFormations.find(f => f.id === id);
-    if (found) { this.openPlayer(found); return; }
-    this.activeFormationId = id;
-    this.activeItemTitle   = '';
-    this.viewMode          = 'player';
-  }
-
-  goToDetails(id?: number): void {
-    if (id) this.router.navigate(['/courses/course-details-2', id]);
-  }
+  closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
   // ════════════════════════════════════════════
   // HELPERS
   // ════════════════════════════════════════════
-  getCourseActionLabel(f: Formations): string {
-    const p = Number(f.progression ?? 0);
+  isCourseFinished(f: Formation): boolean  { return this.getProgression(f) === 100; }
+  isInProgress(f: Formation): boolean      { const p = this.getProgression(f); return p > 0 && p < 100; }
+
+  getCourseActionLabel(f: Formation): string {
+    const p = this.getProgression(f);
     if (p === 100) return 'Revoir';
     if (p > 0)     return 'Continuer';
     return 'Commencer';
   }
 
-  getCourseActionIcon(f: Formations): string {
-    const p = Number(f.progression ?? 0);
+  getCourseActionIcon(f: Formation): string {
+    const p = this.getProgression(f);
     if (p === 100) return 'isax-refresh-2';
     if (p > 0)     return 'isax-play-circle';
     return 'isax-play';
   }
 
-  getProgressClass(pct: number): string {
-    if (pct === 100) return 'bg-success';
-    if (pct > 0)     return 'bg-primary';
-    return 'bg-secondary';
+  getStatusLabel(f: Formation): string {
+    const p = this.getProgression(f);
+    if (p === 100) return 'Terminé';
+    if (p > 0)     return 'En cours';
+    return 'À commencer';
   }
 
-  isCourseFinished(f: Formations): boolean { return Number(f.progression ?? 0) === 100; }
+  getStatusClass(f: Formation): string {
+    const p = this.getProgression(f);
+    if (p === 100) return 'statut-validee';
+    if (p > 0)     return 'statut-progress';
+    return 'statut-attente';
+  }
+
+  getNiveauClass(niveau: string | undefined): string {
+    const map: Record<string, string> = {
+      debutant:      'niveau-debutant',
+      intermediaire: 'niveau-inter',
+      avance:        'niveau-avance',
+      expert:        'niveau-expert',
+    };
+    return map[niveau?.toLowerCase() ?? ''] ?? 'niveau-default';
+  }
 }

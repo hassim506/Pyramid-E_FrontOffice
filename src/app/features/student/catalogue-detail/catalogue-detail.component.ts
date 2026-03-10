@@ -129,4 +129,8 @@ export class CatalogueDetailComponent implements OnInit {
   isFree(formation: any): boolean {
     return Number(formation.prix) === 0;
   }
+  commencerFormation(formationId: number, event: Event): void {
+  event.stopPropagation();
+  this.router.navigate(['/student/lecture-formation', formationId]);
+}
 }

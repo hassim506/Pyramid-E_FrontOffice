@@ -104,66 +104,58 @@
       </div>
 
       <!-- Grille formations -->
-      <div class="row g-4" *ngIf="paginatedFormations.length > 0">
-        <div class="col-xl-4 col-md-6" *ngFor="let formation of paginatedFormations">
+      <!-- Grille formations -->
+<div class="row g-4" *ngIf="paginatedFormations.length > 0">
+  <div class="col-xl-4 col-md-6" *ngFor="let formation of paginatedFormations; let i = index">
 
-          <div class="pad-formation-card" (click)="goToDetails(formation.id)">
+    <div class="pad-formation-card" (click)="goToDetails(formation.id)">
 
-            <!-- Image -->
-            <div class="pad-formation-card__img-wrap">
-              <img [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
-                   class="pad-formation-card__img" alt="{{ formation.titre }}">
-              <div class="pad-formation-card__img-overlay">
-                <i class="isax isax-play-circle"></i>
-              </div>
-              <span class="pad-formation-card__badge pad-formation-card__badge--obligatoire"
-                    *ngIf="formation.est_obligatoire">Obligatoire</span>
-              <span class="pad-formation-card__badge pad-formation-card__badge--featured"
-                    *ngIf="formation.est_featured">⭐ Mis en avant</span>
-              <span class="pad-formation-card__badge pad-formation-card__badge--gratuit"
-                    *ngIf="isFree(formation)">Gratuit</span>
-            </div>
+      <!-- Numéro d'ordre -->
+      <div class="pad-formation-card__order">
+        {{ (currentPage - 1) * pageSize + i + 1 }}
+      </div>
 
-            <!-- Body -->
-            <div class="pad-formation-card__body">
-              <div class="pad-formation-card__meta">
-                <span class="pad-meta-chip"
-                      *ngIf="formation.niveau_display && formation.niveau_display !== 'Non défini'">
-                  <i class="isax isax-chart me-1"></i>{{ formation.niveau_display }}
-                </span>
-                <span class="pad-meta-chip" *ngIf="formation.duree_totale">
-                  <i class="isax isax-clock me-1"></i>{{ formation.duree_totale }} h
-                </span>
-                <span class="pad-meta-chip pad-meta-chip--cert" *ngIf="formation.est_certifiante">
-                  <i class="isax isax-award me-1"></i>Certifiante
-                </span>
-              </div>
-
-              <h5 class="pad-formation-card__title">{{ formation.titre }}</h5>
-
-              <p class="pad-formation-card__desc"
-                 *ngIf="formation.short_description || formation.description">
-                {{ formation.short_description || formation.description }}
-              </p>
-            </div>
-
-            <!-- Footer -->
-            <div class="pad-formation-card__footer">
-              <span class="pad-formation-card__price" *ngIf="!isFree(formation)">
-                {{ formation.prix | number:'1.0-0' }} FCFA
-              </span>
-              <span class="pad-formation-card__price pad-formation-card__price--free"
-                    *ngIf="isFree(formation)">Gratuit</span>
-
-              <button class="pad-formation-card__detail-btn">
-                Voir le détail
-                <i class="isax isax-arrow-right-3 ms-1"></i>
-              </button>
-            </div>
-
-          </div>
+      <!-- Image -->
+      <div class="pad-formation-card__img-wrap">
+        <img [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
+             class="pad-formation-card__img" alt="{{ formation.titre }}">
+        <div class="pad-formation-card__img-overlay">
+          <i class="isax isax-play-circle"></i>
         </div>
       </div>
+
+      <!-- Body -->
+      <div class="pad-formation-card__body">
+        <h5 class="pad-formation-card__title">{{ formation.titre }}</h5>
+        <div class="pad-formation-card__meta">
+          <span class="pad-meta-chip"
+                *ngIf="formation.niveau_display && formation.niveau_display !== 'Non défini'">
+            <i class="isax isax-chart me-1"></i>{{ formation.niveau_display }}
+          </span>
+          <span class="pad-meta-chip" *ngIf="formation.duree_totale">
+            <i class="isax isax-clock me-1"></i>{{ formation.duree_totale }} min
+          </span>
+          <span class="pad-meta-chip pad-meta-chip--cert" *ngIf="formation.est_certifiante">
+            <i class="isax isax-award me-1"></i>Certifiante
+          </span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="pad-formation-card__footer">
+        <button class="pad-formation-card__detail-btn">
+          Voir le détail
+          <i class="isax isax-arrow-right-3 ms-1"></i>
+        </button>
+        <button class="pad-formation-card__start-btn"
+                (click)="commencerFormation(formation.id, $event)">
+          <i class="isax isax-play me-1"></i>Commencer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
 
       <!-- Empty -->
       <div class="sc-empty" *ngIf="paginatedFormations.length === 0 && !loading">

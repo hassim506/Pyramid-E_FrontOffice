@@ -27,7 +27,7 @@
     </button>
   </div>
 
-  <!-- ✅ Filtre unique combiné -->
+  <!-- Filtre unique combiné -->
   <div class="sc-filters__types">
     <button *ngFor="let f of filtres"
             class="sc-filters__type-btn"
@@ -36,17 +36,6 @@
       <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
     </button>
   </div>
-
-  <!-- Filtre par type 
-  <div class="sc-filters__types">
-    <button *ngFor="let t of types"
-            class="sc-filters__type-btn"
-            [class.sc-filters__type-btn--active]="selectedType === t.value"
-            (click)="onTypeChange(t.value)">
-      {{ t.label }}
-    </button>
-  </div>
-  -->
 
   <button class="sc-filters__reset" *ngIf="hasActiveFilters" (click)="clearFilters()">
     <i class="isax isax-refresh"></i> Réinitialiser
@@ -75,7 +64,9 @@
   </button>
 </div>
 
-<!-- GRILLE CATALOGUES -->
+<!-- ══════════════════════════════════════════ -->
+<!-- GRILLE CATALOGUES — style identique parcours -->
+<!-- ══════════════════════════════════════════ -->
 <div class="row g-4" *ngIf="!loading && displayedCatalogues.length > 0">
   <div class="col-xl-4 col-md-6" *ngFor="let catalogue of displayedCatalogues">
     <div class="catalogue-card" (click)="goToCatalogue(catalogue.id)">
@@ -89,6 +80,7 @@
         <div class="catalogue-card__banner-overlay"></div>
         <i [class]="(catalogue.icone || 'isax isax-book-1') + ' catalogue-card__banner-icon'"></i>
 
+        <!-- Badge source assigné/demande -->
         <span class="catalogue-card__banner-assigned"
               [class.catalogue-card__banner-assigned--demande]="catalogue.source === 'demande'">
           <i class="isax me-1"
@@ -97,6 +89,7 @@
           {{ catalogue.badge_label || 'Assigné' }}
         </span>
 
+        <!-- Badge type -->
         <span class="catalogue-card__banner-badge"
               [style.background-color]="getTypeColor(catalogue.type)">
           {{ getTypeLabel(catalogue.type) }}
@@ -110,6 +103,7 @@
           {{ catalogue.short_description || catalogue.description || 'Aucune description disponible' }}
         </p>
 
+        <!-- Stats -->
         <div class="catalogue-card__stats">
           <div class="catalogue-card__stat">
             <i class="isax isax-book-1"></i>
@@ -121,35 +115,38 @@
           </div>
         </div>
 
+        <!-- Assignation -->
         <div class="catalogue-card__assignation">
-          <span class="catalogue-card__assignation-item" *ngIf="catalogue.date_assignation">
+          <div class="catalogue-card__assignation-date" *ngIf="catalogue.date_assignation">
             <i class="isax me-1"
                [class.isax-calendar-add]="catalogue.source !== 'demande'"
                [class.isax-tick-circle]="catalogue.source === 'demande'"></i>
             {{ catalogue.source === 'demande' ? 'Validée le' : 'Assigné le' }}
             {{ catalogue.date_assignation | date:'dd/MM/yyyy' }}
-          </span>
-          <span class="catalogue-card__assignation-item catalogue-card__assignation-item--permanent"
-                *ngIf="!catalogue.date_expiration">
+          </div>
+          <div class="catalogue-card__assignation-expiry catalogue-card__assignation-expiry--permanent"
+               *ngIf="!catalogue.date_expiration">
             <i class="isax isax-infinity me-1"></i>Accès permanent
-          </span>
-          <span class="catalogue-card__assignation-item catalogue-card__assignation-item--warning"
-                *ngIf="isExpiringSoon(catalogue.date_expiration)">
+          </div>
+          <div class="catalogue-card__assignation-expiry catalogue-card__assignation-expiry--warning"
+               *ngIf="isExpiringSoon(catalogue.date_expiration)">
             <i class="isax isax-warning-2 me-1"></i>
             Expire dans {{ getJoursRestants(catalogue.date_expiration) }} jour(s) !
-          </span>
-          <span class="catalogue-card__assignation-item"
-                *ngIf="catalogue.date_expiration && !isExpiringSoon(catalogue.date_expiration)">
+          </div>
+          <div class="catalogue-card__assignation-expiry"
+               *ngIf="catalogue.date_expiration && !isExpiringSoon(catalogue.date_expiration)">
             <i class="isax isax-calendar-remove me-1"></i>
             Expire le {{ catalogue.date_expiration | date:'dd/MM/yyyy' }}
-          </span>
+          </div>
         </div>
 
+        <!-- Notes -->
         <div class="catalogue-card__notes" *ngIf="catalogue.notes">
           <i class="isax isax-note-text me-1"></i>
           <em>{{ catalogue.notes }}</em>
         </div>
 
+        <!-- Footer -->
         <div class="catalogue-card__footer">
           <button class="catalogue-card__btn">
             Accéder aux formations

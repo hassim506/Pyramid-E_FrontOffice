@@ -35,9 +35,8 @@
             <span class="pad-breadcrumb__current">{{ parcours.titre }}</span>
           </nav>
 
-          <!-- ✅ Badge dynamique selon source -->
+          <!-- Badges -->
           <div class="pad-hero__badges mb-3">
-
             <span class="pad-badge"
                   [class.pad-badge--assigned]="parcours.source !== 'demande'"
                   [class.pad-badge--demande]="parcours.source === 'demande'">
@@ -46,19 +45,26 @@
                  [class.isax-send-2]="parcours.source === 'demande'"></i>
               {{ parcours.badge_label || 'Assigné' }}
             </span>
-
             <span class="pad-badge pad-badge--cat" *ngIf="parcours.categorie">
               <i class="isax isax-category me-1"></i>{{ parcours.categorie }}
             </span>
             <span class="pad-badge pad-badge--count">
               <i class="isax isax-book-1 me-1"></i>{{ parcours.nombre_formations }} formation(s)
             </span>
+            <!-- Badge progression globale -->
+            <span class="pad-badge" [ngClass]="{
+              'pad-badge--prog-done':    progressionGlobale >= 100,
+              'pad-badge--prog-ongoing': progressionGlobale > 0 && progressionGlobale < 100,
+              'pad-badge--prog-todo':    progressionGlobale === 0
+            }">
+              <i class="isax isax-chart-2 me-1"></i>{{ progressionGlobale | number:'1.0-0' }}% complété
+            </span>
           </div>
 
           <h1 class="pad-hero__title">{{ parcours.titre }}</h1>
           <p class="pad-hero__subtitle" *ngIf="parcours.description">{{ parcours.description }}</p>
 
-          <!-- ✅ Infos date contextuelles selon source -->
+          <!-- Infos date -->
           <div class="pad-hero__assignation mt-3">
             <span *ngIf="parcours.date_assignation">
               <i class="isax me-1"
@@ -80,6 +86,32 @@
             </span>
           </div>
 
+          <!-- ✅ PROGRESSION GLOBALE -->
+          <div class="pad-progression-globale mt-4">
+            <div class="pad-progression-globale__header">
+              <span class="pad-progression-globale__label">
+                <i class="isax isax-chart-2 me-2"></i>Progression globale
+              </span>
+              <span class="pad-progression-globale__pct"
+                    [class.pad-progression-globale__pct--done]="progressionGlobale >= 100">
+                {{ progressionGlobale | number:'1.0-0' }}%
+              </span>
+            </div>
+            <div class="pad-progression-globale__bar">
+              <div class="pad-progression-globale__fill"
+                   [style.width.%]="progressionGlobale"
+                   [class.pad-progression-globale__fill--done]="progressionGlobale >= 100"
+                   [class.pad-progression-globale__fill--ongoing]="progressionGlobale > 0 && progressionGlobale < 100">
+              </div>
+            </div>
+            <p class="pad-progression-globale__detail">
+              <span>{{ formationsTerminees }} / {{ totalFormations }} formations terminées</span>
+              <span *ngIf="progressionGlobale >= 100" class="pad-progression-globale__complete">
+                <i class="isax isax-tick-circle me-1"></i>Parcours complété !
+              </span>
+            </p>
+          </div>
+
           <div class="pad-hero__divider mt-4"></div>
         </div>
       </div>
@@ -98,6 +130,18 @@
           </h4>
           <span class="pad-count-chip">{{ formations.length }} formation(s)</span>
         </div>
+        <!-- Légende statuts -->
+        <div class="pad-legende">
+          <span class="pad-legende__item pad-legende__item--done">
+            <span class="pad-legende__dot"></span>Terminée
+          </span>
+          <span class="pad-legende__item pad-legende__item--ongoing">
+            <span class="pad-legende__dot"></span>En cours
+          </span>
+          <span class="pad-legende__item pad-legende__item--todo">
+            <span class="pad-legende__dot"></span>À commencer
+          </span>
+        </div>
       </div>
 
       <div class="sc-loading py-4" *ngIf="loading">
@@ -105,43 +149,78 @@
       </div>
 
       <div class="row g-4" *ngIf="!loading && formations.length > 0">
-        <div class="col-xl-4 col-md-6" *ngFor="let formation of formations; let i = index">
+        <div class="col-xl-4 col-md-6" *ngFor="let f of formations; let i = index">
 
-          <div class="pad-formation-card" (click)="goToFormation(formation.id)">
+          <div class="pad-formation-card"
+               [class.pad-formation-card--done]="f.statut_formation === 'termine'"
+               [class.pad-formation-card--ongoing]="f.statut_formation === 'en_cours'"
+               (click)="goToFormation(f.id)">
 
-            <div class="pad-formation-card__order">{{ i + 1 }}</div>
+            <!-- Numéro ordre -->
+            <div class="pad-formation-card__order"
+                 [class.pad-formation-card__order--done]="f.statut_formation === 'termine'">
+              <i class="isax isax-tick-circle" *ngIf="f.statut_formation === 'termine'"></i>
+              <span *ngIf="f.statut_formation !== 'termine'">{{ i + 1 }}</span>
+            </div>
 
+            <!-- Image -->
             <div class="pad-formation-card__img-wrap">
-              <img [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
+              <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
                    class="pad-formation-card__img" alt="">
               <div class="pad-formation-card__img-overlay">
                 <i class="isax isax-play-circle"></i>
               </div>
-            </div>
-
-            <div class="pad-formation-card__body">
-              <h5 class="pad-formation-card__title">{{ formation.titre }}</h5>
-              <div class="pad-formation-card__meta">
-                <span class="pad-meta-chip" *ngIf="formation.niveau_display && formation.niveau_display !== 'Non défini'">
-                  <i class="isax isax-chart me-1"></i>{{ formation.niveau_display }}
-                </span>
-                <span class="pad-meta-chip" *ngIf="formation.duree_totale">
-                  <i class="isax isax-clock me-1"></i>{{ formation.duree_totale }} min
-                </span>
-                <span class="pad-meta-chip pad-meta-chip--cert" *ngIf="formation.est_certifiante">
-                  <i class="isax isax-award me-1"></i>Certifiante
-                </span>
+              <!-- Badge statut sur l'image -->
+              <div class="pad-formation-card__statut-badge" [ngClass]="getStatutClass(f.statut_formation)">
+                {{ getStatutLabel(f.statut_formation) }}
               </div>
             </div>
 
+            <!-- Body -->
+            <div class="pad-formation-card__body">
+              <h5 class="pad-formation-card__title">{{ f.titre }}</h5>
+              <div class="pad-formation-card__meta">
+                <span class="pad-meta-chip" *ngIf="f.niveau">
+                  <i class="isax isax-chart me-1"></i>{{ f.niveau }}
+                </span>
+                <span class="pad-meta-chip" *ngIf="f.duree_totale">
+                  <i class="isax isax-clock me-1"></i>{{ f.duree_totale }} min
+                </span>
+              </div>
+
+              <!-- ✅ BARRE DE PROGRESSION PAR FORMATION -->
+              <div class="pad-formation-progress mt-3">
+                <div class="pad-formation-progress__header">
+                  <span class="pad-formation-progress__label">Progression</span>
+                  <span class="pad-formation-progress__pct"
+                        [style.color]="getProgressionColor(f.statut_formation)">
+                    {{ +f.progression | number:'1.0-0' }}%
+                  </span>
+                </div>
+                <div class="pad-formation-progress__bar">
+                  <div class="pad-formation-progress__fill"
+                       [style.width.%]="+f.progression"
+                       [style.background]="getProgressionColor(f.statut_formation)">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
             <div class="pad-formation-card__footer">
               <button class="pad-formation-card__detail-btn">
                 Voir le détail
                 <i class="isax isax-arrow-right-3 ms-1"></i>
               </button>
               <button class="pad-formation-card__start-btn"
-                      (click)="commencerFormation(formation.id, $event)">
-                <i class="isax isax-play me-1"></i>Commencer
+                      [class.pad-formation-card__start-btn--resume]="f.statut_formation === 'en_cours'"
+                      [class.pad-formation-card__start-btn--done]="f.statut_formation === 'termine'"
+                      (click)="commencerFormation(f.id, $event)">
+                <i class="isax me-1"
+                   [class.isax-play]="f.statut_formation === 'non_commence'"
+                   [class.isax-refresh]="f.statut_formation === 'en_cours'"
+                   [class.isax-eye]="f.statut_formation === 'termine'"></i>
+                {{ f.statut_formation === 'termine' ? 'Revoir' : f.statut_formation === 'en_cours' ? 'Reprendre' : 'Commencer' }}
               </button>
             </div>
 
