@@ -13,23 +13,29 @@ import { FormationsService } from '../../../shared/service/Formationsss/formatio
 })
 export class CatalogueDetailComponent implements OnInit {
 
-  catalogue:  any    = null;
-  formations: any[]  = [];
-  loading            = true;
-  error              = '';
+  catalogueId:  number = 0;
+  catalogue:    any    = null;
+  formations:   any[]  = [];
+  loading              = true;
+  error                = '';
 
-  // ✅ Source badge
+  // Source badge
   source     = 'assigne';
   badgeLabel = 'Assigné';
 
+  // ── Progression ────────────────────────────────────────────
+  progressionGlobale    = 0;
+  totalFormations       = 0;
+  formationsTerminees   = 0;
+
   // Recherche
-  searchQuery         = '';
-  filteredFormations: any[] = [];
+  searchQuery          = '';
+  filteredFormations:  any[] = [];
 
   // Pagination
-  currentPage  = 1;
-  pageSize     = 6;
-  totalPages   = 0;
+  currentPage          = 1;
+  pageSize             = 6;
+  totalPages           = 0;
   paginatedFormations: any[] = [];
 
   constructor(
@@ -39,41 +45,28 @@ export class CatalogueDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) {
+    this.catalogueId = Number(this.route.snapshot.paramMap.get('id'));
+    if (!this.catalogueId) {
       this.error   = 'Catalogue introuvable';
       this.loading = false;
       return;
     }
-    this.loadCatalogueDetail(id);
+    this.loadCatalogueDetail();
   }
 
-  loadCatalogueDetail(id: number): void {
+  loadCatalogueDetail(): void {
     this.loading = true;
 
-    // ✅ 1. Récupérer source + badge_label depuis la liste assignés
+    // 1. Récupérer source + badge_label depuis la liste assignés
     this.formationsService.getMesCataloguesAssignes().subscribe({
       next: (res: any) => {
         const all  = res.catalogues ?? [];
-        const meta = all.find((c: any) => c.id === id);
+        const meta = all.find((c: any) => c.id === this.catalogueId);
         this.source     = meta?.source      ?? 'assigne';
         this.badgeLabel = meta?.badge_label ?? 'Assigné';
 
-        // ✅ 2. Charger le détail formations
-        this.formationsService.getCatalogueDetail(id).subscribe({
-          next: (r: any) => {
-            this.catalogue          = r.catalogue;
-            this.formations         = r.formations ?? [];
-            this.filteredFormations = [...this.formations];
-            this.totalPages         = Math.ceil(this.filteredFormations.length / this.pageSize);
-            this.paginate();
-            this.loading = false;
-          },
-          error: () => {
-            this.error   = 'Catalogue introuvable';
-            this.loading = false;
-          }
-        });
+        // 2. Charger formations + progression via ProgressionController
+        this.loadFormations();
       },
       error: () => {
         this.error   = 'Impossible de charger le catalogue';
@@ -82,6 +75,45 @@ export class CatalogueDetailComponent implements OnInit {
     });
   }
 
+  // ✅ Chargement via endpoint progression (comme parcours)
+  loadFormations(): void {
+    this.formationsService.getCatalogueProgression(this.catalogueId).subscribe({
+      next: (res: any) => {
+        this.formations          = res.formations          ?? [];
+        this.progressionGlobale  = res.progression_globale ?? 0;
+        this.totalFormations     = res.total_formations    ?? 0;
+        this.formationsTerminees = res.formations_terminees ?? 0;
+
+        // Charger aussi les infos du catalogue (titre, description...)
+        this.formationsService.getCatalogueDetail(this.catalogueId).subscribe({
+          next: (r: any) => {
+            this.catalogue = r.catalogue;
+            this.filteredFormations = [...this.formations];
+            this.totalPages = Math.ceil(this.filteredFormations.length / this.pageSize);
+            this.paginate();
+            this.loading = false;
+          },
+          error: () => { this.loading = false; }
+        });
+      },
+      error: () => {
+        // Fallback sur l'ancienne méthode
+        this.formationsService.getCatalogueDetail(this.catalogueId).subscribe({
+          next: (r: any) => {
+            this.catalogue          = r.catalogue;
+            this.formations         = r.formations ?? [];
+            this.filteredFormations = [...this.formations];
+            this.totalPages         = Math.ceil(this.filteredFormations.length / this.pageSize);
+            this.paginate();
+            this.loading = false;
+          },
+          error: () => { this.error = 'Catalogue introuvable'; this.loading = false; }
+        });
+      }
+    });
+  }
+
+  // ── Recherche ──────────────────────────────────────────────
   onSearch(): void {
     const q = this.searchQuery.trim().toLowerCase();
     this.filteredFormations = q
@@ -101,6 +133,7 @@ export class CatalogueDetailComponent implements OnInit {
     this.onSearch();
   }
 
+  // ── Pagination ─────────────────────────────────────────────
   paginate(): void {
     const start              = (this.currentPage - 1) * this.pageSize;
     this.paginatedFormations = this.filteredFormations.slice(start, start + this.pageSize);
@@ -116,9 +149,24 @@ export class CatalogueDetailComponent implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
+  // ── Navigation ─────────────────────────────────────────────
   goToDetails(formationId: number): void {
     this.router.navigate(['/courses/course-details-2', formationId], {
-      state: { fromCatalogue: true, catalogueId: this.catalogue?.id }
+      state: {
+        fromPage:    'catalogue',
+        fromCatalogue: true,
+        catalogueId: this.catalogueId,
+      }
+    });
+  }
+
+  commencerFormation(formationId: number, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/student/lecture-formation', formationId], {
+      state: {
+        fromPage:    'catalogue',
+        catalogueId: this.catalogueId,
+      }
     });
   }
 
@@ -126,11 +174,32 @@ export class CatalogueDetailComponent implements OnInit {
     this.router.navigate(['/student/student-courses']);
   }
 
+  // ── Helpers progression ────────────────────────────────────
+  getStatutLabel(statut: string): string {
+    return ({
+      termine:      '✅ Terminé',
+      en_cours:     '▶ En cours',
+      non_commence: '○ À commencer',
+    } as any)[statut] ?? '○ À commencer';
+  }
+
+  getStatutClass(statut: string): string {
+    return ({
+      termine:      'pad-statut--done',
+      en_cours:     'pad-statut--ongoing',
+      non_commence: 'pad-statut--todo',
+    } as any)[statut] ?? 'pad-statut--todo';
+  }
+
+  getProgressionColor(statut: string): string {
+    return ({
+      termine:      '#16a34a',
+      en_cours:     '#069b8f',
+      non_commence: '#e5e7eb',
+    } as any)[statut] ?? '#e5e7eb';
+  }
+
   isFree(formation: any): boolean {
     return Number(formation.prix) === 0;
   }
-  commencerFormation(formationId: number, event: Event): void {
-  event.stopPropagation();
-  this.router.navigate(['/student/lecture-formation', formationId]);
-}
 }
