@@ -229,7 +229,9 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
       this.router.navigate(['/student/parcours-assigne', state.parcoursId]);
     });
   } else if (state?.fromPage === 'catalogue' && state?.catalogueId) {
-    this.router.navigate(['/student/catalogue', state.catalogueId]);
+  this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+    this.router.navigate(['/student/catalogue-detail', state.catalogueId]);
+  });
   } else {
     this.router.navigate(['/student/mes-cours']);
   }
