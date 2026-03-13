@@ -272,7 +272,7 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
 }
 
 // ══════════════════════════════════════════════════
-// RADIAL ROW (taux clés)
+// RADIAL ROW
 // ══════════════════════════════════════════════════
 .db-radial-row {
   display: flex;
@@ -292,8 +292,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   transition: box-shadow .2s;
 
   &:hover { box-shadow: $shadow-md; }
-
-  &__chart { /* ApexCharts s'injecte ici */ }
 
   &__placeholder {
     display: flex;
@@ -329,8 +327,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-
-  &--3 { grid-template-columns: repeat(3, 1fr); }
 
   @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
   @media (max-width: 640px)  { grid-template-columns: 1fr; }
@@ -378,7 +374,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
 
   &__sub { font-size: 12px; color: $gray-400; }
 
-  // Couleurs variantes
   &--teal  .db-kpi-card__icon { background: $teal-lt;   color: $teal; }
   &--green .db-kpi-card__icon { background: $green-lt;  color: $green; }
   &--purple.db-kpi-card__icon { background: $purple-lt; color: $purple; }
@@ -399,8 +394,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   }
 
   &__bar { margin-top: 2px; }
-  &__sparkline { margin-top: 4px; }
-  &__trend { display: flex; align-items: center; justify-content: flex-end; }
 }
 
 // ══════════════════════════════════════════════════
@@ -426,32 +419,7 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
 }
 
 // ══════════════════════════════════════════════════
-// PROGRESS RING (SVG)
-// ══════════════════════════════════════════════════
-.db-progress-ring {
-  position: relative;
-  width: 56px;
-  height: 56px;
-
-  svg {
-    width: 100%;
-    height: 100%;
-    circle:last-child { transition: stroke-dashoffset .8s ease; }
-  }
-
-  span {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 10px;
-    font-weight: 700;
-    color: $gray-800;
-  }
-}
-
-// ══════════════════════════════════════════════════
-// TODAY GRID (échéances + sessions)
+// TODAY GRID
 // ══════════════════════════════════════════════════
 .db-today-grid {
   display: grid;
@@ -462,7 +430,7 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
 }
 
 // ══════════════════════════════════════════════════
-// PANEL (générique)
+// PANEL
 // ══════════════════════════════════════════════════
 .db-panel {
   background: white;
@@ -508,110 +476,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
 }
 
 // ══════════════════════════════════════════════════
-// ÉCHÉANCES
-// ══════════════════════════════════════════════════
-.db-echeance {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
-  border-radius: $radius-sm;
-  border: 1px solid $gray-100;
-  background: white;
-  transition: border-color .2s;
-
-  &:hover { border-color: $gray-200; }
-
-  &--urgent {
-    background: #fff7ed;
-    border-color: #fed7aa;
-  }
-
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  &__type-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    background: $orange-lt;
-    color: $orange;
-    flex-shrink: 0;
-
-    &--blue { background: $blue-lt; color: $blue; }
-  }
-
-  &__titre {
-    font-size: 13px;
-    font-weight: 600;
-    color: $gray-800;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__meta {
-    font-size: 11px;
-    color: $gray-400;
-    margin-top: 2px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  &__badge {
-    padding: 1px 6px;
-    background: $red-lt;
-    color: $red;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 700;
-  }
-
-  &__right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  &__deadline {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-
-    &--normal { background: $gray-100; color: $gray-600; }
-  }
-
-  &__prog-bar {
-    width: 80px;
-    height: 4px;
-    background: $gray-100;
-    border-radius: 2px;
-    overflow: hidden;
-
-    div { height: 100%; border-radius: 2px; transition: width .5s; }
-  }
-}
-
-.urgence--critique .db-echeance__deadline { background: $red-lt;    color: $red; }
-.urgence--haute    .db-echeance__deadline { background: $orange-lt; color: $orange; }
-.urgence--moyenne  .db-echeance__deadline { background: #fef9c3;    color: #a16207; }
-.urgence--normale  .db-echeance__deadline { background: $gray-100;  color: $gray-600; }
-
-// ══════════════════════════════════════════════════
 // SESSIONS PLANIFIÉES
 // ══════════════════════════════════════════════════
 .db-session-item {
@@ -635,21 +499,9 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     flex-shrink: 0;
   }
 
-  &__day {
-    font-size: 16px;
-    font-weight: 800;
-    color: $blue;
-    line-height: 1;
-  }
-
-  &__month {
-    font-size: 10px;
-    font-weight: 600;
-    color: $blue;
-    text-transform: uppercase;
-  }
-
-  &__body { flex: 1; min-width: 0; }
+  &__day   { font-size: 16px; font-weight: 800; color: $blue; line-height: 1; }
+  &__month { font-size: 10px; font-weight: 600; color: $blue; text-transform: uppercase; }
+  &__body  { flex: 1; min-width: 0; }
 
   &__titre {
     font-size: 13px;
@@ -697,29 +549,19 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
 }
 
 // ══════════════════════════════════════════════════
-// CHARTS HEADER
+// CHARTS
 // ══════════════════════════════════════════════════
 .db-charts-header {
-  &__title {
-    font-size: 16px;
-    font-weight: 700;
-    color: $gray-900;
-    margin: 0 0 4px;
-  }
-  &__sub { font-size: 13px; color: $gray-600; margin: 0; }
+  &__title { font-size: 16px; font-weight: 700; color: $gray-900; margin: 0 0 4px; }
+  &__sub   { font-size: 13px; color: $gray-600; margin: 0; }
 }
 
-// ══════════════════════════════════════════════════
-// CHART CARDS
-// ══════════════════════════════════════════════════
 .db-chart-card {
   background: white;
   border: 1px solid $gray-200;
   border-radius: $radius-md;
   padding: 18px 16px;
   box-shadow: $shadow-sm;
-
-  &--full { grid-column: 1 / -1; }
 
   &--highlight {
     border-top: 3px solid $teal;
@@ -742,7 +584,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     font-weight: 700;
     padding: 2px 8px;
     border-radius: 4px;
-
     &--teal { background: $teal-lt; color: $teal; }
   }
 
@@ -770,9 +611,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   @media (max-width: 768px) { grid-template-columns: 1fr; }
 }
 
-// ══════════════════════════════════════════════════
-// KPI STAT CARD (dans la grille graphiques)
-// ══════════════════════════════════════════════════
 .db-kpi-stat {
   display: flex;
   align-items: center;
@@ -793,17 +631,14 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     &--green { background: $green-lt; color: $green; }
   }
 
-  &__label { font-size: 12px; color: $gray-600; }
-
-  &__value  { font-size: 22px; font-weight: 800; color: $gray-900; }
-
+  &__label    { font-size: 12px; color: $gray-600; }
+  &__value    { font-size: 22px; font-weight: 800; color: $gray-900; }
   &__bar-wrap { padding: 4px 0 2px; }
-
-  &__pct { font-size: 11px; color: $gray-400; display: block; margin-top: 4px; }
+  &__pct      { font-size: 11px; color: $gray-400; display: block; margin-top: 4px; }
 }
 
 // ══════════════════════════════════════════════════
-// OBJECTIFS SECTIONS
+// OBJECTIFS
 // ══════════════════════════════════════════════════
 .db-objectif-section {
   background: white;
@@ -836,18 +671,8 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     &--purple { background: $purple-lt; color: $purple; }
   }
 
-  &__title {
-    font-size: 15px;
-    font-weight: 700;
-    color: $gray-900;
-    margin: 0 0 4px;
-  }
-
-  &__sub {
-    font-size: 12px;
-    color: $gray-600;
-    margin: 0;
-  }
+  &__title { font-size: 15px; font-weight: 700; color: $gray-900; margin: 0 0 4px; }
+  &__sub   { font-size: 12px; color: $gray-600; margin: 0; }
 }
 
 .db-objectif-progress {
@@ -889,12 +714,10 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     font-size: 12px;
     color: $gray-600;
     margin-top: 8px;
-
     &--success { color: $green; font-weight: 600; }
   }
 }
 
-// PDI KPI Grid
 .db-pdi-grid {
   display: flex;
   gap: 24px;
@@ -905,23 +728,10 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   flex: 1;
   min-width: 120px;
 
-  &__value {
-    font-size: 26px;
-    font-weight: 800;
-    color: $teal;
-    line-height: 1;
-  }
-
-  &__label {
-    font-size: 12px;
-    color: $gray-600;
-    margin-top: 4px;
-  }
+  &__value { font-size: 26px; font-weight: 800; color: $teal; line-height: 1; }
+  &__label { font-size: 12px; color: $gray-600; margin-top: 4px; }
 }
 
-// ══════════════════════════════════════════════════
-// COMING INLINE
-// ══════════════════════════════════════════════════
 .db-coming-inline {
   display: flex;
   align-items: center;
@@ -934,7 +744,7 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
 }
 
 // ══════════════════════════════════════════════════
-// FUTURE GRID (KPI à venir)
+// FUTURE GRID
 // ══════════════════════════════════════════════════
 .db-future-grid {
   display: grid;
@@ -975,24 +785,15 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     &--red    { background: $red-lt;    color: $red; }
   }
 
-  &__title {
-    font-size: 14px;
-    font-weight: 700;
-    color: $gray-900;
-    margin-bottom: 4px;
-  }
-
-  &__desc { font-size: 12px; color: $gray-400; margin: 0 0 12px; }
+  &__title { font-size: 14px; font-weight: 700; color: $gray-900; margin-bottom: 4px; }
+  &__desc  { font-size: 12px; color: $gray-400; margin: 0 0 12px; }
 
   &__placeholder {
     display: flex;
     flex-direction: column;
     gap: 8px;
 
-    &--circles {
-      flex-direction: row;
-      gap: 6px;
-    }
+    &--circles { flex-direction: row; gap: 6px; }
   }
 }
 
@@ -1005,7 +806,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   border-radius: 4px;
 }
 
-// Placeholder shimmer
 %shimmer {
   background: linear-gradient(90deg, $gray-100 25%, $gray-50 50%, $gray-100 75%);
   background-size: 200% 100%;
@@ -1018,24 +818,147 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   100% { background-position: -200% 0; }
 }
 
-.db-placeholder-bar {
-  @extend %shimmer;
-  height: 10px;
-}
-
+.db-placeholder-bar    { @extend %shimmer; height: 10px; }
 .db-placeholder-circle {
   @extend %shimmer;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  flex-shrink: 0;
-
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
   &--ghost { opacity: .4; }
 }
-
 .db-placeholder-rank,
-.db-placeholder-score {
-  font-size: 28px;
-  font-weight: 800;
-  color: $gray-200;
+.db-placeholder-score  { font-size: 28px; font-weight: 800; color: $gray-200; }
+
+// ══════════════════════════════════════════════════
+// ÉCHÉANCES — design cards
+// ══════════════════════════════════════════════════
+.ech-item {
+  display:       flex;
+  align-items:   center;
+  gap:           12px;
+  padding:       12px 14px;
+  margin-bottom: 8px;
+  background:    var(--color-background-primary);
+  border:        0.5px solid var(--color-border-tertiary);
+  border-left:   4px solid transparent;
+  border-radius: 0 12px 12px 0;
+  transition:    background 0.3s;
+
+  // ── ≤ 4 jours → rouge + clignote ──
+  &--urgent,
+  &--critique {
+    border-left-color: #E24B4A;
+    background:        #FCEBEB;
+    animation:         ech-pulse 2.2s ease-in-out infinite;
+  }
+
+  // ── 5-14 jours → orange, fixe, fond blanc ──
+  &--moyenne {
+    border-left-color: #EF9F27;
+    background:        white;
+  }
+
+  // ── > 14 jours → vert, fixe ──
+  &--normale {
+    border-left-color: #1D9E75;
+  }
 }
+
+@keyframes ech-pulse {
+  0%, 100% { background: #FCEBEB; }
+  50%       { background: #F7C1C1; }
+}
+
+.ech-countdown {
+  flex-shrink: 0;
+  width:       52px;
+  height:      52px;
+  position:    relative;
+
+  svg { transform: rotate(-90deg); }
+
+  &__track { stroke: var(--color-border-tertiary); fill: none; }
+
+  &__fill {
+    fill:           none;
+    stroke-linecap: round;
+    transition:     stroke-dashoffset 0.6s ease;
+  }
+
+  &__label {
+    position:        absolute;
+    inset:           0;
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    font-size:       13px;
+    font-weight:     500;
+    color:           var(--color-text-primary);
+    line-height:     1.1;
+  }
+
+  &__unit { font-size: 9px; color: var(--color-text-secondary); }
+}
+
+.ech-body  { flex: 1; min-width: 0; }
+
+.ech-title {
+  font-size:     14px;
+  font-weight:   500;
+  color:         var(--color-text-primary);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.ech-meta {
+  display:       flex;
+  align-items:   center;
+  gap:           6px;
+  margin-bottom: 5px;
+
+  &__prog { font-size: 11px; color: var(--color-text-secondary); }
+}
+
+.ech-badge {
+  font-size:     11px;
+  font-weight:   500;
+  padding:       2px 8px;
+  border-radius: var(--border-radius-md);
+  color:         #fff;
+}
+
+.ech-prog-wrap { display: flex; align-items: center; gap: 8px; }
+
+.ech-prog-bar {
+  flex:          1;
+  height:        4px;
+  background:    var(--color-border-tertiary);
+  border-radius: 2px;
+  overflow:      hidden;
+}
+
+.ech-prog-fill {
+  height:        100%;
+  border-radius: 2px;
+  transition:    width 0.6s ease;
+}
+
+.ech-prog-pct { font-size: 11px; color: var(--color-text-secondary); min-width: 28px; text-align: right; }
+
+.ech-urgence {
+  flex-shrink: 0;
+  text-align:  center;
+
+  &__label {
+    font-size:     12px;
+    font-weight:   500;
+    padding:       3px 10px;
+    border-radius: 20px;
+    white-space:   nowrap;
+
+    &--rouge  { background: #FCEBEB; color: #A32D2D; }
+    &--orange { background: #FAEEDA; color: #854F0B; }
+    &--vert   { background: #EAF3DE; color: #3B6D11; }
+  }
+} 

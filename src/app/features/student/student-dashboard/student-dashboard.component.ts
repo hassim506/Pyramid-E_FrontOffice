@@ -7,14 +7,10 @@ import { DemandeFormationService } from '../../../shared/service/demande/demande
 
 declare var ApexCharts: any;
 
-// ══════════════════════════════════════════════════
-// INTERFACES
-// ══════════════════════════════════════════════════
-
 interface Echeance {
   id:           number;
   titre:        string;
-  type:         'formation' | 'parcours' | 'session' | 'obligatoire';
+  type:         'formation' | 'parcours' | 'session' | 'obligatoire' | 'catalogue';
   deadline:     string;
   joursRestants:number;
   progression:  number;
@@ -37,8 +33,9 @@ interface DashStats {
       en_cours:        number;
       terminees:       number;
       progression_moy: number;
-      taux_completion: number;   // formations terminées / total assignées
-      taux_achevement: number;   // alias taux_completion pour rétro-compat
+      taux:            number;
+      taux_completion: number;
+      taux_achevement: number;
       obligatoires_total:     number;
       obligatoires_terminees: number;
       taux_obligatoires:      number;
@@ -93,21 +90,17 @@ interface DashStats {
 })
 export class StudentDashboardComponent implements OnInit, OnDestroy {
 
-  // ── ÉTAT ─────────────────────────────────────────
   loading = true;
   stats: DashStats | null = null;
 
-  // ── FILTRES ───────────────────────────────────────
   periodeMode: 'mois' | 'annee' = 'mois';
   selectedAnnee = new Date().getFullYear();
   selectedMois  = new Date().getMonth() + 1;
   annees: number[] = [];
   moisLabels = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
 
-  // ── ONGLET ACTIF ──────────────────────────────────
   activeTab: 'aujourdhui' | 'progression' | 'objectifs' = 'aujourdhui';
 
-  // ── GRAPHIQUES ────────────────────────────────────
   private charts: { [key: string]: any } = {};
 
   constructor(
@@ -125,12 +118,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.destroyAllCharts();
   }
 
-  // ════════════════════════════════════════════════
-  // CHARGEMENT
-  // ════════════════════════════════════════════════
   loadStats(): void {
     this.loading = true;
-    this.destroyAllCharts(); // reset complet avant rechargement
+    this.destroyAllCharts();
 
     this.formationsService.getDashboardStats({
       periode: this.periodeMode,
@@ -170,7 +160,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
       const courbes = this.buildCourbesAngular(formations, demandes, certs);
 
-      // Calcul échéances depuis les formations en cours
       const echeances: Echeance[] = formations
         .filter((f: any) => f.statut_formation === 'en_cours' && f.date_fin_prevue)
         .map((f: any) => {
@@ -197,6 +186,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             en_cours:               enCours.length,
             terminees:              terminees.length,
             progression_moy:        Math.round(progMoy * 10) / 10,
+            taux:                   tauxCompletion,
             taux_completion:        tauxCompletion,
             taux_achevement:        tauxCompletion,
             obligatoires_total:     formations.filter((f: any) => f.est_obligatoire).length,
@@ -240,17 +230,14 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }).catch(() => { this.loading = false; });
   }
 
-  // ════════════════════════════════════════════════
-  // COURBES CÔTÉ ANGULAR
-  // ════════════════════════════════════════════════
   private buildCourbesAngular(formations: any[], demandes: any[], certs: any[]): DashStats['courbes'] {
-    const labels: string[]            = [];
-    const fTerminees: number[]        = [];
-    const certObt: number[]           = [];
-    const demSoum: number[]           = [];
-    const heures: number[]            = [];
-    const progParcours: number[]      = [];
-    const tauxCompletion: number[]    = [];
+    const labels: string[]         = [];
+    const fTerminees: number[]     = [];
+    const certObt: number[]        = [];
+    const demSoum: number[]        = [];
+    const heures: number[]         = [];
+    const progParcours: number[]   = [];
+    const tauxCompletion: number[] = [];
 
     const base = this.periodeMode === 'annee' ? 5 : 12;
 
@@ -278,19 +265,15 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       );
 
       fTerminees.push(termCePeriode.length);
-
       certObt.push(certs.filter(c =>
         c.created_at && new Date(c.created_at) >= debut && new Date(c.created_at) <= fin
       ).length);
-
       demSoum.push(demandes.filter(d =>
         d.created_at && new Date(d.created_at) >= debut && new Date(d.created_at) <= fin
       ).length);
-
       heures.push(termCePeriode.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0));
       progParcours.push(0);
 
-      // Taux de complétion cumulatif jusqu'à cette période
       const totalJusqueLa = formations.filter(f =>
         f.created_at && new Date(f.created_at) <= fin
       ).length;
@@ -309,12 +292,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  // ════════════════════════════════════════════════
-  // ONGLETS
-  // ════════════════════════════════════════════════
   setTab(tab: 'aujourdhui' | 'progression' | 'objectifs'): void {
     this.activeTab = tab;
-    // Laisser Angular terminer le rendu *ngIf avant d'injecter ApexCharts
     this.scheduleCharts();
   }
 
@@ -322,10 +301,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   onAnneeChange(): void   { this.loadStats(); }
   onMoisChange(): void    { this.loadStats(); }
 
-  /**
-   * Retry à 200 / 600 / 1500ms — couvre les cas où Angular CD
-   * n'a pas encore rendu les éléments *ngIf au premier tick.
-   */
   private scheduleCharts(): void {
     [200, 600, 1500].forEach(delay => {
       setTimeout(() => {
@@ -345,9 +320,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  // ════════════════════════════════════════════════
-  // APEX CHARTS
-  // ════════════════════════════════════════════════
   private destroyAllCharts(): void {
     Object.values(this.charts).forEach(c => { try { c?.destroy(); } catch {} });
     this.charts = {};
@@ -356,7 +328,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   private initChartsPourOnglet(): void {
     if (!this.stats) return;
 
-    // Ne pas re-rendre si les charts de cet onglet existent déjà
     const firstId = this.getFirstChartId();
     if (firstId && this.charts[firstId]) return;
 
@@ -396,10 +367,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Radial taux complétion toujours visible sur Aujourd'hui
     if (this.activeTab === 'aujourdhui') {
       this.renderRadial('chart-radial-completion',
-        this.stats.kpi.formations.taux_completion, '#069b8f', 'Complétion');
+        this.tauxCompletionGlobal, '#069b8f', 'Complétion');
       this.renderRadial('chart-radial-heures',
         this.stats.kpi.heures.taux_objectif, '#f59e0b', 'Objectif h.');
       if (this.stats.kpi.formations.obligatoires_total > 0) {
@@ -479,8 +449,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     const el = document.getElementById(id);
     if (!el) return;
     try {
+      const safeValue = isNaN(value) || value == null ? 0 : Math.round(value);
       const chart = new ApexCharts(el, {
-        series: [Math.round(value)],
+        series: [safeValue],
         chart:  { type: 'radialBar', height: 140, toolbar: { show: false } },
         colors: [color],
         plotOptions: {
@@ -511,11 +482,30 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return '#ef4444';
   }
 
+  // ── FIX : ≤ 4j → rouge | > 4j et ≤ 14j → orange | > 14j → vert ──
   getUrgenceClass(e: Echeance): string {
-    if (e.joursRestants <= 3)  return 'urgence--critique';
-    if (e.joursRestants <= 7)  return 'urgence--haute';
-    if (e.joursRestants <= 14) return 'urgence--moyenne';
-    return 'urgence--normale';
+    if (e.joursRestants <= 4)  return 'ech-item--critique';
+    if (e.joursRestants <= 14) return 'ech-item--moyenne';
+    return 'ech-item--normale';
+  }
+
+  getUrgenceLabelClass(e: Echeance): string {
+    if (e.joursRestants <= 4)  return 'ech-urgence__label--rouge';
+    if (e.joursRestants <= 14) return 'ech-urgence__label--orange';
+    return 'ech-urgence__label--vert';
+  }
+
+  getUrgenceStroke(e: Echeance): string {
+    if (e.joursRestants <= 4)  return '#E24B4A';
+    if (e.joursRestants <= 14) return '#EF9F27';
+    return '#1D9E75';
+  }
+
+  getCountdownOffset(joursRestants: number): number {
+    const circonference = 138.2;
+    const max = 30;
+    const ratio = Math.min(joursRestants, max) / max;
+    return Math.round(circonference * (1 - ratio));
   }
 
   getUrgenceLabel(j: number): string {
@@ -523,6 +513,32 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     if (j === 1) return 'Demain';
     if (j <= 7)  return `Dans ${j}j`;
     return `Dans ${j}j`;
+  }
+
+  getTypeLabel(type: Echeance['type']): string {
+    const map: Record<Echeance['type'], string> = {
+      obligatoire: 'Obligatoire',
+      formation:   'Formation',
+      parcours:    'Parcours',
+      catalogue:   'Catalogue',
+      session:     'Session',
+    };
+    return map[type] ?? type;
+  }
+
+  getTypeColor(type: Echeance['type']): string {
+    const map: Record<Echeance['type'], string> = {
+      obligatoire: '#ef4444',
+      formation:   '#069b8f',
+      parcours:    '#7c3aed',
+      catalogue:   '#3b82f6',
+      session:     '#f59e0b',
+    };
+    return map[type] ?? '#9ca3af';
+  }
+
+  hasProgression(type: Echeance['type']): boolean {
+    return type !== 'catalogue';
   }
 
   get echeancesUrgentes(): Echeance[] {
@@ -538,7 +554,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   get tauxCompletionGlobal(): number {
-    return this.stats?.kpi.formations.taux_completion ?? 0;
+    const f = this.stats?.kpi?.formations;
+    if (!f) return 0;
+    const raw = f.taux_completion ?? f.taux ?? f.taux_achevement ?? 0;
+    return isNaN(raw) ? 0 : raw;
   }
 
   get heuresRestantes(): number {

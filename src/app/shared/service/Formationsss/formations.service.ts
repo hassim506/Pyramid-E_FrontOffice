@@ -63,11 +63,18 @@ export class FormationsService {
   }
 
   // ===============================
-  // 📝 DEMANDES FORMATION - LISTES FILTRÉES
+  // 📝 DEMANDES FORMATION — LISTES FILTRÉES
   // ===============================
 
   getSessionsOuvertes(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/sessions`, { headers: this.getHeaders() });
+  }
+  
+    getMesSessionsAcceptees(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/sessions/acceptees`, { headers: this.getHeaders() });
+  }
+    getSessionDetail(sessionId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/sessions/${sessionId}/detail`, { headers: this.getHeaders() });
   }
 
   getCatalogues(): Observable<any> {
@@ -79,71 +86,60 @@ export class FormationsService {
   }
 
   // ===============================
-  // 🗺️ PARCOURS — FLUX 3 NIVEAUX
+  // 🗺️ PARCOURS — FLUX 3 NIVEAUX (demandes)
   // ===============================
 
-  /**
-   * Étape 1 — Parcours filtrés par domaine + entreprise
-   * GET /demandes-formation/listes/parcours
-   */
   getParcoursDisponibles(): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/demandes-formation/listes/parcours`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/parcours`, { headers: this.getHeaders() });
   }
 
-  /**
-   * Détail complet d'un parcours (modal détail)
-   * GET /parcours/{id}/details
-   */
   getParcoursDetails(parcoursId: number): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/parcours/${parcoursId}/details`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<any>(`${this.apiUrl}/parcours/${parcoursId}/details`, { headers: this.getHeaders() });
   }
 
-  /**
-   * Étape 2 — Catégorie du parcours (via categorie_id direct)
-   * GET /demandes-formation/listes/parcours/{parcoursId}/categories
-   */
   getCategoriesDuParcours(parcoursId: number): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/demandes-formation/listes/parcours/${parcoursId}/categories`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/parcours/${parcoursId}/categories`, { headers: this.getHeaders() });
   }
 
-  /**
-   * Étape 3 — Formations de la catégorie dans le parcours
-   * GET /demandes-formation/listes/parcours/{parcoursId}/categories/{categorieId}/formations
-   */
   getFormationsDuParcoursParCategorie(parcoursId: number, categorieId: number): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/demandes-formation/listes/parcours/${parcoursId}/categories/${categorieId}/formations`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/parcours/${parcoursId}/categories/${categorieId}/formations`, { headers: this.getHeaders() });
   }
 
-  /** Gardé pour usage optionnel ailleurs */
   getParcoursParCategorie(categorieId: number): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/demandes-formation/listes/parcours/${categorieId}`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/parcours/${categorieId}`, { headers: this.getHeaders() });
   }
 
   getFormationsByCategorie(categorieId: number): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/demandes-formation/listes/formations/categories-formation/${categorieId}`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/formations/categories-formation/${categorieId}`, { headers: this.getHeaders() });
   }
 
+  // ===============================
+  // 🗺️ PARCOURS — EMPLOYÉ (assignés + progression)
+  // ===============================
+
+  /**
+   * Liste des parcours assignés + progression calculée
+   * GET /api/demandes-formation/parcours/assignes
+   */
   getMesParcoursAssignes(): Observable<any> {
-  return this.http.get<any>(`${this.apiUrl}/demandes-formation/parcours/assignes`, { headers: this.getHeaders() });
-}
+    return this.http.get<any>(`${this.apiUrl}/demandes-formation/parcours/assignes`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Détail d'un parcours avec formations + progression individuelle
+   * GET /api/parcours/{id}/detail
+   */
+  getParcoursDetail(parcoursId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/parcours/${parcoursId}/detail`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Refresh progression rapide (appelé après retour de la lecture)
+   * GET /api/parcours/{id}/progression
+   */
+  getParcoursProgression(parcoursId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/parcours/${parcoursId}/progression`, { headers: this.getHeaders() });
+  }
 
   // ===============================
   // 🏢 CATALOGUES EMPLOYÉ
@@ -153,13 +149,26 @@ export class FormationsService {
     return this.http.get<any>(`${this.apiUrl}/employe/catalogues`, { headers: this.getHeaders() });
   }
 
-  getCatalogueDetail(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/employe/catalogues/${id}`, { headers: this.getHeaders() });
-  }
-  
   getMesCataloguesAssignes(): Observable<any> {
-  return this.http.get<any>(`${this.apiUrl}/catalogues/assignes`, { headers: this.getHeaders() });
-}
+    return this.http.get<any>(`${this.apiUrl}/catalogues/assignes`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Détail catalogue (header + formations)
+   * GET /api/catalogues/{id}
+   */
+  getCatalogueDetail(catalogueId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/catalogues/${catalogueId}`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Progression catalogue (formations + % par formation)
+   * GET /api/catalogues/{id}/progression
+   */
+  getCatalogueProgression(catalogueId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/catalogues/${catalogueId}/progression`, { headers: this.getHeaders() });
+  }
+
   // ===============================
   // 🔁 DEMANDES
   // ===============================
@@ -167,28 +176,16 @@ export class FormationsService {
   relancerDemande(id: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/demandes/${id}/relancer`, {}, { headers: this.getHeaders() });
   }
-  /**
- * Récupère les statistiques complètes pour le dashboard employé.
- * Endpoint : GET /api/mes-statistiques-dashboard
- *
- * @param params { periode: 'mois'|'annee', annee: number, mois: number }
- */
-getDashboardStats(params: { periode: string; annee: number; mois: number }): Observable<any> {
-  const httpParams = new HttpParams()
-    .set('periode', params.periode)
-    .set('annee',   String(params.annee))
-    .set('mois',    String(params.mois));
 
-  return this.http.get(`${this.apiUrl}/mes-statistiques-dashboard`, { params: httpParams });
-}
+  // ===============================
+  // 📊 DASHBOARD EMPLOYÉ
+  // ===============================
 
-//progressionParcours
-getParcoursProgression(parcoursId: number): Observable<any> {
-  return this.http.get(`${this.apiUrl}/parcours/${parcoursId}/progression`);
-}
-
-//progressionCatalogue
-getCatalogueProgression(catalogueId: number): Observable<any> {
-  return this.http.get(`${this.apiUrl}/catalogues/${catalogueId}/progression`);
-}
+  getDashboardStats(params: { periode: string; annee: number; mois: number }): Observable<any> {
+    const httpParams = new HttpParams()
+      .set('periode', params.periode)
+      .set('annee',   String(params.annee))
+      .set('mois',    String(params.mois));
+    return this.http.get(`${this.apiUrl}/mes-statistiques-dashboard`, { params: httpParams });
+  }
 }

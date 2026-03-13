@@ -1,0 +1,528 @@
+<!-- HEADER -->
+<div class="sc-header">
+  <div class="sc-header__left">
+    <h1 class="sc-header__title">Mes Sessions</h1>
+    <p class="sc-header__subtitle">Sessions assignées et demandes acceptées par votre entreprise</p>
+  </div>
+  <div class="sc-header__right" *ngIf="!loading && allSessions.length > 0">
+    <span class="sc-header__count">
+      <i class="isax isax-calendar-1"></i>
+      {{ totalItems }} session{{ totalItems > 1 ? 's' : '' }}
+    </span>
+  </div>
+</div>
+
+<!-- FILTRES -->
+<div class="sc-filters" *ngIf="!loading && allSessions.length > 0">
+  <div class="sc-filters__search">
+    <i class="isax isax-search-normal sc-filters__search-icon"></i>
+    <input type="text" class="sc-filters__search-input"
+           placeholder="Rechercher une session..."
+           [(ngModel)]="searchTerm"
+           (ngModelChange)="onSearchChange()">
+    <button *ngIf="searchTerm" class="sc-filters__search-clear"
+            (click)="searchTerm = ''; onSearchChange()">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+
+  <div class="sc-filters__types">
+    <button *ngFor="let f of filtres"
+            class="sc-filters__type-btn"
+            [class.sc-filters__type-btn--active]="selectedFiltre === f.value"
+            (click)="onFiltreChange(f.value)">
+      <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
+    </button>
+  </div>
+
+  <button class="sc-filters__reset" *ngIf="hasActiveFilters" (click)="clearFilters()">
+    <i class="isax isax-refresh"></i> Réinitialiser
+  </button>
+</div>
+
+<!-- RÉSULTAT FILTRE -->
+<div class="sc-results-info" *ngIf="!loading && hasActiveFilters && filteredSessions.length > 0">
+  <i class="isax isax-filter"></i>
+  <span>{{ totalItems }} résultat{{ totalItems > 1 ? 's' : '' }}</span>
+  <button class="sc-results-info__clear" (click)="clearFilters()">Effacer les filtres</button>
+</div>
+
+<!-- LOADER -->
+<div class="sc-loading" *ngIf="loading">
+  <div class="sc-loading__spinner"></div>
+  <p>Chargement de vos sessions...</p>
+</div>
+
+<!-- ERREUR -->
+<div class="sc-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2 sc-error__icon"></i>
+  <p>{{ error }}</p>
+  <button class="sc-error__retry" (click)="loadSessions()">
+    <i class="isax isax-refresh me-1"></i> Réessayer
+  </button>
+</div>
+
+<!-- GRILLE SESSIONS -->
+<div class="row g-4" *ngIf="!loading && displayedSessions.length > 0">
+  <div class="col-xl-4 col-md-6" *ngFor="let session of displayedSessions">
+    <div class="session-card"
+         [class.session-card--termine]="session.est_termine"
+         [class.session-card--a-venir]="session.est_a_venir"
+         (click)="ouvrirDetail(session)">
+
+      <!-- BANNIÈRE -->
+      <div class="session-card__banner">
+        <div class="session-card__banner-bg"
+             [style.background-image]="session.image_couverture ? 'url(' + session.image_couverture + ')' : 'none'">
+        </div>
+        <div class="session-card__banner-overlay"></div>
+        <i [class]="getTypeIcon(session.type) + ' session-card__banner-icon'"></i>
+
+        <!-- Badge Complété -->
+        <div class="session-card__banner-termine" *ngIf="session.est_termine">
+          <i class="isax isax-medal-star me-1"></i>Complété
+        </div>
+
+        <!-- Badge À venir -->
+        <div class="session-card__banner-avenir" *ngIf="session.est_a_venir && !session.est_termine">
+          <i class="isax isax-clock me-1"></i>À venir
+        </div>
+
+        <!-- Badge source -->
+        <span class="session-card__banner-assigned">
+          <i class="isax isax-send-2 me-1"></i>Demande acceptée
+        </span>
+
+        <!-- Badge type -->
+        <span class="session-card__banner-badge">
+          {{ getTypeLabel(session.type) }}
+        </span>
+      </div>
+
+      <!-- BODY -->
+      <div class="session-card__body">
+        <h5 class="session-card__title">{{ session.titre }}</h5>
+        <p class="session-card__description">
+          {{ session.description || 'Aucune description disponible' }}
+        </p>
+
+        <!-- Stats -->
+        <div class="session-card__stats">
+          <div class="session-card__stat" *ngIf="session.date_debut">
+            <i class="isax isax-calendar-2"></i>
+            <span>{{ session.date_debut | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="session-card__stat" *ngIf="session.duree_jours">
+            <i class="isax isax-clock"></i>
+            <span>{{ session.duree_jours }} jour{{ session.duree_jours > 1 ? 's' : '' }}</span>
+          </div>
+          <div class="session-card__stat" *ngIf="session.lieu">
+            <i class="isax isax-location"></i>
+            <span>{{ session.lieu }}</span>
+          </div>
+          <div class="session-card__stat session-card__stat--award" *ngIf="session.certificat_delivre">
+            <i class="isax isax-award"></i>
+            <span>Certifiante</span>
+          </div>
+        </div>
+
+        <!-- PROGRESSION / ÉTAT -->
+        <div class="session-card__progression" *ngIf="session.est_termine || session.progression != null">
+          <div class="session-card__termine" *ngIf="session.est_termine">
+            <i class="isax isax-medal-star me-1"></i>Session complétée !
+          </div>
+          <div *ngIf="!session.est_termine && session.progression != null">
+            <div class="session-card__prog-header">
+              <span class="session-card__prog-label">Progression</span>
+              <span class="session-card__prog-pct"
+                    [style.color]="session.progression > 0 ? '#069b8f' : '#9ca3af'">
+                {{ session.progression | number:'1.0-0' }}%
+              </span>
+            </div>
+            <div class="session-card__prog-bar">
+              <div class="session-card__prog-fill" [style.width.%]="session.progression"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="session-card__assignation">
+          <div class="session-card__assignation-date" *ngIf="session.date_debut">
+            <i class="isax isax-calendar-2 me-1"></i>
+            {{ session.date_debut | date:'dd/MM/yyyy' }}
+            <span *ngIf="session.date_fin"> → {{ session.date_fin | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="session-card__assignation-date" *ngIf="session.date_assignation">
+            <i class="isax isax-tick-circle me-1"></i>
+            Validée le {{ session.date_assignation | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="session-card__footer">
+          <button class="session-card__btn"
+                  [class.session-card__btn--done]="session.est_termine"
+                  [class.session-card__btn--avenir]="session.est_a_venir && !session.est_termine">
+            <ng-container *ngIf="session.est_termine">
+              <i class="isax isax-medal-star me-1"></i>Revoir la session
+            </ng-container>
+            <ng-container *ngIf="!session.est_termine && session.est_a_venir">
+              <i class="isax isax-calendar-1 me-1"></i>Voir les détails
+            </ng-container>
+            <ng-container *ngIf="!session.est_termine && !session.est_a_venir">
+              <i class="isax isax-play-circle me-1"></i>Accéder à la session
+            </ng-container>
+            <i class="isax isax-arrow-right-3"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EMPTY -->
+<div class="sc-empty" *ngIf="!loading && !error && allSessions.length === 0">
+  <i class="isax isax-calendar-1 sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucune session disponible</h6>
+  <p>Vous n'avez pas encore de sessions dont la demande a été acceptée.</p>
+</div>
+
+<div class="sc-empty" *ngIf="!loading && !error && allSessions.length > 0 && filteredSessions.length === 0">
+  <i class="isax isax-search-normal sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun résultat</h6>
+  <p>Aucune session ne correspond à votre recherche.</p>
+  <button class="sc-empty__btn" (click)="clearFilters()">
+    <i class="isax isax-refresh me-1"></i> Réinitialiser les filtres
+  </button>
+</div>
+
+<!-- PAGINATION -->
+<div class="sc-pagination" *ngIf="!loading && totalPages > 1">
+  <span class="sc-pagination__info">
+    Page {{ currentPage }} / {{ totalPages }}
+    <span class="sc-pagination__info-total">({{ totalItems }} sessions)</span>
+  </span>
+  <div class="sc-pagination__controls">
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(1)">
+      <i class="isax isax-arrow-left-3"></i>
+    </button>
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+      <i class="isax isax-arrow-left-2"></i>
+    </button>
+    <span class="sc-pagination__ellipsis" *ngIf="pages[0] > 1">…</span>
+    <button *ngFor="let p of pages"
+            class="sc-pagination__btn"
+            [class.sc-pagination__btn--active]="currentPage === p"
+            (click)="changePage(p)">{{ p }}</button>
+    <span class="sc-pagination__ellipsis" *ngIf="pages[pages.length - 1] < totalPages">…</span>
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+      <i class="isax isax-arrow-right-2"></i>
+    </button>
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+      <i class="isax isax-arrow-right-3"></i>
+    </button>
+  </div>
+</div>
+
+
+<!-- ============================================================= -->
+<!-- MODAL DÉTAIL SESSION ACCEPTÉE                                 -->
+<!-- ============================================================= -->
+<div class="modal fade" id="sessionDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content lms-modal" *ngIf="sessionSelectionnee">
+
+      <!-- Header coloré selon type -->
+      <div class="modal-header lms-modal__header"
+           [style.background]="getTypeGradient(sessionSelectionnee.type)">
+        <div class="d-flex align-items-center gap-3">
+          <div class="lms-modal__icon">
+            <i [class]="getTypeIcon(sessionSelectionnee.type)"></i>
+          </div>
+          <div>
+            <h5 class="modal-title mb-0">{{ sessionSelectionnee.titre }}</h5>
+            <small>
+              <i class="isax isax-send-2 me-1"></i>Demande acceptée le
+              {{ sessionSelectionnee.date_assignation | date:'dd/MM/yyyy' }}
+            </small>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" (click)="fermerDetail()"></button>
+      </div>
+
+      <div class="modal-body lms-modal__body">
+
+        <!-- Chips statut -->
+        <div class="lms-detail-chips mb-4">
+          <div class="lms-detail-chips__left gap-2 flex-wrap">
+
+            <!-- Statut session -->
+            <span class="lms-meta-chip lms-meta-chip--success" *ngIf="sessionSelectionnee.est_termine">
+              <i class="isax isax-medal-star me-1"></i>Complétée
+            </span>
+            <span class="lms-meta-chip lms-meta-chip--teal" *ngIf="sessionSelectionnee.est_a_venir">
+              <i class="isax isax-clock me-1"></i>À venir
+            </span>
+            <span class="lms-meta-chip" *ngIf="!sessionSelectionnee.est_termine && !sessionSelectionnee.est_a_venir">
+              <i class="isax isax-play-circle me-1"></i>En cours
+            </span>
+
+            <!-- Type -->
+            <span class="lms-meta-chip lms-meta-chip--teal">
+              <i class="isax me-1" [ngClass]="getTypeIcon(sessionSelectionnee.type)"></i>
+              {{ getTypeLabel(sessionSelectionnee.type) }}
+            </span>
+
+            <!-- Certifiante -->
+            <span class="lms-meta-chip lms-meta-chip--award" *ngIf="sessionSelectionnee.certificat_delivre">
+              <i class="isax isax-award me-1"></i>Certifiante
+            </span>
+
+            <!-- Certificat obtenu -->
+            <span class="lms-meta-chip lms-meta-chip--success"
+                  *ngIf="sessionSelectionnee.certificat_obtenu">
+              <i class="isax isax-medal-star me-1"></i>Certificat obtenu
+            </span>
+
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- SECTION 1 — Informations de la session    -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="lms-detail-section mb-3">
+          <div class="lms-detail-section__title">
+            <i class="isax isax-calendar-1 me-2"></i>Informations de la session
+          </div>
+
+          <div class="row g-2 mt-2">
+
+            <div class="col-md-6" *ngIf="sessionSelectionnee.date_debut">
+              <div class="lms-info-item">
+                <i class="isax isax-calendar-2" style="color:#069b8f"></i>
+                <div>
+                  <small>Date de début</small>
+                  <strong>{{ sessionSelectionnee.date_debut | date:'dd/MM/yyyy' }}
+                    <span class="text-muted small ms-1">
+                      {{ sessionSelectionnee.date_debut | date:'HH:mm' }}
+                    </span>
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6" *ngIf="sessionSelectionnee.date_fin">
+              <div class="lms-info-item">
+                <i class="isax isax-calendar-tick" style="color:#069b8f"></i>
+                <div>
+                  <small>Date de fin</small>
+                  <strong>{{ sessionSelectionnee.date_fin | date:'dd/MM/yyyy' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6" *ngIf="sessionSelectionnee.duree_jours">
+              <div class="lms-info-item">
+                <i class="isax isax-clock" style="color:#069b8f"></i>
+                <div>
+                  <small>Durée</small>
+                  <strong>{{ sessionSelectionnee.duree_jours }} jour{{ sessionSelectionnee.duree_jours > 1 ? 's' : '' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6" *ngIf="sessionSelectionnee.lieu">
+              <div class="lms-info-item">
+                <i class="isax isax-location" style="color:#069b8f"></i>
+                <div>
+                  <small>{{ sessionSelectionnee.type === 'distanciel' ? 'Lien de connexion' : 'Lieu' }}</small>
+                  <strong>{{ sessionSelectionnee.lieu }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="lms-info-item">
+                <i class="isax isax-people" style="color:#069b8f"></i>
+                <div>
+                  <small>Participants</small>
+                  <strong>{{ sessionSelectionnee.nombre_inscrits }} / {{ sessionSelectionnee.capacite_max }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6" *ngIf="sessionSelectionnee.formation_titre">
+              <div class="lms-info-item">
+                <i class="isax isax-book-1" style="color:#069b8f"></i>
+                <div>
+                  <small>Formation associée</small>
+                  <strong>{{ sessionSelectionnee.formation_titre }}</strong>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- SECTION 2 — Mon statut de participation   -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="lms-detail-section mb-3">
+          <div class="lms-detail-section__title">
+            <i class="isax isax-chart me-2"></i>Mon statut de participation
+          </div>
+
+          <div class="cd-demande-detail mt-2">
+            <div class="cd-demande-row" *ngIf="sessionSelectionnee.statut_inscription">
+              <span class="cd-demande-label">Statut inscription</span>
+              <span>{{ getStatutInscriptionLabel(sessionSelectionnee.statut_inscription) }}</span>
+            </div>
+            <div class="cd-demande-row" *ngIf="sessionSelectionnee.statut_participation">
+              <span class="cd-demande-label">Statut participation</span>
+              <span>{{ getStatutParticipationLabel(sessionSelectionnee.statut_participation) }}</span>
+            </div>
+          </div>
+
+          <!-- Barre de progression -->
+          <div class="mt-3" *ngIf="!sessionSelectionnee.est_termine && sessionSelectionnee.progression != null">
+            <div class="session-card__prog-header">
+              <span class="session-card__prog-label">Progression</span>
+              <span class="session-card__prog-pct"
+                    [style.color]="sessionSelectionnee.progression > 0 ? '#069b8f' : '#9ca3af'">
+                {{ sessionSelectionnee.progression | number:'1.0-0' }}%
+              </span>
+            </div>
+            <div class="session-card__prog-bar">
+              <div class="session-card__prog-fill"
+                   [style.width.%]="sessionSelectionnee.progression"></div>
+            </div>
+          </div>
+
+          <!-- Complétée -->
+          <div class="session-card__termine mt-3" *ngIf="sessionSelectionnee.est_termine">
+            <i class="isax isax-medal-star me-1"></i>Session complétée !
+          </div>
+
+          <!-- Certificat obtenu -->
+          <div class="lms-detail-section lms-detail-section--success mt-3"
+               *ngIf="sessionSelectionnee.certificat_obtenu">
+            <div class="lms-detail-section__title">
+              <i class="isax isax-medal-star me-2"></i>Certificat obtenu
+            </div>
+            <p class="lms-detail-section__body">
+              Félicitations ! Vous avez obtenu votre certificat pour cette session.
+            </p>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- SECTION 3 — Accès à la session            -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="lms-detail-section mb-3">
+          <div class="lms-detail-section__title">
+            <i class="isax me-2"
+               [ngClass]="sessionSelectionnee.type === 'presentiel' ? 'isax-buildings-2' : 'isax-monitor'">
+            </i>
+            {{ sessionSelectionnee.type === 'presentiel' ? 'Accès présentiel' : 'Accès à la session' }}
+          </div>
+
+          <!-- DISTANCIEL / HYBRIDE : lien Zoom -->
+          <ng-container *ngIf="sessionSelectionnee.type !== 'presentiel'">
+
+            <!-- Cas 1 : lieu = URL directe -->
+            <div class="lms-access-link mt-2" *ngIf="isUrl(sessionSelectionnee.lieu)">
+              <i class="isax isax-video" style="color:#069b8f"></i>
+              <div>
+                <small>Lien de connexion</small>
+                <a [href]="sessionSelectionnee.lieu" target="_blank" rel="noopener"
+                   class="lms-access-link__url" (click)="$event.stopPropagation()">
+                  <i class="isax isax-export-2 me-1"></i>Rejoindre la session
+                </a>
+              </div>
+            </div>
+
+            <!-- Cas 2 : lieu = texte avec URL intégrée -->
+            <div class="lms-access-link mt-2"
+                 *ngIf="!isUrl(sessionSelectionnee.lieu) && extractUrl(sessionSelectionnee.lieu)">
+              <i class="isax isax-video" style="color:#069b8f"></i>
+              <div>
+                <small>Lien de connexion</small>
+                <a [href]="extractUrl(sessionSelectionnee.lieu)!" target="_blank" rel="noopener"
+                   class="lms-access-link__url" (click)="$event.stopPropagation()">
+                  <i class="isax isax-export-2 me-1"></i>Rejoindre la session
+                </a>
+                <span class="d-block mt-1" style="font-size:.78rem;color:#6b7280">
+                  {{ sessionSelectionnee.lieu }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Cas 3 : aucun lien disponible -->
+            <div class="lms-access-pending mt-2"
+                 *ngIf="!sessionSelectionnee.lieu && !sessionSelectionnee.instructions_acces">
+              <i class="isax isax-clock"></i>
+              <span>Le lien de connexion sera communiqué par email avant la session.</span>
+            </div>
+
+          </ng-container>
+
+          <!-- PRÉSENTIEL : adresse -->
+          <div class="lms-info-item mt-2"
+               *ngIf="sessionSelectionnee.type === 'presentiel' && sessionSelectionnee.lieu">
+            <i class="isax isax-location" style="color:#069b8f"></i>
+            <div>
+              <small>Adresse</small>
+              <strong>{{ sessionSelectionnee.lieu }}</strong>
+            </div>
+          </div>
+
+          <!-- Instructions (tous types) -->
+          <div class="lms-formation-desc mt-2" *ngIf="sessionSelectionnee.instructions_acces">
+            <div class="lms-formation-desc__label">
+              <i class="isax isax-info-circle"></i> Instructions
+            </div>
+            <p class="lms-formation-desc__text">{{ sessionSelectionnee.instructions_acces }}</p>
+          </div>
+
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- SECTION 4 — Ma demande                    -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="lms-detail-section mb-3">
+          <div class="lms-detail-section__title">
+            <i class="isax isax-send-2 me-2"></i>Ma demande
+          </div>
+          <div class="cd-demande-detail mt-2">
+            <div class="cd-demande-row">
+              <span class="cd-demande-label">Statut</span>
+              <span class="sc-statut statut-validee">Validée</span>
+            </div>
+            <div class="cd-demande-row" *ngIf="sessionSelectionnee.date_assignation">
+              <span class="cd-demande-label">Validée le</span>
+              <span>{{ sessionSelectionnee.date_assignation | date:'dd/MM/yyyy à HH:mm' }}</span>
+            </div>
+            <div class="cd-demande-row" *ngIf="sessionSelectionnee.notes">
+              <span class="cd-demande-label">Commentaire RH</span>
+              <span>{{ sessionSelectionnee.notes }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer lms-modal__footer lms-modal__footer--split">
+        <button class="btn lms-btn-cancel" (click)="fermerDetail()">
+          <i class="isax isax-close-square me-1"></i>Fermer
+        </button>
+        <!-- Bouton page détail — pour plus tard -->
+        <button class="btn lms-btn-submit" (click)="goToDetail(sessionSelectionnee.id)">
+          <i class="isax isax-arrow-right-3 me-1"></i>Voir la page complète
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

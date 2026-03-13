@@ -20,12 +20,10 @@ export class StudentCoursesComponent implements OnInit {
   loading = false;
   error   = '';
 
-  // Filtres
   searchTerm     = '';
   selectedType   = '';
   selectedFiltre: '' | 'assigne' | 'demande' | 'permanent' | 'expire_bientot' | 'expire' = '';
 
-  // Pagination
   currentPage  = 1;
   itemsPerPage = 9;
   totalItems   = 0;
@@ -65,7 +63,11 @@ export class StudentCoursesComponent implements OnInit {
     this.error   = '';
     this.formationsService.getMesCataloguesAssignes().subscribe({
       next: (res) => {
-        this.allCatalogues = res.catalogues ?? [];
+        this.allCatalogues = (res.catalogues ?? []).map((c: any) => ({
+          ...c,
+          est_termine: c.est_termine
+            || (c.total_formations > 0 && c.formations_terminees >= c.total_formations),
+        }));
         this.applyFilters();
         this.loading = false;
       },
@@ -76,6 +78,26 @@ export class StudentCoursesComponent implements OnInit {
     });
   }
 
+  // ── Helpers état ───────────────────────────────────────────
+
+  /** Vrai si la date d'expiration est dépassée ET le catalogue n'est pas terminé */
+  isExpire(catalogue: any): boolean {
+    if (catalogue.est_termine) return false;
+    if (!catalogue.date_expiration) return false;
+    return new Date(catalogue.date_expiration) < new Date();
+  }
+
+  isExpiringSoon(dateExpiration: string | null): boolean {
+    if (!dateExpiration) return false;
+    const diff = new Date(dateExpiration).getTime() - Date.now();
+    return diff > 0 && diff < 7 * 24 * 60 * 60 * 1000;
+  }
+
+  getJoursRestants(dateExpiration: string | null): number {
+    if (!dateExpiration) return 0;
+    return Math.ceil((new Date(dateExpiration).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  }
+
   // ── Filtres ────────────────────────────────────────────────
 
   onSearchChange(): void { this.currentPage = 1; this.applyFilters(); }
@@ -83,11 +105,12 @@ export class StudentCoursesComponent implements OnInit {
   onTypeChange(type: string): void {
     this.selectedType = type; this.currentPage = 1; this.applyFilters();
   }
-onFiltreChange(valeur: string): void {
-  this.selectedFiltre = valeur as any;
-  this.currentPage    = 1;
-  this.applyFilters();
-}
+
+  onFiltreChange(valeur: string): void {
+    this.selectedFiltre = valeur as any;
+    this.currentPage    = 1;
+    this.applyFilters();
+  }
 
   clearFilters(): void {
     this.searchTerm     = '';
@@ -122,7 +145,7 @@ onFiltreChange(valeur: string): void {
       case 'demande':        result = result.filter(c => c.source === 'demande'); break;
       case 'permanent':      result = result.filter(c => !c.date_expiration); break;
       case 'expire_bientot': result = result.filter(c => this.isExpiringSoon(c.date_expiration)); break;
-      case 'expire':         result = result.filter(c => c.date_expiration && new Date(c.date_expiration) < new Date()); break;
+      case 'expire':         result = result.filter(c => this.isExpire(c)); break;
     }
 
     this.filteredCatalogues = result;
@@ -153,22 +176,13 @@ onFiltreChange(valeur: string): void {
     this.pages  = Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
-  // ── Helpers ────────────────────────────────────────────────
+  // ── Navigation ─────────────────────────────────────────────
 
   goToCatalogue(id: number): void {
     this.router.navigate(['/student/catalogue-detail', id]);
   }
 
-  isExpiringSoon(dateExpiration: string | null): boolean {
-    if (!dateExpiration) return false;
-    const diff = new Date(dateExpiration).getTime() - Date.now();
-    return diff > 0 && diff < 7 * 24 * 60 * 60 * 1000;
-  }
-
-  getJoursRestants(dateExpiration: string | null): number {
-    if (!dateExpiration) return 0;
-    return Math.ceil((new Date(dateExpiration).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  }
+  // ── Helpers couleur / type ─────────────────────────────────
 
   getTypeColor(type: string): string {
     const colors: Record<string, string> = {

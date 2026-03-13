@@ -51,7 +51,6 @@ export const routes: Routes = [
                 {path:'cart',loadComponent:()=>import ('./features/courses/course-cart/course-cart.component').then((m)=>m.CourseCartComponent)},
                 {path:'checkout',loadComponent:()=>import ('./features/courses/course-checkout/course-checkout.component').then((m)=>m.CourseCheckoutComponent)},
                 {path:'add-course',loadComponent:()=>import ('./features/courses/add-course/add-course.component').then((m)=>m.AddCourseComponent)},
-        
             ]
         },
         {path : 'instructor',loadComponent:()=>import ('./features/instructor/instructor.component').then((m)=>m.InstructorComponent),
@@ -85,7 +84,6 @@ export const routes: Routes = [
                         {path:'instructor-social-profiles',loadComponent:()=>import ('./features/instructor/settings/instructor-social-profiles/instructor-social-profiles.component').then((m)=>m.InstructorSocialProfilesComponent)},
                         {path:'instructor-change-password',loadComponent:()=>import ('./features/instructor/settings/instructor-change-password/instructor-change-password.component').then((m)=>m.InstructorChangePasswordComponent)},
                         {path:'instructor-settings',loadComponent:()=>import ('./features/instructor/settings/instructor-settings/instructor-settings.component').then((m)=>m.InstructorSettingsComponent)}
-                        
                     ]
                 },
             ]
@@ -183,7 +181,7 @@ export const routes: Routes = [
                     ]
                 },
             ]
-        },  
+        },
         { path: 'pages', loadComponent:()=>import ('./features/pages/pages.component').then((m)=>m.PagesComponent),
             children: [
                 { path: 'faq', loadComponent: () => import('./features/pages/faq/faq.component').then(m => m.FaqComponent) },
@@ -201,54 +199,79 @@ export const routes: Routes = [
             ]
         },
         { path: 'blog', loadComponent: () => import('./features/blog/blog.component').then(m => m.BlogComponent),
-        children: [
-            { path: 'blog-grid', loadComponent: () => import('./features/blog/blog-grid/blog-grid.component').then(m => m.BlogGridComponent) },
-            { path: 'blog-masonry', loadComponent: () => import('./features/blog/blog-masonry/blog-masonry.component').then(m => m.BlogMasonryComponent) },
-            { path: 'blog-details-left-sidebar', loadComponent: () => import('./features/blog/blog-details-left-sidebar/blog-details-left-sidebar.component').then(m => m.BlogDetailsLeftSidebarComponent) },
-            { path: 'blog-details-right-sidebar', loadComponent: () => import('./features/blog/blog-details-right-sidebar/blog-details-right-sidebar.component').then(m => m.BlogDetailsRightSidebarComponent) },
-            { path: 'blog-2-grid', loadComponent: () => import('./features/blog/blog-2-grid/blog-2-grid.component').then(m => m.Blog2GridComponent) },
-            { path: 'blog-3-grid', loadComponent: () => import('./features/blog/blog-3-grid/blog-3-grid.component').then(m => m.Blog3GridComponent) },
-            { path: 'blog-carousal', loadComponent: () => import('./features/blog/blog-carousal/blog-carousal.component').then(m => m.BlogCarousalComponent) },
-            { path: 'blog-left-sidebar', loadComponent: () => import('./features/blog/blog-left-sidebar/blog-left-sidebar.component').then(m => m.BlogLeftSidebarComponent) },
-            { path: 'blog-right-sidebar', loadComponent: () => import('./features/blog/blog-right-sidebar/blog-right-sidebar.component').then(m => m.BlogRightSidebarComponent) },
-            { path: 'blog-details', loadComponent: () => import('./features/blog/blog-details/blog-details.component').then(m => m.BlogDetailsComponent) }
-        ]
-        },
-        {path : 'student',loadComponent:()=>import ('./features/student/student.component').then((m)=>m.StudentComponent),
-    children:[
-        {path:'student-dashboard',loadComponent:()=>import ('./features/student/student-dashboard/student-dashboard.component').then((m)=>m.StudentDashboardComponent)},
-        {path:'student-profile',loadComponent:()=>import ('./features/student/student-profile/student-profile.component').then((m)=>m.StudentProfileComponent)},
-        {path:'student-courses',loadComponent:()=>import ('./features/student/student-courses/student-courses.component').then((m)=>m.StudentCoursesComponent)},
-        { path: 'catalogue-detail/:id', loadComponent: () => import('./features/student/catalogue-detail/catalogue-detail.component').then(m => m.CatalogueDetailComponent) },
-        {path:'mes-cours',loadComponent:()=>import ('./features/student/mes-cours/mes-cours.component').then((m)=>m.MesCoursComponent)},
-        // ⛔ lecture-formation retiré d'ici — maintenant route racine plein écran
-        {path:'student-tickets',loadComponent:()=>import ('./features/student/student-tickets/student-tickets.component').then((m)=>m.StudentTicketsComponent)},
-        {path:'students-session',loadComponent:()=>import ('./features/student/students-session/students-session.component').then((m)=>m.StudentsSessionsComponent)},
-        { path: 'students-catalogue', loadComponent: () => import('./features/student/students-catalogue/students-catalogue.component').then(m => m.StudentsCatalogueComponent) },
-        { path: 'students-parcours',  loadComponent: () => import('./features/student/students-parcours/students-parcours.component').then(m => m.StudentsParcoursComponent) },
-        { path: 'parcours-assignes', loadComponent: () => import('./features/student/parcours-assignes/parcours-assignes.component').then(m => m.ParcoursAssignesComponent) },
-        { path: 'parcours-assigne/:id', loadComponent: () => import('./features/student/parcours-assigne-detail/parcours-assigne-detail.component').then(m => m.ParcoursAssigneDetailComponent) },
-        {path:'student-quiz',loadComponent:()=>import ('./features/student/student-quiz/student-quiz.component').then((m)=>m.StudentQuizComponent)},
-        {path:'student-quiz-questions',loadComponent:()=>import ('./features/student/student-quiz-questions/student-quiz-questions.component').then((m)=>m.StudentQuizQuestionsComponent)},
-        {path:'student-certificate',loadComponent:()=>import ('./features/student/student-certificate/student-certificate.component').then((m)=>m.StudentCertificateComponent)},
-        {path:'student-message',loadComponent:()=>import ('./features/student/student-message/student-message.component').then((m)=>m.StudentMessageComponent)},
-        {path:'student-qa',loadComponent:()=>import ('./features/student/student-qa/student-qa.component').then((m)=>m.StudentQaComponent)},
-        {path:'student-order-history',loadComponent:()=>import ('./features/student/student-order-history/student-order-history.component').then((m)=>m.StudentOrderHistoryComponent)},
-        {path:'student-referral',loadComponent:()=>import ('./features/student/student-referral/student-referral.component').then((m)=>m.StudentReferralComponent)},
-        {path:'student-reviews',loadComponent:()=>import ('./features/student/student-reviews/student-reviews.component').then((m)=>m.StudentReviewsComponent)},
-        {path:'student-wishlist',loadComponent:()=>import ('./features/student/student-wishlist/student-wishlist.component').then((m)=>m.StudentWishlistComponent)},
-        {path:'settings',loadComponent:()=>import ('./features/student/settings/settings.component').then((m)=>m.SettingsComponent),
-            children:[
-                {path:'student-linked-accounts',loadComponent:()=>import ('./features/student/settings/student-linked-accounts/student-linked-accounts.component').then((m)=>m.StudentLinkedAccountsComponent)},
-                {path:'student-change-password',loadComponent:()=>import ('./features/student/settings/student-change-password/student-change-password.component').then((m)=>m.StudentChangePasswordComponent)},
-                {path:'student-settings',loadComponent:()=>import ('./features/student/settings/student-settings/student-settings.component').then((m)=>m.StudentSettingsComponent)},
-                {path:'student-notifications',loadComponent:()=>import ('./features/student/settings/student-notifications/student-notifications.component').then((m)=>m.StudentNotificationsComponent)},
-                {path:'student-billing-address',loadComponent:()=>import ('./features/student/settings/student-billing-address/student-billing-address.component').then((m)=>m.StudentBillingAddressComponent)},
-                {path:'student-social-profile',loadComponent:()=>import ('./features/student/settings/student-social-profile/student-social-profile.component').then((m)=>m.StudentSocialProfileComponent)}
+            children: [
+                { path: 'blog-grid', loadComponent: () => import('./features/blog/blog-grid/blog-grid.component').then(m => m.BlogGridComponent) },
+                { path: 'blog-masonry', loadComponent: () => import('./features/blog/blog-masonry/blog-masonry.component').then(m => m.BlogMasonryComponent) },
+                { path: 'blog-details-left-sidebar', loadComponent: () => import('./features/blog/blog-details-left-sidebar/blog-details-left-sidebar.component').then(m => m.BlogDetailsLeftSidebarComponent) },
+                { path: 'blog-details-right-sidebar', loadComponent: () => import('./features/blog/blog-details-right-sidebar/blog-details-right-sidebar.component').then(m => m.BlogDetailsRightSidebarComponent) },
+                { path: 'blog-2-grid', loadComponent: () => import('./features/blog/blog-2-grid/blog-2-grid.component').then(m => m.Blog2GridComponent) },
+                { path: 'blog-3-grid', loadComponent: () => import('./features/blog/blog-3-grid/blog-3-grid.component').then(m => m.Blog3GridComponent) },
+                { path: 'blog-carousal', loadComponent: () => import('./features/blog/blog-carousal/blog-carousal.component').then(m => m.BlogCarousalComponent) },
+                { path: 'blog-left-sidebar', loadComponent: () => import('./features/blog/blog-left-sidebar/blog-left-sidebar.component').then(m => m.BlogLeftSidebarComponent) },
+                { path: 'blog-right-sidebar', loadComponent: () => import('./features/blog/blog-right-sidebar/blog-right-sidebar.component').then(m => m.BlogRightSidebarComponent) },
+                { path: 'blog-details', loadComponent: () => import('./features/blog/blog-details/blog-details.component').then(m => m.BlogDetailsComponent) }
             ]
         },
-    ]
-},
+
+        // ══════════════════════════════════════════════════════════════════════
+        // SECTION STUDENT
+        // ══════════════════════════════════════════════════════════════════════
+        {path : 'student', loadComponent:()=>import('./features/student/student.component').then((m)=>m.StudentComponent),
+            children:[
+                { path: 'student-dashboard',   loadComponent: () => import('./features/student/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
+                { path: 'student-profile',     loadComponent: () => import('./features/student/student-profile/student-profile.component').then(m => m.StudentProfileComponent) },
+
+                // ✅ RENOMMÉ : student-courses → mes-catalogues
+                { path: 'mes-catalogues',      loadComponent: () => import('./features/student/student-courses/student-courses.component').then(m => m.StudentCoursesComponent) },
+                // Redirection de l'ancienne URL pour ne pas casser les bookmarks
+                { path: 'student-courses',     redirectTo: 'mes-catalogues', pathMatch: 'full' },
+
+                { path: 'catalogue-detail/:id', loadComponent: () => import('./features/student/catalogue-detail/catalogue-detail.component').then(m => m.CatalogueDetailComponent) },
+
+                // ✅ RENOMMÉ : mes-cours → mes-formations
+                { path: 'mes-formations',      loadComponent: () => import('./features/student/mes-cours/mes-cours.component').then(m => m.MesCoursComponent) },
+                // Redirection de l'ancienne URL
+                { path: 'mes-cours',           redirectTo: 'mes-formations', pathMatch: 'full' },
+
+                { path: 'student-tickets',     loadComponent: () => import('./features/student/student-tickets/student-tickets.component').then(m => m.StudentTicketsComponent) },
+                { path: 'students-session',    loadComponent: () => import('./features/student/students-session/students-session.component').then(m => m.StudentsSessionsComponent) },
+                {path: 'sessions-acceptees', loadComponent: () => import('./features/student/sessions-acceptees/sessions-acceptees.component').then(m => m.SessionsAccepteesComponent)},
+
+                { path: 'students-catalogue',  loadComponent: () => import('./features/student/students-catalogue/students-catalogue.component').then(m => m.StudentsCatalogueComponent) },
+
+                // ✅ RENOMMÉ : students-parcours → mes-parcours
+                { path: 'mes-parcours',        loadComponent: () => import('./features/student/students-parcours/students-parcours.component').then(m => m.StudentsParcoursComponent) },
+                { path: 'students-parcours',   redirectTo: 'mes-parcours', pathMatch: 'full' },
+
+                // ✅ RENOMMÉ : parcours-assignes → mes-parcours-assignes
+                { path: 'mes-parcours-assignes', loadComponent: () => import('./features/student/parcours-assignes/parcours-assignes.component').then(m => m.ParcoursAssignesComponent) },
+                { path: 'parcours-assignes',     redirectTo: 'mes-parcours-assignes', pathMatch: 'full' },
+
+                // ✅ RENOMMÉ : parcours-assigne/:id → mes-parcours/:id
+                { path: 'mes-parcours/:id',    loadComponent: () => import('./features/student/parcours-assigne-detail/parcours-assigne-detail.component').then(m => m.ParcoursAssigneDetailComponent) },
+                { path: 'parcours-assigne/:id', redirectTo: 'mes-parcours/:id', pathMatch: 'full' },
+
+                { path: 'student-quiz',            loadComponent: () => import('./features/student/student-quiz/student-quiz.component').then(m => m.StudentQuizComponent) },
+                { path: 'student-quiz-questions',  loadComponent: () => import('./features/student/student-quiz-questions/student-quiz-questions.component').then(m => m.StudentQuizQuestionsComponent) },
+                { path: 'student-certificate',     loadComponent: () => import('./features/student/student-certificate/student-certificate.component').then(m => m.StudentCertificateComponent) },
+                { path: 'student-message',         loadComponent: () => import('./features/student/student-message/student-message.component').then(m => m.StudentMessageComponent) },
+                { path: 'student-qa',              loadComponent: () => import('./features/student/student-qa/student-qa.component').then(m => m.StudentQaComponent) },
+                { path: 'student-order-history',   loadComponent: () => import('./features/student/student-order-history/student-order-history.component').then(m => m.StudentOrderHistoryComponent) },
+                { path: 'student-referral',        loadComponent: () => import('./features/student/student-referral/student-referral.component').then(m => m.StudentReferralComponent) },
+                { path: 'student-reviews',         loadComponent: () => import('./features/student/student-reviews/student-reviews.component').then(m => m.StudentReviewsComponent) },
+                { path: 'student-wishlist',        loadComponent: () => import('./features/student/student-wishlist/student-wishlist.component').then(m => m.StudentWishlistComponent) },
+                { path: 'settings', loadComponent: () => import('./features/student/settings/settings.component').then(m => m.SettingsComponent),
+                    children: [
+                        { path: 'student-linked-accounts',  loadComponent: () => import('./features/student/settings/student-linked-accounts/student-linked-accounts.component').then(m => m.StudentLinkedAccountsComponent) },
+                        { path: 'student-change-password',  loadComponent: () => import('./features/student/settings/student-change-password/student-change-password.component').then(m => m.StudentChangePasswordComponent) },
+                        { path: 'student-settings',         loadComponent: () => import('./features/student/settings/student-settings/student-settings.component').then(m => m.StudentSettingsComponent) },
+                        { path: 'student-notifications',    loadComponent: () => import('./features/student/settings/student-notifications/student-notifications.component').then(m => m.StudentNotificationsComponent) },
+                        { path: 'student-billing-address',  loadComponent: () => import('./features/student/settings/student-billing-address/student-billing-address.component').then(m => m.StudentBillingAddressComponent) },
+                        { path: 'student-social-profile',   loadComponent: () => import('./features/student/settings/student-social-profile/student-social-profile.component').then(m => m.StudentSocialProfileComponent) }
+                    ]
+                },
+            ]
+        },
     ]
 },
 
@@ -256,7 +279,7 @@ export const routes: Routes = [
 { path: 'coming-soon', loadComponent: () => import('./features/pages/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent) },
 { path: 'error-500', loadComponent: () => import('./error/error500/error500.component').then(m => m.Error500Component) },
 { path: 'error-404', loadComponent: () => import('./error/error404/error404.component').then(m => m.Error404Component) },
-{   
+{
     path:'**',
     redirectTo:'error-404',
     pathMatch:'full'

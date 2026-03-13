@@ -87,6 +87,7 @@ export const routes = {
   // Mes parcours et catalogues assignés
   student_CataloguesAssignes: '/student/student-courses',
   student_ParcoursAssignes:   '/student/parcours-assignes',
+  student_SessionsAcceptees: '/student/sessions-acceptees',
 
   // SuperAdmin Routes
   superadmin: '/superadmin/',

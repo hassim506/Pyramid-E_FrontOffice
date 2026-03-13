@@ -85,7 +85,6 @@
     <!-- RADIALS — TAUX CLÉS -->
     <div class="db-radial-row mb-4">
 
-      <!-- Taux de complétion -->
       <div class="db-radial-card">
         <div class="db-radial-card__chart" id="chart-radial-completion"></div>
         <div class="db-radial-card__label">Taux de complétion</div>
@@ -94,7 +93,6 @@
         </div>
       </div>
 
-      <!-- Objectif heures -->
       <div class="db-radial-card">
         <div class="db-radial-card__chart" id="chart-radial-heures"></div>
         <div class="db-radial-card__label">Objectif heures</div>
@@ -104,7 +102,6 @@
         </div>
       </div>
 
-      <!-- Formations obligatoires -->
       <div class="db-radial-card" *ngIf="stats.kpi.formations.obligatoires_total > 0">
         <div class="db-radial-card__chart" id="chart-radial-oblig"></div>
         <div class="db-radial-card__label">Formations obligatoires</div>
@@ -114,7 +111,6 @@
         </div>
       </div>
 
-      <!-- PDI si disponible -->
       <div class="db-radial-card" *ngIf="stats.kpi.pdi.disponible">
         <div class="db-radial-card__placeholder">
           <span class="db-radial-card__value">{{ stats.kpi.pdi.taux_completion }}%</span>
@@ -196,49 +192,84 @@
         <div class="db-panel__body">
 
           <!-- Urgentes -->
-          <div *ngFor="let e of echeancesUrgentes" class="db-echeance db-echeance--urgent" [ngClass]="getUrgenceClass(e)">
-            <div class="db-echeance__left">
-              <div class="db-echeance__type-icon">
-                <i class="isax" [ngClass]="e.type === 'obligatoire' ? 'isax-shield-tick' : 'isax-book-1'"></i>
-              </div>
-              <div>
-                <div class="db-echeance__titre">{{ e.titre }}</div>
-                <div class="db-echeance__meta">
-                  <span class="db-echeance__badge" *ngIf="e.type === 'obligatoire'">Obligatoire</span>
-                  Progression {{ e.progression }}%
-                </div>
+          <div *ngFor="let e of echeancesUrgentes"
+               class="ech-item ech-item--urgent"
+               [ngClass]="getUrgenceClass(e)">
+            <div class="ech-countdown">
+              <svg width="52" height="52" viewBox="0 0 52 52">
+                <circle class="ech-countdown__track" cx="26" cy="26" r="22" stroke-width="4"/>
+                <circle class="ech-countdown__fill" cx="26" cy="26" r="22" stroke-width="4"
+                  [attr.stroke]="getUrgenceStroke(e)"
+                  stroke-dasharray="138.2"
+                  [attr.stroke-dashoffset]="getCountdownOffset(e.joursRestants)"/>
+              </svg>
+              <div class="ech-countdown__label">
+                <span>{{ e.joursRestants <= 0 ? '!' : e.joursRestants }}</span>
+                <span class="ech-countdown__unit">{{ e.joursRestants === 1 ? 'jour' : 'jours' }}</span>
               </div>
             </div>
-            <div class="db-echeance__right">
-              <div class="db-echeance__deadline" [ngClass]="getUrgenceClass(e)">
+            <div class="ech-body">
+              <div class="ech-title">{{ e.titre }}</div>
+              <div class="ech-meta">
+                <span class="ech-badge" [style.background]="getTypeColor(e.type)">
+                  {{ getTypeLabel(e.type) }}
+                </span>
+                <span class="ech-meta__prog" *ngIf="hasProgression(e.type)"> · {{ e.progression }}%</span>
+              </div>
+              <div class="ech-prog-wrap" *ngIf="hasProgression(e.type)">
+                <div class="ech-prog-bar">
+                  <div class="ech-prog-fill"
+                       [style.width.%]="e.progression"
+                       [style.background]="getUrgenceStroke(e)"></div>
+                </div>
+                <span class="ech-prog-pct">{{ e.progression }}%</span>
+              </div>
+            </div>
+            <div class="ech-urgence">
+              <span class="ech-urgence__label" [ngClass]="getUrgenceLabelClass(e)">
                 {{ getUrgenceLabel(e.joursRestants) }}
-              </div>
-              <div class="db-echeance__prog-bar">
-                <div [style.width.%]="e.progression"
-                     [style.background]="getProgressionColor(e.progression)"></div>
-              </div>
+              </span>
             </div>
           </div>
 
           <!-- Normales -->
-          <div *ngFor="let e of echeancesNormales" class="db-echeance">
-            <div class="db-echeance__left">
-              <div class="db-echeance__type-icon db-echeance__type-icon--blue">
-                <i class="isax isax-book-1"></i>
-              </div>
-              <div>
-                <div class="db-echeance__titre">{{ e.titre }}</div>
-                <div class="db-echeance__meta">Progression {{ e.progression }}%</div>
+          <div *ngFor="let e of echeancesNormales"
+               class="ech-item"
+               [ngClass]="getUrgenceClass(e)">
+            <div class="ech-countdown">
+              <svg width="52" height="52" viewBox="0 0 52 52">
+                <circle class="ech-countdown__track" cx="26" cy="26" r="22" stroke-width="4"/>
+                <circle class="ech-countdown__fill" cx="26" cy="26" r="22" stroke-width="4"
+                  [attr.stroke]="getUrgenceStroke(e)"
+                  stroke-dasharray="138.2"
+                  [attr.stroke-dashoffset]="getCountdownOffset(e.joursRestants)"/>
+              </svg>
+              <div class="ech-countdown__label">
+                <span>{{ e.joursRestants }}</span>
+                <span class="ech-countdown__unit">{{ e.joursRestants === 1 ? 'jour' : 'jours' }}</span>
               </div>
             </div>
-            <div class="db-echeance__right">
-              <div class="db-echeance__deadline db-echeance__deadline--normal">
+            <div class="ech-body">
+              <div class="ech-title">{{ e.titre }}</div>
+              <div class="ech-meta">
+                <span class="ech-badge" [style.background]="getTypeColor(e.type)">
+                  {{ getTypeLabel(e.type) }}
+                </span>
+                <span class="ech-meta__prog" *ngIf="hasProgression(e.type)"> · {{ e.progression }}%</span>
+              </div>
+              <div class="ech-prog-wrap" *ngIf="hasProgression(e.type)">
+                <div class="ech-prog-bar">
+                  <div class="ech-prog-fill"
+                       [style.width.%]="e.progression"
+                       [style.background]="getProgressionColor(e.progression)"></div>
+                </div>
+                <span class="ech-prog-pct">{{ e.progression }}%</span>
+              </div>
+            </div>
+            <div class="ech-urgence">
+              <span class="ech-urgence__label" [ngClass]="getUrgenceLabelClass(e)">
                 {{ getUrgenceLabel(e.joursRestants) }}
-              </div>
-              <div class="db-echeance__prog-bar">
-                <div [style.width.%]="e.progression"
-                     [style.background]="getProgressionColor(e.progression)"></div>
-              </div>
+              </span>
             </div>
           </div>
 
@@ -262,12 +293,8 @@
 
           <div *ngFor="let s of stats.sessions_planifiees" class="db-session-item">
             <div class="db-session-item__date">
-              <span class="db-session-item__day">
-                {{ s.date_debut | date:'dd' }}
-              </span>
-              <span class="db-session-item__month">
-                {{ s.date_debut | date:'MMM' }}
-              </span>
+              <span class="db-session-item__day">{{ s.date_debut | date:'dd' }}</span>
+              <span class="db-session-item__month">{{ s.date_debut | date:'MMM' }}</span>
             </div>
             <div class="db-session-item__body">
               <div class="db-session-item__titre">{{ s.titre }}</div>
@@ -305,30 +332,20 @@
       <p class="db-charts-header__sub">Évolution calculée depuis vos activités de formation</p>
     </div>
 
-    <!-- TAUX DE COMPLÉTION — graphique principal -->
     <div class="db-chart-card db-chart-card--highlight mb-4">
       <div class="db-chart-card__label">
         <span class="db-chart-card__badge db-chart-card__badge--teal">KPI Principal</span>
         Taux de complétion global
-        <span class="db-chart-card__current">
-          {{ tauxCompletionGlobal }}% actuellement
-        </span>
+        <span class="db-chart-card__current">{{ tauxCompletionGlobal }}% actuellement</span>
       </div>
       <div id="chart-completion"></div>
     </div>
 
     <div class="db-chart-grid">
-      <div class="db-chart-card">
-        <div id="chart-heures"></div>
-      </div>
-      <div class="db-chart-card">
-        <div id="chart-formations-terminees"></div>
-      </div>
-      <div class="db-chart-card">
-        <div id="chart-certifications"></div>
-      </div>
+      <div class="db-chart-card"><div id="chart-heures"></div></div>
+      <div class="db-chart-card"><div id="chart-formations-terminees"></div></div>
+      <div class="db-chart-card"><div id="chart-certifications"></div></div>
 
-      <!-- KPI PARCOURS -->
       <div class="db-chart-card db-kpi-stat-card">
         <div class="db-kpi-stat">
           <div class="db-kpi-stat__icon db-kpi-stat__icon--blue">
@@ -456,12 +473,8 @@
       </div>
       <div class="db-objectif-progress">
         <div class="db-objectif-progress__values">
-          <span class="db-objectif-progress__done">
-            {{ stats.kpi.formations.obligatoires_terminees }} terminées
-          </span>
-          <span class="db-objectif-progress__target">
-            sur {{ stats.kpi.formations.obligatoires_total }} obligatoires
-          </span>
+          <span class="db-objectif-progress__done">{{ stats.kpi.formations.obligatoires_terminees }} terminées</span>
+          <span class="db-objectif-progress__target">sur {{ stats.kpi.formations.obligatoires_total }} obligatoires</span>
         </div>
         <div class="db-objectif-progress__bar">
           <div class="db-objectif-progress__fill"
@@ -501,9 +514,7 @@
 
     <!-- GRAPHIQUES OBJECTIFS -->
     <div class="db-chart-grid">
-      <div class="db-chart-card">
-        <div id="chart-demandes"></div>
-      </div>
+      <div class="db-chart-card"><div id="chart-demandes"></div></div>
       <div class="db-chart-card">
         <div id="chart-donut-formations"></div>
         <div class="db-chart-card__donut-label">Répartition formations</div>

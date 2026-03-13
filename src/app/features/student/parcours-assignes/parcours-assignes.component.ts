@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
 
 @Component({
-  standalone: true,
   selector: 'app-parcours-assignes',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './parcours-assignes.component.html',
   styleUrls: ['./parcours-assignes.component.scss'],
@@ -29,17 +29,18 @@ export class ParcoursAssignesComponent implements OnInit {
 
   // Pagination
   currentPage = 1;
-  pageSize    = 6;
+  pageSize    = 9;
   totalPages  = 0;
   totalItems  = 0;
 
   filtres = [
-    { value: '',               label: 'Tous',              icon: 'isax-grid-1'          },
-    { value: 'assigne',        label: 'Assignés',          icon: 'isax-tick-circle'     },
-    { value: 'demande',        label: 'Demandes acceptées',icon: 'isax-send-2'          },
-    { value: 'permanent',      label: 'Accès permanent',   icon: 'isax-infinity'        },
-    { value: 'expire_bientot', label: 'Expire bientôt',    icon: 'isax-warning-2'       },
-    { value: 'expire',         label: 'Expiré',            icon: 'isax-calendar-remove' },
+    { value: '',               label: 'Tous',               icon: 'isax-grid-1'          },
+    { value: 'assigne',        label: 'Assignés',           icon: 'isax-tick-circle'     },
+    { value: 'demande',        label: 'Demandes acceptées', icon: 'isax-send-2'          },
+    { value: 'termine',        label: 'Terminés',           icon: 'isax-medal-star'      },
+    { value: 'permanent',      label: 'Accès permanent',    icon: 'isax-infinity'        },
+    { value: 'expire_bientot', label: 'Expire bientôt',     icon: 'isax-warning-2'       },
+    { value: 'expire',         label: 'Expiré',             icon: 'isax-calendar-remove' },
   ];
 
   constructor(
@@ -57,13 +58,33 @@ export class ParcoursAssignesComponent implements OnInit {
 
     this.formationsService.getMesParcoursAssignes().subscribe({
       next: (res: any) => {
-        this.allParcours = res.parcours ?? [];
+        this.allParcours = (res.parcours ?? []).map((p: any) => {
+          const estTermine = p.est_termine
+            || p.progression >= 100
+            || (p.total_formations > 0 && p.formations_terminees >= p.total_formations);
+
+          const estExpire = !estTermine
+            && !!p.date_expiration
+            && new Date(p.date_expiration) < new Date();
+
+          return {
+            ...p,
+            est_termine: estTermine,
+            // FIX : calcule est_expire côté Angular en fallback si le back ne le renvoie pas
+            est_expire: p.est_expire ?? estExpire,
+            // Badge recalculé localement pour cohérence
+            badge_label: estTermine
+              ? 'Terminé'
+              : (p.est_expire ?? estExpire ? 'Expiré' : p.badge_label ?? 'Assigné'),
+          };
+        });
+
         const cats = this.allParcours.map((p: any) => p.categorie).filter((c: any) => !!c);
         this.categories = [...new Set(cats)] as string[];
         this.applyFilters();
         this.loading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erreur parcours:', err);
         this.error   = 'Erreur lors du chargement de vos parcours';
         this.loading = false;
@@ -71,7 +92,7 @@ export class ParcoursAssignesComponent implements OnInit {
     });
   }
 
-  // ── Filtres ────────────────────────────────────────
+  // ── Filtres ────────────────────────────────────────────────
 
   applyFilters(): void {
     let result = [...this.allParcours];
@@ -89,11 +110,27 @@ export class ParcoursAssignesComponent implements OnInit {
     }
 
     switch (this.selectedFiltre) {
-      case 'assigne':        result = result.filter(p => p.source === 'assigne'); break;
-      case 'demande':        result = result.filter(p => p.source === 'demande'); break;
-      case 'permanent':      result = result.filter(p => !p.date_expiration); break;
-      case 'expire_bientot': result = result.filter(p => this.isExpiringSoon(p.date_expiration)); break;
-      case 'expire':         result = result.filter(p => p.date_expiration && new Date(p.date_expiration) < new Date()); break;
+      // Assignés = source 'assigne' (inclut terminés et expirés assignés)
+      case 'assigne':
+        result = result.filter(p => p.source === 'assigne');
+        break;
+      case 'demande':
+        result = result.filter(p => p.source === 'demande');
+        break;
+      // Terminés toutes sources
+      case 'termine':
+        result = result.filter(p => p.est_termine);
+        break;
+      case 'permanent':
+        result = result.filter(p => !p.date_expiration);
+        break;
+      case 'expire_bientot':
+        result = result.filter(p => this.isExpiringSoon(p.date_expiration));
+        break;
+      // Expirés = date dépassée ET pas terminé
+      case 'expire':
+        result = result.filter(p => p.est_expire);
+        break;
     }
 
     this.filteredParcours = result;
@@ -103,14 +140,15 @@ export class ParcoursAssignesComponent implements OnInit {
     this.paginate();
   }
 
-  onSearchChange(): void                  { this.applyFilters(); }
-  onCategorieChange(c: string): void      { this.selectedCategorie = c; this.applyFilters(); }
-  onFiltreChange(valeur: string): void    { this.selectedFiltre = valeur; this.applyFilters(); }
+  onSearchChange(): void               { this.currentPage = 1; this.applyFilters(); }
+  onCategorieChange(c: string): void   { this.selectedCategorie = c; this.currentPage = 1; this.applyFilters(); }
+  onFiltreChange(valeur: string): void { this.selectedFiltre = valeur; this.currentPage = 1; this.applyFilters(); }
 
   clearFilters(): void {
     this.searchTerm        = '';
     this.selectedCategorie = '';
     this.selectedFiltre    = '';
+    this.currentPage       = 1;
     this.applyFilters();
   }
 
@@ -120,8 +158,10 @@ export class ParcoursAssignesComponent implements OnInit {
 
   get totalAssignes(): number { return this.allParcours.filter(p => p.source === 'assigne').length; }
   get totalDemandes(): number { return this.allParcours.filter(p => p.source === 'demande').length; }
+  get totalTermines(): number { return this.allParcours.filter(p => p.est_termine).length; }
+  get totalExpires():  number { return this.allParcours.filter(p => p.est_expire).length; }
 
-  // ── Pagination ─────────────────────────────────────
+  // ── Pagination ─────────────────────────────────────────────
 
   paginate(): void {
     const start = (this.currentPage - 1) * this.pageSize;
@@ -144,13 +184,48 @@ export class ParcoursAssignesComponent implements OnInit {
     return range;
   }
 
-  // ── Navigation ─────────────────────────────────────
+  // ── Navigation ─────────────────────────────────────────────
 
   goToDetail(parcoursId: number): void {
-    this.router.navigate(['/student/parcours-assigne', parcoursId]);
+    this.router.navigate(['/student/mes-parcours', parcoursId]);
   }
 
-  // ── Helpers expiration ─────────────────────────────
+  // ── Helpers badge ─────────────────────────────────────────
+
+  /**
+   * Couleur du badge selon l'état du parcours
+   * Terminé   → vert
+   * Expiré    → rouge
+   * Demande   → bleu
+   * Assigné   → vert primaire (défaut)
+   */
+  getBadgeClass(p: any): string {
+    if (p.est_termine) return 'badge--termine';
+    if (p.est_expire)  return 'badge--expire';
+    if (p.source === 'demande') return 'badge--demande';
+    return 'badge--assigne';
+  }
+
+  /**
+   * Libellé du bouton CTA
+   * Terminé → "Revoir"
+   * Expiré  → "Consulter"
+   * Sinon   → "Voir le parcours"
+   */
+  getCTALabel(p: any): string {
+    if (p.est_termine) return 'Revoir';
+    if (p.est_expire)  return 'Consulter';
+    return 'Voir le parcours';
+  }
+
+  /**
+   * Opacité réduite pour les cartes terminées ou expirées
+   */
+  isGrayed(p: any): boolean {
+    return p.est_termine || p.est_expire;
+  }
+
+  // ── Helpers expiration ─────────────────────────────────────
 
   isExpiringSoon(dateExpiration: string | null): boolean {
     if (!dateExpiration) return false;
@@ -162,5 +237,33 @@ export class ParcoursAssignesComponent implements OnInit {
     if (!dateExpiration) return null;
     const diff = new Date(dateExpiration).getTime() - new Date().getTime();
     return diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : 0;
+  }
+
+  // ── Helpers couleur / icône catégorie ──────────────────────
+
+  getCategorieColor(categorie: string | null): string {
+    if (!categorie) return '#069b8f';
+    const c = categorie.toLowerCase();
+    if (c.includes('technique') || c.includes('dev') || c.includes('web'))  return '#0369a1';
+    if (c.includes('management') || c.includes('leadership'))                return '#b45309';
+    if (c.includes('securit')    || c.includes('cyber'))                     return '#dc2626';
+    if (c.includes('certif'))                                                 return '#7c3aed';
+    if (c.includes('soft')       || c.includes('communication'))             return '#0d9488';
+    if (c.includes('data')       || c.includes('analyse'))                   return '#6d28d9';
+    if (c.includes('marketing')  || c.includes('commercial'))                return '#b45309';
+    return '#069b8f';
+  }
+
+  getCategorieIcon(categorie: string | null): string {
+    if (!categorie) return 'isax isax-routing';
+    const c = categorie.toLowerCase();
+    if (c.includes('technique') || c.includes('dev') || c.includes('web'))  return 'isax isax-code';
+    if (c.includes('management') || c.includes('leadership'))                return 'isax isax-people';
+    if (c.includes('securit')    || c.includes('cyber'))                     return 'isax isax-shield';
+    if (c.includes('certif'))                                                 return 'isax isax-medal-star';
+    if (c.includes('soft')       || c.includes('communication'))             return 'isax isax-message';
+    if (c.includes('data')       || c.includes('analyse'))                   return 'isax isax-chart';
+    if (c.includes('marketing')  || c.includes('commercial'))                return 'isax isax-trend-up';
+    return 'isax isax-routing';
   }
 }
