@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DemandeFormationResponse, ActionDemandeRequest } from '../../models/formation.models';
+// import { Role, RoleResponse, AssignRoleRequest } from '../../models/role.models';
 import { AuthService } from '../authentification/auth.service';
 
 @Injectable({
@@ -28,10 +29,10 @@ export class DemandeFormationService {
   // ✅ Pour l'employé connecté → /mes-demandes-formation
   getMesDemandes(): Observable<DemandeFormationResponse> {
     return this.http.get<DemandeFormationResponse>(
-      `${this.apiUrl}/mes-demandes-formation`,  // ✅ vérifiez cette ligne
+      `${this.apiUrl}/mes-demandes-formation`,
       { headers: this.getHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
-}
+  }
 
   // ✅ Pour RH/Admin → /demandes-formation (permission requise)
   getDemandesFormation(): Observable<DemandeFormationResponse> {
@@ -81,8 +82,8 @@ export class DemandeFormationService {
   }
 
   relancerDemande(id: number): Observable<any> {
-  return this.http.post(`${this.apiUrl}/demandes/${id}/relancer`, {});
-}
+    return this.http.post(`${this.apiUrl}/demandes/${id}/relancer`, {});
+  }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
     console.error('Erreur API Demandes Formation:', error);

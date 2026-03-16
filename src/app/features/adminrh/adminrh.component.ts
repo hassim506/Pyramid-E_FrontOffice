@@ -4,12 +4,14 @@ import { CommonModule } from '@angular/common';
 import { routes } from '../../shared/service/routes/routes';
 import { AdminrhSidebarComponent } from './common/adminrh-sidebar/adminrh-sidebar.component';
 import { User } from '../../shared/models/user.models';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+// import { AdminrhCategorieComponent } from './adminrh-categorie/adminrh-categorie.component';
 
 @Component({
     selector: 'app-adminrh',
     templateUrl: './adminrh.component.html',
     styleUrls: ['./adminrh.component.scss'],
-    imports: [CommonModule, RouterOutlet, RouterModule, AdminrhSidebarComponent]
+    imports: [CommonModule, RouterOutlet, RouterModule, ReactiveFormsModule, FormsModule, AdminrhSidebarComponent]
 })
 export class AdminrhComponent implements OnInit {
   public routes = routes;

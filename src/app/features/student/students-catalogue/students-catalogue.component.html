@@ -399,9 +399,10 @@
 
         <!-- ═══════════════════════════════════════════ -->
         <!-- SECTION 2 — Formations du catalogue        -->
+        <!-- ✅ FIX : ngIf toujours vrai si loading     -->
         <!-- ═══════════════════════════════════════════ -->
         <div class="lms-detail-section mb-3"
-             *ngIf="formationsCatalogue.length > 0 || loadingFormations">
+             *ngIf="loadingFormations || formationsCatalogue.length > 0">
 
           <div class="lms-modules-header">
             <div class="lms-modules-header__left">
@@ -572,7 +573,7 @@
 
       </div>
 
-      <!-- Footer modal — Fermer à gauche, Annuler + Relancer à droite -->
+      <!-- Footer modal -->
       <div class="modal-footer lms-modal__footer" style="justify-content:space-between;">
         <button class="btn lms-btn-cancel" (click)="fermerDetailDemande()">
           <i class="isax isax-close-square me-1"></i>Fermer
@@ -699,12 +700,16 @@
             <span class="lms-meta-chip lms-meta-chip--teal">{{ selectedCatalogue.nombre_formations }} formation(s)</span>
           </div>
 
-          <!-- Collapsible formations incluses -->
-          <div class="lms-collapsible mb-4" *ngIf="formationsCatalogueModal.length > 0 || loadingFormationsModal">
+          <!-- ✅ FIX : ancré sur selectedCatalogue (toujours vrai à l'étape 2) -->
+          <div class="lms-collapsible mb-4" *ngIf="selectedCatalogue">
             <button class="lms-collapsible__trigger" type="button" (click)="showFormations = !showFormations">
               <span>
                 <i class="isax isax-book me-1"></i>Voir les formations incluses
-                <span class="lms-meta-chip lms-meta-chip--teal ms-2" *ngIf="!loadingFormationsModal">{{ formationsCatalogueModal.length }}</span>
+                <span class="lms-meta-chip lms-meta-chip--teal ms-2" *ngIf="!loadingFormationsModal">
+                  {{ formationsCatalogueModal.length || selectedCatalogue?.nombre_formations || 0 }}
+                </span>
+                <span class="spinner-border spinner-border-sm text-primary ms-2"
+                      *ngIf="loadingFormationsModal"></span>
               </span>
               <i class="isax" [class.isax-arrow-down]="!showFormations" [class.isax-arrow-up]="showFormations"></i>
             </button>

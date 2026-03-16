@@ -1,158 +1,275 @@
-
-    <div class="certificate">
-        <div class="page-title d-flex align-items-center justify-content-between">
-            <h5>Certificates</h5>
-            <div>
-                <a href="javascript:void(0);" class="btn btn-secondary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#add_certificate">
-                    <i class="isax isax-add-circle me-1"></i>Add Certificate
-                </a>
-            </div>
-        </div>
-        <div class="p-0">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="mb-3">
-                              <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><img class="img-fluid rounded" src="./assets/img/instructor/certificate-1.jpg" alt="img"></a>
-                            </div>
-                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-2">
-                            <h6>Certificate 01</h6>
-                            <ul class="edit-delete-icon d-flex align-items-center">
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><i class="isax isax-eye"></i></a></li>
-                                <li><a href="javascript:void(0);"><i class="isax isax-edit-2"></i></a></li>
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><img class="img-fluid rounded" src="./assets/img/instructor/certificate-2.jpg" alt="img"></a>
-                            </div>
-                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-2">
-                            <h6>Certificate 02</h6>
-                            <ul class="edit-delete-icon d-flex align-items-center">
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><i class="isax isax-eye"></i></a></li>
-                                <li><a href="javascript:void(0);"><i class="isax isax-edit-2"></i></a></li>
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><img class="img-fluid rounded" src="./assets/img/instructor/certificate-3.jpg" alt="img"></a>
-                            </div>
-                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-2">
-                            <h6>Certificate 03</h6>
-                            <ul class="edit-delete-icon d-flex align-items-center">
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><i class="isax isax-eye"></i></a></li>
-                                <li><a href="javascript:void(0);"><i class="isax isax-edit-2"></i></a></li>
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><img class="img-fluid rounded" src="./assets/img/instructor/certificate-4.jpg" alt="img"></a>
-                            </div>
-                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-2">
-                            <h6>Certificate 04</h6>
-                            <ul class="edit-delete-icon d-flex align-items-center">
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><i class="isax isax-eye"></i></a></li>
-                                <li><a href="javascript:void(0);"><i class="isax isax-edit-2"></i></a></li>
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="certificate">
+  <div class="page-title d-flex align-items-center justify-content-between mb-4">
+    <h5>Gestion des Certificats</h5>
+    <div>
+      <button class="btn btn-primary me-2" (click)="loadCertificates()">
+        <i class="isax isax-refresh-circle me-1"></i>Actualiser
+      </button>
     </div>
+  </div>
 
+  <!-- Filtres et recherche -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label class="form-label">Rechercher</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Code, employé, formation..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="applyFilters()">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label class="form-label">Statut</label>
+        <select class="form-control" [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()">
+          <option value="">Tous les statuts</option>
+          <option value="valide">Valide</option>
+          <option value="expiré">Expiré</option>
+          <option value="révoqué">Révoqué</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label class="form-label">Entreprise</label>
+        <select class="form-control" [(ngModel)]="selectedEntreprise" (ngModelChange)="applyFilters()">
+          <option value="">Toutes les entreprises</option>
+          <option *ngFor="let entreprise of getUniqueEntreprises()" [value]="entreprise.id">
+            {{entreprise.nom}}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="form-group">
+        <label class="form-label">Résultats</label>
+        <div class="form-control-plaintext">
+          {{filteredCertificates.length}} certificat(s)
+        </div>
+      </div>
+    </div>
+  </div>
 
-    			<!-- Add Question -->
-			<div class="modal fade" id="add_certificate">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5>Add New Certificate</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body pb-0">
-								<div class="mb-3">
-									<label class="form-label">Attachments</label>
-									<div class="file-upload drag-file w-100 d-flex align-items-center justify-content-center flex-column">
-										<span class="upload-img mb-2"><i class="isax isax-folder5 fs-24"></i></span>
-										<p class="mb-1 fs-12">Drag and drop your files</p>
-										<p class="mb-2 fs-12">Accept File Type: doc,docx,jpg,jpeg,png,txt,pdf</p>
-										<input type="file" accept="video/image">
-										<span class="btn btn-secondary rounded-pill"><i class="isax isax-document-upload me-1"></i>Upload</span>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn btn-light rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Submit</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Add Question -->
+  <!-- Message d'erreur -->
+  <div *ngIf="error" class="alert alert-danger mb-4">
+    {{error}}
+  </div>
 
-			<div class="modal fade" id="view_certificate">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5>View Certificate</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<div class="modal-body">
-							<div><img src="assets/img/icon/certificate.svg" class="img-fluid" alt=""></div>
-							<div class="text-end mt-4">
-								<a href="javascript:void(0);" class="btn btn-secondary rounded-pill"><i class="isax isax-import me-2"></i>Download</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-4">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
 
-			<!-- Delete Modal -->
-			<div class="modal fade" id="delete_modal">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-body text-center custom-modal-body">
-							<span class="avatar avatar-lg bg-gray-100 rounded-circle mb-2">
-								<i class="isax isax-trash fs-24 text-danger"></i>
-							</span>
-							<div>
-								<h4 class="mb-2">Delete Certificate</h4>
-								<p class="mb-3">Are you sure you want to delete certificate?</p>
-								<div class="d-flex align-items-center justify-content-center">
-									<a href="javascript:void(0);" class="btn bg-gray-100 rounded-pill me-2" data-bs-dismiss="modal">Cancel</a>
-									<a href="javascript:void(0);" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Yes, Delete</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- /Delete Modal -->
+  <!-- Liste des certificats -->
+  <div class="row">
+    <div *ngFor="let certificate of getPaginatedCertificates()" class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h6 class="card-title mb-0">{{certificate.code_unique}}</h6>
+            <span [class]="getStatusClass(certificate.statut)">{{certificate.statut}}</span>
+          </div>
+          
+          <div class="mb-2">
+            <strong>Employé:</strong> {{certificate.employe.prenom}} {{certificate.employe.nom}}
+          </div>
+          
+          <div class="mb-2">
+            <strong>Formation:</strong> {{certificate.formation.titre}}
+          </div>
+          
+          <div class="mb-2">
+            <strong>Entreprise:</strong> {{certificate.entreprise.nom}}
+          </div>
+          
+          <div class="mb-2">
+            <strong>Délivré le:</strong> {{formatDate(certificate.date_delivrance)}}
+          </div>
+          
+          <div *ngIf="certificate.date_expiration" class="mb-2">
+            <strong>Expire le:</strong> 
+            <span [class]="isExpired(certificate) ? 'text-danger' : 'text-muted'">
+              {{formatDate(certificate.date_expiration)}}
+            </span>
+          </div>
+          
+          <div *ngIf="certificate.score_final" class="mb-3">
+            <strong>Score:</strong> {{certificate.score_final}}%
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <div class="btn-group">
+              <button 
+                class="btn btn-sm btn-outline-primary" 
+                (click)="viewCertificate(certificate)"
+                data-bs-toggle="modal" 
+                data-bs-target="#view_certificate">
+                <i class="isax isax-eye"></i>
+              </button>
+              
+              <button 
+                class="btn btn-sm btn-outline-success" 
+                (click)="downloadCertificate(certificate)">
+                <i class="isax isax-import"></i>
+              </button>
+            </div>
+
+            <div class="btn-group">
+              <button 
+                *ngIf="certificate.statut === 'valide'"
+                class="btn btn-sm btn-outline-warning" 
+                (click)="revokeCertificate(certificate)">
+                <i class="isax isax-close-circle"></i>
+              </button>
+              
+              <button 
+                *ngIf="certificate.statut === 'révoqué'"
+                class="btn btn-sm btn-outline-success" 
+                (click)="reactivateCertificate(certificate)">
+                <i class="isax isax-check-circle"></i>
+              </button>
+              
+              <button 
+                class="btn btn-sm btn-outline-danger" 
+                (click)="deleteCertificate(certificate)">
+                <i class="isax isax-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucun résultat -->
+  <div *ngIf="!loading && filteredCertificates.length === 0" class="text-center py-5">
+    <i class="isax isax-document-text display-1 text-muted mb-3"></i>
+    <h5 class="text-muted">Aucun certificat trouvé</h5>
+    <p class="text-muted">Modifiez vos critères de recherche ou filtres.</p>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="totalPages > 1" class="d-flex justify-content-center mt-4">
+    <nav aria-label="Pagination des certificats">
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <button class="page-link" (click)="prevPage()" [disabled]="currentPage === 1">
+            <i class="isax isax-arrow-left-2"></i>
+          </button>
+        </li>
+        
+        <li class="page-item active">
+          <span class="page-link">{{currentPage}} / {{totalPages}}</span>
+        </li>
+        
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <i class="isax isax-arrow-right-3"></i>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<!-- Modal de visualisation -->
+<div class="modal fade" id="view_certificate">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5>Détails du Certificat</h5>
+        <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <i class="isax isax-close-circle5"></i>
+        </button>
+      </div>
+      <div class="modal-body" *ngIf="selectedCertificate">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Informations générales</h6>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Code unique:</strong></td>
+                <td>{{selectedCertificate.code_unique}}</td>
+              </tr>
+              <tr>
+                <td><strong>Statut:</strong></td>
+                <td><span [class]="getStatusClass(selectedCertificate.statut)">{{selectedCertificate.statut}}</span></td>
+              </tr>
+              <tr>
+                <td><strong>Date de délivrance:</strong></td>
+                <td>{{formatDate(selectedCertificate.date_delivrance)}}</td>
+              </tr>
+              <tr *ngIf="selectedCertificate.date_expiration">
+                <td><strong>Date d'expiration:</strong></td>
+                <td>{{formatDate(selectedCertificate.date_expiration)}}</td>
+              </tr>
+              <tr *ngIf="selectedCertificate.score_final">
+                <td><strong>Score final:</strong></td>
+                <td>{{selectedCertificate.score_final}}%</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="col-md-6">
+            <h6>Détails</h6>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Employé:</strong></td>
+                <td>{{selectedCertificate.employe.prenom}} {{selectedCertificate.employe.nom}}</td>
+              </tr>
+              <tr>
+                <td><strong>Email:</strong></td>
+                <td>{{selectedCertificate.employe.email}}</td>
+              </tr>
+              <tr>
+                <td><strong>Fonction:</strong></td>
+                <td>{{selectedCertificate.employe.fonction}}</td>
+              </tr>
+              <tr>
+                <td><strong>Formation:</strong></td>
+                <td>{{selectedCertificate.formation.titre}}</td>
+              </tr>
+              <tr>
+                <td><strong>Formateur:</strong></td>
+                <td>{{selectedCertificate.formateur.prenom}} {{selectedCertificate.formateur.nom}}</td>
+              </tr>
+              <tr>
+                <td><strong>Entreprise:</strong></td>
+                <td>{{selectedCertificate.entreprise.nom}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        
+        <div class="text-center mt-4">
+          <button 
+            class="btn btn-primary me-2" 
+            (click)="downloadCertificate(selectedCertificate)">
+            <i class="isax isax-import me-2"></i>Télécharger PDF
+          </button>
+          
+          <button 
+            *ngIf="selectedCertificate.statut === 'valide'"
+            class="btn btn-warning me-2" 
+            (click)="revokeCertificate(selectedCertificate)"
+            data-bs-dismiss="modal">
+            <i class="isax isax-close-circle me-2"></i>Révoquer
+          </button>
+          
+          <button 
+            *ngIf="selectedCertificate.statut === 'révoqué'"
+            class="btn btn-success me-2" 
+            (click)="reactivateCertificate(selectedCertificate)"
+            data-bs-dismiss="modal">
+            <i class="isax isax-check-circle me-2"></i>Réactiver
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

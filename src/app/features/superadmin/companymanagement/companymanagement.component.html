@@ -73,12 +73,71 @@
 </td>                <td>
                     <span [class]="getStatusClass(data.statut)">{{data.statut | titlecase}}</span>
                 </td>
-                <td>
+                <!-- <td>
                     <div class="d-flex align-items-center">
                         <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" (click)="editCompany(data)"><i class="isax isax-edit"></i></a>
                         <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" (click)="deleteCompany(data)"><i class="isax isax-trash"></i></a>
                     </div>
-                </td>
+                </td> -->
+                
+
+            <!-- Actions -->
+            <td class="text-end">
+              <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-outline-primary" 
+                        (click)="editCompany(data)"
+                        [disabled]="!canEditCompany(data)"
+                        title="Modifier">
+                  <i class="isax isax-edit"></i>
+                </button>
+                <button class="btn btn-outline-danger" 
+                        (click)="deleteCompany(data)"
+                        [disabled]="!canDeleteCompany(data)"
+                        title="Supprimer">
+                  <i class="isax isax-trash"></i>
+                </button>
+                <a [routerLink]="['/adminrh/adminrh-company-details', data.id]" 
+                   class="btn btn-outline-info"
+                   title="Voir détails">
+                  <i class="isax isax-eye"></i>
+                </a>
+                 <!-- Bouton Archiver pour les entreprises actives -->
+                <button 
+                    *ngIf="data.statut === 'active'" 
+                    class="btn btn-outline-warning" 
+                    (click)="archiveCompany(data)"
+                    title="Archiver l'entreprise">
+                  <i class="isax isax-archive"></i>
+                </button>
+                
+                <!-- Bouton Réactiver pour les entreprises inactives -->
+                <button 
+                    *ngIf="data.statut === 'inactive'" 
+                    class="btn btn-outline-success" 
+                    (click)="reactivateCompany(data)"
+                    title="Réactiver l'entreprise">
+                  <i class="isax isax-refresh"></i>
+                </button>
+                
+                <!-- Bouton Suspendre pour les entreprises actives -->
+                <button 
+                    *ngIf="data.statut === 'active'" 
+                    class="btn btn-outline-danger" 
+                    (click)="suspendCompany(data)"
+                    title="Suspendre l'entreprise">
+                  <i class="isax isax-pause"></i>
+                </button>
+                
+                <!-- Bouton Réactiver pour les entreprises suspendues -->
+                <button 
+                    *ngIf="data.statut === 'suspendue'" 
+                    class="btn btn-outline-success" 
+                    (click)="reactivateCompany(data)"
+                    title="Réactiver l'entreprise">
+                  <i class="isax isax-refresh"></i>
+                </button>
+              </div>
+            </td>
             </tr>
             }
         </tbody>

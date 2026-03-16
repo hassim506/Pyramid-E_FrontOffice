@@ -1,0 +1,300 @@
+<div class="categorie">
+    <div class="page-title d-flex align-items-center justify-content-between">
+        <h5>Catégories de Formation</h5>
+        <div>
+            <a href="javascript:void(0);" class="btn btn-secondary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#add_categorie">
+                <i class="isax isax-add-circle me-1"></i>Ajouter Catégorie
+            </a>
+        </div>
+    </div>
+    
+    <div class="p-0">
+        <!-- Liste des catégories -->
+        <div class="categories-list">
+            <div class="card mb-3" *ngFor="let categorie of categories">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <!-- Icône et couleur -->
+                        <div class="col-md-1">
+                            <div class="categorie-icon d-flex align-items-center justify-content-center rounded" 
+                                 [style.background-color]="categorie.couleur" 
+                                 style="width: 50px; height: 50px;">
+                                <i [class]="getIconClass(categorie.icone)" 
+                                   style="font-size: 1.5rem; color: white;"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Informations principales -->
+                        <div class="col-md-6">
+                            <h6 class="mb-1">{{ categorie.nom }}</h6>
+                            <p class="text-muted mb-1 small">{{ categorie.description }}</p>
+                            <small class="text-muted">{{ categorie.nombre_formations }} formation(s)</small>
+                        </div>
+                        
+                        <!-- Badges de statut -->
+                        <div class="col-md-3">
+                            <div class="d-flex flex-wrap gap-1">
+                                <span class="badge bg-success" *ngIf="categorie.est_active">Active</span>
+                                <span class="badge bg-secondary" *ngIf="!categorie.est_active">Inactive</span>
+                                <span class="badge bg-primary" *ngIf="categorie.est_visible">Visible</span>
+                                <span class="badge bg-warning" *ngIf="!categorie.est_visible">Masquée</span>
+                            </div>
+                            <small class="text-muted d-block mt-1">Ordre: {{ categorie.ordre }}</small>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="col-md-2">
+                            <div class="d-flex justify-content-end">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        Actions
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="javascript:void(0);" 
+                                               (click)="viewCategorie(categorie)"
+                                               data-bs-toggle="modal" 
+                                               data-bs-target="#view_categorie">
+                                                <i class="isax isax-eye me-2"></i>Voir
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="javascript:void(0);" 
+                                               (click)="editCategorie(categorie)"
+                                               data-bs-toggle="modal" 
+                                               data-bs-target="#add_categorie">
+                                                <i class="isax isax-edit-2 me-2"></i>Modifier
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="javascript:void(0);" 
+                                               (click)="deleteCategorie(categorie)"
+                                               data-bs-toggle="modal" 
+                                               data-bs-target="#delete_modal">
+                                                <i class="isax isax-trash me-2"></i>Supprimer
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- États de chargement et vide -->
+        <div class="text-center" *ngIf="loading">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+
+        <div class="text-center py-4" *ngIf="!loading && categories.length === 0">
+            <div class="empty-state">
+                <i class="isax isax-category text-muted" style="font-size: 4rem;"></i>
+                <h6 class="text-muted mt-3">Aucune catégorie trouvée</h6>
+                <p class="text-muted">Commencez par créer votre première catégorie de formation</p>
+                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#add_categorie">
+                    <i class="isax isax-add-circle me-2"></i>Ajouter une catégorie
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modales inchangées -->
+<!-- Add/Edit Categorie Modal -->
+<div class="modal fade" id="add_categorie">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>{{ editMode ? 'Modifier la Catégorie' : 'Ajouter une Nouvelle Catégorie' }}</h5>
+                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="resetForm()">
+                    <i class="isax isax-close-circle5"></i>
+                </button>
+            </div>
+            <form [formGroup]="categorieForm" (ngSubmit)="onSubmit()">
+                <div class="modal-body pb-0">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nom de la catégorie *</label>
+                                <input type="text" class="form-control" formControlName="nom" placeholder="Ex: Développement Web">
+                                <div class="text-danger" *ngIf="categorieForm.get('nom')?.invalid && categorieForm.get('nom')?.touched">
+                                    Le nom est requis (min. 2 caractères)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Icône *</label>
+                                <input type="text" class="form-control" formControlName="icone" placeholder="Ex: code, cloud, users">
+                                <small class="text-muted">Nom de l'icône (sans préfixe isax-)</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description *</label>
+                        <textarea class="form-control" rows="3" formControlName="description" placeholder="Description détaillée de la catégorie"></textarea>
+                        <div class="text-danger" *ngIf="categorieForm.get('description')?.invalid && categorieForm.get('description')?.touched">
+                            La description est requise
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description courte</label>
+                        <input type="text" class="form-control" formControlName="short_description" placeholder="Brève description (optionnelle)">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Couleur *</label>
+                                <input type="color" class="form-control form-control-color" formControlName="couleur">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Ordre d'affichage *</label>
+                                <input type="number" class="form-control" formControlName="ordre" min="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" formControlName="est_active" id="est_active">
+                                    <label class="form-check-label" for="est_active">
+                                        Catégorie active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" formControlName="est_visible" id="est_visible">
+                                    <label class="form-check-label" for="est_visible">
+                                        Visible publiquement
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aperçu de la catégorie -->
+                    <div class="mb-3" *ngIf="categorieForm.value.couleur && categorieForm.value.icone">
+                        <label class="form-label">Aperçu</label>
+                        <div class="d-flex align-items-center justify-content-center p-3 rounded" 
+                             [style.background-color]="categorieForm.value.couleur" 
+                             style="max-width: 200px; height: 80px;">
+                            <i [class]="getIconClass(categorieForm.value.icone)" 
+                               style="font-size: 2rem; color: white;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-light rounded-pill me-2" type="button" data-bs-dismiss="modal" (click)="resetForm()">Annuler</button>
+                    <button class="btn btn-secondary rounded-pill" type="submit" [disabled]="categorieForm.invalid" data-bs-dismiss="modal">
+                        {{ editMode ? 'Modifier' : 'Créer' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Categorie Modal -->
+<div class="modal fade" id="view_categorie">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Détails de la Catégorie</h5>
+                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="isax isax-close-circle5"></i>
+                </button>
+            </div>
+            <div class="modal-body" *ngIf="selectedCategorie">
+                <div class="text-center mb-4">
+                    <div class="d-flex align-items-center justify-content-center p-4 rounded mx-auto" 
+                         [style.background-color]="selectedCategorie.couleur" 
+                         style="width: 150px; height: 150px;">
+                        <i [class]="getIconClass(selectedCategorie.icone)" 
+                           style="font-size: 4rem; color: white;"></i>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><strong>Nom:</strong></h6>
+                        <p>{{ selectedCategorie.nom }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><strong>Slug:</strong></h6>
+                        <p>{{ selectedCategorie.slug }}</p>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h6><strong>Description:</strong></h6>
+                    <p>{{ selectedCategorie.description }}</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><strong>Nombre de formations:</strong></h6>
+                        <p>{{ selectedCategorie.nombre_formations }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><strong>Ordre:</strong></h6>
+                        <p>{{ selectedCategorie.ordre }}</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><strong>Statut:</strong></h6>
+                        <div>
+                            <span class="badge bg-success me-1" *ngIf="selectedCategorie.est_active">Active</span>
+                            <span class="badge bg-secondary me-1" *ngIf="!selectedCategorie.est_active">Inactive</span>
+                            <span class="badge bg-primary" *ngIf="selectedCategorie.est_visible">Visible</span>
+                            <span class="badge bg-warning" *ngIf="!selectedCategorie.est_visible">Masquée</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><strong>Créée le:</strong></h6>
+                        <p>{{ formatDate(selectedCategorie.created_at) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="delete_modal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center custom-modal-body">
+                <span class="avatar avatar-lg bg-gray-100 rounded-circle mb-2">
+                    <i class="isax isax-trash fs-24 text-danger"></i>
+                </span>
+                <div>
+                    <h4 class="mb-2">Supprimer la Catégorie</h4>
+                    <p class="mb-3" *ngIf="selectedCategorie">
+                        Êtes-vous sûr de vouloir supprimer la catégorie "<strong>{{ selectedCategorie.nom }}</strong>" ?
+                    </p>
+                    <div class="d-flex align-items-center justify-content-center">
+                        <a href="javascript:void(0);" class="btn bg-gray-100 rounded-pill me-2" data-bs-dismiss="modal">Annuler</a>
+                        <a href="javascript:void(0);" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal" (click)="confirmDelete()">Oui, Supprimer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

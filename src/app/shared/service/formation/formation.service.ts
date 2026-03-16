@@ -9,6 +9,18 @@ import { environment } from '../../../../environments/environment';
 })
 
 export class FormationService {
+  publishFormation(id: number): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/formations/${id}/publish`, { est_publier: true }, { 
+      headers: this.getHeaders() 
+    });
+  }
+
+unpublishFormation(id: number): Observable<any> {
+  return this.http.put<any>(`${this.baseUrl}/formations/${id}/unpublish`, { est_publier: false }, { 
+    headers: this.getHeaders() 
+  });
+}
+
   private baseUrl = environment.apiUrl;
   handleError: any;
 

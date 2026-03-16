@@ -1,367 +1,229 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, NgForm, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Editor, Toolbar } from 'ngx-editor';
-import { Subject, takeUntil } from 'rxjs';
-import { FormsModule } from '@angular/forms';
-
-import { FormationService } from '../../../shared/service/formation/formation.service';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SafeUrlPipe } from '../../../shared/pipe/safe-url-pipe.pipe';
-declare var bootstrap: any;
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { FormationService } from '../../../shared/service/formation/formation.service';
+import { AuthService } from '../../../shared/service/authentification/auth.service';
 
-// ==================== INTERFACES ====================
+
+declare var bootstrap: any;
 
 interface Module {
   titre: string;
   description: string;
-  duree_estimee?: number;
+  duree_estimee: number;
+  ordre: number;
   sections: Section[];
 }
 
 interface Section {
   titre: string;
-  description: string;
+  type: string;
+  duree_estimee: number;
   contenu: string;
-  type: 'video' | 'reading' | 'quiz' | 'hands-on';
-  duree_estimee: number;
-  video_url?: string;
-  ressources?: string;
-  est_gratuit: boolean;
-  obligatoire: boolean;
-  visible?: boolean;
-}
-
-interface FAQ {
-  question: string;
-  reponse: string;
-  est_active: boolean;
-}
-
-interface Category {
-  id: number;
-  nom: string;
-  description?: string;
-}
-
-interface SelectOption<T = string> {
-  value: T;
-  label: string;
-  icon?: string;
-}
-
-interface FormationData {
-  titre: string;
-  categorie_formation_id: number;
-  niveau: string;
-  langue: string;
-  nb_max_participants: number;
-  type: string;
-  short_description: string;
-  description: string;
-  est_certifiante: boolean;
-  public_cible: string;
-  objectifs_pedagogiques: string[];
-  prerequis: string[];
-  image_couverture?: string;
-  media_url?: string;
-  prix: number;
-  prix_original?: number;
-  tags: string[];
-  modules: ModuleData[];
-  est_publie: boolean;
-  inscription_ouverte: boolean;
-  statut: string;
-}
-
-interface ModuleData {
-  titre: string;
-  description: string;
-  ordre: number;
-  type: string;
-  duree_estimee: number;
+  ressources: string;
   obligatoire: boolean;
   visible: boolean;
-  sections: SectionData[];
-}
-
-interface SectionData {
-  titre: string;
-  description: string;
-  contenu: string;
-  type: string;
   ordre: number;
-  duree_estimee: number;
-  ressources: string | null;
-  metadata: string | null;
-  obligatoire: boolean;
-  visible: boolean;
-  statut: string;
 }
 
 @Component({
   selector: 'app-add-course',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './add-course.component.html',
-   imports: [
-    FormsModule,
-      CommonModule,
-    ReactiveFormsModule,
-    SafeUrlPipe
-  ],
   styleUrls: ['./add-course.component.scss']
 })
-export class AddCourseComponent implements OnInit, OnDestroy {
-  // ==================== VIEW CHILDREN ====================
-  @ViewChild('moduleForm') moduleForm!: NgForm;
-  @ViewChild('sectionForm') sectionForm!: NgForm;
-  @ViewChild('faqForm') faqForm!: NgForm;
+export class AddCourseComponent implements OnInit {
+  // État général
+  loading = false;
+  saving = false;
+  error = '';
+  success = '';
+  currentStep = 0;
 
-  // ==================== EDITOR ====================
-  editor!: Editor;
-  readonly toolbar: Toolbar = [
-    ['bold', 'italic'],
-    ['underline', 'strike'],
-    ['code', 'blockquote'],
-    ['ordered_list', 'bullet_list'],
-    [{ heading: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }],
-    ['link', 'image'],
-    ['text_color', 'background_color'],
-    ['align_left', 'align_center', 'align_right', 'align_justify'],
-  ];
-
-  // ==================== FORMS ====================
+  // Formulaires
   basicInfoForm!: FormGroup;
   mediaForm!: FormGroup;
   additionalInfoForm!: FormGroup;
   pricingForm!: FormGroup;
 
-  // ==================== STATE ====================
-  selectedFieldSet: number[] = [0];
-  loading = false;
-  saving = false;
-  error = '';
-  success = '';
-  uploadedImageUrl = '';
-  private destroy$ = new Subject<void>();
-currentSection: Section = this.createEmptySection();
+  // Données
+  categories: any[] = [];
+  modules: Module[] = [];
+  objectifs: string[] = [''];
+  prerequis: string[] = [''];
+  competencesAcquises: string[] = [''];
+  outilsRequis: string[] = [''];
 
-  // ==================== DATA ====================
-  categories: Category[] = [];
-  modulesData: Module[] = [];
-  faqData: FAQ[] = [];
-  objectifsData: { text: string }[] = [{ text: '' }];
-  prerequisData: { text: string }[] = [{ text: '' }];
+  // Média
+  imagePreview: string | null = null;
+  selectedImageFile: File | null = null;
+  isDragOver = false;
+  imageError = '';
+  videoUrlError = '';
+  videoUrlValid = false;
 
-  // ==================== CURRENT ITEMS ====================
-  newModule: Module = this.createEmptyModule();
-  newSection: Section = this.createEmptySection();
-  newFaq: FAQ = this.createEmptyFaq();
-  selectedModuleIndex: number | null = null;
+  // Modals - Module
+  newModule: Module = this.getEmptyModule();
   editingModuleIndex: number | null = null;
+
+  // Modals - Section
+  currentSection: Section = this.getEmptySection();
   editingSectionIndex: number | null = null;
-
-  // ==================== OPTIONS ====================
-  readonly niveaux: SelectOption[] = [
-    { value: 'debutant', label: 'Débutant' },
-    { value: 'intermediaire', label: 'Intermédiaire' },
-    { value: 'avance', label: 'Avancé' },
-    { value: 'expert', label: 'Expert' }
-  ];
-
-  readonly types: SelectOption[] = [
-    { value: 'en_ligne', label: 'En ligne' },
-    { value: 'presentiel', label: 'Présentiel' },
-    { value: 'hybride', label: 'Hybride' }
-  ];
-
-  readonly langues: SelectOption[] = [
-    { value: 'fr', label: 'Français' },
-    { value: 'en', label: 'Anglais' },
-    { value: 'es', label: 'Espagnol' }
-  ];
-
-  readonly sectionTypes: SelectOption<'video' | 'reading' | 'quiz' | 'hands-on'>[] = [
-    { value: 'video', label: 'Vidéo', icon: 'play-circle' },
-    { value: 'reading', label: 'Lecture', icon: 'document-text' },
-    { value: 'quiz', label: 'Quiz', icon: 'task-square' },
-    { value: 'hands-on', label: 'Pratique', icon: 'code' }
-  ];
-
-  // ==================== CONSTANTS ====================
-  private readonly MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
-  private readonly SUCCESS_MODAL_DELAY = 3000;
+  currentModuleIndex: number | null = null;
 
   constructor(
     private fb: FormBuilder,
+    private formationService: FormationService,
     private router: Router,
-    private formationService: FormationService
-  ) {}
-
-  // ==================== LIFECYCLE HOOKS ====================
+    private sanitizer: DomSanitizer,
+    private authService: AuthService
+  ) {
+    this.initForms();
+  }
 
   ngOnInit(): void {
-    this.initializeEditor();
-    this.initForms();
-    this.setupFormWatchers();
     this.loadCategories();
   }
 
-  ngOnDestroy(): void {
-    this.editor?.destroy();
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+  // ==================== INITIALISATION ====================
 
-  // ==================== INITIALIZATION ====================
-
-  private initializeEditor(): void {
-    this.editor = new Editor();
-  }
-
-  private initForms(): void {
+  initForms(): void {
     this.basicInfoForm = this.fb.group({
-      titre: ['', [Validators.required, Validators.minLength(10)]],
+      titre: ['', [Validators.required, Validators.minLength(5)]],
       categorie_formation_id: ['', Validators.required],
       niveau: ['debutant', Validators.required],
       langue: ['fr', Validators.required],
-      nb_max_participants: [25, [Validators.required, Validators.min(1)]],
       type: ['en_ligne', Validators.required],
-      short_description: ['', [
-        Validators.required,
-        Validators.minLength(20),
-        Validators.maxLength(200)
-      ]],
-      description: ['', [Validators.required, Validators.minLength(50)]],
-      est_certifiante: [false],
-      public_cible: [''],
-      difficulte: ['moyen']
+      nb_max_participants: [25],
+      short_description: ['', Validators.required],
+      description: ['', Validators.required],
+      est_certifiante: [false]
     });
 
     this.mediaForm = this.fb.group({
-      image_couverture: [''],
-      video_type: ['external'],
-      video_presentation: [''],
-      media_url: ['']
+      image: [''],
+      media_url: [''],
+      video_autoplay: [false],
+      video_show_controls: [true]
     });
 
     this.additionalInfoForm = this.fb.group({
+      difficulte: ['moyen', Validators.required],
+      prix: [0, [Validators.required, Validators.min(0)]],
+      duree_totale: [null, [Validators.min(1)]],
+      public_cible: [''],
       tags: [''],
-      message_reviewer: [''],
-      accepte_conditions: [false, Validators.requiredTrue]
+      date_debut: [''],
+      date_fin: [''],
+      metadata: [''],
+      inscription_ouverte: [true],
+      est_publie: [false]
     });
 
     this.pricingForm = this.fb.group({
-      est_gratuite: [false],
-      prix: [0, [Validators.required, Validators.min(0)]],
-      a_remise: [false],
-      prix_remise: [0],
-      duree_acces: ['lifetime'],
-      nb_mois_acces: [12]
+      cout_conception: [0],
+      cout_production: [0],
+      cout_formateur_jour: [0],
+      frais_logistique: [0],
+      nb_jours: [1],
+      notes_estimation: ['']
     });
   }
+loadCategories(): void {
+  this.loading = true;
+  this.error = '';
 
-  
-  private setupFormWatchers(): void {
-    // Prix gratuit
-    this.pricingForm.get('est_gratuite')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(isGratuite => {
-        const prixControl = this.pricingForm.get('prix');
-        if (isGratuite) {
-          prixControl?.setValue(0);
-          prixControl?.disable();
-        } else {
-          prixControl?.enable();
-        }
-      });
+  this.formationService.getCategories().subscribe({
+    next: (response) => {
+      this.loading = false;
+      
+      // Extraction robuste des catégories selon différents formats de réponse
+      if (Array.isArray(response)) {
+        this.categories = response;
+      } else if (response?.categories && Array.isArray(response.categories)) {
+        this.categories = response.categories;
+      } else if (response?.data && Array.isArray(response.data)) {
+        this.categories = response.data;
+      } else {
+        console.warn('Format de réponse inattendu pour les catégories:', response);
+        this.categories = [];
+      }
 
-    // Remise
-    this.pricingForm.get('a_remise')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(hasRemise => {
-        if (!hasRemise) {
-          this.pricingForm.get('prix_remise')?.setValue(0);
-        }
-      });
+      // Validation des données
+      this.categories = this.categories.filter(cat => 
+        cat && typeof cat === 'object' && cat.id && cat.nom
+      );
 
-    // Durée d'accès
-    this.pricingForm.get('duree_acces')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(duree => {
-        const nbMoisControl = this.pricingForm.get('nb_mois_acces');
-        if (duree === 'lifetime') {
-          nbMoisControl?.disable();
-        } else {
-          nbMoisControl?.enable();
-        }
-      });
-  }
+      console.log(`${this.categories.length} catégories chargées:`, this.categories);
 
-  private loadCategories(): void {
-    this.loading = true;
-    this.formationService.getCategories()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          this.categories = response.categories || response.data || response;
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Erreur chargement catégories:', error);
-          this.showError('Impossible de charger les catégories');
-          this.loading = false;
-        }
-      });
-  }
+      // Fallback si aucune catégorie valide
+      if (this.categories.length === 0) {
+        console.warn('Aucune catégorie valide trouvée, utilisation des données de fallback');
+        this.loadFallbackCategories();
+      }
+    },
+    error: (err) => {
+      this.loading = false;
+      console.error('Erreur chargement catégories:', err);
+      
+      this.error = 'Impossible de charger les catégories. Utilisation des catégories par défaut.';
+      this.loadFallbackCategories();
+      
+      // Auto-clear error après 5 secondes
+      setTimeout(() => {
+        this.error = '';
+      }, 5000);
+    }
+  });
+}
 
-  getImageUrl(imagePath: string): string {
-  if (!imagePath) return 'assets/img/placeholder.jpg'; // ou une image par défaut
-  if (imagePath.startsWith('http')) return imagePath;
-  return 'https://ton-backend.fr/uploads/' + imagePath; // adapte selon ton API
+private loadFallbackCategories(): void {
+  this.categories = [
+    { id: 1, nom: 'Développement Web', description: 'HTML, CSS, JavaScript, frameworks web' },
+    { id: 2, nom: 'Développement Mobile', description: 'iOS, Android, React Native, Flutter' },
+    { id: 3, nom: 'Data Science', description: 'Analyse de données, Machine Learning, IA' },
+    { id: 4, nom: 'Intelligence Artificielle', description: 'IA, Deep Learning, NLP' },
+    { id: 5, nom: 'Cybersécurité', description: 'Sécurité informatique, tests de pénétration' },
+    { id: 6, nom: 'DevOps', description: 'CI/CD, Docker, Kubernetes, Cloud' },
+    { id: 7, nom: 'Design UX/UI', description: 'Expérience utilisateur, interface design' }
+  ];
+  console.log('Catégories de fallback chargées:', this.categories.length);
 }
 
   // ==================== NAVIGATION ====================
 
   nextStep(): void {
-    const currentStep = this.selectedFieldSet[0];
-    
-    // Validation selon l'étape
-    if (!this.validateStep(currentStep)) {
-      return;
-    }
-
-    this.clearMessages();
-    if (currentStep < 4) {
-      this.selectedFieldSet[0] = currentStep + 1;
-      this.scrollToTop();
+    if (this.validateCurrentStep()) {
+      this.currentStep++;
     }
   }
 
   prevStep(): void {
-    if (this.selectedFieldSet[0] > 0) {
-      this.selectedFieldSet[0]--;
-      this.scrollToTop();
+    if (this.currentStep > 0) {
+      this.currentStep--;
     }
   }
 
-  private validateStep(step: number): boolean {
-    switch (step) {
+  validateCurrentStep(): boolean {
+    switch (this.currentStep) {
       case 0:
-        if (!this.basicInfoForm.valid) {
+        if (this.basicInfoForm.invalid) {
           this.markFormGroupTouched(this.basicInfoForm);
-          this.showError('Veuillez remplir tous les champs obligatoires');
           return false;
         }
+        break;
+      case 1:
+        // Média est optionnel
         break;
       case 2:
-        if (!this.validateCurriculum()) {
-          return false;
-        }
+        // Modules sont optionnels
         break;
       case 3:
-        if (!this.additionalInfoForm.valid) {
+        if (this.additionalInfoForm.invalid) {
           this.markFormGroupTouched(this.additionalInfoForm);
-          this.showError('Veuillez accepter les conditions');
           return false;
         }
         break;
@@ -369,31 +231,329 @@ currentSection: Section = this.createEmptySection();
     return true;
   }
 
-
-  
-  get currentStep(): number {
-    return this.selectedFieldSet[0];
+  markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      formGroup.get(key)?.markAsTouched();
+    });
   }
 
-  get objectifs(): string[] {
-    return this.objectifsData.map(obj => obj.text);
+  // ==================== OBJECTIFS ====================
+
+  addObjectif(): void {
+    this.objectifs.push('');
   }
 
-  get prerequis(): string[] {
-    return this.prerequisData.map(req => req.text);
+  removeObjectif(index: number): void {
+    if (this.objectifs.length > 1) {
+      this.objectifs.splice(index, 1);
+    }
   }
 
-  get modules(): Module[] {
-    return this.modulesData;
+  // ==================== PREREQUIS ====================
+
+  addPrerequis(): void {
+    this.prerequis.push('');
   }
 
-  get imagePreview(): string {
-    return this.uploadedImageUrl;
+  removePrerequis(index: number): void {
+    if (this.prerequis.length > 1) {
+      this.prerequis.splice(index, 1);
+    }
   }
 
-  // ...existing code...
+  // ==================== COMPETENCES ====================
 
-  // ==================== COST CALCULATION METHODS ====================
+  addCompetence(): void {
+    this.competencesAcquises.push('');
+  }
+
+  removeCompetence(index: number): void {
+    if (this.competencesAcquises.length > 1) {
+      this.competencesAcquises.splice(index, 1);
+    }
+  }
+
+  // ==================== OUTILS ====================
+
+  addOutil(): void {
+    this.outilsRequis.push('');
+  }
+
+  removeOutil(index: number): void {
+    if (this.outilsRequis.length > 1) {
+      this.outilsRequis.splice(index, 1);
+    }
+  }
+
+  getCompetencesCount(): number {
+    return this.competencesAcquises.filter(c => c.trim()).length;
+  }
+
+  getOutilsCount(): number {
+    return this.outilsRequis.filter(o => o.trim()).length;
+  }
+
+  // ==================== MÉDIA - IMAGE ====================
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.processImageFile(files[0]);
+    }
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.processImageFile(input.files[0]);
+    }
+  }
+
+  processImageFile(file: File): void {
+    this.imageError = '';
+    
+    // Validation du type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.imageError = 'Format non supporté. Utilisez JPEG, PNG ou WebP.';
+      return;
+    }
+
+    // Validation de la taille (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      this.imageError = 'L\'image est trop volumineuse. Taille max: 5MB.';
+      return;
+    }
+
+    this.selectedImageFile = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeImage(): void {
+    this.imagePreview = null;
+    this.selectedImageFile = null;
+    this.imageError = '';
+  }
+
+  // ==================== MÉDIA - VIDEO ====================
+
+  onVideoUrlChange(event: Event): void {
+    this.videoUrlError = '';
+    this.videoUrlValid = false;
+  }
+
+  validateVideoUrl(): void {
+    const url = this.mediaForm.get('media_url')?.value;
+    if (!url) {
+      this.videoUrlValid = false;
+      return;
+    }
+
+    if (this.isYouTubeUrl(url) || this.isVimeoUrl(url) || this.isDirectVideoUrl(url)) {
+      this.videoUrlValid = true;
+      this.videoUrlError = '';
+    } else {
+      this.videoUrlValid = false;
+      this.videoUrlError = 'URL non reconnue. Utilisez YouTube, Vimeo ou un lien direct.';
+    }
+  }
+
+  clearVideoUrl(): void {
+    this.mediaForm.patchValue({ media_url: '' });
+    this.videoUrlValid = false;
+    this.videoUrlError = '';
+  }
+
+  isYouTubeUrl(url: string): boolean {
+    return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)/.test(url);
+  }
+
+  isVimeoUrl(url: string): boolean {
+    return /^(https?:\/\/)?(www\.)?vimeo\.com/.test(url);
+  }
+
+  isDirectVideoUrl(url: string): boolean {
+    return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+  }
+
+  getYouTubeEmbedUrl(url: string): SafeResourceUrl {
+    let videoId = '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      videoId = match[2];
+    }
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube.com/embed/${videoId}`
+    );
+  }
+
+  getVimeoEmbedUrl(url: string): SafeResourceUrl {
+    const regExp = /vimeo\.com\/(\d+)/;
+    const match = url.match(regExp);
+    const videoId = match ? match[1] : '';
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://player.vimeo.com/video/${videoId}`
+    );
+  }
+
+  // ==================== MODULES ====================
+
+  getEmptyModule(): Module {
+    return {
+      titre: '',
+      description: '',
+      duree_estimee: 0,
+      ordre: 0,
+      sections: []
+    };
+  }
+
+  openModuleModal(): void {
+    this.newModule = this.getEmptyModule();
+    this.editingModuleIndex = null;
+    const modal = new bootstrap.Modal(document.getElementById('moduleModal'));
+    modal.show();
+  }
+
+  editModule(index: number): void {
+    this.editingModuleIndex = index;
+    this.newModule = { ...this.modules[index] };
+    const modal = new bootstrap.Modal(document.getElementById('moduleModal'));
+    modal.show();
+  }
+
+  saveModule(): void {
+    if (!this.newModule.titre) return;
+
+    if (this.editingModuleIndex !== null) {
+      this.modules[this.editingModuleIndex] = {
+        ...this.newModule,
+        sections: this.modules[this.editingModuleIndex].sections
+      };
+    } else {
+      this.newModule.ordre = this.modules.length;
+      this.newModule.sections = [];
+      this.modules.push({ ...this.newModule });
+    }
+
+    this.closeModal('moduleModal');
+  }
+
+  removeModule(index: number): void {
+    if (confirm('Supprimer ce module et toutes ses sections ?')) {
+      this.modules.splice(index, 1);
+      this.modules.forEach((m, i) => m.ordre = i);
+    }
+  }
+
+  getModuleDuration(module: Module): number {
+    return module.sections?.reduce((sum, s) => sum + (s.duree_estimee || 0), 0) || 0;
+  }
+
+  getTotalSections(): number {
+    return this.modules.reduce((sum, m) => sum + (m.sections?.length || 0), 0);
+  }
+
+  getTotalDuration(): number {
+    return this.modules.reduce((sum, m) => sum + this.getModuleDuration(m), 0);
+  }
+
+  // ==================== SECTIONS ====================
+
+  getEmptySection(): Section {
+    return {
+      titre: '',
+      type: 'video',
+      duree_estimee: 0,
+      contenu: '',
+      ressources: '',
+      obligatoire: true,
+      visible: true,
+      ordre: 0
+    };
+  }
+
+  openSectionModal(moduleIndex: number): void {
+    this.currentModuleIndex = moduleIndex;
+    this.currentSection = this.getEmptySection();
+    this.editingSectionIndex = null;
+    const modal = new bootstrap.Modal(document.getElementById('sectionModal'));
+    modal.show();
+  }
+
+  editSection(moduleIndex: number, sectionIndex: number): void {
+    this.currentModuleIndex = moduleIndex;
+    this.editingSectionIndex = sectionIndex;
+    this.currentSection = { ...this.modules[moduleIndex].sections[sectionIndex] };
+    const modal = new bootstrap.Modal(document.getElementById('sectionModal'));
+    modal.show();
+  }
+
+  saveSection(): void {
+    if (!this.currentSection.titre || this.currentModuleIndex === null) return;
+
+    const module = this.modules[this.currentModuleIndex];
+
+    if (this.editingSectionIndex !== null) {
+      module.sections[this.editingSectionIndex] = { ...this.currentSection };
+    } else {
+      this.currentSection.ordre = module.sections.length;
+      module.sections.push({ ...this.currentSection });
+    }
+
+    this.closeModal('sectionModal');
+  }
+
+  removeSection(moduleIndex: number, sectionIndex: number): void {
+    if (confirm('Supprimer cette section ?')) {
+      this.modules[moduleIndex].sections.splice(sectionIndex, 1);
+      this.modules[moduleIndex].sections.forEach((s, i) => s.ordre = i);
+    }
+  }
+
+  // ==================== UTILITAIRES ====================
+
+  closeModal(modalId: string): void {
+    const modalElement = document.getElementById(modalId);
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal?.hide();
+    }
+  }
+
+  getDifficulteLabel(value: string): string {
+    const labels: { [key: string]: string } = {
+      'facile': 'Facile',
+      'moyen': 'Moyen',
+      'difficile': 'Difficile',
+      'expert': 'Expert'
+    };
+    return labels[value] || value || 'Non défini';
+  }
+
+  getFormControlValue(controlName: string): any {
+    return this.basicInfoForm.get(controlName)?.value || 
+           this.pricingForm.get(controlName)?.value;
+  }
+
+  // ==================== CALCULS COÛTS ====================
 
   getCoutDeveloppement(): number {
     const conception = this.pricingForm.get('cout_conception')?.value || 0;
@@ -403,14 +563,14 @@ currentSection: Section = this.createEmptySection();
 
   getCoutFormateur(): number {
     const coutJour = this.pricingForm.get('cout_formateur_jour')?.value || 0;
-    const nbJours = this.getFormControlValue('nb_jours') || 1;
+    const nbJours = this.pricingForm.get('nb_jours')?.value || 1;
     return coutJour * nbJours;
   }
 
   getCoutLogistique(): number {
-    const fraisParParticipant = this.pricingForm.get('frais_logistique')?.value || 0;
-    const nbParticipants = this.getFormControlValue('nb_max_participants') || 1;
-    return fraisParParticipant * nbParticipants;
+    const frais = this.pricingForm.get('frais_logistique')?.value || 0;
+    const participants = this.basicInfoForm.get('nb_max_participants')?.value || 1;
+    return frais * participants;
   }
 
   getCoutTotal(): number {
@@ -418,671 +578,301 @@ currentSection: Section = this.createEmptySection();
   }
 
   getCoutParticipant(): number {
-    const nbParticipants = this.getFormControlValue('nb_max_participants') || 1;
-    const coutTotal = this.getCoutTotal();
-    return Math.round(coutTotal / nbParticipants);
+    const total = this.getCoutTotal();
+    const participants = this.basicInfoForm.get('nb_max_participants')?.value || 1;
+    return Math.round(total / participants);
   }
 
   getCoutParHeure(): number {
-    const dureeHeures = this.getFormControlValue('duree_totale') || 1;
-    const coutTotal = this.getCoutTotal();
-    return Math.round(coutTotal / dureeHeures);
+    const total = this.getCoutTotal();
+    const duree = this.additionalInfoForm.get('duree_totale')?.value || 1;
+    return Math.round(total / duree);
   }
 
-  getFormControlValue(controlName: string): any {
-    return this.basicInfoForm.get(controlName)?.value || 
-           this.additionalInfoForm.get(controlName)?.value || 
-           this.pricingForm.get(controlName)?.value;
+  // ==================== SOUMISSION ====================
+submitCourse(): void {
+  this.saving = true;
+  this.error = '';
+  this.success = '';
+
+  if (!this.validateAllSteps()) {
+    this.saving = false;
+    // this.error = 'Veuillez corriger les erreurs dans le formulaire.';
+    return;
   }
 
-  // ==================== OBJECTIFS & PREREQUISITES METHODS ====================
+  const formData = this.buildFormData();
+  
+  // Debug: Afficher les données envoyées
+  console.log('Données envoyées:', formData);
 
-  addObjectif(): void {
-    this.objectifsData.push({ text: '' });
-  }
-
-  removeObjectif(index: number): void {
-    if (this.objectifsData.length > 1) {
-      this.objectifsData.splice(index, 1);
+  this.formationService.createFormation(formData).subscribe({
+    next: (response) => {
+      this.saving = false;
+      this.success = 'Formation créée avec succès !';
+      
+      // Afficher le modal de succès
+      setTimeout(() => {
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+      }, 100);
+    },
+    error: (err) => {
+      this.saving = false;
+      console.error('Erreur création:', err);
+      
+      // Gestion détaillée des erreurs de validation
+      if (err.status === 422 && err.error?.errors) {
+        console.error('Erreurs de validation:', err.error.errors);
+        
+        // Construire un message d'erreur détaillé
+        const errors = err.error.errors;
+        let errorMessage = 'Erreurs de validation :\n';
+        
+        Object.keys(errors).forEach(field => {
+          if (Array.isArray(errors[field])) {
+            errorMessage += `• ${field}: ${errors[field].join(', ')}\n`;
+          } else {
+            errorMessage += `• ${field}: ${errors[field]}\n`;
+          }
+        });
+        
+        this.error = errorMessage;
+      } else if (err.error?.message) {
+        this.error = err.error.message;
+      } else {
+        this.error = 'Erreur lors de la création de la formation. Veuillez réessayer.';
+      }
     }
-  }
+  });
+}
 
-  addPrerequis(): void {
-    this.prerequisData.push({ text: '' });
-  }
+buildFormData(): any {
+  // Récupérer toutes les valeurs des formulaires
+  const basicInfo = this.basicInfoForm.value;
+  const mediaInfo = this.mediaForm.value;
+  const additionalInfo = this.additionalInfoForm.value;
+  const pricingInfo = this.pricingForm.value;
+
+  //user connecté
+     const user = this.authService.getUser();
 
 
+  // Construire l'objet final
+  const formData :any = {
+    // Informations de base
+    titre: basicInfo.titre?.trim(),
+    short_description: basicInfo.short_description?.trim(),
+    description: basicInfo.description?.trim(),
+    categorie_formation_id: parseInt(basicInfo.categorie_formation_id) || null,
+    niveau: basicInfo.niveau,
+    langue: basicInfo.langue,
+    type: basicInfo.type,
+    nb_max_participants: parseInt(basicInfo.nb_max_participants) || 25,
+    est_certifiante: Boolean(basicInfo.est_certifiante),
 
-  // ==================== MODULE METHODS ====================
 
-  openModuleModal(): void {
-    this.newModule = this.createEmptyModule();
-    this.editingModuleIndex = null;
-    this.showModal('moduleModal');
-  }
+          formateur_id: user?.id || null,
 
-  saveModule(): void {
-    if (!this.newModule.titre.trim()) {
-      this.showError('Le titre du module est requis');
-      return;
+    // Informations supplémentaires
+    difficulte: additionalInfo.difficulte,
+    prix: parseFloat(additionalInfo.prix) || 0,
+    duree_totale: parseInt(additionalInfo.duree_totale) || null,
+    public_cible: additionalInfo.public_cible?.trim() || null,
+    tags: additionalInfo.tags?.trim() || null,
+    date_debut: additionalInfo.date_debut || null,
+    date_fin: additionalInfo.date_fin || null,
+    inscription_ouverte: Boolean(additionalInfo.inscription_ouverte),
+    est_publie: Boolean(additionalInfo.est_publie),
+
+    // Média
+    media_url: mediaInfo.media_url?.trim() || null,
+    video_autoplay: Boolean(mediaInfo.video_autoplay),
+    video_show_controls: Boolean(mediaInfo.video_show_controls),
+
+    // Objectifs, prérequis, etc. (filtrer les valeurs vides)
+    objectifs: this.objectifs.filter(obj => obj.trim()).map(obj => obj.trim()),
+    prerequis: this.prerequis.filter(pre => pre.trim()).join(', '),
+    competences_acquises: this.competencesAcquises.filter(comp => comp.trim()).map(comp => comp.trim()),
+    outils_requis: this.outilsRequis.filter(outil => outil.trim()).map(outil => outil.trim()),
+
+    // Modules
+    modules: this.modules.map(module => ({
+      titre: module.titre?.trim(),
+      description: module.description?.trim(),
+      duree_estimee: parseInt(module.duree_estimee.toString()) || 0,
+      ordre: module.ordre,
+      sections: module.sections.map(section => ({
+        titre: section.titre?.trim(),
+        type: section.type,
+        duree_estimee: parseInt(section.duree_estimee.toString()) || 0,
+        contenu: section.contenu?.trim() || null,
+        ressources: section.ressources?.trim() || null,
+        obligatoire: Boolean(section.obligatoire),
+        visible: Boolean(section.visible),
+        ordre: section.ordre
+      }))
+    })),
+
+    // Coûts
+    estimation_couts: {
+      cout_conception: parseFloat(pricingInfo.cout_conception) || 0,
+      cout_production: parseFloat(pricingInfo.cout_production) || 0,
+      cout_formateur_jour: parseFloat(pricingInfo.cout_formateur_jour) || 0,
+      frais_logistique: parseFloat(pricingInfo.frais_logistique) || 0,
+      nb_jours: parseInt(pricingInfo.nb_jours) || 1,
+      notes_estimation: pricingInfo.notes_estimation?.trim() || null
     }
+  };
+console.log('Utilisateur connecté:', user);
+    console.log('formateur_id ajouté:', formData.formateur_id);
+  // Nettoyer les valeurs null/undefined si nécessaire
+Object.keys(formData).forEach(key => {
+  if ((formData as any)[key] === '' || (formData as any)[key] === undefined) {
+    (formData as any)[key] = null;
+  }
+});
 
-    if (this.editingModuleIndex !== null) {
-      this.modulesData[this.editingModuleIndex] = { ...this.newModule };
-      this.showSuccess('Module modifié avec succès');
-    } else {
-      this.modulesData.push({ ...this.newModule });
-      this.showSuccess('Module ajouté avec succès');
-    }
+  return formData;
+}
 
-    this.newModule = this.createEmptyModule();
-    this.editingModuleIndex = null;
-    this.hideModal('moduleModal');
+validateAllSteps(): boolean {
+  let isValid = true;
+  let errorMessages: string[] = [];
+
+  // Valider le formulaire de base
+  if (this.basicInfoForm.invalid) {
+    this.markFormGroupTouched(this.basicInfoForm);
+    isValid = false;
+    const formErrors = this.getFormErrorsInFrench(this.basicInfoForm);
+    errorMessages.push(...formErrors);
   }
 
-  editModule(index: number): void {
-    this.editingModuleIndex = index;
-    this.newModule = { ...this.modulesData[index] };
-    this.showModal('moduleModal');
+  // Valider le formulaire d'informations supplémentaires
+  if (this.additionalInfoForm.invalid) {
+    this.markFormGroupTouched(this.additionalInfoForm);
+    isValid = false;
+    const formErrors = this.getFormErrorsInFrench(this.additionalInfoForm);
+    errorMessages.push(...formErrors);
   }
 
-  // removeModule(index: number): void {
-  //   if (confirm('Êtes-vous sûr de vouloir supprimer ce module et toutes ses sections ?')) {
-  //     this.modulesData.splice(index, 1);
-  //     this.showSuccess('Module supprimé');
-  //   }
-  // }
-
-  getTotalSections(): number {
-    return this.modulesData.reduce((total, module) => {
-      return total + (module.sections?.length || 0);
-    }, 0);
+  // Valider que les objectifs ne sont pas vides
+  if (this.objectifs.filter(obj => obj.trim()).length === 0) {
+    isValid = false;
+    errorMessages.push('Au moins un objectif est requis');
   }
 
-  getTotalDuration(): number {
-    return this.modulesData.reduce((total, module) => {
-      return total + this.getModuleDuration(module);
-    }, 0);
+  // Afficher les erreurs spécifiques
+  if (!isValid) {
+    this.error = errorMessages.join('\n');
   }
 
-  getModuleDuration(module: Module): number {
-    if (!module.sections || module.sections.length === 0) return 0;
+  return isValid;
+}
+
+private getFormErrorsInFrench(formGroup: FormGroup): string[] {
+  const errors: string[] = [];
+  const fieldNames: { [key: string]: string } = {
+    'titre': 'Titre',
+    'categorie_formation_id': 'Catégorie',
+    'niveau': 'Niveau',
+    'langue': 'Langue',
+    'type': 'Type',
+    'short_description': 'Description courte',
+    'description': 'Description',
+    'difficulte': 'Difficulté',
+    'prix': 'Prix',
+    'duree_totale': 'Durée totale',
+    'public_cible': 'Public cible',
+    'nb_max_participants': 'Nombre max de participants'
+  };
+
+  Object.keys(formGroup.controls).forEach(key => {
+    const control = formGroup.get(key);
+    const fieldName = fieldNames[key] || key;
     
-    return module.sections.reduce((total, section) => {
-      return total + (section.duree_estimee || 0);
-    }, 0);
-  }
-
-  // ==================== SECTION METHODS ====================
-
-  openSectionModal(moduleIndex: number): void {
-    this.selectedModuleIndex = moduleIndex;
-    this.currentSection = this.createEmptySection();
-    this.editingSectionIndex = null;
-    this.showModal('sectionModal');
-  }
-
-  saveSection(): void {
-    if (this.selectedModuleIndex === null || !this.currentSection.titre.trim()) {
-      this.showError('Le titre de la section est requis');
-      return;
+    if (control && control.errors) {
+      if (control.errors['required']) {
+        errors.push(`• ${fieldName} est requis`);
+      }
+      if (control.errors['minlength']) {
+        const minLength = control.errors['minlength'].requiredLength;
+        errors.push(`• ${fieldName} doit contenir au moins ${minLength} caractères`);
+      }
+      if (control.errors['min']) {
+        const minValue = control.errors['min'].min;
+        errors.push(`• ${fieldName} doit être supérieur ou égal à ${minValue}`);
+      }
+      if (control.errors['email']) {
+        errors.push(`• ${fieldName} doit être une adresse email valide`);
+      }
+      if (control.errors['pattern']) {
+        errors.push(`• ${fieldName} n'a pas le bon format`);
+      }
     }
+  });
 
-    const section = { ...this.currentSection };
+  return errors;
+}
 
-    if (this.editingSectionIndex !== null) {
-      this.modulesData[this.selectedModuleIndex].sections[this.editingSectionIndex] = section;
-      this.showSuccess('Section modifiée avec succès');
-    } else {
-      this.modulesData[this.selectedModuleIndex].sections.push(section);
-      this.showSuccess('Section ajoutée avec succès');
+private getFormErrors(formGroup: FormGroup): any {
+  const errors: any = {};
+  Object.keys(formGroup.controls).forEach(key => {
+    const control = formGroup.get(key);
+    if (control && control.errors) {
+      errors[key] = control.errors;
     }
-
-    this.currentSection = this.createEmptySection();
-    this.selectedModuleIndex = null;
-    this.editingSectionIndex = null;
-    this.hideModal('sectionModal');
-  }
-
-  // editSection(moduleIndex: number, sectionIndex: number): void {
-  //   this.selectedModuleIndex = moduleIndex;
-  //   this.editingSectionIndex = sectionIndex;
-  //   this.currentSection = { ...this.modulesData[moduleIndex].sections[sectionIndex] };
-  //   this.showModal('sectionModal');
-  // }
-
-  // removeSection(moduleIndex: number, sectionIndex: number): void {
-  //   if (confirm('Êtes-vous sûr de vouloir supprimer cette section ?')) {
-  //     this.modulesData[moduleIndex].sections.splice(sectionIndex, 1);
-  //     this.showSuccess('Section supprimée');
-  //   }
-  // }
-
-  // ==================== MEDIA METHODS ====================
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    
-    if (!file) return;
-
-    if (file.size > this.MAX_IMAGE_SIZE) {
-      this.showError('L\'image ne doit pas dépasser 2 MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      this.uploadedImageUrl = e.target?.result as string;
-      this.mediaForm.patchValue({ image_couverture: file.name });
-    };
-    reader.readAsDataURL(file);
-  }
-
-  removeImage(): void {
-    this.uploadedImageUrl = '';
-    this.mediaForm.patchValue({ image_couverture: '' });
-  }
-
-  // ==================== SUCCESS MODAL METHODS ====================
-
-  createNewCourse(): void {
-    // Réinitialiser le composant
-    this.selectedFieldSet = [0];
-    this.initForms();
-    this.modulesData = [];
-    this.objectifsData = [{ text: '' }];
-    this.prerequisData = [{ text: '' }];
-    this.uploadedImageUrl = '';
-    this.clearMessages();
-    this.hideModal('successModal');
-  }
+  });
+  return errors;
+}
 
  
-
-
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.keys(formGroup.controls).forEach(key => {
-      const control = formGroup.get(key);
-      control?.markAsTouched();
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      }
-    });
-  }
-
-  // ==================== OBJECTIFS & PREREQUIS ====================
-
-  addNewObjectif(): void {
-    this.objectifsData.push({ text: '' });
-  }
-
-
-  addNewPrerequis(): void {
-    this.prerequisData.push({ text: '' });
-  }
-
-  removePrerequis(index: number): void {
-    if (this.prerequisData.length > 1) {
-      this.prerequisData.splice(index, 1);
-    }
-  }
-
-  // ==================== MODULES ====================
-
-  private createEmptyModule(): Module {
-    return {
-      titre: '',
-      description: '',
-      sections: []
-    };
-  }
-
-  openAddModuleModal(): void {
-    this.newModule = this.createEmptyModule();
-    this.editingModuleIndex = null;
-    this.showModal('add-module');
-  }
-
-  // editModule(index: number): void {
-  //   this.editingModuleIndex = index;
-  //   this.newModule = { ...this.modulesData[index] };
-  //   this.showModal('add-module');
-  // }
-
-  // saveModule(): void {
-  //   if (!this.newModule.titre.trim()) {
-  //     this.showError('Le titre du module est requis');
-  //     return;
-  //   }
-
-  //   if (this.editingModuleIndex !== null) {
-  //     this.modulesData[this.editingModuleIndex] = { ...this.newModule };
-  //     this.showSuccess('Module modifié avec succès');
-  //   } else {
-  //     this.modulesData.push({ ...this.newModule });
-  //     this.showSuccess('Module ajouté avec succès');
-  //   }
-
-  //   this.newModule = this.createEmptyModule();
-  //   this.editingModuleIndex = null;
-  //   this.hideModal('add-module');
-  // }
-
-  removeModule(index: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce module et toutes ses sections ?')) {
-      this.modulesData.splice(index, 1);
-      this.showSuccess('Module supprimé');
-    }
-  }
-
-  // ==================== SECTIONS ====================
-
-  private createEmptySection(): Section {
-    return {
-      titre: '',
-      description: '',
-      contenu: '',
-      type: 'video',
-      duree_estimee: 0,
-      video_url: '',
-      est_gratuit: false,
-      obligatoire: true,
-      visible: true
-    };
-  }
-
-  openAddSectionModal(moduleIndex: number): void {
-    this.selectedModuleIndex = moduleIndex;
-    this.newSection = this.createEmptySection();
-    this.editingSectionIndex = null;
-    this.showModal('add-section');
-  }
-
-  editSection(moduleIndex: number, sectionIndex: number): void {
-    this.selectedModuleIndex = moduleIndex;
-    this.editingSectionIndex = sectionIndex;
-    this.newSection = { ...this.modulesData[moduleIndex].sections[sectionIndex] };
-    this.showModal('add-section');
-  }
-
-  // saveSection(): void {
-  //   if (this.selectedModuleIndex === null || !this.newSection.titre.trim()) {
-  //     this.showError('Le titre de la section est requis');
-  //     return;
-  //   }
-
-  //   const section = { ...this.newSection };
-    
-  //   // Définir les ressources selon le type
-  //   if (section.type === 'video' && section.video_url) {
-  //     section.ressources = section.video_url;
-  //   }
-
-  //   if (this.editingSectionIndex !== null) {
-  //     this.modulesData[this.selectedModuleIndex].sections[this.editingSectionIndex] = section;
-  //     this.showSuccess('Section modifiée avec succès');
-  //   } else {
-  //     this.modulesData[this.selectedModuleIndex].sections.push(section);
-  //     this.showSuccess('Section ajoutée avec succès');
-  //   }
-
-  //   this.newSection = this.createEmptySection();
-  //   this.selectedModuleIndex = null;
-  //   this.editingSectionIndex = null;
-  //   this.hideModal('add-section');
-  // }
-
-  removeSection(moduleIndex: number, sectionIndex: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette section ?')) {
-      this.modulesData[moduleIndex].sections.splice(sectionIndex, 1);
-      this.showSuccess('Section supprimée');
-    }
-  }
-
-  getSectionTypeIcon(type: string): string {
-    const typeObj = this.sectionTypes.find(t => t.value === type);
-    return typeObj?.icon ? `isax isax-${typeObj.icon}5` : 'isax isax-document-text5';
-  }
-
-  getSectionTypeLabel(type: string): string {
-    const typeObj = this.sectionTypes.find(t => t.value === type);
-    return typeObj?.label || type;
-  }
-
-  // ==================== FAQ ====================
-
-  private createEmptyFaq(): FAQ {
-    return {
-      question: '',
-      reponse: '',
-      est_active: true
-    };
-  }
-
-  openAddFaqModal(): void {
-    this.newFaq = this.createEmptyFaq();
-    this.showModal('add-faq');
-  }
-
-  saveFaq(): void {
-    if (!this.newFaq.question.trim() || !this.newFaq.reponse.trim()) {
-      this.showError('Question et réponse sont requises');
-      return;
-    }
-
-    this.faqData.push({ ...this.newFaq });
-    this.newFaq = this.createEmptyFaq();
-    this.showSuccess('FAQ ajoutée avec succès');
-    this.hideModal('add-faq');
-  }
-
-  removeFaq(index: number): void {
-    this.faqData.splice(index, 1);
-    this.showSuccess('FAQ supprimée');
-  }
-
-  // ==================== MEDIA ====================
-
-  onImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    
-    if (!file) return;
-
-    if (file.size > this.MAX_IMAGE_SIZE) {
-      this.showError('L\'image ne doit pas dépasser 2 MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      this.uploadedImageUrl = e.target?.result as string;
-      this.mediaForm.patchValue({ image_couverture: file.name });
-      
-      // Afficher l'image
-      const uploadSection = document.getElementById('upload-img-section');
-      if (uploadSection) {
-        uploadSection.style.backgroundImage = `url(${this.uploadedImageUrl})`;
-        uploadSection.style.backgroundSize = 'cover';
-        uploadSection.style.backgroundPosition = 'center';
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-
-  // ==================== VALIDATION ====================
-
-  isFieldInvalid(formName: string, fieldName: string): boolean {
-    const form = this.getForm(formName);
-    if (!form) return false;
-
-    const field = form.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
-  }
-
-  getFieldError(formName: string, fieldName: string): string {
-    const form = this.getForm(formName);
-    if (!form) return '';
-
-    const field = form.get(fieldName);
-    if (!field) return '';
-
-    if (field.hasError('required')) return 'Ce champ est obligatoire';
-    if (field.hasError('minlength')) {
-      const minLength = field.errors?.['minlength'].requiredLength;
-      return `Minimum ${minLength} caractères`;
-    }
-    if (field.hasError('maxlength')) {
-      const maxLength = field.errors?.['maxlength'].requiredLength;
-      return `Maximum ${maxLength} caractères`;
-    }
-    if (field.hasError('min')) {
-      const min = field.errors?.['min'].min;
-      return `Valeur minimum: ${min}`;
-    }
-    return '';
-  }
-
-  private getForm(formName: string): FormGroup | null {
-    switch (formName) {
-      case 'basicInfo': return this.basicInfoForm;
-      case 'media': return this.mediaForm;
-      case 'additionalInfo': return this.additionalInfoForm;
-      case 'pricing': return this.pricingForm;
-      default: return null;
-    }
-  }
-
-  private validateCurriculum(): boolean {
-    if (this.modulesData.length === 0) {
-      this.showError('Veuillez ajouter au moins un module');
-      return false;
-    }
-
-    const hasEmptyModules = this.modulesData.some(module => 
-      !module.sections || module.sections.length === 0
-    );
-
-    if (hasEmptyModules) {
-      this.showError('Chaque module doit contenir au moins une section');
-      return false;
-    }
-
-    return true;
-  }
-
-  // ==================== SUBMIT ====================
-
-  submitCourse(): void {
-    // Validation finale
-    if (!this.performFinalValidation()) {
-      return;
-    }
-
-    this.saving = true;
-    this.clearMessages();
-
-    const formationData = this.prepareFormationData();
-    console.log('Données envoyées:', formationData);
-
-    this.formationService.createFormation(formationData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          console.log('Réponse API:', response);
-          this.handleSubmitSuccess();
-        },
-        error: (error) => {
-          console.error('Erreur création formation:', error);
-          this.handleSubmitError(error);
-        }
-      });
-  }
-
-  private performFinalValidation(): boolean {
-    if (!this.basicInfoForm.valid) {
-      this.showError('Veuillez remplir correctement les informations de base');
-      this.selectedFieldSet[0] = 0;
-      return false;
-    }
-
-    if (!this.validateCurriculum()) {
-      this.selectedFieldSet[0] = 2;
-      return false;
-    }
-
-    if (!this.additionalInfoForm.valid) {
-      this.showError('Veuillez accepter les conditions');
-      this.selectedFieldSet[0] = 3;
-      return false;
-    }
-
-    if (!this.pricingForm.valid) {
-      this.showError('Veuillez définir le prix de la formation');
-      this.selectedFieldSet[0] = 4;
-      return false;
-    }
-
-    return true;
-  }
-
-  private prepareFormationData(): FormationData {
-    return {
-      // Informations de base
-      ...this.basicInfoForm.getRawValue(),
-      
-      // Objectifs et prérequis
-      objectifs_pedagogiques: this.objectifsData
-        .map(obj => obj.text)
-        .filter(text => text?.trim()),
-      prerequis: this.prerequisData
-        .map(req => req.text)
-        .filter(text => text?.trim()),
-      
-      // Média
-      image_couverture: this.mediaForm.value.image_couverture,
-      media_url: this.mediaForm.value.video_presentation,
-      
-      // Prix
-      prix: this.pricingForm.value.est_gratuite ? 0 : this.pricingForm.value.prix,
-      prix_original: this.pricingForm.value.a_remise ? this.pricingForm.value.prix : null,
-      
-      // Tags
-      tags: this.parseTags(this.additionalInfoForm.value.tags),
-      
-      // Modules avec sections
-      modules: this.prepareModulesData(),
-
-      // Métadonnées
-      est_publie: false,
-      inscription_ouverte: true,
-      statut: 'brouillon'
-    };
-  }
-
-  private parseTags(tagsString: string): string[] {
-    if (!tagsString) return [];
-    return tagsString
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
-  }
-
-  private prepareModulesData(): ModuleData[] {
-    return this.modulesData.map((module, moduleIndex) => ({
-      titre: module.titre,
-      description: module.description,
-      ordre: moduleIndex + 1,
-      type: 'video',
-      duree_estimee: this.calculateModuleDuration(module),
-      obligatoire: true,
-      visible: true,
-      sections: this.prepareSectionsData(module.sections)
-    }));
-  }
-
-  private prepareSectionsData(sections: Section[]): SectionData[] {
-    return sections.map((section, sectionIndex) => ({
-      titre: section.titre,
-      description: section.description || '',
-      contenu: section.contenu || section.description || '',
-      type: section.type,
-      ordre: sectionIndex + 1,
-      duree_estimee: section.duree_estimee || 0,
-      ressources: section.ressources || section.video_url || null,
-      metadata: section.video_url ? JSON.stringify({
-        video_url: section.video_url,
-        est_gratuit: section.est_gratuit
-      }) : null,
-      obligatoire: section.obligatoire,
-      visible: section.visible ?? true,
-      statut: 'brouillon'
-    }));
-  }
-
-  private handleSubmitSuccess(): void {
-    this.saving = false;
-    this.showSuccess('Formation créée avec succès !');
-    this.showModal('success');
-    
-    setTimeout(() => {
-      this.router.navigate(['/courses']);
-    }, this.SUCCESS_MODAL_DELAY);
-  }
-
-  private handleSubmitError(error: any): void {
-    this.saving = false;
-    const errorMessage = error.error?.message || 'Erreur lors de la création de la formation';
-    this.showError(errorMessage);
-    this.scrollToTop();
-  }
-
-  // ==================== CALCULATIONS ====================
-
-  private calculateModuleDuration(module: Module): number {
-    if (!module.sections || module.sections.length === 0) return 0;
-    
-    return module.sections.reduce((total, section) => {
-      return total + (section.duree_estimee || 0);
-    }, 0);
-  }
-
-  calculateTotalDuration(): number {
-    return this.modulesData.reduce((total, module) => {
-      return total + this.calculateModuleDuration(module);
-    }, 0);
-  }
-
-  // getTotalSections(): number {
-  //   return this.modulesData.reduce((total, module) => {
-  //     return total + (module.sections?.length || 0);
-  //   }, 0);
-  // }
-
-  // ==================== UI HELPERS ====================
-
-  private showModal(modalId: string): void {
-    const modalElement = document.getElementById(modalId);
-    if (modalElement) {
-      const modal = new bootstrap.Modal(modalElement);
-      modal.show();
-    }
-  }
-
-  private hideModal(modalId: string): void {
-    const modalElement = document.getElementById(modalId);
-    if (modalElement) {
-      const modal = bootstrap.Modal.getInstance(modalElement);
-      modal?.hide();
-    }
-  }
-
-  private showSuccess(message: string, duration = 3000): void {
-    this.success = message;
-    setTimeout(() => this.success = '', duration);
-  }
-
-  private showError(message: string): void {
-    this.error = message;
-  }
-
-  private clearMessages(): void {
-    this.error = '';
-    this.success = '';
-  }
-
-  private scrollToTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // ==================== NAVIGATION ====================
+  // ==================== NAVIGATION POST-CREATION ====================
 
   goToCoursesList(): void {
+    this.closeModal('successModal');
     this.router.navigate(['/courses']);
   }
 
-  trackByIndex(index: number): number {
-    return index;
+  createNewCourse(): void {
+    this.closeModal('successModal');
+    this.resetForm();
+  }
+
+  resetForm(): void {
+    this.currentStep = 0;
+    this.basicInfoForm.reset({
+      niveau: 'debutant',
+      langue: 'fr',
+      type: 'en_ligne',
+      nb_max_participants: 25,
+      est_certifiante: false
+    });
+    this.mediaForm.reset({
+      video_autoplay: false,
+      video_show_controls: true
+    });
+    this.additionalInfoForm.reset({
+      difficulte: 'moyen',
+      prix: 0,
+      inscription_ouverte: true,
+      est_publie: false
+    });
+    this.pricingForm.reset({
+      cout_conception: 0,
+      cout_production: 0,
+      cout_formateur_jour: 0,
+      frais_logistique: 0,
+      nb_jours: 1
+    });
+    this.modules = [];
+    this.objectifs = [''];
+    this.prerequis = [''];
+    this.competencesAcquises = [''];
+    this.outilsRequis = [''];
+    this.imagePreview = null;
+    this.selectedImageFile = null;
+    this.error = '';
+    this.success = '';
   }
 }

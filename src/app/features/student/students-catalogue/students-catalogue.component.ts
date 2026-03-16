@@ -205,7 +205,7 @@ export class StudentsCatalogueComponent implements OnInit {
       this.loadingFormations = true;
       this.formationsService.getCatalogueDetail(catalogueId).subscribe({
         next: (res: any) => {
-          this.formationsCatalogue = res.formations ?? [];
+          this.formationsCatalogue = res.formations ?? res.catalogue?.formations ?? [];
           this.loadingFormations   = false;
         },
         error: () => { this.loadingFormations = false; }
@@ -264,6 +264,7 @@ export class StudentsCatalogueComponent implements OnInit {
     this.selectedCatalogue        = null;
     this.formationsCatalogueModal = [];
     this.showFormations           = false;
+    this.loadingFormationsModal   = false;
     this.submitting               = false;
     this.form.reset({ priorite: 'normale' });
   }
@@ -282,19 +283,29 @@ export class StudentsCatalogueComponent implements OnInit {
     });
   }
 
+  // ✅ FIX : loadingFormationsModal = true AVANT l'appel, pas dans loadFormationsDuCatalogue
   selectCatalogue(catalogue: any): void {
     this.selectedCatalogue        = catalogue;
     this.formationsCatalogueModal = [];
     this.showFormations           = false;
+    this.loadingFormationsModal   = true; // ← ICI, avant l'appel pour éviter le flicker
     this.loadFormationsDuCatalogue(catalogue.id);
   }
 
   loadFormationsDuCatalogue(catalogueId: number): void {
-    this.loadingFormationsModal = true;
+    // loadingFormationsModal déjà mis à true dans selectCatalogue
     this.formationsService.getCatalogueDetail(catalogueId).subscribe({
       next: (res: any) => {
-        this.formationsCatalogueModal = res.formations ?? [];
-        this.loadingFormationsModal   = false;
+        // ✅ Peupler les données EN PREMIER avant de couper le loading
+        // ✅ L'API retourne res.catalogue.formations (pas res.formations directement)
+        const formations = res.formations ?? res.catalogue?.formations ?? [];
+        console.log('Formations catalogue reçues:', formations.length, formations);
+        this.formationsCatalogueModal = formations;
+        if (formations.length > 0) {
+          this.showFormations = true;
+        }
+        // Couper le loading EN DERNIER — le DOM a déjà les données
+        this.loadingFormationsModal = false;
       },
       error: () => {
         this.loadingFormationsModal = false;
@@ -306,6 +317,7 @@ export class StudentsCatalogueComponent implements OnInit {
     this.selectedCatalogue        = null;
     this.formationsCatalogueModal = [];
     this.showFormations           = false;
+    this.loadingFormationsModal   = false;
   }
 
   canSubmit(): boolean {

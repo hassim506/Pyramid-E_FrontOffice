@@ -1,975 +1,153 @@
-// .avatar-placeholder {
-//   width: 100%;
-//   height: 100%;
-//   border-radius: 50%;
-//   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-//   color: white;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   font-size: 32px;
-//   font-weight: bold;
-// }
-
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  font-weight: bold;
-}
-
-.adminrh-profile {
-  background: linear-gradient(135deg, #006f78 0%, #00a8b5 100%);
-  border-radius: 20px;
-  padding:10px;
-  margin-bottom: 10px;
-  box-shadow: 0 10px 30px rgba(0, 111, 120, 0.2);
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  
-  .adminrh-profile-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0.1;
-    pointer-events: none;
-    border-radius: 20px;
-    overflow: hidden;
-    
-    .adminrh-profile-bg-1 {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-  
-  .row {
-    position: relative;
-    z-index: 1;
-  }
-  
-  h5, p {
-    margin-bottom: 0;
-  }
-  
-  .verify-tick {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: #fff;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    
-    i {
-      color: #006f78;
-      font-size: 14px;
-    }
-  }
-}
-
-// Style pour les boutons dans la bannière
-.adminrh-profile {
-  .btn-white {
-    background: #ffffff;
-    color: #006f78;
-    border: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background: #f0f0f0;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-  }
-  
-  .btn-secondary {
-    background:#D4AF37;
-    color: #ffffff;
-    border: 2px solid #ffffff;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background: #ffffff;
-      color: #006f78;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-  }
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .adminrh-profile {
-    border-radius: 15px;
-    padding: 20px;
-    
-    .avatar-xxl {
-      width: 80px;
-      height: 80px;
-    }
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// PALETTE AFRICAINE FUTURISTE
-// Inspirée des couleurs de la savane, de l'or Ashanti et des textiles Kente
-// ═══════════════════════════════════════════════════════════════════════════════
-
 $gold-ashanti: #D4AF37;
-$gold-light: #f5d654;
-$gold-dark: #a8882b;
-$teal-ocean: #006F78;
-$teal-light: #00a8b5;
-$teal-deep: #004d54;
-$terracotta: #c45c3e;
-$terracotta-light: #e07b5f;
-$earth-brown: #8b5a2b;
-$savanna-sand: #f4e4c1;
-$night-indigo: #1a1a2e;
-$baobab-green: #2d5a3d;
-
+$main-green: #ffeccf;
+$main-green: #ffeccf;
+$main-green-dark: #f4d9af;
+$main-green-hover: #a3d9a5;
 // ═══════════════════════════════════════════════════════════════════════════════
-// AVATAR PLACEHOLDER - Badge avec motif Adinkra
+// AVATAR PLACEHOLDER - Simple
 // ═══════════════════════════════════════════════════════════════════════════════
 
 .avatar-placeholder {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  // Fond or élégant uni
   background: $gold-ashanti;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba($gold-ashanti, 0.3);
-  position: relative;
-  overflow: hidden;
-  // Motif Adinkra subtil (symbole Gye Nyame - Suprématie de Dieu)
-  &::before {
-    content: '';
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ADMINRH PROFILE - Simple et épuré
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.adminrh-profile {
+  background: $main-green !important;
+  border-radius: 16px;
+  padding: 5px 10px;
+  margin-bottom: 24px;
+  
+  .avatar {
+    border: 2px solid white;
+  }
+  
+  h5 {
+    color: #000000 !important;
+    font-weight: 600;
+    margin-bottom: 0;
+  }
+  
+  p {
+    margin-bottom: 0;
+    color: rgba(0, 0, 0, 0.7) !important;
+    font-weight: 400;
+  }
+  
+  .verify-tick {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
     bottom: 0;
-    // background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M20 5 L25 15 L35 15 L27 22 L30 33 L20 26 L10 33 L13 22 L5 15 L15 15 Z' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='1'/%3E%3C/svg%3E");
-    // background-size: 30px 30px;
-    animation: pattern-drift 20s linear infinite;
-    pointer-events: none;
-  }
-  // Effet de brillance dorée traversante
-  &::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -100%;
-    width: 60%;
-    height: 200%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba($gold-ashanti, 0.4),
-      rgba(255, 255, 255, 0.3),
-      transparent
-    );
-    transform: skewX(-20deg);
-    animation: shimmer-gold 4s ease-in-out infinite;
-  }
-  // Bordure intérieure avec motif
-  .inner-ring {
-    position: absolute;
-    inset: 4px;
+    right: 0;
+    background: $gold-ashanti;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-top-color: rgba($gold-ashanti, 0.5);
-    border-right-color: rgba($terracotta, 0.4);
-    animation: rotate-ring 8s linear infinite;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    
+    i {
+      color: white;
+      font-size: 10px;
+    }
   }
-}
-
-@keyframes shimmer-gold {
-  0%, 100% {
-    left: -100%;
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    left: 150%;
-    opacity: 0;
-  }
-}
-
-@keyframes pattern-drift {
-  from { background-position: 0 0; }
-  to { background-position: 40px 40px; }
-}
-
-@keyframes rotate-ring {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SUPERADMIN PROFILE - Bande principale avec esthétique Afrofuturiste
+// BOUTONS SIMPLES ET ÉLÉGANTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// .adminrh-profile {
-//   // Fond glassmorphism avec teintes africaines*
-//   // background: linear-gradient(
-//   //   135deg,
-//   //   rgba($teal-ocean, 0.12) 0%,
-//   //   rgba($savanna-sand, 0.08) 25%,
-//   //   rgba($gold-ashanti, 0.06) 50%,
-//   //   rgba($terracotta, 0.04) 75%,
-//   //   rgba($teal-light, 0.1) 100%
-//   // );
-//   background: linear-gradient(135deg, #006f78 0%, #00a8b5 100%);
-//   height: 7rem;
-//   backdrop-filter: blur(4px) saturate(1.2);
-//   -webkit-backdrop-filter: blur(4px) saturate(1.2);
+.adminrh-profile {
   
-//   // Bordure avec dégradé Kente
-//   border: 1px solid transparent;
-//   background-clip: padding-box;
-//   position: relative;
-  
-//   &::before {
-//     content: '';
-//     position: absolute;
-//     inset: 0;
-//     padding: 1px;
-//     border-radius: 28px;
-//     // background: linear-gradient(
-//     //   135deg,
-//     //   rgba($gold-ashanti, 0.5) 0%,
-//     //   rgba($teal-ocean, 0.3) 25%,
-//     //   rgba($terracotta, 0.4) 50%,
-//     //   rgba($gold-ashanti, 0.3) 75%,
-//     //   rgba($teal-light, 0.5) 100%
-//     // );
-//     -webkit-mask: 
-//       linear-gradient(#fff 0 0) content-box, 
-//       linear-gradient(#fff 0 0);
-//     -webkit-mask-composite: xor;
-//     mask-composite: exclude;
-//     pointer-events: none;
-//     animation: border-shimmer 8s ease-in-out infinite;
-//   }
-  
-//   border-radius: 28px;
-//   padding: 4px 8px;
-//   margin-bottom: 14px;
-  
-//   // Ombre avec lueur dorée africaine
-//   box-shadow: 
-//     0 4px 20px rgba($teal-ocean, 0.15),
-//     0 8px 40px rgba($gold-ashanti, 0.1),
-//     0 2px 8px rgba(0, 0, 0, 0.08),
-//     inset 0 1px 0 rgba(255, 255, 255, 0.4),
-//     inset 0 -1px 0 rgba($gold-ashanti, 0.1);
-  
-//   overflow: hidden;
-  
-//   // Ligne de lumière supérieure - Style tribal
-//   &::after {
-//     content: '';
-//     position: absolute;
-//     top: 0;
-//     left: 15%;
-//     right: 15%;
-//     height: 2px;
-//     background: linear-gradient(
-//       90deg,
-//       transparent 0%,
-//       rgba($terracotta, 0.6) 15%,
-//       rgba($gold-ashanti, 0.9) 30%,
-//       rgba(255, 255, 255, 0.95) 50%,
-//       rgba($gold-ashanti, 0.9) 70%,
-//       rgba($teal-ocean, 0.6) 85%,
-//       transparent 100%
-//     );
-//     border-radius: 2px;
-//     box-shadow: 
-//       0 0 20px rgba($gold-ashanti, 0.6),
-//       0 0 40px rgba($gold-ashanti, 0.3),
-//       0 2px 10px rgba($gold-ashanti, 0.4);
-//     animation: glow-pulse 3s ease-in-out infinite;
-//   }
-  
-//   // Fond avec motif Kente géométrique
-//   .adminrh-profile-bg {
-//     position: absolute;
-//     top: 0;
-//     left: 0;
-//     right: 0;
-//     bottom: 0;
-//     opacity: 0.04;
-//     pointer-events: none;
-//     border-radius: 28px;
-//     overflow: hidden;
+  .btn-white {
+    background: $main-green;
+    color: #333333;
+    border: 1px solid #b87d23;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 10px 20px;
+    border-radius: 20px;
     
-//     // Motif Kente stylisé
-//     background-image: 
-//       // Lignes horizontales
-//       repeating-linear-gradient(
-//         0deg,
-//         transparent,
-//         transparent 20px,
-//         rgba($gold-ashanti, 0.3) 20px,
-//         rgba($gold-ashanti, 0.3) 22px
-//       ),
-//       // Lignes verticales
-//       repeating-linear-gradient(
-//         90deg,
-//         transparent,
-//         transparent 20px,
-//         rgba($teal-ocean, 0.3) 20px,
-//         rgba($teal-ocean, 0.3) 22px
-//       ),
-//       // Motifs diagonaux
-//       repeating-linear-gradient(
-//         45deg,
-//         transparent,
-//         transparent 30px,
-//         rgba($terracotta, 0.15) 30px,
-//         rgba($terracotta, 0.15) 32px
-//       );
-    
-//     animation: kente-weave 30s linear infinite;
-//   }
+    &:hover {
+      background: #f8f9fa;
+      color: #000000;
+    }
+  }
   
-//   // Particules flottantes - Étoiles africaines
-//   .floating-particles {
-//     position: absolute;
-//     top: 0;
-//     left: 0;
-//     right: 0;
-//     bottom: 0;
-//     pointer-events: none;
-//     overflow: hidden;
+  .btn-secondary {
+    background: #b87d23;
+    color: white;
+    border: 1px solid #b87d23;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 10px 20px;
+    border-radius: 20px;
     
-//     .particle {
-//       position: absolute;
-//       background: radial-gradient(
-//         circle,
-//         rgba($gold-ashanti, 0.8) 0%,
-//         rgba($gold-ashanti, 0.4) 40%,
-//         transparent 70%
-//       );
-//       border-radius: 50%;
+    &:hover {
+      background: $main-green;
+      border-color: #b87d23;
+      color: #000000;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RESPONSIVE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@media (max-width: 768px) {
+  .adminrh-profile {
+    padding: 5px 10px;
+    border-radius: 12px;
+    
+    .avatar-xxl {
+      width: 60px !important;
+      height: 60px !important;
+    }
+    
+    .avatar-placeholder {
+      font-size: 20px;
+    }
+    
+    h5 {
+      font-size: 1rem;
+    }
+    
+    .btn-white,
+    .btn-secondary {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .adminrh-profile {
+    padding: 16px 20px;
+    
+    .d-flex.align-items-center.flex-wrap {
+      flex-direction: column;
+      gap: 12px;
       
-//       // Différentes tailles pour profondeur
-//       &:nth-child(1) { 
-//         width: 6px; height: 6px;
-//         top: 15%; left: 8%; 
-//         animation: float-star 7s ease-in-out infinite;
-//       }
-//       &:nth-child(2) { 
-//         width: 4px; height: 4px;
-//         top: 70%; left: 88%; 
-//         animation: float-star 9s ease-in-out infinite reverse;
-//         animation-delay: 1s;
-//       }
-//       &:nth-child(3) { 
-//         width: 5px; height: 5px;
-//         top: 85%; left: 25%; 
-//         animation: float-star 8s ease-in-out infinite;
-//         animation-delay: 2s;
-//         background: radial-gradient(circle, rgba($terracotta, 0.7) 0%, transparent 70%);
-//       }
-//       &:nth-child(4) { 
-//         width: 3px; height: 3px;
-//         top: 25%; left: 75%; 
-//         animation: float-star 10s ease-in-out infinite reverse;
-//         animation-delay: 3s;
-//       }
-//       &:nth-child(5) { 
-//         width: 4px; height: 4px;
-//         top: 50%; left: 5%; 
-//         animation: float-star 6s ease-in-out infinite;
-//         animation-delay: 4s;
-//         background: radial-gradient(circle, rgba($teal-light, 0.6) 0%, transparent 70%);
-//       }
-//     }
-//   }
-  
-//   .row {
-//     position: relative;
-//     z-index: 2;
-//   }
-  
-//   // Avatar avec halo africain
-//   .avatar {
-//     position: relative;
-    
-//     // Halo externe lumineux
-//     &::before {
-//       content: '';
-//       position: absolute;
-//       inset: -8px;
-//       background: conic-gradient(
-//         from 0deg,
-//         rgba($gold-ashanti, 0.6),
-//         rgba($terracotta, 0.4),
-//         rgba($teal-ocean, 0.5),
-//         rgba($gold-ashanti, 0.6)
-//       );
-//       border-radius: 50%;
-//       z-index: -1;
-//       filter: blur(12px);
-//       opacity: 0.7;
-//       animation: halo-rotate 6s linear infinite;
-//     }
-    
-//     // Anneau tribal rotatif
-//     &::after {
-//       content: '';
-//       position: absolute;
-//       inset: -4px;
-//       border-radius: 50%;
-//       border: 3px solid transparent;
-//       border-top-color: $gold-ashanti;
-//       border-right-color: $terracotta;
-//       border-bottom-color: $teal-ocean;
-//       animation: tribal-ring 4s linear infinite;
-//     }
-//   }
-  
-//   // Typographie élégante
-//   h5 {
-//     color: $night-indigo;
-//     font-weight: 800;
-//     letter-spacing: 0.5px;
-//     text-shadow: 
-//       0 1px 2px rgba(255, 255, 255, 0.6),
-//       0 0 20px rgba($gold-ashanti, 0.1);
-//     margin-bottom: 0;
-//     font-family: 'Montserrat', sans-serif;
-//   }
-  
-//   p {
-//     margin-bottom: 0;
-//     color: rgba($night-indigo, 0.7);
-//     font-weight: 500;
-//   }
-  
-//   // Badge de vérification - Style africain
-//   .verify-tick {
-//     position: absolute;
-//     bottom: 0;
-//     right: 0;
-//     background: linear-gradient(
-//       135deg, 
-//       $gold-ashanti 0%, 
-//       $gold-light 50%,
-//       $gold-ashanti 100%
-//     );
-//     background-size: 150% 150%;
-//     animation: gold-shimmer 3s ease-in-out infinite;
-//     border-radius: 50%;
-//     width: 28px;
-//     height: 16px;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-//     box-shadow: 
-//       0 4px 15px rgba($gold-ashanti, 0.5),
-//       0 2px 6px rgba(0, 0, 0, 0.2),
-//       inset 0 1px 0 rgba(255, 255, 255, 0.4);
-//     border: 3px solid rgba(255, 255, 255, 0.95);
-    
-//     i {
-//       color: $night-indigo;
-//       font-size: 12px;
-//       font-weight: bold;
-//     }
-//   }
-// }
-
-// // ═══════════════════════════════════════════════════════════════════════════════
-// // BOUTONS FUTURISTES AFRICAINS
-// // ═══════════════════════════════════════════════════════════════════════════════
-
-// .adminrh-profile {
-  
-//   // Bouton Principal - "Tableau de bord" - Style Ivoire & Or
-//   .btn-white,
-//   .btn-primary-outline {
-//     background: linear-gradient(
-//       135deg,
-//       rgba(255, 255, 255, 0.95) 0%,
-//       rgba($savanna-sand, 0.9) 100%
-//     );
-//     backdrop-filter: blur(12px);
-//     -webkit-backdrop-filter: blur(12px);
-//     color: $teal-deep;
-//     border: 2px solid rgba($gold-ashanti, 0.3);
-//     font-weight: 700;
-//     font-size: 0.9rem;
-//     padding: 4px 6px;
-//     border-radius: 50px;
-//     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-//     position: relative;
-//     overflow: hidden;
-//     box-shadow: 
-//       0 4px 15px rgba($teal-ocean, 0.1),
-//       0 2px 6px rgba(0, 0, 0, 0.08),
-//       inset 0 1px 0 rgba(255, 255, 255, 0.9);
-//     letter-spacing: 0.5px;
-//     text-transform: uppercase;
-    
-//     i {
-//       margin-right: 10px;
-//       transition: all 0.3s ease;
-//       color: $gold-ashanti;
-//     }
-    
-//     // Motif tribal subtil
-//     &::before {
-//       content: '';
-//       position: absolute;
-//       top: 0;
-//       left: 0;
-//       right: 0;
-//       bottom: 0;
-//       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M0 10 L10 0 L20 10 L10 20 Z' fill='none' stroke='rgba(212,175,55,0.1)' stroke-width='0.5'/%3E%3C/svg%3E");
-//       background-size: 15px 15px;
-//       opacity: 0;
-//       transition: opacity 0.3s ease;
-//     }
-    
-//     // Effet de brillance
-//     &::after {
-//       content: '';
-//       position: absolute;
-//       top: 0;
-//       left: -100%;
-//       width: 100%;
-//       height: 100%;
-//       background: linear-gradient(
-//         90deg,
-//         transparent,
-//         rgba($gold-ashanti, 0.3),
-//         rgba(255, 255, 255, 0.4),
-//         transparent
-//       );
-//       transition: left 0.6s ease;
-//     }
-    
-//     &:hover {
-//       background: linear-gradient(
-//         135deg,
-//         #ffffff 0%,
-//         rgba($savanna-sand, 0.95) 100%
-//       );
-//       color: $teal-ocean;
-//       transform: translateY(-4px) scale(1.02);
-//       border-color: rgba($gold-ashanti, 0.6);
-//       box-shadow: 
-//         0 12px 35px rgba($teal-ocean, 0.2),
-//         0 6px 15px rgba($gold-ashanti, 0.15),
-//         inset 0 1px 0 rgba(255, 255, 255, 1);
-      
-//       &::before {
-//         opacity: 1;
-//       }
-      
-//       &::after {
-//         left: 100%;
-//       }
-      
-//       i {
-//         transform: scale(1.2);
-//         color: $teal-ocean;
-//       }
-//     }
-    
-//     &:active {
-//       transform: translateY(-2px) scale(1.01);
-//     }
-//   }
-  
-//   // Bouton Secondaire - "Ajouter entreprises" - Style Or Ashanti
-//   .btn-secondary,
-//   .btn-gold {
-//     // Couleur or élégante unie, même style que .avatar-placeholder et même taille que .btn-white
-//     background: $gold-ashanti;
-//     color:white;
-//     border: 2px solid rgba(255, 255, 255, 0.4);
-//     font-weight: 700;
-//     font-size: 0.9rem;
-//     padding: 4px 6px;
-//     border-radius: 50px;
-//     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-//     position: relative;
-//     overflow: hidden;
-//     box-shadow: 
-//       0 4px 20px rgba($gold-ashanti, 0.4),
-//       0 2px 8px rgba($gold-dark, 0.3),
-//       inset 0 2px 0 rgba(255, 255, 255, 0.4),
-//       inset 0 -2px 0 rgba($gold-dark, 0.2);
-//     letter-spacing: 0.5px;
-//     text-transform: uppercase;
-//     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
-
-//     i {
-//       margin-right: 10px;
-//       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-//       color: $teal-ocean;
-//     }
-
-//     &::before {
-//       content: '';
-//       position: absolute;
-//       top: 0;
-//       left: 0;
-//       right: 0;
-//       bottom: 0;
-//       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Ccircle cx='15' cy='15' r='8' fill='none' stroke='rgba(26,26,46,0.1)' stroke-width='1'/%3E%3Cpath d='M15 7 L15 23 M7 15 L23 15' stroke='rgba(26,26,46,0.08)' stroke-width='1'/%3E%3C/svg%3E");
-//       background-size: 20px 20px;
-//       opacity: 0;
-//       transition: opacity 0.3s ease;
-//     }
-
-//     &::after {
-//       content: '';
-//       position: absolute;
-//       top: 0;
-//       left: -100%;
-//       width: 100%;
-//       height: 100%;
-//       background: linear-gradient(
-//         90deg,
-//         transparent,
-//         rgba($gold-ashanti, 0.3),
-//         rgba(255, 255, 255, 0.4),
-//         transparent
-//       );
-//       transition: left 0.6s ease;
-//     }
-
-//     &:hover {
-//       background: lighten($gold-ashanti, 8%);
-//       color: $teal-ocean;
-//       transform: translateY(-4px) scale(1.02);
-//       border-color: rgba($gold-ashanti, 0.6);
-//       box-shadow: 
-//         0 12px 35px rgba($teal-ocean, 0.2),
-//         0 6px 15px rgba($gold-ashanti, 0.15),
-//         inset 0 1px 0 rgba(255, 255, 255, 1);
-
-//       &::before {
-//         opacity: 1;
-//       }
-
-//       &::after {
-//         left: 100%;
-//       }
-
-//       i {
-//         transform: scale(1.2);
-//         color: $teal-ocean;
-//       }
-//     }
-
-//     &:active {
-//       transform: translateY(-2px) scale(1.01);
-//     }
-//   }
-// }
-
-// // ═══════════════════════════════════════════════════════════════════════════════
-// // ANIMATIONS
-// // ═══════════════════════════════════════════════════════════════════════════════
-
-// @keyframes border-shimmer {
-//   0%, 100% {
-//     opacity: 0.5;
-//   }
-//   50% {
-//     opacity: 1;
-//   }
-// }
-
-// @keyframes glow-pulse {
-//   0%, 100% {
-//     opacity: 0.8;
-//     box-shadow: 
-//       0 0 20px rgba($gold-ashanti, 0.6),
-//       0 0 40px rgba($gold-ashanti, 0.3);
-//   }
-//   50% {
-//     opacity: 1;
-//     box-shadow: 
-//       0 0 30px rgba($gold-ashanti, 0.8),
-//       0 0 60px rgba($gold-ashanti, 0.4);
-//   }
-// }
-
-// @keyframes kente-weave {
-//   from { background-position: 0 0, 0 0, 0 0; }
-//   to { background-position: 44px 44px, 44px 44px, 64px 64px; }
-// }
-
-// @keyframes float-star {
-//   0%, 100% {
-//     transform: translateY(0) translateX(0) scale(1);
-//     opacity: 0.6;
-//   }
-//   25% {
-//     transform: translateY(-15px) translateX(8px) scale(1.2);
-//     opacity: 1;
-//   }
-//   50% {
-//     transform: translateY(-8px) translateX(-5px) scale(0.9);
-//     opacity: 0.8;
-//   }
-//   75% {
-//     transform: translateY(-20px) translateX(12px) scale(1.1);
-//     opacity: 0.9;
-//   }
-// }
-
-// @keyframes halo-rotate {
-//   from { transform: rotate(0deg); }
-//   to { transform: rotate(360deg); }
-// }
-
-// @keyframes tribal-ring {
-//   from { transform: rotate(0deg); }
-//   to { transform: rotate(360deg); }
-// }
-
-// @keyframes gold-shimmer {
-//   0%, 100% { background-position: 0% 50%; }
-//   50% { background-position: 100% 50%; }
-// }
-
-// @keyframes gold-flow {
-//   0% { background-position: 0% 50%; }
-//   50% { background-position: 100% 50%; }
-//   100% { background-position: 0% 50%; }
-// }
-
-// // ═══════════════════════════════════════════════════════════════════════════════
-// // RESPONSIVE - Adaptation mobile avec préservation de l'esthétique
-// // ═══════════════════════════════════════════════════════════════════════════════
-
-// @media (max-width: 992px) {
-//   .adminrh-profile {
-//     padding: 24px 28px;
-//     border-radius: 24px;
-    
-//     .btn-white,
-//     .btn-primary-outline,
-//     .btn-secondary,
-//     .btn-gold {
-//       padding: 12px 24px;
-//       font-size: 0.85rem;
-//     }
-//   }
-// }
-
-// @media (max-width: 768px) {
-//   .adminrh-profile {
-//     border-radius: 20px;
-//     padding: 20px 22px;
-//     margin-bottom: 20px;
-    
-//     &::after {
-//       left: 10%;
-//       right: 10%;
-//       height: 2px;
-//     }
-    
-//     .avatar-xxl {
-//       width: 75px !important;
-//       height: 75px !important;
-//     }
-    
-//     .avatar-placeholder {
-//       font-size: 24px;
-//     }
-    
-//     h5 {
-//       font-size: 1rem;
-//     }
-    
-//     .btn-white,
-//     .btn-primary-outline,
-//     .btn-secondary,
-//     .btn-gold {
-//       padding: 10px 20px;
-//       font-size: 0.8rem;
-//       letter-spacing: 0.3px;
-      
-//       i {
-//         margin-right: 6px;
-//       }
-//     }
-//   }
-// }
-
-// @media (max-width: 576px) {
-//   .adminrh-profile {
-//     padding: 8px 9px;
-//     border-radius: 8px;
-    
-//     &::after {
-//       left: 5%;
-//       right: 5%;
-//     }
-    
-//     .floating-particles .particle {
-//       display: none; // Masquer sur très petit écran pour performance
-//     }
-    
-//     .d-flex.align-items-center.flex-wrap {
-//       flex-direction: column;
-//       align-items: stretch !important;
-//       gap: 10px;
-      
-//       .btn-white,
-//       .btn-primary-outline,
-//       .btn-secondary,
-//       .btn-gold {
-//         width: 100%;
-//         justify-content: center;
-//         padding: 12px 20px;
-//       }
-//     }
-//   }
-  
-//   .avatar-placeholder {
-//     font-size: 20px;
-//     letter-spacing: 1px;
-//   }
-// }
-
-// // ═══════════════════════════════════════════════════════════════════════════════
-// // MODE SOMBRE - Nuit africaine étoilée
-// // ═══════════════════════════════════════════════════════════════════════════════
-
-// .dark-mode .adminrh-profile {
-//   background: linear-gradient(
-//     135deg,
-//     rgba($teal-deep, 0.4) 0%,
-//     rgba($night-indigo, 0.6) 25%,
-//     rgba($gold-ashanti, 0.15) 50%,
-//     rgba($terracotta, 0.1) 75%,
-//     rgba($teal-ocean, 0.3) 100%
-//   );
-//   border-color: rgba($gold-ashanti, 0.2);
-//   box-shadow: 
-//     0 4px 30px rgba(0, 0, 0, 0.4),
-//     0 8px 50px rgba($gold-ashanti, 0.15),
-//     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  
-//   &::after {
-//     background: linear-gradient(
-//       90deg,
-//       transparent 0%,
-//       rgba($terracotta, 0.5) 15%,
-//       rgba($gold-ashanti, 0.8) 30%,
-//       rgba(255, 255, 255, 0.9) 50%,
-//       rgba($gold-ashanti, 0.8) 70%,
-//       rgba($teal-light, 0.5) 85%,
-//       transparent 100%
-//     );
-//   }
-  
-//   h5 {
-//     color: #ffffff;
-//     text-shadow: 
-//       0 2px 4px rgba(0, 0, 0, 0.4),
-//       0 0 30px rgba($gold-ashanti, 0.2);
-//   }
-  
-//   p {
-//     color: rgba(255, 255, 255, 0.75);
-//   }
-  
-//   .btn-white,
-//   .btn-primary-outline {
-//     background: linear-gradient(
-//       135deg,
-//       rgba(255, 255, 255, 0.12) 0%,
-//       rgba($savanna-sand, 0.08) 100%
-//     );
-//     color: #ffffff;
-//     border-color: rgba($gold-ashanti, 0.3);
-    
-//     i {
-//       color: $gold-ashanti;
-//     }
-    
-//     &:hover {
-//       background: linear-gradient(
-//         135deg,
-//         rgba(255, 255, 255, 0.2) 0%,
-//         rgba($savanna-sand, 0.15) 100%
-//       );
-//       border-color: rgba($gold-ashanti, 0.5);
-//     }
-//   }
-  
-//   .btn-secondary,
-//   .btn-gold {
-//     box-shadow: 
-//       0 4px 25px rgba($gold-ashanti, 0.5),
-//       0 0 40px rgba($gold-ashanti, 0.2);
-    
-//     &:hover {
-//       box-shadow: 
-//         0 15px 50px rgba($gold-ashanti, 0.6),
-//         0 0 60px rgba($gold-ashanti, 0.3);
-//     }
-//   }
-  
-//   .floating-particles .particle {
-//     &:nth-child(1),
-//     &:nth-child(2),
-//     &:nth-child(4) {
-//       background: radial-gradient(
-//         circle,
-//         rgba($gold-ashanti, 1) 0%,
-//         rgba($gold-ashanti, 0.5) 40%,
-//         transparent 70%
-//       );
-//     }
-//   }
-// }
+      .btn-white,
+      .btn-secondary {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  }
+}

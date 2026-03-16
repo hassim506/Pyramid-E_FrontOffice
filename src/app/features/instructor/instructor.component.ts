@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
-import { NavigationStart, Router, Event as RouterEvent, RouterModule } from '@angular/router';
+import { NavigationStart, NavigationEnd, Router, Event as RouterEvent, RouterModule } from '@angular/router';
 import { routes } from '../../shared/service/routes/routes';
 import { CommonModule } from '@angular/common';
 import { FeatherIconModule } from '../../shared/module/feather.module';
 import { SharedModule } from 'primeng/api';
 import { InstructorSidebarComponent } from './common/instructor-sidebar/instructor-sidebar.component';
+import { Component, OnInit } from '@angular/core';
+import { User } from '../../shared/models/user.models';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-instructor',
@@ -18,54 +20,78 @@ import { InstructorSidebarComponent } from './common/instructor-sidebar/instruct
       InstructorSidebarComponent
     ],
 })
-export class InstructorComponent {
+export class InstructorComponent implements OnInit {
   public routes = routes;
-  last = '';
- 
-
-  
+  public last: string = '';
+  instructorProfile: User | null = null;
 
   constructor(private router: Router) {
-    this.updateLastFromUrl(this.router.url);
     this.router.events.subscribe((data: RouterEvent) => {
-      if (data instanceof NavigationStart) {
-        this.updateLastFromUrl(data.url);
+      if (data instanceof NavigationEnd) {
+        this.last = data.url.split('/')[data.url.split('/').length - 1];
       }
     });
   }
 
-  private updateLastFromUrl(url: string): void {
-    const parts = url.split('/');
-    const lastPart = parts[2]?.replace('instructor-', '').trim();
-    this.last =parts[2]
-    if (lastPart === 'profile') {
-      this.last = 'My Profile';
-    } else if (lastPart === 'course') {
-      this.last = 'My Courses';
-    } else if (lastPart === 'chat') {
-      this.last = 'Messages';
-    } else if (lastPart === 'quiz-attempts'){
-      this.last = 'My Quiz Attempts';
+  ngOnInit(): void {
+    this.loadInstructorProfile();
+  }
+
+  loadInstructorProfile(): void {
+    try {
+      const userDataString = localStorage.getItem('pyramide_user');
+      if (userDataString) {
+        const currentUser: any = JSON.parse(userDataString);
+        
+        // Ajouter le champ role si absent
+        if (!currentUser.role && currentUser.role_id === 3) {
+          currentUser.role = 'Instructeur';
+        }
+        
+        this.instructorProfile = currentUser as User;
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du profil:', error);
     }
-    else if (lastPart === 'qa'){
-      this.last = 'Question & Answer';
+  }
+
+  getFullName(): string {
+    if (!this.instructorProfile) return 'Utilisateur';
+    return `${this.instructorProfile.prenom} ${this.instructorProfile.nom}`;
+  }
+
+  public getRoleName(user: User): string {
+    if (!user.role) {
+      return 'Non défini';
     }
-    else if (lastPart === 'quiz-results'){
-      this.last = 'Quiz Results';
-    }
-    else if (lastPart === 'students-grid'){
-      this.last = 'Students Grid';
-    }
-    else if (lastPart === 'students-list'){
-      this.last = 'Students List';
-    }
-    else if (lastPart === 'quiz-questions'){
-      this.last = 'Quiz Questions';
-    }
-   
     
-    else {
-      this.last = lastPart;
+    // Check if role is an object with a name property
+    if (typeof user.role === 'object' && user.role !== null && 'name' in user.role) {
+      return (user.role as { name: string }).name;
     }
+    
+    // Check if role is a string
+    if (typeof user.role === 'string') {
+      return user.role;
+    }
+    
+    return 'Non défini';
   }
+
+  getInitials(): string {
+    if (!this.instructorProfile) return 'U';
+    const firstNameInitial = this.instructorProfile.prenom?.charAt(0) || '';
+    const lastNameInitial = this.instructorProfile.nom?.charAt(0) || '';
+    return (firstNameInitial + lastNameInitial).toUpperCase();
   }
+
+  getUserAvatar(): string {
+    // Si vous avez un champ avatar dans votre modèle User
+    if (this.instructorProfile && (this.instructorProfile as any).avatar) {
+      return (this.instructorProfile as any).avatar;
+    }
+    return 'assets/img/user/user-01.jpg';
+  }
+}
+  
+  

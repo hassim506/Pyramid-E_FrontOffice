@@ -51,7 +51,6 @@
             <span class="pad-badge pad-badge--count">
               <i class="isax isax-book-1 me-1"></i>{{ parcours.nombre_formations }} formation(s)
             </span>
-            <!-- Badge progression globale -->
             <span class="pad-badge" [ngClass]="{
               'pad-badge--prog-done':    progressionGlobale >= 100,
               'pad-badge--prog-ongoing': progressionGlobale > 0 && progressionGlobale < 100,
@@ -86,7 +85,7 @@
             </span>
           </div>
 
-          <!-- ✅ PROGRESSION GLOBALE -->
+          <!-- PROGRESSION GLOBALE -->
           <div class="pad-progression-globale mt-4">
             <div class="pad-progression-globale__header">
               <span class="pad-progression-globale__label">
@@ -170,7 +169,6 @@
               <div class="pad-formation-card__img-overlay">
                 <i class="isax isax-play-circle"></i>
               </div>
-              <!-- Badge statut sur l'image -->
               <div class="pad-formation-card__statut-badge" [ngClass]="getStatutClass(f.statut_formation)">
                 {{ getStatutLabel(f.statut_formation) }}
               </div>
@@ -188,7 +186,7 @@
                 </span>
               </div>
 
-              <!-- ✅ BARRE DE PROGRESSION PAR FORMATION -->
+              <!-- BARRE DE PROGRESSION PAR FORMATION -->
               <div class="pad-formation-progress mt-3">
                 <div class="pad-formation-progress__header">
                   <span class="pad-formation-progress__label">Progression</span>
@@ -208,10 +206,15 @@
 
             <!-- Footer -->
             <div class="pad-formation-card__footer">
-              <button class="pad-formation-card__detail-btn">
+
+              <!-- ✅ "Voir le détail" → course-details-2 avec stopPropagation -->
+              <button class="pad-formation-card__detail-btn"
+                      (click)="voirDetail(f.id, $event)">
                 Voir le détail
                 <i class="isax isax-arrow-right-3 ms-1"></i>
               </button>
+
+              <!-- ✅ "Commencer/Reprendre/Revoir" → lecture-formation avec stopPropagation -->
               <button class="pad-formation-card__start-btn"
                       [class.pad-formation-card__start-btn--resume]="f.statut_formation === 'en_cours'"
                       [class.pad-formation-card__start-btn--done]="f.statut_formation === 'termine'"
@@ -222,6 +225,7 @@
                    [class.isax-eye]="f.statut_formation === 'termine'"></i>
                 {{ f.statut_formation === 'termine' ? 'Revoir' : f.statut_formation === 'en_cours' ? 'Reprendre' : 'Commencer' }}
               </button>
+
             </div>
 
           </div>

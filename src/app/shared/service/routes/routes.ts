@@ -16,7 +16,7 @@ export const routes = {
   instructorCertificate: '/instructor/instructor-certificate',
   instructorEarning: '/instructor/instructor-earnings',
   instructorStatements: '/instructor/instructor-statements',
-  quiz:  'quiz',
+  quiz: 'quiz',
   studentsList: '/instructor/students-list',
   studentsGrid: '/instructor/students-grid',
   studentsDetails: '/instructor/students-details',
@@ -41,7 +41,7 @@ export const routes = {
   students_profile: '/student/student-profile',
   students_Dashboard: '/student/student-dashboard',
   course_student: '/student/course-student',
-  studentMyCourses: '/student/mes-cours',
+  studentMyCourses: '/student/mes-formations',           // ✅ mes-cours → mes-formations
   student_Certificate: '/student/student-certificate',
   student_Wishlist: '/student/student-wishlist',
   view_invoice_student: '/student/view-invoice',
@@ -67,7 +67,7 @@ export const routes = {
   studentsMessage: '/student/student-message',
   studentOrderHistory: '/student/student-order-history',
   studentWishlist: '/student/student-wishlist',
-  studentCourses: '/student/student-courses',
+  studentCourses: '/student/mes-catalogues',             // ✅ student-courses → mes-catalogues
   studentReviews: '/student/student-reviews',
   studentQuizDetails: '/student/student-quiz-details',
   studentQuiz: '/student/student-quiz',
@@ -78,16 +78,16 @@ export const routes = {
   studentSettings: '/student/settings/student-settings',
   studentBillingAddress: '/student/settings/student-billing-address',
 
-  // ✅ Demandes — alignées sur app.routes.ts
-  student_DemandeSession:   '/student/students-session',    // ← path: 'students-session' ✓
-  student_DemandeCatalogue: '/student/students-catalogue',  // ← à ajouter dans app.routes.ts
-  student_DemandeParcours:  '/student/students-parcours',   // ← à ajouter dans app.routes.ts
-  student_DemandeFormation: '/student/student-certificate', // ← path: 'student-certificate' ✓
+  // Demandes — alignées sur app.routes.ts
+  student_DemandeSession:   '/student/students-session',
+  student_DemandeCatalogue: '/student/students-catalogue',
+  student_DemandeParcours:  '/student/students-parcours',
+  student_DemandeFormation: '/student/student-certificate',
 
   // Mes parcours et catalogues assignés
-  student_CataloguesAssignes: '/student/student-courses',
-  student_ParcoursAssignes:   '/student/parcours-assignes',
-  student_SessionsAcceptees: '/student/sessions-acceptees',
+  student_CataloguesAssignes: '/student/mes-catalogues',          // ✅
+  student_ParcoursAssignes:   '/student/mes-parcours-assignes',   // ✅ parcours-assignes → mes-parcours-assignes
+  student_SessionsAcceptees:  '/student/sessions-acceptees',
 
   // SuperAdmin Routes
   superadmin: '/superadmin/',
@@ -162,7 +162,11 @@ export const routes = {
   adminrhPermission: '/adminrh/adminrh-permission',
   adminrhRole: '/adminrh/adminrh-role',
   AdminrhDemande: '/adminrh/adminrh-demande',
+  adminrhSession: '/adminrh/adminrh-session',  // ✅ lead
   adminrhCourse: '/adminrh/adminrh-course',
+  adminrhCategorie: '/adminrh/adminrh-categorie',
+  adminrhCatalogue: '/adminrh/adminrh-catalogue',
+  adminrhParcours: '/adminrh/adminrh-parcours',
   adminrhCourseGrid: '/adminrh/adminrh-course-grid',
   adminrhTickets: '/adminrh/adminrh-tickets',
   adminrhMessage: '/adminrh/adminrh-message',
@@ -241,6 +245,9 @@ export const routes = {
   courseDetails: '/courses/course-details',
   courseDetails2: '/courses/course-details-2',
   addCourse: '/courses/add-course',
+  instructorCourseAdd: '/courses/instructor-course-add',
+  instructorCourseDetails: '/courses/instructor-course-details',
+  instructorCourseEdit: '/courses/instructor-course-edit',
 };
 
 export default routes;

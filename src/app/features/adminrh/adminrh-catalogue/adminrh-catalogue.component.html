@@ -1,0 +1,624 @@
+<div class="catalogue">
+  <!-- En-tête avec titre et bouton d'ajout -->
+  <div class="page-title d-flex align-items-center justify-content-between mb-4">
+    <h5>Gestion des Catalogues de Formation</h5>
+    <button class="btn btn-primary d-flex align-items-center" (click)="openCatalogueModal()">
+      <i class="isax isax-add-circle me-2"></i>Nouveau Catalogue
+    </button>
+  </div>
+
+  <!-- Messages d'alerte -->
+  <div class="alert alert-success alert-dismissible fade show" *ngIf="success">
+    <i class="isax isax-tick-circle me-2"></i>{{ success }}
+    <button type="button" class="btn-close" (click)="success = ''"></button>
+  </div>
+
+  <div class="alert alert-danger alert-dismissible fade show" *ngIf="error">
+    <i class="isax isax-close-circle me-2"></i>{{ error }}
+    <button type="button" class="btn-close" (click)="error = ''"></button>
+  </div>
+
+  <!-- Filtres et recherche -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label class="form-label">Rechercher</label>
+            <input type="text" class="form-control" [(ngModel)]="searchTerm" 
+                   placeholder="Titre, description...">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-select" [(ngModel)]="selectedType">
+              <option value="">Tous les types</option>
+              <option *ngFor="let type of types" [value]="type.value">{{ type.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select class="form-select" [(ngModel)]="selectedStatus">
+              <option value="">Tous les statuts</option>
+              <option value="active">Publié</option>
+              <option value="inactive">Non publié</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+            <i class="isax isax-refresh me-1"></i>Effacer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des catalogues -->
+  <div class="catalogues-list">
+    <div class="card mb-3" *ngFor="let catalogue of filteredCatalogues; trackBy: trackByCatalogueId">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <!-- Icône et couleur -->
+          <div class="col-md-1">
+            <div class="catalogue-icon d-flex align-items-center justify-content-center rounded"
+                 [style.background-color]="catalogue.couleur"
+                 style="width: 60px; height: 60px;">
+              <i [class]="getIconClass(catalogue.icone)" 
+                 style="font-size: 1.8rem; color: white;"></i>
+            </div>
+          </div>
+
+          <!-- Informations principales -->
+          <div class="col-md-5">
+            <h6 class="mb-1">{{ catalogue.titre }}</h6>
+            <p class="text-muted mb-1 small">{{ catalogue.description }}</p>
+            <div class="d-flex align-items-center gap-3 small text-muted">
+              <span><i class="isax isax-book me-1"></i>{{ catalogue.nombre_formations }} formations</span>
+              <span><i class="isax isax-clock me-1"></i>{{ catalogue.duree_totale }}h total</span>
+              <span><i class="isax isax-tag me-1"></i>{{ getTypeLabel(catalogue.type) }}</span>
+            </div>
+          </div>
+
+          <!-- Métadonnées -->
+          <div class="col-md-3">
+            <div class="mb-2">
+              <span class="badge bg-info me-1">{{ catalogue.metadata.niveau }}</span>
+              <span class="badge bg-secondary" *ngIf="catalogue.metadata.certificat_disponible">Certifiant</span>
+            </div>
+            <div class="small text-muted">
+              <div>Durée moyenne: {{ catalogue.metadata.duree_moyenne }}h</div>
+              <div *ngIf="catalogue.formations.length > 0">
+                Prix moyen: {{ getAveragePrice(catalogue.formations) | number:'1.0-0' }}€
+              </div>
+            </div>
+          </div>
+
+          <!-- Statuts et badges -->
+          <div class="col-md-2">
+            <div class="d-flex flex-wrap gap-1 mb-2">
+              <span class="badge bg-success" *ngIf="catalogue.est_publie">Publié</span>
+              <span class="badge bg-secondary" *ngIf="!catalogue.est_publie">Brouillon</span>
+              <span class="badge bg-primary" *ngIf="catalogue.est_public">Public</span>
+              <span class="badge bg-warning" *ngIf="catalogue.inscription_requise">Inscription requise</span>
+            </div>
+            <small class="text-muted">Ordre: {{ catalogue.ordre }}</small>
+          </div>
+
+          <!-- Actions -->
+          <div class="col-md-1">
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                      type="button" data-bs-toggle="dropdown">
+                Actions
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0);" 
+                     (click)="viewCatalogue(catalogue)">
+                    <i class="isax isax-eye me-2"></i>Voir détails
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0);" 
+                     (click)="openFormationModal(catalogue)">
+                    <i class="isax isax-add-circle me-2"></i>Ajouter formation
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0);" 
+                     (click)="editCatalogue(catalogue)">
+                    <i class="isax isax-edit-2 me-2"></i>Modifier
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item text-danger" href="javascript:void(0);" 
+                     (click)="confirmDelete(catalogue)">
+                    <i class="isax isax-trash me-2"></i>Supprimer
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- État de chargement -->
+  <div class="text-center py-4" *ngIf="loading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-2 text-muted">Chargement des catalogues...</p>
+  </div>
+
+  <!-- État vide -->
+  <div class="text-center py-5" *ngIf="!loading && filteredCatalogues.length === 0">
+    <i class="isax isax-folder-2 text-muted" style="font-size: 4rem;"></i>
+    <h6 class="text-muted mt-3">{{ catalogues.length === 0 ? 'Aucun catalogue trouvé' : 'Aucun résultat pour ces filtres' }}</h6>
+    <p class="text-muted">
+      {{ catalogues.length === 0 ? 'Commencez par créer votre premier catalogue' : 'Essayez de modifier vos critères de recherche' }}
+    </p>
+    <button class="btn btn-primary" (click)="openCatalogueModal()" *ngIf="catalogues.length === 0">
+      <i class="isax isax-add-circle me-2"></i>Créer un catalogue
+    </button>
+    <button class="btn btn-outline-secondary" (click)="clearFilters()" *ngIf="catalogues.length > 0">
+      <i class="isax isax-refresh me-2"></i>Effacer les filtres
+    </button>
+  </div>
+</div>
+
+<!-- Modal Ajout/Modification Catalogue -->
+<div class="modal fade" id="catalogueModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editMode ? 'Modifier le Catalogue' : 'Nouveau Catalogue' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <form [formGroup]="catalogueForm" (ngSubmit)="onSubmit()">
+        <div class="modal-body">
+          <!-- Informations de base -->
+          <div class="row mb-3">
+            <div class="col-md-8">
+              <label class="form-label">Titre *</label>
+              <input type="text" class="form-control" formControlName="titre" 
+                     placeholder="Ex: Développement Web Avancé">
+              <div class="invalid-feedback" 
+                   *ngIf="catalogueForm.get('titre')?.invalid && catalogueForm.get('titre')?.touched">
+                Le titre est requis (min. 3 caractères)
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Ordre d'affichage *</label>
+              <input type="number" class="form-control" formControlName="ordre" min="1">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description courte *</label>
+            <input type="text" class="form-control" formControlName="short_description" 
+                   placeholder="Résumé en une phrase">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description complète *</label>
+            <textarea class="form-control" rows="3" formControlName="description" 
+                      placeholder="Description détaillée du catalogue"></textarea>
+            <div class="invalid-feedback" 
+                 *ngIf="catalogueForm.get('description')?.invalid && catalogueForm.get('description')?.touched">
+              La description est requise (min. 10 caractères)
+            </div>
+          </div>
+
+          <!-- Apparence -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Icône *</label>
+              <input type="text" class="form-control" formControlName="icone" 
+                     placeholder="Ex: folder, book, code">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Couleur *</label>
+              <input type="color" class="form-control form-control-color" formControlName="couleur">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Type *</label>
+              <select class="form-select" formControlName="type">
+                <option *ngFor="let type of types" [value]="type.value">{{ type.label }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Métadonnées -->
+          <h6 class="mb-3">Métadonnées</h6>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Niveau *</label>
+              <select class="form-select" formControlName="niveau">
+                <option value="Débutant">Débutant</option>
+                <option value="Intermédiaire">Intermédiaire</option>
+                <option value="Avancé">Avancé</option>
+                <option value="Expert">Expert</option>
+                <option value="Tous niveaux">Tous niveaux</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Durée moyenne (heures) *</label>
+              <input type="number" class="form-control" formControlName="duree_moyenne" min="1">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Prérequis</label>
+            <input type="text" class="form-control" formControlName="prerequis" 
+                   placeholder="Ex: HTML, CSS, JavaScript (séparés par des virgules)">
+            <small class="text-muted">Séparez les prérequis par des virgules</small>
+          </div>
+
+          <!-- Options -->
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" formControlName="est_publie" id="est_publie">
+                <label class="form-check-label" for="est_publie">Publié</label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" formControlName="est_public" id="est_public">
+                <label class="form-check-label" for="est_public">Public</label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" formControlName="certificat_disponible" id="certificat">
+                <label class="form-check-label" for="certificat">Certificat disponible</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" formControlName="inscription_requise" id="inscription">
+            <label class="form-check-label" for="inscription">Inscription requise</label>
+          </div>
+
+          <!-- Aperçu -->
+          <div class="mt-4" *ngIf="catalogueForm.get('couleur')?.value && catalogueForm.get('icone')?.value">
+            <label class="form-label">Aperçu</label>
+            <div class="d-flex align-items-center p-3 border rounded">
+              <div class="catalogue-icon d-flex align-items-center justify-content-center rounded me-3"
+                   [style.background-color]="catalogueForm.get('couleur')?.value"
+                   style="width: 50px; height: 50px;">
+                <i [class]="getIconClass(catalogueForm.get('icone')?.value)" 
+                   style="font-size: 1.5rem; color: white;"></i>
+              </div>
+              <div>
+                <h6 class="mb-1">{{ catalogueForm.get('titre')?.value || 'Titre du catalogue' }}</h6>
+                <p class="mb-0 text-muted small">{{ catalogueForm.get('short_description')?.value || 'Description courte' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary" [disabled]="catalogueForm.invalid || saving">
+            <span class="spinner-border spinner-border-sm me-2" *ngIf="saving"></span>
+            {{ editMode ? 'Modifier' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ajouter Formation au Catalogue -->
+<div class="modal fade" id="formationModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Ajouter une Formation au Catalogue
+          <span class="text-muted" *ngIf="selectedCatalogue">: {{ selectedCatalogue.titre }}</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <form [formGroup]="formationForm" (ngSubmit)="ajouterFormation()">
+        <div class="modal-body">
+          <!-- Chargement des formations -->
+          <div class="text-center py-3" *ngIf="loadingFormations">
+            <div class="spinner-border spinner-border-sm me-2"></div>
+            Chargement des formations...
+          </div>
+
+          <!-- Sélection de la formation -->
+          <div class="mb-3" *ngIf="!loadingFormations">
+            <label class="form-label">Formation à ajouter *</label>
+            <select class="form-select" formControlName="formation_id">
+              <option value="">Choisir une formation...</option>
+              <option *ngFor="let formation of formationsDisponibles" [value]="formation.id">
+                {{ formation.titre }} 
+                <span *ngIf="formation.duree_totale">({{ formation.duree_totale }}h)</span>
+                <span *ngIf="formation.prix"> - {{ formation.prix }}€</span>
+              </option>
+            </select>
+            <div class="invalid-feedback" 
+                 *ngIf="formationForm.get('formation_id')?.invalid && formationForm.get('formation_id')?.touched">
+              Veuillez sélectionner une formation
+            </div>
+            <div class="text-muted small mt-1" *ngIf="formationsDisponibles.length === 0 && !loadingFormations">
+              Toutes les formations publiées sont déjà dans ce catalogue
+            </div>
+          </div>
+
+          <!-- Aperçu de la formation sélectionnée -->
+          <div class="card mb-3" *ngIf="getSelectedFormationInfo() as selectedFormation">
+            <div class="card-body">
+              <h6 class="card-title">{{ selectedFormation.titre }}</h6>
+              <p class="card-text">{{ selectedFormation.short_description || selectedFormation.description }}</p>
+              <div class="d-flex gap-2">
+                <span class="badge bg-info" *ngIf="selectedFormation.niveau">{{ selectedFormation.niveau }}</span>
+                <span class="badge bg-secondary" *ngIf="selectedFormation.type">{{ selectedFormation.type }}</span>
+                <span class="badge bg-primary" *ngIf="selectedFormation.duree_totale">{{ selectedFormation.duree_totale }}h</span>
+                <span class="badge bg-success" *ngIf="selectedFormation.prix">{{ selectedFormation.prix }}€</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Configuration dans le catalogue -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Ordre d'affichage *</label>
+              <input type="number" class="form-control" formControlName="ordre" min="1">
+              <small class="text-muted">Position dans le catalogue</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Options</label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" 
+                       formControlName="est_featured" id="est_featured">
+                <label class="form-check-label" for="est_featured">
+                  Formation mise en avant
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" 
+                       formControlName="est_obligatoire" id="est_obligatoire">
+                <label class="form-check-label" for="est_obligatoire">
+                  Formation obligatoire
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conditions spéciales -->
+          <div class="mb-3">
+            <label class="form-label">Conditions spéciales</label>
+            <textarea class="form-control" rows="3" formControlName="conditions_speciales" 
+                      placeholder="Conditions particulières pour cette formation dans ce catalogue (optionnel)"></textarea>
+          </div>
+
+          <!-- Informations sur le catalogue -->
+          <div class="alert alert-info" *ngIf="selectedCatalogue">
+            <h6><i class="isax isax-info-circle me-2"></i>Informations du catalogue</h6>
+            <div class="row">
+              <div class="col-md-6">
+                <small><strong>Formations actuelles:</strong> {{ selectedCatalogue.formations.length }}</small><br>
+                <small><strong>Durée totale:</strong> {{ selectedCatalogue.duree_totale }}h</small>
+              </div>
+              <div class="col-md-6">
+                <small><strong>Type:</strong> {{ getTypeLabel(selectedCatalogue.type) }}</small><br>
+                <small><strong>Niveau:</strong> {{ selectedCatalogue.metadata.niveau }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary" 
+                  [disabled]="formationForm.invalid || saving || formationsDisponibles.length === 0">
+            <span class="spinner-border spinner-border-sm me-2" *ngIf="saving"></span>
+            Ajouter au catalogue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Visualisation -->
+<div class="modal fade" id="viewModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Détails du Catalogue</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedCatalogue">
+        <div class="row">
+          <!-- En-tête du catalogue -->
+          <div class="col-12 mb-4">
+            <div class="d-flex align-items-center p-3 rounded" 
+                 [style.background-color]="selectedCatalogue.couleur + '20'">
+              <div class="catalogue-icon d-flex align-items-center justify-content-center rounded me-3"
+                   [style.background-color]="selectedCatalogue.couleur"
+                   style="width: 80px; height: 80px;">
+                <i [class]="getIconClass(selectedCatalogue.icone)" 
+                   style="font-size: 2.5rem; color: white;"></i>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-2">{{ selectedCatalogue.titre }}</h4>
+                <p class="mb-2">{{ selectedCatalogue.description }}</p>
+                <div class="d-flex align-items-center gap-3">
+                  <span class="badge bg-primary">{{ getTypeLabel(selectedCatalogue.type) }}</span>
+                  <span class="badge bg-info">{{ selectedCatalogue.metadata.niveau }}</span>
+                  <span class="badge bg-success" *ngIf="selectedCatalogue.est_publie">Publié</span>
+                  <span class="badge bg-secondary" *ngIf="selectedCatalogue.metadata.certificat_disponible">Certifiant</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistiques -->
+          <div class="col-md-6 mb-4">
+            <h6>Statistiques</h6>
+            <div class="list-group list-group-flush">
+              <div class="list-group-item d-flex justify-content-between">
+                <span>Nombre de formations</span>
+                <strong>{{ selectedCatalogue.nombre_formations }}</strong>
+              </div>
+              <div class="list-group-item d-flex justify-content-between">
+                <span>Durée totale</span>
+                <strong>{{ selectedCatalogue.duree_totale }}h</strong>
+              </div>
+              <div class="list-group-item d-flex justify-content-between">
+                <span>Formations mises en avant</span>
+                <strong>{{ getFeaturedFormationsCount(selectedCatalogue.formations) }}</strong>
+              </div>
+              <div class="list-group-item d-flex justify-content-between" *ngIf="selectedCatalogue.formations.length > 0">
+                <span>Prix moyen</span>
+                <strong>{{ getAveragePrice(selectedCatalogue.formations) | number:'1.0-0' }}€</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Métadonnées -->
+          <div class="col-md-6 mb-4">
+            <h6>Informations</h6>
+            <div class="list-group list-group-flush">
+              <div class="list-group-item">
+                <strong>Niveau:</strong> {{ selectedCatalogue.metadata.niveau }}
+              </div>
+              <div class="list-group-item">
+                <strong>Durée moyenne:</strong> {{ selectedCatalogue.metadata.duree_moyenne }}h
+              </div>
+              <div class="list-group-item" *ngIf="selectedCatalogue.metadata.prerequis.length > 0">
+                <strong>Prérequis:</strong>
+                <div class="mt-1">
+                  <span class="badge bg-light text-dark me-1" *ngFor="let prerequis of selectedCatalogue.metadata.prerequis">
+                    {{ prerequis }}
+                  </span>
+                </div>
+              </div>
+              <div class="list-group-item">
+                <strong>Créé le:</strong> {{ formatDate(selectedCatalogue.created_at) }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Formations du catalogue -->
+          <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6>Formations incluses ({{ selectedCatalogue.formations.length }})</h6>
+              <button class="btn btn-sm btn-primary" 
+                      (click)="openFormationModal(selectedCatalogue)"
+                      data-bs-dismiss="modal">
+                <i class="isax isax-add-circle me-1"></i>Ajouter formation
+              </button>
+            </div>
+            
+            <div class="table-responsive" *ngIf="selectedCatalogue.formations.length > 0">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Ordre</th>
+                    <th>Titre</th>
+                    <th>Niveau</th>
+                    <th>Durée</th>
+                    <th>Prix</th>
+                    <th>Type</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let formation of selectedCatalogue.formations; trackBy: trackByFormationId">
+                    <td>
+                      <span class="badge bg-secondary">{{ formation.pivot?.ordre || 1 }}</span>
+                    </td>
+                    <td>
+                      <div>
+                        <strong>{{ formation.titre }}</strong>
+                        <div class="d-flex gap-1 mt-1">
+                          <span class="badge bg-warning" *ngIf="formation.pivot?.est_featured">Featured</span>
+                          <span class="badge bg-info" *ngIf="formation.pivot?.est_obligatoire">Obligatoire</span>
+                        </div>
+                      </div>
+                      <small class="text-muted">{{ formation.short_description }}</small>
+                    </td>
+                    <td>
+                      <span class="badge bg-info">{{ formation.niveau }}</span>
+                    </td>
+                    <td>{{ formation.duree_totale }}h</td>
+                    <td>{{ formation.prix }}€</td>
+                    <td>{{ formation.type }}</td>
+                    <td>
+                      <span class="badge bg-success" *ngIf="formation.est_publie">Publié</span>
+                      <span class="badge bg-secondary" *ngIf="!formation.est_publie">Brouillon</span>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-danger" 
+                              (click)="retirerFormation(selectedCatalogue, formation)"
+                              title="Retirer du catalogue">
+                        <i class="isax isax-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="text-center text-muted py-4" *ngIf="selectedCatalogue.formations.length === 0">
+              <i class="isax isax-book" style="font-size: 2rem; opacity: 0.5;"></i>
+              <p class="mt-2">Aucune formation dans ce catalogue</p>
+              <button class="btn btn-primary btn-sm" 
+                      (click)="openFormationModal(selectedCatalogue)"
+                      data-bs-dismiss="modal">
+                <i class="isax isax-add-circle me-1"></i>Ajouter la première formation
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body text-center py-4">
+        <div class="mb-3">
+          <i class="isax isax-trash text-danger" style="font-size: 3rem;"></i>
+        </div>
+        <h5>Supprimer le catalogue</h5>
+        <p class="text-muted" *ngIf="selectedCatalogue">
+          Êtes-vous sûr de vouloir supprimer le catalogue 
+          "<strong>{{ selectedCatalogue.titre }}</strong>" ?
+        </p>
+        <p class="text-warning small">
+          <i class="isax isax-warning-2 me-1"></i>
+          Cette action est irréversible.
+        </p>
+        <div class="d-flex justify-content-center gap-2 mt-4">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" (click)="deleteCatalogue()">
+            Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

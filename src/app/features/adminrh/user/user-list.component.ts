@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { User } from '../../../shared/models/user.models';
 import { UserService } from '../../../shared/service/user/user.service';
+import { AuthService } from '../../../shared/service/authentification/auth.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { UserAddComponent } from '../user-add/user-add.component';
 import { pageSelection } from '../../../shared/models/model';
@@ -33,13 +34,16 @@ export class UserListComponent implements OnInit {
   public userDialog = false;
   public isEditMode = false;
   public selectedUser: User | null = null;
+  public currentUser: any = null;
 
   constructor(
     private userService: UserService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit() {
+    this.currentUser = this.authService.getUser();
     this.getUserList();
   }
 
@@ -47,7 +51,23 @@ export class UserListComponent implements OnInit {
   this.loading = true;
   this.error = '';
   
-  this.userService.getMyUsers().subscribe({
+  // Déterminer quelle méthode utiliser selon le role_id
+  const userRoleId = Number(this.currentUser?.role_id) || 0;
+  let serviceMethod;
+  
+  if (userRoleId === 4) {
+    serviceMethod = this.userService.getMyUsers();
+    console.log('🔍 Utilisation de getMyUsers() pour role_id:', userRoleId);
+  } else if (userRoleId === 5) {
+    serviceMethod = this.userService.getMyUsersgroup();
+    console.log('🔍 Utilisation de getMyUsersgroup() pour role_id:', userRoleId);
+  } else {
+    // Par défaut, utiliser getMyUsers pour les autres rôles
+    serviceMethod = this.userService.getMyUsers();
+    console.log('🔍 Utilisation de getMyUsers() par défaut pour role_id:', userRoleId);
+  }
+  
+  serviceMethod.subscribe({
     next: (response) => {
       console.log('===== RÉPONSE COMPLÈTE API =====');
       console.log(response);
@@ -171,7 +191,39 @@ export class UserListComponent implements OnInit {
       });
     }
   }
+archiveUser(user: any) {
+  if (confirm('Êtes-vous sûr de vouloir archiver cet utilisateur ?')) {
+    const updatedUser = { ...user, statut: 0 };
+    
+    this.userService.updateUser(user.id, updatedUser).subscribe({
+      next: () => {
+        console.log('Utilisateur archivé avec succès');
+        this.refreshData();
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de l\'archivage:', error);
+        alert('Erreur lors de l\'archivage de l\'utilisateur');
+      }
+    });
+  }
+}
 
+reactivateUser(user: any) {
+  if (confirm('Êtes-vous sûr de vouloir réactiver cet utilisateur ?')) {
+    const updatedUser = { ...user, statut: 1 };
+    
+    this.userService.updateUser(user.id, updatedUser).subscribe({
+      next: () => {
+        console.log('Utilisateur réactivé avec succès');
+        this.refreshData();
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de la réactivation:', error);
+        alert('Erreur lors de la réactivation de l\'utilisateur');
+      }
+    });
+  }
+}
   hideDialog() {
     this.userDialog = false;
     this.selectedUser = null;

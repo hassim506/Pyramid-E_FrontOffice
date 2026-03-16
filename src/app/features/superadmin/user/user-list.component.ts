@@ -33,6 +33,10 @@ export class UserListComponent implements OnInit {
   public userDialog = false;
   public isEditMode = false;
   public selectedUser: User | null = null;
+    selectedFile: File | null = null;
+  isImporting: boolean = false;
+  importProgress: number = 0;
+  showImportDialog: boolean = false;
 
   constructor(
     private userService: UserService,
@@ -187,6 +191,191 @@ public getRoleName(user: User): string {
   refreshData() {
     this.getUserList();
   }
+
+  archiveUser(user: any) {
+  if (confirm('Êtes-vous sûr de vouloir archiver cet utilisateur ?')) {
+    const updatedUser = { ...user, statut: 0 };
+    
+    this.userService.updateUser(user.id, updatedUser).subscribe({
+      next: () => {
+        console.log('Utilisateur archivé avec succès');
+        this.refreshData();
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de l\'archivage:', error);
+        alert('Erreur lors de l\'archivage de l\'utilisateur');
+      }
+    });
+  }
+}
+
+reactivateUser(user: any) {
+  if (confirm('Êtes-vous sûr de vouloir réactiver cet utilisateur ?')) {
+    const updatedUser = { ...user, statut: 1 };
+    
+    this.userService.updateUser(user.id, updatedUser).subscribe({
+      next: () => {
+        console.log('Utilisateur réactivé avec succès');
+        this.refreshData();
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de la réactivation:', error);
+        alert('Erreur lors de la réactivation de l\'utilisateur');
+      }
+    });
+  }
+}
+
+
+  // Ouvrir le dialog d'import
+  openImportDialog() {
+    this.showImportDialog = true;
+    this.selectedFile = null;
+    this.importProgress = 0;
+  }
+
+  // Fermer le dialog d'import
+  closeImportDialog() {
+    this.showImportDialog = false;
+    this.selectedFile = null;
+    this.isImporting = false;
+    this.importProgress = 0;
+  }
+
+  // Sélection du fichier
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      
+      // Vérifier le type de fichier
+      const allowedTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'application/vnd.ms-excel', // .xls
+        'text/csv' // .csv
+      ];
+      
+      if (allowedTypes.includes(file.type)) {
+        this.selectedFile = file;
+      } else {
+        alert('Format de fichier non supporté. Veuillez utiliser .xlsx, .xls ou .csv');
+        this.selectedFile = null;
+      }
+    }
+  }
+
+  // Import des utilisateurs
+  importUsers(): void {
+    if (!this.selectedFile) {
+      alert('Veuillez sélectionner un fichier');
+      return;
+    }
+
+    this.isImporting = true;
+    this.importProgress = 0;
+
+    this.userService.importUsers(this.selectedFile).subscribe({
+      next: (response) => {
+        console.log('Import réussi:', response);
+        this.importProgress = 100;
+        
+        // Afficher un message de succès avec les détails
+        let message = 'Import réussi !';
+        if (response.created) {
+          message += `\n${response.created} utilisateur(s) créé(s)`;
+        }
+        if (response.updated) {
+          message += `\n${response.updated} utilisateur(s) mis à jour`;
+        }
+        if (response.errors && response.errors.length > 0) {
+          message += `\n${response.errors.length} erreur(s)`;
+        }
+        
+        alert(message);
+        
+        // Recharger les données
+        this.refreshData();
+        this.closeImportDialog();
+      },
+      error: (error) => {
+        console.error('Erreur lors de l\'import:', error);
+        this.isImporting = false;
+        
+        let errorMessage = 'Erreur lors de l\'import.';
+        if (error.error?.message) {
+          errorMessage += '\n' + error.error.message;
+        }
+        if (error.error?.errors) {
+          errorMessage += '\nDétails: ' + JSON.stringify(error.error.errors);
+        }
+        
+        alert(errorMessage);
+      }
+    });
+  }
+
+  // Télécharger le template
+downloadTemplate(): void {
+  console.log('Début du téléchargement du template...');
+  
+  this.userService.downloadTemplate().subscribe({
+    next: (blob) => {
+      console.log('Blob reçu:', blob);
+      console.log('Taille du blob:', blob.size);
+      console.log('Type du blob:', blob.type);
+      
+      if (blob.size === 0) {
+        console.error('Blob vide reçu');
+        alert('Le fichier template est vide');
+        return;
+      }
+      
+      try {
+        const url = window.URL.createObjectURL(blob);
+        console.log('URL du blob créée:', url);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'template_import_users.xlsx';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        console.log('Déclenchement du téléchargement...');
+        link.click();
+        
+        // Nettoyage
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          console.log('Nettoyage terminé');
+        }, 100);
+        
+      } catch (error) {
+        console.error('Erreur lors de la création du téléchargement:', error);
+        alert('Erreur lors de la création du téléchargement');
+      }
+    },
+    error: (error) => {
+      console.error('Détails de l\'erreur de téléchargement:', error);
+      console.error('Statut de l\'erreur:', error.status);
+      console.error('Message d\'erreur:', error.message);
+      console.error('Réponse d\'erreur:', error.error);
+      
+      let errorMessage = 'Erreur lors du téléchargement du template';
+      if (error.status === 404) {
+        errorMessage += '\nL\'endpoint n\'existe pas sur le serveur';
+      } else if (error.status === 401) {
+        errorMessage += '\nProblème d\'authentification';
+      } else if (error.status === 500) {
+        errorMessage += '\nErreur serveur interne';
+      } else if (error.status === 0) {
+        errorMessage += '\nProblème de connexion au serveur';
+      }
+      
+      alert(errorMessage);
+    }
+  });
+}
 
 public getRoleBadgeClass(roleName: string): string {
   switch (roleName?.toLowerCase()) {

@@ -1,0 +1,53 @@
+.categorie {
+  .categories-list {
+    .card {
+      transition: all 0.2s ease;
+      border: 1px solid #e9ecef;
+      
+      &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-color: #d1ecf1;
+      }
+    }
+
+    .categorie-icon {
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  .empty-state {
+    padding: 3rem 1rem;
+
+    i {
+      opacity: 0.5;
+    }
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .dropdown-toggle {
+    border: 1px solid #ddd;
+    
+    &:hover {
+      background-color: #f8f9fa;
+      border-color: #adb5bd;
+    }
+  }
+
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    
+    i {
+      width: 16px;
+      font-size: 0.875rem;
+    }
+  }
+}

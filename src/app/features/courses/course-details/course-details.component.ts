@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LightGallery } from 'lightgallery/lightgallery';
 import { LightGallerySettings } from 'lightgallery/lg-settings';
 import { routes } from '../../../shared/service/routes/routes';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; 
 import Aos from 'aos';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -68,7 +69,9 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
     private router: Router,
     private formationService: FormationService,
     private authService: AuthService,
-    private location: Location
+    private location: Location,
+        private sanitizer: DomSanitizer 
+
   ) {}
 
   ngOnInit(): void {
@@ -199,11 +202,13 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+
   private calculateTotalDuration(): void {
     if (!this.formation?.modules) {
       this.totalDuration = 0;
       return;
     }
+
 
     this.totalDuration = this.formation.modules.reduce((total: number, module: any) => {
       const moduleDuration = module.sections?.reduce((moduleTotal: number, section: any) => {
@@ -601,4 +606,191 @@ parseToNumber(value: any): number {
     const features = 'width=600,height=400,scrollbars=yes,resizable=yes,toolbar=no,location=no,menubar=no';
     window.open(url, 'share', features);
   }
+getImageUrl(imageName: string | null | undefined): string {
+  console.log('Image name received:', imageName);
+  
+  // Image par défaut si pas d'image fournie
+  if (!imageName || imageName.trim() === '') {
+    return 'assets/img/course/courses-06.jpg';
+  }
+
+  // Si l'URL contient déjà le domaine mais pas le bon chemin, corriger
+  if (imageName.startsWith('http://localhost:8000/storage/') && !imageName.includes('/formations/')) {
+    const fileName = imageName.replace('http://localhost:8000/storage/', '');
+    const correctedUrl = `http://localhost:8000/storage/formations/${fileName}`;
+    console.log('URL corrected:', correctedUrl);
+    return correctedUrl;
+  }
+
+  // Si l'URL est déjà complète et correcte
+  if (imageName.startsWith('http://') || imageName.startsWith('https://')) {
+    console.log('URL already complete:', imageName);
+    return imageName;
+  }
+
+  // Sinon construire l'URL
+  const finalUrl = `http://localhost:8000/storage/formations/${imageName}`;
+  console.log('Constructed URL:', finalUrl);
+  return finalUrl;
+}
+  getCompetencesList(competences: string | null): string[] {
+  if (!competences) return [];
+  try {
+    return JSON.parse(competences);
+  } catch (e) {
+    return [];
+  }
+}
+
+getBannerStyle() {
+  if (this.formation?.image_couverture) {
+    return {
+      'background-image': `url(${this.getImageUrl(this.formation.image_couverture)})`,
+      'background-repeat': 'no-repeat',
+      'background-position': 'center',
+      'background-size': 'cover',
+      'position': 'relative'
+    };
+  }
+  return {};
+}
+
+getTagsList(tags: string | null): string[] {
+  if (!tags) return [];
+  try {
+    return JSON.parse(tags);
+  } catch (e) {
+    return [];
+  }
+}
+
+getOutilsList(outils: string | null): string[] {
+  if (!outils) return [];
+  try {
+    return JSON.parse(outils);
+  } catch (e) {
+    return [];
+  }
+}
+getLangueLabel(langue: string): string {
+  const langues: { [key: string]: string } = {
+    'fr': 'Français',
+    'en': 'Anglais',
+    'es': 'Espagnol',
+    'de': 'Allemand',
+    'it': 'Italien',
+    'pt': 'Portugais',
+    'ar': 'Arabe',
+    'zh': 'Chinois',
+    'ja': 'Japonais',
+    'ru': 'Russe'
+  };
+  return langues[langue] || langue?.charAt(0).toUpperCase() + langue?.slice(1) || 'Non spécifié';
+}
+formatDate(dateString: string): string {
+  if (!dateString) return 'Non spécifié';
+  
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  } catch (error) {
+    return 'Date invalide';
+  }
+}
+
+// Méthode bonus pour gérer les statuts de difficulté
+getDifficulteLabel(difficulte: string): string {
+  const difficultes: { [key: string]: string } = {
+    'facile': 'Facile',
+    'moyen': 'Moyen',
+    'difficile': 'Difficile',
+    'expert': 'Expert'
+  };
+  return difficultes[difficulte] || difficulte?.charAt(0).toUpperCase() + difficulte?.slice(1) || 'Non spécifié';
+}
+
+// Méthode pour gérer les types de formation
+getTypeFormationLabel(type: string): string {
+  const types: { [key: string]: string } = {
+    'en_ligne': 'En ligne',
+    'presentiel': 'Présentiel',
+    'hybride': 'Hybride',
+    'e_learning': 'E-learning',
+    'webinaire': 'Webinaire',
+    'atelier': 'Atelier'
+  };
+  return types[type] || type?.charAt(0).toUpperCase() + type?.slice(1) || 'Non spécifié';
+}
+
+isYouTubeUrl(url: string | null): boolean {
+  if (!url) return false;
+  
+  const youtubePatterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]+)/
+  ];
+  
+  return youtubePatterns.some(pattern => pattern.test(url));
+}
+
+getYouTubeVideoId(url: string): string | null {
+  if (!url) return null;
+  
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null;
+}
+
+  getYouTubeEmbedUrl(url: string): SafeResourceUrl | null {
+    const videoId = this.getYouTubeVideoId(url);
+    if (!videoId) return null;
+    
+    const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&showinfo=0&modestbranding=1&autoplay=0`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+  }
+
+  
+getYouTubeThumbnail(url: string): string {
+  const videoId = this.getYouTubeVideoId(url);
+  if (!videoId) return this.getImageUrl(null);
+  
+  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+}
+
+openYouTubeVideo(url: string): void {
+  if (this.isYouTubeUrl(url)) {
+    window.open(url, '_blank', 'width=800,height=600');
+  }
+}
+
+// Modification de la méthode getMediaUrl existante
+getMediaUrl(mediaName: string | null): string | null {
+  if (!mediaName) return null;
+  
+  // Si c'est une URL YouTube, la retourner telle quelle
+  if (this.isYouTubeUrl(mediaName)) {
+    return mediaName;
+  }
+  
+  // Sinon, construire l'URL vers le storage local
+  return `http://localhost:8000/storage/formations/videos/${mediaName}`;
+}
 }

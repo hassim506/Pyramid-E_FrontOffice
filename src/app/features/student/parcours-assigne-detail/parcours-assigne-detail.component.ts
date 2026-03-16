@@ -24,7 +24,7 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
   totalFormations       = 0;
   formationsTerminees   = 0;
   estTermine            = false;
-  source                = 'assigne'; // 'assigne' | 'demande'
+  source                = 'assigne';
 
   // ── Filtre local ───────────────────────────────────────────
   filtreStatut: 'tous' | 'termine' | 'en_cours' | 'non_commence' = 'tous';
@@ -46,7 +46,6 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     }
     this.loadDetail();
 
-    // Recharger silencieusement à chaque retour sur cette page
     this.routerSub = this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => {
@@ -62,8 +61,6 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
   }
 
   // ── Chargement principal ───────────────────────────────────
-  // ✅ FIX : utilise getParcoursDetail() qui retourne formations + progression
-  //          (getParcoursProgression() ne retourne PAS les formations)
   loadDetail(): void {
     this.loading = true;
     this.error   = '';
@@ -78,7 +75,6 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
         this.estTermine          = res.est_termine         ?? false;
         this.source              = res.source              ?? 'assigne';
 
-        // Enrichir parcours avec les champs d'assignation pour le header
         if (this.parcours) {
           this.parcours.date_assignation = res.date_assignation ?? null;
           this.parcours.date_expiration  = res.date_expiration  ?? null;
@@ -95,7 +91,7 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Refresh silencieux (retour de lecture) ─────────────────
+  // ── Refresh silencieux ─────────────────────────────────────
   refreshProgressions(): void {
     this.formationsService.getParcoursDetail(this.parcoursId).subscribe({
       next: (res: any) => {
@@ -105,7 +101,7 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
         this.formationsTerminees = res.formations_terminees ?? 0;
         this.estTermine          = res.est_termine         ?? false;
       },
-      error: () => {} // silencieux
+      error: () => {}
     });
   }
 
@@ -115,15 +111,25 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     return this.formations.filter(f => f.statut_formation === this.filtreStatut);
   }
 
-  get countTerminees(): number  { return this.formations.filter(f => f.statut_formation === 'termine').length; }
-  get countEnCours(): number    { return this.formations.filter(f => f.statut_formation === 'en_cours').length; }
-  get countNonCommence(): number{ return this.formations.filter(f => f.statut_formation === 'non_commence').length; }
+  get countTerminees(): number   { return this.formations.filter(f => f.statut_formation === 'termine').length; }
+  get countEnCours(): number     { return this.formations.filter(f => f.statut_formation === 'en_cours').length; }
+  get countNonCommence(): number { return this.formations.filter(f => f.statut_formation === 'non_commence').length; }
 
   setFiltre(f: 'tous' | 'termine' | 'en_cours' | 'non_commence'): void {
     this.filtreStatut = f;
   }
 
   // ── Navigation ─────────────────────────────────────────────
+
+  // ✅ "Voir le détail" → course-details-2 (fiche formation)
+  voirDetail(formationId: number, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/courses/course-details-2', formationId], {
+      state: { fromPage: 'parcours', parcoursId: this.parcoursId }
+    });
+  }
+
+  // ✅ Clic carte ou "Commencer/Reprendre/Revoir" → lecture-formation
   commencerFormation(formationId: number, event: Event): void {
     event.stopPropagation();
     this.router.navigate(['/student/lecture-formation', formationId], {
