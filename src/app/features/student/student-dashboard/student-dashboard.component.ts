@@ -48,6 +48,11 @@ interface DashStats {
     };
     parcours: { total: number; progression: number; termines: number };
     demandes: { en_attente: number; validees: number; refusees: number; total: number };
+    taux_completion_global?: {
+      valeur:        number;
+      total_termine: number;
+      total_assigne: number;
+    };
     pdi: {
       disponible:        boolean;
       taux_completion:   number;
@@ -482,7 +487,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return '#ef4444';
   }
 
-  // ── FIX : ≤ 4j → rouge | > 4j et ≤ 14j → orange | > 14j → vert ──
   getUrgenceClass(e: Echeance): string {
     if (e.joursRestants <= 4)  return 'ech-item--critique';
     if (e.joursRestants <= 14) return 'ech-item--moyenne';
@@ -553,7 +557,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return this.echeancesUrgentes.length > 0;
   }
 
+  // ✅ FIX : utilise taux_completion_global.valeur en priorité
   get tauxCompletionGlobal(): number {
+    const global = this.stats?.kpi?.taux_completion_global?.valeur;
+    if (global != null && !isNaN(global)) return global;
     const f = this.stats?.kpi?.formations;
     if (!f) return 0;
     const raw = f.taux_completion ?? f.taux ?? f.taux_achevement ?? 0;

@@ -74,7 +74,7 @@ export class FormationsService {
     return this.http.get<any>(`${this.apiUrl}/sessions/acceptees`, { headers: this.getHeaders() });
   }
     getSessionDetail(sessionId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/sessions/${sessionId}/detail`, { headers: this.getHeaders() });
+    return this.http.get<any>(`${this.apiUrl}/sessions-formation/${sessionId}`, { headers: this.getHeaders() });
   }
 
   getCatalogues(): Observable<any> {

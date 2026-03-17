@@ -70,12 +70,15 @@ export class ParcoursAssignesComponent implements OnInit {
           return {
             ...p,
             est_termine: estTermine,
-            // FIX : calcule est_expire côté Angular en fallback si le back ne le renvoie pas
             est_expire: p.est_expire ?? estExpire,
-            // Badge recalculé localement pour cohérence
+            // ✅ FIX : badge_label tient compte de source === 'demande'
             badge_label: estTermine
               ? 'Terminé'
-              : (p.est_expire ?? estExpire ? 'Expiré' : p.badge_label ?? 'Assigné'),
+              : (p.est_expire ?? estExpire
+                  ? 'Expiré'
+                  : p.source === 'demande'
+                    ? 'Demande acceptée'
+                    : p.badge_label ?? 'Assigné'),
           };
         });
 
@@ -110,14 +113,12 @@ export class ParcoursAssignesComponent implements OnInit {
     }
 
     switch (this.selectedFiltre) {
-      // Assignés = source 'assigne' (inclut terminés et expirés assignés)
       case 'assigne':
         result = result.filter(p => p.source === 'assigne');
         break;
       case 'demande':
         result = result.filter(p => p.source === 'demande');
         break;
-      // Terminés toutes sources
       case 'termine':
         result = result.filter(p => p.est_termine);
         break;
@@ -127,7 +128,6 @@ export class ParcoursAssignesComponent implements OnInit {
       case 'expire_bientot':
         result = result.filter(p => this.isExpiringSoon(p.date_expiration));
         break;
-      // Expirés = date dépassée ET pas terminé
       case 'expire':
         result = result.filter(p => p.est_expire);
         break;
@@ -190,15 +190,8 @@ export class ParcoursAssignesComponent implements OnInit {
     this.router.navigate(['/student/mes-parcours', parcoursId]);
   }
 
-  // ── Helpers badge ─────────────────────────────────────────
+  // ── Helpers badge ──────────────────────────────────────────
 
-  /**
-   * Couleur du badge selon l'état du parcours
-   * Terminé   → vert
-   * Expiré    → rouge
-   * Demande   → bleu
-   * Assigné   → vert primaire (défaut)
-   */
   getBadgeClass(p: any): string {
     if (p.est_termine) return 'badge--termine';
     if (p.est_expire)  return 'badge--expire';
@@ -206,21 +199,12 @@ export class ParcoursAssignesComponent implements OnInit {
     return 'badge--assigne';
   }
 
-  /**
-   * Libellé du bouton CTA
-   * Terminé → "Revoir"
-   * Expiré  → "Consulter"
-   * Sinon   → "Voir le parcours"
-   */
   getCTALabel(p: any): string {
     if (p.est_termine) return 'Revoir';
     if (p.est_expire)  return 'Consulter';
     return 'Voir le parcours';
   }
 
-  /**
-   * Opacité réduite pour les cartes terminées ou expirées
-   */
   isGrayed(p: any): boolean {
     return p.est_termine || p.est_expire;
   }
