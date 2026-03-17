@@ -123,8 +123,8 @@
 
     </div>
 
-    <!-- GRILLE KPI RAPIDE -->
-    <div class="db-kpi-grid mb-4">
+    <!-- GRILLE KPI RAPIDE — 5 cartes dont parcours -->
+    <div class="db-kpi-grid db-kpi-grid--5 mb-4">
 
       <div class="db-kpi-card db-kpi-card--teal">
         <div class="db-kpi-card__icon"><i class="isax isax-book-1"></i></div>
@@ -170,6 +170,27 @@
             <div class="db-kpi-bar__fill db-kpi-bar__fill--orange"
                  [style.width.%]="stats.kpi.heures.taux_objectif"></div>
           </div>
+        </div>
+      </div>
+
+      <!-- ✅ NOUVEAU — KPI Parcours terminés vs total -->
+      <div class="db-kpi-card db-kpi-card--blue">
+        <div class="db-kpi-card__icon"><i class="isax isax-routing"></i></div>
+        <div class="db-kpi-card__body">
+          <div class="db-kpi-card__label">Parcours</div>
+          <div class="db-kpi-card__value">
+            {{ stats.kpi.parcours.termines }}<span class="db-kpi-card__value-total">/{{ stats.kpi.parcours.total }}</span>
+          </div>
+          <div class="db-kpi-card__sub">parcours terminés</div>
+        </div>
+        <div class="db-kpi-card__bar" *ngIf="stats.kpi.parcours.total > 0">
+          <div class="db-kpi-bar">
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--blue"
+                 [style.width.%]="stats.kpi.parcours.taux"></div>
+          </div>
+        </div>
+        <div class="db-kpi-card__bar" *ngIf="stats.kpi.parcours.total === 0">
+          <div class="db-kpi-card__sub" style="font-style:italic">Aucun parcours assigné</div>
         </div>
       </div>
 
@@ -345,44 +366,8 @@
       <div class="db-chart-card"><div id="chart-heures"></div></div>
       <div class="db-chart-card"><div id="chart-formations-terminees"></div></div>
       <div class="db-chart-card"><div id="chart-certifications"></div></div>
-
-      <div class="db-chart-card db-kpi-stat-card">
-        <div class="db-kpi-stat">
-          <div class="db-kpi-stat__icon db-kpi-stat__icon--blue">
-            <i class="isax isax-routing"></i>
-          </div>
-          <div>
-            <div class="db-kpi-stat__label">Parcours actifs</div>
-            <div class="db-kpi-stat__value">{{ stats.kpi.parcours.total }}</div>
-          </div>
-        </div>
-        <div class="db-kpi-stat__bar-wrap">
-          <div class="db-kpi-bar">
-            <div class="db-kpi-bar__fill db-kpi-bar__fill--blue"
-                 [style.width.%]="stats.kpi.parcours.progression"></div>
-          </div>
-          <span class="db-kpi-stat__pct">{{ stats.kpi.parcours.progression }}% progression moy.</span>
-        </div>
-
-        <div class="db-kpi-stat mt-3">
-          <div class="db-kpi-stat__icon db-kpi-stat__icon--teal">
-            <i class="isax isax-chart"></i>
-          </div>
-          <div>
-            <div class="db-kpi-stat__label">Progression formations</div>
-            <div class="db-kpi-stat__value">{{ (stats.kpi.formations.progression_moy ?? 0) | number:'1.0-1' }}%</div>
-          </div>
-        </div>
-        <div class="db-kpi-stat__bar-wrap">
-          <div class="db-kpi-bar">
-            <div class="db-kpi-bar__fill"
-                 [style.width.%]="stats.kpi.formations.progression_moy ?? 0"
-                 [style.background]="getProgressionColor(stats.kpi.formations.progression_moy ?? 0)"></div>
-          </div>
-          <span class="db-kpi-stat__pct">moyenne sur toutes les formations</span>
-        </div>
-      </div>
-
+      <!-- ✅ NOUVEAU — Courbe progression parcours -->
+      <div class="db-chart-card"><div id="chart-parcours"></div></div>
     </div>
 
   </ng-container>

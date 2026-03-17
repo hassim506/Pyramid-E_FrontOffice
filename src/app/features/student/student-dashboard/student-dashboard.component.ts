@@ -46,7 +46,7 @@ interface DashStats {
       objectif_annuel: number;
       taux_objectif:   number;
     };
-    parcours: { total: number; progression: number; termines: number };
+    parcours: { total: number; progression: number; termines: number; taux: number };
     demandes: { en_attente: number; validees: number; refusees: number; total: number };
     taux_completion_global?: {
       valeur:        number;
@@ -205,7 +205,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             objectif_annuel: 40,
             taux_objectif:   Math.min(Math.round((heures / 40) * 100), 100),
           },
-          parcours:  { total: 0, progression: 0, termines: 0 },
+          parcours:  { total: 0, progression: 0, termines: 0, taux: 0 },
           demandes: {
             en_attente: demandes.filter((d: any) => d.statut === 'en_attente').length,
             validees:   demandes.filter((d: any) => d.statut === 'validee').length,
@@ -354,6 +354,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       this.renderChart('chart-certifications', this.buildAreaConfig(c.labels, [
         { name: 'Certifications', data: c.certifications_obtenues, color: '#7c3aed' },
       ], 'Certifications obtenues'));
+
+      this.renderChart('chart-parcours', this.buildBarConfig(c.labels, [
+        { name: 'Formations de parcours terminées', data: c.progression_parcours, color: '#7c3aed' },
+      ], 'Progression parcours'));
     }
 
     if (this.activeTab === 'objectifs') {
