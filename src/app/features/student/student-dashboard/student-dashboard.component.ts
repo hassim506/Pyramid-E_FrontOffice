@@ -29,24 +29,26 @@ interface SessionPlanifiee {
 interface DashStats {
   kpi: {
     formations: {
-      total:           number;
-      en_cours:        number;
-      terminees:       number;
-      progression_moy: number;
-      taux:            number;
-      taux_completion: number;
-      taux_achevement: number;
+      total:                  number;
+      en_cours:               number;
+      terminees:              number;
+      progression_moy:        number;
+      taux:                   number;
+      taux_completion:        number;
+      taux_achevement:        number;
       obligatoires_total:     number;
       obligatoires_terminees: number;
       taux_obligatoires:      number;
     };
     certifications: { total: number; cette_annee: number };
     heures: {
-      total_cumulees: number;
+      total_cumulees:  number;
       objectif_annuel: number;
       taux_objectif:   number;
     };
     parcours: { total: number; progression: number; termines: number; taux: number };
+    // ✅ catalogues avec taux
+    catalogues: { total: number; termines: number; taux: number };
     demandes: { en_attente: number; validees: number; refusees: number; total: number };
     taux_completion_global?: {
       valeur:        number;
@@ -54,16 +56,16 @@ interface DashStats {
       total_assigne: number;
     };
     pdi: {
-      disponible:        boolean;
-      taux_completion:   number;
-      objectifs_total:   number;
-      objectifs_atteints:number;
-      prochain_entretien:string | null;
+      disponible:         boolean;
+      taux_completion:    number;
+      objectifs_total:    number;
+      objectifs_atteints: number;
+      prochain_entretien: string | null;
     };
     evaluations: {
-      disponible:   boolean;
-      score_moyen:  number;
-      nb_passees:   number;
+      disponible:  boolean;
+      score_moyen: number;
+      nb_passees:  number;
     };
   };
   courbes: {
@@ -73,9 +75,10 @@ interface DashStats {
     demandes_soumises:       number[];
     heures_cumulees:         number[];
     progression_parcours:    number[];
+    progression_catalogues:  number[]; // ✅
     taux_completion:         number[];
   };
-  echeances:          Echeance[];
+  echeances:           Echeance[];
   sessions_planifiees: SessionPlanifiee[];
   kpi_futurs: {
     competences_validees:    { disponible: boolean; message: string };
@@ -159,7 +162,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             return s + (isNaN(p) ? 0 : p);
           }, 0) / formations.length
         : 0;
-      const heures     = terminees.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0);
+      const heures  = terminees.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0);
       const tauxCompletion = formations.length
         ? Math.round((terminees.length / formations.length) * 1000) / 10 : 0;
 
@@ -172,8 +175,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             (new Date(f.date_fin_prevue).getTime() - Date.now()) / 86400000
           );
           return {
-            id:            f.id,
-            titre:         f.titre,
+            id: f.id, titre: f.titre,
             type:          f.est_obligatoire ? 'obligatoire' : 'formation',
             deadline:      f.date_fin_prevue,
             joursRestants,
@@ -198,14 +200,18 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             obligatoires_terminees: formations.filter((f: any) => f.est_obligatoire && f.statut_formation === 'termine').length,
             taux_obligatoires:      0,
           },
-          certifications: { total: certs.length, cette_annee: certs.filter((c: any) =>
-            new Date(c.created_at).getFullYear() === new Date().getFullYear()).length },
+          certifications: {
+            total:       certs.length,
+            cette_annee: certs.filter((c: any) =>
+              new Date(c.created_at).getFullYear() === new Date().getFullYear()).length,
+          },
           heures: {
             total_cumulees:  Math.round(heures * 10) / 10,
             objectif_annuel: 40,
             taux_objectif:   Math.min(Math.round((heures / 40) * 100), 100),
           },
           parcours:  { total: 0, progression: 0, termines: 0, taux: 0 },
+          catalogues: { total: 0, termines: 0, taux: 0 }, // ✅
           demandes: {
             en_attente: demandes.filter((d: any) => d.statut === 'en_attente').length,
             validees:   demandes.filter((d: any) => d.statut === 'validee').length,
@@ -236,13 +242,14 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   private buildCourbesAngular(formations: any[], demandes: any[], certs: any[]): DashStats['courbes'] {
-    const labels: string[]         = [];
-    const fTerminees: number[]     = [];
-    const certObt: number[]        = [];
-    const demSoum: number[]        = [];
-    const heures: number[]         = [];
-    const progParcours: number[]   = [];
-    const tauxCompletion: number[] = [];
+    const labels: string[]              = [];
+    const fTerminees: number[]          = [];
+    const certObt: number[]             = [];
+    const demSoum: number[]             = [];
+    const heures: number[]              = [];
+    const progParcours: number[]        = [];
+    const progCatalogues: number[]      = []; // ✅
+    const tauxCompletion: number[]      = [];
 
     const base = this.periodeMode === 'annee' ? 5 : 12;
 
@@ -278,6 +285,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       ).length);
       heures.push(termCePeriode.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0));
       progParcours.push(0);
+      progCatalogues.push(0); // ✅ fallback 0 côté Angular
 
       const totalJusqueLa = formations.filter(f =>
         f.created_at && new Date(f.created_at) <= fin
@@ -293,6 +301,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       labels, formations_terminees: fTerminees,
       certifications_obtenues: certObt, demandes_soumises: demSoum,
       heures_cumulees: heures, progression_parcours: progParcours,
+      progression_catalogues: progCatalogues, // ✅
       taux_completion: tauxCompletion,
     };
   }
@@ -358,6 +367,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       this.renderChart('chart-parcours', this.buildBarConfig(c.labels, [
         { name: 'Formations de parcours terminées', data: c.progression_parcours, color: '#7c3aed' },
       ], 'Progression parcours'));
+
+      // ✅ NOUVEAU — courbe catalogues réelle
+      this.renderChart('chart-catalogues', this.buildBarConfig(c.labels, [
+        { name: 'Catalogues actifs ce mois', data: c.progression_catalogues, color: '#3b82f6' },
+      ], 'Progression catalogues'));
     }
 
     if (this.activeTab === 'objectifs') {
@@ -519,7 +533,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   getUrgenceLabel(j: number): string {
     if (j <= 0)  return 'Expiré';
     if (j === 1) return 'Demain';
-    if (j <= 7)  return `Dans ${j}j`;
     return `Dans ${j}j`;
   }
 
@@ -561,7 +574,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return this.echeancesUrgentes.length > 0;
   }
 
-  // ✅ FIX : utilise taux_completion_global.valeur en priorité
   get tauxCompletionGlobal(): number {
     const global = this.stats?.kpi?.taux_completion_global?.valeur;
     if (global != null && !isNaN(global)) return global;

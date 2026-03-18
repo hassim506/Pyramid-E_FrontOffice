@@ -123,8 +123,8 @@
 
     </div>
 
-    <!-- GRILLE KPI RAPIDE — 5 cartes dont parcours -->
-    <div class="db-kpi-grid db-kpi-grid--5 mb-4">
+    <!-- ✅ GRILLE KPI RAPIDE — 6 cartes dont parcours ET catalogues -->
+    <div class="db-kpi-grid db-kpi-grid--6 mb-4">
 
       <div class="db-kpi-card db-kpi-card--teal">
         <div class="db-kpi-card__icon"><i class="isax isax-book-1"></i></div>
@@ -173,7 +173,7 @@
         </div>
       </div>
 
-      <!-- ✅ NOUVEAU — KPI Parcours terminés vs total -->
+      <!-- KPI Parcours terminés vs total -->
       <div class="db-kpi-card db-kpi-card--blue">
         <div class="db-kpi-card__icon"><i class="isax isax-routing"></i></div>
         <div class="db-kpi-card__body">
@@ -189,8 +189,29 @@
                  [style.width.%]="stats.kpi.parcours.taux"></div>
           </div>
         </div>
-        <div class="db-kpi-card__bar" *ngIf="stats.kpi.parcours.total === 0">
+        <div *ngIf="stats.kpi.parcours.total === 0">
           <div class="db-kpi-card__sub" style="font-style:italic">Aucun parcours assigné</div>
+        </div>
+      </div>
+
+      <!-- ✅ NOUVEAU — KPI Catalogues terminés vs total -->
+      <div class="db-kpi-card db-kpi-card--teal">
+        <div class="db-kpi-card__icon"><i class="isax isax-book-square"></i></div>
+        <div class="db-kpi-card__body">
+          <div class="db-kpi-card__label">Catalogues</div>
+          <div class="db-kpi-card__value">
+            {{ stats.kpi.catalogues.termines }}<span class="db-kpi-card__value-total">/{{ stats.kpi.catalogues.total }}</span>
+          </div>
+          <div class="db-kpi-card__sub">catalogues complétés</div>
+        </div>
+        <div class="db-kpi-card__bar" *ngIf="stats.kpi.catalogues.total > 0">
+          <div class="db-kpi-bar">
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--teal"
+                 [style.width.%]="stats.kpi.catalogues.taux"></div>
+          </div>
+        </div>
+        <div *ngIf="stats.kpi.catalogues.total === 0">
+          <div class="db-kpi-card__sub" style="font-style:italic">Aucun catalogue assigné</div>
         </div>
       </div>
 
@@ -212,7 +233,6 @@
 
         <div class="db-panel__body">
 
-          <!-- Urgentes -->
           <div *ngFor="let e of echeancesUrgentes"
                class="ech-item ech-item--urgent"
                [ngClass]="getUrgenceClass(e)">
@@ -253,7 +273,6 @@
             </div>
           </div>
 
-          <!-- Normales -->
           <div *ngFor="let e of echeancesNormales"
                class="ech-item"
                [ngClass]="getUrgenceClass(e)">
@@ -294,7 +313,6 @@
             </div>
           </div>
 
-          <!-- Empty state -->
           <div class="db-empty-mini" *ngIf="stats.echeances.length === 0">
             <i class="isax isax-tick-circle"></i>
             <span>Aucune échéance proche</span>
@@ -366,8 +384,9 @@
       <div class="db-chart-card"><div id="chart-heures"></div></div>
       <div class="db-chart-card"><div id="chart-formations-terminees"></div></div>
       <div class="db-chart-card"><div id="chart-certifications"></div></div>
-      <!-- ✅ NOUVEAU — Courbe progression parcours -->
       <div class="db-chart-card"><div id="chart-parcours"></div></div>
+      <!-- ✅ NOUVEAU — Courbe progression catalogues réelle -->
+      <div class="db-chart-card"><div id="chart-catalogues"></div></div>
     </div>
 
   </ng-container>

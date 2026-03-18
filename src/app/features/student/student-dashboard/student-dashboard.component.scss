@@ -328,12 +328,21 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 
-  // ✅ Variante 5 colonnes pour l'onglet Aujourd'hui
+  // Variante 5 colonnes
   &--5 {
     grid-template-columns: repeat(5, 1fr);
 
     @media (max-width: 1200px) { grid-template-columns: repeat(3, 1fr); }
     @media (max-width: 768px)  { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 480px)  { grid-template-columns: 1fr; }
+  }
+
+  // ✅ Variante 6 colonnes pour l'onglet Aujourd'hui
+  &--6 {
+    grid-template-columns: repeat(6, 1fr);
+
+    @media (max-width: 1400px) { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 900px)  { grid-template-columns: repeat(2, 1fr); }
     @media (max-width: 480px)  { grid-template-columns: 1fr; }
   }
 
@@ -380,7 +389,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     color: $gray-900;
     line-height: 1;
 
-    // ✅ Partie "/total" en gris plus petit
     &-total {
       font-size: 16px;
       font-weight: 500;
@@ -402,6 +410,7 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   &--purple { border-top: 3px solid $purple; }
   &--orange { border-top: 3px solid $orange; }
   &--blue   { border-top: 3px solid $blue; }
+  &--red    { border-top: 3px solid $red; }
 
   &--warning {
     border-top: 3px solid $orange;
@@ -431,6 +440,7 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     &--blue   { background: $blue; }
     &--orange { background: $orange; }
     &--purple { background: $purple; }
+    &--red    { background: $red; } // ✅
   }
 }
 
