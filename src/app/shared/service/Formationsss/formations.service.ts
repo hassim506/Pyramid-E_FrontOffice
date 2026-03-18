@@ -69,11 +69,12 @@ export class FormationsService {
   getSessionsOuvertes(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/sessions`, { headers: this.getHeaders() });
   }
-  
-    getMesSessionsAcceptees(): Observable<any> {
+
+  getMesSessionsAcceptees(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/sessions/acceptees`, { headers: this.getHeaders() });
   }
-    getSessionDetail(sessionId: number): Observable<any> {
+
+  getSessionDetail(sessionId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/sessions-formation/${sessionId}`, { headers: this.getHeaders() });
   }
 
@@ -117,26 +118,14 @@ export class FormationsService {
   // 🗺️ PARCOURS — EMPLOYÉ (assignés + progression)
   // ===============================
 
-  /**
-   * Liste des parcours assignés + progression calculée
-   * GET /api/demandes-formation/parcours/assignes
-   */
   getMesParcoursAssignes(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/demandes-formation/parcours/assignes`, { headers: this.getHeaders() });
   }
 
-  /**
-   * Détail d'un parcours avec formations + progression individuelle
-   * GET /api/parcours/{id}/detail
-   */
   getParcoursDetail(parcoursId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/parcours/${parcoursId}/detail`, { headers: this.getHeaders() });
   }
 
-  /**
-   * Refresh progression rapide (appelé après retour de la lecture)
-   * GET /api/parcours/{id}/progression
-   */
   getParcoursProgression(parcoursId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/parcours/${parcoursId}/progression`, { headers: this.getHeaders() });
   }
@@ -153,18 +142,10 @@ export class FormationsService {
     return this.http.get<any>(`${this.apiUrl}/catalogues/assignes`, { headers: this.getHeaders() });
   }
 
-  /**
-   * Détail catalogue (header + formations)
-   * GET /api/catalogues/{id}
-   */
   getCatalogueDetail(catalogueId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/catalogues/${catalogueId}`, { headers: this.getHeaders() });
   }
 
-  /**
-   * Progression catalogue (formations + % par formation)
-   * GET /api/catalogues/{id}/progression
-   */
   getCatalogueProgression(catalogueId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/catalogues/${catalogueId}/progression`, { headers: this.getHeaders() });
   }
@@ -187,5 +168,77 @@ export class FormationsService {
       .set('annee',   String(params.annee))
       .set('mois',    String(params.mois));
     return this.http.get(`${this.apiUrl}/mes-statistiques-dashboard`, { params: httpParams });
+  }
+
+  // ===============================
+  // 🧠 QUIZ EMPLOYÉ
+  // ===============================
+
+  /**
+   * Liste des quiz d'une formation
+   * GET /api/quizzes/formation/{formationId}
+   */
+  getQuizzesParFormation(formationId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/quizzes/formation/${formationId}`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Tous les quiz disponibles
+   * GET /api/quizzes
+   */
+  getTousLesQuizzes(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/quizzes`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Détail d'un quiz avec ses questions et réponses
+   * GET /api/quizzes/{id}
+   */
+  getQuizDetail(quizId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/quizzes/${quizId}`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Questions d'un quiz
+   * GET /api/quizzes/{quizId}/questions
+   */
+  getQuestionsQuiz(quizId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/quizzes/${quizId}/questions`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Soumettre les réponses d'un quiz
+   * POST /api/quizzes/{id}/submit
+   */
+  soumettreQuiz(quizId: number, answers: { question_id: number; reponse_id: number }[]): Observable<any> {
+  return this.http.post<any>(
+    `${this.apiUrl}/quizzes/${quizId}/submit`,
+    { answers },
+    { headers: this.getHeaders() }
+  );
+}
+
+  /**
+   * Résultats de mes quiz pour une formation
+   * GET /api/quiz-results/formation/{formationId}
+   */
+  getMesResultatsQuizFormation(formationId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/quiz-results/formation/${formationId}`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Résultats d'un quiz spécifique
+   * GET /api/quiz-results/quiz/{quizId}
+   */
+  getMesResultatsQuiz(quizId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/quiz-results/quiz/${quizId}`, { headers: this.getHeaders() });
+  }
+
+  /**
+   * Tous mes résultats de quiz
+   * GET /api/quiz-results
+   */
+  getTousMesResultatsQuiz(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/quiz-results`, { headers: this.getHeaders() });
   }
 }

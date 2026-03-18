@@ -280,7 +280,7 @@ export const routes: Routes = [
                     { path: 'parcours-assigne/:id',  redirectTo: 'mes-parcours/:id', pathMatch: 'full' },
 
                     { path: 'student-quiz',           loadComponent: () => import('./features/student/student-quiz/student-quiz.component').then(m => m.StudentQuizComponent) },
-                    { path: 'student-quiz-questions', loadComponent: () => import('./features/student/student-quiz-questions/student-quiz-questions.component').then(m => m.StudentQuizQuestionsComponent) },
+                    { path: 'student-quiz-questions/:id', loadComponent: () => import('./features/student/student-quiz-questions/student-quiz-questions.component').then(m => m.StudentQuizQuestionsComponent) },
                     { path: 'student-certificate',    loadComponent: () => import('./features/student/student-certificate/student-certificate.component').then(m => m.StudentCertificateComponent) },
                     { path: 'student-message',        loadComponent: () => import('./features/student/student-message/student-message.component').then(m => m.StudentMessageComponent) },
                     { path: 'student-qa',             loadComponent: () => import('./features/student/student-qa/student-qa.component').then(m => m.StudentQaComponent) },

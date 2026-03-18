@@ -1,0 +1,414 @@
+// ══════════════════════════════════════════════════
+// VARIABLES
+// ══════════════════════════════════════════════════
+$teal:     #069b8f;
+$teal-lt:  #e6f7f6;
+$green:    #10b981;
+$green-lt: #d1fae5;
+$red:      #ef4444;
+$red-lt:   #fee2e2;
+$orange:   #f59e0b;
+$orange-lt:#fef3c7;
+$blue:     #3b82f6;
+$blue-lt:  #dbeafe;
+$purple:   #7c3aed;
+$purple-lt:#ede9fe;
+
+$gray-50:  #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-400: #9ca3af;
+$gray-600: #6b7280;
+$gray-800: #1f2937;
+$gray-900: #111827;
+
+$radius-sm: 8px;
+$radius-md: 12px;
+$shadow-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+$shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+// ══════════════════════════════════════════════════
+// LOADING / ERROR
+// ══════════════════════════════════════════════════
+.quiz-loading {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  padding:         80px 20px;
+  gap:             16px;
+
+  &__spinner {
+    width:        40px;
+    height:       40px;
+    border:       3px solid $gray-200;
+    border-top-color: $teal;
+    border-radius: 50%;
+    animation:    spin .7s linear infinite;
+  }
+
+  p { color: $gray-600; font-size: 14px; margin: 0; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.quiz-error {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  padding:         60px 20px;
+  gap:             12px;
+  color:           $gray-400;
+
+  i    { font-size: 36px; color: $red; }
+  p    { font-size: 14px; margin: 0; }
+
+  button {
+    padding:       8px 20px;
+    background:    $teal;
+    color:         white;
+    border:        none;
+    border-radius: $radius-sm;
+    font-size:     13px;
+    cursor:        pointer;
+    &:hover { background: darken($teal, 8%); }
+  }
+}
+
+// ══════════════════════════════════════════════════
+// PAGE HEADER
+// ══════════════════════════════════════════════════
+.quiz-page-header {
+  display:     flex;
+  align-items: flex-start;
+  flex-wrap:   wrap;
+  gap:         12px;
+
+  &__title {
+    font-size:   18px;
+    font-weight: 700;
+    color:       $gray-900;
+    margin:      0 0 4px;
+    display:     flex;
+    align-items: center;
+  }
+
+  &__sub {
+    font-size: 13px;
+    color:     $gray-600;
+    margin:    0;
+  }
+}
+
+// ══════════════════════════════════════════════════
+// STATS RAPIDES
+// ══════════════════════════════════════════════════
+.quiz-stats-row {
+  display:               grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:                   12px;
+
+  @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+.quiz-stat-card {
+  display:       flex;
+  align-items:   center;
+  gap:           12px;
+  padding:       14px 16px;
+  background:    white;
+  border:        1px solid $gray-200;
+  border-radius: $radius-md;
+  box-shadow:    $shadow-sm;
+
+  i {
+    font-size:     22px;
+    width:         40px;
+    height:        40px;
+    border-radius: 10px;
+    display:       flex;
+    align-items:   center;
+    justify-content: center;
+    flex-shrink:   0;
+  }
+
+  &__value {
+    font-size:   22px;
+    font-weight: 800;
+    color:       $gray-900;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 12px;
+    color:     $gray-600;
+    margin-top: 2px;
+  }
+
+  &--total  { border-top: 3px solid $teal;   i { background: $teal-lt;   color: $teal; } }
+  &--reussi { border-top: 3px solid $green;  i { background: $green-lt;  color: $green; } }
+  &--echoue { border-top: 3px solid $red;    i { background: $red-lt;    color: $red; } }
+  &--nouveau{ border-top: 3px solid $orange; i { background: $orange-lt; color: $orange; } }
+}
+
+// ══════════════════════════════════════════════════
+// FILTRES
+// ══════════════════════════════════════════════════
+.quiz-filters {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  flex-wrap:   wrap;
+
+  &__search {
+    position:  relative;
+    flex:      1;
+    min-width: 200px;
+
+    &-icon {
+      position:  absolute;
+      left:      12px;
+      top:       50%;
+      transform: translateY(-50%);
+      color:     $gray-400;
+      font-size: 16px;
+    }
+  }
+
+  &__search-input {
+    width:         100%;
+    padding:       9px 12px 9px 38px;
+    border:        1px solid $gray-200;
+    border-radius: $radius-sm;
+    font-size:     13px;
+    color:         $gray-800;
+    background:    white;
+    outline:       none;
+    transition:    border-color .2s;
+
+    &:focus { border-color: $teal; }
+  }
+
+  &__pills {
+    display: flex;
+    gap:     6px;
+    flex-wrap: wrap;
+  }
+
+  &__pill {
+    padding:       7px 14px;
+    border:        1px solid $gray-200;
+    border-radius: 20px;
+    background:    white;
+    font-size:     12px;
+    font-weight:   500;
+    color:         $gray-600;
+    cursor:        pointer;
+    transition:    all .2s;
+
+    &:hover { border-color: $teal; color: $teal; }
+
+    &--active,
+    &.quiz-filters__pill--active {
+      background: $teal;
+      border-color: $teal;
+      color: white;
+    }
+
+    &--reussi.quiz-filters__pill--active  { background: $green;  border-color: $green; }
+    &--echoue.quiz-filters__pill--active  { background: $red;    border-color: $red; }
+    &--nouveau.quiz-filters__pill--active { background: $orange; border-color: $orange; }
+  }
+}
+
+// ══════════════════════════════════════════════════
+// GRILLE QUIZ
+// ══════════════════════════════════════════════════
+.quiz-grid {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   16px;
+
+  @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 640px)  { grid-template-columns: 1fr; }
+}
+
+// ══════════════════════════════════════════════════
+// CARTE QUIZ
+// ══════════════════════════════════════════════════
+.quiz-card {
+  background:    white;
+  border:        1px solid $gray-200;
+  border-radius: $radius-md;
+  box-shadow:    $shadow-sm;
+  display:       flex;
+  flex-direction:column;
+  transition:    box-shadow .2s, transform .2s;
+  overflow:      hidden;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform:  translateY(-2px);
+  }
+
+  // ── Header ──────────────────────────────────────
+  &__header {
+    display:         flex;
+    align-items:     center;
+    justify-content: space-between;
+    padding:         12px 14px 0;
+    gap:             8px;
+  }
+
+  &__formation {
+    font-size:     11px;
+    color:         $gray-400;
+    display:       flex;
+    align-items:   center;
+    white-space:   nowrap;
+    overflow:      hidden;
+    text-overflow: ellipsis;
+    max-width:     140px;
+  }
+
+  // ── Body ────────────────────────────────────────
+  &__body {
+    flex:    1;
+    padding: 12px 14px;
+  }
+
+  &__title {
+    font-size:   14px;
+    font-weight: 700;
+    color:       $gray-900;
+    margin:      0 0 6px;
+    line-height: 1.4;
+  }
+
+  &__desc {
+    font-size: 12px;
+    color:     $gray-600;
+    margin:    0 0 10px;
+    line-height: 1.5;
+  }
+
+  // ── Infos chips ─────────────────────────────────
+  &__infos {
+    display:   flex;
+    gap:       6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  // ── Résultat ────────────────────────────────────
+  &__result {
+    background:    $gray-50;
+    border:        1px solid $gray-100;
+    border-radius: $radius-sm;
+    padding:       10px 12px;
+
+    &-score {
+      display:         flex;
+      justify-content: space-between;
+      align-items:     center;
+      margin-bottom:   6px;
+    }
+
+    &-label { font-size: 11px; color: $gray-600; }
+    &-value { font-size: 18px; font-weight: 800; }
+
+    &-bar {
+      height:        6px;
+      background:    $gray-200;
+      border-radius: 3px;
+      overflow:      hidden;
+      margin-bottom: 4px;
+    }
+
+    &-fill {
+      height:        100%;
+      border-radius: 3px;
+      transition:    width .6s ease;
+    }
+
+    &-tentatives {
+      font-size: 11px;
+      color:     $gray-400;
+    }
+  }
+
+  // ── Footer ──────────────────────────────────────
+  &__footer {
+    padding:    12px 14px;
+    border-top: 1px solid $gray-100;
+  }
+
+  &__btn {
+    width:         100%;
+    padding:       9px 16px;
+    background:    $teal;
+    color:         white;
+    border:        none;
+    border-radius: $radius-sm;
+    font-size:     13px;
+    font-weight:   600;
+    cursor:        pointer;
+    display:       flex;
+    align-items:   center;
+    justify-content: center;
+    gap:           6px;
+    transition:    background .2s;
+
+    &:hover { background: darken($teal, 8%); }
+
+    &--reussi   { background: $green;  &:hover { background: darken($green, 8%); } }
+    &--reprendre{ background: $orange; &:hover { background: darken($orange, 8%); } }
+  }
+}
+
+// ══════════════════════════════════════════════════
+// BADGE STATUT
+// ══════════════════════════════════════════════════
+.quiz-badge {
+  font-size:     11px;
+  font-weight:   600;
+  padding:       3px 10px;
+  border-radius: 12px;
+  white-space:   nowrap;
+
+  &--nouveau  { background: $orange-lt; color: darken($orange, 15%); }
+  &--reussi   { background: $green-lt;  color: darken($green, 15%); }
+  &--echoue   { background: $red-lt;    color: darken($red, 10%); }
+}
+
+// ══════════════════════════════════════════════════
+// INFO CHIP
+// ══════════════════════════════════════════════════
+.quiz-info-chip {
+  display:       inline-flex;
+  align-items:   center;
+  font-size:     11px;
+  color:         $gray-600;
+  background:    $gray-100;
+  padding:       3px 8px;
+  border-radius: 6px;
+}
+
+// ══════════════════════════════════════════════════
+// EMPTY
+// ══════════════════════════════════════════════════
+.quiz-empty {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  padding:         60px 20px;
+  gap:             10px;
+  color:           $gray-400;
+
+  &__icon { font-size: 48px; }
+  h6      { font-size: 16px; font-weight: 700; color: $gray-800; margin: 0; }
+  p       { font-size: 13px; margin: 0; }
+}
