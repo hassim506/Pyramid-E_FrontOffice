@@ -43,6 +43,73 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS                                    -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allDemandes.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="filterByStatus('')"
+       [class.pq-kpi-card--active]="selectedStatus === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-routing"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalDemandes }}</div>
+      <div class="pq-kpi-card__label">Total</div>
+    </div>
+  </div>
+
+  <!-- En attente -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="filterByStatus('en_attente')"
+       [class.pq-kpi-card--active]="selectedStatus === 'en_attente'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-clock"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnAttente }}</div>
+      <div class="pq-kpi-card__label">En attente</div>
+    </div>
+  </div>
+
+  <!-- Validées -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="filterByStatus('validee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'validee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-tick-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalValidees }}</div>
+      <div class="pq-kpi-card__label">Validées</div>
+    </div>
+  </div>
+
+  <!-- Refusées -->
+  <div class="pq-kpi-card pq-kpi-card--red" (click)="filterByStatus('refusee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'refusee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-close-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalRefusees }}</div>
+      <div class="pq-kpi-card__label">Refusées</div>
+    </div>
+  </div>
+
+  <!-- Annulées -->
+  <div class="pq-kpi-card pq-kpi-card--gray" (click)="filterByStatus('annulee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'annulee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-minus-cirlce"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalAnnulees }}</div>
+      <div class="pq-kpi-card__label">Annulées</div>
+    </div>
+  </div>
+
+</div>
+
 <!-- FILTRES -->
 <div class="sc-filters mb-4">
   <div class="sc-filters__search">
@@ -52,11 +119,33 @@
            [(ngModel)]="searchDataValue" (ngModelChange)="searchData(searchDataValue)">
   </div>
   <div class="sc-filters__pills">
-    <button class="sc-filters__pill"                           [class.sc-filters__pill--active]="selectedStatus === ''"           (click)="filterByStatus('')">Tous</button>
-    <button class="sc-filters__pill sc-filters__pill--attente" [class.sc-filters__pill--active]="selectedStatus === 'en_attente'" (click)="filterByStatus('en_attente')">En attente</button>
-    <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'"    (click)="filterByStatus('validee')">Validée</button>
-    <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'"    (click)="filterByStatus('refusee')">Refusée</button>
-    <button class="sc-filters__pill sc-filters__pill--annulee" [class.sc-filters__pill--active]="selectedStatus === 'annulee'"    (click)="filterByStatus('annulee')">Annulée</button>
+    <button class="sc-filters__pill"
+            [class.sc-filters__pill--active]="selectedStatus === ''"
+            (click)="filterByStatus('')">Tous</button>
+    <button class="sc-filters__pill sc-filters__pill--attente"
+            [class.sc-filters__pill--active]="selectedStatus === 'en_attente'"
+            (click)="filterByStatus('en_attente')">
+      En attente
+      <span class="sc-filters__pill-count" *ngIf="totalEnAttente > 0">({{ totalEnAttente }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--validee"
+            [class.sc-filters__pill--active]="selectedStatus === 'validee'"
+            (click)="filterByStatus('validee')">
+      Validée
+      <span class="sc-filters__pill-count" *ngIf="totalValidees > 0">({{ totalValidees }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--refusee"
+            [class.sc-filters__pill--active]="selectedStatus === 'refusee'"
+            (click)="filterByStatus('refusee')">
+      Refusée
+      <span class="sc-filters__pill-count" *ngIf="totalRefusees > 0">({{ totalRefusees }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--annulee"
+            [class.sc-filters__pill--active]="selectedStatus === 'annulee'"
+            (click)="filterByStatus('annulee')">
+      Annulée
+      <span class="sc-filters__pill-count" *ngIf="totalAnnulees > 0">({{ totalAnnulees }})</span>
+    </button>
   </div>
   <button class="sc-filters__reset" (click)="resetFilters()">
     <i class="isax isax-refresh"></i> Réinitialiser
@@ -161,7 +250,7 @@
               </div>
             </td>
 
-            <!-- ACTION — boutons cercle icône -->
+            <!-- ACTION -->
             <td class="text-center" (click)="$event.stopPropagation()">
               <div class="d-flex align-items-center justify-content-center gap-2">
                 <ng-container *ngIf="demande.statut === 'en_attente'">
@@ -240,7 +329,7 @@
         </div>
       </div>
 
-      <!-- Footer contextuel selon statut -->
+      <!-- Footer -->
       <div class="sc-grid-card__footer" (click)="$event.stopPropagation()">
         <span class="sc-grid-card__date">
           <i class="isax isax-calendar-1"></i>
@@ -290,7 +379,6 @@
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content lms-modal" *ngIf="demandeSelectionnee">
 
-      <!-- Header purple fixe -->
       <div class="modal-header lms-modal__header">
         <div class="d-flex align-items-center gap-3">
           <div class="lms-modal__icon"><i class="isax isax-routing"></i></div>
@@ -304,7 +392,6 @@
 
       <div class="modal-body lms-modal__body">
 
-        <!-- Ligne chips statut + priorité + date souhaitée -->
         <div class="lms-detail-chips mb-4">
           <div class="lms-detail-chips__left">
             <span class="sc-statut" [ngClass]="getStatutClass(demandeSelectionnee.statut)">
@@ -324,15 +411,12 @@
           </div>
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 1 — Présentation du parcours       -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 1 — Présentation du parcours -->
         <div class="lms-detail-section mb-3">
           <div class="lms-detail-section__title">
             <i class="isax isax-routing me-2"></i>Parcours demandé
           </div>
 
-          <!-- Bandeau image + titre -->
           <div class="lms-formation-banner mt-2">
             <img [src]="demandeSelectionnee.image_affiche"
                  class="lms-formation-banner__img" alt="">
@@ -354,7 +438,6 @@
             </div>
           </div>
 
-          <!-- Grille infos clés -->
           <div class="row g-2 mt-3">
 
             <div class="col-md-6" *ngIf="demandeSelectionnee.parcours?.nombre_formations != null">
@@ -419,48 +502,31 @@
 
           </div>
 
-          <!-- Blocs texte riches -->
-          <div class="lms-formation-desc mt-3"
-               *ngIf="demandeSelectionnee.parcours?.description">
-            <div class="lms-formation-desc__label">
-              <i class="isax isax-document-text"></i>Description
-            </div>
+          <div class="lms-formation-desc mt-3" *ngIf="demandeSelectionnee.parcours?.description">
+            <div class="lms-formation-desc__label"><i class="isax isax-document-text"></i>Description</div>
             <p class="lms-formation-desc__text">{{ demandeSelectionnee.parcours.description }}</p>
           </div>
 
-          <div class="lms-formation-desc lms-formation-desc--objectifs mt-2"
-               *ngIf="demandeSelectionnee.parcours?.objectifs">
-            <div class="lms-formation-desc__label">
-              <i class="isax isax-tick-square"></i>Objectifs du parcours
-            </div>
+          <div class="lms-formation-desc lms-formation-desc--objectifs mt-2" *ngIf="demandeSelectionnee.parcours?.objectifs">
+            <div class="lms-formation-desc__label"><i class="isax isax-tick-square"></i>Objectifs du parcours</div>
             <p class="lms-formation-desc__text">{{ demandeSelectionnee.parcours.objectifs }}</p>
           </div>
 
-          <div class="lms-formation-desc lms-formation-desc--public mt-2"
-               *ngIf="demandeSelectionnee.parcours?.public_cible">
-            <div class="lms-formation-desc__label">
-              <i class="isax isax-people"></i>Public cible
-            </div>
+          <div class="lms-formation-desc lms-formation-desc--public mt-2" *ngIf="demandeSelectionnee.parcours?.public_cible">
+            <div class="lms-formation-desc__label"><i class="isax isax-people"></i>Public cible</div>
             <p class="lms-formation-desc__text">{{ demandeSelectionnee.parcours.public_cible }}</p>
           </div>
 
-          <div class="lms-formation-desc lms-formation-desc--prerequis mt-2"
-               *ngIf="demandeSelectionnee.parcours?.prerequis">
-            <div class="lms-formation-desc__label">
-              <i class="isax isax-info-circle"></i>Prérequis
-            </div>
+          <div class="lms-formation-desc lms-formation-desc--prerequis mt-2" *ngIf="demandeSelectionnee.parcours?.prerequis">
+            <div class="lms-formation-desc__label"><i class="isax isax-info-circle"></i>Prérequis</div>
             <p class="lms-formation-desc__text">{{ demandeSelectionnee.parcours.prerequis }}</p>
           </div>
-
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 2 — Formations incluses (accordéon) -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 2 — Formations incluses -->
         <div class="lms-detail-section mb-3"
              *ngIf="formationsDetail.length > 0 || loadingFormationsDetail">
 
-          <!-- En-tête + fil d'ariane -->
           <div class="lms-modules-header">
             <div class="lms-modules-header__left">
               <div class="lms-detail-section__title mb-0">
@@ -468,29 +534,23 @@
               </div>
               <div class="lms-modules-breadcrumb mt-1" *ngIf="!loadingFormationsDetail">
                 <span class="lms-modules-breadcrumb__item">
-                  <i class="isax isax-book-1 me-1"></i>
-                  {{ formationsDetail.length }} formation(s)
+                  <i class="isax isax-book-1 me-1"></i>{{ formationsDetail.length }} formation(s)
                 </span>
                 <span class="lms-modules-breadcrumb__sep">·</span>
-                <span class="lms-modules-breadcrumb__item"
-                      *ngIf="demandeSelectionnee.parcours?.duree_totale">
-                  <i class="isax isax-clock me-1"></i>
-                  {{ demandeSelectionnee.parcours.duree_totale }}h au total
+                <span class="lms-modules-breadcrumb__item" *ngIf="demandeSelectionnee.parcours?.duree_totale">
+                  <i class="isax isax-clock me-1"></i>{{ demandeSelectionnee.parcours.duree_totale }}h au total
                 </span>
               </div>
             </div>
           </div>
 
-          <!-- Spinner chargement -->
           <div class="text-center py-4" *ngIf="loadingFormationsDetail">
             <div class="spinner-border spinner-border-sm me-2 text-primary"></div>
             <span class="text-muted" style="font-size:13px">Chargement des formations...</span>
           </div>
 
-          <!-- Accordéon formations -->
           <div class="lms-accordion mt-3" *ngIf="!loadingFormationsDetail && formationsDetail.length > 0">
-            <div class="lms-accordion__item"
-                 *ngFor="let formation of formationsDetail; let i = index">
+            <div class="lms-accordion__item" *ngFor="let formation of formationsDetail; let i = index">
 
               <button class="lms-accordion__header"
                       [class.lms-accordion__header--open]="isFormationOpen(demandeSelectionnee.id, i)"
@@ -505,16 +565,13 @@
                   </div>
                 </div>
                 <div class="lms-accordion__header-right">
-                  <span class="lms-accordion__count lms-accordion__count--teal"
-                        *ngIf="formation.duree_totale">
+                  <span class="lms-accordion__count lms-accordion__count--teal" *ngIf="formation.duree_totale">
                     <i class="isax isax-clock me-1"></i>{{ formation.duree_totale }}h
                   </span>
-                  <span class="lms-accordion__count lms-accordion__count--purple"
-                        *ngIf="formation.nombre_modules">
+                  <span class="lms-accordion__count lms-accordion__count--purple" *ngIf="formation.nombre_modules">
                     <i class="isax isax-book me-1"></i>{{ formation.nombre_modules }} module(s)
                   </span>
-                  <span class="lms-accordion__count lms-accordion__count--warning"
-                        *ngIf="formation.est_certifiante">
+                  <span class="lms-accordion__count lms-accordion__count--warning" *ngIf="formation.est_certifiante">
                     <i class="isax isax-award me-1"></i>Certifiante
                   </span>
                   <i class="isax lms-accordion__chevron"
@@ -523,7 +580,6 @@
                 </div>
               </button>
 
-              <!-- Corps accordéon formation -->
               <div class="lms-accordion__body" *ngIf="isFormationOpen(demandeSelectionnee.id, i)">
                 <div class="lms-formation-detail-body">
                   <div class="lms-formation-detail-body__img-wrap" *ngIf="formation.image_couverture">
@@ -557,12 +613,9 @@
 
             </div>
           </div>
-
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 3 — État de ma demande             -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 3 — État de ma demande -->
         <div class="lms-detail-section mb-3">
           <div class="lms-detail-section__title">
             <i class="isax isax-message-text me-2"></i>État de ma demande
@@ -595,9 +648,7 @@
           </div>
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 4 — Motif de refus                 -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 4 — Motif de refus -->
         <div class="lms-detail-section lms-detail-section--danger mb-3"
              *ngIf="demandeSelectionnee.statut === 'refusee' && demandeSelectionnee.motif_refus">
           <div class="lms-detail-section__title">
@@ -609,9 +660,7 @@
           </p>
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 5 — Validation                     -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 5 — Validation -->
         <div class="lms-detail-section lms-detail-section--success mb-3"
              *ngIf="demandeSelectionnee.statut === 'validee' && demandeSelectionnee.date_validation">
           <div class="lms-detail-section__title">
@@ -628,7 +677,6 @@
 
       </div>
 
-      <!-- Footer modal — Fermer à gauche, Annuler + Relancer à droite -->
       <div class="modal-footer lms-modal__footer" style="justify-content:space-between;">
         <button class="btn lms-btn-cancel" (click)="fermerDetailDemande()">
           <i class="isax isax-close-square me-1"></i>Fermer
@@ -653,7 +701,7 @@
 
 
 <!-- ============================================================= -->
-<!-- MODAL NOUVELLE DEMANDE — FLUX 3 NIVEAUX                      -->
+<!-- MODAL NOUVELLE DEMANDE                                        -->
 <!-- ============================================================= -->
 <div class="modal fade" id="demandeParcoursModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -697,7 +745,7 @@
 
       <div class="modal-body lms-modal__body">
 
-        <!-- ── ÉTAPE 1 — Choisir un parcours ── -->
+        <!-- ÉTAPE 1 — Choisir un parcours -->
         <ng-container *ngIf="!selectedParcours">
           <div class="lms-step__header mb-3">
             <span class="lms-step__number lms-step__number--blue">1</span>
@@ -710,8 +758,7 @@
           <div *ngIf="!loadingParcours && parcours.length > 0" class="lms-list">
             <div class="lms-list-item" *ngFor="let p of parcours" (click)="selectParcours(p)">
               <div class="lms-list-item__icon-wrap">
-                <img *ngIf="p.image_couverture" [src]="p.image_couverture"
-                     class="lms-list-item__img" alt="">
+                <img *ngIf="p.image_couverture" [src]="p.image_couverture" class="lms-list-item__img" alt="">
                 <i *ngIf="!p.image_couverture" class="isax isax-routing"></i>
               </div>
               <div class="lms-list-item__body">
@@ -743,16 +790,14 @@
           </div>
         </ng-container>
 
-        <!-- ── ÉTAPE 2 — Choisir une catégorie ── -->
+        <!-- ÉTAPE 2 — Choisir une catégorie -->
         <ng-container *ngIf="selectedParcours && !selectedCategorie">
           <button class="lms-back-btn mb-3" (click)="retourParcours()">
             <i class="isax isax-arrow-left me-1"></i> Retour aux parcours
           </button>
           <div class="lms-selected-recap mb-4">
             <div class="lms-selected-recap__icon">
-              <img *ngIf="selectedParcours.image_couverture"
-                   [src]="selectedParcours.image_couverture"
-                   class="lms-selected-recap__img" alt="">
+              <img *ngIf="selectedParcours.image_couverture" [src]="selectedParcours.image_couverture" class="lms-selected-recap__img" alt="">
               <i *ngIf="!selectedParcours.image_couverture" class="isax isax-routing"></i>
             </div>
             <div class="lms-selected-recap__body">
@@ -791,13 +836,12 @@
           </div>
         </ng-container>
 
-        <!-- ── ÉTAPE 3 — Formulaire demande ── -->
+        <!-- ÉTAPE 3 — Formulaire demande -->
         <ng-container *ngIf="selectedParcours && selectedCategorie">
           <button class="lms-back-btn mb-3" (click)="retourCategories()">
             <i class="isax isax-arrow-left me-1"></i> Retour aux catégories
           </button>
 
-          <!-- Récap parcours + catégorie -->
           <div class="lms-recap-row mb-4">
             <div class="lms-recap-chip lms-recap-chip--blue">
               <i class="isax isax-routing me-1"></i>{{ selectedParcours.titre }}
@@ -808,7 +852,6 @@
             </div>
           </div>
 
-          <!-- Collapsible formations incluses -->
           <div class="lms-collapsible mb-4" *ngIf="formations.length > 0 || loadingFormations">
             <button class="lms-collapsible__trigger" type="button" (click)="showFormations = !showFormations">
               <span>
@@ -825,8 +868,7 @@
               <div *ngIf="!loadingFormations" class="lms-formations-list">
                 <div class="lms-formation-item" *ngFor="let f of formations; let i = index">
                   <div class="lms-formation-item__num">{{ i + 1 }}</div>
-                  <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
-                       class="lms-formation-item__img" alt="">
+                  <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'" class="lms-formation-item__img" alt="">
                   <div class="lms-formation-item__body">
                     <div class="lms-formation-item__title">{{ f.titre }}</div>
                     <div class="lms-formation-item__meta">

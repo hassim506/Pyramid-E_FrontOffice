@@ -43,6 +43,73 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS                                    -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allDemandes.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="filterByStatus('')"
+       [class.pq-kpi-card--active]="selectedStatus === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-book-saved"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalDemandes }}</div>
+      <div class="pq-kpi-card__label">Total</div>
+    </div>
+  </div>
+
+  <!-- En attente -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="filterByStatus('en_attente')"
+       [class.pq-kpi-card--active]="selectedStatus === 'en_attente'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-clock"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnAttente }}</div>
+      <div class="pq-kpi-card__label">En attente</div>
+    </div>
+  </div>
+
+  <!-- Validées -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="filterByStatus('validee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'validee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-tick-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalValidees }}</div>
+      <div class="pq-kpi-card__label">Validées</div>
+    </div>
+  </div>
+
+  <!-- Refusées -->
+  <div class="pq-kpi-card pq-kpi-card--red" (click)="filterByStatus('refusee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'refusee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-close-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalRefusees }}</div>
+      <div class="pq-kpi-card__label">Refusées</div>
+    </div>
+  </div>
+
+  <!-- Annulées -->
+  <div class="pq-kpi-card pq-kpi-card--gray" (click)="filterByStatus('annulee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'annulee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-minus-cirlce"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalAnnulees }}</div>
+      <div class="pq-kpi-card__label">Annulées</div>
+    </div>
+  </div>
+
+</div>
+
 <!-- FILTRES -->
 <div class="sc-filters mb-4">
   <div class="sc-filters__search">
@@ -53,10 +120,22 @@
   </div>
   <div class="sc-filters__pills">
     <button class="sc-filters__pill"                           [class.sc-filters__pill--active]="selectedStatus === ''"           (click)="filterByStatus('')">Tous</button>
-    <button class="sc-filters__pill sc-filters__pill--attente" [class.sc-filters__pill--active]="selectedStatus === 'en_attente'" (click)="filterByStatus('en_attente')">En attente</button>
-    <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'"    (click)="filterByStatus('validee')">Validée</button>
-    <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'"    (click)="filterByStatus('refusee')">Refusée</button>
-    <button class="sc-filters__pill sc-filters__pill--annulee" [class.sc-filters__pill--active]="selectedStatus === 'annulee'"    (click)="filterByStatus('annulee')">Annulée</button>
+    <button class="sc-filters__pill sc-filters__pill--attente" [class.sc-filters__pill--active]="selectedStatus === 'en_attente'" (click)="filterByStatus('en_attente')">
+      En attente
+      <span class="sc-filters__pill-count" *ngIf="totalEnAttente > 0">({{ totalEnAttente }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'"    (click)="filterByStatus('validee')">
+      Validée
+      <span class="sc-filters__pill-count" *ngIf="totalValidees > 0">({{ totalValidees }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'"    (click)="filterByStatus('refusee')">
+      Refusée
+      <span class="sc-filters__pill-count" *ngIf="totalRefusees > 0">({{ totalRefusees }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--annulee" [class.sc-filters__pill--active]="selectedStatus === 'annulee'"    (click)="filterByStatus('annulee')">
+      Annulée
+      <span class="sc-filters__pill-count" *ngIf="totalAnnulees > 0">({{ totalAnnulees }})</span>
+    </button>
   </div>
   <button class="sc-filters__reset" (click)="resetFilters()">
     <i class="isax isax-refresh"></i> Réinitialiser
@@ -399,7 +478,6 @@
 
         <!-- ═══════════════════════════════════════════ -->
         <!-- SECTION 2 — Formations du catalogue        -->
-        <!-- ✅ FIX : ngIf toujours vrai si loading     -->
         <!-- ═══════════════════════════════════════════ -->
         <div class="lms-detail-section mb-3"
              *ngIf="loadingFormations || formationsCatalogue.length > 0">
@@ -700,7 +778,6 @@
             <span class="lms-meta-chip lms-meta-chip--teal">{{ selectedCatalogue.nombre_formations }} formation(s)</span>
           </div>
 
-          <!-- ✅ FIX : ancré sur selectedCatalogue (toujours vrai à l'étape 2) -->
           <div class="lms-collapsible mb-4" *ngIf="selectedCatalogue">
             <button class="lms-collapsible__trigger" type="button" (click)="showFormations = !showFormations">
               <span>

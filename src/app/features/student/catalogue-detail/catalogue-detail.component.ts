@@ -23,6 +23,9 @@ export class CatalogueDetailComponent implements OnInit {
   source     = 'assigne';
   badgeLabel = 'Assigné';
 
+  // ── Expiration ────────────────────────────────────────────
+  dateExpiration: string | null = null;
+
   // ── Progression ────────────────────────────────────────────
   progressionGlobale    = 0;
   totalFormations       = 0;
@@ -54,18 +57,27 @@ export class CatalogueDetailComponent implements OnInit {
     this.loadCatalogueDetail();
   }
 
+  // ── Expiration ─────────────────────────────────────────────
+
+  /** Vrai si le catalogue est expiré (date dépassée) */
+  get estExpire(): boolean {
+    if (!this.dateExpiration) return false;
+    return new Date(this.dateExpiration) < new Date();
+  }
+
+  // ── Chargement ────────────────────────────────────────────
+
   loadCatalogueDetail(): void {
     this.loading = true;
 
-    // 1. Récupérer source + badge_label depuis la liste assignés
     this.formationsService.getMesCataloguesAssignes().subscribe({
       next: (res: any) => {
         const all  = res.catalogues ?? [];
         const meta = all.find((c: any) => c.id === this.catalogueId);
-        this.source     = meta?.source      ?? 'assigne';
-        this.badgeLabel = meta?.badge_label ?? 'Assigné';
+        this.source         = meta?.source          ?? 'assigne';
+        this.badgeLabel     = meta?.badge_label      ?? 'Assigné';
+        this.dateExpiration = meta?.date_expiration  ?? null;
 
-        // 2. Charger formations + progression via ProgressionController
         this.loadFormations();
       },
       error: () => {
@@ -75,7 +87,6 @@ export class CatalogueDetailComponent implements OnInit {
     });
   }
 
-  // ✅ Chargement via endpoint progression (comme parcours)
   loadFormations(): void {
     this.formationsService.getCatalogueProgression(this.catalogueId).subscribe({
       next: (res: any) => {
@@ -84,12 +95,11 @@ export class CatalogueDetailComponent implements OnInit {
         this.totalFormations     = res.total_formations    ?? 0;
         this.formationsTerminees = res.formations_terminees ?? 0;
 
-        // Charger aussi les infos du catalogue (titre, description...)
         this.formationsService.getCatalogueDetail(this.catalogueId).subscribe({
           next: (r: any) => {
-            this.catalogue = r.catalogue;
+            this.catalogue          = r.catalogue;
             this.filteredFormations = [...this.formations];
-            this.totalPages = Math.ceil(this.filteredFormations.length / this.pageSize);
+            this.totalPages         = Math.ceil(this.filteredFormations.length / this.pageSize);
             this.paginate();
             this.loading = false;
           },
@@ -149,19 +159,21 @@ export class CatalogueDetailComponent implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  // ── Navigation ─────────────────────────────────────────────
+  // ── Navigation — bloquée si expiré ────────────────────────
   goToDetails(formationId: number): void {
+    if (this.estExpire) return;
     this.router.navigate(['/courses/course-details-2', formationId], {
       state: {
-        fromPage:    'catalogue',
+        fromPage:      'catalogue',
         fromCatalogue: true,
-        catalogueId: this.catalogueId,
+        catalogueId:   this.catalogueId,
       }
     });
   }
 
   commencerFormation(formationId: number, event: Event): void {
     event.stopPropagation();
+    if (this.estExpire) return;
     this.router.navigate(['/student/lecture-formation', formationId], {
       state: {
         fromPage:    'catalogue',

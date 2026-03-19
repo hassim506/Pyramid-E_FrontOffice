@@ -53,13 +53,12 @@ export class StudentsParcoursComponent implements OnInit {
   loadingFormationsDetail = false;
 
   // ── ACCORDÉON FORMATIONS (modal détail) ──────────
-  // Clé composite "demandeId_index" — Angular-safe avec Set
   openFormations = new Set<string>();
 
   // ── MODAL NOUVELLE DEMANDE ───────────────────────
   submitting            = false;
   private modalInstance: any;
-  showFormations        = false;    // collapsible étape 3
+  showFormations        = false;
 
   parcours:         any[] = [];
   loadingParcours   = false;
@@ -94,10 +93,12 @@ export class StudentsParcoursComponent implements OnInit {
   // ── TOGGLE VUE ───────────────────────────────────
   setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
 
-  // ── STATS ────────────────────────────────────────
+  // ── KPI GETTERS ──────────────────────────────────
+  get totalDemandes():  number { return this.allDemandes.length; }
   get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
   get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length; }
   get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length; }
+  get totalAnnulees():  number { return this.allDemandes.filter(d => d.statut === 'annulee').length; }
 
   // ── CHARGEMENT DEMANDES ──────────────────────────
   loadDemandes(): void {
@@ -191,7 +192,6 @@ export class StudentsParcoursComponent implements OnInit {
     const target = event?.target as HTMLElement;
     if (target?.closest('.sc-btn-annuler, .sc-btn-relancer, .sc-motif-wrapper')) return;
 
-    // Afficher immédiatement avec données de base
     this.demandeSelectionnee     = { ...demande };
     this.formationsDetail        = [];
     this.loadingFormationsDetail = false;
@@ -203,7 +203,6 @@ export class StudentsParcoursComponent implements OnInit {
       this.detailDemandeModal.show();
     }
 
-    // Charger les formations complètes du parcours
     const parcoursId  = demande.parcours_id ?? demande.parcours?.id;
     const categorieId = demande.parcours?.categorie_id;
     if (parcoursId && categorieId) {
@@ -237,7 +236,7 @@ export class StudentsParcoursComponent implements OnInit {
   }
 
   // ════════════════════════════════════════════════
-  // MODAL NOUVELLE DEMANDE — FLUX 3 NIVEAUX
+  // MODAL NOUVELLE DEMANDE
   // ════════════════════════════════════════════════
   openRequestModal(): void {
     this.resetModal();

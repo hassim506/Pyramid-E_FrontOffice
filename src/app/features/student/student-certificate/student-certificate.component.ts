@@ -86,9 +86,11 @@ export class StudentCertificateComponent implements OnInit {
   setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
 
   // ── STATS ────────────────────────────────────────
+  get totalDemandes():  number { return this.allDemandes.length; }
   get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
   get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length; }
   get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length; }
+  get totalAnnulees():  number { return this.allDemandes.filter(d => d.statut === 'annulee').length; }
 
   // ── CHARGEMENT DEMANDES ──────────────────────────
   loadDemandes(): void {
@@ -185,13 +187,12 @@ export class StudentCertificateComponent implements OnInit {
   loadingFormationDetail = false;
 
   // ════════════════════════════════════════════════
-  // MODAL DÉTAIL DEMANDE — clic ligne tableau ou carte grille
+  // MODAL DÉTAIL DEMANDE
   // ════════════════════════════════════════════════
   ouvrirDetailDemande(demande: any, event: Event): void {
     const target = event.target as HTMLElement;
     if (target.closest('.sc-btn-annuler, .sc-btn-relancer, .sc-motif-wrapper')) return;
 
-    // Afficher le modal immédiatement avec les données de base
     this.demandeSelectionnee = { ...demande };
     this.openModules.clear();
 
@@ -201,14 +202,12 @@ export class StudentCertificateComponent implements OnInit {
       this.detailDemandeModal.show();
     }
 
-    // Charger les détails complets (modules, sections...) si formation_id disponible
     const formationId = demande.formation_id ?? demande.formation?.id;
     if (formationId) {
       this.loadingFormationDetail = true;
       this.formationsService.getFormationById(formationId).subscribe({
         next: (res: any) => {
           const full = res?.data ?? res?.formation ?? res;
-          // Fusionner les données complètes dans demandeSelectionnee
           this.demandeSelectionnee = {
             ...this.demandeSelectionnee,
             formation: {

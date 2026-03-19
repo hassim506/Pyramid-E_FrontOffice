@@ -92,9 +92,11 @@ export class StudentsCatalogueComponent implements OnInit {
   setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
 
   // ── STATS ────────────────────────────────────────
+  get totalDemandes():  number { return this.allDemandes.length; }
   get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
   get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length; }
   get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length; }
+  get totalAnnulees():  number { return this.allDemandes.filter(d => d.statut === 'annulee').length; }
 
   // ── CHARGEMENT DEMANDES ──────────────────────────
   loadDemandes(): void {

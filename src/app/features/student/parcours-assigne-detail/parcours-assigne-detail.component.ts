@@ -105,6 +105,15 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ── Expiration ─────────────────────────────────────────────
+
+  /** Vrai si le parcours est expiré (date dépassée ET pas terminé) */
+  get estExpire(): boolean {
+    if (this.estTermine) return false;
+    if (!this.parcours?.date_expiration) return false;
+    return new Date(this.parcours.date_expiration) < new Date();
+  }
+
   // ── Formations filtrées ────────────────────────────────────
   get formationsFiltrees(): any[] {
     if (this.filtreStatut === 'tous') return this.formations;
@@ -119,25 +128,26 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     this.filtreStatut = f;
   }
 
-  // ── Navigation ─────────────────────────────────────────────
+  // ── Navigation — bloquée si expiré ────────────────────────
 
-  // ✅ "Voir le détail" → course-details-2 (fiche formation)
   voirDetail(formationId: number, event: Event): void {
     event.stopPropagation();
+    if (this.estExpire) return;
     this.router.navigate(['/courses/course-details-2', formationId], {
       state: { fromPage: 'parcours', parcoursId: this.parcoursId }
     });
   }
 
-  // ✅ Clic carte ou "Commencer/Reprendre/Revoir" → lecture-formation
   commencerFormation(formationId: number, event: Event): void {
     event.stopPropagation();
+    if (this.estExpire) return;
     this.router.navigate(['/student/lecture-formation', formationId], {
       state: { fromPage: 'parcours', parcoursId: this.parcoursId }
     });
   }
 
   goToFormation(formationId: number): void {
+    if (this.estExpire) return;
     this.router.navigate(['/student/lecture-formation', formationId], {
       state: { fromPage: 'parcours', parcoursId: this.parcoursId }
     });

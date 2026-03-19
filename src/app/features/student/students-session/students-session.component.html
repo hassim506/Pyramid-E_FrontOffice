@@ -43,6 +43,73 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS                                    -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allDemandes.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="filterByStatus('')"
+       [class.pq-kpi-card--active]="selectedStatus === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-calendar-1"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalDemandes }}</div>
+      <div class="pq-kpi-card__label">Total</div>
+    </div>
+  </div>
+
+  <!-- En attente -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="filterByStatus('en_attente')"
+       [class.pq-kpi-card--active]="selectedStatus === 'en_attente'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-clock"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnAttente }}</div>
+      <div class="pq-kpi-card__label">En attente</div>
+    </div>
+  </div>
+
+  <!-- Validées -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="filterByStatus('validee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'validee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-tick-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalValidees }}</div>
+      <div class="pq-kpi-card__label">Validées</div>
+    </div>
+  </div>
+
+  <!-- Refusées -->
+  <div class="pq-kpi-card pq-kpi-card--red" (click)="filterByStatus('refusee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'refusee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-close-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalRefusees }}</div>
+      <div class="pq-kpi-card__label">Refusées</div>
+    </div>
+  </div>
+
+  <!-- Annulées -->
+  <div class="pq-kpi-card pq-kpi-card--gray" (click)="filterByStatus('annulee')"
+       [class.pq-kpi-card--active]="selectedStatus === 'annulee'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-minus-cirlce"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalAnnulees }}</div>
+      <div class="pq-kpi-card__label">Annulées</div>
+    </div>
+  </div>
+
+</div>
+
 <!-- FILTRES -->
 <div class="sc-filters mb-4">
   <div class="sc-filters__search">
@@ -52,11 +119,33 @@
            [(ngModel)]="searchDataValue" (ngModelChange)="searchData(searchDataValue)">
   </div>
   <div class="sc-filters__pills">
-    <button class="sc-filters__pill"                           [class.sc-filters__pill--active]="selectedStatus === ''"           (click)="filterByStatus('')">Tous</button>
-    <button class="sc-filters__pill sc-filters__pill--attente" [class.sc-filters__pill--active]="selectedStatus === 'en_attente'" (click)="filterByStatus('en_attente')">En attente</button>
-    <button class="sc-filters__pill sc-filters__pill--validee" [class.sc-filters__pill--active]="selectedStatus === 'validee'"    (click)="filterByStatus('validee')">Validée</button>
-    <button class="sc-filters__pill sc-filters__pill--refusee" [class.sc-filters__pill--active]="selectedStatus === 'refusee'"    (click)="filterByStatus('refusee')">Refusée</button>
-    <button class="sc-filters__pill sc-filters__pill--annulee" [class.sc-filters__pill--active]="selectedStatus === 'annulee'"    (click)="filterByStatus('annulee')">Annulée</button>
+    <button class="sc-filters__pill"
+            [class.sc-filters__pill--active]="selectedStatus === ''"
+            (click)="filterByStatus('')">Tous</button>
+    <button class="sc-filters__pill sc-filters__pill--attente"
+            [class.sc-filters__pill--active]="selectedStatus === 'en_attente'"
+            (click)="filterByStatus('en_attente')">
+      En attente
+      <span class="sc-filters__pill-count" *ngIf="totalEnAttente > 0">({{ totalEnAttente }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--validee"
+            [class.sc-filters__pill--active]="selectedStatus === 'validee'"
+            (click)="filterByStatus('validee')">
+      Validée
+      <span class="sc-filters__pill-count" *ngIf="totalValidees > 0">({{ totalValidees }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--refusee"
+            [class.sc-filters__pill--active]="selectedStatus === 'refusee'"
+            (click)="filterByStatus('refusee')">
+      Refusée
+      <span class="sc-filters__pill-count" *ngIf="totalRefusees > 0">({{ totalRefusees }})</span>
+    </button>
+    <button class="sc-filters__pill sc-filters__pill--annulee"
+            [class.sc-filters__pill--active]="selectedStatus === 'annulee'"
+            (click)="filterByStatus('annulee')">
+      Annulée
+      <span class="sc-filters__pill-count" *ngIf="totalAnnulees > 0">({{ totalAnnulees }})</span>
+    </button>
   </div>
   <button class="sc-filters__reset" (click)="resetFilters()">
     <i class="isax isax-refresh"></i> Réinitialiser
@@ -167,7 +256,7 @@
               </div>
             </td>
 
-            <!-- ACTION — boutons cercle icône -->
+            <!-- ACTION -->
             <td class="text-center" (click)="$event.stopPropagation()">
               <div class="d-flex align-items-center justify-content-center gap-2">
                 <ng-container *ngIf="demande.statut === 'en_attente'">
@@ -332,15 +421,12 @@
           </div>
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 1 — Présentation de la session     -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 1 — Présentation de la session -->
         <div class="lms-detail-section mb-3">
           <div class="lms-detail-section__title">
             <i class="isax isax-calendar-1 me-2"></i>Session demandée
           </div>
 
-          <!-- Bandeau image + titre -->
           <div class="lms-formation-banner mt-2">
             <img [src]="demandeSelectionnee.image_affiche"
                  class="lms-formation-banner__img" alt="">
@@ -361,7 +447,6 @@
             </div>
           </div>
 
-          <!-- Grille infos clés -->
           <div class="row g-2 mt-3">
 
             <div class="col-md-6" *ngIf="demandeSelectionnee.session_formation?.date_debut">
@@ -436,7 +521,6 @@
 
           </div>
 
-          <!-- Instructions d'accès (distanciel validée) -->
           <div class="lms-formation-desc mt-3"
                *ngIf="demandeSelectionnee.statut === 'validee'
                       && demandeSelectionnee.session_formation?.instructions_acces
@@ -450,9 +534,7 @@
           </div>
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 2 — État de ma demande             -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 2 — État de ma demande -->
         <div class="lms-detail-section mb-3">
           <div class="lms-detail-section__title">
             <i class="isax isax-message-text me-2"></i>État de ma demande
@@ -485,9 +567,7 @@
           </div>
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 3 — Motif de refus                 -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 3 — Motif de refus -->
         <div class="lms-detail-section lms-detail-section--danger mb-3"
              *ngIf="demandeSelectionnee.statut === 'refusee' && demandeSelectionnee.motif_refus">
           <div class="lms-detail-section__title">
@@ -499,9 +579,7 @@
           </p>
         </div>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 4 — Validation                     -->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 4 — Validation -->
         <div class="lms-detail-section lms-detail-section--success mb-3"
              *ngIf="demandeSelectionnee.statut === 'validee' && demandeSelectionnee.date_validation">
           <div class="lms-detail-section__title">
@@ -518,7 +596,6 @@
 
       </div>
 
-      <!-- Footer modal — Fermer à gauche · Annuler + Relancer à droite -->
       <div class="modal-footer lms-modal__footer lms-modal__footer--split">
         <button class="btn lms-btn-cancel" (click)="fermerDetail()">
           <i class="isax isax-close-square me-1"></i>Fermer
@@ -631,7 +708,6 @@
             <i class="isax isax-arrow-left me-1"></i> Retour aux sessions
           </button>
 
-          <!-- Récap session sélectionnée -->
           <div class="lms-selected-recap mb-4">
             <div class="lms-selected-recap__icon">
               <img *ngIf="selectedSession?.image_couverture"

@@ -79,10 +79,12 @@ export class StudentsSessionsComponent implements OnInit {
   // ── TOGGLE VUE ───────────────────────────────────
   setView(mode: 'table' | 'grid'): void { this.viewMode = mode; }
 
-  // ── STATS ────────────────────────────────────────
-  get totalEnAttente(): number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
-  get totalValidees():  number { return this.allDemandes.filter(d => d.statut === 'validee').length; }
-  get totalRefusees():  number { return this.allDemandes.filter(d => d.statut === 'refusee').length; }
+  // ── KPI GETTERS ──────────────────────────────────
+  get totalDemandes():   number { return this.allDemandes.length; }
+  get totalEnAttente():  number { return this.allDemandes.filter(d => d.statut === 'en_attente').length; }
+  get totalValidees():   number { return this.allDemandes.filter(d => d.statut === 'validee').length; }
+  get totalRefusees():   number { return this.allDemandes.filter(d => d.statut === 'refusee').length; }
+  get totalAnnulees():   number { return this.allDemandes.filter(d => d.statut === 'annulee').length; }
 
   // ── CHARGEMENT DEMANDES ──────────────────────────
   loadDemandes(): void {
@@ -102,9 +104,9 @@ export class StudentsSessionsComponent implements OnInit {
   }
 
   private normaliserDemande(d: any): any {
-    const cap     = d.session_formation?.capacite_max     ?? 0;
-    const inscrits = d.session_formation?.nombre_inscrits ?? 0;
-    const date    = d.session_formation?.date_debut;
+    const cap      = d.session_formation?.capacite_max     ?? 0;
+    const inscrits = d.session_formation?.nombre_inscrits  ?? 0;
+    const date     = d.session_formation?.date_debut;
     return {
       ...d,
       titre_affiche:      d.session_formation?.titre ?? `Session #${d.session_formation_id}`,
@@ -300,8 +302,3 @@ export class StudentsSessionsComponent implements OnInit {
     return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[s] ?? '';
   }
 }
-
-// ────────────────────────────────────────────────────────
-// Navigation vers la page détail formation (si dispo)
-// ────────────────────────────────────────────────────────
-// Note: méthode déjà incluse dans la class principale ci-dessus
