@@ -22,7 +22,7 @@ export class StudentCoursesComponent implements OnInit {
 
   searchTerm     = '';
   selectedType   = '';
-  selectedFiltre: '' | 'assigne' | 'demande' | 'permanent' | 'expire_bientot' | 'expire' = '';
+  selectedFiltre: '' | 'assigne' | 'demande' | 'termine' | 'en_cours' | 'permanent' | 'expire_bientot' | 'expire' = '';
 
   currentPage  = 1;
   itemsPerPage = 9;
@@ -41,12 +41,14 @@ export class StudentCoursesComponent implements OnInit {
   ];
 
   filtres = [
-    { value: '',               label: 'Tous',              icon: 'isax-grid-1'          },
-    { value: 'assigne',        label: 'Assignés',          icon: 'isax-tick-circle'     },
-    { value: 'demande',        label: 'Demandes acceptées',icon: 'isax-send-2'          },
-    { value: 'permanent',      label: 'Accès permanent',   icon: 'isax-infinity'        },
-    { value: 'expire_bientot', label: 'Expire bientôt',    icon: 'isax-warning-2'       },
-    { value: 'expire',         label: 'Expiré',            icon: 'isax-calendar-remove' },
+    { value: '',               label: 'Tous',               icon: 'isax-grid-1'          },
+    { value: 'assigne',        label: 'Assignés',           icon: 'isax-tick-circle'     },
+    { value: 'demande',        label: 'Demandes acceptées', icon: 'isax-send-2'          },
+    { value: 'termine',        label: 'Terminés',           icon: 'isax-medal-star'      },
+    { value: 'en_cours',       label: 'En cours',           icon: 'isax-play-circle'     },
+    { value: 'permanent',      label: 'Accès permanent',    icon: 'isax-infinity'        },
+    { value: 'expire_bientot', label: 'Expire bientôt',     icon: 'isax-warning-2'       },
+    { value: 'expire',         label: 'Expiré',             icon: 'isax-calendar-remove' },
   ];
 
   constructor(
@@ -143,6 +145,8 @@ export class StudentCoursesComponent implements OnInit {
     switch (this.selectedFiltre) {
       case 'assigne':        result = result.filter(c => c.source === 'assigne'); break;
       case 'demande':        result = result.filter(c => c.source === 'demande'); break;
+      case 'termine':        result = result.filter(c => c.est_termine); break;
+      case 'en_cours':       result = result.filter(c => !c.est_termine && !this.isExpire(c) && c.progression > 0); break;
       case 'permanent':      result = result.filter(c => !c.date_expiration); break;
       case 'expire_bientot': result = result.filter(c => this.isExpiringSoon(c.date_expiration)); break;
       case 'expire':         result = result.filter(c => this.isExpire(c)); break;
@@ -154,6 +158,15 @@ export class StudentCoursesComponent implements OnInit {
     this.buildPageNumbers();
     this.updateDisplayed();
   }
+
+  // ── KPI Getters ────────────────────────────────────────────
+  get totalCatalogues():  number { return this.allCatalogues.length; }
+  get totalAssignes():    number { return this.allCatalogues.filter(c => c.source === 'assigne').length; }
+  get totalDemandes():    number { return this.allCatalogues.filter(c => c.source === 'demande').length; }
+  get totalTermines():    number { return this.allCatalogues.filter(c => c.est_termine).length; }
+  get totalEnCours():     number { return this.allCatalogues.filter(c => !c.est_termine && !this.isExpire(c) && c.progression > 0).length; }
+  get totalNonDemarres(): number { return this.allCatalogues.filter(c => !c.est_termine && !this.isExpire(c) && c.progression === 0).length; }
+  get totalExpires():     number { return this.allCatalogues.filter(c => this.isExpire(c)).length; }
 
   // ── Pagination ─────────────────────────────────────────────
 

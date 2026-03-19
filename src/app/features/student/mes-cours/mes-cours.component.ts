@@ -53,16 +53,14 @@ export class MesCoursComponent implements OnInit, OnDestroy {
 
   constructor(
     private formationsService: FormationsService,
-    public  progressionService: ProgressionService,  // public → accessible dans le template
+    public  progressionService: ProgressionService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadFormations();
 
-    // ✅ Écouter les changements de progression en temps réel
     this.progressionSub = this.progressionService.change$.subscribe(() => {
-      // Force la détection de changements — Angular met à jour les cartes
       this.formations = [...this.formations];
     });
   }
@@ -92,15 +90,21 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   }
 
   // ════════════════════════════════════════════
-  // PROGRESSION — lit depuis le service partagé
-  // Fallback : f.progression (valeur API initiale)
+  // PROGRESSION
   // ════════════════════════════════════════════
   getProgression(f: Formation): number {
     const fromService = this.progressionService.getPercent(f.id);
-    // Si le service a une valeur > 0 (sections cochées) on l'utilise
-    // Sinon on utilise la valeur initiale de l'API
     return fromService > 0 ? fromService : Number(f.progression ?? 0);
   }
+
+  // ════════════════════════════════════════════
+  // KPI GETTERS
+  // ════════════════════════════════════════════
+  get totalFormations():  number { return this.allFormations.length; }
+  get totalEnCours():     number { return this.allFormations.filter(f => { const p = this.getProgression(f); return p > 0 && p < 100; }).length; }
+  get totalACommencer():  number { return this.allFormations.filter(f => this.getProgression(f) === 0).length; }
+  get totalTerminees():   number { return this.allFormations.filter(f => this.getProgression(f) === 100).length; }
+  get totalCertifiantes():number { return this.allFormations.filter(f => (f as any).est_certifiante).length; }
 
   // ════════════════════════════════════════════
   // FILTRES

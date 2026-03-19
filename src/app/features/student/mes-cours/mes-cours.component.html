@@ -22,7 +22,7 @@
 <div class="mc-header mb-4">
   <div class="mc-header__left">
     <h3 class="mc-header__title">Mes Formations</h3>
-    <p class="mc-header__subtitle">Accédez à l'ensemble de vos demandes de formations validées </p>
+    <p class="mc-header__subtitle">Accédez à l'ensemble de vos demandes de formations validées</p>
   </div>
   <div class="mc-header__actions">
     <button class="mc-header__toggle-btn"
@@ -36,6 +36,74 @@
       <i class="isax isax-element-3"></i>
     </button>
   </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS — même style que parcours/catalogues -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allFormations.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="selectTab('')"
+       [class.pq-kpi-card--active]="selectedTab === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-book-1"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalFormations }}</div>
+      <div class="pq-kpi-card__label">Total</div>
+    </div>
+  </div>
+
+  <!-- En cours -->
+  <div class="pq-kpi-card pq-kpi-card--blue" (click)="selectTab('en_cours')"
+       [class.pq-kpi-card--active]="selectedTab === 'en_cours'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-play-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnCours }}</div>
+      <div class="pq-kpi-card__label">En cours</div>
+    </div>
+  </div>
+
+  <!-- À commencer -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="selectTab('a_commencer')"
+       [class.pq-kpi-card--active]="selectedTab === 'a_commencer'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-flash-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalACommencer }}</div>
+      <div class="pq-kpi-card__label">À commencer</div>
+    </div>
+  </div>
+
+  <!-- Terminées -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="selectTab('termines')"
+       [class.pq-kpi-card--active]="selectedTab === 'termines'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-medal-star"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalTerminees }}</div>
+      <div class="pq-kpi-card__label">Terminées</div>
+    </div>
+  </div>
+
+  <!-- Certifiantes 
+  <div class="pq-kpi-card pq-kpi-card--purple" (click)="selectTab('')"
+       [class.pq-kpi-card--active]="false">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-award"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalCertifiantes }}</div>
+      <div class="pq-kpi-card__label">Certifiantes</div>
+    </div>
+  </div>
+  -->
+
 </div>
 
 <!-- FILTRES -->
@@ -57,13 +125,22 @@
             (click)="selectTab('')">Tous</button>
     <button class="mc-filters__pill mc-filters__pill--progress"
             [class.mc-filters__pill--active]="selectedTab === 'en_cours'"
-            (click)="selectTab('en_cours')">En cours</button>
+            (click)="selectTab('en_cours')">
+      En cours
+      <span class="mc-filters__pill-count" *ngIf="totalEnCours > 0">({{ totalEnCours }})</span>
+    </button>
     <button class="mc-filters__pill mc-filters__pill--pending"
             [class.mc-filters__pill--active]="selectedTab === 'a_commencer'"
-            (click)="selectTab('a_commencer')">À commencer</button>
+            (click)="selectTab('a_commencer')">
+      À commencer
+      <span class="mc-filters__pill-count" *ngIf="totalACommencer > 0">({{ totalACommencer }})</span>
+    </button>
     <button class="mc-filters__pill mc-filters__pill--done"
             [class.mc-filters__pill--active]="selectedTab === 'termines'"
-            (click)="selectTab('termines')">Terminées</button>
+            (click)="selectTab('termines')">
+      Terminées
+      <span class="mc-filters__pill-count" *ngIf="totalTerminees > 0">({{ totalTerminees }})</span>
+    </button>
   </div>
   <button class="mc-filters__reset" (click)="resetFilters()">
     <i class="isax isax-refresh"></i> Réinitialiser

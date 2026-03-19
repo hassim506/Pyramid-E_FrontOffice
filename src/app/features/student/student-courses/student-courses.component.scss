@@ -10,6 +10,14 @@ $warning:     #d97706;
 $warning-lt:  #fef3c7;
 $danger:      #dc2626;
 $info:        #0369a1;
+$blue:        #3b82f6;
+$blue-lt:     #dbeafe;
+$purple:      #7c3aed;
+$purple-lt:   #ede9fe;
+$indigo:      #4f46e5;
+$indigo-lt:   #e0e7ff;
+$orange:      #f59e0b;
+$orange-lt:   #fef3c7;
 
 $gray-50:     #f9fafb;
 $gray-100:    #f3f4f6;
@@ -27,6 +35,103 @@ $shadow-md:   0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
 $shadow-lg:   0 10px 30px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.06);
 $shadow-hover:0 16px 40px rgba(6,155,143,.15), 0 6px 16px rgba(0,0,0,.08);
 $transition:  all .22s ease;
+
+// ══════════════════════════════════════════════════════════════
+// KPI CARDS — même style que la page parcours
+// ══════════════════════════════════════════════════════════════
+.pq-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+
+  @media (max-width: 1200px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 768px)  { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px)  { grid-template-columns: 1fr; }
+}
+
+.pq-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  cursor: pointer;
+  transition: $transition;
+  border-top: 3px solid transparent;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+
+  &--active {
+    border-color: currentColor;
+    box-shadow: $shadow-md;
+  }
+
+  &__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  &__body { min-width: 0; }
+
+  &__value {
+    font-size: 22px;
+    font-weight: 800;
+    color: $gray-900;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 500;
+    color: $gray-400;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+
+  // Variantes couleur
+  &--teal {
+    border-top-color: $primary;
+    .pq-kpi-card__icon { background: $primary-lt; color: $primary; }
+    &.pq-kpi-card--active { border-color: $primary; }
+  }
+  &--green {
+    border-top-color: $success;
+    .pq-kpi-card__icon { background: $success-lt; color: $success; }
+    &.pq-kpi-card--active { border-color: $success; }
+  }
+  &--blue {
+    border-top-color: $blue;
+    .pq-kpi-card__icon { background: $blue-lt; color: $blue; }
+    &.pq-kpi-card--active { border-color: $blue; }
+  }
+  &--orange {
+    border-top-color: $orange;
+    .pq-kpi-card__icon { background: $orange-lt; color: $orange; }
+    &.pq-kpi-card--active { border-color: $orange; }
+  }
+  &--purple {
+    border-top-color: $purple;
+    .pq-kpi-card__icon { background: $purple-lt; color: $purple; }
+    &.pq-kpi-card--active { border-color: $purple; }
+  }
+  &--indigo {
+    border-top-color: $indigo;
+    .pq-kpi-card__icon { background: $indigo-lt; color: $indigo; }
+    &.pq-kpi-card--active { border-color: $indigo; }
+  }
+}
 
 // ══════════════════════════════════════════════════════════════
 // HEADER
@@ -178,6 +283,13 @@ $transition:  all .22s ease;
 
       &:hover { background: $primary-dk; }
     }
+  }
+
+  &__type-count {
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 3px;
+    opacity: .8;
   }
 
   &__reset {
@@ -763,12 +875,16 @@ $transition:  all .22s ease;
     align-items: center;
     &__btn { width: 30px; height: 30px; }
   }
+
+  .pq-kpi-card { padding: 12px; }
 }
 
 @media (max-width: 480px) {
   .catalogue-card__stat { font-size: 10px; padding: 2px 8px; }
-}// ══════════════════════════════════════════════════════════════
-// ÉTATS EXPIRÉ / TERMINÉ — miroir exact des parcours
+}
+
+// ══════════════════════════════════════════════════════════════
+// ÉTATS EXPIRÉ / TERMINÉ
 // ══════════════════════════════════════════════════════════════
 
 // Carte grisée (terminée ou expirée)
@@ -825,22 +941,9 @@ $transition:  all .22s ease;
   i { color: #ef4444 !important; }
 }
 
-// Bouton CTA — variante expiré (gris)
-.catalogue-card__btn--expire {
-  background:   #6b7280 !important;
-  box-shadow:   none !important;
-
-  &:hover {
-    background:  #4b5563 !important;
-    box-shadow:  none !important;
-  }
-}
-
-// ── Bouton CTA — 3 états ─────────────────────────────────────
-// Override complet pour garantir la priorité
-
+// Bouton CTA — 3 états
 .catalogue-card__btn {
-  background:   #069b8f !important;  // teal — actif
+  background:   #069b8f !important;
   box-shadow:   0 2px 8px rgba(6,155,143,.25) !important;
 
   &:hover {
@@ -850,7 +953,7 @@ $transition:  all .22s ease;
   }
 
   &--done {
-    background: #16a34a !important;  // vert — terminé
+    background: #16a34a !important;
     box-shadow: 0 2px 8px rgba(22,163,74,.25) !important;
     &:hover {
       background: #15803d !important;
@@ -859,7 +962,7 @@ $transition:  all .22s ease;
   }
 
   &--expire {
-    background: #6b7280 !important;  // gris — expiré
+    background: #6b7280 !important;
     box-shadow: none !important;
     &:hover {
       background:  #4b5563 !important;

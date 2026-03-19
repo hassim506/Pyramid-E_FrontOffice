@@ -2,12 +2,22 @@
 // SESSIONS ACCEPTÉES — Variables & Base
 // ═══════════════════════════════════════════════════════════════
 $primary:    #069b8f;
+$primary-lt: #e6f7f5;
+$primary-dk: #047a6f;
 $success:    #16a34a;
+$success-lt: #dcfce7;
 $warning:    #d97706;
 $danger:     #dc2626;
 $info:       #0369a1;
+$info-lt:    #dbeafe;
 $purple:     #7c3aed;
+$purple-lt:  #ede9fe;
+$indigo:     #4f46e5;
+$indigo-lt:  #e0e7ff;
+$orange:     #f59e0b;
+$orange-lt:  #fef3c7;
 $teal:       #0d9488;
+$gray-50:    #f9fafb;
 $gray-100:   #f3f4f6;
 $gray-200:   #e5e7eb;
 $gray-400:   #9ca3af;
@@ -16,9 +26,108 @@ $gray-800:   #1f2937;
 $white:      #ffffff;
 $radius:     12px;
 $radius-sm:  8px;
+$radius-md:  12px;
 $shadow:     0 2px 12px rgba(0,0,0,.08);
 $shadow-md:  0 4px 20px rgba(0,0,0,.12);
+$shadow-sm:  0 1px 3px rgba(0,0,0,.08);
 $transition: all .2s ease;
+
+// ═══════════════════════════════════════════════════════════════
+// KPI CARDS — même style que parcours / catalogues
+// ═══════════════════════════════════════════════════════════════
+.pq-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+
+  @media (max-width: 1200px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 768px)  { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px)  { grid-template-columns: 1fr; }
+}
+
+.pq-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: $white;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  cursor: pointer;
+  transition: $transition;
+  border-top: 3px solid transparent;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+
+  &--active {
+    border-color: currentColor;
+    box-shadow: $shadow-md;
+  }
+
+  &__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  &__body { min-width: 0; }
+
+  &__value {
+    font-size: 22px;
+    font-weight: 800;
+    color: $gray-800;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 500;
+    color: $gray-400;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+
+  // Variantes couleur
+  &--teal {
+    border-top-color: $primary;
+    .pq-kpi-card__icon { background: $primary-lt; color: $primary; }
+    &.pq-kpi-card--active { border-color: $primary; }
+  }
+  &--green {
+    border-top-color: $success;
+    .pq-kpi-card__icon { background: $success-lt; color: $success; }
+    &.pq-kpi-card--active { border-color: $success; }
+  }
+  &--blue {
+    border-top-color: $info;
+    .pq-kpi-card__icon { background: $info-lt; color: $info; }
+    &.pq-kpi-card--active { border-color: $info; }
+  }
+  &--orange {
+    border-top-color: $orange;
+    .pq-kpi-card__icon { background: $orange-lt; color: $orange; }
+    &.pq-kpi-card--active { border-color: $orange; }
+  }
+  &--purple {
+    border-top-color: $purple;
+    .pq-kpi-card__icon { background: $purple-lt; color: $purple; }
+    &.pq-kpi-card--active { border-color: $purple; }
+  }
+  &--indigo {
+    border-top-color: $indigo;
+    .pq-kpi-card__icon { background: $indigo-lt; color: $indigo; }
+    &.pq-kpi-card--active { border-color: $indigo; }
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════
 // HEADER
@@ -71,6 +180,10 @@ $transition: all .2s ease;
     cursor: pointer; transition: $transition; white-space: nowrap;
     &:hover { border-color: $primary; color: $primary; }
     &--active { background: $primary; border-color: $primary; color: $white !important; }
+  }
+
+  &__type-count {
+    font-size: 11px; font-weight: 600; margin-left: 3px; opacity: .8;
   }
 
   &__reset {
@@ -375,7 +488,7 @@ $transition: all .2s ease;
   &__text  { font-size: .85rem; color: $gray-600; margin: 0; line-height: 1.5; }
 }
 
-// Lien accès cliquable (Zoom, Teams...)
+// Lien accès cliquable
 .lms-access-link {
   display: flex; align-items: flex-start; gap: 10px;
   background: rgba($primary, .06); border: 1.5px solid rgba($primary, .2);
@@ -413,4 +526,23 @@ $transition: all .2s ease;
   border-radius: 8px; font-size: .875rem; font-weight: 600; cursor: pointer;
   transition: $transition; display: inline-flex; align-items: center;
   &:hover { opacity: .9; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESPONSIVE
+// ═══════════════════════════════════════════════════════════════
+@media (max-width: 767px) {
+  .sc-header {
+    flex-direction: column; gap: 8px;
+    &__title { font-size: 1.25rem; }
+    &__subtitle { display: none; }
+  }
+
+  .sc-filters {
+    flex-direction: column; align-items: stretch;
+    &__search { max-width: 100%; }
+    &__type-btn { font-size: .75rem; padding: 6px 10px; }
+  }
+
+  .pq-kpi-card { padding: 12px; }
 }

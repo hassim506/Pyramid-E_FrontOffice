@@ -162,6 +162,16 @@ export class SessionsAccepteesComponent implements OnInit {
   }
 
   // ════════════════════════════════════════════════════════
+  // KPI GETTERS
+  // ════════════════════════════════════════════════════════
+  get totalSessions():    number { return this.allSessions.length; }
+  get totalAVenir():      number { return this.allSessions.filter(s =>  s.est_a_venir && !s.est_termine).length; }
+  get totalEnCours():     number { return this.allSessions.filter(s => !s.est_termine && !s.est_a_venir).length; }
+  get totalTerminees():   number { return this.allSessions.filter(s =>  s.est_termine).length; }
+  get totalCertifiantes():number { return this.allSessions.filter(s =>  s.certificat_delivre).length; }
+  get totalCertifiees():  number { return this.allSessions.filter(s =>  s.certificat_obtenu).length; }
+
+  // ════════════════════════════════════════════════════════
   // PAGINATION
   // ════════════════════════════════════════════════════════
   updatePage(): void {

@@ -12,6 +12,85 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS — même style que la page parcours  -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allCatalogues.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="onFiltreChange('')"
+       [class.pq-kpi-card--active]="selectedFiltre === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-book-1"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalCatalogues }}</div>
+      <div class="pq-kpi-card__label">Total</div>
+    </div>
+  </div>
+
+  <!-- En cours -->
+  <div class="pq-kpi-card pq-kpi-card--blue" (click)="onFiltreChange('en_cours')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'en_cours'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-play-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnCours }}</div>
+      <div class="pq-kpi-card__label">En cours</div>
+    </div>
+  </div>
+
+  <!-- Terminés -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="onFiltreChange('termine')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'termine'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-medal-star"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalTermines }}</div>
+      <div class="pq-kpi-card__label">Terminés</div>
+    </div>
+  </div>
+
+  <!-- Non démarrés -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="onFiltreChange('')"
+       [class.pq-kpi-card--active]="false">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-flash-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalNonDemarres }}</div>
+      <div class="pq-kpi-card__label">Non démarrés</div>
+    </div>
+  </div>
+
+  <!-- Assignés directement -->
+  <div class="pq-kpi-card pq-kpi-card--purple" (click)="onFiltreChange('assigne')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'assigne'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-tick-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalAssignes }}</div>
+      <div class="pq-kpi-card__label">Assignés</div>
+    </div>
+  </div>
+
+  <!-- Demandes acceptées -->
+  <div class="pq-kpi-card pq-kpi-card--indigo" (click)="onFiltreChange('demande')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'demande'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-send-2"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalDemandes }}</div>
+      <div class="pq-kpi-card__label">Demandes acceptées</div>
+    </div>
+  </div>
+
+</div>
+
 <!-- FILTRES -->
 <div class="sc-filters" *ngIf="!loading && allCatalogues.length > 0">
   <div class="sc-filters__search">
@@ -32,6 +111,11 @@
             [class.sc-filters__type-btn--active]="selectedFiltre === f.value"
             (click)="onFiltreChange(f.value)">
       <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
+      <span class="sc-filters__type-count" *ngIf="f.value === 'assigne'        && totalAssignes    > 0">({{ totalAssignes }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'demande'        && totalDemandes    > 0">({{ totalDemandes }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'termine'        && totalTermines    > 0">({{ totalTermines }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'en_cours'       && totalEnCours     > 0">({{ totalEnCours }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'expire'         && totalExpires     > 0">({{ totalExpires }})</span>
     </button>
   </div>
 

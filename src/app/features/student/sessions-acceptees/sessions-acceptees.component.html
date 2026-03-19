@@ -12,6 +12,85 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS — même style que parcours/catalogues -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allSessions.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="onFiltreChange('toutes')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'toutes'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-calendar-1"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalSessions }}</div>
+      <div class="pq-kpi-card__label">Total</div>
+    </div>
+  </div>
+
+  <!-- À venir -->
+  <div class="pq-kpi-card pq-kpi-card--blue" (click)="onFiltreChange('a_venir')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'a_venir'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-clock"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalAVenir }}</div>
+      <div class="pq-kpi-card__label">À venir</div>
+    </div>
+  </div>
+
+  <!-- En cours -->
+  <div class="pq-kpi-card pq-kpi-card--indigo" (click)="onFiltreChange('en_cours')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'en_cours'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-play-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnCours }}</div>
+      <div class="pq-kpi-card__label">En cours</div>
+    </div>
+  </div>
+
+  <!-- Terminées -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="onFiltreChange('terminees')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'terminees'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-medal-star"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalTerminees }}</div>
+      <div class="pq-kpi-card__label">Terminées</div>
+    </div>
+  </div>
+
+  <!-- Certifiantes -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="onFiltreChange('certif')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'certif'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-award"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalCertifiantes }}</div>
+      <div class="pq-kpi-card__label">Certifiantes</div>
+    </div>
+  </div>
+
+  <!-- Certificats obtenus -->
+  <div class="pq-kpi-card pq-kpi-card--purple" (click)="onFiltreChange('toutes')"
+       [class.pq-kpi-card--active]="false">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-medal-star"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalCertifiees }}</div>
+      <div class="pq-kpi-card__label">Certifiées</div>
+    </div>
+  </div>
+
+</div>
+
 <!-- FILTRES -->
 <div class="sc-filters" *ngIf="!loading && allSessions.length > 0">
   <div class="sc-filters__search">
@@ -32,6 +111,10 @@
             [class.sc-filters__type-btn--active]="selectedFiltre === f.value"
             (click)="onFiltreChange(f.value)">
       <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
+      <span class="sc-filters__type-count" *ngIf="f.value === 'a_venir'   && totalAVenir      > 0">({{ totalAVenir }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'en_cours'  && totalEnCours     > 0">({{ totalEnCours }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'terminees' && totalTerminees   > 0">({{ totalTerminees }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'certif'    && totalCertifiantes > 0">({{ totalCertifiantes }})</span>
     </button>
   </div>
 
@@ -517,7 +600,6 @@
         <button class="btn lms-btn-cancel" (click)="fermerDetail()">
           <i class="isax isax-close-square me-1"></i>Fermer
         </button>
-        <!-- Bouton page détail — pour plus tard -->
         <button class="btn lms-btn-submit" (click)="goToDetail(sessionSelectionnee.id)">
           <i class="isax isax-arrow-right-3 me-1"></i>Voir la page complète
         </button>

@@ -67,9 +67,11 @@
     </button>
   </div>
 
-  <!-- ════════════════════════════════════════════════ -->
-  <!-- ONGLET 1 — AUJOURD'HUI                         -->
-  <!-- ════════════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- ONGLET 1 — AUJOURD'HUI                                              -->
+  <!-- Snapshot instantané : taux globaux (radials) + volumes par          -->
+  <!-- catégorie (4 cartes) + échéances + sessions planifiées              -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
   <ng-container *ngIf="activeTab === 'aujourdhui'">
 
     <!-- ALERTE URGENCES -->
@@ -82,14 +84,15 @@
       <span class="db-alert-banner__count">⚠ Action requise</span>
     </div>
 
-    <!-- RADIALS — TAUX CLÉS -->
+    <!-- RADIALS — 3 taux clés globaux -->
     <div class="db-radial-row mb-4">
 
       <div class="db-radial-card">
         <div class="db-radial-card__chart" id="chart-radial-completion"></div>
-        <div class="db-radial-card__label">Taux de complétion</div>
+        <div class="db-radial-card__label">Complétion globale</div>
         <div class="db-radial-card__sub">
-          {{ stats.kpi.formations.terminees }} / {{ stats.kpi.formations.total }} formations
+          {{ stats.kpi.taux_completion_global?.total_termine ?? stats.kpi.formations.terminees }}
+          / {{ stats.kpi.taux_completion_global?.total_assigne ?? stats.kpi.formations.total }} éléments
         </div>
       </div>
 
@@ -111,113 +114,91 @@
         </div>
       </div>
 
-      <div class="db-radial-card" *ngIf="stats.kpi.pdi.disponible">
-        <div class="db-radial-card__placeholder">
-          <span class="db-radial-card__value">{{ stats.kpi.pdi.taux_completion }}%</span>
-        </div>
-        <div class="db-radial-card__label">Avancement PDI</div>
-        <div class="db-radial-card__sub">
-          {{ stats.kpi.pdi.objectifs_atteints }} / {{ stats.kpi.pdi.objectifs_total }} objectifs
-        </div>
-      </div>
-
     </div>
 
-    <!-- ✅ GRILLE KPI RAPIDE — 6 cartes dont parcours ET catalogues -->
-    <div class="db-kpi-grid db-kpi-grid--6 mb-4">
+    <!-- 4 CARTES VOLUMES — terminés/total par catégorie -->
+    <div class="db-kpi-grid db-kpi-grid--4 mb-4">
 
       <div class="db-kpi-card db-kpi-card--teal">
         <div class="db-kpi-card__icon"><i class="isax isax-book-1"></i></div>
         <div class="db-kpi-card__body">
-          <div class="db-kpi-card__label">En cours</div>
-          <div class="db-kpi-card__value">{{ stats.kpi.formations.en_cours }}</div>
-          <div class="db-kpi-card__sub">formations actives</div>
+          <div class="db-kpi-card__label">Formations</div>
+          <div class="db-kpi-card__value">
+            {{ stats.kpi.formations.terminees }}<span class="db-kpi-card__value-total">/{{ stats.kpi.formations.total }}</span>
+          </div>
+          <div class="db-kpi-card__sub">{{ stats.kpi.formations.en_cours }} en cours</div>
+        </div>
+        <div class="db-kpi-card__bar" *ngIf="stats.kpi.formations.total > 0">
+          <div class="db-kpi-bar">
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--teal"
+                 [style.width.%]="stats.kpi.formations.taux_completion"></div>
+          </div>
         </div>
       </div>
 
-      <div class="db-kpi-card db-kpi-card--green">
-        <div class="db-kpi-card__icon"><i class="isax isax-tick-circle"></i></div>
+      <div class="db-kpi-card db-kpi-card--blue">
+        <div class="db-kpi-card__icon"><i class="isax isax-video-play"></i></div>
         <div class="db-kpi-card__body">
-          <div class="db-kpi-card__label">Terminées</div>
-          <div class="db-kpi-card__value">{{ stats.kpi.formations.terminees }}</div>
-          <div class="db-kpi-card__sub">formations complétées</div>
+          <div class="db-kpi-card__label">Sessions</div>
+          <div class="db-kpi-card__value">
+            {{ stats.kpi.sessions.terminees }}<span class="db-kpi-card__value-total">/{{ stats.kpi.sessions.total }}</span>
+          </div>
+          <div class="db-kpi-card__sub">
+            <span *ngIf="stats.kpi.sessions.total > 0">{{ stats.kpi.sessions.taux }}% terminées</span>
+            <span *ngIf="stats.kpi.sessions.total === 0" style="font-style:italic">Aucune assignée</span>
+          </div>
+        </div>
+        <div class="db-kpi-card__bar" *ngIf="stats.kpi.sessions.total > 0">
+          <div class="db-kpi-bar">
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--blue"
+                 [style.width.%]="stats.kpi.sessions.taux"></div>
+          </div>
         </div>
       </div>
 
       <div class="db-kpi-card db-kpi-card--purple">
-        <div class="db-kpi-card__icon"><i class="isax isax-award"></i></div>
-        <div class="db-kpi-card__body">
-          <div class="db-kpi-card__label">Certifications</div>
-          <div class="db-kpi-card__value">{{ stats.kpi.certifications.total }}</div>
-          <div class="db-kpi-card__sub">
-            <span *ngIf="stats.kpi.certifications.cette_annee > 0">
-              +{{ stats.kpi.certifications.cette_annee }} cette année
-            </span>
-            <span *ngIf="stats.kpi.certifications.cette_annee === 0">obtenues</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="db-kpi-card db-kpi-card--orange">
-        <div class="db-kpi-card__icon"><i class="isax isax-clock"></i></div>
-        <div class="db-kpi-card__body">
-          <div class="db-kpi-card__label">Heures cumulées</div>
-          <div class="db-kpi-card__value">{{ stats.kpi.heures.total_cumulees }}h</div>
-          <div class="db-kpi-card__sub">sur {{ stats.kpi.heures.objectif_annuel }}h objectif</div>
-        </div>
-        <div class="db-kpi-card__bar">
-          <div class="db-kpi-bar">
-            <div class="db-kpi-bar__fill db-kpi-bar__fill--orange"
-                 [style.width.%]="stats.kpi.heures.taux_objectif"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- KPI Parcours terminés vs total -->
-      <div class="db-kpi-card db-kpi-card--blue">
         <div class="db-kpi-card__icon"><i class="isax isax-routing"></i></div>
         <div class="db-kpi-card__body">
           <div class="db-kpi-card__label">Parcours</div>
           <div class="db-kpi-card__value">
             {{ stats.kpi.parcours.termines }}<span class="db-kpi-card__value-total">/{{ stats.kpi.parcours.total }}</span>
           </div>
-          <div class="db-kpi-card__sub">parcours terminés</div>
+          <div class="db-kpi-card__sub">
+            <span *ngIf="stats.kpi.parcours.total > 0">{{ stats.kpi.parcours.progression }}% de progression</span>
+            <span *ngIf="stats.kpi.parcours.total === 0" style="font-style:italic">Aucun assigné</span>
+          </div>
         </div>
         <div class="db-kpi-card__bar" *ngIf="stats.kpi.parcours.total > 0">
           <div class="db-kpi-bar">
-            <div class="db-kpi-bar__fill db-kpi-bar__fill--blue"
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--purple"
                  [style.width.%]="stats.kpi.parcours.taux"></div>
           </div>
         </div>
-        <div *ngIf="stats.kpi.parcours.total === 0">
-          <div class="db-kpi-card__sub" style="font-style:italic">Aucun parcours assigné</div>
-        </div>
       </div>
 
-      <!-- ✅ NOUVEAU — KPI Catalogues terminés vs total -->
-      <div class="db-kpi-card db-kpi-card--teal">
+      <div class="db-kpi-card db-kpi-card--green">
         <div class="db-kpi-card__icon"><i class="isax isax-book-square"></i></div>
         <div class="db-kpi-card__body">
           <div class="db-kpi-card__label">Catalogues</div>
           <div class="db-kpi-card__value">
             {{ stats.kpi.catalogues.termines }}<span class="db-kpi-card__value-total">/{{ stats.kpi.catalogues.total }}</span>
           </div>
-          <div class="db-kpi-card__sub">catalogues complétés</div>
+          <div class="db-kpi-card__sub">
+            <span *ngIf="stats.kpi.catalogues.total > 0">{{ stats.kpi.catalogues.taux }}% complétés</span>
+            <span *ngIf="stats.kpi.catalogues.total === 0" style="font-style:italic">Aucun assigné</span>
+          </div>
         </div>
         <div class="db-kpi-card__bar" *ngIf="stats.kpi.catalogues.total > 0">
           <div class="db-kpi-bar">
-            <div class="db-kpi-bar__fill db-kpi-bar__fill--teal"
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--green"
                  [style.width.%]="stats.kpi.catalogues.taux"></div>
           </div>
-        </div>
-        <div *ngIf="stats.kpi.catalogues.total === 0">
-          <div class="db-kpi-card__sub" style="font-style:italic">Aucun catalogue assigné</div>
         </div>
       </div>
 
     </div>
 
-    <!-- DEUX COLONNES : ÉCHÉANCES + SESSIONS -->
+    <!-- DEUX COLONNES : ÉCHÉANCES + SESSIONS PLANIFIÉES -->
     <div class="db-today-grid">
 
       <!-- ÉCHÉANCES -->
@@ -230,7 +211,6 @@
             {{ stats.echeances.length }}
           </span>
         </div>
-
         <div class="db-panel__body">
 
           <div *ngFor="let e of echeancesUrgentes"
@@ -252,9 +232,7 @@
             <div class="ech-body">
               <div class="ech-title">{{ e.titre }}</div>
               <div class="ech-meta">
-                <span class="ech-badge" [style.background]="getTypeColor(e.type)">
-                  {{ getTypeLabel(e.type) }}
-                </span>
+                <span class="ech-badge" [style.background]="getTypeColor(e.type)">{{ getTypeLabel(e.type) }}</span>
                 <span class="ech-meta__prog" *ngIf="hasProgression(e.type)"> · {{ e.progression }}%</span>
               </div>
               <div class="ech-prog-wrap" *ngIf="hasProgression(e.type)">
@@ -292,9 +270,7 @@
             <div class="ech-body">
               <div class="ech-title">{{ e.titre }}</div>
               <div class="ech-meta">
-                <span class="ech-badge" [style.background]="getTypeColor(e.type)">
-                  {{ getTypeLabel(e.type) }}
-                </span>
+                <span class="ech-badge" [style.background]="getTypeColor(e.type)">{{ getTypeLabel(e.type) }}</span>
                 <span class="ech-meta__prog" *ngIf="hasProgression(e.type)"> · {{ e.progression }}%</span>
               </div>
               <div class="ech-prog-wrap" *ngIf="hasProgression(e.type)">
@@ -359,77 +335,82 @@
 
   </ng-container>
 
-  <!-- ════════════════════════════════════════════════ -->
-  <!-- ONGLET 2 — MA PROGRESSION                      -->
-  <!-- ════════════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- ONGLET 2 — MA PROGRESSION                                           -->
+  <!-- Courbes temporelles uniquement — aucun KPI statique                 -->
+  <!-- Courbes area = taux  |  Histogrammes = volumes                      -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
   <ng-container *ngIf="activeTab === 'progression'">
 
-    <div class="db-charts-header mb-3">
+    <div class="db-charts-header mb-4">
       <h5 class="db-charts-header__title">
-        Courbes — {{ periodeMode === 'mois' ? '12 derniers mois' : '5 dernières années' }}
+        Évolution — {{ periodeMode === 'mois' ? '12 derniers mois' : '5 dernières années' }}
       </h5>
-      <p class="db-charts-header__sub">Évolution calculée depuis vos activités de formation</p>
+      <p class="db-charts-header__sub">Courbes d'évolution des taux · Histogrammes des volumes par période</p>
     </div>
 
-    <div class="db-chart-card db-chart-card--highlight mb-4">
+    <!-- SECTION 1 — COURBES DE TAUX -->
+    <div class="db-charts-section-label mb-2">
+      <span class="db-section-badge db-section-badge--teal">Taux d'évolution</span>
+      <span class="db-section-hint">Courbes en % — suivez la tendance</span>
+    </div>
+
+    <div class="db-chart-card db-chart-card--highlight mb-3">
       <div class="db-chart-card__label">
-        <span class="db-chart-card__badge db-chart-card__badge--teal">KPI Principal</span>
+        <span class="db-chart-card__badge db-chart-card__badge--teal">KPI principal</span>
         Taux de complétion global
         <span class="db-chart-card__current">{{ tauxCompletionGlobal }}% actuellement</span>
       </div>
       <div id="chart-completion"></div>
     </div>
 
-    <div class="db-chart-grid">
-      <div class="db-chart-card"><div id="chart-heures"></div></div>
+    <div class="db-chart-grid db-chart-grid--2 mb-4">
+      <div class="db-chart-card"><div id="chart-taux-abandon"></div></div>
+    </div>
+
+    <!-- SECTION 2 — HISTOGRAMMES DE VOLUMES -->
+    <div class="db-charts-section-label mb-2">
+      <span class="db-section-badge db-section-badge--blue">Volumes par période</span>
+      <span class="db-section-hint">Histogrammes — nombre d'éléments terminés</span>
+    </div>
+
+    <div class="db-chart-grid mb-4">
       <div class="db-chart-card"><div id="chart-formations-terminees"></div></div>
-      <div class="db-chart-card"><div id="chart-certifications"></div></div>
+      <div class="db-chart-card"><div id="chart-sessions-terminees"></div></div>
       <div class="db-chart-card"><div id="chart-parcours"></div></div>
-      <!-- ✅ NOUVEAU — Courbe progression catalogues réelle -->
       <div class="db-chart-card"><div id="chart-catalogues"></div></div>
+      <div class="db-chart-card"><div id="chart-heures"></div></div>
+      <div class="db-chart-card"><div id="chart-certifications"></div></div>
     </div>
 
   </ng-container>
 
-  <!-- ════════════════════════════════════════════════ -->
-  <!-- ONGLET 3 — MES OBJECTIFS                       -->
-  <!-- ════════════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- ONGLET 3 — MES OBJECTIFS                                            -->
+  <!-- Demandes (donut) + objectif heures + obligatoires + PDI             -->
+  <!-- + évaluations + KPI futurs                                          -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
   <ng-container *ngIf="activeTab === 'objectifs'">
 
-    <!-- PDI -->
+    <!-- DONUT DEMANDES GLOBALES -->
     <div class="db-objectif-section mb-4">
       <div class="db-objectif-header">
-        <div class="db-objectif-header__icon db-objectif-header__icon--teal">
-          <i class="isax isax-task-square"></i>
+        <div class="db-objectif-header__icon db-objectif-header__icon--blue">
+          <i class="isax isax-document-text"></i>
         </div>
         <div>
-          <h6 class="db-objectif-header__title">Plan de Développement Individuel (PDI)</h6>
-          <p class="db-objectif-header__sub">Objectifs fixés avec votre manager</p>
+          <h6 class="db-objectif-header__title">Statut global des demandes</h6>
+          <p class="db-objectif-header__sub">
+            Toutes catégories confondues — {{ demandesTotal }} demande(s) au total
+          </p>
         </div>
       </div>
-
-      <div *ngIf="stats.kpi.pdi.disponible" class="db-pdi-grid">
-        <div class="db-pdi-kpi">
-          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.taux_completion }}%</div>
-          <div class="db-pdi-kpi__label">Taux d'achèvement PDI</div>
-          <div class="db-kpi-bar mt-2">
-            <div class="db-kpi-bar__fill db-kpi-bar__fill--teal"
-                 [style.width.%]="stats.kpi.pdi.taux_completion"></div>
-          </div>
-        </div>
-        <div class="db-pdi-kpi">
-          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.objectifs_atteints }}/{{ stats.kpi.pdi.objectifs_total }}</div>
-          <div class="db-pdi-kpi__label">Objectifs atteints</div>
-        </div>
-        <div class="db-pdi-kpi" *ngIf="stats.kpi.pdi.prochain_entretien">
-          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.prochain_entretien | date:'dd/MM/yyyy' }}</div>
-          <div class="db-pdi-kpi__label">Prochain entretien</div>
-        </div>
+      <div *ngIf="demandesTotal > 0" class="db-demandes-chart-wrap">
+        <div id="chart-donut-demandes"></div>
       </div>
-
-      <div *ngIf="!stats.kpi.pdi.disponible" class="db-coming-inline">
-        <i class="isax isax-flash-1 me-2"></i>
-        Fonctionnalité à venir — Le PDI sera intégré dans une prochaine version
+      <div *ngIf="demandesTotal === 0" class="db-coming-inline">
+        <i class="isax isax-document me-2"></i>
+        Aucune demande enregistrée pour le moment
       </div>
     </div>
 
@@ -489,6 +470,41 @@
       </div>
     </div>
 
+    <!-- PDI -->
+    <div class="db-objectif-section mb-4">
+      <div class="db-objectif-header">
+        <div class="db-objectif-header__icon db-objectif-header__icon--teal">
+          <i class="isax isax-task-square"></i>
+        </div>
+        <div>
+          <h6 class="db-objectif-header__title">Plan de Développement Individuel (PDI)</h6>
+          <p class="db-objectif-header__sub">Objectifs fixés avec votre manager</p>
+        </div>
+      </div>
+      <div *ngIf="stats.kpi.pdi.disponible" class="db-pdi-grid">
+        <div class="db-pdi-kpi">
+          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.taux_completion }}%</div>
+          <div class="db-pdi-kpi__label">Taux d'achèvement PDI</div>
+          <div class="db-kpi-bar mt-2">
+            <div class="db-kpi-bar__fill db-kpi-bar__fill--teal"
+                 [style.width.%]="stats.kpi.pdi.taux_completion"></div>
+          </div>
+        </div>
+        <div class="db-pdi-kpi">
+          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.objectifs_atteints }}/{{ stats.kpi.pdi.objectifs_total }}</div>
+          <div class="db-pdi-kpi__label">Objectifs atteints</div>
+        </div>
+        <div class="db-pdi-kpi" *ngIf="stats.kpi.pdi.prochain_entretien">
+          <div class="db-pdi-kpi__value">{{ stats.kpi.pdi.prochain_entretien | date:'dd/MM/yyyy' }}</div>
+          <div class="db-pdi-kpi__label">Prochain entretien</div>
+        </div>
+      </div>
+      <div *ngIf="!stats.kpi.pdi.disponible" class="db-coming-inline">
+        <i class="isax isax-flash-1 me-2"></i>
+        Fonctionnalité à venir — Le PDI sera intégré dans une prochaine version
+      </div>
+    </div>
+
     <!-- SCORES ÉVALUATIONS -->
     <div class="db-objectif-section mb-4">
       <div class="db-objectif-header">
@@ -516,23 +532,12 @@
       </div>
     </div>
 
-    <!-- GRAPHIQUES OBJECTIFS -->
-    <div class="db-chart-grid">
-      <div class="db-chart-card"><div id="chart-demandes"></div></div>
-      <div class="db-chart-card">
-        <div id="chart-donut-formations"></div>
-        <div class="db-chart-card__donut-label">Répartition formations</div>
-      </div>
-    </div>
-
     <!-- KPI FUTURS -->
     <div class="db-future-grid mt-4">
 
       <div class="db-future-card">
         <div class="db-future-card__header">
-          <div class="db-future-card__icon db-future-card__icon--purple">
-            <i class="isax isax-medal-star"></i>
-          </div>
+          <div class="db-future-card__icon db-future-card__icon--purple"><i class="isax isax-medal-star"></i></div>
           <span class="db-future-badge">À venir</span>
         </div>
         <div class="db-future-card__title">Compétences validées</div>
@@ -546,9 +551,7 @@
 
       <div class="db-future-card">
         <div class="db-future-card__header">
-          <div class="db-future-card__icon db-future-card__icon--orange">
-            <i class="isax isax-award"></i>
-          </div>
+          <div class="db-future-card__icon db-future-card__icon--orange"><i class="isax isax-award"></i></div>
           <span class="db-future-badge">À venir</span>
         </div>
         <div class="db-future-card__title">Badges obtenus</div>
@@ -564,9 +567,7 @@
 
       <div class="db-future-card">
         <div class="db-future-card__header">
-          <div class="db-future-card__icon db-future-card__icon--teal">
-            <i class="isax isax-ranking"></i>
-          </div>
+          <div class="db-future-card__icon db-future-card__icon--teal"><i class="isax isax-ranking"></i></div>
           <span class="db-future-badge">À venir</span>
         </div>
         <div class="db-future-card__title">Classement</div>
@@ -578,9 +579,7 @@
 
       <div class="db-future-card">
         <div class="db-future-card__header">
-          <div class="db-future-card__icon db-future-card__icon--red">
-            <i class="isax isax-radar-2"></i>
-          </div>
+          <div class="db-future-card__icon db-future-card__icon--red"><i class="isax isax-radar-2"></i></div>
           <span class="db-future-badge">À venir</span>
         </div>
         <div class="db-future-card__title">Écart compétences cible</div>

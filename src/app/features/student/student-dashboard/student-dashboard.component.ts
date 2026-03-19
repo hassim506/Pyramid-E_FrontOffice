@@ -33,12 +33,26 @@ interface DashStats {
       en_cours:               number;
       terminees:              number;
       progression_moy:        number;
-      taux:                   number;
       taux_completion:        number;
-      taux_achevement:        number;
+      taux_obligatoires:      number;
       obligatoires_total:     number;
       obligatoires_terminees: number;
-      taux_obligatoires:      number;
+    };
+    sessions: {
+      total:     number;
+      terminees: number;
+      taux:      number;
+    };
+    parcours: {
+      total:      number;
+      termines:   number;
+      progression:number;
+      taux:       number;
+    };
+    catalogues: {
+      total:    number;
+      termines: number;
+      taux:     number;
     };
     certifications: { total: number; cette_annee: number };
     heures: {
@@ -46,10 +60,12 @@ interface DashStats {
       objectif_annuel: number;
       taux_objectif:   number;
     };
-    parcours: { total: number; progression: number; termines: number; taux: number };
-    // ✅ catalogues avec taux
-    catalogues: { total: number; termines: number; taux: number };
-    demandes: { en_attente: number; validees: number; refusees: number; total: number };
+    demandes: {
+      en_attente: number;
+      validees:   number;
+      refusees:   number;
+      total:      number;
+    };
     taux_completion_global?: {
       valeur:        number;
       total_termine: number;
@@ -72,11 +88,12 @@ interface DashStats {
     labels:                  string[];
     formations_terminees:    number[];
     certifications_obtenues: number[];
-    demandes_soumises:       number[];
     heures_cumulees:         number[];
     progression_parcours:    number[];
-    progression_catalogues:  number[]; // ✅
+    progression_catalogues:  number[];
+    sessions_terminees:      number[];
     taux_completion:         number[];
+    taux_abandon:            number[];
   };
   echeances:           Echeance[];
   sessions_planifiees: SessionPlanifiee[];
@@ -162,7 +179,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             return s + (isNaN(p) ? 0 : p);
           }, 0) / formations.length
         : 0;
-      const heures  = terminees.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0);
       const tauxCompletion = formations.length
         ? Math.round((terminees.length / formations.length) * 1000) / 10 : 0;
 
@@ -193,25 +209,24 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             en_cours:               enCours.length,
             terminees:              terminees.length,
             progression_moy:        Math.round(progMoy * 10) / 10,
-            taux:                   tauxCompletion,
             taux_completion:        tauxCompletion,
-            taux_achevement:        tauxCompletion,
+            taux_obligatoires:      0,
             obligatoires_total:     formations.filter((f: any) => f.est_obligatoire).length,
             obligatoires_terminees: formations.filter((f: any) => f.est_obligatoire && f.statut_formation === 'termine').length,
-            taux_obligatoires:      0,
           },
+          sessions:   { total: 0, terminees: 0, taux: 0 },
+          parcours:   { total: 0, termines: 0, progression: 0, taux: 0 },
+          catalogues: { total: 0, termines: 0, taux: 0 },
           certifications: {
             total:       certs.length,
             cette_annee: certs.filter((c: any) =>
               new Date(c.created_at).getFullYear() === new Date().getFullYear()).length,
           },
           heures: {
-            total_cumulees:  Math.round(heures * 10) / 10,
+            total_cumulees:  Math.round(terminees.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0) * 10) / 10,
             objectif_annuel: 40,
-            taux_objectif:   Math.min(Math.round((heures / 40) * 100), 100),
+            taux_objectif:   0,
           },
-          parcours:  { total: 0, progression: 0, termines: 0, taux: 0 },
-          catalogues: { total: 0, termines: 0, taux: 0 }, // ✅
           demandes: {
             en_attente: demandes.filter((d: any) => d.statut === 'en_attente').length,
             validees:   demandes.filter((d: any) => d.statut === 'validee').length,
@@ -242,14 +257,15 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   private buildCourbesAngular(formations: any[], demandes: any[], certs: any[]): DashStats['courbes'] {
-    const labels: string[]              = [];
-    const fTerminees: number[]          = [];
-    const certObt: number[]             = [];
-    const demSoum: number[]             = [];
-    const heures: number[]              = [];
-    const progParcours: number[]        = [];
-    const progCatalogues: number[]      = []; // ✅
-    const tauxCompletion: number[]      = [];
+    const labels: string[]         = [];
+    const fTerminees: number[]     = [];
+    const certObt: number[]        = [];
+    const heures: number[]         = [];
+    const progParcours: number[]   = [];
+    const progCatalogues: number[] = [];
+    const sessionsT: number[]      = [];
+    const tauxCompletion: number[] = [];
+    const tauxAbandon: number[]    = [];
 
     const base = this.periodeMode === 'annee' ? 5 : 12;
 
@@ -275,17 +291,23 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         f.statut_formation === 'termine' &&
         f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin
       );
+      const abandCePeriode = formations.filter(f =>
+        f.statut_formation === 'abandonne' &&
+        f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin
+      );
+      const enCoursCePeriode = formations.filter(f =>
+        f.statut_formation === 'en_cours' &&
+        f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin
+      );
 
       fTerminees.push(termCePeriode.length);
       certObt.push(certs.filter(c =>
         c.created_at && new Date(c.created_at) >= debut && new Date(c.created_at) <= fin
       ).length);
-      demSoum.push(demandes.filter(d =>
-        d.created_at && new Date(d.created_at) >= debut && new Date(d.created_at) <= fin
-      ).length);
       heures.push(termCePeriode.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0));
       progParcours.push(0);
-      progCatalogues.push(0); // ✅ fallback 0 côté Angular
+      progCatalogues.push(0);
+      sessionsT.push(0);
 
       const totalJusqueLa = formations.filter(f =>
         f.created_at && new Date(f.created_at) <= fin
@@ -295,14 +317,22 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       ).length;
       tauxCompletion.push(totalJusqueLa > 0
         ? Math.round((termJusqueLa / totalJusqueLa) * 100) : 0);
+
+      const commencesCePeriode = termCePeriode.length + abandCePeriode.length + enCoursCePeriode.length;
+      tauxAbandon.push(commencesCePeriode > 0
+        ? Math.round((abandCePeriode.length / commencesCePeriode) * 100) : 0);
     }
 
     return {
-      labels, formations_terminees: fTerminees,
-      certifications_obtenues: certObt, demandes_soumises: demSoum,
-      heures_cumulees: heures, progression_parcours: progParcours,
-      progression_catalogues: progCatalogues, // ✅
-      taux_completion: tauxCompletion,
+      labels,
+      formations_terminees:    fTerminees,
+      certifications_obtenues: certObt,
+      heures_cumulees:         heures,
+      progression_parcours:    progParcours,
+      progression_catalogues:  progCatalogues,
+      sessions_terminees:      sessionsT,
+      taux_completion:         tauxCompletion,
+      taux_abandon:            tauxAbandon,
     };
   }
 
@@ -329,7 +359,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   private getFirstChartId(): string | null {
     if (this.activeTab === 'progression') return 'chart-completion';
-    if (this.activeTab === 'objectifs')   return 'chart-demandes';
+    if (this.activeTab === 'objectifs')   return 'chart-donut-demandes';
     if (this.activeTab === 'aujourdhui')  return 'chart-radial-completion';
     return null;
   }
@@ -348,38 +378,54 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     const c = this.stats.courbes;
 
     if (this.activeTab === 'progression') {
+      // ── COURBES (taux) ──
       this.renderChart('chart-completion', this.buildAreaConfig(c.labels, [
         { name: 'Taux de complétion (%)', data: c.taux_completion, color: '#069b8f' },
-      ], 'Taux de complétion'));
+      ], 'Taux de complétion global'));
 
+      this.renderChart('chart-taux-abandon', this.buildAreaConfig(c.labels, [
+        { name: "Taux d'abandon (%)", data: c.taux_abandon ?? [], color: '#ef4444' },
+      ], "Taux d'abandon"));
+
+      // ── HISTOGRAMMES (volumes) ──
       this.renderChart('chart-heures', this.buildBarConfig(c.labels, [
         { name: 'Heures de formation', data: c.heures_cumulees, color: '#f59e0b' },
       ], 'Heures cumulées'));
 
-      this.renderChart('chart-formations-terminees', this.buildLineConfig(c.labels, [
+      this.renderChart('chart-formations-terminees', this.buildBarConfig(c.labels, [
         { name: 'Formations terminées', data: c.formations_terminees, color: '#10b981' },
       ], 'Formations terminées'));
 
-      this.renderChart('chart-certifications', this.buildAreaConfig(c.labels, [
-        { name: 'Certifications', data: c.certifications_obtenues, color: '#7c3aed' },
+      this.renderChart('chart-certifications', this.buildBarConfig(c.labels, [
+        { name: 'Certifications obtenues', data: c.certifications_obtenues, color: '#7c3aed' },
       ], 'Certifications obtenues'));
 
+      this.renderChart('chart-sessions-terminees', this.buildBarConfig(c.labels, [
+        { name: 'Sessions terminées', data: c.sessions_terminees ?? [], color: '#3b82f6' },
+      ], 'Sessions terminées'));
+
       this.renderChart('chart-parcours', this.buildBarConfig(c.labels, [
-        { name: 'Formations de parcours terminées', data: c.progression_parcours, color: '#7c3aed' },
+        { name: 'Parcours progressés', data: c.progression_parcours, color: '#7c3aed' },
       ], 'Progression parcours'));
 
-      // ✅ NOUVEAU — courbe catalogues réelle
       this.renderChart('chart-catalogues', this.buildBarConfig(c.labels, [
-        { name: 'Catalogues actifs ce mois', data: c.progression_catalogues, color: '#3b82f6' },
+        { name: 'Catalogues actifs', data: c.progression_catalogues, color: '#3b82f6' },
       ], 'Progression catalogues'));
     }
 
     if (this.activeTab === 'objectifs') {
-      this.renderChart('chart-demandes', this.buildLineConfig(c.labels, [
-        { name: 'Demandes soumises', data: c.demandes_soumises, color: '#3b82f6' },
-      ], 'Demandes soumises'));
+      // Diagramme en secteur des demandes (toutes catégories)
+      const d = this.stats.kpi.demandes;
+      if (d.total > 0) {
+        this.renderDonut('chart-donut-demandes',
+          [d.validees, d.en_attente, d.refusees,
+           Math.max(0, d.total - d.validees - d.en_attente - d.refusees)],
+          ['Validées', 'En attente', 'Refusées', 'Autres'],
+          ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']
+        );
+      }
 
-      if (this.stats.kpi.formations.total > 0) {
+      if (this.stats.kpi.formations.obligatoires_total > 0) {
         this.renderDonut('chart-donut-formations', [
           this.stats.kpi.formations.en_cours,
           this.stats.kpi.formations.terminees,
@@ -412,27 +458,21 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     } catch {}
   }
 
-  private buildLineConfig(labels: string[], series: { name: string; data: number[]; color: string }[], title: string): any {
+  private buildAreaConfig(labels: string[], series: { name: string; data: number[]; color: string }[], title: string): any {
     return {
       series:  series.map(s => ({ name: s.name, data: s.data })),
-      chart:   { type: 'line', height: 230, toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 600 } },
+      chart:   { type: 'area', height: 230, toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 600 } },
       colors:  series.map(s => s.color),
       stroke:  { curve: 'smooth', width: 3 },
       markers: { size: 4, hover: { size: 6 } },
+      fill:    { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.03 } },
       xaxis:   { categories: labels, labels: { style: { fontSize: '11px', colors: '#9ca3af' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-      yaxis:   { labels: { style: { fontSize: '11px', colors: '#9ca3af' } }, min: 0 },
+      yaxis:   { labels: { style: { fontSize: '11px', colors: '#9ca3af' }, formatter: (v: number) => v + '%' }, min: 0, max: 100 },
       grid:    { borderColor: '#f3f4f6', strokeDashArray: 4 },
-      tooltip: { theme: 'light' },
+      tooltip: { theme: 'light', y: { formatter: (v: number) => v + '%' } },
       legend:  { show: false },
       title:   { text: title, align: 'left', style: { fontSize: '13px', fontWeight: 700, color: '#374151' } },
     };
-  }
-
-  private buildAreaConfig(labels: string[], series: { name: string; data: number[]; color: string }[], title: string): any {
-    const cfg = this.buildLineConfig(labels, series, title);
-    cfg.chart.type = 'area';
-    cfg.fill = { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.03 } };
-    return cfg;
   }
 
   private buildBarConfig(labels: string[], series: { name: string; data: number[]; color: string }[], title: string): any {
@@ -440,8 +480,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       series:      series.map(s => ({ name: s.name, data: s.data })),
       chart:       { type: 'bar', height: 230, toolbar: { show: false }, animations: { enabled: true, speed: 600 } },
       colors:      series.map(s => s.color),
-      plotOptions: { bar: { borderRadius: 6, columnWidth: '52%' } },
-      dataLabels:  { enabled: false },
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '52%', dataLabels: { position: 'top' } } },
+      dataLabels:  {
+        enabled: true,
+        offsetY: -20,
+        style: { fontSize: '11px', colors: ['#374151'], fontWeight: 600 },
+        formatter: (v: number) => v > 0 ? v : '',
+      },
       xaxis:       { categories: labels, labels: { style: { fontSize: '11px', colors: '#9ca3af' } }, axisBorder: { show: false }, axisTicks: { show: false } },
       yaxis:       { labels: { style: { fontSize: '11px', colors: '#9ca3af' } }, min: 0 },
       grid:        { borderColor: '#f3f4f6', strokeDashArray: 4 },
@@ -455,13 +500,39 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     const el = document.getElementById(id);
     if (!el) return;
     try {
+      const total = series.reduce((a, b) => a + b, 0);
       const chart = new ApexCharts(el, {
-        series, chart: { type: 'donut', height: 200, toolbar: { show: false } },
-        colors, labels,
-        legend:      { position: 'bottom', fontSize: '11px' },
-        dataLabels:  { enabled: false },
-        plotOptions: { pie: { donut: { size: '65%' } } },
-        tooltip:     { theme: 'light' },
+        series,
+        chart: { type: 'donut', height: 260, toolbar: { show: false } },
+        colors,
+        labels,
+        legend: {
+          position: 'bottom',
+          fontSize: '12px',
+          formatter: (val: string, opts: any) => {
+            const v = opts.w.globals.series[opts.seriesIndex];
+            const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+            return `${val}: ${v} (${pct}%)`;
+          },
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: (_val: any, opts: any) => {
+            const v = opts.w.globals.series[opts.seriesIndex];
+            const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+            return pct > 0 ? pct + '%' : '';
+          },
+        },
+        plotOptions: { pie: { donut: { size: '60%' } } },
+        tooltip: {
+          theme: 'light',
+          y: {
+            formatter: (v: number) => {
+              const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+              return `${v} (${pct}%)`;
+            },
+          },
+        },
       });
       chart.render();
       this.charts[id] = chart;
@@ -579,7 +650,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     if (global != null && !isNaN(global)) return global;
     const f = this.stats?.kpi?.formations;
     if (!f) return 0;
-    const raw = f.taux_completion ?? f.taux ?? f.taux_achevement ?? 0;
+    const raw = f.taux_completion ?? 0;
     return isNaN(raw) ? 0 : raw;
   }
 
@@ -591,5 +662,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   get nomMoisSelectionne(): string {
     return this.moisLabels[this.selectedMois - 1] ?? '';
+  }
+
+  get demandesTotal(): number {
+    return this.stats?.kpi.demandes.total ?? 0;
   }
 }

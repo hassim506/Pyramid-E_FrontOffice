@@ -12,6 +12,85 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS — même style que la page quiz      -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allParcours.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="onFiltreChange('')"
+       [class.pq-kpi-card--active]="selectedFiltre === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-routing"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalParcours }}</div>
+      <div class="pq-kpi-card__label">Total assignés</div>
+    </div>
+  </div>
+
+  <!-- En cours -->
+  <div class="pq-kpi-card pq-kpi-card--blue" (click)="onFiltreChange('en_cours')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'en_cours'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-play-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnCours }}</div>
+      <div class="pq-kpi-card__label">En cours</div>
+    </div>
+  </div>
+
+  <!-- Terminés -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="onFiltreChange('termine')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'termine'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-medal-star"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalTermines }}</div>
+      <div class="pq-kpi-card__label">Terminés</div>
+    </div>
+  </div>
+
+  <!-- Non démarrés -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="onFiltreChange('')"
+       [class.pq-kpi-card--active]="false">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-flash-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalNonDemarres }}</div>
+      <div class="pq-kpi-card__label">Non démarrés</div>
+    </div>
+  </div>
+
+  <!-- Assignés directement -->
+  <div class="pq-kpi-card pq-kpi-card--purple" (click)="onFiltreChange('assigne')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'assigne'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-tick-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalAssignes }}</div>
+      <div class="pq-kpi-card__label">Assignés</div>
+    </div>
+  </div>
+
+  <!-- Demandes acceptées -->
+  <div class="pq-kpi-card pq-kpi-card--indigo" (click)="onFiltreChange('demande')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'demande'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-send-2"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalDemandes }}</div>
+      <div class="pq-kpi-card__label">Demandes acceptées</div>
+    </div>
+  </div>
+
+</div>
+
 <!-- FILTRES -->
 <div class="sc-filters" *ngIf="!loading && allParcours.length > 0">
   <div class="sc-filters__search">
@@ -32,9 +111,10 @@
             [class.sc-filters__type-btn--active]="selectedFiltre === f.value"
             (click)="onFiltreChange(f.value)">
       <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
-      <!-- Compteurs sur les filtres clés -->
       <span class="sc-filters__type-count" *ngIf="f.value === 'assigne'  && totalAssignes > 0">({{ totalAssignes }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'demande'  && totalDemandes > 0">({{ totalDemandes }})</span>
       <span class="sc-filters__type-count" *ngIf="f.value === 'termine'  && totalTermines > 0">({{ totalTermines }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'en_cours' && totalEnCours  > 0">({{ totalEnCours }})</span>
       <span class="sc-filters__type-count" *ngIf="f.value === 'expire'   && totalExpires  > 0">({{ totalExpires }})</span>
     </button>
   </div>
@@ -84,27 +164,24 @@
         <div class="parcours-card__banner-overlay"></div>
         <i [class]="getCategorieIcon(parcours.categorie) + ' parcours-card__banner-icon'"></i>
 
-        <!-- Badge Complété (haut gauche) — affiché si terminé -->
         <div class="parcours-card__banner-termine" *ngIf="parcours.est_termine">
           <i class="isax isax-medal-star me-1"></i>Complété
         </div>
 
-        <!-- Badge Expiré (haut gauche) — affiché si expiré et pas terminé -->
         <div class="parcours-card__banner-expire" *ngIf="parcours.est_expire && !parcours.est_termine">
           <i class="isax isax-calendar-remove me-1"></i>Expiré
         </div>
 
-        <!-- Badge source (haut droite) — montre uniquement la source -->
-<span class="parcours-card__banner-assigned"
-      [class.parcours-card__banner-assigned--demande]="parcours.source === 'demande'"
-      [class.parcours-card__banner-assigned--termine]="parcours.est_termine">
-  <i class="isax me-1"
-     [class.isax-medal-star]="parcours.est_termine"
-     [class.isax-tick-circle]="!parcours.est_termine && parcours.source !== 'demande'"
-     [class.isax-send-2]="!parcours.est_termine && parcours.source === 'demande'"></i>
-  {{ parcours.source === 'demande' ? 'Demande acceptée' : 'Assigné' }}
-</span>
-        <!-- Badge catégorie (bas droite) -->
+        <span class="parcours-card__banner-assigned"
+              [class.parcours-card__banner-assigned--demande]="parcours.source === 'demande'"
+              [class.parcours-card__banner-assigned--termine]="parcours.est_termine">
+          <i class="isax me-1"
+             [class.isax-medal-star]="parcours.est_termine"
+             [class.isax-tick-circle]="!parcours.est_termine && parcours.source !== 'demande'"
+             [class.isax-send-2]="!parcours.est_termine && parcours.source === 'demande'"></i>
+          {{ parcours.source === 'demande' ? 'Demande acceptée' : 'Assigné' }}
+        </span>
+
         <span class="parcours-card__banner-badge"
               *ngIf="parcours.categorie"
               [style.background-color]="getCategorieColor(parcours.categorie)">
@@ -119,7 +196,6 @@
           {{ parcours.description || 'Aucune description disponible' }}
         </p>
 
-        <!-- Stats -->
         <div class="parcours-card__stats">
           <div class="parcours-card__stat">
             <i class="isax isax-book-1"></i>
@@ -136,16 +212,11 @@
           </div>
         </div>
 
-        <!-- PROGRESSION -->
         <div class="parcours-card__progression" *ngIf="parcours.total_formations > 0">
-
-          <!-- Parcours complété -->
           <div class="parcours-card__termine" *ngIf="parcours.est_termine">
             <i class="isax isax-medal-star me-1"></i>
             Parcours Terminé !
           </div>
-
-          <!-- Barre de progression (non terminé) -->
           <div *ngIf="!parcours.est_termine">
             <div class="parcours-card__prog-header">
               <span class="parcours-card__prog-label">Progression</span>
@@ -163,7 +234,6 @@
           </div>
         </div>
 
-        <!-- Assignation -->
         <div class="parcours-card__assignation">
           <div class="parcours-card__assignation-date" *ngIf="parcours.date_assignation">
             <i class="isax me-1"
@@ -172,28 +242,20 @@
             {{ parcours.source === 'demande' ? 'Validée le' : 'Assigné le' }}
             {{ parcours.date_assignation | date:'dd/MM/yyyy' }}
           </div>
-
-          <!-- Accès permanent -->
           <div class="parcours-card__assignation-expiry parcours-card__assignation-expiry--permanent"
                *ngIf="!parcours.date_expiration">
             <i class="isax isax-infinity me-1"></i>Accès permanent
           </div>
-
-          <!-- Expiré -->
           <div class="parcours-card__assignation-expiry parcours-card__assignation-expiry--expired"
                *ngIf="parcours.est_expire">
             <i class="isax isax-calendar-remove me-1"></i>
             Expiré le {{ parcours.date_expiration | date:'dd/MM/yyyy' }}
           </div>
-
-          <!-- Expire bientôt -->
           <div class="parcours-card__assignation-expiry parcours-card__assignation-expiry--warning"
                *ngIf="!parcours.est_expire && isExpiringSoon(parcours.date_expiration)">
             <i class="isax isax-warning-2 me-1"></i>
             Expire dans {{ getJoursRestants(parcours.date_expiration) }} jour(s) !
           </div>
-
-          <!-- Date expiration normale -->
           <div class="parcours-card__assignation-expiry"
                *ngIf="!parcours.est_expire && parcours.date_expiration && !isExpiringSoon(parcours.date_expiration)">
             <i class="isax isax-calendar-remove me-1"></i>
@@ -201,13 +263,11 @@
           </div>
         </div>
 
-        <!-- Notes -->
         <div class="parcours-card__notes" *ngIf="parcours.notes">
           <i class="isax isax-note-text me-1"></i>
           <em>{{ parcours.notes }}</em>
         </div>
 
-        <!-- Footer -->
         <div class="parcours-card__footer">
           <button class="parcours-card__btn"
                   [class.parcours-card__btn--done]="parcours.est_termine"

@@ -38,6 +38,7 @@ export class ParcoursAssignesComponent implements OnInit {
     { value: 'assigne',        label: 'Assignés',           icon: 'isax-tick-circle'     },
     { value: 'demande',        label: 'Demandes acceptées', icon: 'isax-send-2'          },
     { value: 'termine',        label: 'Terminés',           icon: 'isax-medal-star'      },
+    { value: 'en_cours',       label: 'En cours',           icon: 'isax-play-circle'     },
     { value: 'permanent',      label: 'Accès permanent',    icon: 'isax-infinity'        },
     { value: 'expire_bientot', label: 'Expire bientôt',     icon: 'isax-warning-2'       },
     { value: 'expire',         label: 'Expiré',             icon: 'isax-calendar-remove' },
@@ -67,11 +68,15 @@ export class ParcoursAssignesComponent implements OnInit {
             && !!p.date_expiration
             && new Date(p.date_expiration) < new Date();
 
+          const estEnCours = !estTermine && !estExpire && p.progression > 0;
+          const nonDemarre = !estTermine && !estExpire && p.progression === 0;
+
           return {
             ...p,
-            est_termine: estTermine,
-            est_expire: p.est_expire ?? estExpire,
-            // ✅ FIX : badge_label tient compte de source === 'demande'
+            est_termine:   estTermine,
+            est_expire:    p.est_expire ?? estExpire,
+            est_en_cours:  estEnCours,
+            non_demarre:   nonDemarre,
             badge_label: estTermine
               ? 'Terminé'
               : (p.est_expire ?? estExpire
@@ -113,24 +118,13 @@ export class ParcoursAssignesComponent implements OnInit {
     }
 
     switch (this.selectedFiltre) {
-      case 'assigne':
-        result = result.filter(p => p.source === 'assigne');
-        break;
-      case 'demande':
-        result = result.filter(p => p.source === 'demande');
-        break;
-      case 'termine':
-        result = result.filter(p => p.est_termine);
-        break;
-      case 'permanent':
-        result = result.filter(p => !p.date_expiration);
-        break;
-      case 'expire_bientot':
-        result = result.filter(p => this.isExpiringSoon(p.date_expiration));
-        break;
-      case 'expire':
-        result = result.filter(p => p.est_expire);
-        break;
+      case 'assigne':        result = result.filter(p => p.source === 'assigne'); break;
+      case 'demande':        result = result.filter(p => p.source === 'demande'); break;
+      case 'termine':        result = result.filter(p => p.est_termine); break;
+      case 'en_cours':       result = result.filter(p => p.est_en_cours); break;
+      case 'permanent':      result = result.filter(p => !p.date_expiration); break;
+      case 'expire_bientot': result = result.filter(p => this.isExpiringSoon(p.date_expiration)); break;
+      case 'expire':         result = result.filter(p => p.est_expire); break;
     }
 
     this.filteredParcours = result;
@@ -156,10 +150,14 @@ export class ParcoursAssignesComponent implements OnInit {
     return !!this.searchTerm || !!this.selectedCategorie || !!this.selectedFiltre;
   }
 
-  get totalAssignes(): number { return this.allParcours.filter(p => p.source === 'assigne').length; }
-  get totalDemandes(): number { return this.allParcours.filter(p => p.source === 'demande').length; }
-  get totalTermines(): number { return this.allParcours.filter(p => p.est_termine).length; }
-  get totalExpires():  number { return this.allParcours.filter(p => p.est_expire).length; }
+  // ── KPI Getters ────────────────────────────────────────────
+  get totalParcours():   number { return this.allParcours.length; }
+  get totalAssignes():   number { return this.allParcours.filter(p => p.source === 'assigne').length; }
+  get totalDemandes():   number { return this.allParcours.filter(p => p.source === 'demande').length; }
+  get totalTermines():   number { return this.allParcours.filter(p => p.est_termine).length; }
+  get totalEnCours():    number { return this.allParcours.filter(p => p.est_en_cours).length; }
+  get totalNonDemarres():number { return this.allParcours.filter(p => p.non_demarre && !p.est_expire).length; }
+  get totalExpires():    number { return this.allParcours.filter(p => p.est_expire).length; }
 
   // ── Pagination ─────────────────────────────────────────────
 
@@ -191,13 +189,6 @@ export class ParcoursAssignesComponent implements OnInit {
   }
 
   // ── Helpers badge ──────────────────────────────────────────
-
-  getBadgeClass(p: any): string {
-    if (p.est_termine) return 'badge--termine';
-    if (p.est_expire)  return 'badge--expire';
-    if (p.source === 'demande') return 'badge--demande';
-    return 'badge--assigne';
-  }
 
   getCTALabel(p: any): string {
     if (p.est_termine) return 'Revoir';
