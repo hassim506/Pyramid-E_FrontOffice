@@ -48,6 +48,10 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   quizResults: { [sectionId: number]: QuizResult } = {};
   videoError = false;
 
+  // ── Modal Quiz Final ─────────────────────────────
+  showQuizFinalModal = false;
+  quizFinalData: { id: number; titre: string; score_minimum: number; max_tentatives: number } | null = null;
+
   private sub?: Subscription;
 
   constructor(
@@ -89,14 +93,14 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
     this.selectedSection = null; this.hasContent = false; this.openModules = [];
     this.flatSections = [];
     this.quizMode = false; this.quizSubmitted = false;
-    this.currentAnswers = {}; this.quizResults = {}; this.videoError = false; this.sidebarOpen = true;
+    this.currentAnswers = {}; this.quizResults = {}; this.videoError = false;
+    this.sidebarOpen = true;
+    this.showQuizFinalModal = false; this.quizFinalData = null;
   }
 
   loadStructure(): void {
     this.loading = true; this.error = '';
-
     this.progressionService.loadFromApi(this.formationId).subscribe();
-
     this.formationsService.getFormationStructure(this.formationId).subscribe({
       next: (res: any) => {
         this.formation = res?.formation || res?.structure?.formation || res?.data?.formation || null;
@@ -110,13 +114,11 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
             if (!this.hasContent) { this.hasContent = true; this.selectedSection = s; }
           }
         }
-
         if (!this.progressionService.hasData(this.formationId)) {
           this.progressionService.init(this.formationId, this.flatSections.length, []);
         } else {
           this.progressionService.init(this.formationId, this.flatSections.length);
         }
-
         this.loading = false;
       },
       error: () => { this.error = 'Impossible de charger le contenu'; this.loading = false; }
@@ -141,15 +143,11 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   markCompleted(sectionId: number): void {
     this.progressionService.markCompleted(this.formationId, sectionId)
       .subscribe((res: any) => {
-
-        // Quiz de section intermédiaire (logique existante inchangée)
         if (this.hasQuiz(this.selectedSection) && !this.quizResults[sectionId]) {
           setTimeout(() => this.startQuiz(), 400);
         }
-
-        // ✅ Formation terminée ET quiz final disponible
         if (res?.est_termine && res?.quiz_final) {
-          this._proposerQuizFinal(res.quiz_final);
+          setTimeout(() => this._ouvrirModalQuizFinal(res.quiz_final), 600);
         }
       });
   }
@@ -178,13 +176,11 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
       answers: { ...this.currentAnswers }
     };
     this.quizSubmitted = true;
-
-    // ✅ Si quiz de section réussi, marquer + écouter quiz_final
     if (passed) {
       this.progressionService.markCompleted(this.formationId, this.selectedSection.id)
         .subscribe((res: any) => {
           if (res?.est_termine && res?.quiz_final) {
-            this._proposerQuizFinal(res.quiz_final);
+            setTimeout(() => this._ouvrirModalQuizFinal(res.quiz_final), 600);
           }
         });
     }
@@ -198,24 +194,28 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  // ✅ Proposer le quiz final quand la formation est terminée
-  private _proposerQuizFinal(quiz: { id: number; titre: string }): void {
-    setTimeout(() => {
-      const allerAuQuiz = confirm(
-        `🎉 Félicitations ! Vous avez terminé la formation.\n\n` +
-        `Le quiz final "${quiz.titre}" est maintenant disponible.\n\n` +
-        `Voulez-vous le passer maintenant ?`
-      );
-
-      if (allerAuQuiz) {
-        this.router.navigate(['/student/student-quiz-questions', quiz.id]);
-      } else {
-        // L'employé peut le faire plus tard via "Mes Quiz"
-        this.goBack();
-      }
-    }, 600);
+  // ── Modal Quiz Final ─────────────────────────────
+  private _ouvrirModalQuizFinal(quiz: any): void {
+    this.quizFinalData      = quiz;
+    this.showQuizFinalModal = true;
   }
 
+  allerAuQuizFinal(): void {
+    if (!this.quizFinalData) return;
+    this.showQuizFinalModal = false;
+    this.router.navigate(['/student/student-quiz-questions', this.quizFinalData.id]);
+  }
+
+  fermerModalQuizFinal(): void {
+    this.showQuizFinalModal = false;
+    this.goBack();
+  }
+
+  resterEtFairePlusTard(): void {
+    this.showQuizFinalModal = false;
+  }
+
+  // ── Helpers ──────────────────────────────────────
   isCorrectAnswer(q: QuizQuestion, opt: string): boolean {
     if (Array.isArray(q.reponse_correcte)) return q.reponse_correcte.includes(opt);
     return opt?.toLowerCase() === q.reponse_correcte?.toLowerCase();

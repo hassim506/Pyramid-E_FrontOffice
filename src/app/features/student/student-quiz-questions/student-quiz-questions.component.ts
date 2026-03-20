@@ -1,9 +1,9 @@
-import { Component, OnInit }        from '@angular/core';
-import { CommonModule }              from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule }                  from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
-import { FormsModule }               from '@angular/forms';
-import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
-import { routes }                    from '../../../shared/service/routes/routes';
+import { FormsModule }                   from '@angular/forms';
+import { FormationsService }             from '../../../shared/service/Formationsss/formations.service';
+import { routes }                        from '../../../shared/service/routes/routes';
 
 interface Reponse {
   id:           number;
@@ -12,21 +12,21 @@ interface Reponse {
 }
 
 interface Question {
-  id:           number;
-  question_text:string;
-  type:         'multiple_choice' | 'true_false' | 'text';
-  points:       number;
-  ordre:        number;
-  reponses:     Reponse[];
+  id:            number;
+  question_text: string;
+  type:          'multiple_choice' | 'true_false' | 'text';
+  points:        number;
+  ordre:         number;
+  reponses:      Reponse[];
 }
 
 interface Quiz {
-  id:             number;
-  titre:          string;
-  description:    string | null;
-  duree_minutes:  number;
-  score_minimum:  number;
-  formation_id:   number;
+  id:            number;
+  titre:         string;
+  description:   string | null;
+  duree_minutes: number;
+  score_minimum: number;
+  formation_id:  number;
 }
 
 @Component({
@@ -36,38 +36,35 @@ interface Quiz {
   templateUrl: './student-quiz-questions.component.html',
   styleUrl:    './student-quiz-questions.component.scss'
 })
-export class StudentQuizQuestionsComponent implements OnInit {
+export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
 
   public routes = routes;
 
   // ── Données ────────────────────────────────────────────────
-  quiz:      Quiz | null  = null;
-  questions: Question[]   = [];
+  quiz:      Quiz | null = null;
+  questions: Question[]  = [];
   loading  = true;
   error    = '';
 
-  // ── Navigation question ────────────────────────────────────
-  selected     = 1;   // index 1-based (comme avant)
-  get currentQuestion(): Question | null {
-    return this.questions[this.selected - 1] ?? null;
-  }
-  get totalQuestions(): number { return this.questions.length; }
+  // ── Navigation ─────────────────────────────────────────────
+  selected = 1;
+  get currentQuestion(): Question | null { return this.questions[this.selected - 1] ?? null; }
+  get totalQuestions(): number           { return this.questions.length; }
   get progressPercent(): number {
     return this.totalQuestions ? Math.round((this.selected / this.totalQuestions) * 100) : 0;
   }
 
-  // ── Réponses sélectionnées ─────────────────────────────────
-  // Map questionId → reponseId (ou texte pour 'text')
+  // ── Réponses ───────────────────────────────────────────────
   selectedReponses: Record<number, number | string> = {};
   textReponses:     Record<number, string>           = {};
 
   // ── Timer ──────────────────────────────────────────────────
-  timeLeft   = 0;   // en secondes
+  timeLeft   = 0;
   timerLabel = '00:00';
   private timerInterval: any;
 
   // ── Résultat ───────────────────────────────────────────────
-  resultat: any    = null;
+  resultat:  any  = null;
   submitted        = false;
   submitting       = false;
 
@@ -83,9 +80,19 @@ export class StudentQuizQuestionsComponent implements OnInit {
     this.loadQuiz(quizId);
   }
 
+  ngOnDestroy(): void { clearInterval(this.timerInterval); }
+
   // ── Chargement ─────────────────────────────────────────────
   loadQuiz(quizId: number): void {
-    this.loading = true;
+    this.loading          = true;
+    this.submitted        = false;
+    this.submitting       = false;
+    this.selected         = 1;
+    this.selectedReponses = {};
+    this.textReponses     = {};
+    this.resultat         = null;
+    clearInterval(this.timerInterval);
+
     this.formationsService.getQuizDetail(quizId).subscribe({
       next: (res: any) => {
         this.quiz      = res.quiz      ?? res;
@@ -98,10 +105,7 @@ export class StudentQuizQuestionsComponent implements OnInit {
         }
         this.loading = false;
       },
-      error: () => {
-        this.error   = 'Impossible de charger le quiz.';
-        this.loading = false;
-      }
+      error: () => { this.error = 'Impossible de charger le quiz.'; this.loading = false; }
     });
   }
 
@@ -109,11 +113,7 @@ export class StudentQuizQuestionsComponent implements OnInit {
   startTimer(): void {
     this.updateTimerLabel();
     this.timerInterval = setInterval(() => {
-      if (this.timeLeft <= 0) {
-        clearInterval(this.timerInterval);
-        this.submitQuiz(); // Soumission automatique
-        return;
-      }
+      if (this.timeLeft <= 0) { clearInterval(this.timerInterval); this.submitQuiz(); return; }
       this.timeLeft--;
       this.updateTimerLabel();
     }, 1000);
@@ -127,8 +127,7 @@ export class StudentQuizQuestionsComponent implements OnInit {
 
   get totalTimeLabel(): string {
     if (!this.quiz?.duree_minutes) return '';
-    const m = this.quiz.duree_minutes.toString().padStart(2, '0');
-    return `${m}:00`;
+    return `${this.quiz.duree_minutes.toString().padStart(2, '0')}:00`;
   }
 
   // ── Navigation ─────────────────────────────────────────────
@@ -137,11 +136,9 @@ export class StudentQuizQuestionsComponent implements OnInit {
     else this.submitQuiz();
   }
 
-  movePrev(): void {
-    if (this.selected > 1) this.selected--;
-  }
+  movePrev(): void { if (this.selected > 1) this.selected--; }
 
-  // ── Sélection réponse ──────────────────────────────────────
+  // ── Réponses ───────────────────────────────────────────────
   selectReponse(questionId: number, reponseId: number): void {
     this.selectedReponses[questionId] = reponseId;
   }
@@ -160,42 +157,39 @@ export class StudentQuizQuestionsComponent implements OnInit {
   }
 
   // ── Soumission ─────────────────────────────────────────────
-  submitQuiz(): void {
-    if (this.submitting || !this.quiz) return;
-    clearInterval(this.timerInterval);
-    this.submitting = true;
+ submitQuiz(): void {
+  if (this.submitting || !this.quiz) return;
+  clearInterval(this.timerInterval);
+  this.submitting = true;
 
-    const reponses = this.questions
-      .filter(q => q.type !== 'text' && this.selectedReponses[q.id])
-      .map(q => ({
-        question_id: q.id,
-        reponse_id:  this.selectedReponses[q.id] as number,
-      }));
+  const answers: any[] = this.questions.map(q => {
+    if (q.type === 'text') {
+      return { question_id: q.id, reponse_text: this.textReponses[q.id] ?? '' };
+    }
+    return { question_id: q.id, reponse_id: (this.selectedReponses[q.id] as number) ?? null };
+  });
 
-    this.formationsService.soumettreQuiz(this.quiz.id, reponses).subscribe({
-      next: (res: any) => {
-       this.resultat   = res.result ?? res.resultat ?? res;
-       this.submitted  = true;
-       this.submitting = false;
+  this.formationsService.soumettreQuiz(this.quiz.id, answers).subscribe({
+    next: (res: any) => {
+      this.resultat   = res.result ?? res.resultat ?? res;
+      this.submitted  = true;
+      this.submitting = false;
       this.selected   = this.totalQuestions + 1;
-        // Aller à la page résultat (selected = totalQuestions + 1)
-        this.selected   = this.totalQuestions + 1;
-      },
-      error: () => {
-        this.submitting = false;
-        this.error = 'Erreur lors de la soumission du quiz.';
-      }
-    });
+    },
+   error: (err: any) => {
+  this.submitting = false;
+  if (err?.status === 403) {
+    this.error = err?.error?.message ?? 'Accès refusé.';
+  } else {
+    this.error = 'Erreur lors de la soumission du quiz.';
   }
+}
+  });
+}
 
   // ── Helpers résultat ───────────────────────────────────────
-  get estReussi(): boolean {
-    return this.resultat?.est_reussi ?? false;
-  }
-
-  get noteFinale(): number {
-    return this.resultat?.note ?? 0;
-  }
+  get estReussi(): boolean  { return this.resultat?.est_reussi ?? false; }
+  get noteFinale(): number  { return this.resultat?.note ?? 0; }
 
   getNoteColor(): string {
     if (this.noteFinale >= 75) return '#10b981';
@@ -203,11 +197,43 @@ export class StudentQuizQuestionsComponent implements OnInit {
     return '#ef4444';
   }
 
-  retournerAuxQuiz(): void {
-    this.router.navigate([routes.studentsQuiz]);
+  // Calcul du dashoffset pour le cercle SVG (circumference = 2π×50 ≈ 314)
+  getScoreDashOffset(): number {
+    const circumference = 314;
+    return circumference - (this.noteFinale / 100) * circumference;
   }
 
-  ngOnDestroy(): void {
-    clearInterval(this.timerInterval);
+  retournerAuxQuiz(): void { this.router.navigate([routes.studentsQuiz]); }
+
+  // ── Helpers affichage ──────────────────────────────────────
+  getOptionLetter(index: number): string {
+    return ['A', 'B', 'C', 'D', 'E'][index] ?? String(index + 1);
+  }
+
+  getTypeBadgeClass(type: string): string {
+    const map: Record<string, string> = {
+      multiple_choice: 'qq-type-badge--mcq',
+      true_false:      'qq-type-badge--tf',
+      text:            'qq-type-badge--text',
+    };
+    return map[type] ?? '';
+  }
+
+  getTypeIcon(type: string): string {
+    const map: Record<string, string> = {
+      multiple_choice: 'isax-task-square',
+      true_false:      'isax-toggle-off-circle',
+      text:            'isax-edit-2',
+    };
+    return map[type] ?? 'isax-task-square';
+  }
+
+  getTypeLabel(type: string): string {
+    const map: Record<string, string> = {
+      multiple_choice: 'Choix unique',
+      true_false:      'Vrai / Faux',
+      text:            'Réponse libre',
+    };
+    return map[type] ?? type;
   }
 }

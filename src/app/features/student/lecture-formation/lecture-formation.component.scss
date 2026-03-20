@@ -783,3 +783,185 @@ $t:            all .2s ease;
   .lp-nav-btns { width: 100%; .lp-btn { flex: 1; justify-content: center; } }
   .lp-topbar__title { max-width: 38vw; }
 }
+// ═══════════════════════════════════════════════════════
+// MODAL QUIZ FINAL — à ajouter à la fin du fichier SCSS
+// ═══════════════════════════════════════════════════════
+
+.lp-modal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: lp-fade-in .25s ease;
+}
+
+@keyframes lp-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lp-modal {
+  position: relative;
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 36px 32px;
+  max-width: 460px; width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,.22), 0 8px 24px rgba(0,0,0,.12);
+  animation: lp-slide-up .3s cubic-bezier(.34,1.56,.64,1);
+  overflow: hidden;
+
+  // Gradient décoratif en haut
+  &::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, #069b8f, #4f46e5, #d97706);
+    border-radius: 24px 24px 0 0;
+  }
+}
+
+@keyframes lp-slide-up {
+  from { opacity: 0; transform: translateY(30px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+// Confettis
+.lp-modal__confetti {
+  position: absolute; top: 14px; left: 0; right: 0;
+  display: flex; justify-content: space-around; padding: 0 20px;
+  font-size: 18px; pointer-events: none;
+
+  span {
+    animation: lp-float 3s ease-in-out infinite;
+    display: inline-block;
+    &:nth-child(1) { animation-delay: 0s; }
+    &:nth-child(2) { animation-delay: .4s; }
+    &:nth-child(3) { animation-delay: .8s; }
+    &:nth-child(4) { animation-delay: 1.2s; }
+    &:nth-child(5) { animation-delay: 1.6s; }
+  }
+}
+
+@keyframes lp-float {
+  0%, 100% { transform: translateY(0) rotate(-5deg); opacity: .7; }
+  50%       { transform: translateY(-8px) rotate(5deg); opacity: 1; }
+}
+
+// Icône centrale
+.lp-modal__icon-wrap {
+  position: relative; display: inline-block;
+  margin: 16px auto 20px; width: 80px; height: 80px;
+}
+
+.lp-modal__icon-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(6,155,143,.15), rgba(79,70,229,.15));
+  border: 2px solid rgba(6,155,143,.2);
+  animation: lp-pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes lp-pulse-ring {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.08); opacity: .7; }
+}
+
+.lp-modal__icon {
+  position: absolute; inset: 8px; border-radius: 50%;
+  background: linear-gradient(135deg, #069b8f, #047a6f);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(6,155,143,.35);
+
+  i { font-size: 28px; color: #fff; }
+}
+
+// Textes
+.lp-modal__title {
+  font-size: 22px; font-weight: 800; color: #0f172a;
+  margin: 0 0 8px; letter-spacing: -.3px;
+}
+
+.lp-modal__sub {
+  font-size: 14px; color: #64748b; margin: 0 0 24px; line-height: 1.6;
+  strong { color: #0f172a; font-weight: 700; }
+}
+
+// Bloc info quiz
+.lp-modal__quiz-info {
+  background: linear-gradient(135deg, #eef2ff, #e6f7f5);
+  border: 1px solid rgba(79,70,229,.15);
+  border-radius: 16px; padding: 18px 20px; margin-bottom: 24px;
+  text-align: left;
+}
+
+.lp-modal__quiz-badge {
+  display: inline-flex; align-items: center;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 12px; border-radius: 99px;
+  background: rgba(79,70,229,.1); color: #4f46e5;
+  margin-bottom: 10px;
+  i { font-size: 13px; }
+}
+
+.lp-modal__quiz-name {
+  font-size: 15px; font-weight: 700; color: #0f172a;
+  margin: 0 0 12px; line-height: 1.4;
+}
+
+.lp-modal__quiz-meta {
+  display: flex; gap: 16px; flex-wrap: wrap;
+
+  span {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: #64748b;
+    i { font-size: 13px; color: #069b8f; }
+    strong { color: #0f172a; font-weight: 700; }
+  }
+}
+
+// Boutons
+.lp-modal__actions {
+  display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;
+}
+
+.lp-modal__btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 13px 20px; border-radius: 12px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  border: none; transition: all .2s ease;
+
+  i { font-size: 16px; }
+
+  &--primary {
+    background: linear-gradient(135deg, #069b8f 0%, #047a6f 100%);
+    color: #fff; box-shadow: 0 4px 16px rgba(6,155,143,.3);
+    &:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(6,155,143,.4); }
+  }
+
+  &--secondary {
+    background: #f1f5f9; color: #475569;
+    border: 1.5px solid #e2e8f0;
+    &:hover { background: #e2e8f0; color: #0f172a; }
+  }
+
+  &--ghost {
+    background: transparent; color: #94a3b8;
+    border: 1.5px solid #e2e8f0;
+    font-size: 13px; padding: 10px 20px;
+    &:hover { background: #f8fafc; color: #64748b; }
+  }
+}
+
+// Note bas de modal
+.lp-modal__note {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  font-size: 12px; color: #94a3b8; margin: 0;
+  i { font-size: 13px; color: #cbd5e1; }
+  strong { color: #64748b; font-weight: 600; }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .lp-modal { padding: 32px 20px 24px; border-radius: 20px; }
+  .lp-modal__title { font-size: 20px; }
+}
