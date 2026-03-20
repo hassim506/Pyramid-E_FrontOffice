@@ -38,62 +38,28 @@ interface DashStats {
       obligatoires_total:     number;
       obligatoires_terminees: number;
     };
-    sessions: {
-      total:     number;
-      terminees: number;
-      taux:      number;
-    };
-    parcours: {
-      total:      number;
-      termines:   number;
-      progression:number;
-      taux:       number;
-    };
-    catalogues: {
-      total:    number;
-      termines: number;
-      taux:     number;
-    };
+    sessions:   { total: number; terminees: number; taux: number; };
+    parcours:   { total: number; termines: number; progression: number; taux: number; };
+    catalogues: { total: number; termines: number; taux: number; };
     certifications: { total: number; cette_annee: number };
-    heures: {
-      total_cumulees:  number;
-      objectif_annuel: number;
-      taux_objectif:   number;
-    };
-    demandes: {
-      en_attente: number;
-      validees:   number;
-      refusees:   number;
-      total:      number;
-    };
-    taux_completion_global?: {
-      valeur:        number;
-      total_termine: number;
-      total_assigne: number;
-    };
-    pdi: {
-      disponible:         boolean;
-      taux_completion:    number;
-      objectifs_total:    number;
-      objectifs_atteints: number;
-      prochain_entretien: string | null;
-    };
-    evaluations: {
-      disponible:  boolean;
-      score_moyen: number;
-      nb_passees:  number;
-    };
+    heures: { total_cumulees: number; objectif_annuel: number; taux_objectif: number; };
+    demandes: { en_attente: number; validees: number; refusees: number; total: number; };
+    taux_completion_global?: { valeur: number; total_termine: number; total_assigne: number; };
+    pdi: { disponible: boolean; taux_completion: number; objectifs_total: number; objectifs_atteints: number; prochain_entretien: string | null; };
+    evaluations: { disponible: boolean; score_moyen: number; nb_passees: number; nb_reussies: number; taux_reussite: number; };
   };
+  // ✅ Clés en camelCase — correspond exactement au retour PHP compact()
   courbes: {
-    labels:                  string[];
-    formations_terminees:    number[];
-    certifications_obtenues: number[];
-    heures_cumulees:         number[];
-    progression_parcours:    number[];
-    progression_catalogues:  number[];
-    sessions_terminees:      number[];
-    taux_completion:         number[];
-    taux_abandon:            number[];
+    labels:                 string[];
+    formationsTerminees:    number[];
+    certificationsObtenues: number[];
+    heuresCumulees:         number[];
+    progressionParcours:    number[];
+    progressionCatalogues:  number[];
+    sessionsTerminees:      number[];
+    tauxCompletion:         number[];
+    tauxAbandonCourbe:      number[];
+    scoresQuiz:             number[];
   };
   echeances:           Echeance[];
   sessions_planifiees: SessionPlanifiee[];
@@ -139,9 +105,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.loadStats();
   }
 
-  ngOnDestroy(): void {
-    this.destroyAllCharts();
-  }
+  ngOnDestroy(): void { this.destroyAllCharts(); }
 
   loadStats(): void {
     this.loading = true;
@@ -171,33 +135,20 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       const demandes   = demRes?.demandes     ?? [];
       const certs      = certRes?.certificats ?? [];
 
-      const terminees  = formations.filter((f: any) => f.statut_formation === 'termine');
-      const enCours    = formations.filter((f: any) => f.statut_formation === 'en_cours');
-      const progMoy = formations.length
-        ? formations.reduce((s: number, f: any) => {
-            const p = parseFloat(f.progression);
-            return s + (isNaN(p) ? 0 : p);
-          }, 0) / formations.length
+      const terminees = formations.filter((f: any) => f.statut_formation === 'termine');
+      const enCours   = formations.filter((f: any) => f.statut_formation === 'en_cours');
+      const progMoy   = formations.length
+        ? formations.reduce((s: number, f: any) => { const p = parseFloat(f.progression); return s + (isNaN(p) ? 0 : p); }, 0) / formations.length
         : 0;
-      const tauxCompletion = formations.length
-        ? Math.round((terminees.length / formations.length) * 1000) / 10 : 0;
+      const tauxCompletion = formations.length ? Math.round((terminees.length / formations.length) * 1000) / 10 : 0;
 
       const courbes = this.buildCourbesAngular(formations, demandes, certs);
 
       const echeances: Echeance[] = formations
         .filter((f: any) => f.statut_formation === 'en_cours' && f.date_fin_prevue)
         .map((f: any) => {
-          const joursRestants = Math.ceil(
-            (new Date(f.date_fin_prevue).getTime() - Date.now()) / 86400000
-          );
-          return {
-            id: f.id, titre: f.titre,
-            type:          f.est_obligatoire ? 'obligatoire' : 'formation',
-            deadline:      f.date_fin_prevue,
-            joursRestants,
-            progression:   f.progression ?? 0,
-            urgent:        joursRestants <= 7,
-          } as Echeance;
+          const joursRestants = Math.ceil((new Date(f.date_fin_prevue).getTime() - Date.now()) / 86400000);
+          return { id: f.id, titre: f.titre, type: f.est_obligatoire ? 'obligatoire' : 'formation', deadline: f.date_fin_prevue, joursRestants, progression: f.progression ?? 0, urgent: joursRestants <= 7 } as Echeance;
         })
         .sort((a: Echeance, b: Echeance) => a.joursRestants - b.joursRestants)
         .slice(0, 5);
@@ -205,12 +156,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       this.stats = {
         kpi: {
           formations: {
-            total:                  formations.length,
-            en_cours:               enCours.length,
-            terminees:              terminees.length,
-            progression_moy:        Math.round(progMoy * 10) / 10,
-            taux_completion:        tauxCompletion,
-            taux_obligatoires:      0,
+            total: formations.length, en_cours: enCours.length, terminees: terminees.length,
+            progression_moy: Math.round(progMoy * 10) / 10, taux_completion: tauxCompletion,
+            taux_obligatoires: 0,
             obligatoires_total:     formations.filter((f: any) => f.est_obligatoire).length,
             obligatoires_terminees: formations.filter((f: any) => f.est_obligatoire && f.statut_formation === 'termine').length,
           },
@@ -218,26 +166,21 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           parcours:   { total: 0, termines: 0, progression: 0, taux: 0 },
           catalogues: { total: 0, termines: 0, taux: 0 },
           certifications: {
-            total:       certs.length,
-            cette_annee: certs.filter((c: any) =>
-              new Date(c.created_at).getFullYear() === new Date().getFullYear()).length,
+            total: certs.length,
+            cette_annee: certs.filter((c: any) => new Date(c.created_at).getFullYear() === new Date().getFullYear()).length,
           },
           heures: {
-            total_cumulees:  Math.round(terminees.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0) * 10) / 10,
-            objectif_annuel: 40,
-            taux_objectif:   0,
+            total_cumulees: Math.round(terminees.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0) * 10) / 10,
+            objectif_annuel: 40, taux_objectif: 0,
           },
           demandes: {
             en_attente: demandes.filter((d: any) => d.statut === 'en_attente').length,
             validees:   demandes.filter((d: any) => d.statut === 'validee').length,
             refusees:   demandes.filter((d: any) => d.statut === 'refusee').length,
-            total:      demandes.length,
+            total: demandes.length,
           },
-          pdi: {
-            disponible: false, taux_completion: 0,
-            objectifs_total: 0, objectifs_atteints: 0, prochain_entretien: null,
-          },
-          evaluations: { disponible: false, score_moyen: 0, nb_passees: 0 },
+          pdi: { disponible: false, taux_completion: 0, objectifs_total: 0, objectifs_atteints: 0, prochain_entretien: null },
+          evaluations: { disponible: false, score_moyen: 0, nb_passees: 0, nb_reussies: 0, taux_reussite: 0 },
         },
         courbes,
         echeances,
@@ -257,26 +200,24 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   private buildCourbesAngular(formations: any[], demandes: any[], certs: any[]): DashStats['courbes'] {
-    const labels: string[]         = [];
-    const fTerminees: number[]     = [];
-    const certObt: number[]        = [];
-    const heures: number[]         = [];
-    const progParcours: number[]   = [];
-    const progCatalogues: number[] = [];
-    const sessionsT: number[]      = [];
-    const tauxCompletion: number[] = [];
-    const tauxAbandon: number[]    = [];
+    const labels: string[]              = [];
+    const formationsTerminees: number[] = [];
+    const certificationsObtenues: number[] = [];
+    const heuresCumulees: number[]      = [];
+    const progressionParcours: number[] = [];
+    const progressionCatalogues: number[] = [];
+    const sessionsTerminees: number[]   = [];
+    const tauxCompletion: number[]      = [];
+    const tauxAbandonCourbe: number[]   = [];
+    const scoresQuiz: number[]          = [];
 
     const base = this.periodeMode === 'annee' ? 5 : 12;
 
     for (let i = base - 1; i >= 0; i--) {
       let debut: Date, fin: Date, label: string;
-
       if (this.periodeMode === 'annee') {
         const y = new Date().getFullYear() - i;
-        debut = new Date(y, 0, 1);
-        fin   = new Date(y, 11, 31, 23, 59, 59);
-        label = String(y);
+        debut = new Date(y, 0, 1); fin = new Date(y, 11, 31, 23, 59, 59); label = String(y);
       } else {
         const d = new Date(this.selectedAnnee, this.selectedMois - 1, 1);
         d.setMonth(d.getMonth() - i);
@@ -284,55 +225,32 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         fin   = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
         label = `${this.moisLabels[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
       }
-
       labels.push(label);
 
-      const termCePeriode = formations.filter(f =>
-        f.statut_formation === 'termine' &&
-        f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin
-      );
-      const abandCePeriode = formations.filter(f =>
-        f.statut_formation === 'abandonne' &&
-        f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin
-      );
-      const enCoursCePeriode = formations.filter(f =>
-        f.statut_formation === 'en_cours' &&
-        f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin
-      );
+      const termCe  = formations.filter(f => f.statut_formation === 'termine'  && f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin);
+      const abandCe = formations.filter(f => f.statut_formation === 'abandonne' && f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin);
+      const enCoursCe = formations.filter(f => f.statut_formation === 'en_cours' && f.updated_at && new Date(f.updated_at) >= debut && new Date(f.updated_at) <= fin);
 
-      fTerminees.push(termCePeriode.length);
-      certObt.push(certs.filter(c =>
-        c.created_at && new Date(c.created_at) >= debut && new Date(c.created_at) <= fin
-      ).length);
-      heures.push(termCePeriode.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0));
-      progParcours.push(0);
-      progCatalogues.push(0);
-      sessionsT.push(0);
+      formationsTerminees.push(termCe.length);
+      certificationsObtenues.push(certs.filter(c => c.created_at && new Date(c.created_at) >= debut && new Date(c.created_at) <= fin).length);
+      heuresCumulees.push(termCe.reduce((s: number, f: any) => s + (f.duree_totale ?? 0), 0));
+      progressionParcours.push(0);
+      progressionCatalogues.push(0);
+      sessionsTerminees.push(0);
+      scoresQuiz.push(0);
 
-      const totalJusqueLa = formations.filter(f =>
-        f.created_at && new Date(f.created_at) <= fin
-      ).length;
-      const termJusqueLa = formations.filter(f =>
-        f.statut_formation === 'termine' && f.updated_at && new Date(f.updated_at) <= fin
-      ).length;
-      tauxCompletion.push(totalJusqueLa > 0
-        ? Math.round((termJusqueLa / totalJusqueLa) * 100) : 0);
+      const totalJLa = formations.filter(f => f.created_at && new Date(f.created_at) <= fin).length;
+      const termJLa  = formations.filter(f => f.statut_formation === 'termine' && f.updated_at && new Date(f.updated_at) <= fin).length;
+      tauxCompletion.push(totalJLa > 0 ? Math.round((termJLa / totalJLa) * 100) : 0);
 
-      const commencesCePeriode = termCePeriode.length + abandCePeriode.length + enCoursCePeriode.length;
-      tauxAbandon.push(commencesCePeriode > 0
-        ? Math.round((abandCePeriode.length / commencesCePeriode) * 100) : 0);
+      const commences = termCe.length + abandCe.length + enCoursCe.length;
+      tauxAbandonCourbe.push(commences > 0 ? Math.round((abandCe.length / commences) * 100) : 0);
     }
 
     return {
-      labels,
-      formations_terminees:    fTerminees,
-      certifications_obtenues: certObt,
-      heures_cumulees:         heures,
-      progression_parcours:    progParcours,
-      progression_catalogues:  progCatalogues,
-      sessions_terminees:      sessionsT,
-      taux_completion:         tauxCompletion,
-      taux_abandon:            tauxAbandon,
+      labels, formationsTerminees, certificationsObtenues, heuresCumulees,
+      progressionParcours, progressionCatalogues, sessionsTerminees,
+      tauxCompletion, tauxAbandonCourbe, scoresQuiz,
     };
   }
 
@@ -350,9 +268,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         if (!this.stats) return;
         const firstId = this.getFirstChartId();
-        if (firstId && document.getElementById(firstId)) {
-          this.initChartsPourOnglet();
-        }
+        if (firstId && document.getElementById(firstId)) this.initChartsPourOnglet();
       }, delay);
     });
   }
@@ -371,57 +287,70 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   private initChartsPourOnglet(): void {
     if (!this.stats) return;
-
     const firstId = this.getFirstChartId();
     if (firstId && this.charts[firstId]) return;
 
     const c = this.stats.courbes;
 
     if (this.activeTab === 'progression') {
-      // ── COURBES (taux) ──
+      // ✅ Clés corrigées en camelCase
       this.renderChart('chart-completion', this.buildAreaConfig(c.labels, [
-        { name: 'Taux de complétion (%)', data: c.taux_completion, color: '#069b8f' },
+        { name: 'Taux de complétion (%)', data: c.tauxCompletion, color: '#069b8f' },
       ], 'Taux de complétion global'));
 
       this.renderChart('chart-taux-abandon', this.buildAreaConfig(c.labels, [
-        { name: "Taux d'abandon (%)", data: c.taux_abandon ?? [], color: '#ef4444' },
+        { name: "Taux d'abandon (%)", data: c.tauxAbandonCourbe ?? [], color: '#ef4444' },
       ], "Taux d'abandon"));
 
-      // ── HISTOGRAMMES (volumes) ──
       this.renderChart('chart-heures', this.buildBarConfig(c.labels, [
-        { name: 'Heures de formation', data: c.heures_cumulees, color: '#f59e0b' },
+        { name: 'Heures de formation', data: c.heuresCumulees, color: '#f59e0b' },
       ], 'Heures cumulées'));
 
       this.renderChart('chart-formations-terminees', this.buildBarConfig(c.labels, [
-        { name: 'Formations terminées', data: c.formations_terminees, color: '#10b981' },
+        { name: 'Formations terminées', data: c.formationsTerminees, color: '#10b981' },
       ], 'Formations terminées'));
 
       this.renderChart('chart-certifications', this.buildBarConfig(c.labels, [
-        { name: 'Certifications obtenues', data: c.certifications_obtenues, color: '#7c3aed' },
+        { name: 'Certifications obtenues', data: c.certificationsObtenues, color: '#7c3aed' },
       ], 'Certifications obtenues'));
 
       this.renderChart('chart-sessions-terminees', this.buildBarConfig(c.labels, [
-        { name: 'Sessions terminées', data: c.sessions_terminees ?? [], color: '#3b82f6' },
+        { name: 'Sessions terminées', data: c.sessionsTerminees ?? [], color: '#3b82f6' },
       ], 'Sessions terminées'));
 
       this.renderChart('chart-parcours', this.buildBarConfig(c.labels, [
-        { name: 'Parcours progressés', data: c.progression_parcours, color: '#7c3aed' },
+        { name: 'Parcours progressés', data: c.progressionParcours, color: '#7c3aed' },
       ], 'Progression parcours'));
 
       this.renderChart('chart-catalogues', this.buildBarConfig(c.labels, [
-        { name: 'Catalogues actifs', data: c.progression_catalogues, color: '#3b82f6' },
+        { name: 'Catalogues actifs', data: c.progressionCatalogues, color: '#3b82f6' },
       ], 'Progression catalogues'));
+
+      // ✅ Courbe scores quiz — uniquement si données non nulles
+      if (c.scoresQuiz && c.scoresQuiz.some(v => v > 0)) {
+        this.renderChart('chart-scores-quiz', this.buildAreaConfig(c.labels, [
+          { name: 'Score moyen quiz (%)', data: c.scoresQuiz, color: '#4f46e5' },
+        ], 'Score moyen aux quiz'));
+      }
     }
 
     if (this.activeTab === 'objectifs') {
-      // Diagramme en secteur des demandes (toutes catégories)
       const d = this.stats.kpi.demandes;
       if (d.total > 0) {
         this.renderDonut('chart-donut-demandes',
-          [d.validees, d.en_attente, d.refusees,
-           Math.max(0, d.total - d.validees - d.en_attente - d.refusees)],
+          [d.validees, d.en_attente, d.refusees, Math.max(0, d.total - d.validees - d.en_attente - d.refusees)],
           ['Validées', 'En attente', 'Refusées', 'Autres'],
           ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']
+        );
+      }
+
+      // ✅ Donut quiz — uniquement si données disponibles
+      const ev = this.stats.kpi.evaluations;
+      if (ev.disponible && ev.nb_passees > 0) {
+        this.renderDonut('chart-donut-quiz',
+          [ev.nb_reussies, ev.nb_passees - ev.nb_reussies],
+          ['Réussis', 'Échoués'],
+          ['#10b981', '#ef4444']
         );
       }
 
@@ -429,21 +358,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         this.renderDonut('chart-donut-formations', [
           this.stats.kpi.formations.en_cours,
           this.stats.kpi.formations.terminees,
-          Math.max(0, this.stats.kpi.formations.total
-            - this.stats.kpi.formations.en_cours
-            - this.stats.kpi.formations.terminees),
+          Math.max(0, this.stats.kpi.formations.total - this.stats.kpi.formations.en_cours - this.stats.kpi.formations.terminees),
         ], ['En cours', 'Terminées', 'Non démarrées'], ['#069b8f', '#10b981', '#e5e7eb']);
       }
     }
 
     if (this.activeTab === 'aujourdhui') {
-      this.renderRadial('chart-radial-completion',
-        this.tauxCompletionGlobal, '#069b8f', 'Complétion');
-      this.renderRadial('chart-radial-heures',
-        this.stats.kpi.heures.taux_objectif, '#f59e0b', 'Objectif h.');
+      this.renderRadial('chart-radial-completion', this.tauxCompletionGlobal, '#069b8f', 'Complétion');
+      this.renderRadial('chart-radial-heures', this.stats.kpi.heures.taux_objectif, '#f59e0b', 'Objectif h.');
       if (this.stats.kpi.formations.obligatoires_total > 0) {
-        this.renderRadial('chart-radial-oblig',
-          this.stats.kpi.formations.taux_obligatoires, '#ef4444', 'Obligatoires');
+        this.renderRadial('chart-radial-oblig', this.stats.kpi.formations.taux_obligatoires, '#ef4444', 'Obligatoires');
       }
     }
   }
@@ -451,11 +375,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   private renderChart(id: string, config: any): void {
     const el = document.getElementById(id);
     if (!el) return;
-    try {
-      const chart = new ApexCharts(el, config);
-      chart.render();
-      this.charts[id] = chart;
-    } catch {}
+    try { const chart = new ApexCharts(el, config); chart.render(); this.charts[id] = chart; } catch {}
   }
 
   private buildAreaConfig(labels: string[], series: { name: string; data: number[]; color: string }[], title: string): any {
@@ -481,18 +401,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       chart:       { type: 'bar', height: 230, toolbar: { show: false }, animations: { enabled: true, speed: 600 } },
       colors:      series.map(s => s.color),
       plotOptions: { bar: { borderRadius: 5, columnWidth: '52%', dataLabels: { position: 'top' } } },
-      dataLabels:  {
-        enabled: true,
-        offsetY: -20,
-        style: { fontSize: '11px', colors: ['#374151'], fontWeight: 600 },
-        formatter: (v: number) => v > 0 ? v : '',
-      },
-      xaxis:       { categories: labels, labels: { style: { fontSize: '11px', colors: '#9ca3af' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-      yaxis:       { labels: { style: { fontSize: '11px', colors: '#9ca3af' } }, min: 0 },
-      grid:        { borderColor: '#f3f4f6', strokeDashArray: 4 },
-      tooltip:     { theme: 'light' },
-      legend:      { show: false },
-      title:       { text: title, align: 'left', style: { fontSize: '13px', fontWeight: 700, color: '#374151' } },
+      dataLabels:  { enabled: true, offsetY: -20, style: { fontSize: '11px', colors: ['#374151'], fontWeight: 600 }, formatter: (v: number) => v > 0 ? v : '' },
+      xaxis:  { categories: labels, labels: { style: { fontSize: '11px', colors: '#9ca3af' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+      yaxis:  { labels: { style: { fontSize: '11px', colors: '#9ca3af' } }, min: 0 },
+      grid:   { borderColor: '#f3f4f6', strokeDashArray: 4 },
+      tooltip:{ theme: 'light' },
+      legend: { show: false },
+      title:  { text: title, align: 'left', style: { fontSize: '13px', fontWeight: 700, color: '#374151' } },
     };
   }
 
@@ -502,21 +417,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     try {
       const total = series.reduce((a, b) => a + b, 0);
       const chart = new ApexCharts(el, {
-        series,
-        chart: { type: 'donut', height: 260, toolbar: { show: false } },
-        colors,
-        labels,
-        legend: {
-          position: 'bottom',
-          fontSize: '12px',
+        series, chart: { type: 'donut', height: 260, toolbar: { show: false } },
+        colors, labels,
+        legend: { position: 'bottom', fontSize: '12px',
           formatter: (val: string, opts: any) => {
             const v = opts.w.globals.series[opts.seriesIndex];
             const pct = total > 0 ? Math.round((v / total) * 100) : 0;
             return `${val}: ${v} (${pct}%)`;
           },
         },
-        dataLabels: {
-          enabled: true,
+        dataLabels: { enabled: true,
           formatter: (_val: any, opts: any) => {
             const v = opts.w.globals.series[opts.seriesIndex];
             const pct = total > 0 ? Math.round((v / total) * 100) : 0;
@@ -524,15 +434,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           },
         },
         plotOptions: { pie: { donut: { size: '60%' } } },
-        tooltip: {
-          theme: 'light',
-          y: {
-            formatter: (v: number) => {
-              const pct = total > 0 ? Math.round((v / total) * 100) : 0;
-              return `${v} (${pct}%)`;
-            },
-          },
-        },
+        tooltip: { theme: 'light', y: { formatter: (v: number) => `${v} (${total > 0 ? Math.round((v / total) * 100) : 0}%)` } },
       });
       chart.render();
       this.charts[id] = chart;
@@ -548,16 +450,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         series: [safeValue],
         chart:  { type: 'radialBar', height: 140, toolbar: { show: false } },
         colors: [color],
-        plotOptions: {
-          radialBar: {
-            hollow:    { size: '55%' },
-            dataLabels: {
-              name:  { show: true, offsetY: -4, fontSize: '10px', color: '#9ca3af' },
-              value: { show: true, offsetY: 4,  fontSize: '16px', fontWeight: 700, color: '#111827',
-                formatter: (v: number) => v + '%' },
-            },
-          },
-        },
+        plotOptions: { radialBar: { hollow: { size: '55%' }, dataLabels: {
+          name:  { show: true, offsetY: -4, fontSize: '10px', color: '#9ca3af' },
+          value: { show: true, offsetY: 4, fontSize: '16px', fontWeight: 700, color: '#111827', formatter: (v: number) => v + '%' },
+        }}},
         labels: [label],
       });
       chart.render();
@@ -596,8 +492,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   getCountdownOffset(joursRestants: number): number {
     const circonference = 138.2;
-    const max = 30;
-    const ratio = Math.min(joursRestants, max) / max;
+    const ratio = Math.min(joursRestants, 30) / 30;
     return Math.round(circonference * (1 - ratio));
   }
 
@@ -609,41 +504,25 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   getTypeLabel(type: Echeance['type']): string {
     const map: Record<Echeance['type'], string> = {
-      obligatoire: 'Obligatoire',
-      formation:   'Formation',
-      parcours:    'Parcours',
-      catalogue:   'Catalogue',
-      session:     'Session',
+      obligatoire: 'Obligatoire', formation: 'Formation',
+      parcours: 'Parcours', catalogue: 'Catalogue', session: 'Session',
     };
     return map[type] ?? type;
   }
 
   getTypeColor(type: Echeance['type']): string {
     const map: Record<Echeance['type'], string> = {
-      obligatoire: '#ef4444',
-      formation:   '#069b8f',
-      parcours:    '#7c3aed',
-      catalogue:   '#3b82f6',
-      session:     '#f59e0b',
+      obligatoire: '#ef4444', formation: '#069b8f',
+      parcours: '#7c3aed', catalogue: '#3b82f6', session: '#f59e0b',
     };
     return map[type] ?? '#9ca3af';
   }
 
-  hasProgression(type: Echeance['type']): boolean {
-    return type !== 'catalogue';
-  }
+  hasProgression(type: Echeance['type']): boolean { return type !== 'catalogue'; }
 
-  get echeancesUrgentes(): Echeance[] {
-    return (this.stats?.echeances ?? []).filter(e => e.urgent);
-  }
-
-  get echeancesNormales(): Echeance[] {
-    return (this.stats?.echeances ?? []).filter(e => !e.urgent);
-  }
-
-  get hasUrgences(): boolean {
-    return this.echeancesUrgentes.length > 0;
-  }
+  get echeancesUrgentes(): Echeance[] { return (this.stats?.echeances ?? []).filter(e => e.urgent); }
+  get echeancesNormales(): Echeance[] { return (this.stats?.echeances ?? []).filter(e => !e.urgent); }
+  get hasUrgences(): boolean          { return this.echeancesUrgentes.length > 0; }
 
   get tauxCompletionGlobal(): number {
     const global = this.stats?.kpi?.taux_completion_global?.valeur;
@@ -660,11 +539,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     return Math.max(0, obj - cum);
   }
 
-  get nomMoisSelectionne(): string {
-    return this.moisLabels[this.selectedMois - 1] ?? '';
-  }
+  get nomMoisSelectionne(): string { return this.moisLabels[this.selectedMois - 1] ?? ''; }
+  get demandesTotal(): number      { return this.stats?.kpi.demandes.total ?? 0; }
 
-  get demandesTotal(): number {
-    return this.stats?.kpi.demandes.total ?? 0;
+  // ✅ Helper pour le ngIf de la courbe quiz dans le HTML
+  get hasScoresQuiz(): boolean {
+    return (this.stats?.courbes?.scoresQuiz ?? []).some(v => v > 0);
   }
 }
