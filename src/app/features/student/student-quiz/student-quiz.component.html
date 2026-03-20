@@ -43,14 +43,14 @@
       <i class="isax isax-close-circle"></i>
       <div>
         <div class="quiz-stat-card__value">{{ totalEchoues }}</div>
-        <div class="quiz-stat-card__label">À reprendre</div>
+        <div class="quiz-stat-card__label">Échoués</div>
       </div>
     </div>
     <div class="quiz-stat-card quiz-stat-card--nouveau">
-      <i class="isax isax-flash-1"></i>
+      <i class="isax isax-clock"></i>
       <div>
-        <div class="quiz-stat-card__value">{{ totalNonTentes }}</div>
-        <div class="quiz-stat-card__label">Non tentés</div>
+        <div class="quiz-stat-card__value">{{ totalEnAttente }}</div>
+        <div class="quiz-stat-card__label">En attente</div>
       </div>
     </div>
   </div>
@@ -71,19 +71,20 @@
               (click)="setFiltre('tous')">Tous</button>
       <button class="quiz-filters__pill quiz-filters__pill--nouveau"
               [class.quiz-filters__pill--active]="selectedFiltre === 'non_tente'"
-              (click)="setFiltre('non_tente')">Non tentés</button>
+              (click)="setFiltre('non_tente')">En attente</button>
       <button class="quiz-filters__pill quiz-filters__pill--reussi"
               [class.quiz-filters__pill--active]="selectedFiltre === 'reussi'"
               (click)="setFiltre('reussi')">Réussis</button>
       <button class="quiz-filters__pill quiz-filters__pill--echoue"
               [class.quiz-filters__pill--active]="selectedFiltre === 'echoue'"
-              (click)="setFiltre('echoue')">À reprendre</button>
+              (click)="setFiltre('echoue')">Échoués</button>
     </div>
   </div>
 
   <!-- GRILLE QUIZ -->
   <div class="quiz-grid" *ngIf="displayedQuizzes.length > 0">
-    <div class="quiz-card" *ngFor="let quiz of displayedQuizzes">
+    <div class="quiz-card" *ngFor="let quiz of displayedQuizzes"
+         [class.quiz-card--bloque]="isBloquer(quiz)">
 
       <!-- Badge statut -->
       <div class="quiz-card__header">
@@ -118,6 +119,22 @@
           </span>
         </div>
 
+        <!-- ✅ TENTATIVES : pastilles X/max_tentatives -->
+        <div class="quiz-card__tentatives">
+          <span class="quiz-card__tentatives-label">
+            <i class="isax isax-repeat me-1"></i>
+            Tentatives
+            <strong>{{ getTentativesUtilisees(quiz) }} / {{ quiz.max_tentatives }}</strong>
+          </span>
+          <div class="quiz-card__pastilles">
+            <span *ngFor="let i of getPastillesArray(quiz)"
+                  class="pastille"
+                  [ngClass]="getPastilleClass(quiz, i)"
+                  [title]="i < getTentativesUtilisees(quiz) ? 'Tentative ' + (i + 1) : 'Non utilisée'">
+            </span>
+          </div>
+        </div>
+
         <!-- Résultat précédent -->
         <div class="quiz-card__result" *ngIf="quiz.dernier_resultat">
           <div class="quiz-card__result-score">
@@ -133,18 +150,24 @@
                  [style.background]="getNoteColor(quiz.dernier_resultat.note)">
             </div>
           </div>
-          <small class="quiz-card__result-tentatives">
-            {{ quiz.dernier_resultat.nombre_tentatives }} tentative{{ quiz.dernier_resultat.nombre_tentatives > 1 ? 's' : '' }}
-          </small>
         </div>
+
+        <!-- Message tentatives épuisées -->
+        <div class="quiz-card__bloque-msg" *ngIf="isBloquer(quiz)">
+          <i class="isax isax-lock me-1"></i>
+          Toutes les tentatives ont été utilisées sans succès.
+        </div>
+
       </div>
 
       <!-- Footer -->
       <div class="quiz-card__footer">
         <button class="quiz-card__btn"
                 [class.quiz-card__btn--reussi]="quiz.dernier_resultat?.est_reussi"
-                [class.quiz-card__btn--reprendre]="quiz.dernier_resultat && !quiz.dernier_resultat.est_reussi"
-                (click)="commencerQuiz(quiz.id)">
+                [class.quiz-card__btn--reprendre]="quiz.dernier_resultat && !quiz.dernier_resultat.est_reussi && !isBloquer(quiz)"
+                [class.quiz-card__btn--bloque]="isBloquer(quiz)"
+                [disabled]="isBloquer(quiz)"
+                (click)="commencerQuiz(quiz)">
           <i class="isax me-1" [ngClass]="getCTAIcon(quiz)"></i>
           {{ getCTALabel(quiz) }}
         </button>
@@ -157,12 +180,8 @@
   <div class="quiz-empty" *ngIf="displayedQuizzes.length === 0">
     <i class="isax isax-document-text quiz-empty__icon"></i>
     <h6>Aucun quiz trouvé</h6>
-    <p *ngIf="selectedFiltre !== 'tous' || searchTerm">
-      Essayez de modifier vos filtres.
-    </p>
-    <p *ngIf="selectedFiltre === 'tous' && !searchTerm">
-      Aucun quiz disponible pour le moment.
-    </p>
+    <p *ngIf="selectedFiltre !== 'tous' || searchTerm">Essayez de modifier vos filtres.</p>
+    <p *ngIf="selectedFiltre === 'tous' && !searchTerm">Aucun quiz disponible pour le moment.</p>
   </div>
 
   <!-- PAGINATION -->
@@ -191,4 +210,4 @@
     </div>
   </div>
 
-</ng-container>
+</ng-container> 

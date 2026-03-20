@@ -38,7 +38,6 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   private flatSections: any[] = [];
 
   // ── Progression via service partagé ─────────────
-  // On délègue completedIds au service
   get completedIds(): Set<number>  { return this.progressionService.getCompleted(this.formationId); }
   get completedCount(): number     { return this.completedIds.size; }
   get totalSections(): number      { return this.flatSections.length; }
@@ -56,7 +55,7 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
     private router:             Router,
     private formationsService:  FormationsService,
     private sanitizer:          DomSanitizer,
-    public  progressionService: ProgressionService   // public pour template si besoin
+    public  progressionService: ProgressionService
   ) {}
 
   ngOnInit(): void {
@@ -96,10 +95,8 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   loadStructure(): void {
     this.loading = true; this.error = '';
 
-    // ✅ 1. Charger la progression depuis l'API (source de vérité persistée)
     this.progressionService.loadFromApi(this.formationId).subscribe();
 
-    // 2. Charger la structure de la formation
     this.formationsService.getFormationStructure(this.formationId).subscribe({
       next: (res: any) => {
         this.formation = res?.formation || res?.structure?.formation || res?.data?.formation || null;
@@ -114,11 +111,9 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
           }
         }
 
-        // 3. Init locale en fallback (si loadFromApi n'a pas encore répondu)
         if (!this.progressionService.hasData(this.formationId)) {
           this.progressionService.init(this.formationId, this.flatSections.length, []);
         } else {
-          // Mettre à jour le total sections (connu après chargement structure)
           this.progressionService.init(this.formationId, this.flatSections.length);
         }
 
@@ -142,12 +137,21 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   goToPrev(): void { const i = this.getCurrentIndex(); if (i > 0) this.selectSection(this.flatSections[i - 1]); }
   goToNext(): void { const i = this.getCurrentIndex(); if (i < this.flatSections.length - 1) this.selectSection(this.flatSections[i + 1]); }
 
-  // ✅ markCompleted — délègue au service partagé
+  // ✅ markCompleted — souscrit à l'Observable et gère quiz_final
   markCompleted(sectionId: number): void {
-    this.progressionService.markCompleted(this.formationId, sectionId);
-    if (this.hasQuiz(this.selectedSection) && !this.quizResults[sectionId]) {
-      setTimeout(() => this.startQuiz(), 400);
-    }
+    this.progressionService.markCompleted(this.formationId, sectionId)
+      .subscribe((res: any) => {
+
+        // Quiz de section intermédiaire (logique existante inchangée)
+        if (this.hasQuiz(this.selectedSection) && !this.quizResults[sectionId]) {
+          setTimeout(() => this.startQuiz(), 400);
+        }
+
+        // ✅ Formation terminée ET quiz final disponible
+        if (res?.est_termine && res?.quiz_final) {
+          this._proposerQuizFinal(res.quiz_final);
+        }
+      });
   }
 
   isCompleted(id: number): boolean { return this.progressionService.isCompleted(this.formationId, id); }
@@ -174,7 +178,16 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
       answers: { ...this.currentAnswers }
     };
     this.quizSubmitted = true;
-    if (passed) this.progressionService.markCompleted(this.formationId, this.selectedSection.id);
+
+    // ✅ Si quiz de section réussi, marquer + écouter quiz_final
+    if (passed) {
+      this.progressionService.markCompleted(this.formationId, this.selectedSection.id)
+        .subscribe((res: any) => {
+          if (res?.est_termine && res?.quiz_final) {
+            this._proposerQuizFinal(res.quiz_final);
+          }
+        });
+    }
   }
 
   retryQuiz(): void {
@@ -183,6 +196,24 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
       delete this.quizResults[this.selectedSection.id];
       this.progressionService.markUncompleted(this.formationId, this.selectedSection.id);
     }
+  }
+
+  // ✅ Proposer le quiz final quand la formation est terminée
+  private _proposerQuizFinal(quiz: { id: number; titre: string }): void {
+    setTimeout(() => {
+      const allerAuQuiz = confirm(
+        `🎉 Félicitations ! Vous avez terminé la formation.\n\n` +
+        `Le quiz final "${quiz.titre}" est maintenant disponible.\n\n` +
+        `Voulez-vous le passer maintenant ?`
+      );
+
+      if (allerAuQuiz) {
+        this.router.navigate(['/student/student-quiz-questions', quiz.id]);
+      } else {
+        // L'employé peut le faire plus tard via "Mes Quiz"
+        this.goBack();
+      }
+    }, 600);
   }
 
   isCorrectAnswer(q: QuizQuestion, opt: string): boolean {
@@ -221,21 +252,20 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   goBack(): void {
-  if (this.isEmbedded) { this.closePlayer.emit(); return; }
-  const state = history.state;
-  if (state?.fromPage === 'parcours' && state?.parcoursId) {
-    // Force la recréation du composant → ngOnInit rappelé → données fraîches
-    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-      this.router.navigate(['/student/parcours-assigne', state.parcoursId]);
-    });
-  } else if (state?.fromPage === 'catalogue' && state?.catalogueId) {
-  this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-    this.router.navigate(['/student/catalogue-detail', state.catalogueId]);
-  });
-  } else {
-    this.router.navigate(['/student/mes-cours']);
+    if (this.isEmbedded) { this.closePlayer.emit(); return; }
+    const state = history.state;
+    if (state?.fromPage === 'parcours' && state?.parcoursId) {
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate(['/student/parcours-assigne', state.parcoursId]);
+      });
+    } else if (state?.fromPage === 'catalogue' && state?.catalogueId) {
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate(['/student/catalogue-detail', state.catalogueId]);
+      });
+    } else {
+      this.router.navigate(['/student/mes-cours']);
+    }
   }
-}
 
   getSectionIcon(s: any): string {
     return ({ video: 'isax-video-play', texte: 'isax-document-text', image: 'isax-gallery', pdf: 'isax-document', audio: 'isax-voice-cricle' } as any)[s?.type] ?? 'isax-document-text';

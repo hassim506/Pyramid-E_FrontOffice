@@ -24,62 +24,61 @@
       </a>
         <ul class="submenu">
           <li><a [routerLink]="routes.studentMyCourses" routerLinkActive="active">Formations</a></li>
-          <li><a [routerLink]="routes.student_CataloguesAssignes" routerLinkActive="active">Catalogues </a></li>
-          <li><a [routerLink]="routes.student_ParcoursAssignes"   routerLinkActive="active">Parcours </a></li>
+          <li><a [routerLink]="routes.student_CataloguesAssignes" routerLinkActive="active">Catalogues</a></li>
+          <li><a [routerLink]="routes.student_ParcoursAssignes" routerLinkActive="active">Parcours</a></li>
           <li><a [routerLink]="routes.student_SessionsAcceptees" routerLinkActive="active">Sessions</a></li>
           <li><a>Feedback formateur</a></li>
         </ul>
     </li>
 
     <!-- ================= MES DEMANDES ================= -->
-<li class="menu-item has-submenu">
-  <a>
-    <i class="isax isax-send-2"></i>
-    <span>Mes demandes</span>
-    <i class="submenu-arrow isax isax-arrow-right-3"></i>
-  </a>
-  <ul class="submenu">
-    <li>
-      <a [routerLink]="routes.student_DemandeFormation" routerLinkActive="active">
-       
-        <span>Formations</span>
-      </a>
-    </li>
-    <li>
-      <a [routerLink]="routes.student_DemandeSession" routerLinkActive="active">
-       
-        <span>Sessions</span>
-      </a>
-    </li>
-    <li>
-      <a [routerLink]="routes.student_DemandeParcours" routerLinkActive="active">
-        
-        <span>Parcours</span>
-      </a>
-    </li>
-    <li>
-      <a [routerLink]="routes.student_DemandeCatalogue" routerLinkActive="active">
-        
-        <span>Catalogues</span>
-      </a>
-    </li>
-  </ul>
-</li>
-
-    <!-- ================= MON PLANNING ================= -->
     <li class="menu-item has-submenu">
       <a>
-        <i class="isax isax-ticket"></i>
-        <span>Mon planning</span>
+        <i class="isax isax-send-2"></i>
+        <span>Mes demandes</span>
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
       <ul class="submenu">
-        <li><a>Formations présentielles planifiées</a></li>
-        <li><a>Webinaires à venir</a></li>
-        <li><a>Sessions planifiées</a></li>
-        <li><a>Nouvelles invitations reçues</a></li>
+        <li>
+          <a [routerLink]="routes.student_DemandeFormation" routerLinkActive="active">
+            <span>Formations</span>
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeSession" routerLinkActive="active">
+            <span>Sessions</span>
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeParcours" routerLinkActive="active">
+            <span>Parcours</span>
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeCatalogue" routerLinkActive="active">
+            <span>Catalogues</span>
+          </a>
+        </li>
       </ul>
     </li>
+
+    <!-- ================= MES QUIZ ================= -->
+    <li class="menu-item">
+      <a [routerLink]="routes.students_quiz" routerLinkActive="active">
+        <i class="isax isax-note-21"></i>
+        <span>Mes Quiz</span>
+      </a>
+    </li>
+
+    <!-- ================= MON PLANNING ================= -->
+    <li class="menu-item">
+      <a routerLinkActive="active">
+        <i class="isax isax-calendar-1"></i>
+        <span>Mon planning</span>
+      </a>
+    </li>
+
+    
 
     <!-- ================= MES COMPÉTENCES ================= -->
     <li class="menu-item has-submenu">

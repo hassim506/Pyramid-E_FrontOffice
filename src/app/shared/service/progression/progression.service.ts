@@ -14,9 +14,8 @@ export interface FormationProgression {
 @Injectable({ providedIn: 'root' })
 export class ProgressionService {
 
-  private apiUrl = environment.apiUrl; // ex: http://localhost:8000/api
+  private apiUrl = environment.apiUrl;
 
-  // Map formationId → état local
   private progressions = new Map<number, FormationProgression>();
   private _change$ = new BehaviorSubject<Map<number, FormationProgression>>(this.progressions);
   readonly change$ = this._change$.asObservable();
@@ -58,7 +57,6 @@ export class ProgressionService {
       });
       this._change$.next(new Map(this.progressions));
     } else {
-      // Mettre à jour totalSections si chargé après
       const prog = this.progressions.get(formationId)!;
       prog.totalSections = totalSections;
       prog.percent = this.calcPercent(prog.completed.size, totalSections);
@@ -67,9 +65,10 @@ export class ProgressionService {
   }
 
   // ════════════════════════════════════════════
-  // MARQUER une section — met à jour local + API
+  // MARQUER une section — retourne Observable
+  // pour que l'appelant puisse lire quiz_final
   // ════════════════════════════════════════════
-  markCompleted(formationId: number, sectionId: number): void {
+  markCompleted(formationId: number, sectionId: number): Observable<any> {
     // 1. Mise à jour locale immédiate (UI réactive)
     const prog = this.progressions.get(formationId);
     if (prog) {
@@ -78,8 +77,9 @@ export class ProgressionService {
       this._change$.next(new Map(this.progressions));
     }
 
-    // 2. Persistance API en arrière-plan
-    this.http.post<any>(
+    // 2. Retourner l'Observable — le composant s'abonne
+    //    et peut lire est_termine + quiz_final dans la réponse
+    return this.http.post<any>(
       `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/complete`, {}
     ).pipe(
       tap(res => {
@@ -89,8 +89,8 @@ export class ProgressionService {
           this._change$.next(new Map(this.progressions));
         }
       }),
-      catchError(() => of(null)) // ne pas bloquer l'UI si l'API échoue
-    ).subscribe();
+      catchError(() => of(null))
+    );
   }
 
   // ════════════════════════════════════════════
