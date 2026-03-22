@@ -81,13 +81,14 @@ export class MesCompetencesComponent implements OnInit {
   get hasEnCours(): boolean                        { return this.formationsEnCours.length > 0; }
 
   // ── Navigation vers formation ──────────────────────────
-  allerVersFormation(formationId: number, statut: 'termine' | 'en_cours'): void {
-    if (statut === 'en_cours') {
-      this.router.navigate(['/student/lecture-formation', formationId]);
-    } else {
-      this.router.navigate(['/student/mes-formations']);
-    }
+ // Après
+allerVersFormation(formationId: number, statut: 'termine' | 'en_cours'): void {
+  if (statut === 'en_cours') {
+    this.router.navigate(['/student/lecture-formation', formationId]);
+  } else {
+    this.router.navigate(['/courses/course-details-2', formationId]);
   }
+}
 
   // ── Date acquisition en français ──────────────────────
   formatDateFr(dateStr: string | null): string {

@@ -85,19 +85,32 @@ export class CourseDetails2Component implements OnInit {
     }
   }
 
-  loadFormationDetails(id: number): void {
-    this.loading = true;
-    this.formationsService.getFormationById(id).subscribe({
-      next: (res: any) => {
-        this.formation = res?.data || res?.formation || res;
-        this.loading   = false;
-      },
-      error: () => {
-        this.error   = 'Formation introuvable';
-        this.loading = false;
+ loadFormationDetails(id: number): void {
+  this.loading = true;
+  this.formationsService.getFormationById(id).subscribe({
+    next: (res: any) => {
+      this.formation = res?.data || res?.formation || res;
+
+      // ✅ Parser competences_acquises si c'est une string
+      if (this.formation && typeof this.formation.competences_acquises === 'string') {
+        try {
+          const raw = (this.formation.competences_acquises as string)
+            .replace(/\\\"/g, '"')
+            .replace(/^"|"$/g, '');
+          this.formation.competences_acquises = JSON.parse(raw) ?? [];
+        } catch {
+          this.formation.competences_acquises = [];
+        }
       }
-    });
-  }
+
+      this.loading = false;
+    },
+    error: () => {
+      this.error   = 'Formation introuvable';
+      this.loading = false;
+    }
+  });
+}
 
   // ════════════════════════════════════════════════════════════
   // BOUTON COMMENCER

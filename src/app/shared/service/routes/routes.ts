@@ -64,6 +64,7 @@ export const routes = {
   studentsQuiz: '/student/student-quiz',
   studentProfile: '/student/student-profile',
   student_MesCompetences: '/student/mes-competences',
+  student_CompetencesRecommandees:     '/student/mes-competences-recommandees',  // ✅
   student_Planning: '/student/student-planning',
   studentMessages: '/student/student-message',
   studentsMessage: '/student/student-message',

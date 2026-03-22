@@ -260,9 +260,15 @@ getMonPlanning(annee: number, mois: number): Observable<any> {
 // 🎯 COMPÉTENCES EMPLOYÉ
 // ===============================
 
+//competences acquises
 getMesCompetences(): Observable<any> {
   return this.http.get<any>(`${this.apiUrl}/student/competences`, {
     headers: this.getHeaders()
   });
+}
+
+//Competences recommandées
+getCompetencesRecommandees(): Observable<any> {
+  return this.http.get(`${this.apiUrl}/student/competences/recommandees`);
 }
 }
