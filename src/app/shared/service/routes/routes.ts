@@ -63,6 +63,8 @@ export const routes = {
   studentsQuizQuestion: '/student/student-quiz-questions',
   studentsQuiz: '/student/student-quiz',
   studentProfile: '/student/student-profile',
+  student_MesCompetences: '/student/mes-competences',
+  student_Planning: '/student/student-planning',
   studentMessages: '/student/student-message',
   studentsMessage: '/student/student-message',
   studentOrderHistory: '/student/student-order-history',

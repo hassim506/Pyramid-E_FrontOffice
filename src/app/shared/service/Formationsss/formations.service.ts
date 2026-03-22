@@ -241,4 +241,28 @@ export class FormationsService {
   getTousMesResultatsQuiz(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/quiz-results`, { headers: this.getHeaders() });
   }
+
+  // ===============================
+// 📅 PLANNING EMPLOYÉ
+// ===============================
+
+getMonPlanning(annee: number, mois: number): Observable<any> {
+  const params = new HttpParams()
+    .set('annee', String(annee))
+    .set('mois',  String(mois));
+  return this.http.get<any>(`${this.apiUrl}/student/planning`, {
+    headers: this.getHeaders(),
+    params
+  });
+}
+
+// ===============================
+// 🎯 COMPÉTENCES EMPLOYÉ
+// ===============================
+
+getMesCompetences(): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/student/competences`, {
+    headers: this.getHeaders()
+  });
+}
 }

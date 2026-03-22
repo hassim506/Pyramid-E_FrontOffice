@@ -1,0 +1,198 @@
+<!-- LOADING -->
+<div class="pl-loading" *ngIf="loading">
+  <div class="pl-loading__ring"></div>
+  <p>Chargement de votre planning...</p>
+</div>
+
+<!-- ERREUR -->
+<div class="pl-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2"></i>
+  <p>{{ error }}</p>
+  <button class="pl-btn pl-btn--primary" (click)="loadPlanning()">
+    <i class="isax isax-refresh me-2"></i>Réessayer
+  </button>
+</div>
+
+<ng-container *ngIf="!loading && !error">
+
+  <!-- ── HEADER ─────────────────────────────────────── -->
+  <div class="pl-header mb-4">
+    <div class="pl-header__left">
+      <h3 class="pl-header__title">
+        <i class="isax isax-calendar-2 me-2" style="color:#069b8f"></i>Mon Planning
+      </h3>
+      <p class="pl-header__sub">Formations, webinaires et sessions planifiées</p>
+    </div>
+  </div>
+
+  <!-- ── STATS RAPIDES ──────────────────────────────── -->
+  <div class="pl-stats mb-4">
+    <div class="pl-stat-card pl-stat-card--total">
+      <i class="isax isax-calendar-tick"></i>
+      <div>
+        <div class="pl-stat-card__value">{{ totalMois }}</div>
+        <div class="pl-stat-card__label">Ce mois</div>
+      </div>
+    </div>
+    <div class="pl-stat-card pl-stat-card--presentiel">
+      <i class="isax isax-buildings-2"></i>
+      <div>
+        <div class="pl-stat-card__value">{{ totalPresentiels }}</div>
+        <div class="pl-stat-card__label">Présentiel</div>
+      </div>
+    </div>
+    <div class="pl-stat-card pl-stat-card--enligne">
+      <i class="isax isax-monitor"></i>
+      <div>
+        <div class="pl-stat-card__value">{{ totalEnLigne }}</div>
+        <div class="pl-stat-card__label">En ligne</div>
+      </div>
+    </div>
+    <div class="pl-stat-card pl-stat-card--session">
+      <i class="isax isax-video-play"></i>
+      <div>
+        <div class="pl-stat-card__value">{{ totalSessions }}</div>
+        <div class="pl-stat-card__label">Sessions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NAVIGATION + FILTRES ───────────────────────── -->
+  <div class="pl-toolbar mb-4">
+    <div class="pl-nav">
+      <button class="pl-nav__btn" (click)="moisPrecedent()">
+        <i class="isax isax-arrow-left-2"></i>
+      </button>
+      <div class="pl-nav__label">
+        <span class="pl-nav__mois">{{ nomMois }}</span>
+        <span class="pl-nav__annee">{{ annee }}</span>
+      </div>
+      <button class="pl-nav__btn" (click)="moisSuivant()">
+        <i class="isax isax-arrow-right-2"></i>
+      </button>
+      <button class="pl-nav__today" (click)="allerAujourdhui()">Aujourd'hui</button>
+    </div>
+    <div class="pl-filtres">
+      <button class="pl-filtre"
+              [class.pl-filtre--active]="filtreActif === 'tous'"
+              (click)="setFiltre('tous')">Tous</button>
+      <button class="pl-filtre pl-filtre--presentiel"
+              [class.pl-filtre--active]="filtreActif === 'presentiel'"
+              (click)="setFiltre('presentiel')">
+        <i class="isax isax-buildings-2 me-1"></i>Présentiel
+      </button>
+      <button class="pl-filtre pl-filtre--enligne"
+              [class.pl-filtre--active]="filtreActif === 'en_ligne'"
+              (click)="setFiltre('en_ligne')">
+        <i class="isax isax-monitor me-1"></i>En ligne
+      </button>
+    </div>
+  </div>
+
+  <!-- ── CALENDRIER + PANEL ─────────────────────────── -->
+  <div class="pl-calendar-wrap" [class.pl-calendar-wrap--with-detail]="selectedJour">
+
+    <!-- ✅ Wrapper scroll indépendant autour du calendrier uniquement -->
+    <div class="pl-calendar-scroll">
+      <div class="pl-calendar">
+        <div class="pl-calendar__headers">
+          <div class="pl-calendar__header-day" *ngFor="let j of joursLabels">{{ j }}</div>
+        </div>
+        <div class="pl-calendar__grid">
+          <div class="pl-day"
+               *ngFor="let jour of jours"
+               [class.pl-day--other-month]="!jour.moisCourant"
+               [class.pl-day--today]="jour.estAujourdhui"
+               [class.pl-day--has-events]="jour.evenements.length > 0"
+               [class.pl-day--selected]="selectedJour?.date?.getTime() === jour.date?.getTime()"
+               (click)="selectJour(jour)">
+            <div class="pl-day__num">{{ jour.jour }}</div>
+            <div class="pl-day__events">
+              <div class="pl-day-evt"
+                   *ngFor="let evt of jour.evenements.slice(0, 3)"
+                   [style.background]="evt.couleur + '22'"
+                   [style.border-left]="'3px solid ' + evt.couleur">
+                <i class="isax {{ evt.icone }}" [style.color]="evt.couleur"></i>
+                <span class="pl-day-evt__title">{{ evt.titre }}</span>
+              </div>
+              <div class="pl-day-evt__more" *ngIf="jour.evenements.length > 3">
+                +{{ jour.evenements.length - 3 }} autres
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL DÉTAIL JOUR ──────────────────────── -->
+    <div class="pl-detail" *ngIf="selectedJour">
+      <div class="pl-detail__header">
+        <div>
+          <div class="pl-detail__date">{{ formatDateFr(selectedJour.date) }}</div>
+          <div class="pl-detail__count">{{ selectedJour.evenements.length }} événement(s)</div>
+        </div>
+        <button class="pl-detail__close" (click)="fermerDetail()">
+          <i class="isax isax-close-circle"></i>
+        </button>
+      </div>
+      <div class="pl-detail__list">
+        <div class="pl-evt-card"
+             *ngFor="let evt of selectedJour.evenements"
+             [class.pl-evt-card--selected]="selectedEvenement?.id === evt.id"
+             [style.border-color]="evt.couleur"
+             (click)="selectEvenement(evt)">
+          <div class="pl-evt-card__badge" [style.background]="evt.couleur">
+            <i class="isax {{ evt.icone }} me-1"></i>{{ evt.label_type }}
+          </div>
+          <h6 class="pl-evt-card__title">{{ evt.titre }}</h6>
+          <p class="pl-evt-card__sub" *ngIf="evt.formation_titre">
+            <i class="isax isax-book-1 me-1"></i>{{ evt.formation_titre }}
+          </p>
+          <div class="pl-evt-card__infos">
+            <span *ngIf="evt.date_debut">
+              <i class="isax isax-clock me-1"></i>
+              {{ formatHeure(evt.date_debut) }}
+              <ng-container *ngIf="evt.date_fin"> – {{ formatHeure(evt.date_fin) }}</ng-container>
+            </span>
+            <span *ngIf="evt.lieu">
+              <i class="isax isax-location me-1"></i>{{ evt.lieu }}
+            </span>
+            <span *ngIf="evt.duree">
+              <i class="isax isax-timer me-1"></i>{{ evt.duree }}
+            </span>
+          </div>
+          <div class="pl-evt-card__footer">
+            <span class="pl-evt-status" [class]="'pl-evt-status--' + evt.statut">
+              {{ getStatutLabel(evt.statut) }}
+            </span>
+            <div class="pl-evt-prog" *ngIf="evt.progression > 0">
+              <div class="pl-evt-prog__bar">
+                <div class="pl-evt-prog__fill" [style.width.%]="evt.progression" [style.background]="evt.couleur"></div>
+              </div>
+              <span>{{ evt.progression }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LÉGENDE -->
+  <div class="pl-legende mt-4">
+    <div class="pl-legende__item">
+      <span class="pl-legende__dot" style="background:#10b981"></span>Présentiel
+    </div>
+    <div class="pl-legende__item">
+      <span class="pl-legende__dot" style="background:#3b82f6"></span>En ligne / Webinaire
+    </div>
+  </div>
+
+  <!-- EMPTY -->
+  <div class="pl-empty mt-4" *ngIf="totalMois === 0">
+    <i class="isax isax-calendar pl-empty__icon"></i>
+    <h6>Aucun événement ce mois</h6>
+    <p>Naviguez vers un autre mois ou vérifiez vos inscriptions.</p>
+  </div>
+
+</ng-container>

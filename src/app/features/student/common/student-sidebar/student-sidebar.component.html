@@ -72,13 +72,11 @@
 
     <!-- ================= MON PLANNING ================= -->
     <li class="menu-item">
-      <a routerLinkActive="active">
+      <a [routerLink]="routes.student_Planning" routerLinkActive="active">
         <i class="isax isax-calendar-1"></i>
         <span>Mon planning</span>
       </a>
     </li>
-
-    
 
     <!-- ================= MES COMPÉTENCES ================= -->
     <li class="menu-item has-submenu">
@@ -88,7 +86,7 @@
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
       <ul class="submenu">
-        <li><a>Compétences acquises</a></li>
+       <li><a [routerLink]="routes.student_MesCompetences" routerLinkActive="active">Compétences acquises</a></li>
         <li><a>Compétences recommandées</a></li>
       </ul>
     </li>
