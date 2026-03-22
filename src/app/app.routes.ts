@@ -285,6 +285,7 @@ export const routes: Routes = [
                     { path: 'student-certificate',    loadComponent: () => import('./features/student/student-certificate/student-certificate.component').then(m => m.StudentCertificateComponent) },
                     { path: 'mes-competences', loadComponent: () => import('./features/student/mes-competences/mes-competences.component').then(m => m.MesCompetencesComponent) },
                     { path: 'mes-competences-recommandees', loadComponent: () => import('./features/student/mes-competences-recommandees/mes-competences-recommandees.component').then(m => m.MesCompetencesRecommandeesComponent) },
+                    { path: 'mes-palmares', loadComponent: () => import('./features/student/mes-palmares/mes-palmares.component').then(m => m.MesPalmaresComponent) },
                     { path: 'student-message',        loadComponent: () => import('./features/student/student-message/student-message.component').then(m => m.StudentMessageComponent) },
                     { path: 'student-qa',             loadComponent: () => import('./features/student/student-qa/student-qa.component').then(m => m.StudentQaComponent) },
                     { path: 'student-order-history',  loadComponent: () => import('./features/student/student-order-history/student-order-history.component').then(m => m.StudentOrderHistoryComponent) },
