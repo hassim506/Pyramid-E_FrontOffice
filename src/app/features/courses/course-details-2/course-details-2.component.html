@@ -376,7 +376,7 @@
           <nav class="cd-breadcrumb mb-3">
             <button class="cd-breadcrumb__back" (click)="goBack()">
               <i class="ti ti-arrow-left me-1"></i>
-              <ng-container *ngIf="catalogueId">Retour au catalogue</ng-container>
+              <ng-container *ngIf="catalogueId ">Retour au catalogue</ng-container>
               <ng-container *ngIf="parcoursId && !catalogueId">Retour au parcours</ng-container>
               <ng-container *ngIf="!catalogueId && !parcoursId">Mes formations</ng-container>
             </button>

@@ -19,11 +19,17 @@ export const routes: Routes = [
     },
 
     // ══════════════════════════════════════════════════════════════════════
-    // PAGE LECTEUR PLEIN ÉCRAN — en dehors de tout layout back-office
+    // PAGES PLEIN ÉCRAN — en dehors de tout layout back-office
     // ══════════════════════════════════════════════════════════════════════
     {
         path: 'student/lecture-formation/:id',
         loadComponent: () => import('./features/student/lecture-formation/lecture-formation.component').then(m => m.LectureFormationComponent),
+        canActivate: [authGuard],
+    },
+    // ✅ Route quiz plein écran — hors layout, même niveau que lecture-formation
+    {
+        path: 'student/quiz/:id',
+        loadComponent: () => import('./features/student/student-quiz-questions/student-quiz-questions.component').then(m => m.StudentQuizQuestionsComponent),
         canActivate: [authGuard],
     },
 
@@ -53,7 +59,6 @@ export const routes: Routes = [
                     { path: 'course-watch',                loadComponent: () => import('./features/courses/course-watch/course-watch.component').then(m => m.CourseWatchComponent) },
                     { path: 'cart',                        loadComponent: () => import('./features/courses/course-cart/course-cart.component').then(m => m.CourseCartComponent) },
                     { path: 'checkout',                    loadComponent: () => import('./features/courses/course-checkout/course-checkout.component').then(m => m.CourseCheckoutComponent) },
-                    // ✅ Routes du lead
                     { path: 'instructor-course-add',       loadComponent: () => import('./features/courses/instructor-course-add/instructor-course-add.component').then(m => m.InstructorCourseAddComponent) },
                     { path: 'instructor-course-edit/:id',  loadComponent: () => import('./features/courses/instructor-course-edit/instructor-course-edit.component').then(m => m.InstructorCourseEditComponent) },
                     { path: 'instructor-course-details/:id', loadComponent: () => import('./features/courses/instructor-course-details/instructor-course-details.component').then(m => m.InstructorCourseDetailsComponent) },
@@ -86,14 +91,14 @@ export const routes: Routes = [
                         path: 'settings',
                         loadComponent: () => import('./features/instructor/settings/settings.component').then(m => m.SettingsComponent),
                         children: [
-                            { path: 'instructor-setting-withdraw',    loadComponent: () => import('./features/instructor/settings/instructor-setting-withdraw/instructor-setting-withdraw.component').then(m => m.InstructorSettingWithdrawComponent) },
+                            { path: 'instructor-setting-withdraw',     loadComponent: () => import('./features/instructor/settings/instructor-setting-withdraw/instructor-setting-withdraw.component').then(m => m.InstructorSettingWithdrawComponent) },
                             { path: 'instructor-setting-notifications',loadComponent: () => import('./features/instructor/settings/instructor-setting-notifications/instructor-setting-notifications.component').then(m => m.InstructorSettingNotificationsComponent) },
-                            { path: 'instructor-plans',               loadComponent: () => import('./features/instructor/settings/instructor-plans/instructor-plans.component').then(m => m.InstructorPlansComponent) },
-                            { path: 'instructor-integrations',        loadComponent: () => import('./features/instructor/settings/instructor-integrations/instructor-integrations.component').then(m => m.InstructorIntegrationsComponent) },
-                            { path: 'instructor-linked-accounts',     loadComponent: () => import('./features/instructor/settings/instructor-linked-accounts/instructor-linked-accounts.component').then(m => m.InstructorLinkedAccountsComponent) },
-                            { path: 'instructor-social-profiles',     loadComponent: () => import('./features/instructor/settings/instructor-social-profiles/instructor-social-profiles.component').then(m => m.InstructorSocialProfilesComponent) },
-                            { path: 'instructor-change-password',     loadComponent: () => import('./features/instructor/settings/instructor-change-password/instructor-change-password.component').then(m => m.InstructorChangePasswordComponent) },
-                            { path: 'instructor-settings',            loadComponent: () => import('./features/instructor/settings/instructor-settings/instructor-settings.component').then(m => m.InstructorSettingsComponent) },
+                            { path: 'instructor-plans',                loadComponent: () => import('./features/instructor/settings/instructor-plans/instructor-plans.component').then(m => m.InstructorPlansComponent) },
+                            { path: 'instructor-integrations',         loadComponent: () => import('./features/instructor/settings/instructor-integrations/instructor-integrations.component').then(m => m.InstructorIntegrationsComponent) },
+                            { path: 'instructor-linked-accounts',      loadComponent: () => import('./features/instructor/settings/instructor-linked-accounts/instructor-linked-accounts.component').then(m => m.InstructorLinkedAccountsComponent) },
+                            { path: 'instructor-social-profiles',      loadComponent: () => import('./features/instructor/settings/instructor-social-profiles/instructor-social-profiles.component').then(m => m.InstructorSocialProfilesComponent) },
+                            { path: 'instructor-change-password',      loadComponent: () => import('./features/instructor/settings/instructor-change-password/instructor-change-password.component').then(m => m.InstructorChangePasswordComponent) },
+                            { path: 'instructor-settings',             loadComponent: () => import('./features/instructor/settings/instructor-settings/instructor-settings.component').then(m => m.InstructorSettingsComponent) },
                         ],
                     },
                 ],
@@ -137,14 +142,14 @@ export const routes: Routes = [
                         path: 'settings',
                         loadComponent: () => import('./features/superadmin/settings/settings.component').then(m => m.SettingsComponent),
                         children: [
-                            { path: 'superadmin-setting-withdraw',    loadComponent: () => import('./features/superadmin/settings/superadmin-setting-withdraw/superadmin-setting-withdraw.component').then(m => m.SuperadminSettingWithdrawComponent) },
+                            { path: 'superadmin-setting-withdraw',     loadComponent: () => import('./features/superadmin/settings/superadmin-setting-withdraw/superadmin-setting-withdraw.component').then(m => m.SuperadminSettingWithdrawComponent) },
                             { path: 'superadmin-setting-notifications',loadComponent: () => import('./features/superadmin/settings/superadmin-setting-notifications/superadmin-setting-notifications.component').then(m => m.SuperadminSettingNotificationsComponent) },
-                            { path: 'superadmin-plans',               loadComponent: () => import('./features/superadmin/settings/superadmin-plans/superadmin-plans.component').then(m => m.SuperadminPlansComponent) },
-                            { path: 'superadmin-integrations',        loadComponent: () => import('./features/superadmin/settings/superadmin-integrations/superadmin-integrations.component').then(m => m.SuperadminIntegrationsComponent) },
-                            { path: 'superadmin-linked-accounts',     loadComponent: () => import('./features/superadmin/settings/superadmin-linked-accounts/superadmin-linked-accounts.component').then(m => m.SuperadminLinkedAccountsComponent) },
-                            { path: 'superadmin-social-profiles',     loadComponent: () => import('./features/superadmin/settings/superadmin-social-profiles/superadmin-social-profiles.component').then(m => m.SuperadminSocialProfilesComponent) },
-                            { path: 'superadmin-change-password',     loadComponent: () => import('./features/superadmin/settings/superadmin-change-password/superadmin-change-password.component').then(m => m.SuperadminChangePasswordComponent) },
-                            { path: 'superadmin-settings',            loadComponent: () => import('./features/superadmin/settings/superadmin-settings/superadmin-settings.component').then(m => m.SuperadminSettingsComponent) },
+                            { path: 'superadmin-plans',                loadComponent: () => import('./features/superadmin/settings/superadmin-plans/superadmin-plans.component').then(m => m.SuperadminPlansComponent) },
+                            { path: 'superadmin-integrations',         loadComponent: () => import('./features/superadmin/settings/superadmin-integrations/superadmin-integrations.component').then(m => m.SuperadminIntegrationsComponent) },
+                            { path: 'superadmin-linked-accounts',      loadComponent: () => import('./features/superadmin/settings/superadmin-linked-accounts/superadmin-linked-accounts.component').then(m => m.SuperadminLinkedAccountsComponent) },
+                            { path: 'superadmin-social-profiles',      loadComponent: () => import('./features/superadmin/settings/superadmin-social-profiles/superadmin-social-profiles.component').then(m => m.SuperadminSocialProfilesComponent) },
+                            { path: 'superadmin-change-password',      loadComponent: () => import('./features/superadmin/settings/superadmin-change-password/superadmin-change-password.component').then(m => m.SuperadminChangePasswordComponent) },
+                            { path: 'superadmin-settings',             loadComponent: () => import('./features/superadmin/settings/superadmin-settings/superadmin-settings.component').then(m => m.SuperadminSettingsComponent) },
                         ],
                     },
                 ],
@@ -195,14 +200,14 @@ export const routes: Routes = [
                         path: 'settings',
                         loadComponent: () => import('./features/adminrh/settings/settings.component').then(m => m.SettingsComponent),
                         children: [
-                            { path: 'adminrh-setting-withdraw',    loadComponent: () => import('./features/adminrh/settings/adminrh-setting-withdraw/adminrh-setting-withdraw.component').then(m => m.AdminrhSettingWithdrawComponent) },
+                            { path: 'adminrh-setting-withdraw',     loadComponent: () => import('./features/adminrh/settings/adminrh-setting-withdraw/adminrh-setting-withdraw.component').then(m => m.AdminrhSettingWithdrawComponent) },
                             { path: 'adminrh-setting-notifications',loadComponent: () => import('./features/adminrh/settings/adminrh-setting-notifications/adminrh-setting-notifications.component').then(m => m.AdminrhSettingNotificationsComponent) },
-                            { path: 'adminrh-plans',               loadComponent: () => import('./features/adminrh/settings/adminrh-plans/adminrh-plans.component').then(m => m.AdminrhPlansComponent) },
-                            { path: 'adminrh-integrations',        loadComponent: () => import('./features/adminrh/settings/adminrh-integrations/adminrh-integrations.component').then(m => m.AdminrhIntegrationsComponent) },
-                            { path: 'adminrh-linked-accounts',     loadComponent: () => import('./features/adminrh/settings/adminrh-linked-accounts/adminrh-linked-accounts.component').then(m => m.AdminrhLinkedAccountsComponent) },
-                            { path: 'adminrh-social-profiles',     loadComponent: () => import('./features/adminrh/settings/adminrh-social-profiles/adminrh-social-profiles.component').then(m => m.AdminrhSocialProfilesComponent) },
-                            { path: 'adminrh-change-password',     loadComponent: () => import('./features/adminrh/settings/adminrh-change-password/adminrh-change-password.component').then(m => m.AdminrhChangePasswordComponent) },
-                            { path: 'adminrh-settings',            loadComponent: () => import('./features/adminrh/settings/adminrh-settings/adminrh-settings.component').then(m => m.AdminrhSettingsComponent) },
+                            { path: 'adminrh-plans',                loadComponent: () => import('./features/adminrh/settings/adminrh-plans/adminrh-plans.component').then(m => m.AdminrhPlansComponent) },
+                            { path: 'adminrh-integrations',         loadComponent: () => import('./features/adminrh/settings/adminrh-integrations/adminrh-integrations.component').then(m => m.AdminrhIntegrationsComponent) },
+                            { path: 'adminrh-linked-accounts',      loadComponent: () => import('./features/adminrh/settings/adminrh-linked-accounts/adminrh-linked-accounts.component').then(m => m.AdminrhLinkedAccountsComponent) },
+                            { path: 'adminrh-social-profiles',      loadComponent: () => import('./features/adminrh/settings/adminrh-social-profiles/adminrh-social-profiles.component').then(m => m.AdminrhSocialProfilesComponent) },
+                            { path: 'adminrh-change-password',      loadComponent: () => import('./features/adminrh/settings/adminrh-change-password/adminrh-change-password.component').then(m => m.AdminrhChangePasswordComponent) },
+                            { path: 'adminrh-settings',             loadComponent: () => import('./features/adminrh/settings/adminrh-settings/adminrh-settings.component').then(m => m.AdminrhSettingsComponent) },
                         ],
                     },
                 ],
@@ -252,13 +257,11 @@ export const routes: Routes = [
                     { path: 'student-dashboard',  loadComponent: () => import('./features/student/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
                     { path: 'student-profile',    loadComponent: () => import('./features/student/student-profile/student-profile.component').then(m => m.StudentProfileComponent) },
 
-                    // ✅ RENOMMÉ : student-courses → mes-catalogues
                     { path: 'mes-catalogues',     loadComponent: () => import('./features/student/student-courses/student-courses.component').then(m => m.StudentCoursesComponent) },
                     { path: 'student-courses',    redirectTo: 'mes-catalogues', pathMatch: 'full' },
 
                     { path: 'catalogue-detail/:id', loadComponent: () => import('./features/student/catalogue-detail/catalogue-detail.component').then(m => m.CatalogueDetailComponent) },
 
-                    // ✅ RENOMMÉ : mes-cours → mes-formations
                     { path: 'mes-formations',     loadComponent: () => import('./features/student/mes-cours/mes-cours.component').then(m => m.MesCoursComponent) },
                     { path: 'mes-cours',          redirectTo: 'mes-formations', pathMatch: 'full' },
 
@@ -267,31 +270,28 @@ export const routes: Routes = [
                     { path: 'sessions-acceptees', loadComponent: () => import('./features/student/sessions-acceptees/sessions-acceptees.component').then(m => m.SessionsAccepteesComponent) },
                     { path: 'students-catalogue', loadComponent: () => import('./features/student/students-catalogue/students-catalogue.component').then(m => m.StudentsCatalogueComponent) },
 
-                    // ✅ RENOMMÉ : students-parcours → mes-parcours
                     { path: 'mes-parcours',       loadComponent: () => import('./features/student/students-parcours/students-parcours.component').then(m => m.StudentsParcoursComponent) },
                     { path: 'students-parcours',  redirectTo: 'mes-parcours', pathMatch: 'full' },
 
-                    // ✅ RENOMMÉ : parcours-assignes → mes-parcours-assignes
                     { path: 'mes-parcours-assignes', loadComponent: () => import('./features/student/parcours-assignes/parcours-assignes.component').then(m => m.ParcoursAssignesComponent) },
                     { path: 'parcours-assignes',     redirectTo: 'mes-parcours-assignes', pathMatch: 'full' },
 
-                    // ✅ RENOMMÉ : parcours-assigne/:id → mes-parcours/:id
                     { path: 'mes-parcours/:id',      loadComponent: () => import('./features/student/parcours-assigne-detail/parcours-assigne-detail.component').then(m => m.ParcoursAssigneDetailComponent) },
                     { path: 'parcours-assigne/:id',  redirectTo: 'mes-parcours/:id', pathMatch: 'full' },
 
                     { path: 'student-quiz',           loadComponent: () => import('./features/student/student-quiz/student-quiz.component').then(m => m.StudentQuizComponent) },
-                    { path: 'student-quiz-questions/:id', loadComponent: () => import('./features/student/student-quiz-questions/student-quiz-questions.component').then(m => m.StudentQuizQuestionsComponent) },
-                    { path: 'student-planning', loadComponent: () => import('./features/student/student-planning/student-planning.component').then(m => m.StudentPlanningComponent) },
+                    { path: 'student-planning',       loadComponent: () => import('./features/student/student-planning/student-planning.component').then(m => m.StudentPlanningComponent) },
                     { path: 'student-certificate',    loadComponent: () => import('./features/student/student-certificate/student-certificate.component').then(m => m.StudentCertificateComponent) },
-                    { path: 'mes-competences', loadComponent: () => import('./features/student/mes-competences/mes-competences.component').then(m => m.MesCompetencesComponent) },
-                    { path: 'mes-competences-recommandees', loadComponent: () => import('./features/student/mes-competences-recommandees/mes-competences-recommandees.component').then(m => m.MesCompetencesRecommandeesComponent) },
-                    { path: 'mes-palmares', loadComponent: () => import('./features/student/mes-palmares/mes-palmares.component').then(m => m.MesPalmaresComponent) },
+                    { path: 'mes-competences',                loadComponent: () => import('./features/student/mes-competences/mes-competences.component').then(m => m.MesCompetencesComponent) },
+                    { path: 'mes-competences-recommandees',   loadComponent: () => import('./features/student/mes-competences-recommandees/mes-competences-recommandees.component').then(m => m.MesCompetencesRecommandeesComponent) },
+                    { path: 'mes-palmares',           loadComponent: () => import('./features/student/mes-palmares/mes-palmares.component').then(m => m.MesPalmaresComponent) },
                     { path: 'student-message',        loadComponent: () => import('./features/student/student-message/student-message.component').then(m => m.StudentMessageComponent) },
                     { path: 'student-qa',             loadComponent: () => import('./features/student/student-qa/student-qa.component').then(m => m.StudentQaComponent) },
                     { path: 'student-order-history',  loadComponent: () => import('./features/student/student-order-history/student-order-history.component').then(m => m.StudentOrderHistoryComponent) },
                     { path: 'student-referral',       loadComponent: () => import('./features/student/student-referral/student-referral.component').then(m => m.StudentReferralComponent) },
                     { path: 'student-reviews',        loadComponent: () => import('./features/student/student-reviews/student-reviews.component').then(m => m.StudentReviewsComponent) },
                     { path: 'student-wishlist',       loadComponent: () => import('./features/student/student-wishlist/student-wishlist.component').then(m => m.StudentWishlistComponent) },
+                    // ✅ SUPPRIMÉ : student/quiz/:id retiré d'ici — maintenant route top-level hors layout
                     {
                         path: 'settings',
                         loadComponent: () => import('./features/student/settings/settings.component').then(m => m.SettingsComponent),

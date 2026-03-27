@@ -99,8 +99,9 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
         this.questions = (res.questions ?? res.quiz?.questions ?? [])
           .sort((a: Question, b: Question) => a.ordre - b.ordre);
 
-        if (this.quiz?.duree_minutes) {
-          this.timeLeft = this.quiz.duree_minutes * 60;
+        const duree = this.quiz?.duree_minutes || 10; // fallback 10 min
+        if (duree) {
+          this.timeLeft = duree * 60;
           this.startTimer();
         }
         this.loading = false;
@@ -157,35 +158,35 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
   }
 
   // ── Soumission ─────────────────────────────────────────────
- submitQuiz(): void {
-  if (this.submitting || !this.quiz) return;
-  clearInterval(this.timerInterval);
-  this.submitting = true;
+  submitQuiz(): void {
+    if (this.submitting || !this.quiz) return;
+    clearInterval(this.timerInterval);
+    this.submitting = true;
 
-  const answers: any[] = this.questions.map(q => {
-    if (q.type === 'text') {
-      return { question_id: q.id, reponse_text: this.textReponses[q.id] ?? '' };
-    }
-    return { question_id: q.id, reponse_id: (this.selectedReponses[q.id] as number) ?? null };
-  });
+    const answers: any[] = this.questions.map(q => {
+      if (q.type === 'text') {
+        return { question_id: q.id, reponse_text: this.textReponses[q.id] ?? '' };
+      }
+      return { question_id: q.id, reponse_id: (this.selectedReponses[q.id] as number) ?? null };
+    });
 
-  this.formationsService.soumettreQuiz(this.quiz.id, answers).subscribe({
-    next: (res: any) => {
-      this.resultat   = res.result ?? res.resultat ?? res;
-      this.submitted  = true;
-      this.submitting = false;
-      this.selected   = this.totalQuestions + 1;
-    },
-   error: (err: any) => {
-  this.submitting = false;
-  if (err?.status === 403) {
-    this.error = err?.error?.message ?? 'Accès refusé.';
-  } else {
-    this.error = 'Erreur lors de la soumission du quiz.';
+    this.formationsService.soumettreQuiz(this.quiz.id, answers).subscribe({
+      next: (res: any) => {
+        this.resultat   = res.result ?? res.resultat ?? res;
+        this.submitted  = true;
+        this.submitting = false;
+        this.selected   = this.totalQuestions + 1;
+      },
+      error: (err: any) => {
+        this.submitting = false;
+        if (err?.status === 403) {
+          this.error = err?.error?.message ?? 'Accès refusé.';
+        } else {
+          this.error = 'Erreur lors de la soumission du quiz.';
+        }
+      }
+    });
   }
-}
-  });
-}
 
   // ── Helpers résultat ───────────────────────────────────────
   get estReussi(): boolean  { return this.resultat?.est_reussi ?? false; }
@@ -197,13 +198,16 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
     return '#ef4444';
   }
 
-  // Calcul du dashoffset pour le cercle SVG (circumference = 2π×50 ≈ 314)
   getScoreDashOffset(): number {
     const circumference = 314;
     return circumference - (this.noteFinale / 100) * circumference;
   }
 
-  retournerAuxQuiz(): void { this.router.navigate([routes.studentsQuiz]); }
+  // ── Route retour — pointe vers la liste quiz avec le layout ─
+  // ✅ CORRIGÉ : navigate avec tableau pour correspondre au path /student/quiz/:id
+  retournerAuxQuiz(): void {
+    this.router.navigate([routes.studentsQuiz]);
+  }
 
   // ── Helpers affichage ──────────────────────────────────────
   getOptionLetter(index: number): string {

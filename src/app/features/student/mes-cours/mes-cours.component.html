@@ -148,9 +148,13 @@
 </div>
 
 <!-- LOADING -->
-<div *ngIf="loading" class="mc-loading">
-  <div class="mc-loading__spinner"></div>
-  <p>Chargement de vos formations...</p>
+<div *ngIf="loading" class="qq-loading">
+   <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
+   <p>Chargement de vos formations...</p>
+
+  
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -345,10 +349,7 @@
       Vos formations apparaîtront ici dès qu'elles vous seront assignées.
     </ng-container>
   </p>
-  <button *ngIf="searchDataValue || selectedTab !== ''"
-          class="mc-btn-retry" (click)="resetFilters()">
-    <i class="isax isax-refresh me-1"></i>Réinitialiser les filtres
-  </button>
+ 
 </div>
 
 <!-- PAGINATION -->

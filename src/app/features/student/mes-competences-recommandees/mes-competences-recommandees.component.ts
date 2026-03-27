@@ -3,6 +3,15 @@ import { CommonModule }      from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
 
+// ── Interfaces ────────────────────────────────────────────────────────────────
+export interface DomaineDB {
+  id:      number;
+  nom:     string;
+  slug:    string;
+  couleur: string | null;
+  icone:   string | null;
+}
+
 interface FormationRecommandee {
   formation_id:    number;
   formation_titre: string;
@@ -10,9 +19,21 @@ interface FormationRecommandee {
   duree:           string | null;
   competences:     string[];
   nb_competences:  number;
+  domaine:         DomaineDB | null;   // ← enrichi côté backend (patch PHP)
+}
+
+export interface DomaineGroupReco {
+  domaine:     DomaineDB;
+  formations:  FormationRecommandee[];
+  competences: string[];              // compétences uniques du groupe
 }
 
 type SortOption = 'competences' | 'duree';
+
+const FALLBACK_COLORS = [
+  '#4f46e5','#059669','#db2777','#ea580c',
+  '#0284c7','#0d9488','#64748b','#7c3aed',
+];
 
 @Component({
   selector:    'app-mes-competences-recommandees',
@@ -55,6 +76,7 @@ export class MesCompetencesRecommandeesComponent implements OnInit {
     });
   }
 
+  // ── Formations filtrées + triées ──────────────────────────────────────────
   get formationsFiltrees(): FormationRecommandee[] {
     let list = [...this.formations];
 
@@ -79,23 +101,66 @@ export class MesCompetencesRecommandeesComponent implements OnInit {
     return list;
   }
 
-  get totalCompetences(): number {
-    return this.formations.reduce((acc, f) => acc + f.nb_competences, 0);
+  // ── Groupement par domaine (même logique que les acquises) ────────────────
+  get groupesFinaux(): DomaineGroupReco[] {
+    const map = new Map<number | 'autres', DomaineGroupReco>();
+
+    for (const f of this.formationsFiltrees) {
+      const key = f.domaine?.id ?? 'autres';
+
+      if (!map.has(key)) {
+        const domaine: DomaineDB = f.domaine ?? {
+          id: 0, nom: 'Autres compétences',
+          slug: 'autres', couleur: '#64748b', icone: 'isax-category',
+        };
+        map.set(key, { domaine, formations: [], competences: [] });
+      }
+
+      const grp = map.get(key)!;
+      grp.formations.push(f);
+
+      // Dédoublonnage des compétences dans le groupe
+      const existing = new Set(grp.competences);
+      f.competences.forEach(c => { if (!existing.has(c)) grp.competences.push(c); });
+    }
+
+    // Tri des groupes : par nombre de compétences décroissant
+    return Array.from(map.values())
+      .sort((a, b) => b.competences.length - a.competences.length);
   }
 
-  // ✅ Fiche détail formation
+  get hasGroupes(): boolean { return this.groupesFinaux.length > 0; }
+
+  get totalCompetences(): number {
+    const all = new Set<string>();
+    this.formations.forEach(f => f.competences.forEach(c => all.add(c)));
+    return all.size;
+  }
+
+  // ── Helpers domaine ───────────────────────────────────────────────────────
+  getDomaineColor(domaine: DomaineDB, index = 0): string {
+    return domaine.couleur ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+  }
+
+  getDomaineColorLight(domaine: DomaineDB, index = 0): string {
+    return this.getDomaineColor(domaine, index) + '18';
+  }
+
+  getDomaineIcon(domaine: DomaineDB): string {
+    return domaine.icone ?? 'isax-category';
+  }
+
+  // ── Helpers existants (inchangés) ─────────────────────────────────────────
   allerVersFormation(id: number): void {
     this.router.navigate(['/courses/course-details-2', id]);
   }
 
-  // ✅ Image avec fallback
   getImage(image: string | null): string | null {
     if (!image) return null;
     if (image.startsWith('http')) return image;
     return this.imageBase + image;
   }
 
-  // ✅ Durée avec unité
   formatDuree(duree: string | null): string {
     if (!duree) return '';
     const n = parseFloat(duree);
@@ -108,4 +173,6 @@ export class MesCompetencesRecommandeesComponent implements OnInit {
   onRecherche(event: Event): void {
     this.recherche = (event.target as HTMLInputElement).value;
   }
+
+  trackByDomaine(_: number, g: DomaineGroupReco): number { return g.domaine.id; }
 }

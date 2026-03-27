@@ -8,8 +8,8 @@
   <ul class="main-menu">
 
     <!-- ================= TABLEAU DE BORD ================= -->
-    <li class="menu-item">
-      <a [routerLink]="routes.students_Dashboard" routerLinkActive="active">
+    <li class="menu-item" [class.active]="isDashboardActive()">
+      <a [routerLink]="routes.students_Dashboard">
         <i class="isax isax-grid-35"></i>
         <span>Tableau de bord</span>
       </a>
@@ -93,13 +93,13 @@
       </ul>
     </li>
 
-<!-- ================= MES PALMARÈS ================= -->
-<li class="menu-item">
-  <a [routerLink]="routes.student_MesPalmares" routerLinkActive="active">
-    <i class="isax isax-medal"></i>
-    <span>Mes palmarès</span>
-  </a>
-</li>
+    <!-- ================= MES PALMARÈS ================= -->
+    <li class="menu-item">
+      <a [routerLink]="routes.student_MesPalmares" routerLinkActive="active">
+        <i class="isax isax-medal"></i>
+        <span>Mes palmarès</span>
+      </a>
+    </li>
 
     <!-- ================= CENTRE D'AIDE ================= -->
     <li class="menu-item has-submenu">

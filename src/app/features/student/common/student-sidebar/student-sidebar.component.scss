@@ -245,3 +245,36 @@ $transition:  all 0.25s ease;
     background: rgba(239, 68, 68, 0.1);
   }
 }
+/* ✅ Dashboard actif (fort) */
+.menu-item.active > a {
+  background: linear-gradient(90deg, #11a9b7, #0e8f9b);
+  color: #fff;
+
+  i {
+    color: #fff;
+  }
+}
+
+/* Lien routerLinkActive (sous-items et items simples) */
+.menu-item a.active {
+  background: transparent !important;
+  color: #11a9b7;
+
+  /* ✅ L'icône reste visible avec la couleur primaire */
+  i {
+    color: #11a9b7 !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Barre indicatrice à gauche */
+.menu-item a.active::before {
+  content: '';
+  width: 4px;
+  height: 100%;
+  background: #11a9b7;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 4px;
+}

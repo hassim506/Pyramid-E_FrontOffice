@@ -153,10 +153,13 @@
 </div>
 
 <!-- LOADING -->
-<div *ngIf="loading" class="sc-loading">
-  <div class="sc-loading__spinner"></div>
-  <p>Chargement de vos demandes...</p>
+<div class="qq-loading" *ngIf="loading">
+  <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
+  <p>Chargement de vos demandes de formations...</p>
 </div>
+
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- VUE TABLEAU                                -->

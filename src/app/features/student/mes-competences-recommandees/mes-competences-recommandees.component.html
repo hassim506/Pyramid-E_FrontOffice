@@ -1,7 +1,9 @@
 <!-- LOADING -->
-<div class="cp-loading" *ngIf="loading">
-  <div class="cp-loading__ring"></div>
-  <p>Chargement des compétences recommandées...</p>
+<div class="qq-loading" *ngIf="loading">
+  <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
+  <p>Chargement de vos compétences recommandées...</p>
 </div>
 
 <!-- ERREUR -->
@@ -53,6 +55,13 @@
           <div class="cp-stat-card__label">Compétences</div>
         </div>
       </div>
+      <div class="cp-stat-card cp-stat-card--indigo">
+        <i class="isax isax-category"></i>
+        <div>
+          <div class="cp-stat-card__value">{{ groupesFinaux.length }}</div>
+          <div class="cp-stat-card__label">Domaines</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -60,10 +69,9 @@
   <div class="cp-toolbar mb-4">
     <div class="cp-search">
       <i class="isax isax-search-normal-1"></i>
-      <input type="text" placeholder="Rechercher une compétence ou une formation..."
+      <input type="text" placeholder="Rechercher une compétence..."
              [value]="recherche" (input)="onRecherche($event)" class="cp-search__input"/>
     </div>
-    <!-- ✅ Tri -->
     <div class="cp-sort">
       <select class="cp-sort__select" (change)="setTri($any($event.target).value)">
         <option value="competences">Trier : Compétences ↓</option>
@@ -72,54 +80,43 @@
     </div>
   </div>
 
-  <!-- ── LISTE FORMATIONS ─────────────────────────────── -->
-  <div class="cp-section">
-    <div class="cp-formation-grid" *ngIf="formationsFiltrees.length > 0">
-      <div class="cp-formation-card" *ngFor="let f of formationsFiltrees">
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- GRILLE PAR DOMAINE                                   -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <div class="cp-domaine-grid" *ngIf="hasGroupes; else emptyState">
 
-        <div class="cp-formation-card__header">
+    <div class="cp-domaine-card"
+         *ngFor="let grp of groupesFinaux; let i = index; trackBy: trackByDomaine"
+         [style.--d-color]="getDomaineColor(grp.domaine, i)"
+         [style.--d-color-lt]="getDomaineColorLight(grp.domaine, i)">
 
-          <!-- ✅ Image de couverture ou icône fallback -->
-          <div class="cp-formation-card__icon cp-formation-card__icon--teal">
-            <img *ngIf="getImage(f.image)" [src]="getImage(f.image)"
-                 class="cp-formation-card__img" alt="{{ f.formation_titre }}"/>
-            <i *ngIf="!getImage(f.image)" class="isax isax-lamp-on"></i>
-          </div>
-
-          <div class="cp-formation-card__info">
-            <div class="cp-formation-card__titre">{{ f.formation_titre }}</div>
-            <div class="cp-formation-card__meta">
-              {{ f.nb_competences }} compétence(s) à acquérir
-              <!-- ✅ Durée avec unité -->
-              <span *ngIf="f.duree"> · {{ formatDuree(f.duree) }}</span>
-            </div>
-          </div>
-          <span class="cp-formation-card__badge cp-formation-card__badge--teal">Disponible</span>
+      <!-- En-tête domaine -->
+      <div class="cp-domaine-card__header">
+        <div class="cp-domaine-card__icon">
+          <i class="isax {{ getDomaineIcon(grp.domaine) }}"></i>
         </div>
-
-        <div class="cp-badges cp-badges--sm mt-3">
-          <div class="cp-badge cp-badge--reco" *ngFor="let c of f.competences">
-            <i class="isax isax-lamp-on me-1"></i>{{ c }}
-          </div>
-        </div>
-
-        <div class="cp-formation-card__footer">
-          <!-- ✅ Redirige vers le détail de la formation -->
-          <button class="cp-btn-link cp-btn-link--teal"
-                  (click)="allerVersFormation(f.formation_id)">
-            <i class="isax isax-play-circle me-1"></i>Voir la formation
-          </button>
-        </div>
-
+        <div class="cp-domaine-card__title">{{ grp.domaine.nom }}</div>
+        <span class="cp-domaine-card__count">{{ grp.competences.length }}</span>
       </div>
-    </div>
 
-    <div class="cp-empty" *ngIf="formationsFiltrees.length === 0">
+      <!-- Badges compétences uniquement -->
+      <div class="cp-badges cp-badges--sm mt-3">
+        <div class="cp-badge cp-badge--reco" *ngFor="let c of grp.competences">
+          <i class="isax isax-lamp-on me-1"></i>{{ c }}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <ng-template #emptyState>
+    <div class="cp-empty">
       <i class="isax isax-lamp-on cp-empty__icon"></i>
       <h6>Aucune compétence recommandée</h6>
       <p *ngIf="recherche">Aucun résultat pour "{{ recherche }}".</p>
       <p *ngIf="!recherche">Vous avez déjà accès à toutes les formations disponibles.</p>
     </div>
-  </div>
+  </ng-template>
 
 </ng-container>

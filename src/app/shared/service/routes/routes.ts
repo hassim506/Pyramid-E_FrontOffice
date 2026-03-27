@@ -58,13 +58,14 @@ export const routes = {
   students_invoice: '/student/setting-student-invoice',
   students_tickets: '/student/student-tickets',
   students_message: '/student/student-message',
-  students_quiz_question: '/student/student-quiz-questions',
+  // ✅ CORRIGÉ : pointe vers la route top-level /student/quiz/:id (usage: navigate([routes.students_quiz_question, id]))
+  students_quiz_question: '/student/quiz',
   students_quiz: '/student/student-quiz',
-  studentsQuizQuestion: '/student/student-quiz-questions',
+  studentsQuizQuestion: '/student/quiz',               // ✅ CORRIGÉ (alias)
   studentsQuiz: '/student/student-quiz',
   studentProfile: '/student/student-profile',
   student_MesCompetences: '/student/mes-competences',
-  student_CompetencesRecommandees:     '/student/mes-competences-recommandees',  // ✅
+  student_CompetencesRecommandees: '/student/mes-competences-recommandees',
   student_Planning: '/student/student-planning',
   student_MesPalmares: '/student/mes-palmares',
   studentMessages: '/student/student-message',
@@ -89,8 +90,8 @@ export const routes = {
   student_DemandeFormation: '/student/student-certificate',
 
   // Mes parcours et catalogues assignés
-  student_CataloguesAssignes: '/student/mes-catalogues',          // ✅
-  student_ParcoursAssignes:   '/student/mes-parcours-assignes',   // ✅ parcours-assignes → mes-parcours-assignes
+  student_CataloguesAssignes: '/student/mes-catalogues',
+  student_ParcoursAssignes:   '/student/mes-parcours-assignes',
   student_SessionsAcceptees:  '/student/sessions-acceptees',
 
   // SuperAdmin Routes
@@ -166,7 +167,7 @@ export const routes = {
   adminrhPermission: '/adminrh/adminrh-permission',
   adminrhRole: '/adminrh/adminrh-role',
   AdminrhDemande: '/adminrh/adminrh-demande',
-  adminrhSession: '/adminrh/adminrh-session',  // ✅ lead
+  adminrhSession: '/adminrh/adminrh-session',
   adminrhCourse: '/adminrh/adminrh-course',
   adminrhCategorie: '/adminrh/adminrh-categorie',
   adminrhCatalogue: '/adminrh/adminrh-catalogue',

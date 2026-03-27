@@ -24,31 +24,31 @@ interface Toast {
 })
 export class MesCoursComponent implements OnInit, OnDestroy {
 
-  // ── Vue ─────────────────────────────────────────
+  // ── Vue ──────────────────────────────────────
   viewMode: 'grid' | 'table' = 'grid';
 
-  // ── Données ──────────────────────────────────────
+  // ── Données ──────────────────────────────────
   allFormations: Formation[] = [];
   formations:    Formation[] = [];
   loading = false;
   error   = '';
 
-  // ── Pagination ───────────────────────────────────
+  // ── Pagination ───────────────────────────────
   currentPage = 1;
   pageSize    = 10;
   totalData   = 0;
   skip        = 0;
   limit       = 10;
 
-  // ── Filtres ──────────────────────────────────────
+  // ── Filtres ──────────────────────────────────
   selectedTab     = '';
   searchDataValue = '';
 
-  // ── Toast ────────────────────────────────────────
+  // ── Toast ────────────────────────────────────
   toast: Toast = { type: 'success', message: '', visible: false };
   private toastTimer: any;
 
-  // ── Abonnement progression ───────────────────────
+  // ── Abonnement progression ───────────────────
   private progressionSub?: Subscription;
 
   constructor(
@@ -100,11 +100,11 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   // ════════════════════════════════════════════
   // KPI GETTERS
   // ════════════════════════════════════════════
-  get totalFormations():  number { return this.allFormations.length; }
-  get totalEnCours():     number { return this.allFormations.filter(f => { const p = this.getProgression(f); return p > 0 && p < 100; }).length; }
-  get totalACommencer():  number { return this.allFormations.filter(f => this.getProgression(f) === 0).length; }
-  get totalTerminees():   number { return this.allFormations.filter(f => this.getProgression(f) === 100).length; }
-  get totalCertifiantes():number { return this.allFormations.filter(f => (f as any).est_certifiante).length; }
+  get totalFormations():   number { return this.allFormations.length; }
+  get totalEnCours():      number { return this.allFormations.filter(f => { const p = this.getProgression(f); return p > 0 && p < 100; }).length; }
+  get totalACommencer():   number { return this.allFormations.filter(f => this.getProgression(f) === 0).length; }
+  get totalTerminees():    number { return this.allFormations.filter(f => this.getProgression(f) === 100).length; }
+  get totalCertifiantes(): number { return this.allFormations.filter(f => (f as any).est_certifiante).length; }
 
   // ════════════════════════════════════════════
   // FILTRES
@@ -152,8 +152,30 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   // ════════════════════════════════════════════
   // NAVIGATION
   // ════════════════════════════════════════════
+
+  /**
+   * Ouvre le détail d'une formation depuis mes-formations
+   * Tunnel : mes-formations → course-details-2
+   * On passe fromPage: 'demandes' + la demande associée pour le retour
+   */
+  openDetails(f: Formation): void {
+    this.router.navigate(['/courses/course-details-2', f.id], {
+      state: {
+        fromPage: 'demandes',
+        demande:  f,
+      }
+    });
+  }
+
+  /**
+   * Lance directement le player depuis mes-formations
+   * Tunnel : mes-formations → lecture-formation
+   * On passe fromPage: 'demandes' pour que le retour revienne ici
+   */
   openPlayer(f: Formation): void {
-    this.router.navigate(['/student/lecture-formation', f.id]);
+    this.router.navigate(['/student/lecture-formation', f.id], {
+      state: { fromPage: 'demandes' } // ✅ retour vers /student/mes-formations
+    });
   }
 
   // ════════════════════════════════════════════

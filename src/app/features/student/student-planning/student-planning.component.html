@@ -1,6 +1,8 @@
 <!-- LOADING -->
-<div class="pl-loading" *ngIf="loading">
-  <div class="pl-loading__ring"></div>
+<div *ngIf="loading" class="qq-loading">
+  <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
   <p>Chargement de votre planning...</p>
 </div>
 
@@ -89,53 +91,60 @@
     </div>
   </div>
 
-  <!-- ── CALENDRIER + PANEL ─────────────────────────── -->
-  <div class="pl-calendar-wrap" [class.pl-calendar-wrap--with-detail]="selectedJour">
+  <!-- ── CALENDRIER (wrapper relatif pour le popover) ── -->
+  <div class="pl-calendar-wrap" (click)="onWrapClick($event)">
 
-    <!-- ✅ Wrapper scroll indépendant autour du calendrier uniquement -->
-    <div class="pl-calendar-scroll">
-      <div class="pl-calendar">
-        <div class="pl-calendar__headers">
-          <div class="pl-calendar__header-day" *ngFor="let j of joursLabels">{{ j }}</div>
-        </div>
-        <div class="pl-calendar__grid">
-          <div class="pl-day"
-               *ngFor="let jour of jours"
-               [class.pl-day--other-month]="!jour.moisCourant"
-               [class.pl-day--today]="jour.estAujourdhui"
-               [class.pl-day--has-events]="jour.evenements.length > 0"
-               [class.pl-day--selected]="selectedJour?.date?.getTime() === jour.date?.getTime()"
-               (click)="selectJour(jour)">
-            <div class="pl-day__num">{{ jour.jour }}</div>
-            <div class="pl-day__events">
-              <div class="pl-day-evt"
-                   *ngFor="let evt of jour.evenements.slice(0, 3)"
-                   [style.background]="evt.couleur + '22'"
-                   [style.border-left]="'3px solid ' + evt.couleur">
-                <i class="isax {{ evt.icone }}" [style.color]="evt.couleur"></i>
-                <span class="pl-day-evt__title">{{ evt.titre }}</span>
-              </div>
-              <div class="pl-day-evt__more" *ngIf="jour.evenements.length > 3">
-                +{{ jour.evenements.length - 3 }} autres
-              </div>
+    <div class="pl-calendar">
+      <div class="pl-calendar__headers">
+        <div class="pl-calendar__header-day" *ngFor="let j of joursLabels">{{ j }}</div>
+      </div>
+      <div class="pl-calendar__grid" #calendarGrid>
+        <div class="pl-day"
+             *ngFor="let jour of jours; let i = index"
+             [attr.data-index]="i"
+             [class.pl-day--other-month]="!jour.moisCourant"
+             [class.pl-day--today]="jour.estAujourdhui"
+             [class.pl-day--has-events]="jour.evenements.length > 0"
+             [class.pl-day--selected]="selectedJour?.date?.getTime() === jour.date?.getTime()"
+             (click)="selectJour(jour, $event)">
+          <div class="pl-day__num">{{ jour.jour }}</div>
+          <div class="pl-day__events">
+            <div class="pl-day-evt"
+                 *ngFor="let evt of jour.evenements.slice(0, 3)"
+                 [style.background]="evt.couleur + '22'"
+                 [style.border-left]="'3px solid ' + evt.couleur">
+              <i class="isax {{ evt.icone }}" [style.color]="evt.couleur"></i>
+              <span class="pl-day-evt__title">{{ evt.titre }}</span>
+            </div>
+            <div class="pl-day-evt__more" *ngIf="jour.evenements.length > 3">
+              +{{ jour.evenements.length - 3 }} autres
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ── PANEL DÉTAIL JOUR ──────────────────────── -->
-    <div class="pl-detail" *ngIf="selectedJour">
-      <div class="pl-detail__header">
+    <!-- ── POPOVER FLOTTANT AU-DESSUS DU CALENDRIER ── -->
+    <div class="pl-popover"
+         *ngIf="selectedJour"
+         [style.top.px]="popoverTop"
+         [style.left.px]="popoverLeft"
+         (click)="$event.stopPropagation()">
+
+      <!-- Flèche de pointage vers la case -->
+      <div class="pl-popover__arrow" [style.left.px]="popoverArrowLeft"></div>
+
+      <div class="pl-popover__header">
         <div>
-          <div class="pl-detail__date">{{ formatDateFr(selectedJour.date) }}</div>
-          <div class="pl-detail__count">{{ selectedJour.evenements.length }} événement(s)</div>
+          <div class="pl-popover__date">{{ formatDateFr(selectedJour.date) }}</div>
+          <div class="pl-popover__count">{{ selectedJour.evenements.length }} événement(s)</div>
         </div>
-        <button class="pl-detail__close" (click)="fermerDetail()">
+        <button class="pl-popover__close" (click)="fermerDetail()">
           <i class="isax isax-close-circle"></i>
         </button>
       </div>
-      <div class="pl-detail__list">
+
+      <div class="pl-popover__list">
         <div class="pl-evt-card"
              *ngFor="let evt of selectedJour.evenements"
              [class.pl-evt-card--selected]="selectedEvenement?.id === evt.id"
@@ -167,7 +176,9 @@
             </span>
             <div class="pl-evt-prog" *ngIf="evt.progression > 0">
               <div class="pl-evt-prog__bar">
-                <div class="pl-evt-prog__fill" [style.width.%]="evt.progression" [style.background]="evt.couleur"></div>
+                <div class="pl-evt-prog__fill"
+                     [style.width.%]="evt.progression"
+                     [style.background]="evt.couleur"></div>
               </div>
               <span>{{ evt.progression }}%</span>
             </div>
@@ -176,7 +187,7 @@
       </div>
     </div>
 
-  </div>
+  </div><!-- /pl-calendar-wrap -->
 
   <!-- LÉGENDE -->
   <div class="pl-legende mt-4">

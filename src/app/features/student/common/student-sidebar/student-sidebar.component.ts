@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, NavigationEnd, RouterModule } from '@angular/router'; // ✅ ajouté
 import { routes } from '../../../../shared/service/routes/routes';
 import { CommonService } from '../../../../shared/service/common/common.service';
-
+import { filter } from 'rxjs/operators'; // ✅ ajouté
 
 @Component({
     selector: 'app-student-sidebar',
@@ -18,7 +18,13 @@ export class StudentSidebarComponent {
   public last = '';
   isCollapsed = false;
 
-  constructor(private common: CommonService) {
+  // ✅ ajouté
+  public currentUrl = '';
+
+  constructor(
+    private common: CommonService,
+    private router: Router // ✅ ajouté
+  ) {
     this.common.base.subscribe((base: string) => {
       this.base = base;
     });
@@ -28,5 +34,17 @@ export class StudentSidebarComponent {
     this.common.last.subscribe((last: string) => {
       this.last = last;
     });
+
+    // ✅ ajouté (écoute changement de route)
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        this.currentUrl = event.url;
+      });
+  }
+
+  // ✅ ajouté (Dashboard toujours actif)
+  isDashboardActive(): boolean {
+    return true;
   }
 }

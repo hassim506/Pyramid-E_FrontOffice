@@ -10,9 +10,8 @@ $warning:      #f59e0b;
 $warning-lt:   #fffbeb;
 $danger:       #ef4444;
 $danger-lt:    #fef2f2;
-$indigo:       #4f46e5;
-$indigo-lt:    #eef2ff;
 $dark:         #0f172a;
+$dark-2:       #1e293b;
 $gray-50:      #f8fafc;
 $gray-100:     #f1f5f9;
 $gray-200:     #e2e8f0;
@@ -21,6 +20,7 @@ $gray-400:     #94a3b8;
 $gray-500:     #64748b;
 $gray-600:     #475569;
 $gray-700:     #334155;
+$gray-800:     #0f172a;
 $gray-900:     #0f172a;
 $radius-sm:    8px;
 $radius-md:    14px;
@@ -29,6 +29,7 @@ $radius-xl:    28px;
 $shadow-sm:    0 1px 4px rgba(0,0,0,.06);
 $shadow-md:    0 4px 20px rgba(0,0,0,.08);
 $shadow-lg:    0 12px 40px rgba(0,0,0,.12);
+$shadow-xl:    0 20px 60px rgba(0,0,0,.18);
 $t:            all .2s ease;
 
 // ═══════════════════════════════════════════════════════
@@ -36,13 +37,14 @@ $t:            all .2s ease;
 // ═══════════════════════════════════════════════════════
 .qq-loading {
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; min-height: 60vh; gap: 20px;
+  justify-content: center; min-height: 100vh;
+  background: $dark; gap: 24px;
 
   p { font-size: 14px; color: $gray-400; margin: 0; }
 }
 
 .qq-loading__ring {
-  position: relative; width: 50px; height: 50px;
+  position: relative; width: 56px; height: 56px;
 
   div {
     position: absolute; width: 100%; height: 100%;
@@ -51,9 +53,9 @@ $t:            all .2s ease;
     border-radius: 50%;
     animation: qq-spin .8s linear infinite;
 
-    &:nth-child(2) { width: 38px; height: 38px; top: 6px; left: 6px; border-top-color: $indigo; animation-delay: -.3s; }
-    &:nth-child(3) { width: 26px; height: 26px; top: 12px; left: 12px; border-top-color: $warning; animation-delay: -.6s; }
-    &:nth-child(4) { width: 14px; height: 14px; top: 18px; left: 18px; border-top-color: $success; animation-delay: -.9s; }
+    &:nth-child(2) { width: 42px; height: 42px; top: 7px; left: 7px; border-top-color: $warning; animation-delay: -.3s; }
+    &:nth-child(3) { width: 28px; height: 28px; top: 14px; left: 14px; border-top-color: $success; animation-delay: -.6s; }
+    &:nth-child(4) { width: 14px; height: 14px; top: 21px; left: 21px; border-top-color: $danger; animation-delay: -.9s; }
   }
 }
 
@@ -64,364 +66,437 @@ $t:            all .2s ease;
 // ═══════════════════════════════════════════════════════
 .qq-error {
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; min-height: 60vh; gap: 14px; text-align: center;
-  padding: 40px;
+  justify-content: center; min-height: 100vh; gap: 16px;
+  background: $dark; text-align: center; padding: 40px;
 
-  &__icon { font-size: 3rem; color: $danger; }
-  h3 { font-size: 18px; font-weight: 800; color: $gray-900; margin: 0; }
-  p  { font-size: 14px; color: $gray-500; margin: 0; }
+  &__icon { font-size: 3.5rem; color: $danger; }
+  h3  { font-size: 22px; font-weight: 800; color: #fff; margin: 0; }
+  p   { font-size: 14px; color: $gray-400; margin: 0; }
 }
 
 // ═══════════════════════════════════════════════════════
-// SHELL
+// PAGE PLEIN ÉCRAN
 // ═══════════════════════════════════════════════════════
-.qq-shell {
+.qq-page {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: $gray-50;
-  display: flex; flex-direction: column;
+  animation: qq-fade-in .3s ease;
+}
+
+@keyframes qq-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 // ═══════════════════════════════════════════════════════
-// TOP BAR
+// TOPBAR
 // ═══════════════════════════════════════════════════════
 .qq-topbar {
-  display: flex; align-items: center; gap: 14px;
-  padding: 0 24px; height: 60px; flex-shrink: 0;
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20px;
+  padding: 0 24px;
+  height: 64px;
   background: $dark;
   border-bottom: 1px solid rgba(255,255,255,.06);
-  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 16px rgba(0,0,0,.2);
+
+  &--result { background: $dark; }
+
+  &__left {
+    display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;
+  }
 
   &__back {
     width: 36px; height: 36px; border-radius: $radius-sm;
-    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
-    color: #fff; font-size: 16px; cursor: pointer; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; transition: $t;
-    &:hover { background: rgba(255,255,255,.16); }
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.7); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: $t;
+    &:hover { background: rgba(255,255,255,.12); color: #fff; }
   }
 
-  &__info { flex: 1; min-width: 0; }
-  &__label {
-    display: block; font-size: 10px; text-transform: uppercase;
-    letter-spacing: .07em; color: rgba(255,255,255,.35); font-weight: 600;
+  &__meta {
+    display: flex; flex-direction: column; min-width: 0;
   }
+
+  &__label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: $primary; line-height: 1;
+  }
+
   &__title {
-    margin: 0; font-size: 14px; font-weight: 700; color: #fff;
+    font-size: 15px; font-weight: 700; color: #fff; margin: 2px 0 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 280px;
+  }
+
+  &__center {
+    flex: 2; max-width: 480px;
+  }
+
+  &__progress {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  &__progress-track {
+    flex: 1; height: 6px; background: rgba(255,255,255,.1);
+    border-radius: 99px; overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%; background: linear-gradient(90deg, $primary, $success);
+    border-radius: 99px; transition: width .4s ease;
+  }
+
+  &__progress-label {
+    font-size: 12px; color: rgba(255,255,255,.5); white-space: nowrap;
+    strong { color: #fff; }
+  }
+
+  &__right {
+    display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+  }
+
+  &__answered {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: rgba(255,255,255,.6);
+    i { color: $success; font-size: 15px; }
   }
 
   &__timer {
     display: flex; align-items: center; gap: 6px;
-    padding: 6px 14px; border-radius: 99px;
-    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
-    font-size: 14px; font-weight: 700; color: rgba(255,255,255,.8);
-    flex-shrink: 0;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: $radius-sm; padding: 6px 12px;
+    transition: $t;
 
-    i { font-size: 15px; color: $primary; }
+    i { font-size: 15px; color: rgba(255,255,255,.5); }
+
+    &-value { font-size: 15px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+    &-sep   { font-size: 12px; color: rgba(255,255,255,.3); }
+    &-total { font-size: 12px; color: rgba(255,255,255,.4); }
+
+    &--warning {
+      background: rgba($warning,.15);
+      border-color: rgba($warning,.3);
+      i, .qq-topbar__timer-value { color: $warning; }
+    }
 
     &--danger {
-      background: rgba($danger,.15); border-color: rgba($danger,.3);
-      color: lighten($danger, 20%);
-      i { color: lighten($danger, 20%); }
-      animation: qq-pulse-danger 1s ease infinite;
+      background: rgba($danger,.15);
+      border-color: rgba($danger,.3);
+      animation: qq-pulse 1s ease-in-out infinite;
+      i, .qq-topbar__timer-value { color: $danger; }
+    }
+  }
+}
+
+@keyframes qq-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba($danger, 0); }
+  50%       { box-shadow: 0 0 0 4px rgba($danger, .2); }
+}
+
+// ═══════════════════════════════════════════════════════
+// LAYOUT PRINCIPAL (aside + content)
+// ═══════════════════════════════════════════════════════
+.qq-main {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  min-height: 0;
+}
+
+// ── ASIDE NAVIGATION ─────────────────────────────────
+.qq-aside {
+  width: 220px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid $gray-200;
+  padding: 24px 16px;
+  overflow-y: auto;
+
+  &__inner { position: sticky; top: 0; }
+
+  &__title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: $gray-400; margin: 0 0 14px;
+  }
+
+  &__dots {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  &__dot {
+    width: 100%; aspect-ratio: 1; border-radius: $radius-sm;
+    font-size: 11px; font-weight: 700;
+    background: $gray-100; border: 1.5px solid $gray-200;
+    color: $gray-500; cursor: pointer; transition: $t;
+
+    &:hover { background: $primary-lt; border-color: rgba($primary,.3); color: $primary; }
+
+    &--active {
+      background: $dark; border-color: $dark; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+
+    &--answered {
+      background: rgba($success,.1); border-color: rgba($success,.3); color: $success;
     }
   }
 
-  &__timer-total { font-size: 12px; color: rgba(255,255,255,.35); }
+  &__legend {
+    display: flex; flex-direction: column; gap: 8px;
+    padding-top: 16px; border-top: 1px solid $gray-100;
+  }
+
+  &__legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: $gray-500;
+
+    &--answered .qq-aside__legend-dot { background: rgba($success,.3); border-color: rgba($success,.4); }
+    &--current  .qq-aside__legend-dot { background: $dark; border-color: $dark; }
+  }
+
+  &__legend-dot {
+    width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;
+    border: 1.5px solid $gray-300; background: $gray-100;
+
+    &--empty { background: $gray-100; border-color: $gray-200; }
+  }
 }
 
-@keyframes qq-pulse-danger {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: .7; }
+// ── ZONE QUESTION ─────────────────────────────────────
+.qq-content {
+  flex: 1;
+  padding: 40px 60px;
+  overflow-y: auto;
+  max-width: 900px;
+
+  @media (max-width: 1024px) { padding: 28px 24px; }
 }
 
-// ═══════════════════════════════════════════════════════
-// PROGRESS
-// ═══════════════════════════════════════════════════════
-.qq-progress-wrap {
-  padding: 12px 24px 0; background: $dark;
-}
-
-.qq-progress-bar {
-  height: 4px; background: rgba(255,255,255,.1);
-  border-radius: 99px; overflow: hidden; margin-bottom: 8px;
-}
-
-.qq-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, $primary, lighten($primary, 14%));
-  border-radius: 99px; transition: width .4s ease;
-}
-
-.qq-progress-info {
-  display: flex; justify-content: space-between; align-items: center;
-  padding-bottom: 12px;
-}
-
-.qq-progress-steps {
-  font-size: 12px; color: rgba(255,255,255,.4);
-  strong { color: rgba(255,255,255,.8); font-weight: 700; }
-}
-
-.qq-progress-answered {
-  display: flex; align-items: center;
-  font-size: 12px; color: lighten($primary, 20%);
-  i { font-size: 13px; }
-}
-
-// ═══════════════════════════════════════════════════════
-// BODY
-// ═══════════════════════════════════════════════════════
-.qq-body {
-  flex: 1; padding: 28px 24px;
-  max-width: 760px; width: 100%; margin: 0 auto;
-}
-
-// ═══════════════════════════════════════════════════════
-// QUESTION CARD
-// ═══════════════════════════════════════════════════════
-.qq-question-card {
-  background: #fff; border-radius: $radius-xl;
-  border: 1px solid $gray-200; box-shadow: $shadow-md;
-  padding: 28px; margin-bottom: 24px;
-  animation: qq-slide-in .3s ease;
-}
-
-@keyframes qq-slide-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.qq-question-card__header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+// ── En-tête question ─────────────────────────────────
+.qq-question-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
 }
 
 .qq-question-num {
-  width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
-  background: linear-gradient(135deg, $primary, $primary-dk);
-  color: #fff; font-size: 14px; font-weight: 800;
+  width: 52px; height: 52px; border-radius: $radius-md;
+  background: $dark; color: #fff;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px rgba($primary,.3);
+  font-size: 17px; font-weight: 900; flex-shrink: 0;
+
+  span { font-size: 11px; font-weight: 500; opacity: .5; margin-right: 2px; }
 }
 
-// Type badges
-.qq-question-type-badge {
+.qq-question-type {
   display: inline-flex; align-items: center;
-  font-size: 11px; font-weight: 700; letter-spacing: .04em;
-  padding: 4px 12px; border-radius: 99px;
-  text-transform: uppercase;
-
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; padding: 5px 12px; border-radius: 99px;
   i { font-size: 12px; }
 
-  &--mcq  { background: $indigo-lt; color: $indigo; }
-  &--tf   { background: $warning-lt; color: darken($warning, 10%); }
-  &--text { background: $primary-lt; color: $primary-dk; }
+  &.qq-type-badge--mcq  { background: rgba($primary,.1);  color: $primary; }
+  &.qq-type-badge--tf   { background: rgba($warning,.12); color: darken($warning,8%); }
+  &.qq-type-badge--text { background: rgba(#6366f1,.1);   color: #6366f1; }
 }
 
+// ── Texte question ────────────────────────────────────
 .qq-question-text {
-  font-size: 17px; font-weight: 600; color: $gray-900;
-  line-height: 1.6; margin: 0 0 22px; letter-spacing: -.2px;
+  font-size: 20px; font-weight: 700; color: $gray-900;
+  line-height: 1.55; margin: 0 0 32px;
+
+  @media (max-width: 768px) { font-size: 16px; }
 }
 
-// ═══════════════════════════════════════════════════════
-// OPTIONS (QCM / Vrai-Faux)
-// ═══════════════════════════════════════════════════════
+// ── Options ───────────────────────────────────────────
 .qq-options {
-  display: flex; flex-direction: column; gap: 10px;
+  display: flex; flex-direction: column; gap: 12px;
+  margin-bottom: 36px;
 }
 
 .qq-option {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 18px; border-radius: $radius-md;
-  background: $gray-50; border: 2px solid $gray-200;
-  cursor: pointer; transition: $t; text-align: left; width: 100%;
-  color: $gray-700;
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px; border-radius: $radius-md;
+  background: #fff; border: 2px solid $gray-200;
+  cursor: pointer; text-align: left; width: 100%;
+  transition: $t; position: relative; overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: $primary-lt;
+    opacity: 0; transition: opacity .2s;
+  }
 
   &:hover {
-    background: $primary-lt; border-color: rgba($primary,.3);
-    color: $primary-dk;
-    .qq-option__letter { background: $primary; color: #fff; border-color: $primary; }
+    border-color: rgba($primary,.4);
+    box-shadow: $shadow-sm;
+    &::before { opacity: 1; }
   }
 
   &--selected {
-    background: $primary-lt; border-color: $primary;
-    color: $primary-dk;
-    .qq-option__letter { background: $primary; color: #fff; border-color: $primary; }
-    .qq-option__check  { opacity: 1; transform: scale(1); }
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary,.15);
+    background: $primary-lt;
+
+    .qq-option__letter {
+      background: $primary; color: #fff; border-color: $primary;
+    }
+
+    .qq-option__check { opacity: 1; color: $primary; }
+    .qq-option__text  { color: $dark; font-weight: 600; }
+
+    &::before { opacity: 0; }
   }
 
   &__letter {
-    width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
-    background: #fff; border: 2px solid $gray-200;
-    font-size: 13px; font-weight: 800; color: $gray-500;
-    display: flex; align-items: center; justify-content: center; transition: $t;
+    width: 34px; height: 34px; border-radius: $radius-sm;
+    background: $gray-100; border: 1.5px solid $gray-200;
+    font-size: 12px; font-weight: 800; color: $gray-600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: $t; position: relative; z-index: 1;
   }
 
   &__text {
-    flex: 1; font-size: 14px; font-weight: 500; line-height: 1.5;
+    flex: 1; font-size: 14px; font-weight: 500; color: $gray-700;
+    line-height: 1.5; position: relative; z-index: 1; transition: $t;
   }
 
   &__check {
-    font-size: 18px; color: $primary; opacity: 0;
-    transform: scale(.6); transition: $t; flex-shrink: 0;
+    font-size: 18px; opacity: 0; transition: $t;
+    position: relative; z-index: 1;
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// TEXTE LIBRE
-// ═══════════════════════════════════════════════════════
-.qq-text-wrap { display: flex; flex-direction: column; gap: 8px; }
+// ── Textarea ──────────────────────────────────────────
+.qq-text-wrap {
+  margin-bottom: 36px;
+}
 
 .qq-textarea {
-  width: 100%; padding: 14px 16px;
-  border: 2px solid $gray-200; border-radius: $radius-md;
-  font-size: 14px; color: $gray-700; resize: vertical;
-  background: $gray-50; transition: $t; font-family: inherit;
-  outline: none;
+  width: 100%; padding: 16px 20px;
+  border-radius: $radius-md; border: 2px solid $gray-200;
+  background: #fff; font-size: 14px; color: $gray-800;
+  resize: vertical; outline: none; transition: $t;
+  font-family: inherit; line-height: 1.6;
 
-  &:focus {
-    border-color: $primary; background: #fff;
-    box-shadow: 0 0 0 4px rgba($primary,.1);
-  }
-
-  &::placeholder { color: $gray-400; }
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary,.1); }
+  &::placeholder { color: $gray-300; }
 }
 
 .qq-textarea-hint {
+  margin-top: 8px; font-size: 12px; color: $gray-400;
   display: flex; align-items: center;
-  font-size: 12px; color: $gray-400;
   i { font-size: 13px; }
 }
 
-// ═══════════════════════════════════════════════════════
-// DOTS NAVIGATION
-// ═══════════════════════════════════════════════════════
-.qq-dots {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  justify-content: center; margin-bottom: 20px;
-}
-
-.qq-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: $gray-200; border: none; cursor: pointer; transition: $t;
-  padding: 0;
-
-  &--active   { background: $primary; transform: scale(1.4); box-shadow: 0 0 0 3px rgba($primary,.2); }
-  &--answered { background: lighten($primary, 20%); }
-
-  &:hover:not(.qq-dot--active) { background: $gray-300; transform: scale(1.2); }
-}
-
-// ═══════════════════════════════════════════════════════
-// NAVIGATION BUTTONS
-// ═══════════════════════════════════════════════════════
+// ── Navigation boutons ────────────────────────────────
 .qq-nav {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 24px; border-top: 1px solid $gray-100;
 }
 
+// ═══════════════════════════════════════════════════════
+// BOUTONS
+// ═══════════════════════════════════════════════════════
 .qq-btn {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 8px;
   padding: 12px 24px; border-radius: 50px;
-  font-size: 14px; font-weight: 700; cursor: pointer;
-  border: none; transition: $t; white-space: nowrap;
-
-  i { font-size: 15px; }
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border: none; transition: $t; text-decoration: none;
 
   &--primary {
-    background: linear-gradient(135deg, $primary, $primary-dk);
-    color: #fff; box-shadow: 0 4px 16px rgba($primary,.3);
-    &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 24px rgba($primary,.4); }
-    &:disabled { opacity: .5; cursor: not-allowed; }
+    background: $primary; color: #fff;
+    box-shadow: 0 4px 14px rgba($primary,.3);
+    &:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba($primary,.4); }
   }
 
   &--success {
-    background: linear-gradient(135deg, $success, darken($success,10%));
-    color: #fff; box-shadow: 0 4px 16px rgba($success,.3);
-    &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 24px rgba($success,.4); }
-    &:disabled { opacity: .5; cursor: not-allowed; }
+    background: $success; color: #fff;
+    box-shadow: 0 4px 14px rgba($success,.3);
+    &:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba($success,.4); }
   }
 
   &--ghost {
-    background: $gray-100; color: $gray-600;
+    background: $gray-100; color: $gray-700;
     border: 1.5px solid $gray-200;
     &:hover { background: $gray-200; color: $gray-900; }
   }
+
+  &:disabled { opacity: .6; cursor: not-allowed; }
+
+  &__loading { display: flex; align-items: center; gap: 8px; }
 }
 
-// Spinner inline
+// ── Spinner ───────────────────────────────────────────
 .qq-spinner {
-  display: inline-block; width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
-  border-radius: 50%; animation: qq-spin .6s linear infinite; margin-right: 6px;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: qq-spin .7s linear infinite;
+  display: inline-block;
 }
 
 // ═══════════════════════════════════════════════════════
-// RÉSULTAT
+// PAGE RÉSULTAT
 // ═══════════════════════════════════════════════════════
-.qq-shell--result { background: $gray-50; }
+.qq-page--result {
+  background: $gray-50;
+}
 
-.qq-result-body {
-  flex: 1; padding: 32px 24px;
-  max-width: 600px; width: 100%; margin: 0 auto;
-  display: flex; flex-direction: column; gap: 24px;
+.qq-result-main {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 40px 24px;
 }
 
 .qq-result-card {
-  border-radius: $radius-xl; padding: 36px 28px;
-  border: 1px solid $gray-200; box-shadow: $shadow-lg;
-  text-align: center; position: relative; overflow: hidden;
-  animation: qq-slide-in .4s ease;
+  position: relative; overflow: hidden;
+  background: #fff; border-radius: $radius-xl;
+  border: 1px solid $gray-200;
+  box-shadow: $shadow-xl;
+  padding: 48px 56px;
+  max-width: 600px; width: 100%;
+  text-align: center;
+  animation: qq-fade-in .4s ease;
 
-  // Gradient décoratif
   &::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 5px;
   }
 
-  &--success {
-    background: linear-gradient(160deg, #fff 60%, $success-lt);
-    &::before { background: linear-gradient(90deg, $success, $primary); }
-  }
-
-  &--fail {
-    background: linear-gradient(160deg, #fff 60%, $danger-lt);
-    &::before { background: linear-gradient(90deg, $danger, $warning); }
-  }
-
-  &__deco {
-    position: absolute; top: 16px; left: 0; right: 0;
-    display: flex; justify-content: space-around; padding: 0 30px;
-    font-size: 22px; pointer-events: none;
-    span {
-      animation: lp-float 2.5s ease-in-out infinite;
-      &:nth-child(2) { animation-delay: .5s; }
-      &:nth-child(3) { animation-delay: 1s; }
-    }
-  }
+  &--success::before { background: linear-gradient(90deg, $primary, $success); }
+  &--fail::before    { background: linear-gradient(90deg, $warning, $danger); }
 }
 
-@keyframes lp-float {
-  0%, 100% { transform: translateY(0); opacity: .6; }
-  50%       { transform: translateY(-8px); opacity: 1; }
+// ── Décorations flottantes ────────────────────────────
+.qq-result-decos {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
 }
 
-// Icône résultat
-.qq-result-icon {
-  width: 72px; height: 72px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  margin: 20px auto 24px; font-size: 32px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+.qq-deco {
+  position: absolute; font-size: 28px;
+  animation: qq-float 4s ease-in-out infinite;
 
-  &--success { background: linear-gradient(135deg, $success, darken($success,10%)); color: #fff; }
-  &--fail    { background: linear-gradient(135deg, $danger, darken($danger,10%)); color: #fff; }
+  &--1 { top: 10%; left: 8%;  animation-delay: 0s;    font-size: 32px; }
+  &--2 { top: 15%; right: 10%; animation-delay: .8s;  font-size: 24px; }
+  &--3 { bottom: 20%; left: 12%; animation-delay: 1.5s; font-size: 28px; }
+  &--4 { bottom: 15%; right: 8%; animation-delay: .4s; font-size: 20px; }
 }
 
-// Score SVG
-.qq-result-score {
-  margin-bottom: 24px;
+@keyframes qq-float {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50%       { transform: translateY(-14px) rotate(5deg); }
+}
 
-  &__ring {
-    position: relative; width: 140px; height: 140px;
-    margin: 0 auto 10px;
-  }
+// ── Anneau score ──────────────────────────────────────
+.qq-score-ring {
+  position: relative; width: 160px; height: 160px;
+  margin: 0 auto 24px;
 
   &__svg {
     width: 100%; height: 100%;
@@ -429,13 +504,13 @@ $t:            all .2s ease;
   }
 
   &__track {
-    fill: none; stroke: $gray-200; stroke-width: 8;
+    fill: none; stroke: $gray-100; stroke-width: 10;
   }
 
   &__fill {
-    fill: none; stroke-width: 8;
+    fill: none; stroke-width: 10;
     stroke-linecap: round;
-    stroke-dasharray: 314;
+    stroke-dasharray: 364;
     transition: stroke-dashoffset 1s ease;
 
     &--success { stroke: $success; }
@@ -445,54 +520,102 @@ $t:            all .2s ease;
   &__value {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 30px; font-weight: 900; letter-spacing: -1px;
-    span { font-size: 16px; font-weight: 700; margin-top: 4px; }
+    font-size: 36px; font-weight: 900; line-height: 1;
   }
 
-  &__min { font-size: 13px; color: $gray-400; margin: 0; }
+  &__pct { font-size: 18px; font-weight: 600; margin-left: 2px; }
 }
 
-// Message
+// ── Icône résultat ────────────────────────────────────
+.qq-result-icon {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 20px;
+  background: rgba($danger,.1); display: flex; align-items: center; justify-content: center;
+  i { font-size: 26px; color: $danger; }
+
+  &--success {
+    background: rgba($success,.1);
+    i { color: $success; }
+  }
+}
+
+// ── Message ───────────────────────────────────────────
 .qq-result-message {
-  margin-bottom: 24px;
-  h2 { font-size: 20px; font-weight: 800; color: $gray-900; margin: 0 0 8px; }
-  p  { font-size: 14px; color: $gray-500; margin: 0; line-height: 1.6; }
+  margin-bottom: 28px;
+  h2 { font-size: 22px; font-weight: 800; color: $gray-900; margin: 0 0 8px; }
+  p  { font-size: 14px; color: $gray-500; margin: 0 0 12px; }
 }
 
-// Stats
+.qq-result-min {
+  display: inline-block; font-size: 12px; color: $gray-400;
+  background: $gray-100; padding: 4px 14px; border-radius: 99px;
+  strong { color: $gray-700; }
+}
+
+// ── Stats ─────────────────────────────────────────────
 .qq-result-stats {
-  display: flex; align-items: center; justify-content: center;
-  gap: 0; margin-bottom: 28px;
-  background: $gray-50; border: 1px solid $gray-200;
-  border-radius: $radius-lg; overflow: hidden;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-bottom: 32px;
 }
 
 .qq-result-stat {
-  flex: 1; padding: 16px 10px; text-align: center;
+  background: $gray-50; border: 1px solid $gray-100;
+  border-radius: $radius-md; padding: 16px 12px;
 
-  &__value { font-size: 24px; font-weight: 800; color: $gray-900; line-height: 1; }
-  &__label { font-size: 11px; color: $gray-400; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+  &__icon {
+    width: 36px; height: 36px; border-radius: $radius-sm;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px;
+    i { font-size: 18px; }
 
-  &--sep {
-    flex: 0; width: 1px; background: $gray-200;
-    align-self: stretch; padding: 0;
+    &--green  { background: rgba($success,.1); i { color: $success; } }
+    &--blue   { background: rgba($primary,.1);  i { color: $primary; } }
+    &--orange { background: rgba($warning,.12); i { color: $warning; } }
   }
+
+  &__value { font-size: 26px; font-weight: 900; color: $gray-900; line-height: 1; }
+  &__label { font-size: 11px; color: $gray-400; margin-top: 4px; }
 }
 
-// Actions résultat
+// ── Actions résultat ──────────────────────────────────
 .qq-result-actions {
-  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
 }
 
 // ═══════════════════════════════════════════════════════
 // RESPONSIVE
 // ═══════════════════════════════════════════════════════
-@media (max-width: 575px) {
-  .qq-body { padding: 16px 14px; }
-  .qq-question-card { padding: 18px 16px; }
-  .qq-question-text { font-size: 15px; }
-  .qq-topbar { padding: 0 14px; }
-  .qq-topbar__title { font-size: 13px; }
-  .qq-result-body { padding: 20px 14px; }
-  .qq-result-card { padding: 24px 16px; }
+@media (max-width: 1024px) {
+  .qq-aside { width: 180px; }
+}
+
+@media (max-width: 768px) {
+  .qq-topbar {
+    padding: 0 14px; gap: 10px;
+    &__center  { display: none; }
+    &__title   { max-width: 160px; font-size: 13px; }
+    &__answered{ display: none; }
+    &__timer-sep, &__timer-total { display: none; }
+  }
+
+  .qq-main { flex-direction: column; }
+
+  .qq-aside {
+    width: 100%; border-right: none; border-bottom: 1px solid $gray-200;
+    padding: 12px 16px;
+    &__dots { grid-template-columns: repeat(8, 1fr); gap: 6px; }
+    &__legend { display: none; }
+    &__inner { position: static; }
+  }
+
+  .qq-content { padding: 20px 16px; }
+
+  .qq-question-text { font-size: 16px; }
+
+  .qq-result-card { padding: 32px 20px; }
+  .qq-result-stats { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+}
+
+.qq-char-warn {
+  color: $danger;
+  font-weight: 700;
 }

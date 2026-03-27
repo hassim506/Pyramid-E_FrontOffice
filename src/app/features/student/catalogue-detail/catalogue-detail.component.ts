@@ -26,7 +26,7 @@ export class CatalogueDetailComponent implements OnInit {
   // ── Expiration ────────────────────────────────────────────
   dateExpiration: string | null = null;
 
-  // ── Progression ────────────────────────────────────────────
+  // ── Progression ───────────────────────────────────────────
   progressionGlobale    = 0;
   totalFormations       = 0;
   formationsTerminees   = 0;
@@ -74,9 +74,9 @@ export class CatalogueDetailComponent implements OnInit {
       next: (res: any) => {
         const all  = res.catalogues ?? [];
         const meta = all.find((c: any) => c.id === this.catalogueId);
-        this.source         = meta?.source          ?? 'assigne';
-        this.badgeLabel     = meta?.badge_label      ?? 'Assigné';
-        this.dateExpiration = meta?.date_expiration  ?? null;
+        this.source         = meta?.source         ?? 'assigne';
+        this.badgeLabel     = meta?.badge_label     ?? 'Assigné';
+        this.dateExpiration = meta?.date_expiration ?? null;
 
         this.loadFormations();
       },
@@ -90,9 +90,9 @@ export class CatalogueDetailComponent implements OnInit {
   loadFormations(): void {
     this.formationsService.getCatalogueProgression(this.catalogueId).subscribe({
       next: (res: any) => {
-        this.formations          = res.formations          ?? [];
-        this.progressionGlobale  = res.progression_globale ?? 0;
-        this.totalFormations     = res.total_formations    ?? 0;
+        this.formations          = res.formations           ?? [];
+        this.progressionGlobale  = res.progression_globale  ?? 0;
+        this.totalFormations     = res.total_formations     ?? 0;
         this.formationsTerminees = res.formations_terminees ?? 0;
 
         this.formationsService.getCatalogueDetail(this.catalogueId).subscribe({
@@ -159,14 +159,18 @@ export class CatalogueDetailComponent implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  // ── Navigation — bloquée si expiré ────────────────────────
+  // ── Navigation ────────────────────────────────────────────
+
+  /**
+   * Tunnel : students-catalogue → catalogue/:id → course-details-2
+   * On passe fromPage + catalogueId pour que le retour revienne ici
+   */
   goToDetails(formationId: number): void {
     if (this.estExpire) return;
     this.router.navigate(['/courses/course-details-2', formationId], {
       state: {
-        fromPage:      'catalogue',
-        fromCatalogue: true,
-        catalogueId:   this.catalogueId,
+        fromPage:    'catalogue',
+        catalogueId: this.catalogueId,
       }
     });
   }
@@ -182,8 +186,12 @@ export class CatalogueDetailComponent implements OnInit {
     });
   }
 
+  /**
+   * Retour vers la liste des catalogues
+   * Tunnel : students-catalogue → catalogue/:id
+   */
   goBack(): void {
-    this.router.navigate(['/student/student-courses']);
+    this.router.navigate(['/student/mes-catalogues']);
   }
 
   // ── Helpers progression ────────────────────────────────────

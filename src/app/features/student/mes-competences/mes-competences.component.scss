@@ -24,6 +24,65 @@ $shadow-sm:  0 1px 4px rgba(0,0,0,.06);
 $shadow-md:  0 4px 20px rgba(0,0,0,.08);
 $t:          all .2s ease;
 
+
+$primary:      #069b8f;
+$primary-lt:   #e6f7f5;
+$primary-dk:   #047a6f;
+$success:      #10b981;
+$success-lt:   #f0fdf4;
+$warning:      #f59e0b;
+$warning-lt:   #fffbeb;
+$danger:       #ef4444;
+$danger-lt:    #fef2f2;
+$indigo:       #4f46e5;
+$indigo-lt:    #eef2ff;
+$dark:         #0f172a;
+$gray-50:      #f8fafc;
+$gray-100:     #f1f5f9;
+$gray-200:     #e2e8f0;
+$gray-300:     #cbd5e1;
+$gray-400:     #94a3b8;
+$gray-500:     #64748b;
+$gray-600:     #475569;
+$gray-700:     #334155;
+$gray-900:     #0f172a;
+$radius-sm:    8px;
+$radius-md:    14px;
+$radius-lg:    20px;
+$radius-xl:    28px;
+$shadow-sm:    0 1px 4px rgba(0,0,0,.06);
+$shadow-md:    0 4px 20px rgba(0,0,0,.08);
+$shadow-lg:    0 12px 40px rgba(0,0,0,.12);
+$t:            all .2s ease;
+
+// ═══════════════════════════════════════════════════════
+// LOADING
+// ═══════════════════════════════════════════════════════
+.qq-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 60vh; gap: 20px;
+
+  p { font-size: 14px; color: $gray-400; margin: 0; }
+}
+
+.qq-loading__ring {
+  position: relative; width: 50px; height: 50px;
+
+  div {
+    position: absolute; width: 100%; height: 100%;
+    border: 3px solid transparent;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: qq-spin .8s linear infinite;
+
+    &:nth-child(2) { width: 38px; height: 38px; top: 6px; left: 6px; border-top-color: $indigo; animation-delay: -.3s; }
+    &:nth-child(3) { width: 26px; height: 26px; top: 12px; left: 12px; border-top-color: $warning; animation-delay: -.6s; }
+    &:nth-child(4) { width: 14px; height: 14px; top: 18px; left: 18px; border-top-color: $success; animation-delay: -.9s; }
+  }
+}
+
+@keyframes qq-spin { to { transform: rotate(360deg); } }
+
 // ═══════════════════════════════════════════════════════
 // LOADING / ERREUR
 // ═══════════════════════════════════════════════════════
@@ -287,4 +346,137 @@ $t:          all .2s ease;
   .cp-toolbar { flex-direction: column; align-items: stretch; }
   .cp-search { max-width: none; }
   .cp-vue-toggle { justify-content: center; }
+}
+
+// ── Badge domaine dans le header ───────────────────────
+.cp-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  &__left { flex: 1; }
+}
+
+.cp-domaine-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 700;
+  padding: 8px 16px; border-radius: 99px;
+  border: 1.5px solid;
+  i { font-size: 15px; }
+}
+
+// ── Stat card indigo dynamique ────────────────────────
+.cp-stat-card--indigo {
+  i { font-size: 26px; flex-shrink: 0; }
+}
+
+// ── Hint recherche ────────────────────────────────────
+.cp-search-hint {
+  font-size: 12px; color: $gray-400;
+  display: flex; align-items: center;
+}
+
+// ── Grille domaines ───────────────────────────────────
+.cp-domaine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+// ── Carte domaine ─────────────────────────────────────
+.cp-domaine-card {
+  background: #fff;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  padding: 22px;
+  transition: $t;
+  position: relative;
+  overflow: hidden;
+
+  &:hover { box-shadow: $shadow-md; transform: translateY(-2px); }
+
+  // Mise en avant domaine principal
+  &--primary {
+    border-color: var(--d-color);
+    box-shadow: 0 0 0 3px rgba(0,0,0,.04), $shadow-sm;
+
+    &::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--d-color-lt) 0%, transparent 55%);
+      pointer-events: none;
+    }
+  }
+
+  &__header {
+    display: flex; align-items: center; gap: 12px; position: relative;
+  }
+
+  &__icon {
+    width: 46px; height: 46px; border-radius: $radius-md;
+    background: var(--d-color-lt); color: var(--d-color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+
+  &__title {
+    flex: 1; font-size: 15px; font-weight: 800; color: $gray-900;
+  }
+
+  &__count {
+    font-size: 12px; font-weight: 800;
+    background: var(--d-color-lt); color: var(--d-color);
+    padding: 4px 12px; border-radius: 99px; flex-shrink: 0;
+  }
+
+  // Formations liées
+  &__formations {
+    padding-top: 14px;
+    border-top: 1px solid $gray-100;
+  }
+
+  &__formations-label {
+    font-size: 11px; font-weight: 700; color: $gray-400;
+    text-transform: uppercase; letter-spacing: .4px;
+    margin-bottom: 8px;
+    display: flex; align-items: center;
+    i { font-size: 12px; }
+  }
+}
+
+// ── Tag "Mon domaine principal" ───────────────────────
+.cp-domaine-primary-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 800; letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--d-color);
+  background: var(--d-color-lt);
+  border: 1px solid color-mix(in srgb, var(--d-color) 25%, transparent);
+  padding: 3px 10px; border-radius: 99px;
+  margin-bottom: 14px; position: relative;
+  i { font-size: 10px; }
+}
+
+// ── Chips formations ──────────────────────────────────
+.cp-formation-chips {
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.cp-formation-chip {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 8px 12px;
+  background: $gray-50; border: 1px solid $gray-200;
+  border-radius: $radius-sm; cursor: pointer; transition: $t;
+  font-size: 12px; font-weight: 600; color: $gray-700;
+
+  &:hover {
+    background: var(--d-color-lt);
+    border-color: var(--d-color);
+    color: var(--d-color);
+  }
+
+  &__date {
+    font-size: 11px; color: $gray-400; font-weight: 500;
+    white-space: nowrap;
+  }
 }

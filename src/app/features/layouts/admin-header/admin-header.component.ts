@@ -12,7 +12,8 @@ import { AuthService } from '../../../shared/service/authentification/auth.servi
     selector: 'app-admin-header',
     templateUrl: './admin-header.component.html',
     styleUrls: ['./admin-header.component.scss'],
-    imports: [CommonModule,RouterLink]
+    imports: [CommonModule,RouterLink],
+    standalone: true
 })
 export class AdminHeaderComponent implements OnInit {
     // @Input() base: string = ''; // Définir le type

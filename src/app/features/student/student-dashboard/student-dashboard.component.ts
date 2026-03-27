@@ -48,7 +48,6 @@ interface DashStats {
     pdi: { disponible: boolean; taux_completion: number; objectifs_total: number; objectifs_atteints: number; prochain_entretien: string | null; };
     evaluations: { disponible: boolean; score_moyen: number; nb_passees: number; nb_reussies: number; taux_reussite: number; };
   };
-  // ✅ Clés en camelCase — correspond exactement au retour PHP compact()
   courbes: {
     labels:                 string[];
     formationsTerminees:    number[];
@@ -64,7 +63,13 @@ interface DashStats {
   echeances:           Echeance[];
   sessions_planifiees: SessionPlanifiee[];
   kpi_futurs: {
-    competences_validees:    { disponible: boolean; message: string };
+    // ── ACTIVÉ ───────────────────────────────────────────────────────
+    competences_validees: {
+      disponible: boolean;
+      total:      number;
+      liste:      string[];
+    };
+    // ── À VENIR ──────────────────────────────────────────────────────
     badges_obtenus:          { disponible: boolean; message: string };
     classement:              { disponible: boolean; message: string };
     ecart_competences:       { disponible: boolean; message: string };
@@ -153,6 +158,18 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         .sort((a: Echeance, b: Echeance) => a.joursRestants - b.joursRestants)
         .slice(0, 5);
 
+      // Fallback compétences : parser depuis les formations terminées côté client
+      const competencesListe: string[] = [];
+      terminees.forEach((f: any) => {
+        if (f.competences_acquises) {
+          try {
+            const decoded = JSON.parse(f.competences_acquises);
+            if (Array.isArray(decoded)) competencesListe.push(...decoded);
+          } catch {}
+        }
+      });
+      const competencesUniques = [...new Set(competencesListe)];
+
       this.stats = {
         kpi: {
           formations: {
@@ -186,7 +203,11 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         echeances,
         sessions_planifiees: [],
         kpi_futurs: {
-          competences_validees:    { disponible: false, message: 'Fonctionnalité à venir' },
+          competences_validees: {
+            disponible: competencesUniques.length > 0,
+            total:      competencesUniques.length,
+            liste:      competencesUniques,
+          },
           badges_obtenus:          { disponible: false, message: 'Fonctionnalité à venir' },
           classement:              { disponible: false, message: 'Fonctionnalité à venir' },
           ecart_competences:       { disponible: false, message: 'Fonctionnalité à venir' },
@@ -293,7 +314,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     const c = this.stats.courbes;
 
     if (this.activeTab === 'progression') {
-      // ✅ Clés corrigées en camelCase
       this.renderChart('chart-completion', this.buildAreaConfig(c.labels, [
         { name: 'Taux de complétion (%)', data: c.tauxCompletion, color: '#069b8f' },
       ], 'Taux de complétion global'));
@@ -326,11 +346,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         { name: 'Catalogues actifs', data: c.progressionCatalogues, color: '#3b82f6' },
       ], 'Progression catalogues'));
 
-      // ✅ Courbe scores quiz — uniquement si données non nulles
       if (c.scoresQuiz && c.scoresQuiz.some(v => v > 0)) {
         this.renderChart('chart-scores-quiz', this.buildAreaConfig(c.labels, [
           { name: 'Score moyen quiz (%)', data: c.scoresQuiz, color: '#4f46e5' },
-        ], 'Score moyen aux quiz'));
+        ], 'Taux de réussite aux quiz '));
       }
     }
 
@@ -344,7 +363,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         );
       }
 
-      // ✅ Donut quiz — uniquement si données disponibles
       const ev = this.stats.kpi.evaluations;
       if (ev.disponible && ev.nb_passees > 0) {
         this.renderDonut('chart-donut-quiz',
@@ -464,6 +482,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   // ════════════════════════════════════════════════
   // HELPERS TEMPLATE
   // ════════════════════════════════════════════════
+
   getProgressionColor(v: number | null | undefined): string {
     const val = v ?? 0;
     if (isNaN(val)) return '#9ca3af';
@@ -542,8 +561,22 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   get nomMoisSelectionne(): string { return this.moisLabels[this.selectedMois - 1] ?? ''; }
   get demandesTotal(): number      { return this.stats?.kpi.demandes.total ?? 0; }
 
-  // ✅ Helper pour le ngIf de la courbe quiz dans le HTML
   get hasScoresQuiz(): boolean {
     return (this.stats?.courbes?.scoresQuiz ?? []).some(v => v > 0);
+  }
+
+  // ── Getter compétences validées ──────────────────
+  get competencesValidees() {
+    return this.stats?.kpi_futurs?.competences_validees ?? { disponible: false, total: 0, liste: [] };
+  }
+
+  /** Tags affichés (max 6) */
+  get competencesTagsVisibles(): string[] {
+    return this.competencesValidees.liste.slice(0, 6);
+  }
+
+  /** Nombre de compétences masquées */
+  get competencesRestantes(): number {
+    return Math.max(0, this.competencesValidees.liste.length - 6);
   }
 }

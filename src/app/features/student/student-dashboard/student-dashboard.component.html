@@ -2,8 +2,12 @@
 <!-- LOADING                                           -->
 <!-- ══════════════════════════════════════════════════ -->
 <div *ngIf="loading" class="db-loading">
-  <div class="db-loading__spinner"></div>
-  <p>Chargement de votre tableau de bord...</p>
+   <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
+   <p>Chargement de votre tableau de bord...</p>
+
+ 
 </div>
 
 <!-- ══════════════════════════════════════════════════ -->
@@ -20,14 +24,7 @@
         Suivez vos formations, votre progression et vos objectifs
       </p>
     </div>
-    <div class="db-header-actions">
-      <a routerLink="/student/demandes" class="db-header-link">
-        <i class="isax isax-document-text me-1"></i>Mes demandes
-        <span class="db-header-link__badge" *ngIf="stats.kpi.demandes.en_attente > 0">
-          {{ stats.kpi.demandes.en_attente }}
-        </span>
-      </a>
-    </div>
+    
   </div>
 
   <!-- ── FILTRES PÉRIODE ─────────────────────────── -->
@@ -60,7 +57,7 @@
       <span class="db-tabs__alert" *ngIf="hasUrgences">{{ echeancesUrgentes.length }}</span>
     </button>
     <button class="db-tabs__tab" [class.active]="activeTab === 'progression'" (click)="setTab('progression')">
-      <i class="isax isax-chart-2 me-1"></i>Ma progression
+      <i class="isax isax-chart-2 me-1"></i>Mes Performances
     </button>
     <button class="db-tabs__tab" [class.active]="activeTab === 'objectifs'" (click)="setTab('objectifs')">
       <i class="isax isax-flag me-1"></i>Mes objectifs
@@ -268,14 +265,14 @@
     </div>
 
     <div class="db-charts-section-label mb-2">
-      <span class="db-section-badge db-section-badge--teal">Taux d'évolution</span>
-      <span class="db-section-hint">Courbes en % — suivez la tendance</span>
+      
+      <span class="db-section-hint">— suivez la tendance</span>
     </div>
 
     <div class="db-chart-card db-chart-card--highlight mb-3">
       <div class="db-chart-card__label">
         <span class="db-chart-card__badge db-chart-card__badge--teal">KPI principal</span>
-        Taux de complétion global
+        Evolution du taux de complétion global
         <span class="db-chart-card__current">{{ tauxCompletionGlobal }}% actuellement</span>
       </div>
       <div id="chart-completion"></div>
@@ -283,15 +280,14 @@
 
     <div class="db-chart-grid db-chart-grid--2 mb-4">
       <div class="db-chart-card"><div id="chart-taux-abandon"></div></div>
-      <!-- ✅ Courbe quiz uniquement si données non nulles -->
       <div class="db-chart-card" *ngIf="hasScoresQuiz">
         <div id="chart-scores-quiz"></div>
       </div>
     </div>
 
     <div class="db-charts-section-label mb-2">
-      <span class="db-section-badge db-section-badge--blue">Volumes par période</span>
-      <span class="db-section-hint">Histogrammes — nombre d'éléments terminés</span>
+      
+      <span class="db-section-hint">— Nombre d'éléments terminés</span>
     </div>
 
     <div class="db-chart-grid mb-4">
@@ -379,7 +375,7 @@
       </div>
     </div>
 
-    <!-- ✅ SCORES ÉVALUATIONS -->
+    <!-- SCORES ÉVALUATIONS -->
     <div class="db-objectif-section mb-4">
       <div class="db-objectif-header">
         <div class="db-objectif-header__icon db-objectif-header__icon--blue"><i class="isax isax-chart-2"></i></div>
@@ -427,7 +423,6 @@
           </div>
         </div>
 
-        <!-- ✅ Donut réussis/échoués — uniquement si données -->
         <div class="db-demandes-chart-wrap mt-3" *ngIf="stats.kpi.evaluations.nb_passees > 0">
           <div id="chart-donut-quiz"></div>
         </div>
@@ -439,20 +434,57 @@
       </div>
     </div>
 
+    <!-- ════════════════════════════════════════════ -->
+    <!-- FUTURE GRID                                  -->
+    <!-- ════════════════════════════════════════════ -->
     <div class="db-future-grid mt-4">
-      <div class="db-future-card">
+
+      <!-- ── COMPÉTENCES VALIDÉES — ACTIVÉ ───────── -->
+      <div class="db-future-card db-future-card--competences">
         <div class="db-future-card__header">
-          <div class="db-future-card__icon db-future-card__icon--purple"><i class="isax isax-medal-star"></i></div>
-          <span class="db-future-badge">À venir</span>
+          <div class="db-future-card__icon db-future-card__icon--purple">
+            <i class="isax isax-medal-star"></i>
+          </div>
+          <!-- Pas de badge "À venir" si données disponibles -->
         </div>
+
         <div class="db-future-card__title">Compétences validées</div>
-        <p class="db-future-card__desc">{{ stats.kpi_futurs.competences_validees.message }}</p>
-        <div class="db-future-card__placeholder">
-          <div class="db-placeholder-bar" style="width:70%"></div>
-          <div class="db-placeholder-bar" style="width:50%"></div>
-          <div class="db-placeholder-bar" style="width:85%"></div>
-        </div>
+
+        <!-- CAS 1 : compétences disponibles -->
+        <ng-container *ngIf="competencesValidees.disponible">
+          <div class="db-competences-count">
+            <span class="db-competences-count__val">{{ competencesValidees.total }}</span>
+           
+          </div>
+
+          <div class="db-competences-tags" *ngIf="competencesTagsVisibles.length > 0">
+            <span class="db-competence-tag" *ngFor="let comp of competencesTagsVisibles">
+              {{ comp }}
+            </span>
+            <span class="db-competence-tag db-competence-tag--more" *ngIf="competencesRestantes > 0">
+              +{{ competencesRestantes }}
+            </span>
+          </div>
+
+          <a routerLink="/student/competences" class="db-competences-link">
+            Voir toutes mes compétences →
+          </a>
+        </ng-container>
+
+        <!-- CAS 2 : aucune compétence encore -->
+        <ng-container *ngIf="!competencesValidees.disponible">
+          <p class="db-future-card__desc">
+            Terminez une formation pour voir vos compétences acquises ici
+          </p>
+          <div class="db-future-card__placeholder">
+            <div class="db-placeholder-bar" style="width:70%"></div>
+            <div class="db-placeholder-bar" style="width:50%"></div>
+            <div class="db-placeholder-bar" style="width:85%"></div>
+          </div>
+        </ng-container>
       </div>
+
+      <!-- ── BADGES — À VENIR ─────────────────────── -->
       <div class="db-future-card">
         <div class="db-future-card__header">
           <div class="db-future-card__icon db-future-card__icon--orange"><i class="isax isax-award"></i></div>
@@ -468,6 +500,8 @@
           <div class="db-placeholder-circle db-placeholder-circle--ghost"></div>
         </div>
       </div>
+
+      <!-- ── CLASSEMENT — À VENIR ──────────────────── -->
       <div class="db-future-card">
         <div class="db-future-card__header">
           <div class="db-future-card__icon db-future-card__icon--teal"><i class="isax isax-ranking"></i></div>
@@ -477,6 +511,8 @@
         <p class="db-future-card__desc">{{ stats.kpi_futurs.classement.message }}</p>
         <div class="db-future-card__placeholder"><div class="db-placeholder-rank">#—</div></div>
       </div>
+
+      <!-- ── ÉCART COMPÉTENCES — À VENIR ───────────── -->
       <div class="db-future-card">
         <div class="db-future-card__header">
           <div class="db-future-card__icon db-future-card__icon--red"><i class="isax isax-radar-2"></i></div>
@@ -489,6 +525,7 @@
           <div class="db-placeholder-bar" style="width:80%"></div>
         </div>
       </div>
+
     </div>
 
   </ng-container>

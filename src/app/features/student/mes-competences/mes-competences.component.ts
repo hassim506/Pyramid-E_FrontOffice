@@ -1,9 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule }      from '@angular/common';
+import { CommonModule }       from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationsService }  from '../../../shared/service/Formationsss/formations.service';
 
-interface CompetenceFormation {
+// ── Interfaces ───────────────────────────────────────────────────────────────
+export interface DomaineDB {
+  id:      number;
+  nom:     string;
+  slug:    string;
+  couleur: string | null;
+  icone:   string | null;
+}
+
+export interface CompetenceFormation {
   formation_id:    number;
   formation_titre: string;
   image:           string | null;
@@ -11,26 +20,36 @@ interface CompetenceFormation {
   competences:     string[];
   nb_competences:  number;
   date_fin:        string | null;
+  domaine:         DomaineDB | null;   // ← domaine de la formation
 }
 
-interface CompetencesStats {
+export interface CompetencesStats {
   total_acquises:       number;
-  total_en_cours:       number;
-  total_possible:       number;
-  taux_maitrise:        number;
   formations_terminees: number;
-  formations_en_cours:  number;
 }
 
-interface CompetencesData {
-  stats:               CompetencesStats;
-  competences_a_plat:  string[];
+export interface CompetencesData {
+  stats:              CompetencesStats;
+  competences_a_plat: string[];
+  domaine_user:       DomaineDB | null;
   par_formation: {
     acquises: CompetenceFormation[];
-    en_cours: CompetenceFormation[];
   };
 }
 
+export interface DomaineGroup {
+  domaine:     DomaineDB;
+  competences: string[];
+  formations:  CompetenceFormation[];
+  isPrimary:   boolean;
+}
+
+const FALLBACK_COLORS = [
+  '#4f46e5','#059669','#db2777','#ea580c',
+  '#0284c7','#0d9488','#64748b','#7c3aed',
+];
+
+// ── Composant ────────────────────────────────────────────────────────────────
 @Component({
   selector:    'app-mes-competences',
   standalone:  true,
@@ -40,20 +59,17 @@ interface CompetencesData {
 })
 export class MesCompetencesComponent implements OnInit {
 
-  loading = true;
-  error   = '';
-  data:   CompetencesData | null = null;
-
+  loading   = true;
+  error     = '';
+  data:     CompetencesData | null = null;
   recherche = '';
-  vue: 'liste' | 'formation' = 'formation';
 
-  // Labels mois en français
   private moisFr = ['janvier','février','mars','avril','mai','juin',
                     'juillet','août','septembre','octobre','novembre','décembre'];
 
   constructor(
     private formationsService: FormationsService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void { this.loadCompetences(); }
@@ -62,12 +78,11 @@ export class MesCompetencesComponent implements OnInit {
     this.loading = true;
     this.error   = '';
     this.formationsService.getMesCompetences().subscribe({
-      next: (res: any) => { this.data = res; this.loading = false; },
-      error: () => { this.error = 'Impossible de charger les compétences.'; this.loading = false; }
+      next:  (res: any) => { this.data = res; this.loading = false; },
+      error: ()         => { this.error = 'Impossible de charger les compétences.'; this.loading = false; },
     });
   }
 
-  // ── Getters ────────────────────────────────────────────
   get stats(): CompetencesStats | null { return this.data?.stats ?? null; }
 
   get competencesAcquises(): string[] {
@@ -76,21 +91,90 @@ export class MesCompetencesComponent implements OnInit {
     return all.filter(c => c.toLowerCase().includes(this.recherche.toLowerCase()));
   }
 
-  get formationsAcquises(): CompetenceFormation[] { return this.data?.par_formation.acquises ?? []; }
-  get formationsEnCours(): CompetenceFormation[]  { return this.data?.par_formation.en_cours  ?? []; }
-  get hasEnCours(): boolean                        { return this.formationsEnCours.length > 0; }
+  // ── Groupes par domaine ───────────────────────────────────────────────────
+  // Chaque formation porte son domaine_id → on regroupe par domaine de formation.
+  // Le domaine de l'utilisateur est toujours en premier (isPrimary = true).
+  // Les formations sans domaine tombent dans "Autres".
+  get groupesFinaux(): DomaineGroup[] {
+    const formations  = this.data?.par_formation.acquises ?? [];
+    const domaineUser = this.data?.domaine_user ?? null;
+    const recherche   = this.recherche.toLowerCase().trim();
 
-  // ── Navigation vers formation ──────────────────────────
- // Après
-allerVersFormation(formationId: number, statut: 'termine' | 'en_cours'): void {
-  if (statut === 'en_cours') {
-    this.router.navigate(['/student/lecture-formation', formationId]);
-  } else {
+    // Filtrage par recherche
+    const formationsFiltrees = formations.map(f => ({
+      ...f,
+      competences: recherche
+        ? f.competences.filter(c => c.toLowerCase().includes(recherche))
+        : f.competences,
+    })).filter(f => f.competences.length > 0);
+
+    // Regroupement par domaine de la formation
+    const map = new Map<number | 'autres', DomaineGroup>();
+
+    for (const f of formationsFiltrees) {
+      const key = f.domaine?.id ?? 'autres';
+
+      if (!map.has(key)) {
+        const domaine: DomaineDB = f.domaine ?? {
+          id: 0, nom: 'Autres compétences',
+          slug: 'autres', couleur: '#94a3b8', icone: 'isax-category',
+        };
+        map.set(key, {
+          domaine,
+          competences: [],
+          formations:  [],
+          isPrimary:   domaineUser ? domaine.id === domaineUser.id : false,
+        });
+      }
+
+      const grp = map.get(key)!;
+      grp.formations.push(f);
+      // Dédoublonnage des compétences dans le groupe
+      const existing = new Set(grp.competences);
+      f.competences.forEach(c => { if (!existing.has(c)) grp.competences.push(c); });
+    }
+
+    const groups = Array.from(map.values());
+
+    // Tri : domaine user en premier, puis par nombre de compétences
+    groups.sort((a, b) => {
+      if (a.isPrimary && !b.isPrimary) return -1;
+      if (!a.isPrimary && b.isPrimary) return  1;
+      return b.competences.length - a.competences.length;
+    });
+
+    // Si aucun groupe isPrimary mais domaine_user existe → forcer le bon groupe
+    if (domaineUser && !groups.some(g => g.isPrimary)) {
+      const idx = groups.findIndex(g => g.domaine.id === domaineUser.id);
+      if (idx > 0) {
+        groups[idx].isPrimary = true;
+        const [dom] = groups.splice(idx, 1);
+        groups.unshift(dom);
+      }
+    }
+
+    return groups;
+  }
+
+  get hasGroupes(): boolean { return this.groupesFinaux.length > 0; }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  getDomaineColor(domaine: DomaineDB, index = 0): string {
+    return domaine.couleur ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+  }
+
+  getDomaineColorLight(domaine: DomaineDB, index = 0): string {
+    return this.getDomaineColor(domaine, index) + '18';
+  }
+
+  getDomaineIcon(domaine: DomaineDB): string {
+    return domaine.icone ?? 'isax-category';
+  }
+
+  allerVersFormation(formationId: number): void {
     this.router.navigate(['/courses/course-details-2', formationId]);
   }
-}
 
-  // ── Date acquisition en français ──────────────────────
   formatDateFr(dateStr: string | null): string {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -98,16 +182,9 @@ allerVersFormation(formationId: number, statut: 'termine' | 'en_cours'): void {
     return `${d.getDate()} ${this.moisFr[d.getMonth()]} ${d.getFullYear()}`;
   }
 
-  // ── Helpers ────────────────────────────────────────────
-  getProgressionColor(v: number): string {
-    if (v >= 75) return '#10b981';
-    if (v >= 40) return '#f59e0b';
-    return '#ef4444';
-  }
-
-  setVue(v: 'liste' | 'formation'): void { this.vue = v; }
-
   onRecherche(event: Event): void {
     this.recherche = (event.target as HTMLInputElement).value;
   }
+
+  trackByDomaine(_: number, g: DomaineGroup): number { return g.domaine.id; }
 }

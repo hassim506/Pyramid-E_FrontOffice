@@ -13,6 +13,7 @@ $blue:    #3b82f6;
 $blue-lt: #dbeafe;
 $red:     #ef4444;
 $red-lt:  #fee2e2;
+$primary: #4f46e5;
 
 $gray-50:  #f9fafb;
 $gray-100: #f3f4f6;
@@ -27,6 +28,37 @@ $radius-md: 12px;
 $radius-lg: 16px;
 $shadow-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
 $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+$primary:      #069b8f;
+$primary-lt:   #e6f7f5;
+$primary-dk:   #047a6f;
+$success:      #10b981;
+$success-lt:   #f0fdf4;
+$warning:      #f59e0b;
+$warning-lt:   #fffbeb;
+$danger:       #ef4444;
+$danger-lt:    #fef2f2;
+$indigo:       #4f46e5;
+$indigo-lt:    #eef2ff;
+$dark:         #0f172a;
+$gray-50:      #f8fafc;
+$gray-100:     #f1f5f9;
+$gray-200:     #e2e8f0;
+$gray-300:     #cbd5e1;
+$gray-400:     #94a3b8;
+$gray-500:     #64748b;
+$gray-600:     #475569;
+$gray-700:     #334155;
+$gray-900:     #0f172a;
+$radius-sm:    8px;
+$radius-md:    14px;
+$radius-lg:    20px;
+$radius-xl:    28px;
+$shadow-sm:    0 1px 4px rgba(0,0,0,.06);
+$shadow-md:    0 4px 20px rgba(0,0,0,.08);
+$shadow-lg:    0 12px 40px rgba(0,0,0,.12);
+$t:            all .2s ease;
+
 
 // ══════════════════════════════════════════════════
 // LOADING
@@ -328,7 +360,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 
-  // Variante 5 colonnes
   &--5 {
     grid-template-columns: repeat(5, 1fr);
 
@@ -337,7 +368,6 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     @media (max-width: 480px)  { grid-template-columns: 1fr; }
   }
 
-  // ✅ Variante 6 colonnes pour l'onglet Aujourd'hui
   &--6 {
     grid-template-columns: repeat(6, 1fr);
 
@@ -440,7 +470,7 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     &--blue   { background: $blue; }
     &--orange { background: $orange; }
     &--purple { background: $purple; }
-    &--red    { background: $red; } // ✅
+    &--red    { background: $red; }
   }
 }
 
@@ -786,6 +816,15 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
   border-radius: $radius-md;
   padding: 18px 16px;
   box-shadow: $shadow-sm;
+  transition: box-shadow .2s;
+
+  &:hover { box-shadow: $shadow-md; }
+
+  // ── Variante compétences activée ──
+  &--competences {
+    border-top: 3px solid $purple;
+    background: linear-gradient(135deg, white 0%, #faf7ff 100%);
+  }
 
   &__header {
     display: flex;
@@ -852,6 +891,84 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
 }
 .db-placeholder-rank,
 .db-placeholder-score  { font-size: 28px; font-weight: 800; color: $gray-200; }
+
+// ══════════════════════════════════════════════════
+// COMPÉTENCES VALIDÉES
+// ══════════════════════════════════════════════════
+
+// Compteur total compétences
+.db-competences-count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 12px;
+
+  &__val {
+    font-size: 32px;
+    font-weight: 800;
+    color: $purple;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 13px;
+    color: $gray-600;
+  }
+}
+
+// Conteneur des tags
+.db-competences-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+// Tag individuel
+.db-competence-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: $purple-lt;
+  color: $purple;
+  font-size: 11px;
+  font-weight: 600;
+  transition: background .15s, color .15s;
+
+  &:hover {
+    background: darken($purple-lt, 5%);
+  }
+
+  // Tag "+N restants"
+  &--more {
+    background: $gray-100;
+    color: $gray-600;
+    cursor: default;
+    font-style: italic;
+
+    &:hover { background: $gray-100; }
+  }
+}
+
+// Lien vers page compétences
+.db-competences-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $purple;
+  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 1px dashed $purple-lt;
+  transition: border-color .2s, color .2s;
+
+  &:hover {
+    color: darken($purple, 10%);
+    border-bottom-color: $purple;
+  }
+}
 
 // ══════════════════════════════════════════════════
 // ÉCHÉANCES — design cards
@@ -985,3 +1102,30 @@ $shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
     &--vert   { background: #EAF3DE; color: #3B6D11; }
   }
 }
+// ═══════════════════════════════════════════════════════
+// LOADING
+// ═══════════════════════════════════════════════════════
+.qq-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 60vh; gap: 20px;
+
+  p { font-size: 14px; color: $gray-400; margin: 0; }
+}
+
+.qq-loading__ring {
+  position: relative; width: 50px; height: 50px;
+
+  div {
+    position: absolute; width: 100%; height: 100%;
+    border: 3px solid transparent;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: qq-spin .8s linear infinite;
+
+    &:nth-child(2) { width: 38px; height: 38px; top: 6px; left: 6px; border-top-color: $indigo; animation-delay: -.3s; }
+    &:nth-child(3) { width: 26px; height: 26px; top: 12px; left: 12px; border-top-color: $warning; animation-delay: -.6s; }
+    &:nth-child(4) { width: 14px; height: 14px; top: 18px; left: 18px; border-top-color: $success; animation-delay: -.9s; }
+  }
+}
+
+@keyframes qq-spin { to { transform: rotate(360deg); } }

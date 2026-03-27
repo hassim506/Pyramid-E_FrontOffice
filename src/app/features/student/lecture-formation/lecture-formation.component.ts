@@ -215,6 +215,24 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
     this.showQuizFinalModal = false;
   }
 
+  // ── Retour — navigation exacte selon le tunnel emprunté ──
+  goBack(): void {
+    if (this.isEmbedded) { this.closePlayer.emit(); return; }
+
+    const state = history.state;
+
+    if (state?.fromPage === 'parcours' && state?.parcoursId) {
+      // Tunnel : mes-parcours/:id → lecture-formation
+      this.router.navigate(['/student/mes-parcours', state.parcoursId]);
+    } else if (state?.fromPage === 'catalogue' && state?.catalogueId) {
+      // Tunnel : catalogue-detail/:id → lecture-formation
+      this.router.navigate(['/student/catalogue-detail', state.catalogueId]);
+    } else {
+      // Tunnel : mes-formations → lecture-formation (fromPage: 'demandes' ou fallback)
+      this.router.navigate(['/student/mes-formations']);
+    }
+  }
+
   // ── Helpers ──────────────────────────────────────
   isCorrectAnswer(q: QuizQuestion, opt: string): boolean {
     if (Array.isArray(q.reponse_correcte)) return q.reponse_correcte.includes(opt);
@@ -249,22 +267,6 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
     return s.length ? Math.round(
       s.filter((x: any) => this.progressionService.isCompleted(this.formationId, x.id)).length / s.length * 100
     ) : 0;
-  }
-
-  goBack(): void {
-    if (this.isEmbedded) { this.closePlayer.emit(); return; }
-    const state = history.state;
-    if (state?.fromPage === 'parcours' && state?.parcoursId) {
-      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-        this.router.navigate(['/student/parcours-assigne', state.parcoursId]);
-      });
-    } else if (state?.fromPage === 'catalogue' && state?.catalogueId) {
-      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-        this.router.navigate(['/student/catalogue-detail', state.catalogueId]);
-      });
-    } else {
-      this.router.navigate(['/student/mes-cours']);
-    }
   }
 
   getSectionIcon(s: any): string {
