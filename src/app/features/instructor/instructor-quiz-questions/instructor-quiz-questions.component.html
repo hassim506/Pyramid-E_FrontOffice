@@ -1,460 +1,358 @@
+<div class="container-fluid px-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-0">Questions du Quiz</h1>
+      <p class="text-muted" *ngIf="quiz">{{ quiz.titre }}</p>
+    </div>
+    <div>
+      <button class="btn btn-secondary me-2" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i> Retour
+      </button>
+      <button class="btn btn-primary" (click)="showAddQuestionModal()">
+        <i class="fas fa-plus"></i> Ajouter une question
+      </button>
+    </div>
+  </div>
 
-    <div class="card bg-light">
-        <div class="card-body">
-            <div class="row align-items-center gy-3">
-                <div class="col-xl-8">
-                    <div>
-                        <div class="d-sm-flex align-items-center">
-                            <div class="quiz-img me-3 mb-2 mb-sm-0">
-                                <img src="assets/img/students/quiz.jpg" alt="">
-                            </div>
-                            <div>
-                                <h5 class="mb-2"><a href="javascript:void(0);">Information About UI/UX Design Degree</a></h5>
-                                <div class="question-info d-flex align-items-center">
-                                    <p class="d-flex align-items-center fs-14 me-2 pe-2 border-end mb-0"><i class="isax isax-message-question5 text-primary-soft me-2"></i>25 Questions</p>
-                                    <p class="d-flex align-items-center fs-14 mb-0"><i class="isax isax-clock5 text-secondary-soft me-2"></i>30 Minutes</p>
-                                </div>
-                            </div>
-                        </div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center p-4">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2">Chargement...</p>
+  </div>
+
+  <!-- Questions List -->
+  <div *ngIf="!loading && questions.length > 0" cdkDropList (cdkDropListDropped)="onDrop($event)">
+    <div 
+      *ngFor="let question of questions" 
+      class="card question-item mb-3"
+      cdkDrag>
+      
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center mb-2">
+              <span class="badge bg-primary me-2">Q{{ question.ordre }}</span>
+              <span class="badge bg-secondary me-2">{{ getTypeLabel(question.type) }}</span>
+              <span class="badge bg-success">{{ question.points }} pts</span>
+              <div class="ms-auto">
+                <i class="fas fa-grip-vertical text-muted" cdkDragHandle></i>
+              </div>
+            </div>
+            
+            <h6 class="question-text">{{ question.question_text }}</h6>
+            
+            <!-- Aperçu des réponses -->
+            <div *ngIf="question.reponses && question.reponses.length > 0" class="mt-2">
+              <small class="text-muted">Réponses :</small>
+              <ul class="list-unstyled mt-1">
+                <li *ngFor="let reponse of question.reponses" class="small">
+                  <i class="fas" [class.fa-check-circle]="reponse.is_correct" 
+                     [class.fa-circle]="!reponse.is_correct"
+                     [class.text-success]="reponse.is_correct"
+                     [class.text-muted]="!reponse.is_correct"></i>
+                  {{ reponse.reponse_text }}
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="ms-3">
+            <button 
+              class="btn btn-sm btn-outline-primary me-1"
+              (click)="showEditQuestionModal(question)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-danger"
+              (click)="confirmDeleteQuestion(question)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && questions.length === 0" class="text-center p-4">
+    <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+    <p class="text-muted">Aucune question n'a été ajoutée à ce quiz.</p>
+    <button class="btn btn-primary" (click)="showAddQuestionModal()">
+      Ajouter la première question
+    </button>
+  </div>
+</div>
+
+<!-- Add Question Modal -->
+<div class="modal fade" id="add_question">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ajouter une question</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form [formGroup]="questionForm" (ngSubmit)="saveQuestion()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Texte de la question *</label>
+            <textarea 
+              class="form-control" 
+              formControlName="question_text"
+              rows="3"
+              placeholder="Saisissez votre question...">
+            </textarea>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Type de question *</label>
+                <select 
+                  class="form-select" 
+                  formControlName="type"
+                  (change)="onTypeChange()">
+                  <option value="multiple_choice">Choix multiple (QCM)</option>
+                  <option value="true_false">Vrai/Faux</option>
+                  <option value="text">Texte libre</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <label class="form-label">Points *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  formControlName="points"
+                  min="1">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <label class="form-label">Ordre *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  formControlName="ordre"
+                  min="1">
+              </div>
+            </div>
+          </div>
+
+          <!-- Réponses -->
+          <div *ngIf="questionForm.get('type')?.value !== 'text'">
+            <h6>Réponses</h6>
+            <div formArrayName="reponses">
+              <div 
+                *ngFor="let reponse of reponsesArray.controls; let i = index"
+                class="mb-3 p-3 border rounded"
+                [formGroupName]="i">
+                
+                <div class="row align-items-center">
+                  <div class="col-md-8">
+                    <label class="form-label">Réponse {{ i + 1 }} *</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      formControlName="reponse_text"
+                      placeholder="Texte de la réponse">
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-check">
+                      <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        formControlName="is_correct"
+                        [id]="'correct-add-' + i"
+                        (change)="onCorrectAnswerChange(i)">
+                      <label class="form-check-label" [for]="'correct-add-' + i">
+                        Bonne réponse
+                      </label>
                     </div>
+                  </div>
+                  <div class="col-md-1" *ngIf="questionForm.get('type')?.value === 'multiple_choice'">
+                    <button 
+                      type="button" 
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeAnswer(i)"
+                      [disabled]="reponsesArray.length <= 2">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="col-xl-4">
-                    <div class="d-flex align-items-center justify-content-sm-end">
-                        <a [routerLink]="routes.instructorQuizResult" class="text-info text-decoration-underline fs-12 fw-medium me-3">View Results</a>
-                        <a href="javascript:void(0);" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#add_question">Add Question</a>
+              </div>
+            </div>
+
+            <button 
+              type="button" 
+              class="btn btn-sm btn-outline-primary"
+              (click)="addAnswer()"
+              *ngIf="questionForm.get('type')?.value === 'multiple_choice'">
+              <i class="fas fa-plus"></i> Ajouter une réponse
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Annuler
+          </button>
+         <button 
+  type="submit" 
+  class="btn btn-primary" 
+  [disabled]="questionForm.invalid || loading">
+  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+  Ajouter
+</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Question Modal -->
+<div class="modal fade" id="edit_question">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modifier la question</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form [formGroup]="questionForm" (ngSubmit)="saveQuestion()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Texte de la question *</label>
+            <textarea 
+              class="form-control" 
+              formControlName="question_text"
+              rows="3">
+            </textarea>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Type de question *</label>
+                <select 
+                  class="form-select" 
+                  formControlName="type"
+                  (change)="onTypeChange()">
+                  <option value="multiple_choice">Choix multiple (QCM)</option>
+                  <option value="true_false">Vrai/Faux</option>
+                  <option value="text">Texte libre</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <label class="form-label">Points *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  formControlName="points"
+                  min="1">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <label class="form-label">Ordre *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  formControlName="ordre"
+                  min="1">
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="questionForm.get('type')?.value !== 'text'">
+            <h6>Réponses</h6>
+            <div formArrayName="reponses">
+              <div 
+                *ngFor="let reponse of reponsesArray.controls; let i = index"
+                class="mb-3 p-3 border rounded"
+                [formGroupName]="i">
+                
+                <div class="row align-items-center">
+                  <div class="col-md-8">
+                    <label class="form-label">Réponse {{ i + 1 }} *</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      formControlName="reponse_text">
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-check">
+                      <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        formControlName="is_correct"
+                        [id]="'correct-edit-' + i"
+                        (change)="onCorrectAnswerChange(i)">
+                      <label class="form-check-label" [for]="'correct-edit-' + i">
+                        Bonne réponse
+                      </label>
                     </div>
+                  </div>
+                  <div class="col-md-1" *ngIf="questionForm.get('type')?.value === 'multiple_choice'">
+                    <button 
+                      type="button" 
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeAnswer(i)"
+                      [disabled]="reponsesArray.length <= 2">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
                 </div>
+              </div>
             </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6>Which of the following is a principle of UX design?</h6>
-                <div class="d-flex align-items-center justify-content-end">
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-2 action-icon" data-bs-toggle="modal" data-bs-target="#edit_question"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-            <div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-1" id="Radio-sm-1">
-                    <label class="form-check-label" for="Radio-sm-1">
-                        Minimalistic Design
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-1" id="Radio-sm-2" checked>
-                    <label class="form-check-label" for="Radio-sm-2">
-                        User-Centered Design
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-1" id="Radio-sm-3">
-                    <label class="form-check-label" for="Radio-sm-3">
-                        Gradient Usage
-                    </label>
-                </div>
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="qusetion-1" id="Radio-sm-4">
-                    <label class="form-check-label" for="Radio-sm-4">
-                        Typography Hierarchy
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6>Which tool is commonly used for wireframing?</h6>
-                <div class="d-flex align-items-center justify-content-end">
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-2 action-icon" data-bs-toggle="modal" data-bs-target="#edit_question"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-            <div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-1" id="Radio-sm-5">
-                    <label class="form-check-label" for="Radio-sm-5">
-                        Adobe Photoshop
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-2" id="Radio-sm-6" checked>
-                    <label class="form-check-label" for="Radio-sm-6">
-                        Figma
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-2" id="Radio-sm-7">
-                    <label class="form-check-label" for="Radio-sm-7">
-                        Visual Studio Code
-                    </label>
-                </div>
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="qusetion-2" id="Radio-sm-8">
-                    <label class="form-check-label" for="Radio-sm-8">
-                        GitHub
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6>What does UI stand for?</h6>
-                <div class="d-flex align-items-center justify-content-end">
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-2 action-icon" data-bs-toggle="modal" data-bs-target="#edit_question"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-            <div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-3" id="Radio-sm-9">
-                    <label class="form-check-label" for="Radio-sm-9">
-                        User Intention
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-3" id="Radio-sm-10" checked>
-                    <label class="form-check-label" for="Radio-sm-10">
-                        User Interface
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-3" id="Radio-sm-11">
-                    <label class="form-check-label" for="Radio-sm-11">
-                        Universal Interaction
-                    </label>
-                </div>
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="qusetion-3" id="Radio-sm-12">
-                    <label class="form-check-label" for="Radio-sm-12">
-                        Usability Information
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6>Which of the following is a principle of UX design?</h6>
-                <div class="d-flex align-items-center justify-content-end">
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-2 action-icon" data-bs-toggle="modal" data-bs-target="#edit_question"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-            <div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-4" id="Radio-sm-13">
-                    <label class="form-check-label" for="Radio-sm-13">
-                        Minimalistic Design
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-4" id="Radio-sm-14" checked>
-                    <label class="form-check-label" for="Radio-sm-14">
-                        User-Centered Design
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-4" id="Radio-sm-15">
-                    <label class="form-check-label" for="Radio-sm-15">
-                        Gradient Usage
-                    </label>
-                </div>
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="qusetion-4" id="Radio-sm-16">
-                    <label class="form-check-label" for="Radio-sm-16">
-                        Typography Hierarchy
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6>Which tool is commonly used for wireframing?</h6>
-                <div class="d-flex align-items-center justify-content-end">
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-2 action-icon" data-bs-toggle="modal" data-bs-target="#edit_question"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-            <div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-5" id="Radio-sm-17">
-                    <label class="form-check-label" for="Radio-sm-17">
-                        Adobe Photoshop
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-5" id="Radio-sm-18" checked>
-                    <label class="form-check-label" for="Radio-sm-18">
-                        Figma
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-5" id="Radio-sm-19">
-                    <label class="form-check-label" for="Radio-sm-19">
-                        Visual Studio Code
-                    </label>
-                </div>
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="qusetion-5" id="Radio-sm-20">
-                    <label class="form-check-label" for="Radio-sm-20">
-                        GitHub
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6>What is a wireframe?</h6>
-                <div class="d-flex align-items-center justify-content-end">
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-2 action-icon" data-bs-toggle="modal" data-bs-target="#edit_question"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-            <div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-6" id="Radio-sm-21">
-                    <label class="form-check-label" for="Radio-sm-21">
-                        A detailed, interactive prototype
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-6" id="Radio-sm-22" checked>
-                    <label class="form-check-label" for="Radio-sm-22">
-                        A low-fidelity representation of a design
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-6" id="Radio-sm-23">
-                    <label class="form-check-label" for="Radio-sm-23">
-                        The codebase of a website
-                    </label>
-                </div>
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="qusetion-6" id="Radio-sm-24">
-                    <label class="form-check-label" for="Radio-sm-24">
-                        A high-fidelity design concept
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6>What is the primary goal of UX design?</h6>
-                <div class="d-flex align-items-center justify-content-end">
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-2 action-icon" data-bs-toggle="modal" data-bs-target="#edit_question"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14"><i class="isax isax-trash" data-bs-toggle="modal" data-bs-target="#delete_modal"></i></a>
-                </div>
-            </div>
-            <div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-7" id="Radio-sm-25">
-                    <label class="form-check-label" for="Radio-sm-25">
-                        To create a visually appealing design
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-7" id="Radio-sm-26" checked>
-                    <label class="form-check-label" for="Radio-sm-26">
-                        To enhance user satisfaction and usability
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="qusetion-7" id="Radio-sm-27">
-                    <label class="form-check-label" for="Radio-sm-27">
-                        To develop complex navigation flows
-                    </label>
-                </div>
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="qusetion-7" id="Radio-sm-28">
-                    <label class="form-check-label" for="Radio-sm-28">
-                        To optimize code performance
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="text-center">
-        <a href="javascript:void(0);" class="btn btn-secondary">Load More</a>
-    </div>
 
+            <button 
+              type="button" 
+              class="btn btn-sm btn-outline-primary"
+              (click)="addAnswer()"
+              *ngIf="questionForm.get('type')?.value === 'multiple_choice'">
+              <i class="fas fa-plus"></i> Ajouter une réponse
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="questionForm.invalid || loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            Modifier
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
-    			<!-- Add Question -->
-			<div class="modal fade" id="add_question">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Add New Question</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body">
-								<div class="mb-3">
-									<label class="form-label">Question <span class="text-danger"> *</span></label>
-									<input type="text" class="form-control">
-								</div>
-								<div class="mb-3">
-									<label class="form-label">Question Type <span class="text-danger"> *</span></label>
-									<mat-select class="custom-mat-select select" placeholder="Select">
-										<mat-option value="1">Select</mat-option>
-										<mat-option value="1">Multiple choice</mat-option>
-										<mat-option value="1">True or False</mat-option>
-									</mat-select>
-								</div>
-								<h6 class="mb-3">Answer</h6>
-								<div class="add-choice-data">
-									<div class="mb-3">
-										<div class="d-flex align-items-center justify-content-between">
-											<label class="form-label">Choice 1 <span class="text-danger"> *</span></label>
-											<div class="form-check form-switch form-switch-end">
-												<label class="form-check-label" for="switch-sm">Correct Answer</label>
-												<input class="form-check-input" type="checkbox" role="switch" id="switch-sm" checked>
-											</div>
-										</div>
-										<input type="text" class="form-control">
-									</div>
-                                    <ng-container *ngFor="let item of formData; let i = index;">
-                                        <div class="mb-3 extra-choice-row">
-                                            <div class="d-flex align-items-end justify-content-between">
-                                                <div class="flex-fill">
-                                                    <div class="d-flex align-items-center justify-content-between">
-                                                        <label class="form-label">Choice {{ i + 2 }}
-                                                            <span class="text-danger"> *</span>
-                                                        </label>
-                                                        <div class="form-check form-switch form-switch-end">
-                                                            <label class="form-check-label" for="switch-sm2">Correct Answer</label>
-                                                            <input class="form-check-input" type="checkbox" role="switch" id="switch-sm2">
-                                                        </div>
-                                                    </div>
-                                                    <input type="text" class="form-control"></div>
-                                                    <a href="javascript:void(0);" class="delete-item ms-4" (click)="removeRow(i)"><i class="isax isax-trash"></i></a>
-                                                </div>
-                                            </div>
-                                    </ng-container>
-								</div>
-								<a href="javascript:void(0);" class="text-secondary d-inline-flex align-items-center fw-medium add-choice" (click)="addNewRow()">
-									<i class="isax isax-add me-1"></i>Add New
-								</a>
-							</div>
-							<div class="modal-footer">
-								<button class="btn bg-gray-100 rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Add Question</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Add Question -->
-
-			<!-- Add Question -->
-			<div class="modal fade" id="edit_question">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Edit Question</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body">
-								<div class="mb-3">
-									<label class="form-label">Question <span class="text-danger"> *</span></label>
-									<input type="text" class="form-control" value="Which of the following is a principle of UX design?">
-								</div>
-								<div class="mb-3">
-									<label class="form-label">Question Type <span class="text-danger"> *</span></label>
-									<mat-select class="custom-mat-select select" placeholder="Multiple choice">
-										<mat-option value="1">Select</mat-option>
-										<mat-option value="1">Multiple choice</mat-option>
-										<mat-option value="1">True or False</mat-option>
-									</mat-select>
-								</div>
-								<h6 class="mb-3">Answer</h6>
-								<div class="mb-3">
-									<div class="d-flex align-items-center justify-content-between">
-										<label class="form-label">Choice 1 <span class="text-danger"> *</span></label>
-										<div class="form-check form-switch form-switch-end">
-											<label class="form-check-label correct-ans" for="switch-sm3">Correct Answer</label>
-											<input class="form-check-input" type="checkbox" role="switch" id="switch-sm3" checked>
-										</div>
-									</div>
-									<input type="text" class="form-control" value="Minimalistic Design">
-								</div>
-								<div class="mb-3">
-									<div class="d-flex align-items-center justify-content-between">
-										<label class="form-label">Choice 2 <span class="text-danger"> *</span></label>
-										<div class="form-check form-switch form-switch-end">
-											<label class="form-check-label" for="switch-sm4">Correct Answer</label>
-											<input class="form-check-input" type="checkbox" role="switch" id="switch-sm4">
-										</div>
-									</div>
-									<input type="text" class="form-control" value="User-Centered Design">
-								</div>
-								<div class="mb-3">
-									<div class="d-flex align-items-center justify-content-between">
-										<label class="form-label">Choice 3 <span class="text-danger"> *</span></label>
-										<div class="form-check form-switch form-switch-end">
-											<label class="form-check-label" for="switch-sm5">Correct Answer</label>
-											<input class="form-check-input" type="checkbox" role="switch" id="switch-sm5">
-										</div>
-									</div>
-									<input type="text" class="form-control" value="Gradient Usage">
-								</div>
-								<div class="mb-3">
-									<div class="d-flex align-items-center justify-content-between">
-										<label class="form-label">Choice 4 <span class="text-danger"> *</span></label>
-										<div class="form-check form-switch form-switch-end">
-											<label class="form-check-label" for="switch-sm6">Correct Answer</label>
-											<input class="form-check-input" type="checkbox" role="switch" id="switch-sm6">
-										</div>
-									</div>
-									<input type="text" class="form-control" value="Typography Hierarchy">
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn bg-gray-100 rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Save Changes</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Add Question -->
-
-			<!-- Delete Modal -->
-			<div class="modal fade" id="delete_modal">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-body text-center custom-modal-body">
-							<span class="avatar avatar-lg bg-secondary-transparent rounded-circle mb-2">
-								<i class="isax isax-trash fs-24 text-danger"></i>
-							</span>
-							<div>
-								<h4 class="mb-2">Delete Quiz</h4>
-								<p class="mb-3">Are you sure you want to delete Quiz 
-									“Information About UI/UX Design Degree”?</p>
-								<div class="d-flex align-items-center justify-content-center">
-									<a href="javascript:void(0);" class="btn bg-gray-100 rounded-pill me-2" data-bs-dismiss="modal">Cancel</a>
-									<a href="javascript:void(0);" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Yes, Delete</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- /Delete Modal -->
+<!-- Delete Modal -->
+<div class="modal fade" id="delete_modal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Supprimer la question</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <i class="fas fa-trash fa-3x text-danger mb-3"></i>
+          <h5>Êtes-vous sûr ?</h5>
+          <p class="text-muted">Cette action supprimera définitivement cette question et toutes ses réponses.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Annuler
+        </button>
+        <button type="button" class="btn btn-danger" (click)="deleteQuestion()">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

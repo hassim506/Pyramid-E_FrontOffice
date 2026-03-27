@@ -722,23 +722,22 @@ buildFormData(): any {
     outils_requis: this.outilsRequis.filter(outil => outil.trim()).map(outil => outil.trim()),
 
     // Modules
-    modules: this.modules.map(module => ({
-      titre: module.titre?.trim(),
-      description: module.description?.trim(),
-      duree_estimee: parseInt(module.duree_estimee.toString()) || 0,
-      ordre: module.ordre,
-      sections: module.sections.map(section => ({
-        titre: section.titre?.trim(),
-        type: section.type,
-        duree_estimee: parseInt(section.duree_estimee.toString()) || 0,
-        contenu: section.contenu?.trim() || null,
-        ressources: section.ressources?.trim() || null,
-        obligatoire: Boolean(section.obligatoire),
-        visible: Boolean(section.visible),
-        ordre: section.ordre
-      }))
-    })),
-
+ modules: this.modules.map(module => ({
+  titre: module.titre?.trim(),
+  description: module.description?.trim(),
+  duree_estimee: module.duree_estimee.toString() || '0',
+  ordre: module.ordre,
+  sections: module.sections.map(section => ({
+    titre: section.titre?.trim(),
+    type: section.type,
+    duree_estimee: section.duree_estimee.toString() || '0',
+    contenu: section.contenu?.trim() || null,
+    ressources: section.ressources?.trim() || null,
+    obligatoire: Boolean(section.obligatoire),
+    visible: Boolean(section.visible),
+    ordre: section.ordre
+  }))
+})),
     // Coûts
     estimation_couts: {
       cout_conception: parseFloat(pricingInfo.cout_conception) || 0,

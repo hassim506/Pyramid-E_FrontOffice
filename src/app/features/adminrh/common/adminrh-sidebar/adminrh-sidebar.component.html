@@ -65,7 +65,7 @@
 
          
             <li>
-                <a [routerLink]="routes.adminrhQuiz" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-medal-star5 me-2"></i>Quiz Results</a>
+                <a [routerLink]="routes.adminrhQuizResult" class="d-inline-flex align-items-center" [ngClass]="{'active':page==='adminrh-quiz-results'}"  routerLinkActive="active"><i class="isax isax-medal-star5 me-2"></i> Resultats Quiz</a>
             </li>
             <li>
                 <a [routerLink]="routes.adminrhCertificate" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-note-215 me-2"></i>Certificats</a>

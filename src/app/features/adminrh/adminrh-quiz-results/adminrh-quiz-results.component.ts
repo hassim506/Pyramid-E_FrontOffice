@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+
 import { Sort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
@@ -10,101 +10,152 @@ import { CommonModule } from '@angular/common';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
+ import { Component, OnInit } from '@angular/core';
+import { QuizResultsService, QuizResult, QuizResultsResponse } from '../../../shared/service/quiz/quiz-results.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-adminrh-quiz-results',
-  imports:[CommonModule,MatTableModule,MatSortModule,MatPaginatorModule,MatSelectModule,CustomPaginationComponent,RouterLink],
+  imports:[CommonModule,MatTableModule,MatSortModule,MatPaginatorModule,MatSelectModule,CustomPaginationComponent,RouterLink,FormsModule],
   templateUrl: './adminrh-quiz-results.component.html',
   styleUrl: './adminrh-quiz-results.component.scss'
 })
 export class AdminrhQuizResultsComponent {
-  routes=routes;
-// pagination variables
-public pageSize = 10;
-public tableData: instructorQuizResult[] = [];
-public tableDataCopy: instructorQuizResult[] = [];
-public actualData: instructorQuizResult[] = [];
-public currentPage = 1;
-public skip = 0;
-public limit: number = this.pageSize;
-public serialNumberArray: number[] = [];
-public totalData = 0;       
-public pageSelection: pageSelection[] = [];
-dataSource!: MatTableDataSource<instructorQuizResult>;
-public searchDataValue = '';
-constructor(
-  private data: DataService,
-  private router: Router,
-  private pagination: PaginationService
-) {
-  this.data.getInstructorQuizResult().subscribe((apiRes: apiResultFormat) => {
-    this.actualData = apiRes.data;
-    this.pagination.tablePageSize.subscribe((res: tablePageSize) => {
-      if (this.router.url == this.routes.instructorQuizResult) {
-        this.getTableData({ skip: res.skip, limit: res.limit });
-        this.pageSize = res.pageSize;
+ 
+
+
+// @Component({
+//   selector: 'app-instructor-quiz-results',
+//   imports:[CommonModule,MatTableModule,MatSortModule,MatPaginatorModule,MatSelectModule,CustomPaginationComponent,RouterLink,FormsModule],
+//   templateUrl: './instructor-quiz-results.component.html',
+//   styleUrl: './instructor-quiz-results.component.scss'
+// })
+
+
+
+
+// export class InstructorQuizResultsComponent implements OnInit {
+  results: QuizResult[] = [];
+  filteredResults: QuizResult[] = [];
+  totalResults = 0;
+  userId = 0;
+  isAuthenticated = false;
+  loading = false;
+  
+  // Filtres
+  filterQuizId: number | null = null;
+  filterUserId: number | null = null;
+  filterStatus: string = 'all'; // 'all', 'success', 'failed'
+  
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  totalData = 0;
+
+  constructor(private quizResultsService: QuizResultsService) {}
+
+  ngOnInit(): void {
+    this.loadResults();
+  }
+
+  loadResults(): void {
+    this.loading = true;
+    this.quizResultsService.getAllResults().subscribe({
+      next: (response: QuizResultsResponse) => {
+        this.results = response.results;
+        this.filteredResults = [...this.results];
+        this.totalResults = response.total_in_db;
+        this.userId = response.user_id;
+        this.isAuthenticated = response.is_authenticated;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des résultats:', error);
+        this.loading = false;
       }
     });
-  });
-}
-private getTableData(pageOption: pageSelection): void {
-  this.data.getInstructorQuizResult().subscribe((apiRes: apiResultFormat) => {
-    this.tableData = [];
-    this.tableDataCopy = [];
-    this.serialNumberArray = [];
-    this.totalData = apiRes.totalData;
-    apiRes.data.map((res: instructorQuizResult, index: number) => {
-      const serialNumber = index + 1;
-      if (index >= pageOption.skip && serialNumber <= pageOption.limit) {
-        res.sNo = serialNumber;
-        this.tableData.push(res);
-        this.tableDataCopy.push(res);
-        this.serialNumberArray.push(serialNumber);
+  }
+
+  applyFilters(): void {
+    this.filteredResults = this.results.filter(result => {
+      let matches = true;
+
+      if (this.filterQuizId !== null) {
+        matches = matches && result.quiz_id === this.filterQuizId;
       }
-    });
-    this.dataSource = new MatTableDataSource<instructorQuizResult>(this.actualData);
-    this.pagination.calculatePageSize.next({
-      totalData: this.totalData,
-      pageSize: this.pageSize,
-      tableData: this.tableData,
-      tableDataCopy: this.tableDataCopy,
-      serialNumberArray: this.serialNumberArray,
-    });
-  });
-}
 
-public searchData(value: string): void {
-  if (value == '') {
-    this.tableData = this.tableDataCopy;
-  } else {
-    this.dataSource.filter = value.trim().toLowerCase();
-    this.tableData = this.dataSource.filteredData;
+      if (this.filterUserId !== null) {
+        matches = matches && result.user_id === this.filterUserId;
+      }
+
+      if (this.filterStatus !== 'all') {
+        matches = matches && (this.filterStatus === 'success' ? result.est_reussi : !result.est_reussi);
+      }
+
+      return matches;
+    });
+
+    this.totalData = Math.ceil(this.filteredResults.length / this.pageSize);
+    this.currentPage = 1;
   }
-}
 
-public sortData(sort: Sort) {
-  const data = this.tableData.slice();
+  clearFilters(): void {
+    this.filterQuizId = null;
+    this.filterUserId = null;
+    this.filterStatus = 'all';
+    this.applyFilters();
+  }
 
-  if (!sort.active || sort.direction === '') {
-    this.tableData = data;
-  } else {
-    this.tableData = data.sort((a, b) => {
-      const aValue = (a as never)[sort.active];
+  getPaginatedResults(): QuizResult[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.filteredResults.slice(startIndex, startIndex + this.pageSize);
+  }
 
-      const bValue = (b as never)[sort.active];
-      return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
+  nextPage(): void {
+    if (this.currentPage < this.totalData) {
+      this.currentPage++;
+    }
+  }
+  parseFloat(value: string): number {
+    return parseFloat(value);
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+  sortData(event: any): void {
+    // Implémentation du tri si nécessaire
+    console.log('Sort event:', event);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalData) {
+      this.currentPage = page;
+    }
+  }
+
+  getSuccessRate(): number {
+    if (this.filteredResults.length === 0) return 0;
+    const successCount = this.filteredResults.filter(r => r.est_reussi).length;
+    return Math.round((successCount / this.filteredResults.length) * 100);
+  }
+
+  getAverageScore(): number {
+    if (this.filteredResults.length === 0) return 0;
+    const totalScore = this.filteredResults.reduce((sum, r) => sum + parseFloat(r.note), 0);
+    return Math.round((totalScore / this.filteredResults.length) * 100) / 100;
+  }
+
+  formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   }
-}
-public changePageSize(pageSize: number): void {
-  this.pageSelection = [];
-  this.limit = pageSize;
-  this.skip = 0;
-  this.currentPage = 1;
-  this.pagination.tablePageSize.next({
-    skip: this.skip,
-    limit: this.limit,
-    pageSize: this.pageSize,
-  });
-}
 }

@@ -1,0 +1,56 @@
+/* filepath: src/app/features/instructor/instructor-quiz-results/instructor-quiz-results.component.scss */
+.quiz-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.progress {
+  &.small {
+    height: 4px;
+  }
+}
+
+.avatar {
+  &.bg-soft-primary {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.fs-12 {
+  font-size: 0.75rem;
+}
+
+.custom-table {
+  .table {
+    th {
+      background-color: #f8f9fa;
+      border-top: none;
+      color: #6c757d;
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 1rem 0.75rem;
+    }
+    
+    td {
+      padding: 1rem 0.75rem;
+      vertical-align: middle;
+      border-color: #e9ecef;
+    }
+    
+    tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+  }
+}

@@ -24,7 +24,7 @@
                 <a [routerLink]="routes.instructorQuiz" [ngClass]="{'active':page==='instructor-quiz' || page==='instructor-quiz-questions'}" class="d-inline-flex align-items-center"><i class="isax isax-award5 me-2"></i>Quiz</a>
             </li>
             <li>
-                <a [routerLink]="routes.instructorQuizResult" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-medal-star5 me-2"></i>Résultats Quiz</a>
+                <a [routerLink]="routes.instructorQuizResult" [ngClass]="{'active':page==='instructor-quiz-result' }" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-medal-star5 me-2"></i>Résultats Quiz</a>
             </li>
             <li>
                 <a [routerLink]="routes.instructorCertificate" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-note-215 me-2"></i>Certificats</a>

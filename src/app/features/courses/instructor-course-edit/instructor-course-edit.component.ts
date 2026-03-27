@@ -6,17 +6,13 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 
 import { FormationService } from '../../../shared/service/formation/formation.service';
-import { CategorieService } from '../../../shared/service/categorie/categorie-service.service';
-// import { AuthService } from '../../../core/services/auth.service';
-import { CategorieFormation } from '../../../shared/service/categorie/categorie-service.service';
-
+import { CategorieService, CategorieFormation } from '../../../shared/service/categorie/categorie-service.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
-
 
 declare var bootstrap: any;
 
 interface Module {
-  id?: string;
+  id?: number;
   titre: string;
   description: string;
   duree_estimee: number;
@@ -25,7 +21,7 @@ interface Module {
 }
 
 interface Section {
-  id?: string;
+  id?: number;
   titre: string;
   type: string;
   duree_estimee: number;
@@ -49,6 +45,8 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   error = '';
   success = '';
   currentStep = 0;
+
+  // ID et données de la formation
   courseId: number | null = null;
   course: any = null;
   originalCourseData: any = null;
@@ -131,7 +129,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
       niveau: ['debutant', Validators.required],
       langue: ['fr', Validators.required],
       type: ['en_ligne', Validators.required],
-      nb_max_participants: [25, [Validators.min(1)]],
+      nb_max_participants: [25],
       short_description: ['', Validators.required],
       description: ['', Validators.required],
       est_certifiante: [false]
@@ -146,7 +144,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
     this.additionalInfoForm = this.fb.group({
       difficulte: ['moyen', Validators.required],
       prix: [0, [Validators.required, Validators.min(0)]],
-      duree_totale: ['', [Validators.min(1)]],
+      duree_totale: [null, [Validators.min(1)]],
       public_cible: [''],
       tags: [''],
       date_debut: [''],
@@ -157,11 +155,11 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
     });
 
     this.pricingForm = this.fb.group({
-      cout_conception: [0, [Validators.min(0)]],
-      cout_production: [0, [Validators.min(0)]],
-      cout_formateur_jour: [600, [Validators.min(0)]],
-      frais_logistique: [50, [Validators.min(0)]],
-      nb_jours: [1, [Validators.min(1)]],
+      cout_conception: [0],
+      cout_production: [0],
+      cout_formateur_jour: [0],
+      frais_logistique: [0],
+      nb_jours: [1],
       notes_estimation: ['']
     });
   }
@@ -171,11 +169,37 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   loadCategories(): void {
     const subscription = this.categorieService.getCategories().subscribe({
       next: (response: any) => {
-        this.categories = response.data || response;
+        try {
+          if (Array.isArray(response)) {
+            this.categories = response;
+          } else if (response?.data?.categories && Array.isArray(response.data.categories)) {
+            this.categories = response.data.categories;
+          } else if (response?.categories && Array.isArray(response.categories)) {
+            this.categories = response.categories;
+          } else if (response?.data && Array.isArray(response.data)) {
+            this.categories = response.data;
+          } else {
+            console.warn('Format de réponse inattendu pour les catégories:', response);
+            this.categories = [];
+          }
+
+          this.categories = this.categories.filter(cat => 
+            cat && typeof cat === 'object' && cat.id && cat.nom
+          );
+
+          if (this.categories.length === 0) {
+            this.error = 'Aucune catégorie de formation disponible.';
+          }
+        } catch (error) {
+          console.error('Erreur lors du traitement des catégories:', error);
+          this.categories = [];
+          this.error = 'Erreur lors du traitement des catégories.';
+        }
       },
-      error: (err: any) => {
-        console.error('Erreur lors du chargement des catégories:', err);
-        this.error = 'Erreur lors du chargement des catégories';
+      error: (err) => {
+        console.error('Erreur chargement catégories:', err);
+        this.categories = [];
+        this.error = 'Impossible de charger les catégories.';
       }
     });
     this.subscriptions.add(subscription);
@@ -206,15 +230,14 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
           return;
         }
 
-        // Sauvegarder les données originales pour la comparaison
+        // Sauvegarder les données originales
         this.originalCourseData = JSON.parse(JSON.stringify(this.course));
 
         // Remplir les formulaires avec les données
         this.populateFormsWithCourseData();
-        this.loadModulesAndSections();
         this.loading = false;
       },
-      error: (err: { status: number; error: { message: any; }; message: any; }) => {
+      error: (err: any) => {
         this.loading = false;
         console.error('Erreur lors du chargement de la formation:', err);
 
@@ -223,7 +246,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
         } else if (err.status === 403) {
           this.error = 'Accès non autorisé à cette formation';
         } else {
-          this.error = 'Erreur lors du chargement de la formation : ' + (err.error?.message || err.message);
+          this.error = 'Erreur lors du chargement de la formation';
         }
       }
     });
@@ -233,7 +256,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   populateFormsWithCourseData(): void {
     if (!this.course) return;
 
-    // Formulaire de base
+    // Remplir le formulaire de base
     this.basicInfoForm.patchValue({
       titre: this.course.titre || '',
       categorie_formation_id: this.course.categorie_formation_id || '',
@@ -246,7 +269,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
       est_certifiante: Boolean(this.course.est_certifiante)
     });
 
-    // Formulaire média
+    // Remplir le formulaire média
     this.mediaForm.patchValue({
       media_url: this.course.media_url || '',
       video_autoplay: Boolean(this.course.video_autoplay),
@@ -257,7 +280,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
       this.imagePreview = this.course.image_url;
     }
 
-    // Formulaire informations supplémentaires
+    // Remplir le formulaire d'informations supplémentaires
     this.additionalInfoForm.patchValue({
       difficulte: this.course.difficulte || 'moyen',
       prix: this.course.prix || 0,
@@ -271,30 +294,28 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
       est_publie: Boolean(this.course.est_publie)
     });
 
-    // Formulaire prix
+    // Remplir le formulaire de prix
     this.pricingForm.patchValue({
       cout_conception: this.course.cout_conception || 0,
       cout_production: this.course.cout_production || 0,
-      cout_formateur_jour: this.course.cout_formateur_jour || 600,
-      frais_logistique: this.course.frais_logistique || 50,
+      cout_formateur_jour: this.course.cout_formateur_jour || 0,
+      frais_logistique: this.course.frais_logistique || 0,
       nb_jours: this.course.nb_jours || 1,
       notes_estimation: this.course.notes_estimation || ''
     });
 
     // Gestion des tableaux
     this.handleArrayData();
+    this.loadModulesAndSections();
 
     // Valider l'URL vidéo si présente
     if (this.mediaForm.get('media_url')?.value) {
       this.validateVideoUrl();
     }
 
-    // Marquer les formulaires comme non modifiés après le remplissage initial
+    // Marquer les formulaires comme non modifiés
     setTimeout(() => {
-      this.basicInfoForm.markAsPristine();
-      this.mediaForm.markAsPristine();
-      this.additionalInfoForm.markAsPristine();
-      this.pricingForm.markAsPristine();
+      this.markAllFormsAsPristine();
       this.hasUnsavedChanges = false;
     }, 100);
   }
@@ -364,7 +385,6 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   // ==================== GESTION DES CHANGEMENTS ====================
 
   private setupChangeDetection(): void {
-    // Surveiller les changements dans tous les formulaires
     this.subscriptions.add(
       this.basicInfoForm.valueChanges.subscribe(() => {
         this.hasUnsavedChanges = true;
@@ -408,184 +428,60 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
     this.hasUnsavedChanges = true;
   }
 
-  // ==================== VALIDATION DES ÉTAPES ====================
-
-  isStepCompleted(stepIndex: number): boolean {
-    switch (stepIndex) {
-      case 0:
-        return this.basicInfoForm.valid;
-      case 1:
-        return true; // Média est optionnel
-      case 2:
-        return this.modules.length > 0;
-      case 3:
-        return this.additionalInfoForm.valid;
-      case 4:
-        return true; // Coûts sont optionnels
-      default:
-        return false;
-    }
-  }
-
-  hasChangesInStep(stepIndex: number): boolean {
-    switch (stepIndex) {
-      case 0:
-        return this.basicInfoForm.dirty;
-      case 1:
-        return this.mediaForm.dirty || this.selectedImageFile !== null;
-      case 2:
-        return true; // Considérer toujours comme modifié pour les modules
-      case 3:
-        return this.additionalInfoForm.dirty;
-      case 4:
-        return this.pricingForm.dirty;
-      default:
-        return false;
-    }
-  }
-
   // ==================== NAVIGATION ====================
-nextStep(): void {
-  console.log('Next step called, current step:', this.currentStep);
-  if (this.validateCurrentStep() && this.currentStep < 4) {
-    this.currentStep++;
-    console.log('Moving to step:', this.currentStep);
-  }
-}
 
-prevStep(): void {
-  console.log('Prev step called, current step:', this.currentStep);
-  if (this.currentStep > 0) {
-    this.currentStep--;
-    console.log('Moving to step:', this.currentStep);
+  nextStep(): void {
+    if (this.validateCurrentStep()) {
+      this.currentStep++;
+    }
   }
-}
 
-validateCurrentStep(): boolean {
-  console.log('Validating step:', this.currentStep);
-  
-  switch (this.currentStep) {
-    case 0:
-      if (this.basicInfoForm.invalid) {
-        this.markFormGroupTouched(this.basicInfoForm);
-        this.error = 'Veuillez remplir correctement les informations de base';
-        setTimeout(() => this.error = '', 5000);
-        return false;
-      }
-      break;
-    case 1:
-      // Média optionnel - toujours valide
-      break;
-    case 2:
-      if (this.modules.length === 0) {
-        this.error = 'Vous devez créer au moins un module';
-        setTimeout(() => this.error = '', 5000);
-        return false;
-      }
-      break;
-    case 3:
-      if (this.additionalInfoForm.invalid) {
-        this.markFormGroupTouched(this.additionalInfoForm);
-        this.error = 'Veuillez remplir correctement les informations supplémentaires';
-        setTimeout(() => this.error = '', 5000);
-        return false;
-      }
-      break;
-    case 4:
-      // Coûts optionnels - toujours valide
-      break;
+  prevStep(): void {
+    if (this.currentStep > 0) {
+      this.currentStep--;
+    }
   }
-  
-  this.error = ''; // Clear any previous errors
-  return true;
-}
+
+  validateCurrentStep(): boolean {
+    switch (this.currentStep) {
+      case 0:
+        if (this.basicInfoForm.invalid) {
+          this.markFormGroupTouched(this.basicInfoForm);
+          this.error = 'Veuillez remplir correctement les informations de base';
+          setTimeout(() => this.error = '', 5000);
+          return false;
+        }
+        break;
+      case 1:
+        // Média optionnel
+        break;
+      case 2:
+        if (this.modules.length === 0) {
+          this.error = 'Vous devez créer au moins un module';
+          setTimeout(() => this.error = '', 5000);
+          return false;
+        }
+        break;
+      case 3:
+        if (this.additionalInfoForm.invalid) {
+          this.markFormGroupTouched(this.additionalInfoForm);
+          this.error = 'Veuillez remplir correctement les informations supplémentaires';
+          setTimeout(() => this.error = '', 5000);
+          return false;
+        }
+        break;
+      case 4:
+        // Coûts optionnels
+        break;
+    }
+    this.error = '';
+    return true;
+  }
+
   markFormGroupTouched(formGroup: FormGroup): void {
     Object.keys(formGroup.controls).forEach(key => {
-      const control = formGroup.get(key);
-      control?.markAsTouched();
+      formGroup.get(key)?.markAsTouched();
     });
-  }
-
-  // ==================== SAUVEGARDE PARTIELLE ====================
-
-  updateBasicInfo(): void {
-    if (this.basicInfoForm.invalid) {
-      this.markFormGroupTouched(this.basicInfoForm);
-      return;
-    }
-
-    this.saving = true;
-    const basicData = {
-      ...this.basicInfoForm.value,
-      objectifs: this.objectifs.filter(obj => obj.trim()).join(', '),
-      prerequis: this.prerequis.filter(pre => pre.trim()).join(', ')
-    };
-
-    const subscription = this.formationService.updateFormation(this.courseId!, basicData).subscribe({
-      next: () => {
-        this.saving = false;
-        this.success = 'Informations de base sauvegardées !';
-        this.basicInfoForm.markAsPristine();
-        setTimeout(() => this.success = '', 3000);
-      },
-      error: (err) => {
-        this.saving = false;
-        this.error = 'Erreur lors de la sauvegarde : ' + (err.error?.message || err.message);
-        setTimeout(() => this.error = '', 5000);
-      }
-    });
-    this.subscriptions.add(subscription);
-  }
-
-  resetStep(stepIndex: number): void {
-    if (confirm('Annuler toutes les modifications de cette étape ?')) {
-      switch (stepIndex) {
-        case 0:
-          this.populateBasicInfoForm();
-          break;
-        case 1:
-          this.populateMediaForm();
-          break;
-        case 2:
-          this.loadModulesAndSections();
-          break;
-        case 3:
-          this.populateAdditionalInfoForm();
-          break;
-        case 4:
-          this.populatePricingForm();
-          break;
-      }
-    }
-  }
-
-  saveDraft(): void {
-    this.saving = true;
-    const draftData = {
-      ...this.buildFormData(),
-      est_publie: false,
-      statut: 'brouillon'
-    };
-
-    const subscription = this.formationService.updateFormation(this.courseId!, draftData).subscribe({
-      next: () => {
-        this.saving = false;
-        this.success = 'Brouillon sauvegardé !';
-        this.hasUnsavedChanges = false;
-        this.markAllFormsAsPristine();
-        setTimeout(() => this.success = '', 3000);
-      },
-      error: (err) => {
-        this.saving = false;
-        this.error = 'Erreur lors de la sauvegarde : ' + (err.error?.message || err.message);
-        setTimeout(() => this.error = '', 5000);
-      }
-    });
-    this.subscriptions.add(subscription);
-  }
-
-  saveChanges(): void {
-    this.updateCourse();
   }
 
   // ==================== OBJECTIFS ====================
@@ -644,22 +540,12 @@ validateCurrentStep(): boolean {
     }
   }
 
-  // ==================== COMPTEURS ====================
-
-  getObjectifsCount(): number {
-    return this.objectifs.filter(obj => obj.trim()).length;
-  }
-
-  getPrerequisCount(): number {
-    return this.prerequis.filter(pre => pre.trim()).length;
-  }
-
   getCompetencesCount(): number {
-    return this.competencesAcquises.filter(comp => comp.trim()).length;
+    return this.competencesAcquises.filter(c => c.trim()).length;
   }
 
   getOutilsCount(): number {
-    return this.outilsRequis.filter(outil => outil.trim()).length;
+    return this.outilsRequis.filter(o => o.trim()).length;
   }
 
   // ==================== MÉDIA - IMAGE ====================
@@ -677,7 +563,6 @@ validateCurrentStep(): boolean {
   onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver = false;
-    
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
       this.processImageFile(files[0]);
@@ -685,35 +570,30 @@ validateCurrentStep(): boolean {
   }
 
   onImageSelected(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (file) {
-      this.processImageFile(file);
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.processImageFile(input.files[0]);
     }
   }
-createNewCourse(): void {
-  this.router.navigate(['/instructor/courses/create']);
-}
+
   processImageFile(file: File): void {
-    // Validation du type de fichier
-    if (!file.type.startsWith('image/')) {
-      this.imageError = 'Veuillez sélectionner un fichier image';
-      return;
-    }
-
-    // Validation de la taille (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      this.imageError = 'L\'image ne doit pas dépasser 5MB';
-      return;
-    }
-
     this.imageError = '';
-    this.selectedImageFile = file;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.imageError = 'Format non supporté. Utilisez JPEG, PNG ou WebP.';
+      return;
+    }
 
-    // Créer un aperçu
+    if (file.size > 5 * 1024 * 1024) {
+      this.imageError = 'L\'image est trop volumineuse. Taille max: 5MB.';
+      return;
+    }
+
+    this.selectedImageFile = file;
     const reader = new FileReader();
-    reader.onload = (e) => {
-      this.imagePreview = e.target?.result as string;
+    reader.onload = () => {
+      this.imagePreview = reader.result as string;
       this.markAsChanged();
     };
     reader.readAsDataURL(file);
@@ -722,83 +602,70 @@ createNewCourse(): void {
   removeImage(): void {
     this.imagePreview = null;
     this.selectedImageFile = null;
+    this.imageError = '';
     this.markAsChanged();
   }
 
   // ==================== MÉDIA - VIDEO ====================
 
   onVideoUrlChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    const url = target.value;
-    
-    if (url) {
-      this.validateVideoUrl();
-    } else {
-      this.videoUrlError = '';
-      this.videoUrlValid = false;
-    }
+    this.videoUrlError = '';
+    this.videoUrlValid = false;
   }
 
   validateVideoUrl(): void {
     const url = this.mediaForm.get('media_url')?.value;
-    
     if (!url) {
-      this.videoUrlError = '';
       this.videoUrlValid = false;
       return;
     }
 
-    try {
-      new URL(url);
-      
-      if (this.isYouTubeUrl(url) || this.isVimeoUrl(url) || this.isDirectVideoUrl(url)) {
-        this.videoUrlError = '';
-        this.videoUrlValid = true;
-      } else {
-        this.videoUrlError = 'URL non supportée. Utilisez YouTube, Vimeo ou un lien direct vers une vidéo.';
-        this.videoUrlValid = false;
-      }
-    } catch {
-      this.videoUrlError = 'URL invalide';
+    if (this.isYouTubeUrl(url) || this.isVimeoUrl(url) || this.isDirectVideoUrl(url)) {
+      this.videoUrlValid = true;
+      this.videoUrlError = '';
+    } else {
       this.videoUrlValid = false;
+      this.videoUrlError = 'URL non reconnue. Utilisez YouTube, Vimeo ou un lien direct.';
     }
   }
 
   clearVideoUrl(): void {
     this.mediaForm.patchValue({ media_url: '' });
-    this.videoUrlError = '';
     this.videoUrlValid = false;
+    this.videoUrlError = '';
   }
 
   isYouTubeUrl(url: string): boolean {
-    return /^https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)/.test(url);
+    return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)/.test(url);
   }
 
   isVimeoUrl(url: string): boolean {
-    return /^https?:\/\/(www\.)?vimeo\.com\//.test(url);
+    return /^(https?:\/\/)?(www\.)?vimeo\.com/.test(url);
   }
 
   isDirectVideoUrl(url: string): boolean {
-    return /\.(mp4|webm|ogg)$/i.test(url);
+    return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
   }
 
   getYouTubeEmbedUrl(url: string): SafeResourceUrl {
     let videoId = '';
-    
-    if (url.includes('youtube.com/watch?v=')) {
-      videoId = url.split('v=')[1].split('&')[0];
-    } else if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1].split('?')[0];
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      videoId = match[2];
     }
-    
-    const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube.com/embed/${videoId}`
+    );
   }
 
   getVimeoEmbedUrl(url: string): SafeResourceUrl {
-    const videoId = url.split('vimeo.com/')[1].split('?')[0];
-    const embedUrl = `https://player.vimeo.com/video/${videoId}`;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+    const regExp = /vimeo\.com\/(\d+)/;
+    const match = url.match(regExp);
+    const videoId = match ? match[1] : '';
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://player.vimeo.com/video/${videoId}`
+    );
   }
 
   // ==================== MODULES ====================
@@ -808,14 +675,14 @@ createNewCourse(): void {
       titre: '',
       description: '',
       duree_estimee: 0,
-      ordre: this.modules.length + 1,
+      ordre: 0,
       sections: []
     };
   }
 
   openModuleModal(): void {
-    this.editingModuleIndex = null;
     this.newModule = this.getEmptyModule();
+    this.editingModuleIndex = null;
     const modal = new bootstrap.Modal(document.getElementById('moduleModal'));
     modal.show();
   }
@@ -828,35 +695,41 @@ createNewCourse(): void {
   }
 
   saveModule(): void {
+    if (!this.newModule.titre) return;
+
     if (this.editingModuleIndex !== null) {
-      this.modules[this.editingModuleIndex] = { ...this.newModule };
+      this.modules[this.editingModuleIndex] = {
+        ...this.newModule,
+        sections: this.modules[this.editingModuleIndex].sections
+      };
     } else {
+      this.newModule.ordre = this.modules.length;
+      this.newModule.sections = [];
       this.modules.push({ ...this.newModule });
     }
 
-    this.markAsChanged();
     this.closeModal('moduleModal');
-    this.newModule = this.getEmptyModule();
-    this.editingModuleIndex = null;
+    this.markAsChanged();
   }
 
   removeModule(index: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce module et toutes ses sections ?')) {
+    if (confirm('Supprimer ce module et toutes ses sections ?')) {
       this.modules.splice(index, 1);
+      this.modules.forEach((m, i) => m.ordre = i);
       this.markAsChanged();
     }
   }
 
   getModuleDuration(module: Module): number {
-    return module.sections.reduce((total, section) => total + (section.duree_estimee || 0), 0);
+    return module.sections?.reduce((sum, s) => sum + (s.duree_estimee || 0), 0) || 0;
   }
 
   getTotalSections(): number {
-    return this.modules.reduce((total, module) => total + module.sections.length, 0);
+    return this.modules.reduce((sum, m) => sum + (m.sections?.length || 0), 0);
   }
 
   getTotalDuration(): number {
-    return this.modules.reduce((total, module) => total + this.getModuleDuration(module), 0);
+    return this.modules.reduce((sum, m) => sum + this.getModuleDuration(m), 0);
   }
 
   // ==================== SECTIONS ====================
@@ -864,7 +737,7 @@ createNewCourse(): void {
   getEmptySection(): Section {
     return {
       titre: '',
-      type: 'video',
+      type: 'text',
       duree_estimee: 0,
       contenu: '',
       ressources: '',
@@ -873,13 +746,14 @@ createNewCourse(): void {
       ordre: 0
     };
   }
-
+private validateSectionType(type: string): string {
+  const validTypes = ['text', 'video', 'pdf', 'quiz', 'exercice', 'ressource'];
+  return validTypes.includes(type) ? type : 'text';
+}
   openSectionModal(moduleIndex: number): void {
     this.currentModuleIndex = moduleIndex;
-    this.editingSectionIndex = null;
     this.currentSection = this.getEmptySection();
-    this.currentSection.ordre = this.modules[moduleIndex].sections.length + 1;
-    
+    this.editingSectionIndex = null;
     const modal = new bootstrap.Modal(document.getElementById('sectionModal'));
     modal.show();
   }
@@ -888,30 +762,30 @@ createNewCourse(): void {
     this.currentModuleIndex = moduleIndex;
     this.editingSectionIndex = sectionIndex;
     this.currentSection = { ...this.modules[moduleIndex].sections[sectionIndex] };
-    
     const modal = new bootstrap.Modal(document.getElementById('sectionModal'));
     modal.show();
   }
 
   saveSection(): void {
-    if (this.currentModuleIndex === null) return;
+    if (!this.currentSection.titre || this.currentModuleIndex === null) return;
+
+    const module = this.modules[this.currentModuleIndex];
 
     if (this.editingSectionIndex !== null) {
-      this.modules[this.currentModuleIndex].sections[this.editingSectionIndex] = { ...this.currentSection };
+      module.sections[this.editingSectionIndex] = { ...this.currentSection };
     } else {
-      this.modules[this.currentModuleIndex].sections.push({ ...this.currentSection });
+      this.currentSection.ordre = module.sections.length;
+      module.sections.push({ ...this.currentSection });
     }
 
-    this.markAsChanged();
     this.closeModal('sectionModal');
-    this.currentSection = this.getEmptySection();
-    this.editingSectionIndex = null;
-    this.currentModuleIndex = null;
+    this.markAsChanged();
   }
 
   removeSection(moduleIndex: number, sectionIndex: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette section ?')) {
+    if (confirm('Supprimer cette section ?')) {
       this.modules[moduleIndex].sections.splice(sectionIndex, 1);
+      this.modules[moduleIndex].sections.forEach((s, i) => s.ordre = i);
       this.markAsChanged();
     }
   }
@@ -922,9 +796,7 @@ createNewCourse(): void {
     const modalElement = document.getElementById(modalId);
     if (modalElement) {
       const modal = bootstrap.Modal.getInstance(modalElement);
-      if (modal) {
-        modal.hide();
-      }
+      modal?.hide();
     }
   }
 
@@ -935,23 +807,12 @@ createNewCourse(): void {
       'difficile': 'Difficile',
       'expert': 'Expert'
     };
-    return labels[value] || value;
+    return labels[value] || value || 'Non défini';
   }
 
   getFormControlValue(controlName: string): any {
-    // Cherche d'abord dans basicInfoForm
-    if (this.basicInfoForm.get(controlName)) {
-      return this.basicInfoForm.get(controlName)?.value;
-    }
-    // Puis dans additionalInfoForm
-    if (this.additionalInfoForm.get(controlName)) {
-      return this.additionalInfoForm.get(controlName)?.value;
-    }
-    // Puis dans pricingForm
-    if (this.pricingForm.get(controlName)) {
-      return this.pricingForm.get(controlName)?.value;
-    }
-    return null;
+    return this.basicInfoForm.get(controlName)?.value || 
+           this.pricingForm.get(controlName)?.value;
   }
 
   // ==================== CALCULS COÛTS ====================
@@ -963,15 +824,15 @@ createNewCourse(): void {
   }
 
   getCoutFormateur(): number {
-    const tarifJour = this.pricingForm.get('cout_formateur_jour')?.value || 0;
+    const coutJour = this.pricingForm.get('cout_formateur_jour')?.value || 0;
     const nbJours = this.pricingForm.get('nb_jours')?.value || 1;
-    return tarifJour * nbJours;
+    return coutJour * nbJours;
   }
 
   getCoutLogistique(): number {
-    const fraisParParticipant = this.pricingForm.get('frais_logistique')?.value || 0;
-    const nbParticipants = this.basicInfoForm.get('nb_max_participants')?.value || 1;
-    return fraisParParticipant * nbParticipants;
+    const frais = this.pricingForm.get('frais_logistique')?.value || 0;
+    const participants = this.basicInfoForm.get('nb_max_participants')?.value || 1;
+    return frais * participants;
   }
 
   getCoutTotal(): number {
@@ -980,42 +841,66 @@ createNewCourse(): void {
 
   getCoutParticipant(): number {
     const total = this.getCoutTotal();
-    const nbParticipants = this.basicInfoForm.get('nb_max_participants')?.value || 1;
-    return Math.round(total / nbParticipants);
+    const participants = this.basicInfoForm.get('nb_max_participants')?.value || 1;
+    return Math.round(total / participants);
   }
 
   getCoutParHeure(): number {
     const total = this.getCoutTotal();
-    const dureeHeures = this.additionalInfoForm.get('duree_totale')?.value || 1;
-    return Math.round(total / dureeHeures);
+    const duree = this.additionalInfoForm.get('duree_totale')?.value || 1;
+    return Math.round(total / duree);
   }
 
-  // ==================== MISE À JOUR FINALE ====================
+  // ==================== MISE À JOUR ====================
 
   updateCourse(): void {
+    this.saving = true;
+    this.error = '';
+    this.success = '';
+
     if (!this.validateAllSteps()) {
-      this.error = 'Veuillez corriger les erreurs avant de sauvegarder';
+      this.saving = false;
       return;
     }
 
-    this.saving = true;
     const formData = this.buildFormData();
-
-    console.log('Données à envoyer:', formData);
+    
+    console.log('Données envoyées pour mise à jour:', formData);
 
     const subscription = this.formationService.updateFormation(this.courseId!, formData).subscribe({
       next: (response) => {
         this.saving = false;
+        this.success = 'Formation mise à jour avec succès !';
         this.hasUnsavedChanges = false;
         this.markAllFormsAsPristine();
-        this.showSuccessModal();
-        console.log('Formation mise à jour avec succès:', response);
+        
+        setTimeout(() => {
+          const modal = new bootstrap.Modal(document.getElementById('updateSuccessModal'));
+          modal.show();
+        }, 100);
       },
       error: (err) => {
         this.saving = false;
-        console.error('Erreur lors de la mise à jour:', err);
-        this.error = 'Erreur lors de la mise à jour : ' + (err.error?.message || err.message);
-        setTimeout(() => this.error = '', 5000);
+        console.error('Erreur mise à jour:', err);
+        
+        if (err.status === 422 && err.error?.errors) {
+          const errors = err.error.errors;
+          let errorMessage = 'Erreurs de validation :\n';
+          
+          Object.keys(errors).forEach(field => {
+            if (Array.isArray(errors[field])) {
+              errorMessage += `• ${field}: ${errors[field].join(', ')}\n`;
+            } else {
+              errorMessage += `• ${field}: ${errors[field]}\n`;
+            }
+          });
+          
+          this.error = errorMessage;
+        } else if (err.error?.message) {
+          this.error = err.error.message;
+        } else {
+          this.error = 'Erreur lors de la mise à jour de la formation.';
+        }
       }
     });
     this.subscriptions.add(subscription);
@@ -1037,34 +922,155 @@ createNewCourse(): void {
       }
     }
 
-    return {
-      ...basicInfo,
-      ...mediaInfo,
-      ...additionalInfo,
-      ...pricingInfo,
+    const formData: any = {
+      // Informations de base
+      titre: basicInfo.titre?.trim(),
+      short_description: basicInfo.short_description?.trim(),
+      description: basicInfo.description?.trim(),
+      categorie_formation_id: parseInt(basicInfo.categorie_formation_id) || null,
+      niveau: basicInfo.niveau,
+      langue: basicInfo.langue,
+      type: basicInfo.type,
+      nb_max_participants: parseInt(basicInfo.nb_max_participants) || 25,
+      est_certifiante: Boolean(basicInfo.est_certifiante),
+
+      // Informations supplémentaires
+      difficulte: additionalInfo.difficulte,
+      prix: parseFloat(additionalInfo.prix) || 0,
+      duree_totale: parseInt(additionalInfo.duree_totale) || null,
+      public_cible: additionalInfo.public_cible?.trim() || null,
+      tags: additionalInfo.tags?.trim() || null,
+      date_debut: additionalInfo.date_debut || null,
+      date_fin: additionalInfo.date_fin || null,
+      inscription_ouverte: Boolean(additionalInfo.inscription_ouverte),
+      est_publie: Boolean(additionalInfo.est_publie),
+
+      // Média
+      media_url: mediaInfo.media_url?.trim() || null,
+      video_autoplay: Boolean(mediaInfo.video_autoplay),
+      video_show_controls: Boolean(mediaInfo.video_show_controls),
+
+      // Objectifs, prérequis, compétences, outils
       objectifs: this.objectifs.filter(obj => obj.trim()).join(', '),
       prerequis: this.prerequis.filter(pre => pre.trim()).join(', '),
       competences_acquises: this.competencesAcquises.filter(comp => comp.trim()).join(', '),
       outils_requis: this.outilsRequis.filter(outil => outil.trim()).join(', '),
-      modules: JSON.stringify(this.modules),
+
+      // Modules (JSON stringified pour l'édition)
+        modules: this.modules.map(module => ({
+        id: module.id,
+        titre: module.titre?.trim(),
+        description: module.description?.trim(),
+        duree_estimee: module.duree_estimee.toString() || '0',
+        ordre: module.ordre,
+       sections: module.sections.map(section => ({
+        id: section.id,
+        titre: section.titre?.trim(),
+        type: section.type,
+        duree_estimee: section.duree_estimee.toString() || '0',
+        contenu: section.contenu?.trim() || null,
+        ressources: section.ressources?.trim() 
+          ? section.ressources.split(',').map(r => r.trim()).filter(r => r) 
+          : [],  // Convertir en array au lieu de string
+        obligatoire: Boolean(section.obligatoire),
+        visible: Boolean(section.visible),
+        ordre: section.ordre
+      }))
+      })),
+
+      // Coûts
+      cout_conception: parseFloat(pricingInfo.cout_conception) || 0,
+      cout_production: parseFloat(pricingInfo.cout_production) || 0,
+      cout_formateur_jour: parseFloat(pricingInfo.cout_formateur_jour) || 0,
+      frais_logistique: parseFloat(pricingInfo.frais_logistique) || 0,
+      nb_jours: parseInt(pricingInfo.nb_jours) || 1,
+      notes_estimation: pricingInfo.notes_estimation?.trim() || null,
+
+      // Métadonnées
       metadata: parsedMetadata
     };
+
+    // Nettoyer les valeurs vides
+    Object.keys(formData).forEach(key => {
+      if (formData[key] === '' || formData[key] === undefined) {
+        formData[key] = null;
+      }
+    });
+
+    return formData;
   }
 
-
   validateAllSteps(): boolean {
-    let allValid = true;
+    let isValid = true;
+    let errorMessages: string[] = [];
 
-    // Valider toutes les étapes
-    for (let i = 0; i <= 4; i++) {
-      this.currentStep = i;
-      if (!this.validateCurrentStep()) {
-        allValid = false;
-        break;
-      }
+    // Valider le formulaire de base
+    if (this.basicInfoForm.invalid) {
+      this.markFormGroupTouched(this.basicInfoForm);
+      isValid = false;
+      const formErrors = this.getFormErrorsInFrench(this.basicInfoForm);
+      errorMessages.push(...formErrors);
     }
 
-    return allValid;
+    // Valider le formulaire d'informations supplémentaires
+    if (this.additionalInfoForm.invalid) {
+      this.markFormGroupTouched(this.additionalInfoForm);
+      isValid = false;
+      const formErrors = this.getFormErrorsInFrench(this.additionalInfoForm);
+      errorMessages.push(...formErrors);
+    }
+
+    // Valider que les objectifs ne sont pas vides
+    if (this.objectifs.filter(obj => obj.trim()).length === 0) {
+      isValid = false;
+      errorMessages.push('Au moins un objectif est requis');
+    }
+
+    // Afficher les erreurs spécifiques
+    if (!isValid) {
+      this.error = errorMessages.join('\n');
+    }
+
+    return isValid;
+  }
+
+  private getFormErrorsInFrench(formGroup: FormGroup): string[] {
+    const errors: string[] = [];
+    const fieldNames: { [key: string]: string } = {
+      'titre': 'Titre',
+      'categorie_formation_id': 'Catégorie',
+      'niveau': 'Niveau',
+      'langue': 'Langue',
+      'type': 'Type',
+      'short_description': 'Description courte',
+      'description': 'Description',
+      'difficulte': 'Difficulté',
+      'prix': 'Prix',
+      'duree_totale': 'Durée totale',
+      'public_cible': 'Public cible',
+      'nb_max_participants': 'Nombre max de participants'
+    };
+
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      const fieldName = fieldNames[key] || key;
+      
+      if (control && control.errors) {
+        if (control.errors['required']) {
+          errors.push(`• ${fieldName} est requis`);
+        }
+        if (control.errors['minlength']) {
+          const minLength = control.errors['minlength'].requiredLength;
+          errors.push(`• ${fieldName} doit contenir au moins ${minLength} caractères`);
+        }
+        if (control.errors['min']) {
+          const minValue = control.errors['min'].min;
+          errors.push(`• ${fieldName} doit être supérieur ou égal à ${minValue}`);
+        }
+      }
+    });
+
+    return errors;
   }
 
   private markAllFormsAsPristine(): void {
@@ -1074,89 +1080,11 @@ createNewCourse(): void {
     this.pricingForm.markAsPristine();
   }
 
-  private showSuccessModal(): void {
-    const modal = new bootstrap.Modal(document.getElementById('updateSuccessModal'));
-    modal.show();
-  }
-
-  // ==================== MÉTHODES DE REMPLISSAGE INDIVIDUELLES ====================
-
-  private populateBasicInfoForm(): void {
-    if (!this.originalCourseData) return;
-    
-    this.basicInfoForm.patchValue({
-      titre: this.originalCourseData.titre || '',
-      categorie_formation_id: this.originalCourseData.categorie_formation_id || '',
-      niveau: this.originalCourseData.niveau || 'debutant',
-      langue: this.originalCourseData.langue || 'fr',
-      type: this.originalCourseData.type || 'en_ligne',
-      nb_max_participants: this.originalCourseData.nb_max_participants || 25,
-      short_description: this.originalCourseData.short_description || '',
-      description: this.originalCourseData.description || '',
-      est_certifiante: Boolean(this.originalCourseData.est_certifiante)
-    });
-    
-    this.basicInfoForm.markAsPristine();
-  }
-
-  private populateMediaForm(): void {
-    if (!this.originalCourseData) return;
-    
-    this.mediaForm.patchValue({
-      media_url: this.originalCourseData.media_url || '',
-      video_autoplay: Boolean(this.originalCourseData.video_autoplay),
-      video_show_controls: this.originalCourseData.video_show_controls !== false
-    });
-    
-    this.imagePreview = this.originalCourseData.image_url || null;
-    this.selectedImageFile = null;
-    this.mediaForm.markAsPristine();
-  }
-
-  private populateAdditionalInfoForm(): void {
-    if (!this.originalCourseData) return;
-    
-    this.additionalInfoForm.patchValue({
-      difficulte: this.originalCourseData.difficulte || 'moyen',
-      prix: this.originalCourseData.prix || 0,
-      duree_totale: this.originalCourseData.duree_totale || null,
-      public_cible: this.originalCourseData.public_cible || '',
-      tags: this.originalCourseData.tags || '',
-      date_debut: this.originalCourseData.date_debut ? this.originalCourseData.date_debut.split('T')[0] : '',
-      date_fin: this.originalCourseData.date_fin ? this.originalCourseData.date_fin.split('T')[0] : '',
-      metadata: this.originalCourseData.metadata ? JSON.stringify(this.originalCourseData.metadata) : '',
-      inscription_ouverte: this.originalCourseData.inscription_ouverte !== false,
-      est_publie: Boolean(this.originalCourseData.est_publie)
-    });
-    
-    this.additionalInfoForm.markAsPristine();
-  }
-
-  private populatePricingForm(): void {
-    if (!this.originalCourseData) return;
-    
-    this.pricingForm.patchValue({
-      cout_conception: this.originalCourseData.cout_conception || 0,
-      cout_production: this.originalCourseData.cout_production || 0,
-      cout_formateur_jour: this.originalCourseData.cout_formateur_jour || 600,
-      frais_logistique: this.originalCourseData.frais_logistique || 50,
-      nb_jours: this.originalCourseData.nb_jours || 1,
-      notes_estimation: this.originalCourseData.notes_estimation || ''
-    });
-    
-    this.pricingForm.markAsPristine();
-  }
-
   // ==================== NAVIGATION POST-MISE À JOUR ====================
 
   goToCoursesList(): void {
-    if (this.hasUnsavedChanges) {
-      if (confirm('Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir quitter ?')) {
-        this.router.navigate(['/instructor/courses']);
-      }
-    } else {
-      this.router.navigate(['/instructor/courses']);
-    }
+    this.closeModal('updateSuccessModal');
+    this.router.navigate(['/instructor/courses']);
   }
 
   continueEditing(): void {
@@ -1164,27 +1092,13 @@ createNewCourse(): void {
     this.hasUnsavedChanges = false;
   }
 
-  previewCourse(): void {
-    if (this.courseId) {
-      window.open(`/courses/${this.courseId}`, '_blank');
-    }
-  }
-
-  confirmDeleteCourse(): void {
-    if (!this.courseId) return;
-
-    const subscription = this.formationService.deleteFormation(this.courseId).subscribe({
-      next: () => {
-        this.success = 'Formation supprimée avec succès';
-        setTimeout(() => {
-          this.router.navigate(['/instructor/courses']);
-        }, 1500);
-      },
-      error: (err) => {
-        this.error = 'Erreur lors de la suppression : ' + (err.error?.message || err.message);
-        setTimeout(() => this.error = '', 5000);
+  createNewCourse(): void {
+    if (this.hasUnsavedChanges) {
+      if (confirm('Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir créer une nouvelle formation ?')) {
+        this.router.navigate(['/instructor/courses/add']);
       }
-    });
-    this.subscriptions.add(subscription);
+    } else {
+      this.router.navigate(['/instructor/courses/add']);
+    }
   }
 }
