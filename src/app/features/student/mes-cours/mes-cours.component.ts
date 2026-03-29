@@ -94,7 +94,22 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   // ════════════════════════════════════════════
   getProgression(f: Formation): number {
     const fromService = this.progressionService.getPercent(f.id);
-    return fromService > 0 ? fromService : Number(f.progression ?? 0);
+    return fromService > 0 ? fromService : Number((f as any).progression ?? 0);
+  }
+
+  // ════════════════════════════════════════════
+  // SOURCE HELPERS
+  // ════════════════════════════════════════════
+  getSource(f: Formation): string {
+    return (f as any).source ?? 'assigne';
+  }
+
+  isFromDemande(f: Formation): boolean {
+    return this.getSource(f) === 'demande';
+  }
+
+  getBadgeLabel(f: Formation): string {
+    return (f as any).badge_label ?? (this.isFromDemande(f) ? 'Demande acceptée' : 'Assignée');
   }
 
   // ════════════════════════════════════════════
@@ -103,25 +118,31 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   get totalFormations():   number { return this.allFormations.length; }
   get totalEnCours():      number { return this.allFormations.filter(f => { const p = this.getProgression(f); return p > 0 && p < 100; }).length; }
   get totalACommencer():   number { return this.allFormations.filter(f => this.getProgression(f) === 0).length; }
-  get totalTerminees():    number { return this.allFormations.filter(f => this.getProgression(f) === 100).length; }
+  get totalTerminees():    number { return this.allFormations.filter(f => this.getProgression(f) >= 100).length; }
   get totalCertifiantes(): number { return this.allFormations.filter(f => (f as any).est_certifiante).length; }
+  get totalAssignees():    number { return this.allFormations.filter(f => this.getSource(f) === 'assigne').length; }
+  get totalDemandes():     number { return this.allFormations.filter(f => this.getSource(f) === 'demande').length; }
 
   // ════════════════════════════════════════════
   // FILTRES
   // ════════════════════════════════════════════
   get filteredFormations(): Formation[] {
     return this.allFormations.filter(f => {
-      const p = this.getProgression(f);
+      const p      = this.getProgression(f);
+      const source = this.getSource(f);
 
       const matchSearch = !this.searchDataValue ||
         f.titre.toLowerCase().includes(this.searchDataValue.toLowerCase()) ||
-        (f.description ?? '').toLowerCase().includes(this.searchDataValue.toLowerCase());
+        ((f as any).description ?? '').toLowerCase().includes(this.searchDataValue.toLowerCase());
 
       const matchTab =
         this.selectedTab === ''            ? true :
         this.selectedTab === 'en_cours'    ? (p > 0 && p < 100) :
         this.selectedTab === 'a_commencer' ? p === 0 :
-        this.selectedTab === 'termines'    ? p === 100 : true;
+        this.selectedTab === 'termines'    ? p >= 100 :
+        this.selectedTab === 'assigne'     ? source === 'assigne' :
+        this.selectedTab === 'demande'     ? source === 'demande' :
+        true;
 
       return matchSearch && matchTab;
     });
@@ -152,29 +173,15 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   // ════════════════════════════════════════════
   // NAVIGATION
   // ════════════════════════════════════════════
-
-  /**
-   * Ouvre le détail d'une formation depuis mes-formations
-   * Tunnel : mes-formations → course-details-2
-   * On passe fromPage: 'demandes' + la demande associée pour le retour
-   */
   openDetails(f: Formation): void {
     this.router.navigate(['/courses/course-details-2', f.id], {
-      state: {
-        fromPage: 'demandes',
-        demande:  f,
-      }
+      state: { fromPage: 'demandes', demande: f }
     });
   }
 
-  /**
-   * Lance directement le player depuis mes-formations
-   * Tunnel : mes-formations → lecture-formation
-   * On passe fromPage: 'demandes' pour que le retour revienne ici
-   */
   openPlayer(f: Formation): void {
     this.router.navigate(['/student/lecture-formation', f.id], {
-      state: { fromPage: 'demandes' } // ✅ retour vers /student/mes-formations
+      state: { fromPage: 'demandes' }
     });
   }
 
@@ -190,36 +197,36 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
   // ════════════════════════════════════════════
-  // HELPERS
+  // HELPERS UI
   // ════════════════════════════════════════════
-  isCourseFinished(f: Formation): boolean  { return this.getProgression(f) === 100; }
+  isCourseFinished(f: Formation): boolean  { return this.getProgression(f) >= 100; }
   isInProgress(f: Formation): boolean      { const p = this.getProgression(f); return p > 0 && p < 100; }
 
   getCourseActionLabel(f: Formation): string {
     const p = this.getProgression(f);
-    if (p === 100) return 'Revoir';
-    if (p > 0)     return 'Continuer';
+    if (p >= 100) return 'Revoir';
+    if (p > 0)    return 'Continuer';
     return 'Commencer';
   }
 
   getCourseActionIcon(f: Formation): string {
     const p = this.getProgression(f);
-    if (p === 100) return 'isax-refresh-2';
-    if (p > 0)     return 'isax-play-circle';
+    if (p >= 100) return 'isax-refresh-2';
+    if (p > 0)    return 'isax-play-circle';
     return 'isax-play';
   }
 
   getStatusLabel(f: Formation): string {
     const p = this.getProgression(f);
-    if (p === 100) return 'Terminé';
-    if (p > 0)     return 'En cours';
+    if (p >= 100) return 'Terminé';
+    if (p > 0)    return 'En cours';
     return 'À commencer';
   }
 
   getStatusClass(f: Formation): string {
     const p = this.getProgression(f);
-    if (p === 100) return 'statut-validee';
-    if (p > 0)     return 'statut-progress';
+    if (p >= 100) return 'statut-validee';
+    if (p > 0)    return 'statut-progress';
     return 'statut-attente';
   }
 

@@ -11,6 +11,11 @@ interface Reponse {
   ordre:        number;
 }
 
+interface Section {
+  id:    number;
+  titre: string;
+}
+
 interface Question {
   id:            number;
   question_text: string;
@@ -18,6 +23,7 @@ interface Question {
   points:        number;
   ordre:         number;
   reponses:      Reponse[];
+  section:       Section | null;
 }
 
 interface Quiz {
@@ -68,6 +74,9 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
   submitted        = false;
   submitting       = false;
 
+  // ── Accordion ──────────────────────────────────────────────
+  openSections: Set<string> = new Set();
+
   constructor(
     private route:             ActivatedRoute,
     private router:            Router,
@@ -91,6 +100,7 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
     this.selectedReponses = {};
     this.textReponses     = {};
     this.resultat         = null;
+    this.openSections     = new Set();
     clearInterval(this.timerInterval);
 
     this.formationsService.getQuizDetail(quizId).subscribe({
@@ -99,7 +109,13 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
         this.questions = (res.questions ?? res.quiz?.questions ?? [])
           .sort((a: Question, b: Question) => a.ordre - b.ordre);
 
-        const duree = this.quiz?.duree_minutes || 10; // fallback 10 min
+        // ── Auto-ouvrir toutes les sections dès le chargement ──
+        const titres = new Set(
+          this.questions.map(q => q.section?.titre ?? 'Questions générales')
+        );
+        this.openSections = new Set(titres);
+
+        const duree = this.quiz?.duree_minutes || 10;
         if (duree) {
           this.timeLeft = duree * 60;
           this.startTimer();
@@ -133,11 +149,27 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
 
   // ── Navigation ─────────────────────────────────────────────
   moveNext(): void {
-    if (this.selected < this.totalQuestions) this.selected++;
-    else this.submitQuiz();
+    if (this.selected < this.totalQuestions) {
+      this.selected++;
+      this.scrollToActive();
+    } else {
+      this.submitQuiz();
+    }
   }
 
-  movePrev(): void { if (this.selected > 1) this.selected--; }
+  movePrev(): void {
+    if (this.selected > 1) {
+      this.selected--;
+      this.scrollToActive();
+    }
+  }
+
+  scrollToActive(): void {
+    setTimeout(() => {
+      const el = document.querySelector('.qq-acc-dot--active');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  }
 
   // ── Réponses ───────────────────────────────────────────────
   selectReponse(questionId: number, reponseId: number): void {
@@ -155,6 +187,35 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
 
   get totalAnswered(): number {
     return this.questions.filter(q => this.isAnswered(q)).length;
+  }
+
+  get questionsBySection(): { titre: string; questions: { q: Question; index: number }[] }[] {
+    const groups = new Map<string, { titre: string; questions: { q: Question; index: number }[] }>();
+
+    this.questions.forEach((q, index) => {
+      const key   = q.section ? String(q.section.id) : '__none__';
+      const titre = q.section?.titre ?? 'Questions générales';
+
+      if (!groups.has(key)) {
+        groups.set(key, { titre, questions: [] });
+      }
+      groups.get(key)!.questions.push({ q, index });
+    });
+
+    return Array.from(groups.values());
+  }
+
+  // ── Accordion ──────────────────────────────────────────────
+  toggleSection(titre: string): void {
+    if (this.openSections.has(titre)) {
+      this.openSections.delete(titre);
+    } else {
+      this.openSections.add(titre);
+    }
+  }
+
+  isSectionOpen(titre: string): boolean {
+    return this.openSections.has(titre);
   }
 
   // ── Soumission ─────────────────────────────────────────────
@@ -203,8 +264,6 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
     return circumference - (this.noteFinale / 100) * circumference;
   }
 
-  // ── Route retour — pointe vers la liste quiz avec le layout ─
-  // ✅ CORRIGÉ : navigate avec tableau pour correspondre au path /student/quiz/:id
   retournerAuxQuiz(): void {
     this.router.navigate([routes.studentsQuiz]);
   }
