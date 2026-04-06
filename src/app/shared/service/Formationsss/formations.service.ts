@@ -271,4 +271,8 @@ getMesCompetences(): Observable<any> {
 getCompetencesRecommandees(): Observable<any> {
   return this.http.get(`${this.apiUrl}/student/competences/recommandees`);
 }
+//Ecart de ccompetences 
+getEcartCompetences(): Observable<any> {
+  return this.http.get(`${this.apiUrl}/student/competences/ecart`);
+}
 }

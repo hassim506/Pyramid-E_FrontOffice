@@ -66,6 +66,7 @@ export class StudentSidebarComponent implements OnInit {
     return [
       routes.student_MesCompetences,
       routes.student_CompetencesRecommandees,
+      routes.student_EcartCompetences,
     ].some(r => r && this.currentUrl.startsWith(r));
   }
 

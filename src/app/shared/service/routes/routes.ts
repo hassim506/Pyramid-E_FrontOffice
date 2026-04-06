@@ -66,6 +66,7 @@ export const routes = {
   studentProfile: '/student/student-profile',
   student_MesCompetences: '/student/mes-competences',
   student_CompetencesRecommandees: '/student/mes-competences-recommandees',
+  student_EcartCompetences: '/student/ecart-competences',
   student_Planning: '/student/student-planning',
   student_MesPalmares: '/student/mes-palmares',
   studentMessages: '/student/student-message',
