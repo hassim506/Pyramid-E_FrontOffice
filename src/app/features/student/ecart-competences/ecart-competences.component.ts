@@ -69,9 +69,31 @@ export class EcartCompetencesComponent implements OnInit {
     return this.data?.domaine_user ?? null;
   }
 
-  get groupeDomaineUser(): DomaineGroupEcart | null {
+  /** Groupe brut du domaine principal (sans filtre recherche). */
+  private get groupeDomaineUserRaw(): DomaineGroupEcart | null {
     if (!this.domaineUser) return null;
     return this.data?.par_domaine.find(g => g.domaine.id === this.domaineUser!.id) ?? null;
+  }
+
+  /** Groupe du domaine principal filtré par la recherche texte en cours.
+   *  Retourne null si aucune compétence ne correspond → le bloc disparaît. */
+  get groupeDomaineUser(): DomaineGroupEcart | null {
+    const grp = this.groupeDomaineUserRaw;
+    if (!grp) return null;
+    if (!this.recherche.trim()) return grp;
+
+    const q = this.recherche.toLowerCase();
+    const competences = grp.competences.filter(c => c.toLowerCase().includes(q));
+    if (competences.length === 0) return null; // ← aucune correspondance → on masque
+
+    const formations = grp.formations
+      .map(f => ({
+        ...f,
+        competences: f.competences.filter(c => c.toLowerCase().includes(q)),
+      }))
+      .filter(f => f.competences.length > 0);
+
+    return { ...grp, competences, formations };
   }
 
   // ── Chips ─────────────────────────────────────────────────────────────────
@@ -97,11 +119,13 @@ export class EcartCompetencesComponent implements OnInit {
     this.domaineFiltre = id;
   }
 
-  /** Le bloc domaine principal doit-il s'afficher selon le chip actif ? */
+  /** Le bloc domaine principal doit-il s'afficher ?
+   *  Masqué si : chip d'un autre domaine actif, ou recherche active sans résultat dans ce domaine. */
   get showDomainePrincipal(): boolean {
     if (!this.domaineUser) return false;
-    if (this.domaineFiltre === null) return true;
-    return this.domaineFiltre === this.domaineUser.id;
+    if (this.domaineFiltre !== null && this.domaineFiltre !== this.domaineUser.id) return false;
+    if (this.recherche.trim() && !this.groupeDomaineUser) return false;
+    return true;
   }
 
   // ── Groupes grille (hors domaine principal) ───────────────────────────────

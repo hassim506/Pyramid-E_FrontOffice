@@ -230,55 +230,101 @@
   <!-- ══════════════════════════════════════════════ -->
   <ng-container *ngIf="activeTab === 'progression'">
 
-    <!-- ── BADGES + CLASSEMENT EN TÊTE ── -->
-    <div class="db-section-label mb-3">
-      <span class="db-section-label__bar"></span>
-      <span class="db-section-label__text">Récompenses &amp; Position</span>
-    </div>
 
     <div class="db-perf-top-grid mb-4">
 
-      <!-- Badges obtenus -->
-      <div class="db-objectif-section">
-        <div class="db-objectif-header">
-          <div class="db-objectif-header__icon db-objectif-header__icon--orange">
-            <i class="isax isax-award"></i>
-          </div>
-          <div>
-            <h6 class="db-objectif-header__title">Badges obtenus</h6>
-            <p class="db-objectif-header__sub">{{ stats.kpi_futurs.badges_obtenus.message }}</p>
-          </div>
-          <span class="db-future-badge ms-auto">À venir</span>
-        </div>
-        <div class="db-coming-inline">
-          <i class="isax isax-flash-1 me-2"></i>
-          Fonctionnalité à venir — Les badges seront disponibles dans une prochaine version
-        </div>
-        <div class="db-future-card__placeholder db-future-card__placeholder--circles mt-3">
-          <div class="db-placeholder-circle"></div>
-          <div class="db-placeholder-circle"></div>
-          <div class="db-placeholder-circle"></div>
-          <div class="db-placeholder-circle db-placeholder-circle--ghost"></div>
-        </div>
+      <!-- ── BADGES ── -->
+        <!-- ── BADGES (2 max) ── -->
+  <div class="db-objectif-section">
+    <div class="db-objectif-header">
+      <div class="db-objectif-header__icon db-objectif-header__icon--orange">
+        <i class="isax isax-award"></i>
       </div>
+      <div>
+        <h6 class="db-objectif-header__title">Badges obtenus</h6>
+        <p class="db-objectif-header__sub">{{ badgesObtenus.length }} badge(s) débloqué(s) sur {{ badges.length }}</p>
+      </div>
+      <span class="db-badge-count-pill ms-auto">{{ badgesObtenus.length }}/{{ badges.length }}</span>
+    </div>
 
-      <!-- Classement -->
-      <div class="db-objectif-section">
-        <div class="db-objectif-header">
-          <div class="db-objectif-header__icon db-objectif-header__icon--orange">
-            <i class="isax isax-ranking"></i>
-          </div>
-          <div>
-            <h6 class="db-objectif-header__title">Classement</h6>
-            <p class="db-objectif-header__sub">Votre position par rapport à vos collègues</p>
-          </div>
-          <span class="db-future-badge ms-auto">À venir</span>
+    <!-- 2 badges obtenus max -->
+    <div class="db-badges-grid" *ngIf="badgesObtenus.length > 0">
+      <div class="db-badge-item db-badge-item--obtenu" *ngFor="let b of badgesObtenus.slice(0, 2)">
+        <div class="db-badge-item__icon" [style.background]="b.couleur + '20'" [style.color]="b.couleur">
+          <i class="isax {{ b.icone }}"></i>
         </div>
-        <div class="db-coming-inline">
-          <i class="isax isax-flash-1 me-2"></i>
-          Fonctionnalité à venir — Le classement sera disponible dans une prochaine version
+        <div class="db-badge-item__info">
+          <div class="db-badge-item__nom">{{ b.nom }}</div>
+          <div class="db-badge-item__desc">{{ b.description }}</div>
+          <div class="db-badge-item__date" *ngIf="b.date">
+            <i class="isax isax-calendar me-1"></i>{{ b.date | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+        <i class="isax isax-tick-circle db-badge-item__check" [style.color]="b.couleur"></i>
+      </div>
+    </div>
+
+    <!-- 1 badge verrouillé max -->
+    <div class="db-badges-locked" *ngIf="badgesVerrouilles.length > 0">
+      <div class="db-badges-locked__label">À débloquer</div>
+      <div class="db-badges-grid db-badges-grid--locked">
+        <div class="db-badge-item db-badge-item--locked">
+          <div class="db-badge-item__icon db-badge-item__icon--locked">
+            <i class="isax isax-lock"></i>
+          </div>
+          <div class="db-badge-item__info">
+            <div class="db-badge-item__nom db-badge-item__nom--locked">{{ badgesVerrouilles[0].nom }}</div>
+            <div class="db-badge-item__desc">{{ badgesVerrouilles[0].description }}</div>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+      <!-- ── CLASSEMENT ── -->
+      <!-- ── CLASSEMENT (rang seulement) ── -->
+<div class="db-objectif-section">
+  <div class="db-objectif-header">
+    <div class="db-objectif-header__icon db-objectif-header__icon--orange">
+      <i class="isax isax-ranking"></i>
+    </div>
+    <div>
+      <h6 class="db-objectif-header__title">Mon classement</h6>
+      <p class="db-objectif-header__sub">Votre position par rapport à vos collègues</p>
+    </div>
+  </div>
+
+  <!-- Rang affiché comme une grande métrique -->
+  <div class="db-rank-display">
+    <div class="db-rank-display__medal">{{ getRangMedal(monClassement ?? 0) }}</div>
+    <div class="db-rank-display__body">
+      <div class="db-rank-display__value">#{{ monClassement ?? '–' }}</div>
+      <div class="db-rank-display__label">sur {{ classement.length }} participants</div>
+    </div>
+    <div class="db-rank-display__score">
+      <span class="db-rank-display__pts">{{ myScore }}</span>
+      <span class="db-rank-display__pts-label">pts</span>
+    </div>
+  </div>
+
+  <!-- Barre de progression relative -->
+  <div class="db-objectif-progress mt-3" *ngIf="monClassement">
+    <div class="db-objectif-progress__values">
+      <span class="db-objectif-progress__done">Votre score</span>
+      <span class="db-objectif-progress__target">{{ myScore }} / 100</span>
+    </div>
+    <div class="db-objectif-progress__bar">
+      <div class="db-objectif-progress__fill"
+           [style.width.%]="myScore"
+           style="background: #069b8f"></div>
+      <span class="db-objectif-progress__pct">{{ myScore }}%</span>
+    </div>
+  </div>
+
+  <p class="db-objectif-progress__note mt-2" style="font-style:italic">
+    Le détail du classement est confidentiel
+  </p>
+</div>
 
     </div>
 
@@ -354,14 +400,11 @@
 
     <div class="db-chart-grid db-chart-grid--2 mb-4">
       <div class="db-chart-card">
-        <div class="db-chart-card__label">
-          Taux d'abandon
-          <span class="db-chart-card__hint">Non terminés + expirés / total assignés</span>
-        </div>
+        
         <div id="chart-taux-abandon"></div>
       </div>
       <div class="db-chart-card" *ngIf="hasScoresQuiz">
-        <div class="db-chart-card__label">Score moyen mensuel aux évaluations</div>
+
         <div id="chart-scores-quiz-bar"></div>
       </div>
       <div class="db-chart-card" *ngIf="!hasScoresQuiz">
@@ -396,7 +439,7 @@
         <div class="db-objectif-header">
           <div class="db-objectif-header__icon db-objectif-header__icon--blue"><i class="isax isax-chart-2"></i></div>
           <div>
-            <h6 class="db-objectif-header__title">Score moyen aux évaluations</h6>
+            <h6 class="db-objectif-header__title">Taux de réussite aux quiz</h6>
             <p class="db-objectif-header__sub">Résultats de vos quiz de fin de formation</p>
           </div>
         </div>
@@ -452,7 +495,6 @@
   <!-- ══════════════════════════════════════════════ -->
   <ng-container *ngIf="activeTab === 'objectifs'">
 
-    <!-- ── DEMANDES + HEURES sur la même ligne ── -->
     <div class="db-obj-top-grid mb-4">
 
       <!-- Statut global des demandes -->
@@ -491,7 +533,7 @@
         </div>
       </div>
 
-      <!-- Heures de formation → donut -->
+      <!-- Heures de formation -->
       <div class="db-objectif-section">
         <div class="db-objectif-header">
           <div class="db-objectif-header__icon db-objectif-header__icon--orange">
@@ -562,7 +604,7 @@
       </div>
     </div>
 
-    <!-- Taux d'évolution de l'écart de compétences -->
+    <!-- Compétences de la période -->
     <div class="db-objectif-section mb-4">
       <div class="db-objectif-header">
         <div class="db-objectif-header__icon db-objectif-header__icon--purple"><i class="isax isax-medal-star"></i></div>

@@ -521,3 +521,238 @@ $t: all .2s ease;
   font-weight: 700;
   color: $gray-900;
 }
+// ═══════════════════════════════════════════════════════
+// BADGES & CLASSEMENT — styles additionnels à ajouter
+// dans student-dashboard.component.scss
+// ═══════════════════════════════════════════════════════
+
+// ── Pill compteur ────────────────────────────────────
+.db-badge-count-pill {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px; border-radius: 99px;
+  font-size: 12px; font-weight: 800;
+  background: #fef3c7; color: #d97706;
+  border: 1.5px solid #fde68a;
+  white-space: nowrap;
+
+  &--indigo {
+    background: #eef2ff; color: #4f46e5;
+    border-color: #c7d2fe;
+  }
+}
+
+// ── Grille badges ─────────────────────────────────────
+.db-badges-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+
+  &--locked {
+    margin-top: 0;
+    opacity: .65;
+  }
+}
+
+.db-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  transition: all .2s ease;
+  position: relative;
+
+  &--obtenu {
+    border-color: #d1fae5;
+    background: #f0fdf4;
+    &:hover { box-shadow: 0 4px 12px rgba(16,185,129,.1); transform: translateY(-1px); }
+  }
+
+  &--locked {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+  }
+
+  &__icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+
+    &--locked {
+      background: #f1f5f9; color: #94a3b8;
+    }
+  }
+
+  &__info { flex: 1; min-width: 0; }
+
+  &__nom {
+    font-size: 13px; font-weight: 700; color: #0f172a;
+    margin-bottom: 2px;
+    &--locked { color: #94a3b8; }
+  }
+
+  &__desc {
+    font-size: 11px; color: #64748b;
+  }
+
+  &__date {
+    font-size: 10px; color: #10b981; font-weight: 600; margin-top: 3px;
+    display: flex; align-items: center;
+    i { font-size: 11px; }
+  }
+
+  &__check {
+    font-size: 18px; flex-shrink: 0;
+  }
+}
+
+// ── Section verrouillés ───────────────────────────────
+.db-badges-locked {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #e2e8f0;
+
+  &__label {
+    font-size: 11px; font-weight: 700; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-bottom: 10px;
+  }
+}
+
+// ── Classement ────────────────────────────────────────
+.db-classement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.db-cl-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  transition: all .2s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover { box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+
+  // ── Moi ──
+  &--me {
+    border-color: #069b8f;
+    background: linear-gradient(135deg, #e6f7f5 0%, #fff 60%);
+    box-shadow: 0 0 0 2px rgba(6,155,143,.15);
+  }
+
+  // ── Médailles ──
+  &--gold   { .db-cl-entry__rang { color: #d97706; } }
+  &--silver { .db-cl-entry__rang { color: #64748b; } }
+  &--bronze { .db-cl-entry__rang { color: #b45309; } }
+
+  &__rang {
+    font-size: 18px; width: 28px; text-align: center; flex-shrink: 0;
+    font-weight: 800; color: #94a3b8;
+  }
+
+  &__avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #e2e8f0; color: #475569;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; flex-shrink: 0;
+
+    &--me {
+      background: #069b8f; color: #fff;
+    }
+  }
+
+  &__nom {
+    flex: 1; font-size: 13px; font-weight: 600; color: #0f172a;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  &__me-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    background: #069b8f; color: #fff; border-radius: 99px;
+  }
+
+  &__score {
+    display: flex; align-items: baseline; gap: 2px; flex-shrink: 0;
+  }
+
+  &__score-val {
+    font-size: 15px; font-weight: 800; color: #0f172a;
+  }
+
+  &__score-label {
+    font-size: 10px; color: #94a3b8; font-weight: 600;
+  }
+
+  &__bar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: #f1f5f9;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .6s ease;
+  }
+}
+// ── Affichage rang simple ─────────────────────────────
+.db-rank-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  background: linear-gradient(135deg, #e6f7f5 0%, #f0fdf4 100%);
+  border-radius: 12px;
+  border: 1.5px solid #069b8f;
+
+  &__medal {
+    font-size: 40px;
+    flex-shrink: 0;
+  }
+
+  &__body {
+    flex: 1;
+  }
+
+  &__value {
+    font-size: 32px;
+    font-weight: 900;
+    color: #069b8f;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  &__score {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  &__pts {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  &__pts-label {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+}

@@ -20,7 +20,7 @@ export interface CompetenceFormation {
   competences:     string[];
   nb_competences:  number;
   date_fin:        string | null;
-  domaine:         DomaineDB | null;   // ← domaine de la formation
+  domaine:         DomaineDB | null;
 }
 
 export interface CompetencesStats {
@@ -64,6 +64,9 @@ export class MesCompetencesComponent implements OnInit {
   data:     CompetencesData | null = null;
   recherche = '';
 
+  /** Chip domaine actif — null = tous les domaines */
+  domaineFiltre: number | null = null;
+
   private moisFr = ['janvier','février','mars','avril','mai','juin',
                     'juillet','août','septembre','octobre','novembre','décembre'];
 
@@ -91,24 +94,80 @@ export class MesCompetencesComponent implements OnInit {
     return all.filter(c => c.toLowerCase().includes(this.recherche.toLowerCase()));
   }
 
-  // ── Groupes par domaine ───────────────────────────────────────────────────
-  // Chaque formation porte son domaine_id → on regroupe par domaine de formation.
-  // Le domaine de l'utilisateur est toujours en premier (isPrimary = true).
-  // Les formations sans domaine tombent dans "Autres".
+  // ── Chips ─────────────────────────────────────────────────────────────────
+
+  /** Tous les groupes bruts (sans filtre chip ni recherche), pour alimenter les chips. */
+  private get tousGroupes(): DomaineGroup[] {
+    return this.buildGroupes(
+      this.data?.par_formation.acquises ?? [],
+      this.data?.domaine_user ?? null,
+      '',       // pas de filtre recherche pour les chips
+      null,     // pas de filtre domaine
+    );
+  }
+
+  /** Domaines disponibles pour les chips (hors domaine principal),
+   *  triés par nombre de compétences décroissant. */
+  get domainesDisponibles(): DomaineDB[] {
+    const domaineUserId = this.data?.domaine_user?.id;
+    return this.tousGroupes
+      .filter(g => !g.isPrimary)
+      .sort((a, b) => b.competences.length - a.competences.length)
+      .map(g => g.domaine);
+  }
+
+  /** Groupe brut du domaine principal (pour le chip avec son count). */
+  get groupePrincipalBrut(): DomaineGroup | null {
+    return this.tousGroupes.find(g => g.isPrimary) ?? null;
+  }
+
+  /** Nb compétences pour un domaine donné (affiché dans le badge chip). */
+  getNbCompetencesDomaine(domaineId: number): number {
+    return this.tousGroupes.find(g => g.domaine.id === domaineId)
+      ?.competences.length ?? 0;
+  }
+
+  setDomaineFiltre(id: number | null): void {
+    this.domaineFiltre = id;
+  }
+
+  // ── Groupes finaux (avec filtre chip + recherche) ─────────────────────────
+
   get groupesFinaux(): DomaineGroup[] {
-    const formations  = this.data?.par_formation.acquises ?? [];
-    const domaineUser = this.data?.domaine_user ?? null;
-    const recherche   = this.recherche.toLowerCase().trim();
+    return this.buildGroupes(
+      this.data?.par_formation.acquises ?? [],
+      this.data?.domaine_user ?? null,
+      this.recherche,
+      this.domaineFiltre,
+    );
+  }
 
-    // Filtrage par recherche
-    const formationsFiltrees = formations.map(f => ({
-      ...f,
-      competences: recherche
-        ? f.competences.filter(c => c.toLowerCase().includes(recherche))
-        : f.competences,
-    })).filter(f => f.competences.length > 0);
+  get hasGroupes(): boolean { return this.groupesFinaux.length > 0; }
 
-    // Regroupement par domaine de la formation
+  get totalDomainesBrut(): number { return this.tousGroupes.length; }
+
+  // ── Builder central ───────────────────────────────────────────────────────
+  // Toute la logique de regroupement est ici pour éviter la duplication.
+
+  private buildGroupes(
+    formations: CompetenceFormation[],
+    domaineUser: DomaineDB | null,
+    recherche: string,
+    domaineFiltre: number | null,
+  ): DomaineGroup[] {
+    const q = recherche.toLowerCase().trim();
+
+    // 1. Filtrage par recherche texte
+    const formationsFiltrees = formations
+      .map(f => ({
+        ...f,
+        competences: q
+          ? f.competences.filter(c => c.toLowerCase().includes(q))
+          : f.competences,
+      }))
+      .filter(f => f.competences.length > 0);
+
+    // 2. Regroupement par domaine
     const map = new Map<number | 'autres', DomaineGroup>();
 
     for (const f of formationsFiltrees) {
@@ -129,36 +188,35 @@ export class MesCompetencesComponent implements OnInit {
 
       const grp = map.get(key)!;
       grp.formations.push(f);
-      // Dédoublonnage des compétences dans le groupe
       const existing = new Set(grp.competences);
       f.competences.forEach(c => { if (!existing.has(c)) grp.competences.push(c); });
     }
 
-    const groups = Array.from(map.values());
+    let groups = Array.from(map.values());
 
-    // Tri : domaine user en premier, puis par nombre de compétences
+    // 3. Forcer isPrimary si non détecté
+    if (domaineUser && !groups.some(g => g.isPrimary)) {
+      const idx = groups.findIndex(g => g.domaine.id === domaineUser.id);
+      if (idx >= 0) groups[idx].isPrimary = true;
+    }
+
+    // 4. Filtre chip domaine
+    if (domaineFiltre !== null) {
+      groups = groups.filter(g => g.domaine.id === domaineFiltre);
+    }
+
+    // 5. Tri : domaine principal en premier, puis pertinence (nb compétences desc)
     groups.sort((a, b) => {
       if (a.isPrimary && !b.isPrimary) return -1;
       if (!a.isPrimary && b.isPrimary) return  1;
       return b.competences.length - a.competences.length;
     });
 
-    // Si aucun groupe isPrimary mais domaine_user existe → forcer le bon groupe
-    if (domaineUser && !groups.some(g => g.isPrimary)) {
-      const idx = groups.findIndex(g => g.domaine.id === domaineUser.id);
-      if (idx > 0) {
-        groups[idx].isPrimary = true;
-        const [dom] = groups.splice(idx, 1);
-        groups.unshift(dom);
-      }
-    }
-
     return groups;
   }
 
-  get hasGroupes(): boolean { return this.groupesFinaux.length > 0; }
-
   // ── Helpers ───────────────────────────────────────────────────────────────
+
   getDomaineColor(domaine: DomaineDB, index = 0): string {
     return domaine.couleur ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length];
   }
@@ -187,4 +245,5 @@ export class MesCompetencesComponent implements OnInit {
   }
 
   trackByDomaine(_: number, g: DomaineGroup): number { return g.domaine.id; }
+  trackByDomaine2(_: number, d: DomaineDB): number   { return d.id; }
 }

@@ -1,30 +1,6 @@
 // ═══════════════════════════════════════════════════════
 // VARIABLES
 // ═══════════════════════════════════════════════════════
-$primary:    #069b8f;
-$primary-lt: #e6f7f5;
-$success:    #10b981;
-$success-lt: #ecfdf5;
-$warning:    #f59e0b;
-$warning-lt: #fffbeb;
-$danger:     #ef4444;
-$gray-50:    #f8fafc;
-$gray-100:   #f1f5f9;
-$gray-200:   #e2e8f0;
-$gray-300:   #cbd5e1;
-$gray-400:   #94a3b8;
-$gray-500:   #64748b;
-$gray-700:   #334155;
-$gray-900:   #0f172a;
-$dark:       #1e293b;
-$radius-sm:  8px;
-$radius-md:  12px;
-$radius-lg:  18px;
-$shadow-sm:  0 1px 4px rgba(0,0,0,.06);
-$shadow-md:  0 4px 20px rgba(0,0,0,.08);
-$t:          all .2s ease;
-
-
 $primary:      #069b8f;
 $primary-lt:   #e6f7f5;
 $primary-dk:   #047a6f;
@@ -55,48 +31,30 @@ $shadow-md:    0 4px 20px rgba(0,0,0,.08);
 $shadow-lg:    0 12px 40px rgba(0,0,0,.12);
 $t:            all .2s ease;
 
+
 // ═══════════════════════════════════════════════════════
 // LOADING
 // ═══════════════════════════════════════════════════════
 .qq-loading {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; min-height: 60vh; gap: 20px;
-
   p { font-size: 14px; color: $gray-400; margin: 0; }
 }
 
 .qq-loading__ring {
   position: relative; width: 50px; height: 50px;
-
   div {
     position: absolute; width: 100%; height: 100%;
     border: 3px solid transparent;
     border-top-color: $primary;
     border-radius: 50%;
     animation: qq-spin .8s linear infinite;
-
     &:nth-child(2) { width: 38px; height: 38px; top: 6px; left: 6px; border-top-color: $indigo; animation-delay: -.3s; }
     &:nth-child(3) { width: 26px; height: 26px; top: 12px; left: 12px; border-top-color: $warning; animation-delay: -.6s; }
     &:nth-child(4) { width: 14px; height: 14px; top: 18px; left: 18px; border-top-color: $success; animation-delay: -.9s; }
   }
 }
-
 @keyframes qq-spin { to { transform: rotate(360deg); } }
-
-// ═══════════════════════════════════════════════════════
-// LOADING / ERREUR
-// ═══════════════════════════════════════════════════════
-.cp-loading {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; min-height: 60vh; gap: 16px;
-  &__ring {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: 3px solid $gray-200; border-top-color: $primary;
-    animation: cp-spin .7s linear infinite;
-  }
-  p { font-size: 14px; color: $gray-400; margin: 0; }
-}
-@keyframes cp-spin { to { transform: rotate(360deg); } }
 
 .cp-error {
   display: flex; flex-direction: column; align-items: center;
@@ -105,13 +63,26 @@ $t:            all .2s ease;
   p { font-size: 14px; color: $gray-500; margin: 0; }
 }
 
+
 // ═══════════════════════════════════════════════════════
 // HEADER
 // ═══════════════════════════════════════════════════════
 .cp-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  &__left  { flex: 1; }
   &__title { font-size: 22px; font-weight: 800; color: $gray-900; margin: 0 0 4px; display: flex; align-items: center; }
   &__sub   { font-size: 13px; color: $gray-400; margin: 0; }
 }
+
+.cp-domaine-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 700;
+  padding: 8px 16px; border-radius: 99px;
+  border: 1.5px solid;
+  i { font-size: 15px; }
+}
+
 
 // ═══════════════════════════════════════════════════════
 // STATS
@@ -150,64 +121,347 @@ $t:            all .2s ease;
   &--teal   { i { color: $primary; } }
 }
 
+
 // ═══════════════════════════════════════════════════════
 // TOOLBAR
 // ═══════════════════════════════════════════════════════
 .cp-toolbar {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cp-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .cp-search {
   display: flex; align-items: center; gap: 10px;
   background: #fff; border: 1.5px solid $gray-200;
   border-radius: $radius-sm; padding: 10px 14px;
-  flex: 1; max-width: 400px; transition: $t;
+  flex: 1; max-width: 420px; transition: $t;
   &:focus-within { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary,.1); }
   i { font-size: 16px; color: $gray-400; flex-shrink: 0; }
-  &__input { border: none; outline: none; font-size: 13px; color: $gray-700; background: transparent; width: 100%; &::placeholder { color: $gray-400; } }
-}
-
-.cp-vue-toggle {
-  display: flex; gap: 6px;
-  button {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 8px 16px; border-radius: $radius-sm;
-    font-size: 12px; font-weight: 700; cursor: pointer;
-    background: $gray-100; color: $gray-500;
-    border: 1.5px solid $gray-200; transition: $t;
-    i { font-size: 13px; }
-    &:hover { background: $gray-200; }
-    &.active { background: $dark; color: #fff; border-color: $dark; }
+  &__input {
+    border: none; outline: none; font-size: 13px;
+    color: $gray-700; background: transparent; width: 100%;
+    &::placeholder { color: $gray-400; }
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// SECTIONS
-// ═══════════════════════════════════════════════════════
-.cp-section {
-  &__header { margin-bottom: 16px; }
-  &__title  {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 15px; font-weight: 800; color: $gray-900;
-    &--green  { i { color: $success; } }
-    &--orange { i { color: $warning; } }
-  }
-  &__count  {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 24px; height: 24px; border-radius: 50%;
-    background: $success-lt; color: $success;
-    font-size: 11px; font-weight: 800;
-    &--orange { background: $warning-lt; color: darken($warning, 10%); }
-  }
-  &__hint { font-size: 12px; color: $gray-400; margin: 4px 0 0; }
+.cp-search-hint {
+  font-size: 12px;
+  color: $gray-400;
+  white-space: nowrap;
 }
 
+.cp-filter-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: $gray-500;
+  background: $gray-50;
+  border: 1.5px solid $gray-200;
+  border-radius: 99px;
+  padding: 5px 10px 5px 12px;
+  white-space: nowrap;
+  margin-left: auto;
+
+  i { font-size: 13px; color: $gray-400; }
+
+  &__clear {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px 3px 8px;
+    background: #fff;
+    border: 1.5px solid $gray-200;
+    border-radius: 99px;
+    font-size: 11px; font-weight: 700;
+    color: $gray-600; cursor: pointer;
+    transition: $t;
+    i { font-size: 12px; color: $danger; }
+    &:hover {
+      background: $danger-lt;
+      border-color: $danger;
+      color: $danger;
+    }
+  }
+}
+
+
 // ═══════════════════════════════════════════════════════
-// BADGES
+// CHIPS DE FILTRE
+// ═══════════════════════════════════════════════════════
+.cp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px 7px 12px;
+  border-radius: 99px;
+  border: 1.5px solid $gray-200;
+  background: #fff;
+  color: $gray-500;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: $t;
+  white-space: nowrap;
+  line-height: 1;
+
+  i {
+    font-size: 14px;
+    flex-shrink: 0;
+    color: $gray-400;
+    transition: $t;
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 99px;
+    background: $gray-100;
+    color: $gray-500;
+    font-size: 11px;
+    font-weight: 700;
+    transition: $t;
+  }
+
+  &:hover {
+    border-color: $gray-300;
+    color: $gray-700;
+    i { color: $gray-600; }
+  }
+
+  &--active {
+    background: color-mix(in srgb, var(--chip-color, #{$primary}) 10%, white);
+    border-color: var(--chip-color, #{$primary});
+    color: var(--chip-color, #{$primary});
+    font-weight: 700;
+
+    i { color: var(--chip-color, #{$primary}); }
+
+    .cp-chip__count {
+      background: var(--chip-color, #{$primary});
+      color: #fff;
+    }
+  }
+
+  &:first-child {
+    --chip-color: #{$primary};
+  }
+
+  &--principal {
+    i { color: var(--chip-color, #{$primary}); }
+    &.cp-chip--active i { color: var(--chip-color, #{$primary}); }
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// BLOC DOMAINE PRINCIPAL — pleine largeur
+// Calqué sur .cp-domaine-principal de ecart-competences
+// ═══════════════════════════════════════════════════════
+.cp-domaine-principal {
+  background: #fff;
+  border: 2px solid var(--dp-color);
+  border-radius: $radius-xl;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--dp-color) 8%, transparent), $shadow-sm;
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+
+  // Fond dégradé subtil
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--dp-color-lt) 0%, transparent 60%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  // Badge "Mon domaine principal"
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--dp-color);
+    background: var(--dp-color-lt);
+    border: 1.5px solid color-mix(in srgb, var(--dp-color) 25%, transparent);
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-bottom: 16px;
+    position: relative;
+
+    i { font-size: 12px; }
+  }
+
+  // Corps : icône + titre + count
+  &__body {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    margin-bottom: 4px;
+  }
+
+  &__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: $radius-md;
+    background: var(--dp-color-lt);
+    color: var(--dp-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+    border: 1.5px solid color-mix(in srgb, var(--dp-color) 20%, transparent);
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 20px;
+    font-weight: 800;
+    color: $gray-900;
+  }
+
+  &__count {
+    font-size: 14px;
+    font-weight: 800;
+    background: var(--dp-color-lt);
+    color: var(--dp-color);
+    border: 1.5px solid color-mix(in srgb, var(--dp-color) 25%, transparent);
+    padding: 6px 16px;
+    border-radius: 99px;
+    flex-shrink: 0;
+  }
+
+  // Section formations liées
+  &__formations {
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in srgb, var(--dp-color) 15%, transparent);
+    position: relative;
+  }
+
+  &__formations-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: $gray-400;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-bottom: 10px;
+    i { font-size: 13px; color: var(--dp-color); }
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// GRILLE DOMAINES
+// ═══════════════════════════════════════════════════════
+.cp-domaine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.cp-domaine-card {
+  background: #fff;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  padding: 22px;
+  transition: $t;
+  position: relative;
+  overflow: hidden;
+
+  &:hover { box-shadow: $shadow-md; transform: translateY(-2px); }
+
+  &--primary {
+    border-color: var(--d-color);
+    box-shadow: 0 0 0 3px rgba(0,0,0,.04), $shadow-sm;
+    &::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--d-color-lt) 0%, transparent 55%);
+      pointer-events: none;
+    }
+  }
+
+  &__header {
+    display: flex; align-items: center; gap: 12px; position: relative;
+  }
+
+  &__icon {
+    width: 46px; height: 46px; border-radius: $radius-md;
+    background: var(--d-color-lt); color: var(--d-color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+
+  &__title { flex: 1; font-size: 15px; font-weight: 800; color: $gray-900; }
+
+  &__count {
+    font-size: 12px; font-weight: 800;
+    background: var(--d-color-lt); color: var(--d-color);
+    padding: 4px 12px; border-radius: 99px; flex-shrink: 0;
+  }
+
+  &__formations {
+    padding-top: 14px;
+    border-top: 1px solid $gray-100;
+  }
+
+  &__formations-label {
+    font-size: 11px; font-weight: 700; color: $gray-400;
+    text-transform: uppercase; letter-spacing: .4px;
+    margin-bottom: 8px;
+    display: flex; align-items: center;
+    i { font-size: 12px; }
+  }
+}
+
+.cp-domaine-primary-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 800; letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--d-color);
+  background: var(--d-color-lt);
+  border: 1px solid color-mix(in srgb, var(--d-color) 25%, transparent);
+  padding: 3px 10px; border-radius: 99px;
+  margin-bottom: 14px; position: relative;
+  i { font-size: 10px; }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// BADGES COMPÉTENCES
 // ═══════════════════════════════════════════════════════
 .cp-badges {
   display: flex; flex-wrap: wrap; gap: 8px;
+  position: relative;
   &--sm .cp-badge { font-size: 11px; padding: 4px 10px; }
 }
 
@@ -228,98 +482,28 @@ $t:            all .2s ease;
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// FORMATION CARDS
-// ═══════════════════════════════════════════════════════
-.cp-formation-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px;
-  @media (max-width: 768px) { grid-template-columns: 1fr; }
-}
-
-.cp-formation-card {
-  background: #fff; border-radius: $radius-lg;
-  border: 1px solid $gray-200; box-shadow: $shadow-sm;
-  padding: 18px 20px; transition: $t;
-  display: flex; flex-direction: column;
-  &:hover { box-shadow: $shadow-md; transform: translateY(-2px); }
-
-  &__header {
-    display: flex; align-items: flex-start; gap: 12px;
-  }
-
-  &__icon {
-    width: 42px; height: 42px; border-radius: $radius-md;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; font-size: 20px;
-    &--green  { background: $success-lt; color: $success; }
-    &--orange { background: $warning-lt; color: $warning; }
-  }
-
-  &__info  { flex: 1; min-width: 0; }
-  &__titre { font-size: 14px; font-weight: 700; color: $gray-900; line-height: 1.4; margin-bottom: 4px; }
-  &__meta  { font-size: 12px; color: $gray-400; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-
-  // ✅ Date d'acquisition
-  &__date {
-    font-size: 11px; color: $primary; font-weight: 600;
-    background: $primary-lt; padding: 2px 8px; border-radius: 99px;
-    white-space: nowrap;
-  }
-
-  &__badge {
-    margin-left: auto; flex-shrink: 0;
-    font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px;
-    &--green  { background: $success-lt; color: $success; }
-    &--orange { background: $warning-lt; color: darken($warning, 10%); }
-  }
-
-  // ✅ Footer avec lien
-  &__footer {
-    margin-top: 14px; padding-top: 12px;
-    border-top: 1px solid $gray-100;
-    display: flex; justify-content: flex-end;
-  }
-}
-
-// ✅ Bouton lien vers formation
-.cp-btn-link {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12px; font-weight: 700; cursor: pointer;
-  background: none; border: 1.5px solid rgba($primary, .3);
-  color: $primary; padding: 6px 14px; border-radius: 99px;
-  transition: $t;
-  i { font-size: 13px; }
-  &:hover { background: $primary-lt; border-color: $primary; }
-
-  &--orange {
-    color: darken($warning, 10%);
-    border-color: rgba($warning, .3);
-    &:hover { background: $warning-lt; border-color: $warning; }
-  }
-}
-
-// ── Barre progression ────────────────────────────────
-.cp-prog-bar {
-  height: 5px; background: $gray-100; border-radius: 99px; overflow: hidden;
-  &__fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
-}
 
 // ═══════════════════════════════════════════════════════
-// EMPTY
+// CHIPS FORMATIONS (dans la carte domaine)
 // ═══════════════════════════════════════════════════════
-.cp-empty {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 60px 20px; text-align: center; gap: 10px;
-  &__icon { font-size: 3.5rem; color: $primary; opacity: .25; }
-  h6 { font-size: 16px; font-weight: 700; color: $gray-900; margin: 0; }
-  p  { font-size: 13px; color: $gray-400; margin: 0; }
+.cp-formation-chips {
+  display: flex; flex-direction: column; gap: 6px;
 }
 
-.cp-empty-mini {
-  display: flex; align-items: center; gap: 8px;
-  padding: 16px; color: $gray-400; font-size: 13px;
-  i { font-size: 16px; }
+.cp-formation-chip {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 8px 12px;
+  background: $gray-50; border: 1px solid $gray-200;
+  border-radius: $radius-sm; cursor: pointer; transition: $t;
+  font-size: 12px; font-weight: 600; color: $gray-700;
+  &:hover {
+    background: var(--dp-color-lt, var(--d-color-lt));
+    border-color: var(--dp-color, var(--d-color));
+    color: var(--dp-color, var(--d-color));
+  }
+  &__date { font-size: 11px; color: $gray-400; font-weight: 500; white-space: nowrap; }
 }
+
 
 // ═══════════════════════════════════════════════════════
 // BOUTONS
@@ -336,147 +520,39 @@ $t:            all .2s ease;
   }
 }
 
+.cp-btn-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  background: none; border: 1.5px solid rgba($primary, .3);
+  color: $primary; padding: 6px 14px; border-radius: 99px;
+  transition: $t;
+  i { font-size: 13px; }
+  &:hover { background: $primary-lt; border-color: $primary; }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// EMPTY STATE
+// ═══════════════════════════════════════════════════════
+.cp-empty {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 60px 20px; text-align: center; gap: 10px;
+  &__icon { font-size: 3.5rem; color: $primary; opacity: .25; }
+  h6 { font-size: 16px; font-weight: 700; color: $gray-900; margin: 0; }
+  p  { font-size: 13px; color: $gray-400; margin: 0; }
+}
+
+
 // ═══════════════════════════════════════════════════════
 // RESPONSIVE
 // ═══════════════════════════════════════════════════════
 @media (max-width: 768px) {
-  .cp-stats { flex-direction: column; }
-  .cp-stat-main { width: 100%; }
-  .cp-stat-cards { width: 100%; }
-  .cp-toolbar { flex-direction: column; align-items: stretch; }
-  .cp-search { max-width: none; }
-  .cp-vue-toggle { justify-content: center; }
-}
-
-// ── Badge domaine dans le header ───────────────────────
-.cp-header {
-  display: flex; align-items: flex-start;
-  justify-content: space-between; flex-wrap: wrap; gap: 12px;
-  &__left { flex: 1; }
-}
-
-.cp-domaine-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 13px; font-weight: 700;
-  padding: 8px 16px; border-radius: 99px;
-  border: 1.5px solid;
-  i { font-size: 15px; }
-}
-
-// ── Stat card indigo dynamique ────────────────────────
-.cp-stat-card--indigo {
-  i { font-size: 26px; flex-shrink: 0; }
-}
-
-// ── Hint recherche ────────────────────────────────────
-.cp-search-hint {
-  font-size: 12px; color: $gray-400;
-  display: flex; align-items: center;
-}
-
-// ── Grille domaines ───────────────────────────────────
-.cp-domaine-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 20px;
-  @media (max-width: 768px) { grid-template-columns: 1fr; }
-}
-
-// ── Carte domaine ─────────────────────────────────────
-.cp-domaine-card {
-  background: #fff;
-  border: 1.5px solid $gray-200;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-  padding: 22px;
-  transition: $t;
-  position: relative;
-  overflow: hidden;
-
-  &:hover { box-shadow: $shadow-md; transform: translateY(-2px); }
-
-  // Mise en avant domaine principal
-  &--primary {
-    border-color: var(--d-color);
-    box-shadow: 0 0 0 3px rgba(0,0,0,.04), $shadow-sm;
-
-    &::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, var(--d-color-lt) 0%, transparent 55%);
-      pointer-events: none;
-    }
-  }
-
-  &__header {
-    display: flex; align-items: center; gap: 12px; position: relative;
-  }
-
-  &__icon {
-    width: 46px; height: 46px; border-radius: $radius-md;
-    background: var(--d-color-lt); color: var(--d-color);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; flex-shrink: 0;
-  }
-
-  &__title {
-    flex: 1; font-size: 15px; font-weight: 800; color: $gray-900;
-  }
-
-  &__count {
-    font-size: 12px; font-weight: 800;
-    background: var(--d-color-lt); color: var(--d-color);
-    padding: 4px 12px; border-radius: 99px; flex-shrink: 0;
-  }
-
-  // Formations liées
-  &__formations {
-    padding-top: 14px;
-    border-top: 1px solid $gray-100;
-  }
-
-  &__formations-label {
-    font-size: 11px; font-weight: 700; color: $gray-400;
-    text-transform: uppercase; letter-spacing: .4px;
-    margin-bottom: 8px;
-    display: flex; align-items: center;
-    i { font-size: 12px; }
-  }
-}
-
-// ── Tag "Mon domaine principal" ───────────────────────
-.cp-domaine-primary-tag {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 10px; font-weight: 800; letter-spacing: .5px;
-  text-transform: uppercase;
-  color: var(--d-color);
-  background: var(--d-color-lt);
-  border: 1px solid color-mix(in srgb, var(--d-color) 25%, transparent);
-  padding: 3px 10px; border-radius: 99px;
-  margin-bottom: 14px; position: relative;
-  i { font-size: 10px; }
-}
-
-// ── Chips formations ──────────────────────────────────
-.cp-formation-chips {
-  display: flex; flex-direction: column; gap: 6px;
-}
-
-.cp-formation-chip {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 8px; padding: 8px 12px;
-  background: $gray-50; border: 1px solid $gray-200;
-  border-radius: $radius-sm; cursor: pointer; transition: $t;
-  font-size: 12px; font-weight: 600; color: $gray-700;
-
-  &:hover {
-    background: var(--d-color-lt);
-    border-color: var(--d-color);
-    color: var(--d-color);
-  }
-
-  &__date {
-    font-size: 11px; color: $gray-400; font-weight: 500;
-    white-space: nowrap;
-  }
+  .cp-stats        { flex-direction: column; }
+  .cp-stat-main    { width: 100%; }
+  .cp-stat-cards   { width: 100%; }
+  .cp-toolbar-row  { flex-wrap: wrap; }
+  .cp-search       { max-width: none; flex: 1 1 100%; }
+  .cp-filter-hint  { margin-left: 0; }
+  .cp-domaine-principal { padding: 18px 16px; }
+  .cp-domaine-principal__title { font-size: 16px; }
 }

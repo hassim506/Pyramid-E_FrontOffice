@@ -52,13 +52,13 @@
       <div class="cp-stat-main__info">
         <div class="cp-stat-main__label">Compétences acquises</div>
         <div class="cp-stat-main__sub">
-          Issues de {{ stats.formations_terminees }} formation(s) terminée(s) <br> et dont le quiz final a été validé
+          Issues de {{ stats.formations_terminees }} formation(s) terminée(s) <br>
+          et dont le quiz final a été validé
         </div>
       </div>
     </div>
 
     <div class="cp-stat-cards">
-      <!-- Total compétences -->
       <div class="cp-stat-card cp-stat-card--green">
         <i class="isax isax-tick-circle"></i>
         <div>
@@ -66,15 +66,13 @@
           <div class="cp-stat-card__label">Compétences acquises</div>
         </div>
       </div>
-      <!-- Domaines couverts -->
       <div class="cp-stat-card cp-stat-card--teal">
         <i class="isax isax-category"></i>
         <div>
-          <div class="cp-stat-card__value">{{ groupesFinaux.length }}</div>
+          <div class="cp-stat-card__value">{{ totalDomainesBrut }}</div>
           <div class="cp-stat-card__label">Domaines couverts</div>
         </div>
       </div>
-      <!-- Mon domaine -->
       <div class="cp-stat-card" *ngIf="data.domaine_user"
            [style.--d-color]="getDomaineColor(data.domaine_user)"
            [style.--d-color-lt]="getDomaineColorLight(data.domaine_user)">
@@ -91,17 +89,76 @@
     </div>
   </div>
 
-  <!-- ── RECHERCHE ────────────────────────────────────────────── -->
+  <!-- ── TOOLBAR ─────────────────────────────────────────────── -->
   <div class="cp-toolbar mb-4">
-    <div class="cp-search">
-      <i class="isax isax-search-normal-1"></i>
-      <input type="text" placeholder="Rechercher une compétence..."
-             [value]="recherche" (input)="onRecherche($event)"
-             class="cp-search__input"/>
+
+    <!-- Ligne 1 : search + hints actifs -->
+    <div class="cp-toolbar-row">
+
+      <div class="cp-search">
+        <i class="isax isax-search-normal-1"></i>
+        <input
+          type="text"
+          placeholder="Rechercher une compétence..."
+          [value]="recherche"
+          (input)="onRecherche($event)"
+          class="cp-search__input"
+        />
+      </div>
+
+      <div class="cp-search-hint" *ngIf="recherche">
+        {{ competencesAcquises.length }} résultat(s) pour « {{ recherche }} »
+      </div>
+
+      <div class="cp-filter-hint" *ngIf="domaineFiltre !== null">
+        <i class="isax isax-filter"></i>
+        Domaine filtré ·
+        <button class="cp-filter-hint__clear" (click)="setDomaineFiltre(null)">
+          Tout afficher <i class="isax isax-close-circle"></i>
+        </button>
+      </div>
+
     </div>
-    <div class="cp-search-hint" *ngIf="recherche">
-      {{ competencesAcquises.length }} résultat(s) pour « {{ recherche }} »
+
+    <!-- Ligne 2 : chips de filtre par domaine -->
+    <div class="cp-chips" *ngIf="totalDomainesBrut > 1">
+
+      <!-- Chip "Tous" -->
+      <button
+        class="cp-chip"
+        [class.cp-chip--active]="domaineFiltre === null"
+        (click)="setDomaineFiltre(null)">
+        <i class="isax isax-category"></i>
+        Tous
+        <span class="cp-chip__count">{{ totalDomainesBrut }}</span>
+      </button>
+
+      <!-- Chip domaine principal -->
+      <button
+        class="cp-chip cp-chip--principal"
+        *ngIf="data.domaine_user && groupePrincipalBrut"
+        [class.cp-chip--active]="domaineFiltre === data.domaine_user.id"
+        [style.--chip-color]="getDomaineColor(data.domaine_user)"
+        (click)="setDomaineFiltre(data.domaine_user.id)">
+        <i class="isax isax-star-1"></i>
+        {{ data.domaine_user.nom }}
+        <span class="cp-chip__count">{{ groupePrincipalBrut.competences.length }}</span>
+      </button>
+
+      <!-- Chips autres domaines -->
+      <button
+        class="cp-chip"
+        *ngFor="let d of domainesDisponibles; let i = index; trackBy: trackByDomaine2"
+        [class.cp-chip--active]="domaineFiltre === d.id"
+        [style.--chip-color]="getDomaineColor(d, i)"
+        (click)="setDomaineFiltre(d.id)">
+        <i class="isax {{ getDomaineIcon(d) }}"></i>
+        {{ d.nom }}
+        <span class="cp-chip__count">{{ getNbCompetencesDomaine(d.id) }}</span>
+      </button>
+
     </div>
+
   </div>
 
   <!-- ════════════════════════════════════════════════════════════ -->
@@ -120,7 +177,7 @@
         <i class="isax isax-star-1 me-1"></i>Mon domaine principal
       </div>
 
-      <!-- En-tête de la carte -->
+      <!-- En-tête -->
       <div class="cp-domaine-card__header">
         <div class="cp-domaine-card__icon">
           <i class="isax {{ getDomaineIcon(grp.domaine) }}"></i>
@@ -136,7 +193,7 @@
         </div>
       </div>
 
-      <!-- Formations liées au domaine -->
+      <!-- Formations liées -->
       <div class="cp-domaine-card__formations mt-3">
         <div class="cp-domaine-card__formations-label">
           <i class="isax isax-book-1 me-1"></i>Formations terminées
@@ -158,15 +215,19 @@
 
   <!-- État vide -->
   <ng-template #emptyState>
-  <div class="cp-empty">
-    <i class="isax isax-medal-star cp-empty__icon"></i>
-    <h6>Aucune compétence débloquée</h6>
-    <p *ngIf="recherche">Aucun résultat pour « {{ recherche }} »</p>
-    <p *ngIf="!recherche">
-      Terminez une formation <strong>et réussissez le quiz final</strong>
-      pour débloquer vos compétences.
-    </p>
-  </div>
-</ng-template>
+    <div class="cp-empty">
+      <i class="isax isax-medal-star cp-empty__icon"></i>
+      <h6>Aucune compétence débloquée</h6>
+      <p *ngIf="recherche">Aucun résultat pour « {{ recherche }} »</p>
+      <p *ngIf="domaineFiltre !== null && !recherche">
+        Aucune compétence dans ce domaine.
+        <button class="cp-btn-link" (click)="setDomaineFiltre(null)">Voir tous les domaines</button>
+      </p>
+      <p *ngIf="!recherche && domaineFiltre === null">
+        Terminez une formation <strong>et réussissez le quiz final</strong>
+        pour débloquer vos compétences.
+      </p>
+    </div>
+  </ng-template>
 
 </ng-container>
