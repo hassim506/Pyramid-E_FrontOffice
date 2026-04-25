@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule }                  from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule }                   from '@angular/forms';
-import { FormationsService }             from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 import { routes }                        from '../../../shared/service/routes/routes';
 
 interface Reponse {
@@ -80,7 +80,7 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
   constructor(
     private route:             ActivatedRoute,
     private router:            Router,
-    private formationsService: FormationsService
+    private formationsService: FormationService
   ) {}
 
   ngOnInit(): void {

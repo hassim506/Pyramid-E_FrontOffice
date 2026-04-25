@@ -288,6 +288,21 @@ $t: all .2s ease;
 }
 
 // ══════════════════════════════════════════════════
+// MODIFICATION 1 — PIE 3D WRAP
+// Laisse de la place en bas pour l'effet de profondeur
+// ══════════════════════════════════════════════════
+.db-pie3d-wrap {
+  overflow: visible;
+  padding-bottom: 20px; // espace pour l'ombre 3D projetée vers le bas
+
+  // Le SVG ApexCharts reçoit la perspective via JS (renderPie3D)
+  // On laisse l'overflow visible pour que la rotation ne soit pas coupée
+  .apexcharts-canvas {
+    overflow: visible !important;
+  }
+}
+
+// ══════════════════════════════════════════════════
 // OBJECTIFS
 // ══════════════════════════════════════════════════
 .db-objectif-section {
@@ -522,11 +537,9 @@ $t: all .2s ease;
   color: $gray-900;
 }
 // ═══════════════════════════════════════════════════════
-// BADGES & CLASSEMENT — styles additionnels à ajouter
-// dans student-dashboard.component.scss
+// BADGES & CLASSEMENT
 // ═══════════════════════════════════════════════════════
 
-// ── Pill compteur ────────────────────────────────────
 .db-badge-count-pill {
   display: inline-flex; align-items: center;
   padding: 4px 12px; border-radius: 99px;
@@ -541,7 +554,6 @@ $t: all .2s ease;
   }
 }
 
-// ── Grille badges ─────────────────────────────────────
 .db-badges-grid {
   display: flex;
   flex-direction: column;
@@ -609,7 +621,6 @@ $t: all .2s ease;
   }
 }
 
-// ── Section verrouillés ───────────────────────────────
 .db-badges-locked {
   margin-top: 16px;
   padding-top: 14px;
@@ -622,7 +633,6 @@ $t: all .2s ease;
   }
 }
 
-// ── Classement ────────────────────────────────────────
 .db-classement-list {
   display: flex;
   flex-direction: column;
@@ -644,14 +654,12 @@ $t: all .2s ease;
 
   &:hover { box-shadow: 0 2px 10px rgba(0,0,0,.06); }
 
-  // ── Moi ──
   &--me {
     border-color: #069b8f;
     background: linear-gradient(135deg, #e6f7f5 0%, #fff 60%);
     box-shadow: 0 0 0 2px rgba(6,155,143,.15);
   }
 
-  // ── Médailles ──
   &--gold   { .db-cl-entry__rang { color: #d97706; } }
   &--silver { .db-cl-entry__rang { color: #64748b; } }
   &--bronze { .db-cl-entry__rang { color: #b45309; } }
@@ -705,7 +713,7 @@ $t: all .2s ease;
     transition: width .6s ease;
   }
 }
-// ── Affichage rang simple ─────────────────────────────
+
 .db-rank-display {
   display: flex;
   align-items: center;
@@ -755,4 +763,9 @@ $t: all .2s ease;
     color: #94a3b8;
     font-weight: 600;
   }
+}
+.db-autres-kpi-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }

@@ -6,6 +6,8 @@ import { environment } from '../../../../environments/environment';
 
 export interface FormationProgression {
   formationId:   number;
+  parcoursId:    number | null;
+  catalogueId:   number | null; // ✅ NOUVEAU — contexte catalogue
   completed:     Set<number>;
   totalSections: number;
   percent:       number;
@@ -16,124 +18,259 @@ export class ProgressionService {
 
   private apiUrl = environment.apiUrl;
 
-  private progressions = new Map<number, FormationProgression>();
-  private _change$ = new BehaviorSubject<Map<number, FormationProgression>>(this.progressions);
+  // ✅ CLÉ COMPOSITE "formationId_parcoursId_catalogueId"
+  //    formation simple              → "42_null_null"
+  //    formation dans parcours 5     → "42_5_null"
+  //    formation dans catalogue 3    → "42_null_3"
+  //    → isolation totale, jamais de contamination croisée
+  private progressions = new Map<string, FormationProgression>();
+  private _change$ = new BehaviorSubject<Map<string, FormationProgression>>(this.progressions);
   readonly change$ = this._change$.asObservable();
 
   constructor(private http: HttpClient) {}
 
   // ════════════════════════════════════════════
+  // CLÉ COMPOSITE PRIVÉE
+  // ════════════════════════════════════════════
+  private key(
+    formationId:  number,
+    parcoursId:   number | null,
+    catalogueId:  number | null = null
+  ): string {
+    return `${formationId}_${parcoursId ?? 'null'}_${catalogueId ?? 'null'}`;
+  }
+
+  // ════════════════════════════════════════════
   // CHARGER depuis l'API au démarrage du lecteur
   // ════════════════════════════════════════════
-  loadFromApi(formationId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/formations/${formationId}/progression`).pipe(
+  loadFromApi(
+    formationId:  number,
+    parcoursId:   number | null = null,
+    catalogueId:  number | null = null  // ✅ NOUVEAU
+  ): Observable<any> {
+    const params: any = {};
+    if (parcoursId)  params['parcours_id']  = parcoursId;
+    if (catalogueId) params['catalogue_id'] = catalogueId; // ✅
+
+    console.log(`📡 [ProgressionService] loadFromApi → formationId=${formationId} | parcoursId=${parcoursId} | catalogueId=${catalogueId} | clé="${this.key(formationId, parcoursId, catalogueId)}" | params:`, params);
+
+    return this.http.get<any>(
+      `${this.apiUrl}/formations/${formationId}/progression`,
+      { params }
+    ).pipe(
       tap(res => {
+        console.log(`✅ [ProgressionService] loadFromApi réponse pour clé="${this.key(formationId, parcoursId, catalogueId)}":`, res);
+
         if (res?.status) {
           const completed = new Set<number>(res.completed_section_ids ?? []);
-          this.progressions.set(formationId, {
+          const k = this.key(formationId, parcoursId, catalogueId);
+          this.progressions.set(k, {
             formationId,
+            parcoursId,
+            catalogueId,  // ✅
             completed,
             totalSections: res.total_sections ?? 0,
-            percent:       res.progression ?? 0,
+            percent:       res.progression    ?? 0,
           });
+
+          console.log(`💾 [ProgressionService] Cache mis à jour → clé="${k}" | sections complétées: [${[...completed]}] | total: ${res.total_sections} | %: ${res.progression}`);
+
           this._change$.next(new Map(this.progressions));
         }
       }),
-      catchError(() => of(null))
+      catchError((err) => {
+        console.error(`❌ [ProgressionService] loadFromApi ERREUR pour formationId=${formationId} parcoursId=${parcoursId} catalogueId=${catalogueId}:`, err);
+        return of(null);
+      })
     );
   }
 
   // ════════════════════════════════════════════
-  // INIT locale (fallback si pas d'API)
+  // INIT locale (sans appel API)
   // ════════════════════════════════════════════
-  init(formationId: number, totalSections: number, alreadyCompleted: number[] = []): void {
-    if (!this.progressions.has(formationId)) {
+  init(
+    formationId:      number,
+    totalSections:    number,
+    alreadyCompleted: number[]      = [],
+    parcoursId:       number | null = null,
+    catalogueId:      number | null = null  // ✅ NOUVEAU
+  ): void {
+    const k = this.key(formationId, parcoursId, catalogueId);
+
+    if (!this.progressions.has(k)) {
       const completed = new Set<number>(alreadyCompleted);
-      this.progressions.set(formationId, {
+      const percent   = this.calcPercent(completed.size, totalSections);
+
+      this.progressions.set(k, {
         formationId,
+        parcoursId,
+        catalogueId, // ✅
         completed,
         totalSections,
-        percent: this.calcPercent(completed.size, totalSections),
+        percent,
       });
-      this._change$.next(new Map(this.progressions));
+
+      console.log(`🔧 [ProgressionService] init (nouveau) → clé="${k}" | total=${totalSections} | déjà complétées: [${alreadyCompleted}] | %=${percent}`);
     } else {
-      const prog = this.progressions.get(formationId)!;
+      const prog = this.progressions.get(k)!;
       prog.totalSections = totalSections;
-      prog.percent = this.calcPercent(prog.completed.size, totalSections);
-      this._change$.next(new Map(this.progressions));
+      prog.percent       = this.calcPercent(prog.completed.size, totalSections);
+
+      console.log(`🔧 [ProgressionService] init (mise à jour totalSections) → clé="${k}" | total=${totalSections} | sections en cache: [${[...prog.completed]}] | %=${prog.percent}`);
     }
+
+    this._change$.next(new Map(this.progressions));
   }
 
   // ════════════════════════════════════════════
-  // MARQUER une section — retourne Observable
-  // pour que l'appelant puisse lire quiz_final
+  // MARQUER une section complétée
   // ════════════════════════════════════════════
-  markCompleted(formationId: number, sectionId: number): Observable<any> {
-    // 1. Mise à jour locale immédiate (UI réactive)
-    const prog = this.progressions.get(formationId);
+  markCompleted(
+    formationId:  number,
+    sectionId:    number,
+    parcoursId:   number | null = null,
+    catalogueId:  number | null = null  // ✅ NOUVEAU
+  ): Observable<any> {
+    const k    = this.key(formationId, parcoursId, catalogueId);
+    const prog = this.progressions.get(k);
+
+    console.log(`✔️ [ProgressionService] markCompleted → formationId=${formationId} | sectionId=${sectionId} | parcoursId=${parcoursId} | catalogueId=${catalogueId} | clé="${k}"`);
+
+    // Mise à jour locale IMMÉDIATE (optimiste)
     if (prog) {
       prog.completed.add(sectionId);
       prog.percent = this.calcPercent(prog.completed.size, prog.totalSections);
       this._change$.next(new Map(this.progressions));
+
+      console.log(`⚡ [ProgressionService] Mise à jour locale optimiste → sections complétées: [${[...prog.completed]}] | %=${prog.percent}`);
+    } else {
+      console.warn(`⚠️ [ProgressionService] markCompleted — aucune entrée en cache pour clé="${k}", mise à jour locale ignorée`);
     }
 
-    // 2. Retourner l'Observable — le composant s'abonne
-    //    et peut lire est_termine + quiz_final dans la réponse
+    const body: any = {};
+    if (parcoursId)  body['parcours_id']  = parcoursId;
+    if (catalogueId) body['catalogue_id'] = catalogueId; // ✅
+
+    console.log(`📤 [ProgressionService] POST /formations/${formationId}/sections/${sectionId}/complete | body:`, body);
+
     return this.http.post<any>(
-      `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/complete`, {}
+      `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/complete`,
+      body
     ).pipe(
       tap(res => {
+        console.log(`✅ [ProgressionService] markCompleted réponse API:`, res);
+
         if (res?.status && prog) {
-          // Synchroniser le % calculé par le backend (source de vérité)
           prog.percent = res.progression ?? prog.percent;
           this._change$.next(new Map(this.progressions));
+
+          console.log(`🔄 [ProgressionService] % synchronisé depuis API → %=${prog.percent} | est_termine=${res.est_termine} | quiz_final=${JSON.stringify(res.quiz_final)}`);
         }
       }),
-      catchError(() => of(null))
+      catchError((err) => {
+        console.error(`❌ [ProgressionService] markCompleted ERREUR API:`, err);
+        return of(null);
+      })
     );
   }
 
   // ════════════════════════════════════════════
   // RETIRER une section (retry quiz)
   // ════════════════════════════════════════════
-  markUncompleted(formationId: number, sectionId: number): void {
-    const prog = this.progressions.get(formationId);
+  markUncompleted(
+    formationId:  number,
+    sectionId:    number,
+    parcoursId:   number | null = null,
+    catalogueId:  number | null = null  // ✅ NOUVEAU
+  ): void {
+    const k    = this.key(formationId, parcoursId, catalogueId);
+    const prog = this.progressions.get(k);
+
+    console.log(`↩️ [ProgressionService] markUncompleted → formationId=${formationId} | sectionId=${sectionId} | parcoursId=${parcoursId} | catalogueId=${catalogueId} | clé="${k}"`);
+
     if (prog) {
       prog.completed.delete(sectionId);
       prog.percent = this.calcPercent(prog.completed.size, prog.totalSections);
       this._change$.next(new Map(this.progressions));
+
+      console.log(`⚡ [ProgressionService] Section retirée localement → sections restantes: [${[...prog.completed]}] | %=${prog.percent}`);
     }
 
+    const body: any = {};
+    if (parcoursId)  body['parcours_id']  = parcoursId;
+    if (catalogueId) body['catalogue_id'] = catalogueId; // ✅
+
     this.http.post<any>(
-      `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/uncomplete`, {}
+      `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/uncomplete`,
+      body
     ).pipe(
       tap(res => {
+        console.log(`✅ [ProgressionService] markUncompleted réponse API:`, res);
+
         if (res?.status && prog) {
           prog.percent = res.progression ?? prog.percent;
           this._change$.next(new Map(this.progressions));
         }
       }),
-      catchError(() => of(null))
+      catchError((err) => {
+        console.error(`❌ [ProgressionService] markUncompleted ERREUR API:`, err);
+        return of(null);
+      })
     ).subscribe();
   }
 
   // ════════════════════════════════════════════
-  // GETTERS
+  // GETTERS — tous exigent parcoursId + catalogueId pour isoler le contexte
   // ════════════════════════════════════════════
-  getPercent(formationId: number): number {
-    return this.progressions.get(formationId)?.percent ?? 0;
+
+  /** Retourne le % pour un contexte précis */
+  getPercent(
+    formationId:  number,
+    parcoursId:   number | null = null,
+    catalogueId:  number | null = null  // ✅ NOUVEAU
+  ): number {
+    return this.progressions.get(this.key(formationId, parcoursId, catalogueId))?.percent ?? 0;
   }
 
-  getCompleted(formationId: number): Set<number> {
-    return this.progressions.get(formationId)?.completed ?? new Set();
+  getCompleted(
+    formationId:  number,
+    parcoursId:   number | null = null,
+    catalogueId:  number | null = null  // ✅ NOUVEAU
+  ): Set<number> {
+    return this.progressions.get(this.key(formationId, parcoursId, catalogueId))?.completed ?? new Set();
   }
 
-  isCompleted(formationId: number, sectionId: number): boolean {
-    return this.progressions.get(formationId)?.completed.has(sectionId) ?? false;
+  isCompleted(
+    formationId:  number,
+    sectionId:    number,
+    parcoursId:   number | null = null,
+    catalogueId:  number | null = null  // ✅ NOUVEAU
+  ): boolean {
+    return this.progressions.get(this.key(formationId, parcoursId, catalogueId))?.completed.has(sectionId) ?? false;
   }
 
-  hasData(formationId: number): boolean {
-    return this.progressions.has(formationId);
+  hasData(
+    formationId:  number,
+    parcoursId:   number | null = null,
+    catalogueId:  number | null = null  // ✅ NOUVEAU
+  ): boolean {
+    return this.progressions.has(this.key(formationId, parcoursId, catalogueId));
+  }
+
+  /** Debug — affiche tout le cache en console */
+  debugDump(): void {
+    console.group('🗺️ [ProgressionService] Dump complet du cache');
+    this.progressions.forEach((v, k) => {
+      console.log(`  clé="${k}" →`, {
+        formationId:   v.formationId,
+        parcoursId:    v.parcoursId,
+        catalogueId:   v.catalogueId,
+        percent:       v.percent,
+        completed:     [...v.completed],
+        totalSections: v.totalSections,
+      });
+    });
+    console.groupEnd();
   }
 
   private calcPercent(done: number, total: number): number {

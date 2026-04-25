@@ -4,7 +4,7 @@ import { RouterModule }             from '@angular/router';
 import { Router }                   from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DemandeFormationService }  from '../../../shared/service/demande/demande-formation.service';
-import { FormationsService }        from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service'; 
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 
 declare var bootstrap: any;
@@ -72,7 +72,7 @@ export class StudentsCatalogueComponent implements OnInit {
 
   constructor(
     private demandeFormationService: DemandeFormationService,
-    private formationsService:       FormationsService,
+    private formationsService:       FormationService,
     private fb:                      FormBuilder,
     private router:                  Router
   ) {}

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule }      from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 export interface DomaineDB {
@@ -54,7 +54,7 @@ export class MesCompetencesRecommandeesComponent implements OnInit {
   private readonly imageBase = 'http://localhost:8000/storage/';
 
   constructor(
-    private formationsService: FormationsService,
+    private formationsService: FormationService,
     private router: Router
   ) {}
 

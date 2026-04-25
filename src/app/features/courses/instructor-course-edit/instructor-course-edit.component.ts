@@ -187,7 +187,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
 
-    const subscription = this.formationService.getFormationById(this.courseId.toString()).subscribe({
+    const subscription = this.formationService.getFormationById(this.courseId).subscribe({
       next: (response: any) => {
         console.log('Réponse API:', response);
 

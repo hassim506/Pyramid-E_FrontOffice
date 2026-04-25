@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 import { Formation } from '../../../shared/models/formation.models';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 import { ProgressionService } from '../../../shared/service/progression/progression.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 
@@ -52,7 +52,7 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   private progressionSub?: Subscription;
 
   constructor(
-    private formationsService: FormationsService,
+    private formationsService: FormationService,
     public  progressionService: ProgressionService,
     private router: Router
   ) {}
@@ -91,9 +91,16 @@ export class MesCoursComponent implements OnInit, OnDestroy {
 
   // ════════════════════════════════════════════
   // PROGRESSION
+  // ✅ CORRECTION CLÉ : on passe toujours parcoursId=null ici
+  //    car mes-cours n'affiche QUE les formations simples (sans parcours).
+  //    Le service utilise désormais une clé composite "formationId_parcoursId",
+  //    donc getPercent(id, null) lit uniquement le cache de la formation simple
+  //    et ne sera jamais pollué par une session dans un parcours.
   // ════════════════════════════════════════════
   getProgression(f: Formation): number {
-    const fromService = this.progressionService.getPercent(f.id);
+    // Priorité au cache service (contexte formation simple, parcoursId=null)
+    const fromService = this.progressionService.getPercent(f.id, null);
+    // Fallback sur la valeur de l'API si le cache n'a pas encore été chargé
     return fromService > 0 ? fromService : Number((f as any).progression ?? 0);
   }
 
@@ -172,6 +179,9 @@ export class MesCoursComponent implements OnInit, OnDestroy {
 
   // ════════════════════════════════════════════
   // NAVIGATION
+  // ✅ openPlayer passe explicitement fromPage:'demandes' sans parcoursId
+  //    → lecture-formation lira parcoursId=null depuis history.state
+  //    → progression stockée sous clé "formationId_null" → aucun conflit
   // ════════════════════════════════════════════
   openDetails(f: Formation): void {
     this.router.navigate(['/courses/course-details-2', f.id], {
@@ -182,6 +192,8 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   openPlayer(f: Formation): void {
     this.router.navigate(['/student/lecture-formation', f.id], {
       state: { fromPage: 'demandes' }
+      // ✅ Pas de parcoursId ici — c'est une formation simple
+      // lecture-formation lira state.parcoursId = undefined → null
     });
   }
 

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 
 export interface DomaineDB {
   id: number; nom: string; slug?: string; couleur: string | null; icone: string | null;
@@ -50,7 +50,7 @@ export class EcartCompetencesComponent implements OnInit {
   /** Chip domaine actif — null = tous les domaines */
   domaineFiltre: number | null = null;
 
-  constructor(private formationsService: FormationsService) {}
+  constructor(private formationsService: FormationService) {}
 
   ngOnInit(): void { this.load(); }
 

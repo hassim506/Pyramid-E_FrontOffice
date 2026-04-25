@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
+import { ProgressionService } from '../../../shared/service/progression/progression.service';
 import { Subscription, filter } from 'rxjs';
 
 @Component({
@@ -19,22 +20,22 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
   loading               = true;
   error                 = '';
 
-  // ── Progression ───────────────────────────────────────────
   progressionGlobale    = 0;
   totalFormations       = 0;
   formationsTerminees   = 0;
   estTermine            = false;
   source                = 'assigne';
 
-  // ── Filtre local ──────────────────────────────────────────
   filtreStatut: 'tous' | 'termine' | 'en_cours' | 'non_commence' = 'tous';
 
-  private routerSub?: Subscription;
+  private routerSub?:      Subscription;
+  private progressionSub?: Subscription;
 
   constructor(
-    private route:             ActivatedRoute,
-    private router:            Router,
-    private formationsService: FormationsService
+    private route:              ActivatedRoute,
+    private router:             Router,
+    private formationsService:  FormationService,
+    public  progressionService: ProgressionService
   ) {}
 
   ngOnInit(): void {
@@ -44,13 +45,19 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
       this.loading = false;
       return;
     }
+
     this.loadDetail();
+
+    this.progressionSub = this.progressionService.change$.subscribe(() => {
+      this._syncFormationsDepuisService();
+    });
 
     this.routerSub = this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => {
         const url = e.urlAfterRedirects || e.url;
-        if (url.includes('parcours') && url.includes(String(this.parcoursId))) {
+        if (url.includes(`/mes-parcours/${this.parcoursId}`) ||
+            url.includes(`/parcours-assigne/${this.parcoursId}`)) {
           this.refreshProgressions();
         }
       });
@@ -58,9 +65,9 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
+    this.progressionSub?.unsubscribe();
   }
 
-  // ── Chargement principal ──────────────────────────────────
   loadDetail(): void {
     this.loading = true;
     this.error   = '';
@@ -81,6 +88,7 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
           this.parcours.statut           = res.statut           ?? 'actif';
         }
 
+        this._syncFormationsDepuisService();
         this.loading = false;
       },
       error: (err) => {
@@ -91,7 +99,6 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Refresh silencieux ────────────────────────────────────
   refreshProgressions(): void {
     this.formationsService.getParcoursDetail(this.parcoursId).subscribe({
       next: (res: any) => {
@@ -100,21 +107,52 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
         this.totalFormations     = res.total_formations     ?? 0;
         this.formationsTerminees = res.formations_terminees ?? 0;
         this.estTermine          = res.est_termine          ?? false;
+        this._syncFormationsDepuisService();
       },
       error: () => {}
     });
   }
 
-  // ── Expiration ─────────────────────────────────────────────
+  private _syncFormationsDepuisService(): void {
+    if (!this.formations.length) return;
 
-  /** Vrai si le parcours est expiré (date dépassée ET pas terminé) */
+    let terminees         = 0;
+    let sommeProgressions = 0;
+
+    this.formations = this.formations.map(f => {
+      const percentService = this.progressionService.getPercent(f.id, this.parcoursId);
+      const progression    = percentService > 0 ? percentService : (f.progression ?? 0);
+      const statut         = progression >= 100 ? 'termine'
+                           : progression > 0    ? 'en_cours'
+                           : (f.statut_formation ?? 'non_commence');
+
+      if (statut === 'termine') terminees++;
+      sommeProgressions += progression;
+
+      return { ...f, progression, statut_formation: statut, est_terminee: progression >= 100 };
+    });
+
+    const total = this.formations.length;
+    if (total === 0) return;
+
+    // ✅ Progression globale = MOYENNE pondérée des progressions individuelles
+    // Ainsi 3 formations à 33% / 11% / 50% donnent (33+11+50)/3 = 31% globaux
+    // et non 0% parce qu'aucune n'est entièrement terminée
+    const progressionMoyenne = Math.round(sommeProgressions / total);
+
+    if (progressionMoyenne > this.progressionGlobale) {
+      this.progressionGlobale = progressionMoyenne;
+    }
+    this.formationsTerminees = terminees;
+    this.estTermine          = this.progressionGlobale >= 100;
+  }
+
   get estExpire(): boolean {
     if (this.estTermine) return false;
     if (!this.parcours?.date_expiration) return false;
     return new Date(this.parcours.date_expiration) < new Date();
   }
 
-  // ── Formations filtrées ───────────────────────────────────
   get formationsFiltrees(): any[] {
     if (this.filtreStatut === 'tous') return this.formations;
     return this.formations.filter(f => f.statut_formation === this.filtreStatut);
@@ -124,24 +162,13 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
   get countEnCours(): number     { return this.formations.filter(f => f.statut_formation === 'en_cours').length; }
   get countNonCommence(): number { return this.formations.filter(f => f.statut_formation === 'non_commence').length; }
 
-  setFiltre(f: 'tous' | 'termine' | 'en_cours' | 'non_commence'): void {
-    this.filtreStatut = f;
-  }
+  setFiltre(f: 'tous' | 'termine' | 'en_cours' | 'non_commence'): void { this.filtreStatut = f; }
 
-  // ── Navigation ────────────────────────────────────────────
-
-  /**
-   * Tunnel : students-parcours → parcours-assigne/:id → course-details-2
-   * On passe fromPage + parcoursId pour que le retour revienne ici
-   */
   voirDetail(formationId: number, event: Event): void {
     event.stopPropagation();
     if (this.estExpire) return;
     this.router.navigate(['/courses/course-details-2', formationId], {
-      state: {
-        fromPage:  'parcours',
-        parcoursId: this.parcoursId,
-      }
+      state: { fromPage: 'parcours', parcoursId: this.parcoursId }
     });
   }
 
@@ -149,59 +176,39 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     if (this.estExpire) return;
     this.router.navigate(['/student/lecture-formation', formationId], {
-      state: {
-        fromPage:  'parcours',
-        parcoursId: this.parcoursId,
-      }
+      state: { fromPage: 'parcours', parcoursId: this.parcoursId }
     });
   }
 
   goToFormation(formationId: number): void {
     if (this.estExpire) return;
     this.router.navigate(['/student/lecture-formation', formationId], {
-      state: {
-        fromPage:  'parcours',
-        parcoursId: this.parcoursId,
-      }
+      state: { fromPage: 'parcours', parcoursId: this.parcoursId }
     });
   }
 
-  /**
-   * Retour vers la liste des parcours
-   * Tunnel : students-parcours → parcours-assigne/:id
-   */
-  goBack(): void {
-    this.router.navigate(['/student/mes-parcours-assignes']);
-  }
+  goBack(): void { this.router.navigate(['/student/mes-parcours-assignes']); }
 
-  // ── Helpers statut ────────────────────────────────────────
   getStatutLabel(statut: string): string {
     return ({ termine: 'Terminé', en_cours: 'En cours', non_commence: 'À commencer' } as any)[statut] ?? 'À commencer';
   }
-
   getStatutClass(statut: string): string {
     return ({ termine: 'pad-statut--done', en_cours: 'pad-statut--ongoing', non_commence: 'pad-statut--todo' } as any)[statut] ?? 'pad-statut--todo';
   }
-
   getProgressionColor(statut: string): string {
     return ({ termine: '#16a34a', en_cours: '#069b8f', non_commence: '#e5e7eb' } as any)[statut] ?? '#e5e7eb';
   }
-
   getNiveauClass(niveau: string): string {
     return ({ debutant: 'niveau-debutant', intermediaire: 'niveau-inter', avance: 'niveau-avance' } as any)[niveau] ?? '';
   }
-
   getCTALabel(statut: string): string {
     return ({ termine: 'Revoir', en_cours: 'Continuer', non_commence: 'Commencer' } as any)[statut] ?? 'Commencer';
   }
-
-  // ── Helpers expiration ────────────────────────────────────
   isExpiringSoon(dateExpiration: string | null): boolean {
     if (!dateExpiration) return false;
     const diff = new Date(dateExpiration).getTime() - new Date().getTime();
     return diff > 0 && diff < 7 * 24 * 60 * 60 * 1000;
   }
-
   getJoursRestants(dateExpiration: string | null): number | null {
     if (!dateExpiration) return null;
     const diff = new Date(dateExpiration).getTime() - new Date().getTime();

@@ -365,7 +365,7 @@ export class AdminrhDemandeComponent implements OnInit {
     this.refusingIds.add(demande.id);
     this.clearMessages();
 
-    this.demandeFormationService.refuserDemande(demande.id, { commentaire_rh: motif }).subscribe({
+   this.demandeFormationService.refuserDemande(demande.id, { motif_refus: motif }).subscribe({
       next: () => {
         this.successMessage = `Demande de formation refusée.`;
         this.refusingIds.delete(demande.id);

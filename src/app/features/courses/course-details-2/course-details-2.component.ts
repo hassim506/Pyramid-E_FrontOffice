@@ -2,7 +2,7 @@ import { Component, OnInit }     from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule }           from '@angular/common';
 import { Formation }              from '../../../shared/models/formation.models';
-import { FormationsService }      from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 
 @Component({
   standalone: true,
@@ -53,7 +53,7 @@ export class CourseDetails2Component implements OnInit {
   constructor(
     private route:             ActivatedRoute,
     private router:            Router,
-    private formationsService: FormationsService
+    private formationsService: FormationService
   ) {}
 
   ngOnInit(): void {

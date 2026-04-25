@@ -62,6 +62,23 @@
       </ul>
     </li>
 
+      <!-- ================= MES COMPÉTENCES ================= -->
+<li class="menu-item has-submenu" [class.active]="isCompetencesActive()">
+  <a>
+    <i class="isax isax-chart"></i>
+    <span>Mes compétences</span>
+    <i class="submenu-arrow isax isax-arrow-right-3"></i>
+  </a>
+  <ul class="submenu">
+    <li><a [routerLink]="routes.student_MesCompetences"
+           [class.active]="isExactActive(routes.student_MesCompetences)">Compétences acquises</a></li>
+    <li><a [routerLink]="routes.student_CompetencesRecommandees"
+           [class.active]="isExactActive(routes.student_CompetencesRecommandees)">Compétences recommandées</a></li>
+    <li><a [routerLink]="routes.student_EcartCompetences"
+           [class.active]="isExactActive(routes.student_EcartCompetences)">Écart de compétences</a></li>
+  </ul>
+</li>
+
     <!-- ================= MES QUIZ ================= -->
     <li class="menu-item">
       <a [routerLink]="routes.students_quiz" routerLinkActive="active">
@@ -79,22 +96,7 @@
     </li>
 
     
-    <!-- ================= MES COMPÉTENCES ================= -->
-<li class="menu-item has-submenu" [class.active]="isCompetencesActive()">
-  <a>
-    <i class="isax isax-chart"></i>
-    <span>Mes compétences</span>
-    <i class="submenu-arrow isax isax-arrow-right-3"></i>
-  </a>
-  <ul class="submenu">
-    <li><a [routerLink]="routes.student_MesCompetences"
-           [class.active]="isExactActive(routes.student_MesCompetences)">Compétences acquises</a></li>
-    <li><a [routerLink]="routes.student_CompetencesRecommandees"
-           [class.active]="isExactActive(routes.student_CompetencesRecommandees)">Compétences recommandées</a></li>
-    <li><a [routerLink]="routes.student_EcartCompetences"
-           [class.active]="isExactActive(routes.student_EcartCompetences)">Écart de compétences</a></li>
-  </ul>
-</li>
+  
     <!-- ================= MES PALMARÈS ================= -->
     <li class="menu-item">
       <a [routerLink]="routes.student_MesPalmares" routerLinkActive="active">

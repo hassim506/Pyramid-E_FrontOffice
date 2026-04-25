@@ -5,12 +5,17 @@ import { catchError } from 'rxjs/operators';
 import { DemandeFormationResponse, ActionDemandeRequest } from '../../models/formation.models';
 // import { Role, RoleResponse, AssignRoleRequest } from '../../models/role.models';
 import { AuthService } from '../authentification/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
-export class DemandeFormationService {
-  private apiUrl = 'http://127.0.0.1:8000/api';
+export class DemandeFormationService {    
+  //private apiUrl = 'http://127.0.0.1:8000/api';
+
+
+    private baseUrl = environment.apiUrl;
+
 
   constructor(
     private http: HttpClient,
@@ -29,7 +34,7 @@ export class DemandeFormationService {
   // ✅ Pour l'employé connecté → /mes-demandes-formation
   getMesDemandes(): Observable<DemandeFormationResponse> {
     return this.http.get<DemandeFormationResponse>(
-      `${this.apiUrl}/mes-demandes-formation`,
+      `${this.baseUrl}/mes-demandes-formation`,
       { headers: this.getHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
   }
@@ -37,7 +42,7 @@ export class DemandeFormationService {
   // ✅ Pour RH/Admin → /demandes-formation (permission requise)
   getDemandesFormation(): Observable<DemandeFormationResponse> {
     return this.http.get<DemandeFormationResponse>(
-      `${this.apiUrl}/demandes-formation`,
+      `${this.baseUrl }/demandes-formation`,
       { headers: this.getHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
   }
@@ -45,7 +50,7 @@ export class DemandeFormationService {
   // Valider une demande (RH)
   validerDemande(id: number, data: ActionDemandeRequest = {}): Observable<any> {
     return this.http.put(
-      `${this.apiUrl}/demandes-formation/${id}/valider`, data,
+      `${this.baseUrl}/demandes-formation/${id}/valider`, data,
       { headers: this.getHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
   }
@@ -53,7 +58,7 @@ export class DemandeFormationService {
   // Refuser une demande (RH)
   refuserDemande(id: number, data: ActionDemandeRequest): Observable<any> {
     return this.http.put(
-      `${this.apiUrl}/demandes-formation/${id}/refuser`, data,
+      `${this.baseUrl}/demandes-formation/${id}/refuser`, data,
       { headers: this.getHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
   }
@@ -61,7 +66,7 @@ export class DemandeFormationService {
   // Annuler une demande (Employé)
   annulerDemande(id: number, data: ActionDemandeRequest = {}): Observable<any> {
     return this.http.put(
-      `${this.apiUrl}/demandes-formation/${id}/annuler`, data,
+      `${this.baseUrl}/demandes-formation/${id}/annuler`, data,
       { headers: this.getHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
   }
@@ -76,13 +81,13 @@ export class DemandeFormationService {
     commentaire_employe?: string;
   }): Observable<any> {
     return this.http.post(
-      `${this.apiUrl}/demandes-formation`, payload,
+      `${this.baseUrl}/demandes-formation`, payload,
       { headers: this.getHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
   }
 
   relancerDemande(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/demandes/${id}/relancer`, {});
+    return this.http.post(`${this.baseUrl}/demandes/${id}/relancer`, {});
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

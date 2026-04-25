@@ -1,7 +1,7 @@
 import { Component, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { CommonModule }   from '@angular/common';
 import { RouterModule }   from '@angular/router';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 
 interface Evenement {
   id:                    string;
@@ -80,7 +80,7 @@ export class StudentPlanningComponent implements OnInit {
   @ViewChild('calendarGrid') calendarGridRef!: ElementRef<HTMLElement>;
 
   constructor(
-    private formationsService: FormationsService,
+    private formationsService: FormationService,
     private elRef: ElementRef
   ) {}
 
