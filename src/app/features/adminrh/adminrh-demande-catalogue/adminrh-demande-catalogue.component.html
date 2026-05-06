@@ -1,0 +1,359 @@
+<div class="page-content">
+  <!-- En-tête de la page -->
+  <div class="page-title d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">Gestion des Demandes de Catalogue</h4>
+      <p class="text-muted mb-0">
+        Validez ou refusez les demandes de catalogue de vos employés
+      </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <!-- Statistiques rapides -->
+      <div class="d-flex align-items-center gap-3 me-3" *ngIf="hasData">
+        <div class="text-center">
+          <div class="fw-bold text-primary fs-5">{{ totalDemandes }}</div>
+          <small class="text-muted">Total</small>
+        </div>
+        <div class="text-center">
+          <div class="fw-bold text-warning fs-5">{{ demandesEnAttente }}</div>
+          <small class="text-muted">En attente</small>
+        </div>
+        <div class="text-center">
+          <div class="fw-bold text-success fs-5">{{ demandesValidees }}</div>
+          <small class="text-muted">Validées</small>
+        </div>
+        <div class="text-center" *ngIf="demandesRefusees > 0">
+          <div class="fw-bold text-danger fs-5">{{ demandesRefusees }}</div>
+          <small class="text-muted">Refusées</small>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <button class="btn btn-outline-primary"
+              (click)="refreshData()"
+              [disabled]="loading">
+        <i class="isax isax-refresh" [class.fa-spin]="loading"></i>
+        <span class="ms-1 d-none d-sm-inline">Actualiser</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages de notification -->
+  <div class="alert alert-success alert-dismissible fade show"
+       *ngIf="successMessage"
+       role="alert">
+    <i class="isax isax-tick-circle me-2"></i>
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="clearMessages()"></button>
+  </div>
+
+  <div class="alert alert-danger alert-dismissible fade show"
+       *ngIf="error"
+       role="alert">
+    <i class="isax isax-warning-2 me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="clearMessages()"></button>
+  </div>
+
+  <!-- Filtres et recherche -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Recherche -->
+        <div class="col-lg-4">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="isax isax-search-normal-1"></i>
+            </span>
+            <input
+              [(ngModel)]="searchDataValue"
+              [ngModelOptions]="{ standalone: true }"
+              type="search"
+              (ngModelChange)="searchData(searchDataValue)"
+              class="form-control"
+              placeholder="Rechercher catalogue, employé..."
+              [disabled]="loading">
+          </div>
+        </div>
+
+        <!-- Filtre par statut -->
+        <div class="col-lg-3">
+          <select class="form-select"
+                  [(ngModel)]="selectedStatutFilter"
+                  (ngModelChange)="onStatutFilterChange($event)"
+                  [disabled]="loading">
+            <option *ngFor="let filter of statutFilters" [value]="filter.value">
+              {{ filter.label }} ({{ filter.count }})
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtre par priorité -->
+        <div class="col-lg-3">
+          <select class="form-select"
+                  [(ngModel)]="selectedPrioriteFilter"
+                  (ngModelChange)="onPrioriteFilterChange($event)"
+                  [disabled]="loading">
+            <option value="tous">Toutes les priorités</option>
+            <option value="basse">Basse</option>
+            <option value="normale">Normale</option>
+            <option value="haute">Haute</option>
+            <option value="urgente">Urgente</option>
+          </select>
+        </div>
+
+        <!-- Résultats -->
+        <div class="col-lg-2 text-end">
+          <small class="text-muted" *ngIf="hasData">
+            {{ tableData.length }} résultat(s)
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- État de chargement -->
+  <div class="d-flex justify-content-center p-5" *ngIf="loading">
+    <div class="text-center">
+      <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <p class="text-muted fs-6">Chargement des demandes...</p>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div class="card text-center py-5" *ngIf="showEmptyState">
+    <div class="card-body">
+      <div class="mb-4">
+        <i class="isax isax-document display-1 text-muted"></i>
+      </div>
+      <h5 class="fw-bold mb-3">Aucune demande de catalogue</h5>
+      <p class="text-muted mb-4">
+        Aucune demande de catalogue n'a été soumise pour le moment.
+      </p>
+    </div>
+  </div>
+
+  <!-- Tableau des demandes -->
+  <div class="card" *ngIf="hasData && !loading">
+    <div class="card-header bg-white border-bottom">
+      <div class="d-flex align-items-center justify-content-between">
+        <h6 class="mb-0 fw-bold">
+          <i class="isax isax-document me-2 text-primary"></i>
+          Demandes de Catalogue
+        </h6>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-light text-dark">{{ tableData.length }} affichée(s)</span>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+              {{ pageSize }} par page
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="javascript:void(0)" (click)="changePageSize(5)">5 par page</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" (click)="changePageSize(10)">10 par page</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" (click)="changePageSize(25)">25 par page</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" (click)="changePageSize(50)">50 par page</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table matSort (matSortChange)="sortData($event)" class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th mat-sort-header="catalogue" class="fw-semibold">
+              <i class="isax isax-book me-1"></i>Catalogue
+            </th>
+            <th mat-sort-header="employe" class="fw-semibold">
+              <i class="isax isax-profile-2user me-1"></i>Employé
+            </th>
+            <th mat-sort-header="priorite" class="fw-semibold">
+              <i class="isax isax-flag me-1"></i>Priorité
+            </th>
+            <th mat-sort-header="created_at" class="fw-semibold">
+              <i class="isax isax-calendar me-1"></i>Date demande
+            </th>
+            <th mat-sort-header="date_souhaitee_debut" class="fw-semibold">
+              <i class="isax isax-clock me-1"></i>Date souhaitée
+            </th>
+            <th mat-sort-header="statut" class="fw-semibold">
+              <i class="isax isax-status me-1"></i>Statut
+            </th>
+            <th class="fw-semibold">Motif</th>
+            <th class="text-end fw-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let demande of tableData; trackBy: trackByDemandeId" class="align-middle">
+
+            <!-- Catalogue -->
+            <td>
+              <div class="d-flex align-items-start">
+                <div class="avatar avatar-md bg-primary text-white rounded me-3 d-flex align-items-center justify-content-center"
+                     [style.background-color]="demande.catalogue?.couleur || null">
+                  <i class="isax isax-book"></i>
+                </div>
+                <div>
+                  <div class="fw-semibold text-dark mb-1">
+                    {{ demande.catalogue?.titre || ('Catalogue #' + demande.catalogue_id) }}
+                  </div>
+                  <small class="text-muted" *ngIf="demande.catalogue">
+                    {{ demande.catalogue.nombre_formations || 0 }} formation(s) •
+                    {{ demande.catalogue.type_display || demande.catalogue.type || 'N/A' }}
+                  </small>
+                  <small class="text-muted fst-italic" *ngIf="!demande.catalogue">
+                    Chargement...
+                  </small>
+                  <div class="mt-1" *ngIf="demande.catalogue?.statut">
+                        <span class="badge"
+                              [ngClass]="{
+                                'bg-success bg-opacity-10 text-success': demande.catalogue?.est_actif,
+                                'bg-secondary bg-opacity-10 text-secondary': !demande.catalogue?.est_actif
+                              }">
+                          {{ demande.catalogue?.statut }}
+                        </span>
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Employé -->
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="avatar avatar-md bg-info text-white rounded me-3 d-flex align-items-center justify-content-center">
+                  <span class="fw-bold">{{ demande.employe?.prenom?.charAt(0) || '' }}{{ demande.employe?.nom?.charAt(0) || '' }}</span>
+                </div>
+                <div>
+                  <div class="fw-medium text-dark">
+                    {{ demande.employe?.name || 'Employé inconnu' }}
+                  </div>
+                  <small class="text-muted">
+                    {{ demande.employe?.email || 'Email non renseigné' }}
+                  </small>
+                  <div class="mt-1">
+                    <small class="text-muted">
+                      {{ demande.employe?.fonction || 'Fonction non définie' }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Priorité -->
+            <td>
+              <span [class]="getPrioriteClass(demande.priorite ?? undefined)">
+                {{ demande.priorite_display }}
+              </span>
+            </td>
+
+            <!-- Date demande -->
+            <td>
+              <div class="d-flex align-items-center">
+                <i class="isax isax-calendar text-muted me-2"></i>
+                <span>{{ formatDate(demande.created_at) }}</span>
+              </div>
+            </td>
+
+            <!-- Date souhaitée -->
+            <td>
+              <div class="d-flex align-items-center">
+                <i class="isax isax-clock text-muted me-2"></i>
+                <span>{{ formatDate(demande.date_souhaitee_debut ?? undefined) }}</span>
+              </div>
+            </td>
+
+            <!-- Statut -->
+            <td>
+              <span [class]="getStatutClass(demande.statut)">
+                {{ demande.statut_display }}
+              </span>
+              <div *ngIf="demande.date_validation" class="mt-1">
+                <small class="text-muted">
+                  Validé le {{ formatDate(demande.date_validation) }}
+                </small>
+              </div>
+            </td>
+
+            <!-- Motif -->
+            <td>
+              <div class="text-truncate" style="max-width: 200px;" [title]="demande.motif_demande">
+                {{ demande.motif_demande || 'Aucun motif' }}
+              </div>
+              <div *ngIf="demande.commentaire_rh" class="mt-1">
+                <small class="text-muted fw-medium">RH:</small>
+                <small class="text-muted d-block text-truncate" style="max-width: 200px;" [title]="demande.commentaire_rh">
+                  {{ demande.commentaire_rh }}
+                </small>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-end">
+              <div class="btn-group btn-group-sm" role="group">
+                <!-- Valider -->
+                <button class="btn btn-outline-success"
+                        (click)="validerDemande(demande)"
+                        [disabled]="!canValidate(demande) || validatingIds.has(demande.id)"
+                        *ngIf="canValidate(demande)"
+                        title="Valider la demande">
+                  <span *ngIf="validatingIds.has(demande.id)" class="spinner-border spinner-border-sm me-1"></span>
+                  <i class="isax isax-tick-circle" *ngIf="!validatingIds.has(demande.id)"></i>
+                </button>
+
+                <!-- Refuser -->
+                <button class="btn btn-outline-danger"
+                        (click)="refuserDemande(demande)"
+                        [disabled]="!canRefuse(demande) || refusingIds.has(demande.id)"
+                        *ngIf="canRefuse(demande)"
+                        title="Refuser la demande">
+                  <span *ngIf="refusingIds.has(demande.id)" class="spinner-border spinner-border-sm me-1"></span>
+                  <i class="isax isax-close-circle" *ngIf="!refusingIds.has(demande.id)"></i>
+                </button>
+
+                <!-- Annuler -->
+                <button class="btn btn-outline-warning"
+                        (click)="annulerDemande(demande)"
+                        [disabled]="!canCancel(demande)"
+                        *ngIf="canCancel(demande)"
+                        title="Annuler la demande">
+                  <i class="isax isax-close-circle"></i>
+                </button>
+
+                <!-- Détails -->
+                <button class="btn btn-outline-info"
+                        title="Voir les détails">
+                  <i class="isax isax-eye"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Message si recherche vide -->
+          <tr *ngIf="tableData.length === 0 && searchDataValue && !loading">
+            <td colspan="8" class="text-center py-5">
+              <div class="text-muted">
+                <i class="isax isax-search-normal-1 display-6 mb-3 d-block text-muted opacity-50"></i>
+                <h6 class="fw-bold">Aucun résultat pour "{{ searchDataValue }}"</h6>
+                <p class="mb-0 small">Essayez avec d'autres termes de recherche.</p>
+                <button class="btn btn-sm btn-outline-primary mt-2" (click)="searchDataValue = ''; searchData('')">
+                  <i class="isax isax-refresh me-1"></i>Effacer la recherche
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="card-footer bg-white border-top" *ngIf="hasData">
+      <app-custom-pagination></app-custom-pagination>
+    </div>
+  </div>
+</div>
