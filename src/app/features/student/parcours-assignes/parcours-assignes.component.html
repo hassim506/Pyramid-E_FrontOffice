@@ -1,0 +1,328 @@
+<!-- HEADER -->
+<div class="sc-header">
+  <div class="sc-header__left">
+    <h1 class="sc-header__title">Mes Parcours</h1>
+    <p class="sc-header__subtitle">Parcours assignés et demandes acceptées par votre entreprise</p>
+  </div>
+  <div class="sc-header__right" *ngIf="!loading && allParcours.length > 0">
+    <span class="sc-header__count">
+      <i class="isax isax-routing"></i>
+      {{ totalItems }} parcours
+    </span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS — même style que la page quiz      -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allParcours.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="onFiltreChange('')"
+       [class.pq-kpi-card--active]="selectedFiltre === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-routing"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalParcours }}</div>
+      <div class="pq-kpi-card__label">Total assignés</div>
+    </div>
+  </div>
+
+  <!-- En cours -->
+  <div class="pq-kpi-card pq-kpi-card--blue" (click)="onFiltreChange('en_cours')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'en_cours'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-play-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnCours }}</div>
+      <div class="pq-kpi-card__label">En cours</div>
+    </div>
+  </div>
+
+  <!-- Terminés -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="onFiltreChange('termine')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'termine'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-medal-star"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalTermines }}</div>
+      <div class="pq-kpi-card__label">Terminés</div>
+    </div>
+  </div>
+
+  <!-- Non démarrés -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="onFiltreChange('')"
+       [class.pq-kpi-card--active]="false">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-flash-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalNonDemarres }}</div>
+      <div class="pq-kpi-card__label">Non démarrés</div>
+    </div>
+  </div>
+
+  <!-- Assignés directement -->
+  <div class="pq-kpi-card pq-kpi-card--purple" (click)="onFiltreChange('assigne')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'assigne'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-tick-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalAssignes }}</div>
+      <div class="pq-kpi-card__label">Assignés</div>
+    </div>
+  </div>
+
+  <!-- Demandes acceptées -->
+  <div class="pq-kpi-card pq-kpi-card--indigo" (click)="onFiltreChange('demande')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'demande'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-send-2"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalDemandes }}</div>
+      <div class="pq-kpi-card__label">Demandes acceptées</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FILTRES -->
+<div class="sc-filters" *ngIf="!loading && allParcours.length > 0">
+  <div class="sc-filters__search">
+    <i class="isax isax-search-normal sc-filters__search-icon"></i>
+    <input type="text" class="sc-filters__search-input"
+           placeholder="Rechercher un parcours..."
+           [(ngModel)]="searchTerm"
+           (ngModelChange)="onSearchChange()">
+    <button *ngIf="searchTerm" class="sc-filters__search-clear"
+            (click)="searchTerm = ''; onSearchChange()">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+
+  <div class="sc-filters__types">
+    <button *ngFor="let f of filtres"
+            class="sc-filters__type-btn"
+            [class.sc-filters__type-btn--active]="selectedFiltre === f.value"
+            (click)="onFiltreChange(f.value)">
+      <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
+      <span class="sc-filters__type-count" *ngIf="f.value === 'assigne'  && totalAssignes > 0">({{ totalAssignes }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'demande'  && totalDemandes > 0">({{ totalDemandes }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'termine'  && totalTermines > 0">({{ totalTermines }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'en_cours' && totalEnCours  > 0">({{ totalEnCours }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'expire'   && totalExpires  > 0">({{ totalExpires }})</span>
+    </button>
+  </div>
+
+  <button class="sc-filters__reset" *ngIf="hasActiveFilters" (click)="clearFilters()">
+    <i class="isax isax-refresh"></i> Réinitialiser
+  </button>
+</div>
+
+<!-- RÉSULTAT FILTRE -->
+<div class="sc-results-info" *ngIf="!loading && hasActiveFilters && filteredParcours.length > 0">
+  <i class="isax isax-filter"></i>
+  <span>{{ totalItems }} résultat{{ totalItems > 1 ? 's' : '' }}</span>
+  <button class="sc-results-info__clear" (click)="clearFilters()">Effacer les filtres</button>
+</div>
+
+<!-- LOADER -->
+<div class="sc-loading" *ngIf="loading">
+  <div class="sc-loading__spinner"></div>
+  <p>Chargement de vos parcours...</p>
+</div>
+
+<!-- ERREUR -->
+<div class="sc-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2 sc-error__icon"></i>
+  <p>{{ error }}</p>
+  <button class="sc-error__retry" (click)="loadParcours()">
+    <i class="isax isax-refresh me-1"></i> Réessayer
+  </button>
+</div>
+
+<!-- GRILLE PARCOURS -->
+<div class="row g-4" *ngIf="!loading && displayedParcours.length > 0">
+  <div class="col-xl-4 col-md-6" *ngFor="let parcours of displayedParcours">
+    <div class="parcours-card"
+         [class.parcours-card--termine]="parcours.est_termine"
+         [class.parcours-card--expire]="parcours.est_expire && !parcours.est_termine"
+         [class.parcours-card--grayed]="isGrayed(parcours)"
+         (click)="goToDetail(parcours.id)">
+
+      <!-- BANNIÈRE -->
+      <div class="parcours-card__banner">
+        <div class="parcours-card__banner-bg"
+             [style.background-image]="parcours.image_couverture ? 'url(' + parcours.image_couverture + ')' : 'none'"
+             [style.background-color]="!parcours.image_couverture ? getCategorieColor(parcours.categorie) : 'transparent'">
+        </div>
+        <div class="parcours-card__banner-overlay"></div>
+        <i [class]="getCategorieIcon(parcours.categorie) + ' parcours-card__banner-icon'"></i>
+
+        <div class="parcours-card__banner-termine" *ngIf="parcours.est_termine">
+          <i class="isax isax-medal-star me-1"></i>Complété
+        </div>
+
+        <div class="parcours-card__banner-expire" *ngIf="parcours.est_expire && !parcours.est_termine">
+          <i class="isax isax-calendar-remove me-1"></i>Expiré
+        </div>
+
+        <span class="parcours-card__banner-assigned"
+              [class.parcours-card__banner-assigned--demande]="parcours.source === 'demande'"
+              [class.parcours-card__banner-assigned--termine]="parcours.est_termine">
+          <i class="isax me-1"
+             [class.isax-medal-star]="parcours.est_termine"
+             [class.isax-tick-circle]="!parcours.est_termine && parcours.source !== 'demande'"
+             [class.isax-send-2]="!parcours.est_termine && parcours.source === 'demande'"></i>
+          {{ parcours.source === 'demande' ? 'Demande acceptée' : 'Assigné' }}
+        </span>
+
+        <span class="parcours-card__banner-badge"
+              *ngIf="parcours.categorie"
+              [style.background-color]="getCategorieColor(parcours.categorie)">
+          {{ parcours.categorie | uppercase }}
+        </span>
+      </div>
+
+      <!-- BODY -->
+      <div class="parcours-card__body">
+        <h5 class="parcours-card__title">{{ parcours.titre }}</h5>
+        <p class="parcours-card__description">
+          {{ parcours.description || 'Aucune description disponible' }}
+        </p>
+
+        <div class="parcours-card__stats">
+          <div class="parcours-card__stat">
+            <i class="isax isax-book-1"></i>
+            <span>{{ parcours.nombre_formations }} formation{{ parcours.nombre_formations > 1 ? 's' : '' }}</span>
+          </div>
+          <div class="parcours-card__stat" *ngIf="parcours.duree_totale">
+            <i class="isax isax-clock"></i>
+            <span>{{ parcours.duree_totale }} h</span>
+          </div>
+          <div class="parcours-card__stat parcours-card__stat--done"
+               *ngIf="parcours.formations_terminees > 0">
+            <i class="isax isax-tick-circle"></i>
+            <span>{{ parcours.formations_terminees }}/{{ parcours.total_formations }} terminées</span>
+          </div>
+        </div>
+
+        <div class="parcours-card__progression" *ngIf="parcours.total_formations > 0">
+          <div class="parcours-card__termine" *ngIf="parcours.est_termine">
+            <i class="isax isax-medal-star me-1"></i>
+            Parcours Terminé !
+          </div>
+          <div *ngIf="!parcours.est_termine">
+            <div class="parcours-card__prog-header">
+              <span class="parcours-card__prog-label">Progression</span>
+              <span class="parcours-card__prog-pct"
+                    [style.color]="parcours.est_expire ? '#9ca3af' : (parcours.progression > 0 ? '#069b8f' : '#9ca3af')">
+                {{ parcours.progression | number:'1.0-0' }}%
+              </span>
+            </div>
+            <div class="parcours-card__prog-bar">
+              <div class="parcours-card__prog-fill"
+                   [class.parcours-card__prog-fill--expire]="parcours.est_expire"
+                   [style.width.%]="parcours.progression">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="parcours-card__assignation">
+          <div class="parcours-card__assignation-date" *ngIf="parcours.date_assignation">
+            <i class="isax me-1"
+               [class.isax-calendar-add]="parcours.source !== 'demande'"
+               [class.isax-tick-circle]="parcours.source === 'demande'"></i>
+            {{ parcours.source === 'demande' ? 'Validée le' : 'Assigné le' }}
+            {{ parcours.date_assignation | date:'dd/MM/yyyy' }}
+          </div>
+          <div class="parcours-card__assignation-expiry parcours-card__assignation-expiry--permanent"
+               *ngIf="!parcours.date_expiration">
+            <i class="isax isax-infinity me-1"></i>Accès permanent
+          </div>
+          <div class="parcours-card__assignation-expiry parcours-card__assignation-expiry--expired"
+               *ngIf="parcours.est_expire">
+            <i class="isax isax-calendar-remove me-1"></i>
+            Expiré le {{ parcours.date_expiration | date:'dd/MM/yyyy' }}
+          </div>
+          <div class="parcours-card__assignation-expiry parcours-card__assignation-expiry--warning"
+               *ngIf="!parcours.est_expire && isExpiringSoon(parcours.date_expiration)">
+            <i class="isax isax-warning-2 me-1"></i>
+            Expire dans {{ getJoursRestants(parcours.date_expiration) }} jour(s) !
+          </div>
+          <div class="parcours-card__assignation-expiry"
+               *ngIf="!parcours.est_expire && parcours.date_expiration && !isExpiringSoon(parcours.date_expiration)">
+            <i class="isax isax-calendar-remove me-1"></i>
+            Expire le {{ parcours.date_expiration | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+
+        <div class="parcours-card__notes" *ngIf="parcours.notes">
+          <i class="isax isax-note-text me-1"></i>
+          <em>{{ parcours.notes }}</em>
+        </div>
+
+        <div class="parcours-card__footer">
+          <button class="parcours-card__btn"
+                  [class.parcours-card__btn--done]="parcours.est_termine"
+                  [class.parcours-card__btn--expire]="parcours.est_expire && !parcours.est_termine">
+            {{ getCTALabel(parcours) }}
+            <i class="isax isax-arrow-right-3"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EMPTY — aucun parcours -->
+<div class="sc-empty" *ngIf="!loading && !error && allParcours.length === 0">
+  <i class="isax isax-routing sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun parcours disponible</h6>
+  <p>Vous n'avez pas encore de parcours assignés ou de demandes acceptées.</p>
+</div>
+
+<!-- EMPTY — aucun résultat filtre -->
+<div class="sc-empty" *ngIf="!loading && !error && allParcours.length > 0 && filteredParcours.length === 0">
+  <i class="isax isax-search-normal sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun résultat</h6>
+  <p>Aucun parcours ne correspond à votre recherche.</p>
+  <button class="sc-empty__btn" (click)="clearFilters()">
+    <i class="isax isax-refresh me-1"></i> Réinitialiser les filtres
+  </button>
+</div>
+
+<!-- PAGINATION -->
+<div class="sc-pagination" *ngIf="!loading && totalPages > 1">
+  <span class="sc-pagination__info">
+    Page {{ currentPage }} / {{ totalPages }}
+    <span class="sc-pagination__info-total">({{ totalItems }} parcours)</span>
+  </span>
+  <div class="sc-pagination__controls">
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(1)">
+      <i class="isax isax-arrow-left-3"></i>
+    </button>
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+      <i class="isax isax-arrow-left-2"></i>
+    </button>
+    <span class="sc-pagination__ellipsis" *ngIf="pages[0] > 1">…</span>
+    <button *ngFor="let p of pages"
+            class="sc-pagination__btn"
+            [class.sc-pagination__btn--active]="currentPage === p"
+            (click)="changePage(p)">{{ p }}</button>
+    <span class="sc-pagination__ellipsis" *ngIf="pages[pages.length - 1] < totalPages">…</span>
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+      <i class="isax isax-arrow-right-2"></i>
+    </button>
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+      <i class="isax isax-arrow-right-3"></i>
+    </button>
+  </div>
+</div>

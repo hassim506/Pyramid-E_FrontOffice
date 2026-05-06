@@ -140,8 +140,8 @@
     <div class="card-header bg-white border-bottom">
       <div class="d-flex align-items-center justify-content-between">
         <h6 class="mb-0 fw-bold">
-          <i class="isax isax-document me-2 text-primary"></i>
-          Demandes de Formation
+          <i class="isax isax-routing me-2 text-primary"></i>
+          Demandes de Parcours
         </h6>
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-light text-dark">{{ tableData.length }} affichée(s)</span>
@@ -167,8 +167,8 @@
       <table matSort (matSortChange)="sortData($event)" class="table table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th mat-sort-header="formation" class="fw-semibold">
-              <i class="isax isax-book me-1"></i>Formation
+            <th mat-sort-header="parcours" class="fw-semibold">
+              <i class="isax isax-routing me-1"></i>Parcours
             </th>
             <th mat-sort-header="employe" class="fw-semibold">
               <i class="isax isax-profile-2user me-1"></i>Employé
@@ -192,25 +192,19 @@
         <tbody>
           <tr *ngFor="let demande of tableData; trackBy: trackByDemandeId" class="align-middle">
 
-            <!-- Formation -->
+            <!-- Parcours -->
             <td>
               <div class="d-flex align-items-start">
                 <div class="avatar avatar-md bg-primary text-white rounded me-3 d-flex align-items-center justify-content-center">
-                  <i class="isax isax-book"></i>
+                  <i class="isax isax-routing"></i>
                 </div>
                 <div>
                   <div class="fw-semibold text-dark mb-1">
-                    {{ demande.formation?.titre || 'Formation non définie' }}
+                    {{ demande.parcours?.titre || demande.parcours?.nom || 'Parcours non défini' }}
                   </div>
                   <small class="text-muted">
-                    {{ demande.formation?.duree_totale || 0 }}h •
-                    {{ demande.formation?.niveau || 'N/A' | titlecase }}
+                    {{ demande.parcours?.description || '' | slice:0:60 }}{{ (demande.parcours?.description?.length ?? 0) > 60 ? '…' : '' }}
                   </small>
-                  <div *ngIf="demande.formation?.prix" class="mt-1">
-                    <span class="badge bg-success bg-opacity-10 text-success">
-                      {{ demande.formation?.prix }}€
-                    </span>
-                  </div>
                 </div>
               </div>
             </td>

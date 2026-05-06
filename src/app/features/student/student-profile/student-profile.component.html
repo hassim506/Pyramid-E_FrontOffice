@@ -1,73 +1,140 @@
+<div class="content container-fluid profile-page">
 
-    <div class="page-title d-flex align-items-center justify-content-between">
-        <h5 class="fw-bold">My Profile</h5>
-        <a href="javascript:void(0);" class="edit-profile-icon"><i class="isax isax-edit-2"></i></a>
-    </div>
-    <div class="card mb-0">
-        <div class="card-body">
-            <h6 class="fs-18 page-title fw-bold">Basic Information</h6>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>First Name</h6>
-                        <span>Ronald</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>Last Name</h6>
-                        <span>Richard</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>Registration Date</h6>
-                        <span>16 Jan 2024, 11:15 AM</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>User Name</h6>
-                        <span>studentdemo</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>Phone Number</h6>
-                        <span>90154-91036</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>Email</h6>
-                        <span>studentdemo&#64;example.com</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>Gender</h6>
-                        <span>Male</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>DOB</h6>
-                        <span>16 Jan 2020</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <h6>Age</h6>
-                        <span>24</span>
-                    </div>
-                </div>
-                <div class="col-md-12">
-                    <div>
-                        <h6>Bio</h6>
-                        <span>Hello! I'm Ronald Richard. I'm passionate about developing innovative software solutions, analyzing classic literature. I aspire to become a software developer, work as an editor. In my free time, I enjoy coding, reading, hiking etc.
-                        </span>
-                    </div>
-                </div>
-            </div>								
+  <!-- HEADER -->
+  <div class="profile-hero">
+    <div class="hero-left">
+      <div class="avatar-xl">
+        {{ getInitials() }}
+      </div>
+      <div class="hero-info">
+        <h2>{{ studentProfile?.prenom }} {{ studentProfile?.nom }}</h2>
+        <p class="role">{{ studentProfile?.fonction }}</p>
+        <div class="meta">
+          <span><i class="fas fa-envelope"></i> {{ studentProfile?.email }}</span>
+          <span *ngIf="studentProfile?.telephone">
+            <i class="fas fa-phone"></i> {{ studentProfile?.telephone }}
+          </span>
         </div>
+      </div>
     </div>
+
+    <div class="hero-actions">
+      <span class="status-pill" [ngClass]="getStatusClass()">
+        {{ getStatusText() }}
+      </span>
+
+      <button
+        *ngIf="!isEditing"
+        class="btn btn-edit"
+        (click)="toggleEdit()">
+        <i class="fas fa-pen"></i> Modifier
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW MODE -->
+  <div class="card profile-card" *ngIf="!isEditing && studentProfile">
+    <div class="card-body">
+
+      <h4 class="section-title">Informations personnelles</h4>
+
+      <div class="info-grid">
+        <div class="info-item"><span>ID</span><strong>{{ studentProfile.id }}</strong></div>
+        <div class="info-item"><span>Nom</span><strong>{{ studentProfile.nom }}</strong></div>
+        <div class="info-item"><span>Prénom</span><strong>{{ studentProfile.prenom }}</strong></div>
+        <div class="info-item"><span>Email</span><strong>{{ studentProfile.email }}</strong></div>
+        <div class="info-item"><span>Téléphone</span><strong>{{ studentProfile.telephone || '—' }}</strong></div>
+        <div class="info-item"><span>Fonction</span><strong>{{ studentProfile.fonction }}</strong></div>
+        <div class="info-item"><span>Numéro</span><strong>{{ studentProfile.numero || '—' }}</strong></div>
+
+        <div class="info-item">
+          <span>Rôle</span>
+          <strong class="badge badge-primary">
+            {{ studentProfile.role || 'Employé' }}
+          </strong>
+        </div>
+      </div>
+
+      <h4 class="section-title mt-4">Affectation</h4>
+
+      <div class="info-grid">
+        <div class="info-item" *ngIf="studentProfile.client">
+          <span>Client</span>
+          <strong>{{ studentProfile.client.nom }}</strong>
+        </div>
+
+        <div class="info-item" *ngIf="studentProfile.entreprise">
+          <span>Entreprise</span>
+          <strong>{{ studentProfile.entreprise.nom }}</strong>
+        </div>
+      </div>
+
+      <h4 class="section-title mt-4">Historique</h4>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span>Créé le</span>
+          <strong>{{ studentProfile.created_at | date:'dd/MM/yyyy HH:mm' }}</strong>
+        </div>
+        <div class="info-item">
+          <span>Dernière modification</span>
+          <strong>{{ studentProfile.updated_at | date:'dd/MM/yyyy HH:mm' }}</strong>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EDIT MODE -->
+  <div class="card profile-card" *ngIf="isEditing">
+    <div class="card-body">
+      <h4 class="section-title">Modifier le profil</h4>
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label>Nom</label>
+            <input class="form-control" formControlName="nom">
+          </div>
+
+          <div class="form-group">
+            <label>Prénom</label>
+            <input class="form-control" formControlName="prenom">
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input class="form-control" formControlName="email">
+          </div>
+
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input class="form-control" formControlName="telephone">
+          </div>
+
+          <div class="form-group">
+            <label>Fonction</label>
+            <input class="form-control" formControlName="fonction">
+          </div>
+
+          <div class="form-group">
+            <label>Numéro</label>
+            <input class="form-control" formControlName="numero">
+          </div>
+
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="submit" [disabled]="profileForm.invalid">
+            <i class="fas fa-save"></i> Sauvegarder
+          </button>
+          <button type="button" class="btn btn-light" (click)="toggleEdit()">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

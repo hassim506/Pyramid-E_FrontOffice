@@ -38,6 +38,7 @@ export class AdminrhDemandeCatalogueComponent implements OnInit {
   public tableData: DemandeFormation[] = [];
   public tableDataCopy: DemandeFormation[] = [];
   public actualData: DemandeFormation[] = [];
+  private allCatalogueDemandes: DemandeFormation[] = [];
   public currentPage: number = 1;
   public skip: number = 0;
   public limit: number = this.pageSize;
@@ -124,18 +125,27 @@ export class AdminrhDemandeCatalogueComponent implements OnInit {
 
     this.demandeFormationService.getDemandesFormation().subscribe({
       next: (response: DemandeFormationResponse) => {
-        console.log('📦 Réponse API demandes catalogue:', response);
+        console.log('📦 Réponse API demandes:', response);
 
         try {
+          // Filtre côté client car le backend ne supporte pas le paramètre type_demande
           const catalogueDemandes = (response.demandes || []).filter(d => d.type_demande === 'catalogue');
 
-          this.stats = response.statistiques || {};
+          // Recalcul des statistiques uniquement sur les demandes de type catalogue
+          this.stats = {
+            total: catalogueDemandes.length,
+            en_attente: catalogueDemandes.filter(d => d.statut === 'en_attente').length,
+            validees:   catalogueDemandes.filter(d => d.statut === 'validee').length,
+            refusees:   catalogueDemandes.filter(d => d.statut === 'refusee').length,
+            annulees:   catalogueDemandes.filter(d => d.statut === 'annulee').length,
+          };
           this.updateStatutFilters();
 
           if (catalogueDemandes.length === 0) {
+            this.allCatalogueDemandes = [];
             this.actualData = [];
             this.totalData = 0;
-            this.applyFilters();
+            this.getTableData({ skip: 0, limit: this.pageSize });
             this.loading = false;
             this.error = 'Aucune demande de catalogue trouvée.';
             return;
@@ -157,21 +167,18 @@ export class AdminrhDemandeCatalogueComponent implements OnInit {
                 const res = catalogueResponses[index];
                 if (res && res.data && !demande.catalogue) {
                   demande.catalogue = res.data as any;
-                  console.log(`✅ Catalogue enrichi pour demande ${demande.id}:`, res.data);
                 }
               });
 
-              this.actualData = catalogueDemandes;
-              this.totalData = this.actualData.length;
+              this.allCatalogueDemandes = catalogueDemandes;
               this.applyFilters();
               this.loading = false;
 
-              console.log('✅ Demandes de catalogue chargées avec succès:', this.actualData.length);
+              console.log('✅ Demandes catalogue chargées:', this.allCatalogueDemandes.length);
             },
             error: (err) => {
-              console.error('❌ Erreur lors du chargement des catalogues:', err);
-              this.actualData = catalogueDemandes;
-              this.totalData = this.actualData.length;
+              console.error('❌ Erreur enrichissement catalogues:', err);
+              this.allCatalogueDemandes = catalogueDemandes;
               this.applyFilters();
               this.loading = false;
             }
@@ -245,19 +252,16 @@ export class AdminrhDemandeCatalogueComponent implements OnInit {
   // === MÉTHODES DE FILTRAGE ===
 
   applyFilters(): void {
-    let filteredData = [...this.actualData];
+    let filteredData = [...this.allCatalogueDemandes];
 
-    // Filtre par statut
     if (this.selectedStatutFilter !== 'tous') {
       filteredData = filteredData.filter(demande => demande.statut === this.selectedStatutFilter);
     }
 
-    // Filtre par priorité
     if (this.selectedPrioriteFilter !== 'tous') {
       filteredData = filteredData.filter(demande => demande.priorite === this.selectedPrioriteFilter);
     }
 
-    // Filtre par recherche
     if (this.searchDataValue.trim()) {
       const searchValue = this.searchDataValue.toLowerCase().trim();
       filteredData = filteredData.filter(demande => this.matchesSearch(demande, searchValue));

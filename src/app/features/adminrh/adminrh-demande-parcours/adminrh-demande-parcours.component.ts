@@ -48,6 +48,7 @@ export class AdminrhDemandeParcoursComponent implements OnInit {
   public tableData: DemandeFormation[] = [];
   public tableDataCopy: DemandeFormation[] = [];
   public actualData: DemandeFormation[] = [];
+  private allParcoursDemandes: DemandeFormation[] = [];
   public currentPage: number = 1;
   public skip: number = 0;
   public limit: number = this.pageSize;
@@ -135,19 +136,24 @@ private loadDemandes(): void {
         console.log('📦 Réponse API demandes formation:', response);
         
         try {
-          // Filtrer uniquement les demandes de type 'parcours'
-          this.actualData = (response.demandes || []).filter(d => d.type_demande === 'parcours');
-          
-          this.stats = response.debug?.stats_par_statut || {};
+          const parcoursDemandes = (response.demandes || []).filter(d => d.type_demande === 'parcours');
+
+          this.stats = {
+            total:      parcoursDemandes.length,
+            en_attente: parcoursDemandes.filter(d => d.statut === 'en_attente').length,
+            validees:   parcoursDemandes.filter(d => d.statut === 'validee').length,
+            refusees:   parcoursDemandes.filter(d => d.statut === 'refusee').length,
+            annulees:   parcoursDemandes.filter(d => d.statut === 'annulee').length,
+          };
           this.updateStatutFilters();
-          
-          this.totalData = this.actualData.length;
+
+          this.allParcoursDemandes = parcoursDemandes;
           this.applyFilters();
           this.loading = false;
 
-          console.log('✅ Demandes de parcours chargées avec succès:', this.actualData.length);
-          
-          if (this.actualData.length === 0) {
+          console.log('✅ Demandes de parcours chargées:', this.allParcoursDemandes.length);
+
+          if (parcoursDemandes.length === 0) {
             this.error = 'Aucune demande de parcours trouvée.';
           }
         } catch (err) {
@@ -163,12 +169,16 @@ private loadDemandes(): void {
   }
 
   private updateStatutFilters(): void {
+    const statsMap: Record<string, string> = {
+      'tous':       'total',
+      'en_attente': 'en_attente',
+      'validee':    'validees',
+      'refusee':    'refusees',
+      'annulee':    'annulees'
+    };
     this.statutFilters.forEach(filter => {
-      if (filter.value === 'tous') {
-        filter.count = this.stats.total || 0;
-      } else {
-        filter.count = this.stats[filter.value] || 0;
-      }
+      const key = statsMap[filter.value] ?? filter.value;
+      filter.count = this.stats[key] || 0;
     });
   }
 
@@ -212,19 +222,16 @@ private loadDemandes(): void {
   // === MÉTHODES DE FILTRAGE ===
 
   applyFilters(): void {
-    let filteredData = [...this.actualData];
+    let filteredData = [...this.allParcoursDemandes];
 
-    // Filtre par statut
     if (this.selectedStatutFilter !== 'tous') {
       filteredData = filteredData.filter(demande => demande.statut === this.selectedStatutFilter);
     }
 
-    // Filtre par priorité
     if (this.selectedPrioriteFilter !== 'tous') {
       filteredData = filteredData.filter(demande => demande.priorite === this.selectedPrioriteFilter);
     }
 
-    // Filtre par recherche
     if (this.searchDataValue.trim()) {
       const searchValue = this.searchDataValue.toLowerCase().trim();
       filteredData = filteredData.filter(demande => this.matchesSearch(demande, searchValue));
@@ -254,19 +261,22 @@ private loadDemandes(): void {
   }
 
   private matchesSearch(demande: DemandeFormation, searchValue: string): boolean {
+    const normalizeString = (str: any): string =>
+      String(str || '').toLowerCase().trim().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
     const fields = [
-      demande.formation?.titre || '',
-      demande.employe?.name || '',
-      demande.employe?.email || '',
-      demande.motif_demande || '',
-      demande.objectifs_personnels || '',
-      demande.statut_display || '',
-      demande.priorite_display || ''
+      demande.parcours?.titre,
+      demande.parcours?.nom,
+      demande.employe?.name,
+      demande.employe?.email,
+      demande.motif_demande,
+      demande.objectifs_personnels,
+      demande.statut_display,
+      demande.priorite_display
     ];
 
-    return fields.some(field => 
-      field.toLowerCase().includes(searchValue)
-    );
+    const normalizedSearch = normalizeString(searchValue);
+    return fields.some(field => normalizeString(field).includes(normalizedSearch));
   }
 
   public sortData(sort: Sort): void {
@@ -288,9 +298,9 @@ private loadDemandes(): void {
     let bValue: any = '';
 
     switch (sortField) {
-      case 'formation':
-        aValue = a.formation?.titre || '';
-        bValue = b.formation?.titre || '';
+      case 'parcours':
+        aValue = a.parcours?.titre || a.parcours?.nom || '';
+        bValue = b.parcours?.titre || b.parcours?.nom || '';
         break;
       case 'employe':
         aValue = a.employe?.name || '';
@@ -339,7 +349,7 @@ private loadDemandes(): void {
   validerDemande(demande: DemandeFormation, commentaire: string = ''): void {
     if (this.validatingIds.has(demande.id)) return;
 
-    const confirmMessage = `Êtes-vous sûr de vouloir valider la demande de formation "${demande.formation?.titre}" pour ${demande.employe?.name} ?`;
+    const confirmMessage = `Êtes-vous sûr de vouloir valider la demande de parcours "${demande.parcours?.titre}" pour ${demande.employe?.name} ?`;
     
     if (confirm(confirmMessage)) {
       this.validatingIds.add(demande.id);
@@ -349,7 +359,7 @@ private loadDemandes(): void {
 
       this.demandeFormationService.validerDemande(demande.id, data).subscribe({
         next: () => {
-          this.successMessage = `Demande de formation validée avec succès.`;
+          this.successMessage = `Demande de parcours validée avec succès.`;
           this.validatingIds.delete(demande.id);
           this.refreshData();
           console.log('✅ Demande validée:', demande.id);
@@ -367,7 +377,7 @@ private loadDemandes(): void {
   refuserDemande(demande: DemandeFormation): void {
     if (this.refusingIds.has(demande.id)) return;
 
-    const motif = prompt(`Pourquoi refusez-vous la demande de formation "${demande.formation?.titre}" pour ${demande.employe?.name} ?\n\nVeuillez saisir un motif :`);
+    const motif = prompt(`Pourquoi refusez-vous la demande de parcours "${demande.parcours?.titre}" pour ${demande.employe?.name} ?\n\nVeuillez saisir un motif :`);
     
     if (motif === null) return; // Annulation
     
@@ -381,7 +391,7 @@ private loadDemandes(): void {
 
     this.demandeFormationService.refuserDemande(demande.id, { commentaire_rh: motif }).subscribe({
       next: () => {
-        this.successMessage = `Demande de formation refusée.`;
+        this.successMessage = `Demande de parcours refusée.`;
         this.refusingIds.delete(demande.id);
         this.refreshData();
         console.log('✅ Demande refusée:', demande.id);
@@ -396,14 +406,14 @@ private loadDemandes(): void {
 
   // Annuler une demande
   annulerDemande(demande: DemandeFormation): void {
-    const confirmMessage = `Êtes-vous sûr de vouloir annuler la demande de formation "${demande.formation?.titre}" pour ${demande.employe?.name} ?`;
+    const confirmMessage = `Êtes-vous sûr de vouloir annuler la demande de parcours "${demande.parcours?.titre}" pour ${demande.employe?.name} ?`;
     
     if (confirm(confirmMessage)) {
       this.clearMessages();
 
       this.demandeFormationService.annulerDemande(demande.id).subscribe({
         next: () => {
-          this.successMessage = `Demande de formation annulée.`;
+          this.successMessage = `Demande de parcours annulée.`;
           this.refreshData();
           console.log('✅ Demande annulée:', demande.id);
         },
@@ -527,11 +537,11 @@ private loadDemandes(): void {
   }
 
   get demandesValidees(): number {
-    return this.stats.validee || 0;
+    return this.stats.validees || 0;
   }
 
   get demandesRefusees(): number {
-    return this.stats.refusee || 0;
+    return this.stats.refusees || 0;
   }
 
   get hasData(): boolean {

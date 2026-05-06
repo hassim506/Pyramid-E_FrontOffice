@@ -10,13 +10,13 @@ export const routes = {
   instructorAssignment: '/instructor/instructor-assignment',
   instructorWishlist: '/instructor/instructor-wishlist',
   instructorWithdraw: '/instructor/instructor-withdraw',
-  instructorProfile: '/instructor/instructor-profile',  
+  instructorProfile: '/instructor/instructor-profile',
   instructorQuizQuestions: '/instructor/instructor-quiz-questions',
   instructorQuiz: '/instructor/instructor-quiz',
   instructorCertificate: '/instructor/instructor-certificate',
   instructorEarning: '/instructor/instructor-earnings',
   instructorStatements: '/instructor/instructor-statements',
-  quiz:  'quiz',
+  quiz: 'quiz',
   studentsList: '/instructor/students-list',
   studentsGrid: '/instructor/students-grid',
   studentsDetails: '/instructor/students-details',
@@ -41,6 +41,7 @@ export const routes = {
   students_profile: '/student/student-profile',
   students_Dashboard: '/student/student-dashboard',
   course_student: '/student/course-student',
+  studentMyCourses: '/student/mes-formations',           // ✅ mes-cours → mes-formations
   student_Certificate: '/student/student-certificate',
   student_Wishlist: '/student/student-wishlist',
   view_invoice_student: '/student/view-invoice',
@@ -59,14 +60,17 @@ export const routes = {
   students_message: '/student/student-message',
   students_quiz_question: '/student/student-quiz-questions',
   students_quiz: '/student/student-quiz',
-  studentsQuizQuestion :'/student/student-quiz-questions',
-  studentsQuiz :'/student/student-quiz',
-  studentProfile :'/student/student-profile',
-  studentMessages :'/student/student-message',
+  studentsQuizQuestion: '/student/student-quiz-questions',
+  studentsQuiz: '/student/student-quiz',
+  studentProfile: '/student/student-profile',
+  student_MesCompetences: '/student/mes-competences',
+  student_CompetencesRecommandees:     '/student/mes-competences-recommandees',  // ✅
+  student_Planning: '/student/student-planning',
+  studentMessages: '/student/student-message',
   studentsMessage: '/student/student-message',
   studentOrderHistory: '/student/student-order-history',
   studentWishlist: '/student/student-wishlist',
-  studentCourses: '/student/student-courses',
+  studentCourses: '/student/mes-catalogues',             // ✅ student-courses → mes-catalogues
   studentReviews: '/student/student-reviews',
   studentQuizDetails: '/student/student-quiz-details',
   studentQuiz: '/student/student-quiz',
@@ -77,8 +81,19 @@ export const routes = {
   studentSettings: '/student/settings/student-settings',
   studentBillingAddress: '/student/settings/student-billing-address',
 
+  // Demandes — alignées sur app.routes.ts
+  student_DemandeSession:   '/student/students-session',
+  student_DemandeCatalogue: '/student/students-catalogue',
+  student_DemandeParcours:  '/student/students-parcours',
+  student_DemandeFormation: '/student/student-certificate',
+
+  // Mes parcours et catalogues assignés
+  student_CataloguesAssignes: '/student/mes-catalogues',          // ✅
+  student_ParcoursAssignes:   '/student/mes-parcours-assignes',   // ✅ parcours-assignes → mes-parcours-assignes
+  student_SessionsAcceptees:  '/student/sessions-acceptees',
+
   // SuperAdmin Routes
-superadmin: '/superadmin/',
+  superadmin: '/superadmin/',
   superadmin_dashboard: '/superadmin/superadmin-dashboard',
   superadmin_payouts: '/superadmin/superadmin-payouts',
   superadmin_tickets: '/superadmin/superadmin-tickets',
@@ -126,10 +141,9 @@ superadmin: '/superadmin/',
   superadminDeleteAccount: '/superadmin/settings/superadmin-delete-account',
   superadminChangePassword: '/superadmin/settings/superadmin-change-password',
   superadminSettings: '/superadmin/settings/superadmin-settings',
-  
 
   // Adminrh Routes
-adminrh: '/adminrh/',
+  adminrh: '/adminrh/',
   adminrh_dashboard: '/adminrh/adminrh-dashboard',
   adminrh_payouts: '/adminrh/adminrh-payouts',
   adminrh_tickets: '/adminrh/adminrh-tickets',
@@ -159,17 +173,14 @@ adminrh: '/adminrh/',
   adminrhPermission: '/adminrh/adminrh-permission',
   adminrhRole: '/adminrh/adminrh-role',
   AdminrhDemande: '/adminrh/adminrh-demande',
-  adminrhSession: '/adminrh/adminrh-session',
-
-  // quiz:  'quiz',
-  // studentsList: '/superadmin/students-list',
-  // studentsGrid: '/superadmin/students-grid',
-  // studentsDetails: '/superadmin/students-details',
-  // superadminQuizResult: '/superadmin/superadmin-quiz-results',
+  AdminrhDemandeSession: '/adminrh/adminrh-demande-session',
+  AdminrhDemandeParcours: '/adminrh/adminrh-demande-parcours',
+  AdminrhDemandeCatalogue: '/adminrh/adminrh-demande-catalogue',
+  adminrhSession: '/adminrh/adminrh-session',  // ✅ lead
   adminrhCourse: '/adminrh/adminrh-course',
-  adminrhCategorie : '/adminrh/adminrh-categorie',
-  adminrhCatalogue : '/adminrh/adminrh-catalogue',
-  adminrhParcours : '/adminrh/adminrh-parcours',
+  adminrhCategorie: '/adminrh/adminrh-categorie',
+  adminrhCatalogue: '/adminrh/adminrh-catalogue',
+  adminrhParcours: '/adminrh/adminrh-parcours',
   adminrhCourseGrid: '/adminrh/adminrh-course-grid',
   adminrhTickets: '/adminrh/adminrh-tickets',
   adminrhMessage: '/adminrh/adminrh-message',
@@ -183,7 +194,7 @@ adminrh: '/adminrh/',
   adminrhDeleteAccount: '/adminrh/settings/adminrh-delete-account',
   adminrhChangePassword: '/adminrh/settings/adminrh-change-password',
   adminrhSettings: '/adminrh/settings/adminrh-settings',
-  
+
   // Pages Routes
   pages: '/pages/',
   page_notifications: '/pages/notifications',
@@ -212,8 +223,6 @@ adminrh: '/adminrh/',
   blog_left_sidebar: '/blog/blog-left-sidebar',
   blog_right_sidebar: '/blog/blog-right-sidebar',
 
-
-  
   // Auth Routes
   auth: '/auth/',
   forgot_password: '/auth/forgot-password',

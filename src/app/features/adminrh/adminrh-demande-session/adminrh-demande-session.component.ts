@@ -5,7 +5,6 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
 import { routes } from '../../../shared/service/routes/routes';
 import { pageSelection } from '../../../shared/models/model';
-import { DataService } from '../../../shared/service/data/data.service';
 import { PaginationService, tablePageSize } from '../../../shared/service/custom-pagination/pagination.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -13,9 +12,6 @@ import { CustomPaginationComponent } from '../../../shared/service/custom-pagina
 import { DemandeFormation, DemandeFormationResponse } from '../../../shared/models/formation.models';
 import { DemandeFormationService } from '../../../shared/service/demande/demande-formation.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
-import { SessionFormationService } from '../../../shared/service/session/session-formation.service';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 interface StatutFilter {
   value: string;
   label: string;
@@ -38,6 +34,7 @@ export class AdminrhDemandeSessionComponent implements OnInit {
   public tableData: DemandeFormation[] = [];
   public tableDataCopy: DemandeFormation[] = [];
   public actualData: DemandeFormation[] = [];
+  private allSessionDemandes: DemandeFormation[] = [];
   public currentPage: number = 1;
   public skip: number = 0;
   public limit: number = this.pageSize;
@@ -76,11 +73,9 @@ export class AdminrhDemandeSessionComponent implements OnInit {
   refusingIds: Set<number> = new Set();
 
   constructor(
-    private data: DataService,
     private router: Router,
     private pagination: PaginationService,
     private demandeFormationService: DemandeFormationService,
-    private sessionFormationService: SessionFormationService,
     private authService: AuthService
   ) {
     this.pagination.tablePageSize.subscribe((res: tablePageSize) => {
@@ -127,24 +122,30 @@ export class AdminrhDemandeSessionComponent implements OnInit {
         try {
           const sessionDemandes = (response.demandes || []).filter(d => d.type_demande === 'session');
 
-          this.stats = response.statistiques || {};
+          this.stats = {
+            total:      sessionDemandes.length,
+            en_attente: sessionDemandes.filter(d => d.statut === 'en_attente').length,
+            validees:   sessionDemandes.filter(d => d.statut === 'validee').length,
+            refusees:   sessionDemandes.filter(d => d.statut === 'refusee').length,
+            annulees:   sessionDemandes.filter(d => d.statut === 'annulee').length,
+          };
           this.updateStatutFilters();
 
           if (sessionDemandes.length === 0) {
+            this.allSessionDemandes = [];
             this.actualData = [];
             this.totalData = 0;
-            this.applyFilters();
+            this.getTableData({ skip: 0, limit: this.pageSize });
             this.loading = false;
             this.error = 'Aucune demande de session trouvée.';
             return;
           }
 
-          this.actualData = sessionDemandes;
-          this.totalData = this.actualData.length;
+          this.allSessionDemandes = sessionDemandes;
           this.applyFilters();
           this.loading = false;
 
-          console.log('✅ Demandes de session chargées avec succès:', this.actualData.length);
+          console.log('✅ Demandes de session chargées:', this.allSessionDemandes.length);
 
         } catch (err) {
           console.error('❌ Erreur lors du traitement des données:', err);
@@ -164,12 +165,10 @@ export class AdminrhDemandeSessionComponent implements OnInit {
       'en_attente': 'en_attente',
       'validee':    'validees',
       'refusee':    'refusees',
-      'annulee':    'annulees'
+      'annulee':    'annulees',
     };
-
     this.statutFilters.forEach(filter => {
-      const key = statsMap[filter.value] ?? filter.value;
-      filter.count = this.stats[key] || 0;
+      filter.count = this.stats[statsMap[filter.value] ?? filter.value] || 0;
     });
   }
   private handleLoadError(error: any): void {
@@ -212,19 +211,16 @@ export class AdminrhDemandeSessionComponent implements OnInit {
   // === MÉTHODES DE FILTRAGE ===
 
   applyFilters(): void {
-    let filteredData = [...this.actualData];
+    let filteredData = [...this.allSessionDemandes];
 
-    // Filtre par statut
     if (this.selectedStatutFilter !== 'tous') {
       filteredData = filteredData.filter(demande => demande.statut === this.selectedStatutFilter);
     }
 
-    // Filtre par priorité
     if (this.selectedPrioriteFilter !== 'tous') {
       filteredData = filteredData.filter(demande => demande.priorite === this.selectedPrioriteFilter);
     }
 
-    // Filtre par recherche
     if (this.searchDataValue.trim()) {
       const searchValue = this.searchDataValue.toLowerCase().trim();
       filteredData = filteredData.filter(demande => this.matchesSearch(demande, searchValue));
@@ -529,7 +525,7 @@ export class AdminrhDemandeSessionComponent implements OnInit {
   }
 
   get demandesRefusees(): number {
-    return this.stats.refusee || 0;
+    return this.stats.refusees || 0;
   }
 
   get hasData(): boolean {

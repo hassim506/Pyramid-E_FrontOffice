@@ -1,50 +1,135 @@
-<div class="settings-sidebar">
-    <div>
-        <h6 class="mb-3">Main Menu</h6>
-        <ul class="mb-3 pb-1">
-            <li>
-                <a [routerLink]="routes.students_Dashboard" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-grid-35 me-2"></i>Tableau de bords</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.students_profile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.studentCourses" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Cours Inscrits</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.student_Certificate" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-note-215 me-2"></i>Mes Certificats</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.studentWishlist" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-heart5 me-2"></i>Wishlist</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.studentReviews" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-star5 me-2"></i>Reviews</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.studentQuiz" class="d-inline-flex align-items-center" [class.active]="page==='student-quiz'||page==='student-quiz-questions'"><i class="isax isax-award5 me-2"></i>Mes Tentatives de Quiz</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.studentOrderHistory" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-shopping-cart5 me-2"></i>Historique des Commandesé</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.students_referral" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-tag-user5 me-2"></i>Referrals</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.studentsMessage" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-messages-35 me-2"></i>Messages</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.students_tickets" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-ticket5 me-2"></i>Support Tickets</a>
-            </li>
+<div class="settings-sidebar" [class.collapsed]="isCollapsed">
+
+  <!-- Toggle Collapse -->
+  <div class="sidebar-toggle" (click)="isCollapsed = !isCollapsed">
+    <i class="isax" [ngClass]="isCollapsed ? 'isax-arrow-right-2' : 'isax-arrow-left-2'"></i>
+  </div>
+
+  <ul class="main-menu">
+
+    <!-- ================= TABLEAU DE BORD ================= -->
+    <li class="menu-item">
+      <a [routerLink]="routes.students_Dashboard" routerLinkActive="active">
+        <i class="isax isax-grid-35"></i>
+        <span>Tableau de bord</span>
+      </a>
+    </li>
+
+    <!-- ================= MES FORMATIONS ================= -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-play-circle"></i>
+        <span>Mes formations</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+        <ul class="submenu">
+          <li><a [routerLink]="routes.studentMyCourses" routerLinkActive="active">Formations</a></li>
+          <li><a [routerLink]="routes.student_CataloguesAssignes" routerLinkActive="active">Catalogues</a></li>
+          <li><a [routerLink]="routes.student_ParcoursAssignes" routerLinkActive="active">Parcours</a></li>
+          <li><a [routerLink]="routes.student_SessionsAcceptees" routerLinkActive="active">Sessions</a></li>
+          <li><a>Feedback formateur</a></li>
         </ul>
-        <hr>
-        <h6 class="mb-3">Account Settings</h6>
-        <ul>
-            <li>
-                <a [routerLink]="routes.studentSettings" class="d-inline-flex align-items-center" [class.active]="last==='student-settings'||last==='student-change-password' ||last==='student-social-profile' || last==='student-linked-accounts' || last==='student-notifications' || last==='student-billing-address'" ><i class="isax isax-setting-25 me-2"></i>Settings</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.login" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-logout5 me-2"></i>Logout</a>
-            </li>
-        </ul>
-    </div>
+    </li>
+
+    <!-- ================= MES DEMANDES ================= -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-send-2"></i>
+        <span>Mes demandes</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+      <ul class="submenu">
+        <li>
+          <a [routerLink]="routes.student_DemandeFormation" routerLinkActive="active">
+            <span>Formations</span>
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeSession" routerLinkActive="active">
+            <span>Sessions</span>
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeParcours" routerLinkActive="active">
+            <span>Parcours</span>
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeCatalogue" routerLinkActive="active">
+            <span>Catalogues</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- ================= MES QUIZ ================= -->
+    <li class="menu-item">
+      <a [routerLink]="routes.students_quiz" routerLinkActive="active">
+        <i class="isax isax-note-21"></i>
+        <span>Mes Quiz</span>
+      </a>
+    </li>
+
+    <!-- ================= MON PLANNING ================= -->
+    <li class="menu-item">
+      <a [routerLink]="routes.student_Planning" routerLinkActive="active">
+        <i class="isax isax-calendar-1"></i>
+        <span>Mon planning</span>
+      </a>
+    </li>
+
+    <!-- ================= MES COMPÉTENCES ================= -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-chart"></i>
+        <span>Mes compétences</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+      <ul class="submenu">
+       <li><a [routerLink]="routes.student_MesCompetences" routerLinkActive="active">Compétences acquises</a></li>
+       <li><a [routerLink]="routes.student_CompetencesRecommandees" routerLinkActive="active">
+          Compétences recommandées
+        </a></li>
+      </ul>
+    </li>
+
+    <!-- ================= MES PALMARÈS ================= -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-medal"></i>
+        <span>Mes palmarès</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+      <ul class="submenu">
+        <li><a>Mes certificats</a></li>
+        <li><a>Mes habilitations</a></li>
+        <li><a>Gamification / Mes badges</a></li>
+      </ul>
+    </li>
+
+    <!-- ================= CENTRE D'AIDE ================= -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-ticket"></i>
+        <span>Centre d'aide</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+      <ul class="submenu">
+        <li><a>Guide d'utilisation</a></li>
+        <li><a>Tutoriels vidéo</a></li>
+        <li><a>Soumettre un ticket</a></li>
+        <li><a>Annonces et mises à jour</a></li>
+      </ul>
+    </li>
+
+    <!-- ================= DÉCONNEXION ================= -->
+    <li class="menu-item">
+      <a [routerLink]="routes.login">
+        <i class="isax isax-logout"></i>
+        <span>Déconnexion</span>
+      </a>
+    </li>
+
+  </ul>
+
 </div>

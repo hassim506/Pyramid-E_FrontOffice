@@ -125,18 +125,17 @@ export class AdminrhParcoursComponent implements OnInit {
 
   // ==================== CHARGEMENT DES DONNÉES ====================
 
-  loadParcours(page: number = 1): void {
+  loadParcours(): void {
     this.loading = true;
     this.error = '';
-    this.currentPage = page;
 
-    this.parcoursService.getRhParcours(page, this.itemsPerPage).subscribe({
+    this.parcoursService.getRhParcours().subscribe({
       next: (response) => {
         this.loading = false;
-        this.parcours = response.data || [];
-        this.totalPages = response.last_page;
-        this.totalItems = response.total;
-        console.log(`${this.parcours.length} parcours chargés (page ${page}/${this.totalPages})`);
+        this.parcours = response.parcours || [];
+        this.totalItems = this.parcours.length;
+        this.totalPages = 1;
+        console.log(`${this.parcours.length} parcours chargés`);
       },
       error: (err) => {
         this.loading = false;
@@ -243,7 +242,7 @@ onSubmit(): void {
           ? 'Parcours modifié avec succès!' 
           : 'Parcours créé avec succès!';
         this.closeModal('parcoursModal');
-        this.loadParcours(this.currentPage);
+        this.loadParcours();
         setTimeout(() => this.success = '', 5000);
       } else {
         this.error = response.message || 'Erreur lors de la sauvegarde.';
@@ -313,7 +312,7 @@ buildParcoursData(): ParcoursRequest {
         if (response.status !== false) {
           this.success = 'Parcours supprimé avec succès!';
           this.closeModal('deleteModal');
-          this.loadParcours(this.currentPage);
+          this.loadParcours();
           setTimeout(() => this.success = '', 5000);
         } else {
           this.error = response.message || 'Erreur lors de la suppression.';
@@ -330,7 +329,7 @@ buildParcoursData(): ParcoursRequest {
 
   onPageChange(page: number): void {
     if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
-      this.loadParcours(page);
+      this.loadParcours();
     }
   }
 

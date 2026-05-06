@@ -1,6 +1,6 @@
 
     <div class="page-title d-flex align-items-center justify-content-between">
-        <h5>Order History</h5>
+        <h5>Historique du Panier</h5>
     </div>
         <div class="row">
             <div class="col-md-8">
@@ -25,7 +25,7 @@
                     <span class="input-icon-addon">
                         <i class="isax isax-search-normal-14"></i>
                     </span>
-                    <input  [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }" type="search" (ngModelChange)="searchData(searchDataValue)" class="form-control form-control-md" placeholder="Search">
+                    <input  [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }" type="search" (ngModelChange)="searchData(searchDataValue)" class="form-control form-control-md" placeholder="Rechercher">
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
                         <tr>
                             <th>Order ID</th>
                             <th>Date</th>
-                            <th>Amount</th>
+                            <th>Montant</th>
                             <th>Status</th>
                             <th></th>
                         </tr>

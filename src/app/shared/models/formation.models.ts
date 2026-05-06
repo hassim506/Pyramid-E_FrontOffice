@@ -254,6 +254,13 @@ export interface DemandeFormation {
   peut_etre_inscrit: boolean;
 }
 
+  parcours?: {
+    id: number;
+    titre: string;
+    nom?: string;
+    description?: string;
+  } | null;
+
   type_demande?: string;
   created_at?: string;
   updated_at?: string;
@@ -287,3 +294,4 @@ export interface ActionDemandeRequest {
   date_debut_accordee?: string;
   conditions_validation?: any[];
 }
+

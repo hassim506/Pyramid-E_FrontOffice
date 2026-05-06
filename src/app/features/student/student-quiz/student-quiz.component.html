@@ -1,84 +1,213 @@
+<!-- LOADING -->
+<div class="quiz-loading" *ngIf="loading">
+  <div class="quiz-loading__spinner"></div>
+  <p>Chargement de vos quiz...</p>
+</div>
 
-    <div class="page-title d-flex align-items-center justify-content-between">
-        <h5>My Quiz Attempts</h5>
+<!-- ERREUR -->
+<div class="quiz-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2"></i>
+  <p>{{ error }}</p>
+  <button (click)="loadQuizzes()"><i class="isax isax-refresh me-1"></i>Réessayer</button>
+</div>
+
+<ng-container *ngIf="!loading && !error">
+
+  <!-- HEADER -->
+  <div class="quiz-page-header mb-4">
+    <div>
+      <h5 class="quiz-page-header__title">
+        <i class="isax isax-document-text me-2" style="color:#069b8f"></i>Mes Quiz
+      </h5>
+      <p class="quiz-page-header__sub">Testez vos connaissances sur vos formations</p>
     </div>
-            <div class="d-flex align-items-center justify-content-between border p-3 mb-3 rounded-2">
-                <div>
-                    <h6 class="mb-1"><a [routerLink]="routes.studentsQuizQuestion">Information About UI/UX Design Degree</a></h6>
-                    <p class="fs-14">Number of Questions : 05</p>
-                </div>
-                <div>
-                    <a [routerLink]="routes.studentsQuizQuestion" class="arrow-next"><i class="isax isax-arrow-right-1"></i></a>
-                </div>
-            </div>
-            <div class="d-flex align-items-center justify-content-between border p-3 pb-3 mb-3 rounded-2">
-                <div>
-                    <h6 class="mb-1"><a [routerLink]="routes.studentsQuizQuestion">Learn JavaScript and Express to become a Expert</a></h6>
-                    <p class="fs-14">Number of Questions : 10</p>
-                </div>
-                <div>
-                    <a [routerLink]="routes.studentsQuizQuestion" class="arrow-next"><i class="isax isax-arrow-right-1"></i></a>
-                </div>
-            </div>
-            <div class="d-flex align-items-center justify-content-between border p-3 pb-3 mb-3 rounded-2">
-                <div>
-                    <h6 class="mb-1"><a [routerLink]="routes.studentsQuizQuestion">Introduction to Python Programming</a></h6>
-                    <p class="fs-14">Number of Questions : 08</p>
-                </div>
-                <div>
-                    <a [routerLink]="routes.studentsQuizQuestion" class="arrow-next"><i class="isax isax-arrow-right-1"></i></a>
-                </div>
-            </div>
-            <div class="d-flex align-items-center justify-content-between border p-3 pb-3 mb-3 rounded-2">
-                <div>
-                    <h6 class="mb-1"><a [routerLink]="routes.studentsQuizQuestion">Build Responsive Websites with HTML5 and CSS3</a></h6>
-                    <p class="fs-14">Number of Questions : 05</p>
-                </div>
-                <div>
-                    <a [routerLink]="routes.studentsQuizQuestion" class="arrow-next"><i class="isax isax-arrow-right-1"></i></a>
-                </div>
-            </div>
-            <div class="d-flex align-items-center justify-content-between border p-3 pb-3 mb-3 rounded-2">
-                <div>
-                    <h6 class="mb-1"><a [routerLink]="routes.studentsQuizQuestion">Information About Photoshop Design Degree</a></h6>
-                    <p class="fs-14">Number of Questions : 10</p>
-                </div>
-                <div>
-                    <a [routerLink]="routes.studentsQuizQuestion" class="arrow-next"><i class="isax isax-arrow-right-1"></i></a>
-                </div>
-            </div>
-            <div class="d-flex align-items-center justify-content-between border p-3 rounded-2">
-                <div>
-                    <h6 class="mb-1"><a [routerLink]="routes.studentsQuizQuestion">C# Developers Double Your Coding with Visual Studio</a></h6>
-                    <p class="fs-14">Number of Questions : 07</p>
-                </div>
-                <div>
-                    <a [routerLink]="routes.studentsQuizQuestion" class="arrow-next"><i class="isax isax-arrow-right-1"></i></a>
-                </div>
-            </div>
-    <!-- /pagination -->
-    <div class="row align-items-center mt-3">
-        <div class="col-md-2">
-          <p class="pagination-text">Page 1 of 2</p>
-        </div>
-        <div class="col-md-10">
-            <ul class="pagination lms-page justify-content-center justify-content-md-end mt-2 mt-md-0">
-                <li class="page-item prev">
-                    <a class="page-link" href="javascript:void(0)" tabindex="-1"><i class="fas fa-angle-left"></i></a>
-                </li>
-                <li class="page-item first-page active">
-                    <a class="page-link" href="javascript:void(0)">1</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="javascript:void(0)">2</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="javascript:void(0)">3</a>
-                </li>
-                <li class="page-item next">
-                    <a class="page-link" href="javascript:void(0)"><i class="fas fa-angle-right"></i></a>
-                </li>
-            </ul>
-        </div>
+  </div>
+
+  <!-- STATS RAPIDES -->
+  <div class="quiz-stats-row mb-4">
+    <div class="quiz-stat-card quiz-stat-card--total">
+      <i class="isax isax-document-text"></i>
+      <div>
+        <div class="quiz-stat-card__value">{{ allQuizzes.length }}</div>
+        <div class="quiz-stat-card__label">Total quiz</div>
+      </div>
     </div>
-    <!-- /pagination -->
+    <div class="quiz-stat-card quiz-stat-card--reussi">
+      <i class="isax isax-tick-circle"></i>
+      <div>
+        <div class="quiz-stat-card__value">{{ totalReussis }}</div>
+        <div class="quiz-stat-card__label">Réussis</div>
+      </div>
+    </div>
+    <div class="quiz-stat-card quiz-stat-card--echoue">
+      <i class="isax isax-close-circle"></i>
+      <div>
+        <div class="quiz-stat-card__value">{{ totalEchoues }}</div>
+        <div class="quiz-stat-card__label">Échoués</div>
+      </div>
+    </div>
+    <div class="quiz-stat-card quiz-stat-card--nouveau">
+      <i class="isax isax-clock"></i>
+      <div>
+        <div class="quiz-stat-card__value">{{ totalEnAttente }}</div>
+        <div class="quiz-stat-card__label">En attente</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="quiz-filters mb-4">
+    <div class="quiz-filters__search">
+      <i class="isax isax-search-normal-1 quiz-filters__search-icon"></i>
+      <input type="search"
+             class="quiz-filters__search-input"
+             placeholder="Rechercher un quiz..."
+             [(ngModel)]="searchTerm"
+             (ngModelChange)="onSearchChange()">
+    </div>
+    <div class="quiz-filters__pills">
+      <button class="quiz-filters__pill"
+              [class.quiz-filters__pill--active]="selectedFiltre === 'tous'"
+              (click)="setFiltre('tous')">Tous</button>
+      <button class="quiz-filters__pill quiz-filters__pill--nouveau"
+              [class.quiz-filters__pill--active]="selectedFiltre === 'non_tente'"
+              (click)="setFiltre('non_tente')">En attente</button>
+      <button class="quiz-filters__pill quiz-filters__pill--reussi"
+              [class.quiz-filters__pill--active]="selectedFiltre === 'reussi'"
+              (click)="setFiltre('reussi')">Réussis</button>
+      <button class="quiz-filters__pill quiz-filters__pill--echoue"
+              [class.quiz-filters__pill--active]="selectedFiltre === 'echoue'"
+              (click)="setFiltre('echoue')">Échoués</button>
+    </div>
+  </div>
+
+  <!-- GRILLE QUIZ -->
+  <div class="quiz-grid" *ngIf="displayedQuizzes.length > 0">
+    <div class="quiz-card" *ngFor="let quiz of displayedQuizzes"
+         [class.quiz-card--bloque]="isBloquer(quiz)">
+
+      <!-- Badge statut -->
+      <div class="quiz-card__header">
+        <span class="quiz-badge" [ngClass]="getStatutClass(quiz)">
+          {{ getStatutLabel(quiz) }}
+        </span>
+        <span class="quiz-card__formation" *ngIf="quiz.formation_titre">
+          <i class="isax isax-book-1 me-1"></i>{{ quiz.formation_titre }}
+        </span>
+      </div>
+
+      <!-- Corps -->
+      <div class="quiz-card__body">
+        <h6 class="quiz-card__title">{{ quiz.titre }}</h6>
+        <p class="quiz-card__desc" *ngIf="quiz.description">
+          {{ quiz.description | slice:0:90 }}{{ quiz.description && quiz.description.length > 90 ? '…' : '' }}
+        </p>
+
+        <!-- Infos -->
+        <div class="quiz-card__infos">
+          <span class="quiz-info-chip">
+            <i class="isax isax-document-text me-1"></i>
+            {{ quiz.nombre_questions }} question{{ quiz.nombre_questions > 1 ? 's' : '' }}
+          </span>
+          <span class="quiz-info-chip" *ngIf="quiz.duree_minutes">
+            <i class="isax isax-clock me-1"></i>
+            {{ quiz.duree_minutes }} min
+          </span>
+          <span class="quiz-info-chip">
+            <i class="isax isax-medal-star me-1"></i>
+            Min {{ quiz.score_minimum }}%
+          </span>
+        </div>
+
+        <!-- ✅ TENTATIVES : pastilles X/max_tentatives -->
+        <div class="quiz-card__tentatives">
+          <span class="quiz-card__tentatives-label">
+            <i class="isax isax-repeat me-1"></i>
+            Tentatives
+            <strong>{{ getTentativesUtilisees(quiz) }} / {{ quiz.max_tentatives }}</strong>
+          </span>
+          <div class="quiz-card__pastilles">
+            <span *ngFor="let i of getPastillesArray(quiz)"
+                  class="pastille"
+                  [ngClass]="getPastilleClass(quiz, i)"
+                  [title]="i < getTentativesUtilisees(quiz) ? 'Tentative ' + (i + 1) : 'Non utilisée'">
+            </span>
+          </div>
+        </div>
+
+        <!-- Résultat précédent -->
+        <div class="quiz-card__result" *ngIf="quiz.dernier_resultat">
+          <div class="quiz-card__result-score">
+            <span class="quiz-card__result-label">Dernier score</span>
+            <span class="quiz-card__result-value"
+                  [style.color]="getNoteColor(quiz.dernier_resultat.note)">
+              {{ quiz.dernier_resultat.note | number:'1.0-0' }}%
+            </span>
+          </div>
+          <div class="quiz-card__result-bar">
+            <div class="quiz-card__result-fill"
+                 [style.width.%]="quiz.dernier_resultat.note"
+                 [style.background]="getNoteColor(quiz.dernier_resultat.note)">
+            </div>
+          </div>
+        </div>
+
+        <!-- Message tentatives épuisées -->
+        <div class="quiz-card__bloque-msg" *ngIf="isBloquer(quiz)">
+          <i class="isax isax-lock me-1"></i>
+          Toutes les tentatives ont été utilisées sans succès.
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="quiz-card__footer">
+        <button class="quiz-card__btn"
+                [class.quiz-card__btn--reussi]="quiz.dernier_resultat?.est_reussi"
+                [class.quiz-card__btn--reprendre]="quiz.dernier_resultat && !quiz.dernier_resultat.est_reussi && !isBloquer(quiz)"
+                [class.quiz-card__btn--bloque]="isBloquer(quiz)"
+                [disabled]="isBloquer(quiz)"
+                (click)="commencerQuiz(quiz)">
+          <i class="isax me-1" [ngClass]="getCTAIcon(quiz)"></i>
+          {{ getCTALabel(quiz) }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EMPTY -->
+  <div class="quiz-empty" *ngIf="displayedQuizzes.length === 0">
+    <i class="isax isax-document-text quiz-empty__icon"></i>
+    <h6>Aucun quiz trouvé</h6>
+    <p *ngIf="selectedFiltre !== 'tous' || searchTerm">Essayez de modifier vos filtres.</p>
+    <p *ngIf="selectedFiltre === 'tous' && !searchTerm">Aucun quiz disponible pour le moment.</p>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="row align-items-center mt-4" *ngIf="totalPages > 1">
+    <div class="col-md-2">
+      <p class="pagination-text">Page {{ currentPage }} / {{ totalPages }}</p>
+    </div>
+    <div class="col-md-10">
+      <ul class="pagination lms-page justify-content-center justify-content-md-end mt-2 mt-md-0">
+        <li class="page-item prev" [class.disabled]="currentPage === 1">
+          <a class="page-link" (click)="changePage(currentPage - 1)">
+            <i class="fas fa-angle-left"></i>
+          </a>
+        </li>
+        <li class="page-item"
+            *ngFor="let p of pages"
+            [class.active]="currentPage === p">
+          <a class="page-link" (click)="changePage(p)">{{ p }}</a>
+        </li>
+        <li class="page-item next" [class.disabled]="currentPage === totalPages">
+          <a class="page-link" (click)="changePage(currentPage + 1)">
+            <i class="fas fa-angle-right"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</ng-container> 

@@ -1,0 +1,361 @@
+<!-- TOAST -->
+<div class="mc-toast-container" [class.visible]="toast.visible">
+  <div class="mc-toast" [class]="'mc-toast--' + toast.type">
+    <div class="mc-toast__icon">
+      <i *ngIf="toast.type === 'success'" class="isax isax-tick-circle-filled"></i>
+      <i *ngIf="toast.type === 'error'"   class="isax isax-close-circle-filled"></i>
+      <i *ngIf="toast.type === 'warning'" class="isax isax-warning-2-filled"></i>
+    </div>
+    <div class="mc-toast__body">
+      <span class="mc-toast__label">
+        {{ toast.type === 'success' ? 'Succès' : toast.type === 'warning' ? 'Attention' : 'Erreur' }}
+      </span>
+      <p class="mc-toast__message">{{ toast.message }}</p>
+    </div>
+    <button class="mc-toast__close" (click)="closeToast()">
+      <i class="isax isax-close-square"></i>
+    </button>
+  </div>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="mc-header mb-4">
+  <div class="mc-header__left">
+    <h3 class="mc-header__title">Mes Formations</h3>
+    <p class="mc-header__subtitle">Accédez à l'ensemble de vos demandes de formations validées</p>
+  </div>
+  <div class="mc-header__actions">
+    <button class="mc-header__toggle-btn"
+            [class.mc-header__toggle-btn--active]="viewMode === 'table'"
+            (click)="setView('table')" title="Vue tableau">
+      <i class="isax isax-row-vertical"></i>
+    </button>
+    <button class="mc-header__toggle-btn"
+            [class.mc-header__toggle-btn--active]="viewMode === 'grid'"
+            (click)="setView('grid')" title="Vue grille">
+      <i class="isax isax-element-3"></i>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS — même style que parcours/catalogues -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allFormations.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="selectTab('')"
+       [class.pq-kpi-card--active]="selectedTab === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-book-1"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalFormations }}</div>
+      <div class="pq-kpi-card__label">Total</div>
+    </div>
+  </div>
+
+  <!-- En cours -->
+  <div class="pq-kpi-card pq-kpi-card--blue" (click)="selectTab('en_cours')"
+       [class.pq-kpi-card--active]="selectedTab === 'en_cours'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-play-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnCours }}</div>
+      <div class="pq-kpi-card__label">En cours</div>
+    </div>
+  </div>
+
+  <!-- À commencer -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="selectTab('a_commencer')"
+       [class.pq-kpi-card--active]="selectedTab === 'a_commencer'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-flash-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalACommencer }}</div>
+      <div class="pq-kpi-card__label">À commencer</div>
+    </div>
+  </div>
+
+  <!-- Terminées -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="selectTab('termines')"
+       [class.pq-kpi-card--active]="selectedTab === 'termines'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-medal-star"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalTerminees }}</div>
+      <div class="pq-kpi-card__label">Terminées</div>
+    </div>
+  </div>
+
+  <!-- Certifiantes 
+  <div class="pq-kpi-card pq-kpi-card--purple" (click)="selectTab('')"
+       [class.pq-kpi-card--active]="false">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-award"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalCertifiantes }}</div>
+      <div class="pq-kpi-card__label">Certifiantes</div>
+    </div>
+  </div>
+  -->
+
+</div>
+
+<!-- FILTRES -->
+<div class="mc-filters mb-4">
+  <div class="mc-filters__search">
+    <i class="isax isax-search-normal-1 mc-filters__search-icon"></i>
+    <input type="search" class="mc-filters__search-input"
+           placeholder="Rechercher une formation..."
+           [(ngModel)]="searchDataValue"
+           (ngModelChange)="searchData($event)">
+    <button *ngIf="searchDataValue" class="mc-filters__search-clear"
+            (click)="searchData('')">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+  <div class="mc-filters__pills">
+    <button class="mc-filters__pill"
+            [class.mc-filters__pill--active]="selectedTab === ''"
+            (click)="selectTab('')">Tous</button>
+    <button class="mc-filters__pill mc-filters__pill--progress"
+            [class.mc-filters__pill--active]="selectedTab === 'en_cours'"
+            (click)="selectTab('en_cours')">
+      En cours
+      <span class="mc-filters__pill-count" *ngIf="totalEnCours > 0">({{ totalEnCours }})</span>
+    </button>
+    <button class="mc-filters__pill mc-filters__pill--pending"
+            [class.mc-filters__pill--active]="selectedTab === 'a_commencer'"
+            (click)="selectTab('a_commencer')">
+      À commencer
+      <span class="mc-filters__pill-count" *ngIf="totalACommencer > 0">({{ totalACommencer }})</span>
+    </button>
+    <button class="mc-filters__pill mc-filters__pill--done"
+            [class.mc-filters__pill--active]="selectedTab === 'termines'"
+            (click)="selectTab('termines')">
+      Terminées
+      <span class="mc-filters__pill-count" *ngIf="totalTerminees > 0">({{ totalTerminees }})</span>
+    </button>
+  </div>
+  <button class="mc-filters__reset" (click)="resetFilters()">
+    <i class="isax isax-refresh"></i> Réinitialiser
+  </button>
+</div>
+
+<!-- LOADING -->
+<div *ngIf="loading" class="mc-loading">
+  <div class="mc-loading__spinner"></div>
+  <p>Chargement de vos formations...</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VUE TABLEAU                                -->
+<!-- ═══════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && viewMode === 'table'">
+  <div class="card mc-table-card" *ngIf="formations.length > 0">
+    <div class="card-header mc-table-card__header">
+      <div class="mc-table-card__title">
+        <i class="isax isax-book text-primary me-2"></i>
+        Mes formations
+        <span class="mc-table-card__count">{{ totalData }}</span>
+      </div>
+      <small class="text-muted" style="font-size:11px">
+        <i class="isax isax-mouse-circle me-1"></i>Cliquez sur une ligne pour démarrer
+      </small>
+    </div>
+    <div class="table-responsive">
+      <table class="table mc-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="min-width:300px;">Formation</th>
+            <th>Durée</th>
+            <th class="text-center">Niveau</th>
+            <th class="text-center" style="min-width:140px;">Statut</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let f of formations"
+              class="mc-table-row"
+              [class.mc-row--done]="isCourseFinished(f)"
+              (click)="openPlayer(f)">
+
+            <!-- FORMATION -->
+            <td>
+              <div class="mc-formation">
+                <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+                     class="mc-formation__thumb" alt="">
+                <div class="mc-formation__info">
+                  <div class="mc-formation__title">{{ f.titre }}</div>
+                  <small class="mc-formation__sub"
+                         *ngIf="f.formateur_nom || f.formateur?.nom_complet || f.categorie?.nom">
+                    <i class="isax isax-teacher me-1"></i>
+                    {{ f.formateur_nom || f.formateur?.nom_complet || f.categorie?.nom }}
+                  </small>
+                  <div class="mc-formation__chips">
+                    <span class="mc-chip" *ngIf="f.langue">
+                      <i class="isax isax-language-square me-1"></i>{{ f.langue }}
+                    </span>
+                    <span class="mc-chip mc-chip--award" *ngIf="f.est_certifiante">
+                      <i class="isax isax-award me-1"></i>Certifiante
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <!-- DURÉE -->
+            <td>
+              <span class="mc-meta" *ngIf="f.duree_totale">
+                <i class="isax isax-clock me-1"></i>{{ f.duree_totale }}h
+              </span>
+              <span class="mc-meta mc-meta--muted" *ngIf="!f.duree_totale">—</span>
+            </td>
+
+            <!-- NIVEAU -->
+            <td class="text-center">
+              <span class="mc-niveau" [ngClass]="getNiveauClass(f.niveau)">
+                {{ f.niveau_display || f.niveau || '—' }}
+              </span>
+            </td>
+
+            <!-- STATUT -->
+            <td class="text-center">
+              <span class="mc-statut" [ngClass]="getStatusClass(f)">{{ getStatusLabel(f) }}</span>
+            </td>
+
+            <!-- ACTION -->
+            <td class="text-center" (click)="$event.stopPropagation()">
+              <button class="mc-action-btn"
+                      [class.mc-action-btn--done]="isCourseFinished(f)"
+                      (click)="openPlayer(f)">
+                <i class="isax me-1" [ngClass]="getCourseActionIcon(f)"></i>
+                {{ getCourseActionLabel(f) }}
+              </button>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VUE GRILLE                                 -->
+<!-- ═══════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && viewMode === 'grid'">
+  <div class="mc-grid" *ngIf="formations.length > 0">
+    <div class="mc-grid-card"
+         *ngFor="let f of formations"
+         [class.mc-grid-card--done]="isCourseFinished(f)"
+         [class.mc-grid-card--progress]="isInProgress(f)"
+         (click)="openPlayer(f)">
+
+      <!-- Cover -->
+      <div class="mc-grid-card__cover">
+        <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+             alt="{{ f.titre }}" class="mc-grid-card__img">
+        <div class="mc-grid-card__cover-overlay">
+          <span class="mc-statut" [ngClass]="getStatusClass(f)">{{ getStatusLabel(f) }}</span>
+        </div>
+        <span class="mc-niveau mc-grid-card__niveau"
+              [ngClass]="getNiveauClass(f.niveau)"
+              *ngIf="f.niveau">
+          {{ f.niveau_display || f.niveau }}
+        </span>
+        <!-- Sceau terminé -->
+        <div class="mc-grid-card__seal" *ngIf="isCourseFinished(f)">
+          <i class="isax isax-tick-circle"></i>
+        </div>
+      </div>
+
+      <!-- Corps -->
+      <div class="mc-grid-card__body">
+        <h6 class="mc-grid-card__title">{{ f.titre }}</h6>
+        <p class="mc-grid-card__sub"
+           *ngIf="f.formateur_nom || f.formateur?.nom_complet || f.categorie?.nom">
+          <i class="isax isax-teacher"></i>
+          {{ f.formateur_nom || f.formateur?.nom_complet || f.categorie?.nom }}
+        </p>
+        <div class="mc-grid-card__chips">
+          <span class="mc-chip" *ngIf="f.duree_totale">
+            <i class="isax isax-clock me-1"></i>{{ f.duree_totale }}h
+          </span>
+          <span class="mc-chip" *ngIf="f.langue">
+            <i class="isax isax-language-square me-1"></i>{{ f.langue }}
+          </span>
+          <span class="mc-chip mc-chip--award" *ngIf="f.est_certifiante">
+            <i class="isax isax-award me-1"></i>Certifiante
+          </span>
+        </div>
+      </div>
+
+      <!-- Progression -->
+      <div class="mc-grid-card__progress">
+        <div class="mc-progress-header">
+          <span class="mc-progress-label">Progression</span>
+          <span class="mc-progress-pct"
+                [class.mc-progress-pct--done]="isCourseFinished(f)"
+                [class.mc-progress-pct--active]="isInProgress(f)">
+            {{ getProgression(f) }}%
+          </span>
+        </div>
+        <div class="mc-progress-track">
+          <div class="mc-progress-fill"
+               [style.width.%]="getProgression(f)"
+               [class.mc-progress-fill--done]="isCourseFinished(f)"
+               [class.mc-progress-fill--active]="isInProgress(f)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="mc-grid-card__footer" (click)="$event.stopPropagation()">
+        <span class="mc-grid-card__date" *ngIf="f.date_inscription">
+          <i class="isax isax-calendar-1"></i>
+          {{ f.date_inscription | date:'dd/MM/yyyy' }}
+        </span>
+        <button class="mc-btn-action"
+                [class.mc-btn-action--done]="isCourseFinished(f)"
+                (click)="openPlayer(f)">
+          <i class="isax me-1" [ngClass]="getCourseActionIcon(f)"></i>
+          {{ getCourseActionLabel(f) }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</ng-container>
+
+<!-- EMPTY -->
+<div *ngIf="!loading && formations.length === 0" class="mc-empty">
+  <div class="mc-empty__icon"><i class="isax isax-book-1"></i></div>
+  <h5 class="mc-empty__title">Aucune formation trouvée</h5>
+  <p>
+    <ng-container *ngIf="searchDataValue || selectedTab !== ''">
+      Aucun résultat pour vos filtres actuels.
+    </ng-container>
+    <ng-container *ngIf="!searchDataValue && selectedTab === ''">
+      Vos formations apparaîtront ici dès qu'elles vous seront assignées.
+    </ng-container>
+  </p>
+  <button *ngIf="searchDataValue || selectedTab !== ''"
+          class="mc-btn-retry" (click)="resetFilters()">
+    <i class="isax isax-refresh me-1"></i>Réinitialiser les filtres
+  </button>
+</div>
+
+<!-- PAGINATION -->
+<app-custom-pagination
+  *ngIf="!loading && totalData > pageSize"
+  [totalItems]="totalData"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  (pageChange)="onPageChange($event)">
+</app-custom-pagination>

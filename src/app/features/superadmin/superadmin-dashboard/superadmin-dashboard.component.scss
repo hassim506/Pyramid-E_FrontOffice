@@ -89,3 +89,42 @@
     background-position: -200% 0;
   }
 }
+
+// ── Couleurs de fond supplémentaires ────────────────────────
+.icon-box {
+  &.bg-danger-transparent {
+    background-color: rgba(220, 53, 69, 0.1);
+  }
+}
+
+// ── Section RH : image formation ────────────────────────────
+.rh-formation-avatar {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+}
+
+// ── Section RH : barre de progression ───────────────────────
+.rh-progress-bar {
+  height: 6px;
+  width: 60px;
+  margin: 0 auto;
+}
+
+// ── Section RH : point de légende graphique ─────────────────
+.rh-legend-dot {
+  width: 10px;
+  height: 10px;
+}
+
+// ── Section RH : hauteur min graphique ──────────────────────
+.rh-chart-min-height {
+  min-height: 350px;
+}
+
+// ── Légende graphique (superadmin évolution mensuelle) ──────
+.legend-color {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+}

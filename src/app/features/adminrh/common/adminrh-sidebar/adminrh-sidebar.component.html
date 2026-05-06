@@ -2,72 +2,109 @@
     <div>
         <h6 class="mb-3">Main Menu</h6>
         <ul class="mb-3 pb-1">
-            <li>
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrh_dashboard" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-grid-35 me-2"></i>Dashboard</a>
             </li>
-            <li>
-                <a [routerLink]="routes.adminrhProfile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>  
+            <li class="menu-item">
+                <a [routerLink]="routes.adminrhProfile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>
             </li>
-            <li>
+            <!-- <li>
                 <a [routerLink]="routes.adminrhCourse" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Formations</a>
+
+            </li> -->
+
+             <!-- ================= NOS FORMATIONS ================= -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-play-circle"></i>
+        <span>Nos formations</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+        <ul class="submenu">
+          <li><a [routerLink]="routes.adminrhCourse" routerLinkActive="active">Formations</a></li>
+          <li><a [routerLink]="routes.adminrhCatalogue" routerLinkActive="active">Catalogues</a></li>
+          <li><a [routerLink]="routes.adminrhParcours" routerLinkActive="active">Parcours</a></li>
+          <li><a [routerLink]="routes.adminrhSession" routerLinkActive="active">Sessions</a></li>
+          <li> <a [routerLink]="routes.adminrhCategorie" routerLinkActive="active">Catégories de formations</a>
             </li>
-             <li>
+          <!-- <li><a>Feedback formateur</a></li> -->
+        </ul>
+    </li>
+
+          <!-- <li> <a [routerLink]="routes.adminrhCategorie" [ngClass]="{'active':page==='adminrh-categorie'}" class="d-inline-flex align-items-center"><i class="isax isax-category me-2"></i>Catégories de formations</a> -->
+
+             <!-- ================= NOS DEMANDES ================= -->
+
+
+             <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-play-circle"></i>
+        <span>Nos Demandes</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+      </a>
+        <ul class="submenu">
+          <li><a [routerLink]="routes.AdminrhDemande" routerLinkActive="active">Demandes Formations</a></li>
+          <li><a [routerLink]="routes.AdminrhDemandeSession" routerLinkActive="active">Sessions</a></li>
+          <li><a [routerLink]="routes.AdminrhDemandeParcours" routerLinkActive="active">Parcours</a></li>
+          <li><a [routerLink]="routes.AdminrhDemandeCatalogue" routerLinkActive="active">Catalogues</a></li>
+          <!-- <li><a>Feedback formateur</a></li> -->
+        </ul>
+    </li>
+             <!-- <li>
                 <a [routerLink]="routes.AdminrhDemande" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-document-text5 me-2"></i>Demandes Formations</a>
-                
+
             </li>
               <li>
                 <a [routerLink]="routes.adminrhSession" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-calendar-15 me-2"></i>Session Formations</a>
-            </li>
-            
-            <li>    
+            </li> -->
+
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrhUserList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-profile-2user5 me-2"></i>Gestion des Utilisateurs</a>
             </li>
-             <li *ngIf="isHoldingAdmin()">    
+             <li *ngIf="isHoldingAdmin()">
                 <a [routerLink]="routes.adminrhUserGroupList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-profile-2user5 me-2"></i>Gestion Utilisateurs du Groupe</a>
             </li>
-            
-             <li>
+
+             <li class="menu-item">
                 <!-- <a [routerLink]="routes.adminrhClientList" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-people5 me-2"></i>Gestion des Clients</a> -->
             </li>
-             <li>
+             <li class="menu-item">
                 <a [routerLink]="routes.adminrhCompanyManagement" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Entreprises</a>
              </li>
                 <li>
                 <!-- <a [routerLink]="routes.adminrhPermission" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Permission</a> -->
 
             </li>
- <li>
+ <li class="menu-item">
                 <a [routerLink]="routes.adminrhRole" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-building5 me-2"></i>Gestion des Roles</a>
 
             </li>
-                <li>
-                <a [routerLink]="routes.adminrhCategorie" [ngClass]="{'active':page==='adminrh-categorie'}" class="d-inline-flex align-items-center"><i class="isax isax-category me-2"></i>Catégories de formations</a>
-            </li>
-                <li>
-                    <a [routerLink]="routes.adminrhCatalogue" [ngClass]="{'active':page==='adminrh-catalogue'}" class="d-inline-flex align-items-center"><i class="isax isax-category me-2"></i>Catalogue formations</a>  
-            </li>
 
-             <li>
-                    <a [routerLink]="routes.adminrhParcours" [ngClass]="{'active':page==='adminrh-parcours'}" class="d-inline-flex align-items-center"><i class="isax isax-teacher5 me-2"></i>Parcours formations</a>  
-            </li>
-            <li>
+                <!-- <li class="menu-item">
+                    <a [routerLink]="routes.adminrhCatalogue" [ngClass]="{'active':page==='adminrh-catalogue'}" class="d-inline-flex align-items-center"><i class="isax isax-category me-2"></i>Catalogue formations</a>
+            </li> -->
+
+             <!-- <li>
+                    <a [routerLink]="routes.adminrhParcours" [ngClass]="{'active':page==='adminrh-parcours'}" class="d-inline-flex align-items-center"><i class="isax isax-teacher5 me-2"></i>Parcours formations</a>
+            </li> -->
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrhAnnouncements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-volume-high5 me-2"></i>Annonces</a>
             </li>
-            <li>
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrhAssignment" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-clipboard-text5 me-2"></i>Assignments</a>
             </li>
             <!-- <li>
                 <a [routerLink]="routes.studentsGrid" [ngClass]="{'active':page==='students-list' || page==='students-grid'}" class="d-inline-flex align-items-center" ><i class="isax isax-user-tag5 me-2"></i>Employee</a>
             </li> -->
-            <li>
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrhQuiz" [ngClass]="{'active':page==='adminrh-quiz' || page==='adminrh-quiz-questions'}" class="d-inline-flex align-items-center"><i class="isax isax-award5 me-2"></i>Quiz</a>
             </li>
 
-         
-            <li>
+
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrhQuizResult" class="d-inline-flex align-items-center" [ngClass]="{'active':page==='adminrh-quiz-results'}"  routerLinkActive="active"><i class="isax isax-medal-star5 me-2"></i> Resultats Quiz</a>
             </li>
-            <li>
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrhCertificate" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-note-215 me-2"></i>Certificats</a>
             </li>
             <!-- <li>
@@ -76,27 +113,27 @@
             <!-- <li>
                 <a [routerLink]="routes.adminrh_payouts" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-coin-15 me-2"></i>Paiement</a>
             </li> -->
-            <li>
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrhStatements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-shopping-cart5 me-2"></i>déclarations</a>
             </li>
             <!-- <li>
                 <a [routerLink]="routes.adminrhMessage" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-messages-35 me-2"></i>Messages</a>
             </li> -->
-            <li>
+            <li class="menu-item">
                 <a [routerLink]="routes.adminrh_tickets" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-ticket5 me-2"></i>Tickets Support</a>
             </li>
         </ul>
         <hr>
         <h6 class="mb-3">Account Settings</h6>
         <ul>
-            <li>
-                <a [routerLink]="routes.adminrhSettings" 
-                [ngClass]="{'active':last==='adminrh-settings' || last==='adminrh-change-password' || last==='adminrh-plans' 
+            <li class="menu-item">
+                <a [routerLink]="routes.adminrhSettings"
+                [ngClass]="{'active':last==='adminrh-settings' || last==='adminrh-change-password' || last==='adminrh-plans'
                 || last === 'adminrh-social-profiles' || last === 'adminrh-linked-accounts' || last === 'adminrh-setting-notifications' || last === 'adminrh-integrations' || last === 'adminrh-setting-withdraw'
-                }" 
+                }"
                 class="d-inline-flex align-items-center"><i class="isax isax-setting-25 me-2"></i>Settings</a>
             </li>
-            <li>
+            <li class="menu-item">
                 <a [routerLink]="routes.login" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-logout5 me-2"></i>Logout</a>
             </li>
         </ul>
