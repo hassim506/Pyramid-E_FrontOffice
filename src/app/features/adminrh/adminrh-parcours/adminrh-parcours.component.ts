@@ -59,7 +59,7 @@ export class AdminrhParcoursComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       niveau: ['debutant', Validators.required],
       duree_estimee: [0, [Validators.required, Validators.min(1)]],
-      prix: ['0.00', [Validators.required, Validators.min(0)]],
+      prix: ['0', [Validators.required, Validators.min(0)]],
       actif: [true],
       image_url: [''],
       objectifs: this.formBuilder.array([this.createObjectifControl()]),
@@ -375,7 +375,7 @@ buildParcoursData(): ParcoursRequest {
       description: '',
       niveau: 'debutant',
       duree_estimee: 0,
-      prix: '0.00',
+      prix: '0',
       actif: true,
       image_url: ''
     });

@@ -153,7 +153,7 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   // NAVIGATION
   // ════════════════════════════════════════════
   openPlayer(f: Formation): void {
-    this.router.navigate(['/student/lecture-formation', f.id]);
+    this.router.navigate(['/courses/course-watch', f.id]);
   }
 
   // ════════════════════════════════════════════

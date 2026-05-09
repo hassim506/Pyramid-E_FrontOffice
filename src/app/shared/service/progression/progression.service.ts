@@ -1,7 +1,7 @@
 // filepath: src/app/shared/service/progression/progression.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, of, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export interface FormationProgression {
@@ -69,28 +69,47 @@ export class ProgressionService {
   // pour que l'appelant puisse lire quiz_final
   // ════════════════════════════════════════════
   markCompleted(formationId: number, sectionId: number): Observable<any> {
-    // 1. Mise à jour locale immédiate (UI réactive)
+    // 1. Mise à jour locale optimiste (si la Map est initialisée)
     const prog = this.progressions.get(formationId);
-    if (prog) {
+    if (prog && !prog.completed.has(sectionId)) {
       prog.completed.add(sectionId);
       prog.percent = this.calcPercent(prog.completed.size, prog.totalSections);
       this._change$.next(new Map(this.progressions));
     }
 
-    // 2. Retourner l'Observable — le composant s'abonne
-    //    et peut lire est_termine + quiz_final dans la réponse
+    // 2. POST vers le backend — fonctionne même si la Map locale est vide
+    const url = `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/complete`;
+    console.log('📡 POST progression:', url, '| sectionId:', sectionId, '| formationId:', formationId);
     return this.http.post<any>(
-      `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/complete`, {}
+      url,
+      {},
+      { headers: this.getAuthHeaders() }
     ).pipe(
       tap(res => {
-        if (res?.status && prog) {
-          // Synchroniser le % calculé par le backend (source de vérité)
-          prog.percent = res.progression ?? prog.percent;
+        // Synchroniser le % renvoyé par le backend (source de vérité)
+        if (prog) {
+          prog.percent = res?.progression ?? prog.percent;
+          if (res?.completed_section_ids) {
+            prog.completed = new Set<number>(res.completed_section_ids);
+          }
           this._change$.next(new Map(this.progressions));
         }
       }),
-      catchError(() => of(null))
+      catchError((err) => {
+        // Rollback local uniquement si on avait fait une mise à jour optimiste
+        if (prog) {
+          prog.completed.delete(sectionId);
+          prog.percent = this.calcPercent(prog.completed.size, prog.totalSections);
+          this._change$.next(new Map(this.progressions));
+        }
+        return throwError(() => err);
+      })
     );
+  }
+
+  private getAuthHeaders(): { [key: string]: string } {
+    const token = localStorage.getItem('pyramide_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
   // ════════════════════════════════════════════

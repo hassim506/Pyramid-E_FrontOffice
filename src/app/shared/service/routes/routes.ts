@@ -23,6 +23,7 @@ export const routes = {
   instructorQuizResult: '/instructor/instructor-quiz-results',
   instructorCourse: '/instructor/instructor-course',
   instructorCourseGrid: '/instructor/instructor-course-grid',
+  instructorSession: '/instructor/instructor-session',
   instructorTickets: '/instructor/instructor-tickets',
   instructorMessage: '/instructor/instructor-message',
   instructorQuizDetails: '/instructor/instructor-quiz-details',

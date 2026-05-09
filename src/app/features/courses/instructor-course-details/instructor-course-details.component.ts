@@ -380,30 +380,28 @@ parseToNumber(value: any): number {
   // ================================
   // USER ACTION METHODS
   // ================================
-
-  previewSection(section: any): void {
-    if (!section.ressources) {
-      this.error = 'Aucune ressource disponible pour cette section';
-      setTimeout(() => this.error = '', 3000);
-      return;
-    }
-
-    // Construire l'URL complète de la ressource
-    let resourceUrl = section.ressources;
-    if (!resourceUrl.startsWith('http')) {
-      resourceUrl = `http://localhost:8000/storage/${resourceUrl}`;
-    }
-    
-    if (section.type === 'video') {
-      // Ouvrir la vidéo
-      window.open(resourceUrl, '_blank', 'width=800,height=600');
-      console.log('🎥 Ouverture de la section:', section.titre);
-    } else {
-      // Télécharger ou ouvrir la ressource
-      window.open(resourceUrl, '_blank');
-      console.log('📄 Ouverture de la ressource:', section.titre);
-    }
+previewSection(section: any): void {
+  if (!section.ressources) {
+    this.error = 'Aucune ressource disponible pour cette section';
+    setTimeout(() => this.error = '', 3000);
+    return;
   }
+
+  let resourceUrl = section.ressources;
+
+  // Si c'est un lien YouTube, ouvrir avec openYouTubeVideo
+  if (this.isYouTubeUrl(resourceUrl)) {
+    this.openYouTubeVideo(resourceUrl);
+    return;
+  }
+
+  // Sinon, lien local
+  if (!resourceUrl.startsWith('http')) {
+    resourceUrl = `http://localhost:8000/storage/${resourceUrl}`;
+  }
+
+  window.open(resourceUrl, '_blank', 'width=800,height=600');
+}
 
   shareFormation(): void {
     const url = window.location.href;

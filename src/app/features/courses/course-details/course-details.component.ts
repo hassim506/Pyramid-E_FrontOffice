@@ -125,13 +125,16 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
     this.formationService.getFormationById(this.formationId).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (response) => {
-        this.formation = response.formation || response.data || response;
-        this.processFormationData();
-        this.loadRelatedCourses();
-        this.loading = false;
-        
-        console.log('✅ Formation chargée:', this.formation);
+     next: (response) => {
+          this.formation = response.formation || response.data || response;
+          this.processFormationData();
+          this.loadRelatedCourses();
+          this.loading = false;
+          
+          console.log('✅ Formation chargée:', this.formation);
+          
+          // AOS ne détecte pas les éléments ajoutés dynamiquement → refresh
+          setTimeout(() => Aos.refresh(), 100);
       },
       error: (error) => {
         console.error('❌ Erreur lors du chargement de la formation:', error);

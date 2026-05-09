@@ -201,13 +201,12 @@ confirmTogglePublish(): void {
   isFormationGratuite(formation: any): boolean {
     return !formation.prix || formation.prix === 0;
   }
-
-  formatPrix(prix: number): string {
-    if (!prix || prix === 0) {
-      return 'Gratuit';
+    formatPrix(prix: number): string {
+      if (!prix || prix === 0) {
+        return 'Gratuit';
+      }
+      return `${Math.round(prix)} XOF`;
     }
-    return `${prix} €`;
-  }
 
   getFormationImage(formation: any): string {
     return formation.image || formation.photo || 'assets/img/course/course-01.jpg';

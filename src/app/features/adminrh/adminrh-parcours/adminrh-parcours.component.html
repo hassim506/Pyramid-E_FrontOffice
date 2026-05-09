@@ -123,7 +123,7 @@
           <th>Nom du Parcours</th>
           <th style="width: 120px;">Niveau</th>
           <th style="width: 100px;">Durée</th>
-          <th style="width: 100px;">Prix</th>
+          <th style="width: 100px;">Coût</th>
           <th style="width: 120px;">Formations</th>
           <th style="width: 100px;">Inscrits</th>
           <th style="width: 100px;">Statut</th>
@@ -164,7 +164,7 @@
           <!-- Prix -->
           <td>
             <div class="text-center">
-              <strong class="text-success">{{ parcour.prix }}€</strong>
+              <strong class="text-success">{{ parcour.prix }}XOF</strong>
             </div>
           </td>
 
@@ -364,12 +364,12 @@
 
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Prix (€) *</label>
+                <label class="form-label">Prix (XOF) *</label>
                 <input type="number" class="form-control" formControlName="prix" 
                        min="0" step="0.01">
                 <div class="invalid-feedback" 
                      *ngIf="parcoursForm.get('prix')?.invalid && parcoursForm.get('prix')?.touched">
-                  Le prix doit être positif
+                  Le coût doit être positif
                 </div>
               </div>
 
@@ -489,7 +489,7 @@
                 <span class="badge bg-success" *ngIf="selectedParcours.actif">Actif</span>
                 <span class="badge bg-secondary" *ngIf="!selectedParcours.actif">Inactif</span>
                 <span class="badge bg-info">{{ selectedParcours.duree_estimee }}h</span>
-                <span class="badge bg-warning">{{ selectedParcours.prix }}€</span>
+                <span class="badge bg-warning">{{ selectedParcours.prix }}XOF</span>
               </div>
             </div>
           </div>
@@ -531,7 +531,7 @@
                 <strong>Durée estimée:</strong> {{ selectedParcours.duree_estimee }}h
               </div>
               <div class="list-group-item py-2">
-                <strong>Prix:</strong> {{ selectedParcours.prix }}€
+                <strong>Coût:</strong> {{ selectedParcours.prix }}XOF
               </div>
               <div class="list-group-item py-2">
                 <strong>Créé le:</strong> {{ formatDate(selectedParcours.created_at) }}
@@ -580,7 +580,7 @@
                       <span class="badge bg-info me-1">{{ formation.niveau }}</span>
                       <span class="badge bg-danger me-1" *ngIf="formation.pivot?.obligatoire">Obligatoire</span>
                     </div>
-                    <small class="text-muted">{{ formation.duree_totale }}h - {{ formation.prix }}€</small>
+                    <small class="text-muted">{{ formation.duree_totale }}h - {{ formation.prix }}XOF</small>
                   </div>
                 </div>
               </div>
@@ -595,7 +595,7 @@
                     <th>Formation</th>
                     <th>Niveau</th>
                     <th>Durée</th>
-                    <th>Prix</th>
+                    <th>Coût</th>
                     <th>Statut</th>
                   </tr>
                 </thead>
@@ -614,7 +614,7 @@
                       <span class="badge bg-info">{{ formation.niveau }}</span>
                     </td>
                     <td>{{ formation.duree_totale }}h</td>
-                    <td>{{ formation.prix }}€</td>
+                    <td>{{ formation.prix }}XOF</td>
                     <td>
                       <span class="badge bg-success" *ngIf="formation.est_publie">Publié</span>
                       <span class="badge bg-secondary" *ngIf="!formation.est_publie">Brouillon</span>

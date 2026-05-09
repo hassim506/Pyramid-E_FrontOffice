@@ -46,6 +46,8 @@ export const routes: Routes = [
                 {path:'course-category-3',loadComponent:()=>import ('./features/courses/course-category-3/course-category-3.component').then((m)=>m.CourseCategory3Component)},
                 {path:'course-resume',loadComponent:()=>import ('./features/courses/course-resume/course-resume.component').then((m)=>m.CourseResumeComponent)},
                 {path:'course-watch',loadComponent:()=>import ('./features/courses/course-watch/course-watch.component').then((m)=>m.CourseWatchComponent)},
+                {path:'course-watch/:id',loadComponent:()=>import ('./features/courses/course-watch/course-watch.component').then((m)=>m.CourseWatchComponent)},
+
                 {path:'cart',loadComponent:()=>import ('./features/courses/course-cart/course-cart.component').then((m)=>m.CourseCartComponent)},
                 {path:'checkout',loadComponent:()=>import ('./features/courses/course-checkout/course-checkout.component').then((m)=>m.CourseCheckoutComponent)},
                 {path:'add-course',loadComponent:()=>import ('./features/courses/add-course/add-course.component').then((m)=>m.AddCourseComponent)},
@@ -73,7 +75,7 @@ export const routes: Routes = [
                 {path:'instructor-statements',loadComponent:()=>import ('./features/instructor/instructor-statements/instructor-statements.component').then((m)=>m.InstructorStatementsComponent)},
                 {path:'instructor-course',loadComponent:()=>import ('./features/instructor/instructor-course/instructor-course.component').then((m)=>m.InstructorCourseComponent)},
                 {path:'instructor-course-grid',loadComponent:()=>import ('./features/instructor/instructor-course-grid/instructor-course-grid.component').then((m)=>m.InstructorCourseGridComponent)},
-
+                {path:'instructor-session',loadComponent:()=>import ('./features/instructor/instructor-session/instructor-session.component').then((m)=>m.InstructorSessionComponent)},
 
                 {path:'instructor-message',loadComponent:()=>import ('./features/instructor/instructor-message/instructor-message.component').then((m)=>m.InstructorMessageComponent)},
                 {path:'instructor-assignment',loadComponent:()=>import ('./features/instructor/instructor-assignment/instructor-assignment.component').then((m)=>m.InstructorAssignmentComponent)},
