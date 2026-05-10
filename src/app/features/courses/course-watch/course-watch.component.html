@@ -153,17 +153,135 @@
           </div>
         </ng-container>
 
-        <!-- ── QUIZ / ASSIGNMENT ── -->
+        <!-- ── QUIZ ── -->
         <ng-container *ngIf="activeSection.type === 'quiz' || activeSection.type === 'assignment'">
-          <div class="cw-quiz-banner">
-            <div class="cw-quiz-banner__icon">
-              <i class="isax isax-task-square"></i>
-            </div>
+
+          <!-- Loading quiz -->
+          <div *ngIf="quizLoading" class="cw-quiz-loader">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Chargement du quiz...</p>
+          </div>
+
+          <!-- Pas de quiz associé -->
+          <div *ngIf="!quizLoading && !quiz" class="cw-quiz-banner">
+            <div class="cw-quiz-banner__icon"><i class="isax isax-task-square"></i></div>
             <div>
               <h4 class="cw-quiz-banner__title">{{ activeSection.titre }}</h4>
-              <p class="cw-quiz-banner__sub">{{ activeSection.description || 'Complétez cette section pour valider votre progression.' }}</p>
+              <p class="cw-quiz-banner__sub">{{ activeSection.description || 'Quiz non encore disponible.' }}</p>
             </div>
           </div>
+
+          <!-- Quiz chargé — écran d'accueil -->
+          <div *ngIf="!quizLoading && quiz && !quizStarted && !quizFinished" class="cw-quiz-start">
+            <div class="cw-quiz-start__icon"><i class="isax isax-task-square"></i></div>
+            <h3 class="cw-quiz-start__title">{{ quiz.titre || activeSection.titre }}</h3>
+            <p class="cw-quiz-start__sub">{{ quiz.description || activeSection.description }}</p>
+            <div class="cw-quiz-start__meta">
+              <span><i class="isax isax-message-question me-1"></i>{{ quiz.questions?.length || 0 }} questions</span>
+              <span *ngIf="quiz.duree_minutes"><i class="isax isax-clock me-1"></i>{{ quiz.duree_minutes }} min</span>
+              <span *ngIf="quiz.score_minimum"><i class="isax isax-award me-1"></i>Score minimum : {{ quiz.score_minimum }}%</span>
+            </div>
+            <button class="cw-btn cw-btn--primary cw-quiz-start__btn" (click)="startQuiz()">
+              <i class="isax isax-play-circle me-2"></i>Commencer le quiz
+            </button>
+          </div>
+
+          <!-- Quiz en cours -->
+          <div *ngIf="!quizLoading && quiz && quizStarted && !quizFinished && currentQuestion" class="cw-quiz-player">
+            <!-- Progress -->
+            <div class="cw-quiz-progress">
+              <div class="cw-quiz-progress__bar">
+                <div class="cw-quiz-progress__fill"
+                     [style.width.%]="((currentQuestionIndex + 1) / (quiz.questions?.length || 1)) * 100"></div>
+              </div>
+              <span class="cw-quiz-progress__label">Question {{ currentQuestionIndex + 1 }} / {{ quiz.questions?.length }}</span>
+            </div>
+
+            <!-- Question -->
+            <div class="cw-quiz-question">
+              <div class="cw-quiz-question__num">Q{{ currentQuestionIndex + 1 }}</div>
+              <h4 class="cw-quiz-question__text">{{ currentQuestion.question_text }}</h4>
+              <p class="cw-quiz-question__hint">
+                {{ currentQuestion.type === 'multiple_choice_multi' ? 'Plusieurs réponses possibles' :
+                   currentQuestion.type === 'true_false' ? 'Vrai ou Faux' : 'Une seule réponse' }}
+              </p>
+            </div>
+
+            <!-- Options -->
+            <div class="cw-quiz-options">
+              <button *ngFor="let opt of currentQuestion.reponses"
+                      type="button"
+                      class="cw-quiz-option"
+                      [class.cw-quiz-option--selected]="isAnswerSelected(currentQuestion.id, opt.id)"
+                      (click)="toggleAnswer(currentQuestion.id, opt.id, currentQuestion.type)">
+                <span class="cw-quiz-option__check">
+                  <i *ngIf="isAnswerSelected(currentQuestion.id, opt.id)" class="isax isax-tick-circle"></i>
+                  <i *ngIf="!isAnswerSelected(currentQuestion.id, opt.id)" class="isax isax-record-circle"></i>
+                </span>
+                <span class="cw-quiz-option__text">{{ opt.texte }}</span>
+              </button>
+            </div>
+
+            <!-- Navigation quiz -->
+            <div class="cw-quiz-nav">
+              <button class="cw-btn cw-btn--outline" [disabled]="currentQuestionIndex === 0" (click)="prevQuestion()">
+                <i class="isax isax-arrow-left-2 me-1"></i>Précédent
+              </button>
+              <button *ngIf="currentQuestionIndex < (quiz.questions?.length || 0) - 1"
+                      class="cw-btn cw-btn--primary" (click)="nextQuestion()">
+                Suivant<i class="isax isax-arrow-right-2 ms-1"></i>
+              </button>
+              <button *ngIf="currentQuestionIndex === (quiz.questions?.length || 0) - 1"
+                      class="cw-btn cw-btn--success" (click)="submitQuiz()">
+                <i class="isax isax-tick-circle me-2"></i>Terminer le quiz
+              </button>
+            </div>
+          </div>
+
+          <!-- Résultats -->
+          <div *ngIf="!quizLoading && quiz && quizFinished" class="cw-quiz-results">
+            <div class="cw-quiz-results__score-wrap">
+              <div class="cw-quiz-results__score"
+                   [class.cw-quiz-results__score--pass]="quizScore >= (quiz.score_minimum || 50)"
+                   [class.cw-quiz-results__score--fail]="quizScore < (quiz.score_minimum || 50)">
+                {{ quizScore }}%
+              </div>
+              <div class="cw-quiz-results__label">
+                {{ quizScore >= (quiz.score_minimum || 50) ? '🎉 Réussi !' : 'Non validé' }}
+              </div>
+            </div>
+            <p class="cw-quiz-results__detail">
+              Score minimum requis : {{ quiz.score_minimum || 50 }}%
+            </p>
+            <!-- Correction par question -->
+            <div class="cw-quiz-correction" *ngFor="let q of quiz.questions; let qi = index">
+              <div class="cw-quiz-correction__q">
+                <span class="cw-quiz-correction__num">Q{{ qi + 1 }}</span>
+                {{ q.question_text }}
+              </div>
+              <div class="cw-quiz-correction__opts">
+                <div *ngFor="let opt of q.reponses" class="cw-quiz-correction__opt"
+                     [class.cw-quiz-correction__opt--correct]="opt.est_correcte"
+                     [class.cw-quiz-correction__opt--selected]="isAnswerSelected(q.id, opt.id) && !opt.est_correcte"
+                     [class.cw-quiz-correction__opt--right]="isAnswerSelected(q.id, opt.id) && opt.est_correcte">
+                  <i class="isax"
+                     [class.isax-tick-circle]="opt.est_correcte"
+                     [class.isax-close-circle]="isAnswerSelected(q.id, opt.id) && !opt.est_correcte"
+                     [class.isax-record-circle]="!opt.est_correcte && !isAnswerSelected(q.id, opt.id)"></i>
+                  {{ opt.texte }}
+                </div>
+              </div>
+              <p *ngIf="q.explication" class="cw-quiz-correction__exp">
+                <i class="isax isax-info-circle me-1"></i>{{ q.explication }}
+              </p>
+            </div>
+            <div class="cw-quiz-results__actions">
+              <button class="cw-btn cw-btn--outline" (click)="retryQuiz()">
+                <i class="isax isax-refresh me-2"></i>Recommencer
+              </button>
+            </div>
+          </div>
+
         </ng-container>
 
         <!-- ── ACTIONS BAR ── -->

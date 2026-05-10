@@ -89,6 +89,9 @@ export class TicketService {
     categorie?: string;
     search?: string;
     entreprise_id?: number;
+    user_id?: number;
+    page?: number;
+    par_page?: number;
   }): Observable<any> {
     let httpParams = new HttpParams();
     if (params?.statut)        httpParams = httpParams.set('statut',        params.statut);
@@ -96,6 +99,9 @@ export class TicketService {
     if (params?.categorie)     httpParams = httpParams.set('categorie',     params.categorie);
     if (params?.search)        httpParams = httpParams.set('search',        params.search);
     if (params?.entreprise_id) httpParams = httpParams.set('entreprise_id', String(params.entreprise_id));
+    if (params?.user_id)       httpParams = httpParams.set('user_id',       String(params.user_id));
+    if (params?.page)          httpParams = httpParams.set('page',          String(params.page));
+    if (params?.par_page)      httpParams = httpParams.set('par_page',      String(params.par_page));
     return this.http.get<any>(`${this.apiUrl}/tickets`, { headers: this.getHeaders(), params: httpParams });
   }
   getStatistiques(params?: { entreprise_id?: number }): Observable<any> {

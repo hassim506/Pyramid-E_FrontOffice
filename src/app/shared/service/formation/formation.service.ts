@@ -22,7 +22,14 @@ unpublishFormation(id: number): Observable<any> {
 }
 
   private baseUrl = environment.apiUrl;
+  private storageBase = environment.apiUrl.replace('/api', '');
   handleError: any;
+
+  getImageUrl(imageCouverture: string | null | undefined): string {
+    if (!imageCouverture) return 'assets/img/course/course-01.jpg';
+    if (imageCouverture.startsWith('http')) return imageCouverture;
+    return `${this.storageBase}/storage/${imageCouverture}`;
+  }
 
   constructor(private http: HttpClient) {}
 
@@ -32,6 +39,19 @@ unpublishFormation(id: number): Observable<any> {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
+  }
+
+  private getAuthHeader(): any {
+    const token = localStorage.getItem('pyramide_token');
+    return { 'Authorization': `Bearer ${token}` };
+  }
+
+  uploadImageCouverture(file: File): Observable<any> {
+    const fd = new FormData();
+    fd.append('image', file);
+    return this.http.post<any>(`${this.baseUrl}/upload/image`, fd, {
+      headers: this.getAuthHeader()
+    });
   }
 
   // /adminrh/formations — filtered by the RH's entreprise

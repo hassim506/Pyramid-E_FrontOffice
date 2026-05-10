@@ -1,68 +1,190 @@
- <div class="settings-sidebar mb-lg-0 ">
+<div class="sb-shell">
+
+  <!-- LOGO -->
+  <div class="sb-logo">
+    <div class="sb-logo-mark"><i class="isax isax-teacher"></i></div>
     <div>
-        <h6 class="mb-3">Main Menu</h6>
-        <ul class="mb-3 pb-1">
-            <li>
-                <a [routerLink]="routes.instructor_dashboard" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-grid-35 me-2"></i>Dashboard</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorProfile" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="fa-solid fa-user me-2"></i>Mon Profil</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorCourse" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Formations</a>
-
-            </li>
-            <li>  
-                <a [routerLink]="routes.instructorSession" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-teacher5 me-2"></i>Sessions</a>
-
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorAnnouncements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-volume-high5 me-2"></i>Annonces</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorAssignment" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-clipboard-text5 me-2"></i>Devoirs</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.studentsGrid" [ngClass]="{'active':page==='students-list' || page==='students-grid'}" class="d-inline-flex align-items-center" ><i class="isax isax-profile-2user5 me-2"></i>Étudiants</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorQuiz" [ngClass]="{'active':page==='instructor-quiz' || page==='instructor-quiz-questions'}" class="d-inline-flex align-items-center"><i class="isax isax-award5 me-2"></i>Quiz</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorQuizResult" [ngClass]="{'active':page==='instructor-quiz-result' }" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-medal-star5 me-2"></i>Résultats Quiz</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorCertificate" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-note-215 me-2"></i>Certificats</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorEarning" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-wallet-add5 me-2"></i>Revenus</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructor_payouts" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-coin-15 me-2"></i>Paiements</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorStatements" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-shopping-cart5 me-2"></i>Relevés</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructorMessage" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-messages-35 me-2"></i>Messages</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.instructor_tickets" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-ticket5 me-2"></i>Support Tickets</a>
-            </li>
-        </ul>
-        <hr>
-        <h6 class="mb-3">Paramètres du compte</h6>
-        <ul>
-            <li>
-                <a [routerLink]="routes.instructorSettings" 
-                [ngClass]="{'active':last==='instructor-settings' || last==='instructor-change-password' || last==='instructor-plans' 
-                || last === 'instructor-social-profiles' || last === 'instructor-linked-accounts' || last === 'instructor-setting-notifications' || last === 'instructor-integrations' || last === 'instructor-setting-withdraw'
-                }" 
-                class="d-inline-flex align-items-center"><i class="isax isax-setting-25 me-2"></i>Paramètres</a>
-            </li>
-            <li>
-                <a [routerLink]="routes.login" class="d-inline-flex align-items-center" routerLinkActive="active"><i class="isax isax-logout5 me-2"></i>Déconnexion</a>
-            </li>
-        </ul>
+      <div class="sb-logo-text">LMS Pro</div>
+      <div class="sb-logo-sub">Espace Formateur</div>
     </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="sb-profile">
+    <div class="prof-row">
+      <div class="prof-av">{{ getInitials() }}</div>
+      <div>
+        <div class="prof-name">{{ getDisplayName() }}</div>
+        <div class="prof-role">{{ getRoleLabel() }}</div>
+      </div>
+    </div>
+    <div class="prof-stats">
+      <div class="pstat">
+        <div class="pstat-v">{{ formationsCount }}</div>
+        <div class="pstat-l">Formations</div>
+      </div>
+      <div class="pstat-sep"></div>
+      <div class="pstat">
+        <div class="pstat-v">{{ apprenantCount }}</div>
+        <div class="pstat-l">Apprenants</div>
+      </div>
+      <div class="pstat-sep"></div>
+      <div class="pstat">
+        <div class="pstat-v">{{ completionRate }}%</div>
+        <div class="pstat-l">Complétion</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="sb-scroll">
+
+    <!-- VUE D'ENSEMBLE -->
+    <div class="sb-section-label">Vue d'ensemble</div>
+    <a [routerLink]="routes.instructor_dashboard" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-grid-3 icon"></i>
+      <span class="sb-item-label">Tableau de bord</span>
+    </a>
+    <a [routerLink]="routes.instructorProfile" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-chart-2 icon"></i>
+      <span class="sb-item-label">Mes performances</span>
+    </a>
+
+    <div class="sb-divider"></div>
+
+    <!-- CONTENU PÉDAGOGIQUE -->
+    <div class="sb-section-label">Contenu pédagogique</div>
+
+    <!-- Mes formations (accordion) -->
+    <div class="sb-group">
+      <div class="sb-group-header" [class.open]="openGroups['formations']"
+           (click)="toggleGroup('formations')">
+        <i class="isax isax-book icon"></i>
+        <span>Mes formations</span>
+        <span *ngIf="formationsCount > 0" class="sb-badge sb-badge--purple">{{ formationsCount }}</span>
+        <i class="isax isax-arrow-right-3 arr"></i>
+      </div>
+      <div class="sb-sub" *ngIf="openGroups['formations']">
+        <a [routerLink]="routes.instructorCourse" routerLinkActive="active" class="sb-sub-item">
+          <i class="isax isax-task-square"></i>
+          <span>Toutes mes formations</span>
+        </a>
+        <a href="/courses/instructor-course-add" target="_blank" class="sb-sub-item">
+          <i class="isax isax-add-circle"></i>
+          <span>Créer une formation</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Modules & contenus -->
+    <div class="sb-group">
+      <div class="sb-group-header" [class.open]="openGroups['modules']"
+           (click)="toggleGroup('modules')">
+        <i class="isax isax-element-4 icon"></i>
+        <span>Modules & contenus</span>
+        <i class="isax isax-arrow-right-3 arr"></i>
+      </div>
+      <div class="sb-sub" *ngIf="openGroups['modules']">
+        <a [routerLink]="routes.instructorCourse" routerLinkActive="active" class="sb-sub-item">
+          <i class="isax isax-video-circle"></i>
+          <span>Vidéos & ressources</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Quiz & évaluations -->
+    <div class="sb-group">
+      <div class="sb-group-header" [class.open]="openGroups['quiz']"
+           (click)="toggleGroup('quiz')">
+        <i class="isax isax-award icon"></i>
+        <span>Quiz & évaluations</span>
+        <i class="isax isax-arrow-right-3 arr"></i>
+      </div>
+      <div class="sb-sub" *ngIf="openGroups['quiz']">
+        <a [routerLink]="routes.instructorQuiz" routerLinkActive="active" class="sb-sub-item">
+          <i class="isax isax-task-square"></i>
+          <span>Tous les quiz</span>
+        </a>
+        <a [routerLink]="routes.instructorQuizResult" routerLinkActive="active" class="sb-sub-item">
+          <i class="isax isax-chart-2"></i>
+          <span>Résultats & scores</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- MES APPRENANTS -->
+    <div class="sb-section-label">Mes apprenants</div>
+
+    <a [routerLink]="routes.studentsList" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-profile-2user icon"></i>
+      <span class="sb-item-label">Liste des apprenants</span>
+      <span *ngIf="apprenantCount > 0" class="sb-badge sb-badge--gray">{{ apprenantCount }}</span>
+    </a>
+    <a [routerLink]="routes.instructorCertificate" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-note-21 icon"></i>
+      <span class="sb-item-label">Certificats délivrés</span>
+    </a>
+    <a [routerLink]="routes.instructorAssignment" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-clipboard-text icon"></i>
+      <span class="sb-item-label">Assignments</span>
+    </a>
+
+    <div class="sb-divider"></div>
+
+    <!-- SESSIONS & PLANNING -->
+    <div class="sb-section-label">Sessions & planning</div>
+
+    <a [routerLink]="routes.instructorSession" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-calendar-1 icon"></i>
+      <span class="sb-item-label">Mes sessions</span>
+    </a>
+
+    <div class="sb-divider"></div>
+
+    <!-- COMMUNICATION -->
+    <div class="sb-section-label">Communication</div>
+
+    <a [routerLink]="routes.instructorMessage" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-messages-3 icon"></i>
+      <span class="sb-item-label">Messages</span>
+    </a>
+    <a [routerLink]="routes.instructorAnnouncements" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-volume-high icon"></i>
+      <span class="sb-item-label">Annonces</span>
+    </a>
+    <a [routerLink]="routes.instructor_tickets" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-ticket icon"></i>
+      <span class="sb-item-label">Tickets support</span>
+    </a>
+
+    <!-- Barre de complétion -->
+    <div class="sb-progress-card" *ngIf="progressBars.length > 0">
+      <div class="pc-header">
+        <span class="pc-title">Complétion par formation</span>
+        <span class="pc-period">Cette semaine</span>
+      </div>
+      <div *ngFor="let bar of progressBars" class="pc-row">
+        <div class="pc-name" [title]="bar.name">{{ bar.name }}</div>
+        <div class="pc-bar-wrap"><div class="pc-fill" [style.width.%]="bar.pct"></div></div>
+        <div class="pc-pct">{{ bar.pct }}%</div>
+      </div>
+    </div>
+
+  </div><!-- /sb-scroll -->
+
+  <!-- BOTTOM -->
+  <div class="sb-bottom">
+    <a [routerLink]="routes.instructorProfile" routerLinkActive="active" class="sb-bottom-item">
+      <i class="isax isax-user-square"></i> Mon profil formateur
+    </a>
+    <a [routerLink]="routes.instructorSettings" routerLinkActive="active" class="sb-bottom-item">
+      <i class="isax isax-setting-2"></i> Préférences
+    </a>
+    <a [routerLink]="routes.login" class="sb-bottom-item logout">
+      <i class="isax isax-logout"></i> Déconnexion
+    </a>
+  </div>
+
 </div>

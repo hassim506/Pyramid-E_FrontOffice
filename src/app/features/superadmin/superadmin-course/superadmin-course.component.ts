@@ -239,10 +239,7 @@ export class SuperadminCourseComponent implements OnInit {
   }
 
   getDefaultImage(formation: Formation): string {
-    if (formation.image_couverture) {
-      return 'assets/img/formations/' + formation.image_couverture;
-    }
-    return 'assets/img/course/course-01.jpg';
+    return this.formationService.getImageUrl(formation.image_couverture);
   }
 
   deleteFormation(formation: Formation): void {

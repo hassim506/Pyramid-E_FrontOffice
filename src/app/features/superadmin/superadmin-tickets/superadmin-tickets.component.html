@@ -79,6 +79,21 @@
           </div>
         </div>
       </div>
+
+      <!-- Pagination -->
+      <div class="tk-pagination" *ngIf="totalPages > 1">
+        <span class="pg-info">{{ totalItems }} ticket{{ totalItems > 1 ? 's' : '' }}</span>
+        <div class="pg-controls">
+          <button type="button" class="pg-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+            <i class="isax isax-arrow-left-2"></i>
+          </button>
+          <button type="button" class="pg-btn" *ngFor="let p of pageNumbers"
+                  [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+          <button type="button" class="pg-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+            <i class="isax isax-arrow-right-2"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- DETAIL PANEL -->

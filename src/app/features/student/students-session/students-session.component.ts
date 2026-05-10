@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { DemandeFormationService }   from '../../../shared/service/demande/demande-formation.service';
 import { FormationsService }         from '../../../shared/service/Formationsss/formations.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
+import { environment } from '../../../../environments/environment';
 
 declare var bootstrap: any;
 
@@ -111,7 +112,9 @@ export class StudentsSessionsComponent implements OnInit {
       ...d,
       titre_affiche:      d.session_formation?.titre ?? `Session #${d.session_formation_id}`,
       sous_titre_affiche: date ? `Début : ${new Date(date).toLocaleDateString('fr-FR')}` : '',
-      image_affiche:      d.session_formation?.image_couverture || 'assets/img/course/course-01.jpg',
+      image_affiche:      d.session_formation?.image_couverture
+        ? (d.session_formation.image_couverture.startsWith('http') ? d.session_formation.image_couverture : `${environment.apiUrl.replace('/api','')}/storage/${d.session_formation.image_couverture}`)
+        : 'assets/img/course/course-01.jpg',
       places_restantes:   Math.max(0, cap - inscrits),
     };
   }

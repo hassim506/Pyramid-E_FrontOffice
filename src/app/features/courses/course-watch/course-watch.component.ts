@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { ProgressionService } from '../../../shared/service/progression/progression.service';
+import { QuizService } from '../../../shared/service/quiz/quiz.service';
 import { routes } from '../../../shared/service/routes/routes';
 
 @Component({
@@ -35,6 +36,15 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
   /** Onglet du panneau droit */
   activeTab: 'overview' | 'notes' | 'faq' = 'overview';
 
+  // ── Quiz player ──────────────────────────────────────────────────────────────
+  quiz: any = null;
+  quizLoading = false;
+  quizStarted = false;
+  quizFinished = false;
+  currentQuestionIndex = 0;
+  userAnswers: Record<number, number[]> = {};
+  quizScore = 0;
+
   private formationId!: number;
   private destroy$ = new Subject<void>();
 
@@ -44,6 +54,7 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private formationService: FormationService,
     private progressionService: ProgressionService,
+    private quizService: QuizService,
   ) {}
 
   ngOnInit(): void {
@@ -139,6 +150,118 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
     this.activeSection = section;
     this.activeModule = mod;
     this.activeTab = 'overview';
+
+    if (section.type === 'quiz' || section.type === 'assignment') {
+      const quizId = section.quiz_id;
+      if (quizId) {
+        this.loadQuiz(quizId);
+      } else {
+        // No quiz linked yet — reset quiz state so the "not available" banner shows
+        this.quiz = null;
+        this.quizLoading = false;
+      }
+    }
+  }
+
+  // ── Quiz player ────────────────────────────────────────────────────────────
+
+  loadQuiz(quizId: number): void {
+    this.quizLoading = true;
+    this.quiz = null;
+    this.quizStarted = false;
+    this.quizFinished = false;
+    this.currentQuestionIndex = 0;
+    this.userAnswers = {};
+    this.quizScore = 0;
+
+    this.quizService.getQuiz(quizId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res: any) => {
+        const raw = res?.quiz || res;
+        // Normalize reponses fields: backend sends reponse_text/is_correct,
+        // but we also need texte/est_correcte aliases for the template
+        if (raw?.questions) {
+          raw.questions = raw.questions.map((q: any) => ({
+            ...q,
+            reponses: (q.reponses || []).map((r: any) => ({
+              ...r,
+              texte:        r.texte        ?? r.reponse_text ?? '',
+              est_correcte: r.est_correcte ?? r.is_correct   ?? false,
+            })),
+          }));
+        }
+        this.quiz = raw;
+        this.quizLoading = false;
+      },
+      error: () => {
+        this.quiz = null;
+        this.quizLoading = false;
+      }
+    });
+  }
+
+  startQuiz(): void {
+    this.quizStarted = true;
+  }
+
+  get currentQuestion(): any {
+    return this.quiz?.questions?.[this.currentQuestionIndex] ?? null;
+  }
+
+  isAnswerSelected(questionId: number, optionId: number): boolean {
+    return this.userAnswers[questionId]?.includes(optionId) ?? false;
+  }
+
+  toggleAnswer(questionId: number, optionId: number, type: string): void {
+    if (type === 'multiple_choice_multi') {
+      const current = this.userAnswers[questionId] ?? [];
+      const idx = current.indexOf(optionId);
+      if (idx >= 0) {
+        this.userAnswers = { ...this.userAnswers, [questionId]: current.filter(id => id !== optionId) };
+      } else {
+        this.userAnswers = { ...this.userAnswers, [questionId]: [...current, optionId] };
+      }
+    } else {
+      // radio behaviour (single choice / true_false)
+      this.userAnswers = { ...this.userAnswers, [questionId]: [optionId] };
+    }
+  }
+
+  nextQuestion(): void {
+    this.currentQuestionIndex++;
+  }
+
+  prevQuestion(): void {
+    this.currentQuestionIndex--;
+  }
+
+  submitQuiz(): void {
+    if (!this.quiz?.questions) { this.quizFinished = true; return; }
+    let correct = 0;
+    const total = this.quiz.questions.length;
+
+    for (const q of this.quiz.questions) {
+      const selected = this.userAnswers[q.id] ?? [];
+      const correctIds: number[] = (q.reponses ?? [])
+        .filter((r: any) => r.est_correcte)
+        .map((r: any) => r.id as number);
+
+      const isCorrect =
+        correctIds.length === selected.length &&
+        correctIds.every((id: number) => selected.includes(id));
+
+      if (isCorrect) { correct++; }
+    }
+
+    this.quizScore = total > 0 ? Math.round((correct / total) * 100) : 0;
+    this.quizFinished = true;
+  }
+
+  retryQuiz(): void {
+    this.quizStarted = false;
+    this.quizFinished = false;
+    this.currentQuestionIndex = 0;
+    this.userAnswers = {};
+    this.quizScore = 0;
   }
 
   toggleModule(modId: number): void {

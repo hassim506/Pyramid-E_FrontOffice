@@ -72,7 +72,7 @@
                                         <span class="tickmark"><i class="fa-solid fa-check"></i></span>
                                     </span>
                                     <div class="step-section">
-                                        <p>Informations</p>
+                                        <p>Quiz</p>
                                     </div>
                                 </div>
                             </li>
@@ -80,6 +80,17 @@
                                 <div class="profile-step">
                                     <span class="dot-active mb-2">
                                         <span class="number">05</span>
+                                        <span class="tickmark"><i class="fa-solid fa-check"></i></span>
+                                    </span>
+                                    <div class="step-section">
+                                        <p>Informations</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li [ngClass]="{ 'progress-active': currentStep === 5, 'progress-activated': currentStep > 5 }">
+                                <div class="profile-step">
+                                    <span class="dot-active mb-2">
+                                        <span class="number">06</span>
                                         <span class="tickmark"><i class="fa-solid fa-check"></i></span>
                                     </span>
                                     <div class="step-section">
@@ -173,51 +184,39 @@
 
                                             <!-- Objectifs pédagogiques -->
                                             <div class="col-md-6 mb-3">
-                                                <div class="card bg-light">
-                                                    <div class="card-body">
-                                                        <h6 class="card-title">
-                                                            <i class="fas fa-bullseye text-success me-2"></i>
-                                                            Objectifs pédagogiques
-                                                        </h6>
-                                                        <div *ngFor="let obj of objectifs; let i = index" class="mb-2">
-                                                            <div class="input-group">
-                                                                <input type="text" class="form-control" [(ngModel)]="objectifs[i]" 
-                                                                       [ngModelOptions]="{standalone: true}"
-                                                                       placeholder="Nouvel objectif">
-                                                                <button class="btn btn-outline-danger" type="button" (click)="removeObjectif(i)">
-                                                                    <i class="fas fa-times"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <button class="btn btn-sm btn-outline-primary" type="button" (click)="addObjectif()">
-                                                            <i class="fas fa-plus me-1"></i> Ajouter
-                                                        </button>
-                                                    </div>
+                                                <label class="form-label">
+                                                    <i class="fas fa-bullseye me-1" style="color:#C4900A"></i> Objectifs pédagogiques
+                                                </label>
+                                                <div class="pf-tags-wrap">
+                                                    <span *ngFor="let obj of objectifs; let i = index" class="pf-tag">
+                                                        {{ obj }}
+                                                        <button type="button" class="pf-tag-del" (click)="removeObjectif(i)">×</button>
+                                                    </span>
+                                                    <span *ngIf="objectifs.length === 0" class="pf-empty-tags">Aucun objectif ajouté</span>
+                                                </div>
+                                                <div class="pf-tag-input">
+                                                    <input type="text" [(ngModel)]="newObjectif" [ngModelOptions]="{standalone:true}"
+                                                           placeholder="Ajouter un objectif…" (keyup.enter)="addObjectif()">
+                                                    <button type="button" (click)="addObjectif()">+ Ajouter</button>
                                                 </div>
                                             </div>
 
                                             <!-- Prérequis -->
                                             <div class="col-md-6 mb-3">
-                                                <div class="card bg-light">
-                                                    <div class="card-body">
-                                                        <h6 class="card-title">
-                                                            <i class="fas fa-list-check text-info me-2"></i>
-                                                            Prérequis
-                                                        </h6>
-                                                        <div *ngFor="let req of prerequis; let i = index" class="mb-2">
-                                                            <div class="input-group">
-                                                                <input type="text" class="form-control" [(ngModel)]="prerequis[i]" 
-                                                                       [ngModelOptions]="{standalone: true}"
-                                                                       placeholder="Nouveau prérequis">
-                                                                <button class="btn btn-outline-danger" type="button" (click)="removePrerequis(i)">
-                                                                    <i class="fas fa-times"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <button class="btn btn-sm btn-outline-primary" type="button" (click)="addPrerequis()">
-                                                            <i class="fas fa-plus me-1"></i> Ajouter
-                                                        </button>
-                                                    </div>
+                                                <label class="form-label">
+                                                    <i class="fas fa-list-check me-1" style="color:#1565C0"></i> Prérequis
+                                                </label>
+                                                <div class="pf-tags-wrap">
+                                                    <span *ngFor="let req of prerequis; let i = index" class="pf-tag pf-tag-blue">
+                                                        {{ req }}
+                                                        <button type="button" class="pf-tag-del" (click)="removePrerequis(i)">×</button>
+                                                    </span>
+                                                    <span *ngIf="prerequis.length === 0" class="pf-empty-tags">Aucun prérequis ajouté</span>
+                                                </div>
+                                                <div class="pf-tag-input">
+                                                    <input type="text" [(ngModel)]="newPrerequis" [ngModelOptions]="{standalone:true}"
+                                                           placeholder="Ajouter un prérequis…" (keyup.enter)="addPrerequis()">
+                                                    <button type="button" (click)="addPrerequis()">+ Ajouter</button>
                                                 </div>
                                             </div>
 
@@ -653,29 +652,125 @@
                             </div>
                         </div>
 
-<!-- Étape 4: Informations supplémentaires -->
+<!-- Étape 4 (new): Quiz editor -->
 <div *ngIf="currentStep === 3" class="form-step">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h4 class="card-title mb-4">
+                <i class="fas fa-question-circle text-primary me-2"></i>
+                Quiz des modules
+            </h4>
+            <div *ngIf="getQuizSections().length === 0" class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Aucune section de type <strong>quiz</strong> dans vos modules. Retournez à l'étape Modules &amp; Sections pour en ajouter une avec le type "quiz".
+            </div>
+            <div *ngIf="getQuizSections().length > 0" style="display:flex;gap:1rem;min-height:400px">
+                <div style="width:220px;flex-shrink:0;border-right:1px solid #e5e7eb;padding-right:1rem">
+                    <p class="fw-semibold text-muted mb-2" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em">Sections quiz</p>
+                    <div *ngFor="let qs of getQuizSections()"
+                         [style.background]="activeQuizKey === getQuizKey(qs.moduleIndex, qs.sectionIndex) ? '#ede9fe' : '#f9fafb'"
+                         style="cursor:pointer;padding:.4rem .6rem;border-radius:.375rem;margin-bottom:.25rem;font-size:.85rem"
+                         (click)="selectQuiz(qs.moduleIndex, qs.sectionIndex)">
+                        <i class="fas fa-question-circle me-1" style="color:#7c3aed"></i>
+                        <strong>{{ qs.sectionTitle }}</strong><br>
+                        <small class="text-muted">{{ qs.moduleTitle }}</small>
+                    </div>
+                </div>
+                <div style="flex:1" *ngIf="activeLocalQuiz; else noQuizSelected">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Titre du quiz</label>
+                            <input type="text" class="form-control" [(ngModel)]="activeLocalQuiz!.titre" [ngModelOptions]="{standalone:true}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Durée (min)</label>
+                            <input type="number" class="form-control" [(ngModel)]="activeLocalQuiz!.duree_minutes" [ngModelOptions]="{standalone:true}" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Score minimum (%)</label>
+                            <input type="number" class="form-control" [(ngModel)]="activeLocalQuiz!.score_minimum" [ngModelOptions]="{standalone:true}" min="0" max="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tentatives max</label>
+                            <input type="number" class="form-control" [(ngModel)]="activeLocalQuiz!.tentatives_max" [ngModelOptions]="{standalone:true}" min="1">
+                        </div>
+                    </div>
+                    <div *ngFor="let q of activeLocalQuiz!.questions" class="card mb-2 border">
+                        <div class="card-header d-flex align-items-center justify-content-between py-2 px-3" style="cursor:pointer;background:#f8f9fa" (click)="toggleQuizQuestion(q.id)">
+                            <span class="fw-semibold" style="font-size:.875rem">{{ q.question_text || '(sans titre)' }}</span>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="badge bg-secondary" style="font-size:.7rem">{{ getTypeLabel(q.type) }}</span>
+                                <button type="button" class="btn btn-sm btn-outline-danger" (click)="$event.stopPropagation(); removeQuizQuestion(q)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-3" *ngIf="expandedQuestion === q.id">
+                            <div class="mb-2">
+                                <label class="form-label">Question</label>
+                                <input type="text" class="form-control" [(ngModel)]="q.question_text" [ngModelOptions]="{standalone:true}" placeholder="Texte de la question">
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Points</label>
+                                    <input type="number" class="form-control" [(ngModel)]="q.points" [ngModelOptions]="{standalone:true}" min="1">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Explication</label>
+                                    <input type="text" class="form-control" [(ngModel)]="q.explication" [ngModelOptions]="{standalone:true}" placeholder="Optionnel">
+                                </div>
+                            </div>
+                            <div *ngIf="q.type !== 'text'">
+                                <label class="form-label">Réponses</label>
+                                <div *ngFor="let opt of q.reponses; let oi = index" class="d-flex align-items-center gap-2 mb-1">
+                                    <input type="text" class="form-control form-control-sm" [(ngModel)]="opt.reponse_text" [ngModelOptions]="{standalone:true}" placeholder="Réponse">
+                                    <div class="form-check mb-0 ms-1" *ngIf="q.type !== 'true_false'">
+                                        <input class="form-check-input" type="checkbox" [checked]="opt.is_correct" (change)="toggleQuizCorrect(q, opt)">
+                                        <label class="form-check-label" style="font-size:.75rem">Correcte</label>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="removeQuizOption(q, oi)" *ngIf="q.type !== 'true_false'">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-1" (click)="addQuizOption(q)" *ngIf="q.type !== 'true_false'">
+                                    <i class="fas fa-plus me-1"></i> Réponse
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="addQuizQuestion('multiple_choice')"><i class="fas fa-dot-circle me-1"></i> Choix unique</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="addQuizQuestion('multiple_choice_multi')"><i class="fas fa-check-square me-1"></i> Choix multiple</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="addQuizQuestion('true_false')"><i class="fas fa-toggle-on me-1"></i> Vrai / Faux</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="addQuizQuestion('text')"><i class="fas fa-font me-1"></i> Texte libre</button>
+                    </div>
+                </div>
+                <ng-template #noQuizSelected>
+                    <div class="d-flex align-items-center justify-content-center text-muted" style="flex:1">
+                        <span>Sélectionnez une section quiz à gauche pour l'éditer.</span>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Étape 5: Informations supplémentaires -->
+<div *ngIf="currentStep === 4" class="form-step">
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
             <h4 class="card-title mb-4">
                 <i class="fas fa-info-circle text-primary me-2"></i>
                 Informations supplémentaires
             </h4>
-            
             <form [formGroup]="additionalInfoForm">
                 <div class="row">
-                    
-                    <!-- Section 1: Détails de formation -->
                     <div class="col-12 mb-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-cogs me-2"></i>
-                            Détails de la formation
-                        </h5>
+                        <h5 class="text-secondary border-bottom pb-2"><i class="fas fa-cogs me-2"></i>Détails de la formation</h5>
                     </div>
-
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-semibold">Difficulté<span class="text-danger">*</span></label>
-                        <select class="form-select" formControlName="difficulte" 
+                        <select class="form-select" formControlName="difficulte"
                                 [class.is-invalid]="additionalInfoForm.get('difficulte')?.invalid && additionalInfoForm.get('difficulte')?.touched">
                             <option value="facile">Facile</option>
                             <option value="moyen">Moyen</option>
@@ -684,217 +779,105 @@
                         </select>
                         <div class="invalid-feedback">Le niveau de difficulté est requis</div>
                     </div>
-
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-semibold">Prix (€)<span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" formControlName="prix" 
-                               placeholder="0" min="0" step="0.01"
+                        <input type="number" class="form-control" formControlName="prix" placeholder="0" min="0" step="0.01"
                                [class.is-invalid]="additionalInfoForm.get('prix')?.invalid && additionalInfoForm.get('prix')?.touched">
                         <small class="text-muted">0 pour une formation gratuite</small>
                         <div class="invalid-feedback">Le prix est requis (0 minimum)</div>
                     </div>
-
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-semibold">Durée totale (heures)</label>
-                        <input type="number" class="form-control" formControlName="duree_totale" 
-                               placeholder="40" min="1" step="0.5"
+                        <input type="number" class="form-control" formControlName="duree_totale" placeholder="40" min="1" step="0.5"
                                [class.is-invalid]="additionalInfoForm.get('duree_totale')?.invalid && additionalInfoForm.get('duree_totale')?.touched">
                         <small class="text-muted">Estimation du temps total nécessaire</small>
                         <div class="invalid-feedback">La durée doit être d'au moins 1 heure</div>
                     </div>
-
-                    <!-- Section 2: Contenu et compétences -->
                     <div class="col-12 mb-4 mt-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-graduation-cap me-2"></i>
-                            Contenu et compétences
-                        </h5>
+                        <h5 class="text-secondary border-bottom pb-2"><i class="fas fa-graduation-cap me-2"></i>Contenu et compétences</h5>
                     </div>
-
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Compétences acquises</label>
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <div *ngFor="let comp of competencesAcquises; let i = index" class="mb-2">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" 
-                                               [(ngModel)]="competencesAcquises[i]" 
-                                               [ngModelOptions]="{standalone: true}"
-                                               placeholder="Nouvelle compétence acquise">
-                                        <button class="btn btn-outline-danger" type="button" 
-                                                (click)="removeCompetence(i)">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary" type="button" 
-                                        (click)="addCompetence()">
-                                    <i class="fas fa-plus me-1"></i> Ajouter une compétence
-                                </button>
-                            </div>
+                        <label class="form-label">
+                            <i class="fas fa-graduation-cap me-1" style="color:#3D7A5F"></i> Compétences acquises
+                        </label>
+                        <div class="pf-tags-wrap">
+                            <span *ngFor="let comp of competencesAcquises; let i = index" class="pf-tag pf-tag-green">
+                                {{ comp }}
+                                <button type="button" class="pf-tag-del" (click)="removeCompetence(i)">×</button>
+                            </span>
+                            <span *ngIf="competencesAcquises.length === 0" class="pf-empty-tags">Aucune compétence ajoutée</span>
+                        </div>
+                        <div class="pf-tag-input">
+                            <input type="text" [(ngModel)]="newCompetence" [ngModelOptions]="{standalone:true}"
+                                   placeholder="Ajouter une compétence…" (keyup.enter)="addCompetence()">
+                            <button type="button" (click)="addCompetence()">+ Ajouter</button>
                         </div>
                     </div>
-
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Outils requis</label>
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <div *ngFor="let outil of outilsRequis; let i = index" class="mb-2">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" 
-                                               [(ngModel)]="outilsRequis[i]" 
-                                               [ngModelOptions]="{standalone: true}"
-                                               placeholder="Nouvel outil requis">
-                                        <button class="btn btn-outline-danger" type="button" 
-                                                (click)="removeOutil(i)">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary" type="button" 
-                                        (click)="addOutil()">
-                                    <i class="fas fa-plus me-1"></i> Ajouter un outil
-                                </button>
-                            </div>
+                        <label class="form-label">
+                            <i class="fas fa-tools me-1" style="color:#6B3FA0"></i> Outils requis
+                        </label>
+                        <div class="pf-tags-wrap">
+                            <span *ngFor="let outil of outilsRequis; let i = index" class="pf-tag pf-tag-purple">
+                                {{ outil }}
+                                <button type="button" class="pf-tag-del" (click)="removeOutil(i)">×</button>
+                            </span>
+                            <span *ngIf="outilsRequis.length === 0" class="pf-empty-tags">Aucun outil ajouté</span>
+                        </div>
+                        <div class="pf-tag-input">
+                            <input type="text" [(ngModel)]="newOutil" [ngModelOptions]="{standalone:true}"
+                                   placeholder="Ajouter un outil…" (keyup.enter)="addOutil()">
+                            <button type="button" (click)="addOutil()">+ Ajouter</button>
                         </div>
                     </div>
-
-                    <!-- Section 3: Public et marketing -->
                     <div class="col-12 mb-4 mt-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-users me-2"></i>
-                            Public cible et marketing
-                        </h5>
+                        <h5 class="text-secondary border-bottom pb-2"><i class="fas fa-users me-2"></i>Public cible et marketing</h5>
                     </div>
-
                     <div class="col-md-12 mb-3">
                         <label class="form-label fw-semibold">Public cible</label>
-                        <textarea class="form-control" formControlName="public_cible" rows="3"
-                                  placeholder="À qui s'adresse cette formation ? (ex: développeurs juniors, chefs de projet, étudiants en informatique...)"></textarea>
-                        <small class="text-muted">Décrivez précisément votre audience cible</small>
+                        <textarea class="form-control" formControlName="public_cible" rows="3" placeholder="À qui s'adresse cette formation ?"></textarea>
                     </div>
-
                     <div class="col-md-12 mb-3">
                         <label class="form-label fw-semibold">Tags</label>
-                        <input type="text" class="form-control" formControlName="tags" 
-                               placeholder="javascript, angular, web, développement (séparés par des virgules)">
-                        <small class="text-muted">Maximum 10 tags, séparés par des virgules. Utiles pour la recherche.</small>
+                        <input type="text" class="form-control" formControlName="tags" placeholder="javascript, angular, web (séparés par virgules)">
                     </div>
-
-                    <!-- Section 4: Paramètres avancés -->
                     <div class="col-12 mb-4 mt-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-cog me-2"></i>
-                            Paramètres avancés
-                        </h5>
+                        <h5 class="text-secondary border-bottom pb-2"><i class="fas fa-cog me-2"></i>Paramètres avancés</h5>
                     </div>
-
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">Date de début</label>
                         <input type="date" class="form-control" formControlName="date_debut">
-                        <small class="text-muted">Date de début prévue (optionnel)</small>
                     </div>
-
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">Date de fin</label>
                         <input type="date" class="form-control" formControlName="date_fin">
-                        <small class="text-muted">Date de fin prévue (optionnel)</small>
-                    </div>
-
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label fw-semibold">Métadonnées (JSON)</label>
-                        <textarea class="form-control" formControlName="metadata" rows="2"
-                                  placeholder='{"version": "1.0", "auteur": "Nom", "copyright": "2024"}'></textarea>
-                        <small class="text-muted">Informations techniques au format JSON (optionnel)</small>
-                    </div>
-
-                    <!-- Section 5: Options de publication -->
-                    <div class="col-12 mb-4 mt-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-toggle-on me-2"></i>
-                            Options de publication
-                        </h5>
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" 
-                                   formControlName="inscription_ouverte" id="inscriptionOuverte">
-                            <label class="form-check-label" for="inscriptionOuverte">
-                                <i class="fas fa-door-open text-success me-2"></i>
-                                Inscriptions ouvertes
-                            </label>
-                            <small class="text-muted d-block">
-                                Les utilisateurs peuvent s'inscrire à cette formation
-                            </small>
+                            <input class="form-check-input" type="checkbox" formControlName="inscription_ouverte" id="inscriptionOuverte2">
+                            <label class="form-check-label" for="inscriptionOuverte2"><i class="fas fa-door-open text-success me-2"></i>Inscriptions ouvertes</label>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" 
-                                   formControlName="est_publie" id="estPublie">
-                            <label class="form-check-label" for="estPublie">
-                                <i class="fas fa-eye text-info me-2"></i>
-                                Formation publiée
-                            </label>
-                            <small class="text-muted d-block">
-                                La formation est visible publiquement
-                            </small>
+                            <input class="form-check-input" type="checkbox" formControlName="est_publie" id="estPublie2">
+                            <label class="form-check-label" for="estPublie2"><i class="fas fa-eye text-info me-2"></i>Formation publiée</label>
                         </div>
                     </div>
-
-                    <!-- Résumé des informations -->
-                    <div class="col-12 mt-4">
-                        <div class="card bg-light border-left-primary">
-                            <div class="card-body">
-                                <h6 class="card-title">
-                                    <i class="fas fa-clipboard-check me-2"></i>
-                                    Résumé des informations supplémentaires
-                                </h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <ul class="list-unstyled">
-                                            <li class="mb-1">
-                                                <strong>Difficulté:</strong> {{ getDifficulteLabel(additionalInfoForm.get('difficulte')?.value) }}
-                                            </li>
-                                            <li class="mb-1">
-                                                <strong>Prix:</strong> 
-                                                <span [class]="additionalInfoForm.get('prix')?.value == 0 ? 'text-success' : 'text-primary'">
-                                                    {{ additionalInfoForm.get('prix')?.value == 0 ? 'GRATUIT' : additionalInfoForm.get('prix')?.value + '€' }}
-                                                </span>
-                                            </li>
-                                            <li class="mb-1">
-                                                <strong>Durée:</strong> {{ additionalInfoForm.get('duree_totale')?.value || 'Non définie' }}h
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <ul class="list-unstyled">
-                                            <li class="mb-1">
-                                                <strong>Compétences:</strong> {{ getCompetencesCount() }} définie(s)
-                                            </li>
-                                            <li class="mb-1">
-                                                <strong>Outils requis:</strong> {{ getOutilsCount() }} défini(s)
-                                            </li>
-                                            <li class="mb-1">
-                                                <strong>Inscriptions:</strong> 
-                                                <span [class]="additionalInfoForm.get('inscription_ouverte')?.value ? 'text-success' : 'text-warning'">
-                                                    {{ additionalInfoForm.get('inscription_ouverte')?.value ? 'Ouvertes' : 'Fermées' }}
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" formControlName="est_certifiante" id="estCertifiante2">
+                            <label class="form-check-label" for="estCertifiante2"><i class="fas fa-certificate text-warning me-2"></i>Formation certifiante</label>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-</div>                        
+</div>
 
-                        <!-- Étape 5: Coût estimatif -->
-                        <div *ngIf="currentStep === 4" class="form-step">
+                        <!-- Étape 6: Coût estimatif -->
+                        <div *ngIf="currentStep === 5" class="form-step">
                             <div class="card border-0 shadow-sm">
                                 <div class="card-body p-4">
                                     <h4 class="card-title mb-4">
@@ -1009,20 +992,21 @@
                         </div>
 
                         <!-- Navigation Buttons -->
-                        <div class="d-flex justify-content-between mt-4">
-                            <button class="btn btn-outline-secondary" 
-                                    *ngIf="currentStep > 0"
-                                    (click)="prevStep()">
-                                <i class="fas fa-arrow-left me-2"></i> Précédent
-                            </button>
-                            <div class="ms-auto">
-                                <button class="btn btn-primary" 
-                                        *ngIf="currentStep < 4"
+                        <div class="d-flex justify-content-between align-items-center pf-nav-footer">
+                            <span class="pf-step-lbl">Étape {{ currentStep + 1 }} sur 6</span>
+                            <div class="d-flex gap-2 align-items-center">
+                                <button class="btn btn-outline-secondary"
+                                        *ngIf="currentStep > 0"
+                                        (click)="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i> Retour
+                                </button>
+                                <button class="btn btn-primary"
+                                        *ngIf="currentStep < 5"
                                         (click)="nextStep()">
                                     Suivant <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
-                                <button class="btn btn-success" 
-                                        *ngIf="currentStep === 4"
+                                <button class="btn btn-success"
+                                        *ngIf="currentStep === 5"
                                         (click)="submitCourse()"
                                         [disabled]="saving">
                                     <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
@@ -1095,8 +1079,10 @@
                             <label class="form-label">Type<span class="text-danger">*</span></label>
                             <select class="form-select" [(ngModel)]="currentSection.type" name="type" required>
                                 <option value="video">Vidéo</option>
-                                <option value="reading">Lecture</option>
-                                <option value="hands-on">Pratique</option>
+                                <option value="text">Texte / Lecture</option>
+                                <option value="pdf">Document PDF</option>
+                                <option value="exercice">Exercice pratique</option>
+                                <option value="ressource">Ressource externe</option>
                                 <option value="quiz">Quiz</option>
                             </select>
                         </div>
@@ -1154,245 +1140,7 @@
                 <p class="text-muted mb-4">Votre formation a été enregistrée et l'estimation des coûts est disponible.</p>
                 <div class="d-flex gap-2 justify-content-center">
                     <button class="btn btn-primary" (click)="goToCoursesList()">
-                        Voir mes formations<!-- Étape 4: Informations supplémentaires -->
-<div *ngIf="currentStep === 3" class="form-step">
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-            <h4 class="card-title mb-4">
-                <i class="fas fa-info-circle text-primary me-2"></i>
-                Informations supplémentaires
-            </h4>
-            
-            <form [formGroup]="additionalInfoForm">
-                <div class="row">
-                    
-                    <!-- Section 1: Détails de formation -->
-                    <div class="col-12 mb-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-cogs me-2"></i>
-                            Détails de la formation
-                        </h5>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Difficulté<span class="text-danger">*</span></label>
-                        <select class="form-select" formControlName="difficulte" 
-                                [class.is-invalid]="additionalInfoForm.get('difficulte')?.invalid && additionalInfoForm.get('difficulte')?.touched">
-                            <option value="facile">Facile</option>
-                            <option value="moyen">Moyen</option>
-                            <option value="difficile">Difficile</option>
-                            <option value="expert">Expert</option>
-                        </select>
-                        <div class="invalid-feedback">Le niveau de difficulté est requis</div>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Prix (€)<span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" formControlName="prix" 
-                               placeholder="0" min="0" step="0.01"
-                               [class.is-invalid]="additionalInfoForm.get('prix')?.invalid && additionalInfoForm.get('prix')?.touched">
-                        <small class="text-muted">0 pour une formation gratuite</small>
-                        <div class="invalid-feedback">Le prix est requis (0 minimum)</div>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Durée totale (heures)</label>
-                        <input type="number" class="form-control" formControlName="duree_totale" 
-                               placeholder="40" min="1" step="0.5"
-                               [class.is-invalid]="additionalInfoForm.get('duree_totale')?.invalid && additionalInfoForm.get('duree_totale')?.touched">
-                        <small class="text-muted">Estimation du temps total nécessaire</small>
-                        <div class="invalid-feedback">La durée doit être d'au moins 1 heure</div>
-                    </div>
-
-                    <!-- Section 2: Contenu et compétences -->
-                    <div class="col-12 mb-4 mt-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-graduation-cap me-2"></i>
-                            Contenu et compétences
-                        </h5>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Compétences acquises</label>
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <div *ngFor="let comp of competencesAcquises; let i = index" class="mb-2">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" 
-                                               [(ngModel)]="competencesAcquises[i]" 
-                                               [ngModelOptions]="{standalone: true}"
-                                               placeholder="Nouvelle compétence acquise">
-                                        <button class="btn btn-outline-danger" type="button" 
-                                                (click)="removeCompetence(i)">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary" type="button" 
-                                        (click)="addCompetence()">
-                                    <i class="fas fa-plus me-1"></i> Ajouter une compétence
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Outils requis</label>
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <div *ngFor="let outil of outilsRequis; let i = index" class="mb-2">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" 
-                                               [(ngModel)]="outilsRequis[i]" 
-                                               [ngModelOptions]="{standalone: true}"
-                                               placeholder="Nouvel outil requis">
-                                        <button class="btn btn-outline-danger" type="button" 
-                                                (click)="removeOutil(i)">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary" type="button" 
-                                        (click)="addOutil()">
-                                    <i class="fas fa-plus me-1"></i> Ajouter un outil
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 3: Public et marketing -->
-                    <div class="col-12 mb-4 mt-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-users me-2"></i>
-                            Public cible et marketing
-                        </h5>
-                    </div>
-
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label fw-semibold">Public cible</label>
-                        <textarea class="form-control" formControlName="public_cible" rows="3"
-                                  placeholder="À qui s'adresse cette formation ? (ex: développeurs juniors, chefs de projet, étudiants en informatique...)"></textarea>
-                        <small class="text-muted">Décrivez précisément votre audience cible</small>
-                    </div>
-
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label fw-semibold">Tags</label>
-                        <input type="text" class="form-control" formControlName="tags" 
-                               placeholder="javascript, angular, web, développement (séparés par des virgules)">
-                        <small class="text-muted">Maximum 10 tags, séparés par des virgules. Utiles pour la recherche.</small>
-                    </div>
-
-                    <!-- Section 4: Paramètres avancés -->
-                    <div class="col-12 mb-4 mt-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-cog me-2"></i>
-                            Paramètres avancés
-                        </h5>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Date de début</label>
-                        <input type="date" class="form-control" formControlName="date_debut">
-                        <small class="text-muted">Date de début prévue (optionnel)</small>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Date de fin</label>
-                        <input type="date" class="form-control" formControlName="date_fin">
-                        <small class="text-muted">Date de fin prévue (optionnel)</small>
-                    </div>
-
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label fw-semibold">Métadonnées (JSON)</label>
-                        <textarea class="form-control" formControlName="metadata" rows="2"
-                                  placeholder='{"version": "1.0", "auteur": "Nom", "copyright": "2024"}'></textarea>
-                        <small class="text-muted">Informations techniques au format JSON (optionnel)</small>
-                    </div>
-
-                    <!-- Section 5: Options de publication -->
-                    <div class="col-12 mb-4 mt-4">
-                        <h5 class="text-secondary border-bottom pb-2">
-                            <i class="fas fa-toggle-on me-2"></i>
-                            Options de publication
-                        </h5>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" 
-                                   formControlName="inscription_ouverte" id="inscriptionOuverte">
-                            <label class="form-check-label" for="inscriptionOuverte">
-                                <i class="fas fa-door-open text-success me-2"></i>
-                                Inscriptions ouvertes
-                            </label>
-                            <small class="text-muted d-block">
-                                Les utilisateurs peuvent s'inscrire à cette formation
-                            </small>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" 
-                                   formControlName="est_publie" id="estPublie">
-                            <label class="form-check-label" for="estPublie">
-                                <i class="fas fa-eye text-info me-2"></i>
-                                Formation publiée
-                            </label>
-                            <small class="text-muted d-block">
-                                La formation est visible publiquement
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Résumé des informations -->
-                    <div class="col-12 mt-4">
-                        <div class="card bg-light border-left-primary">
-                            <div class="card-body">
-                                <h6 class="card-title">
-                                    <i class="fas fa-clipboard-check me-2"></i>
-                                    Résumé des informations supplémentaires
-                                </h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <ul class="list-unstyled">
-                                            <li class="mb-1">
-                                                <strong>Difficulté:</strong> {{ getDifficulteLabel(additionalInfoForm.get('difficulte')?.value) }}
-                                            </li>
-                                            <li class="mb-1">
-                                                <strong>Prix:</strong> 
-                                                <span [class]="additionalInfoForm.get('prix')?.value == 0 ? 'text-success' : 'text-primary'">
-                                                    {{ additionalInfoForm.get('prix')?.value == 0 ? 'GRATUIT' : additionalInfoForm.get('prix')?.value + '€' }}
-                                                </span>
-                                            </li>
-                                            <li class="mb-1">
-                                                <strong>Durée:</strong> {{ additionalInfoForm.get('duree_totale')?.value || 'Non définie' }}h
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <ul class="list-unstyled">
-                                            <li class="mb-1">
-                                                <strong>Compétences:</strong> {{ getCompetencesCount() }} définie(s)
-                                            </li>
-                                            <li class="mb-1">
-                                                <strong>Outils requis:</strong> {{ getOutilsCount() }} défini(s)
-                                            </li>
-                                            <li class="mb-1">
-                                                <strong>Inscriptions:</strong> 
-                                                <span [class]="additionalInfoForm.get('inscription_ouverte')?.value ? 'text-success' : 'text-warning'">
-                                                    {{ additionalInfoForm.get('inscription_ouverte')?.value ? 'Ouvertes' : 'Fermées' }}
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+                        Voir mes formations
                     </button>
                     <button class="btn btn-outline-secondary" (click)="createNewCourse()">
                         Créer une nouvelle formation
@@ -1402,3 +1150,4 @@
         </div>
     </div>
 </div>
+

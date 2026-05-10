@@ -187,5 +187,14 @@ export class InstructorSessionComponent implements OnInit {
     return session.id;
   }
 
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const totalPages = Math.ceil(this.totalData / this.pageSize);
+    const start = Math.max(1, this.currentPage - 2);
+    const end   = Math.min(totalPages, this.currentPage + 2);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }
+
   clearError(): void { this.error = ''; }
 }

@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { CategorieService, CategorieFormation } from '../../../shared/service/categorie/categorie-service.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
+import { QuizService } from '../../../shared/service/quiz/quiz.service';
+import { QuestionQuizService } from '../../../shared/service/quiz/question-quiz.service';
 
 declare var bootstrap: any;
 
@@ -26,10 +29,33 @@ interface Section {
   type: string;
   duree_estimee: number;
   contenu: string;
-  ressources: string;
+  ressources: string | string[];
   obligatoire: boolean;
   visible: boolean;
   ordre: number;
+}
+
+interface QuizQuestion {
+  id: number;
+  question_text: string;
+  type: string;
+  points: number;
+  ordre: number;
+  explication: string;
+  reponses: any[];
+  _new?: boolean;
+}
+
+interface LocalQuiz {
+  moduleIndex: number;
+  sectionIndex: number;
+  quizId?: number;
+  titre: string;
+  description: string;
+  score_minimum: number;
+  tentatives_max: number;
+  duree_minutes: number;
+  questions: QuizQuestion[];
 }
 
 @Component({
@@ -61,10 +87,14 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   // Données
   categories: CategorieFormation[] = [];
   modules: Module[] = [];
-  objectifs: string[] = [''];
-  prerequis: string[] = [''];
-  competencesAcquises: string[] = [''];
-  outilsRequis: string[] = [''];
+  objectifs: string[] = [];
+  prerequis: string[] = [];
+  competencesAcquises: string[] = [];
+  outilsRequis: string[] = [];
+  newObjectif = '';
+  newPrerequis = '';
+  newCompetence = '';
+  newOutil = '';
 
   // Média
   imagePreview: string | null = null;
@@ -83,6 +113,12 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   editingSectionIndex: number | null = null;
   currentModuleIndex: number | null = null;
 
+  // ── quiz editor (step 3) ───────────────────────────────────────────────
+  localQuizzes: LocalQuiz[] = [];
+  activeQuizKey: string | null = null;
+  expandedQuestion: number | null = null;
+  loadingQuiz = false;
+
   // Subscriptions
   private subscriptions: Subscription = new Subscription();
 
@@ -93,7 +129,9 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private sanitizer: DomSanitizer,
-    private authService: AuthService
+    private authService: AuthService,
+    private quizService: QuizService,
+    private questionService: QuestionQuizService,
   ) {
     this.initForms();
   }
@@ -276,8 +314,9 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
       video_show_controls: this.course.video_show_controls !== false
     });
 
-    if (this.course.image_url) {
-      this.imagePreview = this.course.image_url;
+    const rawImage = this.course.image_couverture || this.course.image_url;
+    if (rawImage) {
+      this.imagePreview = this.formationService.getImageUrl(rawImage);
     }
 
     // Remplir le formulaire d'informations supplémentaires
@@ -322,14 +361,15 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
 
   private handleArrayData(): void {
     // Objectifs
-    if (this.course.objectifs) {
-      if (typeof this.course.objectifs === 'string') {
-        this.objectifs = this.course.objectifs.split(',').map((obj: string) => obj.trim()).filter((obj: string) => obj);
-      } else if (Array.isArray(this.course.objectifs)) {
-        this.objectifs = [...this.course.objectifs];
+    const rawObjectifs = this.course.objectifs_pedagogiques ?? this.course.objectifs;
+    if (rawObjectifs) {
+      if (typeof rawObjectifs === 'string') {
+        this.objectifs = rawObjectifs.split(',').map((obj: string) => obj.trim()).filter((obj: string) => obj);
+      } else if (Array.isArray(rawObjectifs)) {
+        this.objectifs = [...rawObjectifs];
       }
     }
-    if (this.objectifs.length === 0) this.objectifs = [''];
+    if (this.objectifs.length === 0) this.objectifs = [];
 
     // Prérequis
     if (this.course.prerequis) {
@@ -339,7 +379,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
         this.prerequis = [...this.course.prerequis];
       }
     }
-    if (this.prerequis.length === 0) this.prerequis = [''];
+    if (this.prerequis.length === 0) this.prerequis = [];
 
     // Compétences
     if (this.course.competences_acquises) {
@@ -349,7 +389,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
         this.competencesAcquises = [...this.course.competences_acquises];
       }
     }
-    if (this.competencesAcquises.length === 0) this.competencesAcquises = [''];
+    if (this.competencesAcquises.length === 0) this.competencesAcquises = [];
 
     // Outils
     if (this.course.outils_requis) {
@@ -359,7 +399,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
         this.outilsRequis = [...this.course.outils_requis];
       }
     }
-    if (this.outilsRequis.length === 0) this.outilsRequis = [''];
+    if (this.outilsRequis.length === 0) this.outilsRequis = [];
   }
 
   loadModulesAndSections(): void {
@@ -369,13 +409,24 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
     }
 
     try {
+      let raw: any[];
       if (typeof this.course.modules === 'string') {
-        this.modules = JSON.parse(this.course.modules);
+        raw = JSON.parse(this.course.modules);
       } else if (Array.isArray(this.course.modules)) {
-        this.modules = this.course.modules;
+        raw = this.course.modules;
       } else {
-        this.modules = [];
+        raw = [];
       }
+      // Normaliser les sections : ressources en string pour le sectionModal
+      this.modules = raw.map((m: any) => ({
+        ...m,
+        sections: (m.sections ?? []).map((s: any) => ({
+          ...s,
+          ressources: Array.isArray(s.ressources)
+            ? s.ressources.join(', ')
+            : (s.ressources ?? ''),
+        })),
+      }));
     } catch (error) {
       console.error('Erreur lors du parsing des modules:', error);
       this.modules = [];
@@ -452,17 +503,10 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
           return false;
         }
         break;
-      case 1:
-        // Média optionnel
-        break;
-      case 2:
-        if (this.modules.length === 0) {
-          this.error = 'Vous devez créer au moins un module';
-          setTimeout(() => this.error = '', 5000);
-          return false;
-        }
-        break;
-      case 3:
+      case 1: break; // Média optionnel
+      case 2: break; // Modules optionnels
+      case 3: break; // Quiz optionnel
+      case 4:
         if (this.additionalInfoForm.invalid) {
           this.markFormGroupTouched(this.additionalInfoForm);
           this.error = 'Veuillez remplir correctement les informations supplémentaires';
@@ -470,9 +514,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
           return false;
         }
         break;
-      case 4:
-        // Coûts optionnels
-        break;
+      case 5: break; // Coûts optionnels
     }
     this.error = '';
     return true;
@@ -487,8 +529,8 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   // ==================== OBJECTIFS ====================
 
   addObjectif(): void {
-    this.objectifs.push('');
-    this.markAsChanged();
+    const v = this.newObjectif.trim();
+    if (v) { this.objectifs.push(v); this.newObjectif = ''; this.markAsChanged(); }
   }
 
   removeObjectif(index: number): void {
@@ -501,8 +543,8 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   // ==================== PREREQUIS ====================
 
   addPrerequis(): void {
-    this.prerequis.push('');
-    this.markAsChanged();
+    const v = this.newPrerequis.trim();
+    if (v) { this.prerequis.push(v); this.newPrerequis = ''; this.markAsChanged(); }
   }
 
   removePrerequis(index: number): void {
@@ -515,8 +557,8 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   // ==================== COMPETENCES ====================
 
   addCompetence(): void {
-    this.competencesAcquises.push('');
-    this.markAsChanged();
+    const v = this.newCompetence.trim();
+    if (v) { this.competencesAcquises.push(v); this.newCompetence = ''; this.markAsChanged(); }
   }
 
   removeCompetence(index: number): void {
@@ -529,8 +571,8 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   // ==================== OUTILS ====================
 
   addOutil(): void {
-    this.outilsRequis.push('');
-    this.markAsChanged();
+    const v = this.newOutil.trim();
+    if (v) { this.outilsRequis.push(v); this.newOutil = ''; this.markAsChanged(); }
   }
 
   removeOutil(index: number): void {
@@ -851,6 +893,197 @@ private validateSectionType(type: string): string {
     return Math.round(total / duree);
   }
 
+  // ==================== QUIZ EDITOR (step 3) ====================
+
+  getQuizKey(moduleIndex: number, sectionIndex: number): string {
+    return `${moduleIndex}-${sectionIndex}`;
+  }
+
+  getQuizSections(): { moduleIndex: number; sectionIndex: number; moduleTitle: string; sectionTitle: string }[] {
+    const result: { moduleIndex: number; sectionIndex: number; moduleTitle: string; sectionTitle: string }[] = [];
+    this.modules.forEach((mod, mi) => {
+      (mod.sections || []).forEach((sec, si) => {
+        if (sec.type === 'quiz') {
+          result.push({ moduleIndex: mi, sectionIndex: si, moduleTitle: mod.titre, sectionTitle: sec.titre });
+        }
+      });
+    });
+    return result;
+  }
+
+  getOrCreateLocalQuiz(moduleIndex: number, sectionIndex: number): LocalQuiz {
+    const key = this.getQuizKey(moduleIndex, sectionIndex);
+    let lq = this.localQuizzes.find(q => this.getQuizKey(q.moduleIndex, q.sectionIndex) === key);
+    if (!lq) {
+      const sec = this.modules[moduleIndex]?.sections[sectionIndex] as any;
+      lq = {
+        moduleIndex, sectionIndex,
+        quizId: sec?.quiz_id || undefined,
+        titre: sec?.titre || 'Nouveau quiz',
+        description: '',
+        score_minimum: 70,
+        tentatives_max: 2,
+        duree_minutes: 0,
+        questions: [],
+      };
+      this.localQuizzes.push(lq);
+      if (lq.quizId) { this.loadExistingQuiz(lq); }
+    }
+    return lq;
+  }
+
+  private loadExistingQuiz(lq: LocalQuiz): void {
+    if (!lq.quizId) return;
+    this.loadingQuiz = true;
+    this.quizService.getQuiz(lq.quizId).pipe(catchError(() => of(null))).subscribe((res: any) => {
+      const quiz = res?.quiz || res;
+      if (quiz) {
+        lq.titre = quiz.titre || lq.titre;
+        lq.description = quiz.description || '';
+        lq.score_minimum = quiz.score_minimum ?? 70;
+        lq.tentatives_max = quiz.max_tentatives ?? quiz.tentatives_max ?? 2;
+        lq.duree_minutes = quiz.duree_minutes ?? 0;
+        this.questionService.getQuestions(lq.quizId!).pipe(catchError(() => of({ questions: [] }))).subscribe(res => {
+          lq.questions = (res.questions || []).map((q: any) => ({
+            ...q, reponses: q.reponses || this.quizDefaultOptions(q.type),
+          }));
+          this.loadingQuiz = false;
+        });
+      } else { this.loadingQuiz = false; }
+    });
+  }
+
+  selectQuiz(moduleIndex: number, sectionIndex: number): void {
+    this.activeQuizKey = this.getQuizKey(moduleIndex, sectionIndex);
+    this.expandedQuestion = null;
+    this.getOrCreateLocalQuiz(moduleIndex, sectionIndex);
+  }
+
+  get activeLocalQuiz(): LocalQuiz | null {
+    if (!this.activeQuizKey) return null;
+    return this.localQuizzes.find(q => this.getQuizKey(q.moduleIndex, q.sectionIndex) === this.activeQuizKey) || null;
+  }
+
+  quizDefaultOptions(type: string): any[] {
+    if (type === 'true_false') {
+      return [{ reponse_text: 'Vrai', is_correct: true, ordre: 1 }, { reponse_text: 'Faux', is_correct: false, ordre: 2 }];
+    }
+    if (type === 'multiple_choice' || type === 'multiple_choice_multi') {
+      return [{ reponse_text: '', is_correct: true, ordre: 1 }, { reponse_text: '', is_correct: false, ordre: 2 }];
+    }
+    return [];
+  }
+
+  addQuizQuestion(type: string): void {
+    const lq = this.activeLocalQuiz;
+    if (!lq) return;
+    const newQ: QuizQuestion = {
+      id: Date.now(), question_text: '', type, points: 1,
+      ordre: (lq.questions.length || 0) + 1,
+      reponses: this.quizDefaultOptions(type), explication: '', _new: true,
+    };
+    lq.questions = [...lq.questions, newQ];
+    this.expandedQuestion = newQ.id;
+  }
+
+  removeQuizQuestion(q: QuizQuestion): void {
+    const lq = this.activeLocalQuiz;
+    if (!lq) return;
+    lq.questions = lq.questions.filter(x => x.id !== q.id);
+  }
+
+  toggleQuizQuestion(id: number): void {
+    this.expandedQuestion = this.expandedQuestion === id ? null : id;
+  }
+
+  toggleQuizCorrect(q: QuizQuestion, opt: any): void {
+    if (q.type === 'multiple_choice') {
+      q.reponses.forEach((r: any) => r.is_correct = false);
+      opt.is_correct = true;
+    } else {
+      opt.is_correct = !opt.is_correct;
+    }
+  }
+
+  addQuizOption(q: QuizQuestion): void {
+    q.reponses = [...(q.reponses || []), { reponse_text: '', is_correct: false, ordre: (q.reponses?.length || 0) + 1 }];
+  }
+
+  removeQuizOption(q: QuizQuestion, index: number): void {
+    q.reponses = q.reponses.filter((_: any, i: number) => i !== index);
+  }
+
+  getTypeLabel(type: string): string {
+    const map: Record<string, string> = {
+      multiple_choice: 'Choix unique', multiple_choice_multi: 'Choix multiple',
+      true_false: 'Vrai / Faux', text: 'Texte libre',
+    };
+    return map[type] || type;
+  }
+
+  saveActiveQuiz(): void {
+    const lq = this.activeLocalQuiz;
+    if (!lq || !this.courseId) return;
+    this.saving = true;
+    this.error = '';
+
+    const onError = (err: any) => {
+      this.saving = false;
+      const msg = err?.error?.message
+        || (err?.error?.errors ? Object.values(err.error.errors).flat().join(', ') : null)
+        || `Erreur ${err?.status ?? ''}`;
+      this.error = 'Erreur enregistrement quiz : ' + msg;
+      setTimeout(() => this.error = '', 6000);
+    };
+
+    const doSaveQuestions = (quizId: number) => {
+      if (!lq.questions.length) {
+        this.saving = false;
+        this.success = 'Quiz enregistré';
+        setTimeout(() => this.success = '', 3000);
+        return;
+      }
+      const saves = lq.questions.map((q: QuizQuestion) => {
+        const payload = {
+          question_text: q.question_text, type: q.type as any, points: q.points, ordre: q.ordre,
+          reponses: q.reponses, explication: q.explication, quizzes_id: quizId,
+        };
+        if (q._new) return this.questionService.createQuestion(quizId, payload).pipe(catchError(e => { onError(e); return of(null); }));
+        return this.questionService.updateQuestion(quizId, q.id, payload).pipe(catchError(e => { onError(e); return of(null); }));
+      });
+      forkJoin(saves).subscribe(() => {
+        lq.questions.forEach(q => delete q._new);
+        this.saving = false;
+        this.success = 'Quiz enregistré avec succès';
+        setTimeout(() => this.success = '', 3000);
+      });
+    };
+
+    if (lq.quizId) {
+      this.quizService.updateQuiz(lq.quizId, {
+        titre: lq.titre, description: lq.description, type: 'formation',
+        score_minimum: lq.score_minimum, max_tentatives: lq.tentatives_max,
+        duree_minutes: lq.duree_minutes,
+      } as any).subscribe({
+        next: () => doSaveQuestions(lq.quizId!),
+        error: onError,
+      });
+    } else {
+      this.quizService.createQuiz({
+        titre: lq.titre, description: lq.description, formation_id: this.courseId!,
+        type: 'formation',
+        score_minimum: lq.score_minimum, max_tentatives: lq.tentatives_max,
+        duree_minutes: lq.duree_minutes, is_active: true,
+      } as any).subscribe({
+        next: (quiz: any) => {
+          lq.quizId = (quiz?.quiz || quiz).id;
+          doSaveQuestions(lq.quizId!);
+        },
+        error: onError,
+      });
+    }
+  }
+
   // ==================== MISE À JOUR ====================
 
   updateCourse(): void {
@@ -863,11 +1096,20 @@ private validateSectionType(type: string): string {
       return;
     }
 
-    const formData = this.buildFormData();
-    
-    console.log('Données envoyées pour mise à jour:', formData);
+    let formData: any;
+    try {
+      formData = this.buildFormData();
+    } catch (err) {
+      this.saving = false;
+      this.error = 'Erreur lors de la préparation des données. Vérifiez les modules et sections.';
+      console.error('buildFormData error:', err);
+      return;
+    }
 
-    const subscription = this.formationService.updateFormation(this.courseId!, formData).subscribe({
+    const doUpdate = (imagePath: string | null) => {
+      if (imagePath) formData.image_couverture = imagePath;
+
+      const subscription = this.formationService.updateFormation(this.courseId!, formData).subscribe({
       next: (response) => {
         this.saving = false;
         this.success = 'Formation mise à jour avec succès !';
@@ -902,8 +1144,18 @@ private validateSectionType(type: string): string {
           this.error = 'Erreur lors de la mise à jour de la formation.';
         }
       }
-    });
-    this.subscriptions.add(subscription);
+      });
+      this.subscriptions.add(subscription);
+    };
+
+    if (this.selectedImageFile) {
+      this.formationService.uploadImageCouverture(this.selectedImageFile).subscribe({
+        next: (res) => doUpdate(res.path || null),
+        error: () => doUpdate(null),
+      });
+    } else {
+      doUpdate(null);
+    }
   }
 
   buildFormData(): any {
@@ -939,7 +1191,9 @@ private validateSectionType(type: string): string {
       prix: parseFloat(additionalInfo.prix) || 0,
       duree_totale: parseInt(additionalInfo.duree_totale) || null,
       public_cible: additionalInfo.public_cible?.trim() || null,
-      tags: additionalInfo.tags?.trim() || null,
+      tags: Array.isArray(additionalInfo.tags)
+        ? additionalInfo.tags
+        : (additionalInfo.tags ? additionalInfo.tags.toString().split(',').map((t: string) => t.trim()).filter((t: string) => t) : null),
       date_debut: additionalInfo.date_debut || null,
       date_fin: additionalInfo.date_fin || null,
       inscription_ouverte: Boolean(additionalInfo.inscription_ouverte),
@@ -950,32 +1204,30 @@ private validateSectionType(type: string): string {
       video_autoplay: Boolean(mediaInfo.video_autoplay),
       video_show_controls: Boolean(mediaInfo.video_show_controls),
 
-      // Objectifs, prérequis, compétences, outils
-      objectifs: this.objectifs.filter(obj => obj.trim()).join(', '),
-      prerequis: this.prerequis.filter(pre => pre.trim()).join(', '),
-      competences_acquises: this.competencesAcquises.filter(comp => comp.trim()).join(', '),
-      outils_requis: this.outilsRequis.filter(outil => outil.trim()).join(', '),
+      objectifs_pedagogiques: this.objectifs.filter(obj => String(obj).trim()).map(obj => String(obj).trim()).join(', ') || null,
+      prerequis: this.prerequis.filter(pre => String(pre).trim()).map(pre => String(pre).trim()).join(', ') || null,
+      competences_acquises: this.competencesAcquises.filter(comp => comp.trim()),
+      outils_requis: this.outilsRequis.filter(outil => outil.trim()),
 
-      // Modules (JSON stringified pour l'édition)
-        modules: this.modules.map(module => ({
+      modules: this.modules.map((module: any) => ({
         id: module.id,
-        titre: module.titre?.trim(),
-        description: module.description?.trim(),
-        duree_estimee: module.duree_estimee.toString() || '0',
+        titre: String(module.titre ?? '').trim(),
+        description: String(module.description ?? '').trim() || null,
+        duree_estimee: String(module.duree_estimee ?? '0'),
         ordre: module.ordre,
-       sections: module.sections.map(section => ({
-        id: section.id,
-        titre: section.titre?.trim(),
-        type: section.type,
-        duree_estimee: section.duree_estimee.toString() || '0',
-        contenu: section.contenu?.trim() || null,
-        ressources: section.ressources?.trim() 
-          ? section.ressources.split(',').map(r => r.trim()).filter(r => r) 
-          : [],  // Convertir en array au lieu de string
-        obligatoire: Boolean(section.obligatoire),
-        visible: Boolean(section.visible),
-        ordre: section.ordre
-      }))
+        sections: (module.sections ?? []).map((section: any) => ({
+          id: section.id,
+          titre: String(section.titre ?? '').trim(),
+          type: section.type || 'text',
+          duree_estimee: String(section.duree_estimee ?? '0'),
+          contenu: section.contenu ? String(section.contenu).trim() : null,
+          ressources: Array.isArray(section.ressources)
+            ? section.ressources.filter((r: any) => r && String(r).trim())
+            : (section.ressources ? String(section.ressources).split(',').map((r: string) => r.trim()).filter(Boolean) : []),
+          obligatoire: Boolean(section.obligatoire),
+          visible: Boolean(section.visible),
+          ordre: section.ordre,
+        })),
       })),
 
       // Coûts
@@ -1018,12 +1270,6 @@ private validateSectionType(type: string): string {
       isValid = false;
       const formErrors = this.getFormErrorsInFrench(this.additionalInfoForm);
       errorMessages.push(...formErrors);
-    }
-
-    // Valider que les objectifs ne sont pas vides
-    if (this.objectifs.filter(obj => obj.trim()).length === 0) {
-      isValid = false;
-      errorMessages.push('Au moins un objectif est requis');
     }
 
     // Afficher les erreurs spécifiques
@@ -1084,7 +1330,9 @@ private validateSectionType(type: string): string {
 
   goToCoursesList(): void {
     this.closeModal('updateSuccessModal');
-    this.router.navigate(['/instructor/courses']);
+    window.close();
+    // fallback if window.close() is blocked
+    this.router.navigate(['/instructor/instructor-course']);
   }
 
   continueEditing(): void {

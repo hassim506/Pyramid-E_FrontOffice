@@ -131,7 +131,7 @@ export class InstructorCourseGridComponent implements OnInit {
   }
 
   getFormationImage(formation: any): string {
-    return formation.image_couverture || 'assets/img/course/course-01.jpg';
+    return this.formationService.getImageUrl(formation.image_couverture);
   }
 
   getStatusClass(formation: any): string {

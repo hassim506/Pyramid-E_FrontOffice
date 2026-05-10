@@ -1,0 +1,190 @@
+// ── TOKENS ──────────────────────────────────────────────────────────────────
+$primary:   #534AB7;
+$radius:    10px;
+$border:    #E9ECEF;
+$text-muted: #6C757D;
+
+// ── LOADER ───────────────────────────────────────────────────────────────────
+.ip-loader {
+  display: flex; justify-content: center; align-items: center;
+  min-height: 200px;
+}
+
+// ── PAGE HEADER ───────────────────────────────────────────────────────────────
+.ip-page-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap; gap: 12px;
+
+  &__title {
+    font-size: 18px; font-weight: 600; color: #1A1A2E; margin: 0 0 4px;
+  }
+  &__sub { font-size: 13px; color: $text-muted; margin: 0; }
+}
+
+.ip-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #EEF2FF; color: $primary;
+  font-size: 12px; font-weight: 500;
+  padding: 1px 8px; border-radius: 20px; margin-left: 6px;
+}
+
+// ── BUTTONS ───────────────────────────────────────────────────────────────────
+.ip-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: $radius;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: none; transition: all .15s; text-decoration: none;
+
+  i { font-size: 16px; }
+
+  &--primary { background: $primary; color: #fff;
+    &:hover { background: darken($primary, 8%); color: #fff; }
+  }
+  &--outline { background: #fff; color: $primary; border: 1px solid $primary;
+    &:hover { background: #EEF2FF; }
+  }
+}
+
+// ── KPI ROW ───────────────────────────────────────────────────────────────────
+.ip-kpi-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  margin-bottom: 20px;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 500px) { grid-template-columns: 1fr; }
+}
+
+.ip-kpi {
+  background: #fff; border: 1px solid $border; border-radius: $radius;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+
+  &__icon {
+    width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  &__val { font-size: 20px; font-weight: 600; color: #1A1A2E; line-height: 1; }
+  &__lbl { font-size: 11px; color: $text-muted; margin-top: 3px; }
+}
+
+.ki-green { background: #ECFDF5; color: #059669; }
+.ki-amber { background: #FFFBEB; color: #D97706; }
+.ki-blue  { background: #EFF6FF; color: #2563EB; }
+.ki-teal  { background: #F0FDFA; color: #0D9488; }
+
+// ── TOOLBAR ───────────────────────────────────────────────────────────────────
+.ip-toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px;
+
+  &__right { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+}
+
+.ip-search {
+  height: 36px; border: 1px solid $border; border-radius: 8px;
+  padding: 0 12px; font-size: 13px; outline: none; min-width: 220px;
+  transition: border-color .15s;
+  &:focus { border-color: $primary; }
+}
+
+.ip-select {
+  height: 36px; border: 1px solid $border; border-radius: 8px;
+  padding: 0 10px; font-size: 13px; outline: none; background: #fff;
+  cursor: pointer;
+  &:focus { border-color: $primary; }
+}
+
+.ip-view-btn {
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; border: 1px solid $border; color: $text-muted; text-decoration: none;
+  font-size: 16px; transition: all .15s;
+  &:hover { border-color: $primary; color: $primary; }
+  &.active { background: #EEF2FF; border-color: $primary; color: $primary; }
+}
+
+// ── CARD ──────────────────────────────────────────────────────────────────────
+.ip-card {
+  background: #fff; border: 1px solid $border; border-radius: $radius;
+  overflow: hidden;
+}
+
+// ── TABLE ─────────────────────────────────────────────────────────────────────
+.ip-table {
+  margin: 0;
+
+  thead th {
+    background: #F8F9FA; border-bottom: 1px solid $border;
+    font-size: 11px; font-weight: 600; color: $text-muted;
+    text-transform: uppercase; letter-spacing: .05em;
+    padding: 10px 14px; white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 12px 14px; border-bottom: 1px solid lighten($border, 2%);
+    vertical-align: middle; font-size: 13px;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #FAFBFF; }
+}
+
+// ── COURSE CELL ───────────────────────────────────────────────────────────────
+.ip-course-cell {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.ip-course-img {
+  width: 52px; height: 40px; border-radius: 6px; overflow: hidden; flex-shrink: 0;
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.ip-course-title {
+  font-size: 13px; font-weight: 500; color: #1A1A2E; text-decoration: none;
+  display: block; margin-bottom: 3px;
+  &:hover { color: $primary; }
+}
+
+.ip-course-meta {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  span {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: $text-muted;
+    i { font-size: 12px; }
+  }
+}
+
+// ── PILL ──────────────────────────────────────────────────────────────────────
+.ip-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #F1F3F5; color: #495057;
+  font-size: 11px; padding: 3px 8px; border-radius: 20px;
+  i { font-size: 12px; }
+}
+
+// ── ACTION BUTTONS ────────────────────────────────────────────────────────────
+.ip-actions { display: flex; gap: 4px; }
+
+.ip-action-btn {
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; border: 1px solid $border;
+  background: #fff; color: $text-muted; cursor: pointer;
+  font-size: 14px; transition: all .12s;
+  text-decoration: none;
+
+  &:hover { border-color: $primary; color: $primary; background: #EEF2FF; }
+  &.text-warning:hover { border-color: #D97706; color: #D97706; background: #FFFBEB; }
+  &.text-success:hover { border-color: #059669; color: #059669; background: #ECFDF5; }
+  &.text-danger:hover  { border-color: #DC3545; color: #DC3545; background: #FFF5F5; }
+}
+
+// ── EMPTY ROW ─────────────────────────────────────────────────────────────────
+.ip-empty {
+  text-align: center; padding: 48px 0;
+  color: $text-muted; font-size: 13px;
+  i { font-size: 32px; display: block; margin-bottom: 8px; opacity: .4; }
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+.custom-modal-body { padding: 28px 24px; }

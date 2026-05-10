@@ -1,78 +1,57 @@
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { LightGallery } from 'lightgallery/lightgallery';
-import { LightGallerySettings } from 'lightgallery/lg-settings';
-import { routes } from '../../../shared/service/routes/routes';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; 
-import Aos from 'aos';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { LightgalleryModule } from 'lightgallery/angular';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
+import { routes } from '../../../shared/service/routes/routes';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
-import { Subject, takeUntil } from 'rxjs';
-import { Location } from '@angular/common';
-
-// import { Component } from '@angular/core';
+import { QuizService } from '../../../shared/service/quiz/quiz.service';
+import { QuestionQuizService } from '../../../shared/service/quiz/question-quiz.service';
+import { QuizResultsService } from '../../../shared/service/quiz/quiz-results.service';
 
 @Component({
   selector: 'app-instructor-course-details',
- imports: [CommonModule, RouterLink, LightgalleryModule, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './instructor-course-details.component.html',
   styleUrl: './instructor-course-details.component.scss'
 })
-
-
-// @Component({
-//   selector: 'app-course-details',
-//   imports: [CommonModule, RouterLink, LightgalleryModule, FormsModule],
-//   templateUrl: './course-details.component.html',
-//   styleUrl: './course-details.component.scss'
-// })
 export class InstructorCourseDetailsComponent implements OnInit, OnDestroy {
   routes = routes;
-  
-  // Data properties
+
+  // ── state ──────────────────────────────────────────────────────────────
+  loading    = false;
+  error      = '';
+  success    = '';
+  savingQuiz = false;
+  loadingQuiz   = false;
+  loadingStats  = false;
+
+  activeTab: 'contenu' | 'stats' | 'info' = 'contenu';
+
+  // ── formation data ─────────────────────────────────────────────────────
   formation: any = null;
-  loading = false;
-  error = '';
-  success = '';
-  
-  // Calculated properties
-  totalSections = 0;
-  totalDuration = 0;
-  averageRating = 0;
-  
-  // User state
-  currentUser: any = null;
-  
-  // Comment form
-  newComment = {
-    nom: '',
-    email: '',
-    sujet: '',
-    commentaire: '',
-    note: 5
-  };
-  submittingComment = false;
-  
-  // Related courses
-  relatedCourses: any[] = [];
-  
-  // LightGallery configuration
-  settings: Partial<LightGallerySettings> = {
-    counter: false,
-    download: false,
-    selector: '.lg-item',
-    plugins: [],
-    licenseKey: 'your_license_key'
-  };
-  
-  // Private properties
-  private lightGallery!: LightGallery;
   private formationId: string | null = null;
+  private currentUser: any = null;
+
+  // ── module/section navigation ──────────────────────────────────────────
+  openModules: Record<number, boolean> = {};
+  selectedSection: any = null;
+  selectedModule: any  = null;
+
+  // ── quiz editor ────────────────────────────────────────────────────────
+  activeQuiz: any = null;
+  expandedQuestion: number | null = null;
+
+  // ── stats tab ──────────────────────────────────────────────────────────
+  allFormationQuizzes: any[] = [];
+  selectedQuizId: number | string = '';
+  quizStats: any = null;
+  scoreBands: any[] = [];
+  questionStats: any[] = [];
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -80,37 +59,17 @@ export class InstructorCourseDetailsComponent implements OnInit, OnDestroy {
     private router: Router,
     private formationService: FormationService,
     private authService: AuthService,
-    private location: Location,
-        private sanitizer: DomSanitizer 
-
+    private quizService: QuizService,
+    private questionService: QuestionQuizService,
+    private resultsService: QuizResultsService,
   ) {}
 
   ngOnInit(): void {
-    // Initialize AOS
-    Aos.init({ 
-      duration: 1200, 
-      once: true,
-      disable: 'mobile' 
-    });
-    
-    // Get current user if authenticated
     this.currentUser = this.authService.getUser();
-    if (this.currentUser) {
-      this.newComment.nom = this.currentUser.nom || this.currentUser.name || '';
-      this.newComment.email = this.currentUser.email || '';
-    }
-    
-    // Subscribe to route params changes
-    this.route.paramMap.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(params => {
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.formationId = params.get('id');
-      if (this.formationId) {
-        this.loadFormation();
-      } else {
-        this.error = 'ID de formation manquant';
-        this.router.navigate(['/courses']);
-      }
+      if (this.formationId) { this.loadFormation(); }
+      else { this.error = 'ID de formation manquant'; }
     });
   }
 
@@ -119,687 +78,362 @@ export class InstructorCourseDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onInit = (detail: { instance: LightGallery }): void => {
-    this.lightGallery = detail.instance;
-  };
-
-  // ================================
-  // LOADING AND DATA METHODS
-  // ================================
-
+  // ── load formation ─────────────────────────────────────────────────────
   private loadFormation(): void {
-    if (!this.formationId) return;
-    
     this.loading = true;
     this.error = '';
-
-    this.formationService.getFormationById(this.formationId).pipe(
+    this.formationService.getFormationById(this.formationId!).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (response) => {
-        this.formation = response.formation || response.data || response;
-        this.processFormationData();
-        this.loadRelatedCourses();
+      next: (res) => {
+        this.formation = res.formation || res.data || res;
+        this.formation.modules = this.formation.modules || [];
+        // open first module by default
+        if (this.formation.modules.length) {
+          this.openModules[this.formation.modules[0].id] = true;
+        }
         this.loading = false;
-        
-        console.log('✅ Formation chargée:', this.formation);
+        this.collectFormationQuizzes();
       },
-      error: (error) => {
-        console.error('❌ Erreur lors du chargement de la formation:', error);
-        this.handleLoadError(error);
+      error: (err) => {
+        this.error = 'Erreur lors du chargement de la formation';
+        this.loading = false;
       }
     });
   }
 
-  private processFormationData(): void {
-    if (!this.formation) return;
+  // ── collect all quiz sections for stats selector ───────────────────────
+  private collectFormationQuizzes(): void {
+    this.allFormationQuizzes = [];
+    (this.formation.modules || []).forEach((mod: any) => {
+      (mod.sections || []).forEach((sec: any) => {
+        if (sec.type === 'quiz' && sec.quiz_id) {
+          this.allFormationQuizzes.push({ id: sec.quiz_id, titre: sec.titre });
+        }
+      });
+    });
+  }
 
-    // Calculate totals
-    this.calculateTotalSections();
-    this.calculateTotalDuration();
-    this.calculateAverageRating();
-    
-    // Process tags if they're a string
-    if (typeof this.formation.tags === 'string') {
-      try {
-        this.formation.tags = JSON.parse(this.formation.tags);
-      } catch {
-        this.formation.tags = this.formation.tags.split(',').map((tag: string) => tag.trim());
+  // ── module accordion ───────────────────────────────────────────────────
+  toggleModule(id: number): void {
+    this.openModules[id] = !this.openModules[id];
+  }
+
+  // ── section selection ──────────────────────────────────────────────────
+  selectSection(section: any, module: any): void {
+    this.selectedSection = section;
+    this.selectedModule  = module;
+    this.activeQuiz      = null;
+    this.expandedQuestion = null;
+
+    if (section.type === 'quiz') {
+      const quizId = section.quiz_id;
+      if (quizId) { this.loadQuiz(quizId); }
+    }
+  }
+
+  private loadQuiz(quizId: number): void {
+    this.loadingQuiz = true;
+    this.quizService.getQuiz(quizId).pipe(
+      takeUntil(this.destroy$),
+      catchError(() => of(null))
+    ).subscribe((res: any) => {
+      const quiz = res?.quiz || res;
+      if (quiz) {
+        this.activeQuiz = quiz;
+        // load questions
+        this.questionService.getQuestions(quizId).pipe(
+          takeUntil(this.destroy$),
+          catchError(() => of({ questions: [] }))
+        ).subscribe(res => {
+          this.activeQuiz.questions = (res.questions || []).map((q: any) => ({
+            ...q,
+            reponses: q.reponses || this.defaultOptions(q.type),
+          }));
+          this.loadingQuiz = false;
+        });
+      } else {
+        this.loadingQuiz = false;
       }
-    }
-
-    // Process competences if they're a string
-    if (typeof this.formation.competences_acquises === 'string') {
-      try {
-        this.formation.competences_acquises = JSON.parse(this.formation.competences_acquises);
-      } catch {
-        this.formation.competences_acquises = [];
-      }
-    }
-
-    // Process outils if they're a string
-    if (typeof this.formation.outils_requis === 'string') {
-      try {
-        this.formation.outils_requis = JSON.parse(this.formation.outils_requis);
-      } catch {
-        this.formation.outils_requis = [];
-      }
-    }
-    
-    // Ensure arrays exist
-    this.formation.modules = this.formation.modules || [];
-    this.formation.faqs = this.formation.faqs || [];
-    this.formation.avis = this.formation.avis || [];
-    
-    // Process image URL
-    if (this.formation.image_couverture && !this.formation.image_couverture.startsWith('http')) {
-      this.formation.image_couverture = `http://localhost:8000/storage/${this.formation.image_couverture}`;
-    }
-
-    // Process formateur avatar
-    if (this.formation.formateur?.avatar && !this.formation.formateur.avatar.startsWith('http')) {
-      this.formation.formateur.avatar = `http://localhost:8000/storage/${this.formation.formateur.avatar}`;
-    }
+    });
   }
 
-  private calculateTotalSections(): void {
-    if (!this.formation?.modules) {
-      this.totalSections = 0;
-      return;
+  private defaultOptions(type: string): any[] {
+    if (type === 'true_false') {
+      return [
+        { reponse_text: 'Vrai', is_correct: true,  ordre: 1 },
+        { reponse_text: 'Faux', is_correct: false, ordre: 2 },
+      ];
     }
-
-    this.totalSections = this.formation.modules.reduce((total: number, module: any) => {
-      return total + (module.sections?.length || 0);
-    }, 0);
+    if (type === 'multiple_choice' || type === 'multiple_choice_multi') {
+      return [
+        { reponse_text: '', is_correct: true,  ordre: 1 },
+        { reponse_text: '', is_correct: false, ordre: 2 },
+      ];
+    }
+    return [];
   }
 
-
-  private calculateTotalDuration(): void {
-    if (!this.formation?.modules) {
-      this.totalDuration = 0;
-      return;
-    }
-
-
-    this.totalDuration = this.formation.modules.reduce((total: number, module: any) => {
-      const moduleDuration = module.sections?.reduce((moduleTotal: number, section: any) => {
-        return moduleTotal + (parseInt(section.duree_estimee) || 0);
-      }, 0) || 0;
-      return total + moduleDuration;
-    }, 0);
-  }
-
-  private calculateAverageRating(): void {
-    if (!this.formation?.avis || this.formation.avis.length === 0) {
-      this.averageRating = 0;
-      return;
-    }
-
-    const totalRating = this.formation.avis.reduce((sum: number, avis: any) => {
-      return sum + (parseFloat(avis.note) || 0);
-    }, 0);
-    
-    this.averageRating = Math.round((totalRating / this.formation.avis.length) * 10) / 10;
-  }
-parseToNumber(value: any): number {
-  return parseInt(value) || 0;
-}
-  private loadRelatedCourses(): void {
-    if (!this.formation?.formateur_id) {
-      console.log('ℹ️ Aucun formateur spécifié pour charger les formations similaires');
-      return;
-    }
-
-    // Charger les formations du même formateur
-    this.formationService.getFormations({ page: 1, limit: 20 }).pipe(
+  // ── add quiz to module ─────────────────────────────────────────────────
+  addQuizToModule(module: any): void {
+    // create a blank quiz then attach to module
+    const newQuiz = {
+      titre: `Quiz — ${module.titre}`,
+      description: '',
+      formation_id: this.formation.id,
+      score_minimum: 70,
+      tentatives_max: 2,
+      duree_minutes: 0,
+      is_active: true,
+    };
+    this.quizService.createQuiz(newQuiz).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (response) => {
-        const allFormations = response.formations || response.data || [];
-        
-        // Filtrer par formateur et exclure la formation actuelle
-        this.relatedCourses = allFormations
-          .filter((f: any) => 
-            f.formateur_id === this.formation.formateur_id && 
-            f.id !== this.formation.id
-          )
-          .slice(0, 4);
-          
-        console.log('🔗 Formations du formateur chargées:', this.relatedCourses.length);
+      next: (quiz: any) => {
+        const quizData = quiz.quiz || quiz;
+        // create a fake section in the module for navigation
+        const fakeSection = {
+          id: Date.now(),
+          titre: quizData.titre,
+          type: 'quiz',
+          quiz_id: quizData.id,
+        };
+        module.sections = module.sections || [];
+        module.sections.push(fakeSection);
+        this.activeQuiz = { ...quizData, questions: [] };
+        this.selectedSection = fakeSection;
+        this.selectedModule  = module;
+        this.success = 'Quiz créé avec succès';
+        setTimeout(() => this.success = '', 3000);
       },
-      error: (error) => {
-        console.log('ℹ️ Formations similaires non disponibles:', error);
-        this.relatedCourses = [];
-      }
+      error: () => { this.error = 'Erreur lors de la création du quiz'; }
     });
   }
 
-  private handleLoadError(error: any): void {
-    this.loading = false;
-    
-    if (error.status === 404) {
-      this.error = 'Formation non trouvée';
-    } else if (error.status === 403) {
-      this.error = 'Accès non autorisé à cette formation';
-    } else {
-      this.error = 'Erreur lors du chargement de la formation';
-    }
-    
-    console.error('❌ Erreur de chargement:', error);
-    
-    // Redirect after error display
-    setTimeout(() => {
-      this.router.navigate(['/courses']);
-    }, 3000);
+  createQuizForSection(section: any, module: any): void {
+    this.addQuizToModule(module);
   }
 
-  // ================================
-  // HELPER METHODS FOR TEMPLATE
-  // ================================
-
-  formatDuration(minutes: number): string {
-    if (!minutes || minutes === 0) return '0 min';
-    
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    
-    if (hours > 0) {
-      return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
-    }
-    return `${mins}min`;
+  // ── question accordion ─────────────────────────────────────────────────
+  toggleQuestion(id: number): void {
+    this.expandedQuestion = this.expandedQuestion === id ? null : id;
   }
 
-  getStarsArray(rating: number): number[] {
-    return Array.from({ length: 5 }, (_, i) => i + 1);
-  }
-
-  getObjectifsList(objectifs: string): string[] {
-    if (!objectifs) return [];
-    return objectifs.split('\n')
-      .map(obj => obj.replace(/^[-•*]\s*/, '').trim())
-      .filter(obj => obj.length > 0);
-  }
-
-  getPrerequisList(prerequis: string): string[] {
-    if (!prerequis) return [];
-    return prerequis.split('\n')
-      .map(pre => pre.replace(/^[-•*]\s*/, '').trim())
-      .filter(pre => pre.length > 0);
-  }
-
-  getNiveauLabel(niveau: string): string {
-    const niveaux: { [key: string]: string } = {
-      'debutant': 'Débutant',
-      'intermediaire': 'Intermédiaire',
-      'avance': 'Avancé',
-      'expert': 'Expert'
+  // ── add question ───────────────────────────────────────────────────────
+  addQuestion(type: string): void {
+    if (!this.activeQuiz) return;
+    const newQ = {
+      id: Date.now(), // temp id until saved
+      quizzes_id: this.activeQuiz.id,
+      question_text: '',
+      type,
+      points: 1,
+      ordre: (this.activeQuiz.questions?.length || 0) + 1,
+      reponses: this.defaultOptions(type),
+      explication: '',
+      _new: true,
     };
-    return niveaux[niveau] || niveau.charAt(0).toUpperCase() + niveau.slice(1);
+    this.activeQuiz.questions = [...(this.activeQuiz.questions || []), newQ];
+    this.expandedQuestion = newQ.id;
+  }
+
+  duplicateQuestion(q: any, event: Event): void {
+    event.stopPropagation();
+    if (!this.activeQuiz) return;
+    const copy = {
+      ...JSON.parse(JSON.stringify(q)),
+      id: Date.now(),
+      ordre: (this.activeQuiz.questions?.length || 0) + 1,
+      _new: true,
+    };
+    this.activeQuiz.questions = [...this.activeQuiz.questions, copy];
+    this.expandedQuestion = copy.id;
+  }
+
+  deleteQuestion(q: any, event: Event): void {
+    event.stopPropagation();
+    if (!this.activeQuiz) return;
+    if (q._new) {
+      this.activeQuiz.questions = this.activeQuiz.questions.filter((x: any) => x.id !== q.id);
+      return;
+    }
+    this.questionService.deleteQuestion(this.activeQuiz.id, q.id).pipe(
+      takeUntil(this.destroy$),
+      catchError(() => of(null))
+    ).subscribe(() => {
+      this.activeQuiz.questions = this.activeQuiz.questions.filter((x: any) => x.id !== q.id);
+    });
+  }
+
+  // ── options ────────────────────────────────────────────────────────────
+  toggleCorrect(q: any, opt: any): void {
+    if (q.type === 'multiple_choice') {
+      // single answer — deselect others
+      q.reponses.forEach((r: any) => r.is_correct = false);
+      opt.is_correct = true;
+    } else {
+      // multi or true_false — toggle
+      opt.is_correct = !opt.is_correct;
+    }
+  }
+
+  addOption(q: any): void {
+    q.reponses = [...(q.reponses || []), {
+      reponse_text: '',
+      is_correct: false,
+      ordre: (q.reponses?.length || 0) + 1,
+    }];
+  }
+
+  removeOption(q: any, index: number): void {
+    q.reponses = q.reponses.filter((_: any, i: number) => i !== index);
+  }
+
+  // ── save quiz ──────────────────────────────────────────────────────────
+  saveQuiz(): void {
+    if (!this.activeQuiz) return;
+    this.savingQuiz = true;
+    this.error = '';
+
+    // 1. update quiz settings
+    const quizUpdate = {
+      titre:         this.activeQuiz.titre,
+      description:   this.activeQuiz.description,
+      score_minimum: this.activeQuiz.score_minimum,
+      tentatives_max: this.activeQuiz.tentatives_max,
+      duree_minutes: this.activeQuiz.duree_minutes,
+    };
+
+    this.quizService.updateQuiz(this.activeQuiz.id, quizUpdate).pipe(
+      takeUntil(this.destroy$),
+      catchError(() => of(null))
+    ).subscribe(() => {
+      // 2. save each question
+      const saves = (this.activeQuiz.questions || []).map((q: any) => {
+        const payload = {
+          question_text: q.question_text,
+          type:          q.type,
+          points:        q.points,
+          ordre:         q.ordre,
+          reponses:      q.reponses,
+          explication:   q.explication,
+          quizzes_id:    this.activeQuiz.id,
+        };
+        if (q._new) {
+          return this.questionService.createQuestion(this.activeQuiz.id, payload).pipe(
+            catchError(() => of(null))
+          );
+        }
+        return this.questionService.updateQuestion(this.activeQuiz.id, q.id, payload).pipe(
+          catchError(() => of(null))
+        );
+      });
+
+      forkJoin(saves.length ? saves : [of(null)]).subscribe(() => {
+        this.savingQuiz = false;
+        this.success = 'Quiz enregistré avec succès';
+        setTimeout(() => this.success = '', 3000);
+        // mark questions as no longer new
+        this.activeQuiz.questions.forEach((q: any) => delete q._new);
+      });
+    });
+  }
+
+  // ── publish formation ──────────────────────────────────────────────────
+  publishFormation(): void {
+    if (!this.formation) return;
+    const action = this.formation.est_publie
+      ? this.formationService.unpublishFormation(this.formation.id)
+      : this.formationService.publishFormation(this.formation.id);
+    action.pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.formation.est_publie = !this.formation.est_publie;
+        this.success = this.formation.est_publie ? 'Formation publiée' : 'Formation dépubliée';
+        setTimeout(() => this.success = '', 3000);
+      },
+      error: () => { this.error = 'Erreur lors de la publication'; }
+    });
+  }
+
+  // ── quiz stats ─────────────────────────────────────────────────────────
+  loadQuizStats(): void {
+    if (!this.selectedQuizId) { this.quizStats = null; return; }
+    this.loadingStats = true;
+    this.resultsService.getQuizStatistics(+this.selectedQuizId).pipe(
+      takeUntil(this.destroy$),
+      catchError(() => of(null))
+    ).subscribe(res => {
+      if (res) {
+        this.quizStats = res.statistics || res;
+        this.buildScoreBands(res.score_distribution || []);
+        this.buildQuestionStats(res.question_stats || []);
+      }
+      this.loadingStats = false;
+    });
+  }
+
+  private buildScoreBands(dist: any[]): void {
+    const bands = [
+      { label: '90–100%', color: 'fill-green', textColor: 'tc-green', min: 90, max: 100 },
+      { label: '70–89%',  color: 'fill-green', textColor: 'tc-green', min: 70, max: 89 },
+      { label: '50–69%',  color: 'fill-amber', textColor: 'tc-amber', min: 50, max: 69 },
+      { label: '0–49%',   color: 'fill-red',   textColor: 'tc-red',   min: 0,  max: 49 },
+    ];
+    const total = dist.reduce((s: number, d: any) => s + (d.count || 0), 0) || 1;
+    this.scoreBands = bands.map(b => {
+      const entry = dist.find((d: any) => d.min === b.min) || { count: 0 };
+      return { ...b, count: entry.count || 0, pct: Math.round((entry.count || 0) / total * 100) };
+    });
+  }
+
+  private buildQuestionStats(qs: any[]): void {
+    this.questionStats = qs.map((q: any) => ({
+      question: q.question_text || q.question,
+      pct: Math.round(q.taux_correct ?? q.success_rate ?? 0),
+    }));
+  }
+
+  getParticipationRate(): number {
+    if (!this.quizStats || !this.formation?.nb_inscrits) return 0;
+    return Math.round((this.quizStats.total_participants || 0) / this.formation.nb_inscrits * 100);
+  }
+
+  getReussiteRate(): number {
+    if (!this.quizStats?.total_participants) return 0;
+    return Math.round((this.quizStats.nb_reussis || 0) / this.quizStats.total_participants * 100);
+  }
+
+  // ── helpers ────────────────────────────────────────────────────────────
+  getDisplayName(): string {
+    const u = this.currentUser;
+    if (!u) return this.formation?.formateur?.nom || 'Formateur';
+    return u.name || `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email || 'Formateur';
   }
 
   getTypeLabel(type: string): string {
-    const types: { [key: string]: string } = {
-      'en_ligne': 'En ligne',
-      'presentiel': 'Présentiel',
-      'hybride': 'Hybride',
-      'video': 'Vidéo',
-      'hands-on': 'Pratique',
-      'reading': 'Lecture',
-      'quiz': 'Quiz'
+    const map: Record<string, string> = {
+      multiple_choice:       'Choix unique',
+      multiple_choice_multi: 'Choix multiple',
+      true_false:            'Vrai / Faux',
+      text:                  'Texte libre',
     };
-    return types[type] || type;
+    return map[type] || type;
   }
 
-  getSectionTypeIcon(type: string): string {
-    const icons: { [key: string]: string } = {
-      'video': 'fas fa-play-circle',
-      'hands-on': 'fas fa-hands-helping',
-      'reading': 'fas fa-file-text',
-      'quiz': 'fas fa-question-circle',
-      'assignment': 'fas fa-tasks'
+  getNiveauLabel(niveau: string): string {
+    const map: Record<string, string> = {
+      debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé', expert: 'Expert',
     };
-    return icons[type] || 'fas fa-file';
+    return map[niveau] || niveau || '—';
   }
 
-  getSectionTypeColor(type: string): string {
-    const colors: { [key: string]: string } = {
-      'video': 'text-primary',
-      'hands-on': 'text-success',
-      'reading': 'text-info',
-      'quiz': 'text-warning',
-      'assignment': 'text-danger'
-    };
-    return colors[type] || 'text-secondary';
+  getLangueLabel(langue: string): string {
+    const map: Record<string, string> = { fr: 'Français', en: 'Anglais', ar: 'Arabe' };
+    return map[langue] || langue || '—';
   }
 
-  calculateDiscount(prix: number, prixOriginal: number): number {
-    if (!prixOriginal || prixOriginal <= prix) return 0;
-    return Math.round(((prixOriginal - prix) / prixOriginal) * 100);
+  formatDate(d: string): string {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
   }
-
-  // ================================
-  // USER ACTION METHODS
-  // ================================
-previewSection(section: any): void {
-  if (!section.ressources) {
-    this.error = 'Aucune ressource disponible pour cette section';
-    setTimeout(() => this.error = '', 3000);
-    return;
-  }
-
-  let resourceUrl = section.ressources;
-
-  // Si c'est un lien YouTube, ouvrir avec openYouTubeVideo
-  if (this.isYouTubeUrl(resourceUrl)) {
-    this.openYouTubeVideo(resourceUrl);
-    return;
-  }
-
-  // Sinon, lien local
-  if (!resourceUrl.startsWith('http')) {
-    resourceUrl = `http://localhost:8000/storage/${resourceUrl}`;
-  }
-
-  window.open(resourceUrl, '_blank', 'width=800,height=600');
-}
-
-  shareFormation(): void {
-    const url = window.location.href;
-    const title = this.formation?.titre || 'Formation intéressante';
-    const text = this.formation?.short_description || 'Découvrez cette formation';
-
-    if (navigator.share) {
-      navigator.share({
-        title: title,
-        text: text,
-        url: url
-      }).catch(() => {
-        this.copyToClipboard(url);
-      });
-    } else {
-      this.copyToClipboard(url);
-    }
-  }
-
-  private copyToClipboard(text: string): void {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => {
-        this.success = 'Lien copié dans le presse-papier';
-        setTimeout(() => this.success = '', 3000);
-      }).catch(() => {
-        this.fallbackCopyToClipboard(text);
-      });
-    } else {
-      this.fallbackCopyToClipboard(text);
-    }
-  }
-
-  private fallbackCopyToClipboard(text: string): void {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    
-    try {
-      document.execCommand('copy');
-      this.success = 'Lien copié dans le presse-papier';
-      setTimeout(() => this.success = '', 3000);
-    } catch (err) {
-      console.error('Erreur lors de la copie:', err);
-      this.error = 'Impossible de copier le lien';
-      setTimeout(() => this.error = '', 3000);
-    }
-    
-    document.body.removeChild(textArea);
-  }
-
-  // ================================
-  // COMMENT METHODS
-  // ================================
-
-  submitComment(): void {
-    if (!this.validateCommentForm()) {
-      return;
-    }
-
-    this.submittingComment = true;
-    this.error = '';
-
-    const commentData = {
-      formation_id: this.formation?.id,
-      nom: this.newComment.nom.trim(),
-      email: this.newComment.email.trim(),
-      sujet: this.newComment.sujet.trim(),
-      commentaire: this.newComment.commentaire.trim(),
-      note: this.newComment.note || 5
-    };
-
-    // Simulation d'ajout de commentaire (à remplacer par l'appel API réel)
-    this.simulateCommentSubmission(commentData);
-  }
-
-  private simulateCommentSubmission(commentData: any): void {
-    setTimeout(() => {
-      this.success = 'Commentaire enregistré avec succès !';
-      this.resetCommentForm();
-      this.submittingComment = false;
-      
-      // Add comment to local array for immediate display
-      const newAvis = {
-        ...commentData,
-        created_at: new Date().toISOString(),
-        id: Date.now()
-      };
-      
-      if (!this.formation.avis) {
-        this.formation.avis = [];
-      }
-      this.formation.avis.unshift(newAvis);
-      this.calculateAverageRating();
-      
-      console.log('💬 Commentaire simulé ajouté:', commentData.sujet);
-      setTimeout(() => this.success = '', 5000);
-    }, 1000);
-  }
-
-  private validateCommentForm(): boolean {
-    const { nom, email, sujet, commentaire } = this.newComment;
-    
-    if (!nom.trim()) {
-      this.error = 'Le nom est obligatoire';
-      setTimeout(() => this.error = '', 3000);
-      return false;
-    }
-    
-    if (!email.trim()) {
-      this.error = 'L\'email est obligatoire';
-      setTimeout(() => this.error = '', 3000);
-      return false;
-    }
-    
-    if (!this.isValidEmail(email)) {
-      this.error = 'Format d\'email invalide';
-      setTimeout(() => this.error = '', 3000);
-      return false;
-    }
-    
-    if (!sujet.trim()) {
-      this.error = 'Le sujet est obligatoire';
-      setTimeout(() => this.error = '', 3000);
-      return false;
-    }
-    
-    if (!commentaire.trim()) {
-      this.error = 'Le commentaire est obligatoire';
-      setTimeout(() => this.error = '', 3000);
-      return false;
-    }
-    
-    if (commentaire.trim().length < 10) {
-      this.error = 'Le commentaire doit contenir au moins 10 caractères';
-      setTimeout(() => this.error = '', 3000);
-      return false;
-    }
-    
-    return true;
-  }
-
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  private resetCommentForm(): void {
-    this.newComment = {
-      nom: this.currentUser?.nom || this.currentUser?.name || '',
-      email: this.currentUser?.email || '',
-      sujet: '',
-      commentaire: '',
-      note: 5
-    };
-  }
-
-  setRating(rating: number): void {
-    this.newComment.note = Math.max(1, Math.min(5, rating));
-    console.log('⭐ Note sélectionnée:', this.newComment.note);
-  }
-
-  // ================================
-  // UTILITY METHODS
-  // ================================
-
-  goBack(): void {
-    this.location.back();
-  }
-
-  scrollToSection(sectionId: string): void {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
-
-  trackByIndex(index: number, item: any): number {
-    return item?.id || index;
-  }
-
-  // ================================
-  // SOCIAL SHARING METHODS
-  // ================================
-
-  shareOnFacebook(): void {
-    const url = encodeURIComponent(window.location.href);
-    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-    this.openShareWindow(shareUrl);
-  }
-
-  shareOnTwitter(): void {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(this.formation?.titre || '');
-    const shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
-    this.openShareWindow(shareUrl);
-  }
-
-  shareOnLinkedIn(): void {
-    const url = encodeURIComponent(window.location.href);
-    const title = encodeURIComponent(this.formation?.titre || '');
-    const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}`;
-    this.openShareWindow(shareUrl);
-  }
-
-  private openShareWindow(url: string): void {
-    const features = 'width=600,height=400,scrollbars=yes,resizable=yes,toolbar=no,location=no,menubar=no';
-    window.open(url, 'share', features);
-  }
-getImageUrl(imageName: string | null | undefined): string {
-  console.log('Image name received:', imageName);
-  
-  // Image par défaut si pas d'image fournie
-  if (!imageName || imageName.trim() === '') {
-    return 'assets/img/course/courses-06.jpg';
-  }
-
-  // Si l'URL contient déjà le domaine mais pas le bon chemin, corriger
-  if (imageName.startsWith('http://localhost:8000/storage/') && !imageName.includes('/formations/')) {
-    const fileName = imageName.replace('http://localhost:8000/storage/', '');
-    const correctedUrl = `http://localhost:8000/storage/formations/${fileName}`;
-    console.log('URL corrected:', correctedUrl);
-    return correctedUrl;
-  }
-
-  // Si l'URL est déjà complète et correcte
-  if (imageName.startsWith('http://') || imageName.startsWith('https://')) {
-    console.log('URL already complete:', imageName);
-    return imageName;
-  }
-
-  // Sinon construire l'URL
-  const finalUrl = `http://localhost:8000/storage/formations/${imageName}`;
-  console.log('Constructed URL:', finalUrl);
-  return finalUrl;
-}
-  getCompetencesList(competences: string | null): string[] {
-  if (!competences) return [];
-  try {
-    return JSON.parse(competences);
-  } catch (e) {
-    return [];
-  }
-}
-
-getBannerStyle() {
-  if (this.formation?.image_couverture) {
-    return {
-      'background-image': `url(${this.getImageUrl(this.formation.image_couverture)})`,
-      'background-repeat': 'no-repeat',
-      'background-position': 'center',
-      'background-size': 'cover',
-      'position': 'relative'
-    };
-  }
-  return {};
-}
-
-getTagsList(tags: string | null): string[] {
-  if (!tags) return [];
-  try {
-    return JSON.parse(tags);
-  } catch (e) {
-    return [];
-  }
-}
-
-getOutilsList(outils: string | null): string[] {
-  if (!outils) return [];
-  try {
-    return JSON.parse(outils);
-  } catch (e) {
-    return [];
-  }
-}
-getLangueLabel(langue: string): string {
-  const langues: { [key: string]: string } = {
-    'fr': 'Français',
-    'en': 'Anglais',
-    'es': 'Espagnol',
-    'de': 'Allemand',
-    'it': 'Italien',
-    'pt': 'Portugais',
-    'ar': 'Arabe',
-    'zh': 'Chinois',
-    'ja': 'Japonais',
-    'ru': 'Russe'
-  };
-  return langues[langue] || langue?.charAt(0).toUpperCase() + langue?.slice(1) || 'Non spécifié';
-}
-formatDate(dateString: string): string {
-  if (!dateString) return 'Non spécifié';
-  
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  } catch (error) {
-    return 'Date invalide';
-  }
-}
-
-// Méthode bonus pour gérer les statuts de difficulté
-getDifficulteLabel(difficulte: string): string {
-  const difficultes: { [key: string]: string } = {
-    'facile': 'Facile',
-    'moyen': 'Moyen',
-    'difficile': 'Difficile',
-    'expert': 'Expert'
-  };
-  return difficultes[difficulte] || difficulte?.charAt(0).toUpperCase() + difficulte?.slice(1) || 'Non spécifié';
-}
-
-// Méthode pour gérer les types de formation
-getTypeFormationLabel(type: string): string {
-  const types: { [key: string]: string } = {
-    'en_ligne': 'En ligne',
-    'presentiel': 'Présentiel',
-    'hybride': 'Hybride',
-    'e_learning': 'E-learning',
-    'webinaire': 'Webinaire',
-    'atelier': 'Atelier'
-  };
-  return types[type] || type?.charAt(0).toUpperCase() + type?.slice(1) || 'Non spécifié';
-}
-
-isYouTubeUrl(url: string | null): boolean {
-  if (!url) return false;
-  
-  const youtubePatterns = [
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]+)/
-  ];
-  
-  return youtubePatterns.some(pattern => pattern.test(url));
-}
-
-getYouTubeVideoId(url: string): string | null {
-  if (!url) return null;
-  
-  const patterns = [
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]+)/
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      return match[1];
-    }
-  }
-  
-  return null;
-}
-
-  getYouTubeEmbedUrl(url: string): SafeResourceUrl | null {
-    const videoId = this.getYouTubeVideoId(url);
-    if (!videoId) return null;
-    
-    const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&showinfo=0&modestbranding=1&autoplay=0`;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
-  }
-
-  
-getYouTubeThumbnail(url: string): string {
-  const videoId = this.getYouTubeVideoId(url);
-  if (!videoId) return this.getImageUrl(null);
-  
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-}
-
-openYouTubeVideo(url: string): void {
-  if (this.isYouTubeUrl(url)) {
-    window.open(url, '_blank', 'width=800,height=600');
-  }
-}
-
-// Modification de la méthode getMediaUrl existante
-getMediaUrl(mediaName: string | null): string | null {
-  if (!mediaName) return null;
-  
-  // Si c'est une URL YouTube, la retourner telle quelle
-  if (this.isYouTubeUrl(mediaName)) {
-    return mediaName;
-  }
-  
-  // Sinon, construire l'URL vers le storage local
-  return `http://localhost:8000/storage/formations/videos/${mediaName}`;
-}
 }

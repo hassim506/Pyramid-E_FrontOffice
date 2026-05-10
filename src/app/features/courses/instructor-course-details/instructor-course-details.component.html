@@ -1,617 +1,442 @@
-<!-- Loading State -->
-<div *ngIf="loading" class="d-flex justify-content-center py-5">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Chargement...</span>
+<!-- Loading -->
+<div *ngIf="loading" class="icd-loader">
+  <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement...</span></div>
+</div>
+
+<!-- Error -->
+<div *ngIf="error" class="alert alert-danger alert-dismissible mx-0 mb-3">
+  {{ error }}<button type="button" class="btn-close" (click)="error=''"></button>
+</div>
+<div *ngIf="success" class="alert alert-success alert-dismissible mx-0 mb-3">
+  {{ success }}<button type="button" class="btn-close" (click)="success=''"></button>
+</div>
+
+<ng-container *ngIf="formation && !loading">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <div class="icd-head">
+    <a [routerLink]="routes.instructorCourse" class="icd-back-btn">
+      <i class="isax isax-arrow-left-2"></i> Mes formations
+    </a>
+    <div class="icd-head-info">
+      <div class="icd-head-title">{{ formation.titre }}</div>
+      <div class="icd-head-sub">
+        Formateur : {{ getDisplayName() }} &nbsp;·&nbsp;
+        {{ formation.modules?.length || 0 }} modules &nbsp;·&nbsp;
+        {{ formation.nb_inscrits || 0 }} apprenants
+      </div>
+    </div>
+    <button type="button" class="icd-pub-btn" (click)="publishFormation()">
+      <i class="isax isax-send-2"></i> Publier les modifications
+    </button>
   </div>
-</div>
 
-<!-- Error State -->
-<div *ngIf="error" class="alert alert-danger mx-3" role="alert">
-  <i class="fas fa-exclamation-triangle me-2"></i>
-  {{ error }}
-</div>
+  <!-- ── TAB NAV ─────────────────────────────────────────────────────────── -->
+  <div class="icd-tabs">
+    <button type="button" class="icd-tab" [class.active]="activeTab==='contenu'" (click)="activeTab='contenu'">
+      <i class="isax isax-element-4"></i> Contenu & modules
+    </button>
+    <button type="button" class="icd-tab" [class.active]="activeTab==='stats'" (click)="activeTab='stats'; loadQuizStats()">
+      <i class="isax isax-chart-2"></i> Résultats quiz
+    </button>
+    <button type="button" class="icd-tab" [class.active]="activeTab==='info'" (click)="activeTab='info'">
+      <i class="isax isax-info-circle"></i> Informations
+    </button>
+  </div>
 
-<!-- Success State -->
-<div *ngIf="success" class="alert alert-success mx-3" role="alert">
-  <i class="fas fa-check-circle me-2"></i>
-  {{ success }}
-</div>
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB : CONTENU & MODULES                                              -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab==='contenu'" class="icd-layout">
 
-<!-- Course Details Content -->
-<div *ngIf="formation && !loading">
-  
-  <!-- Banner Section -->
- <section class="inner-banner"
-         [style.background-image]="'url(' + getImageUrl(formation.image_couverture) + ')'"
-         [style.background-repeat]="'no-repeat'"
-         [style.background-position]="'center'"
-         [style.background-size]="'cover'"
-         style="position: relative;">
-  
-  <!-- Overlay noir transparent -->
-  <div class="banner-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1;"></div>
-  
-  <div class="container" style="position: relative; z-index: 2;">
-    <div class="row">
-      <div class="col-lg-8">
-        <h1 class="text-white mb-3 mb-sm-2">{{ formation.titre }}</h1>
-        <p class="text-white fs-14 mb-3">{{ formation.short_description }}</p>
+    <!-- ── LEFT : modules panel ─────────────────────────────────────────── -->
+    <div class="icd-modules-panel">
+      <div class="icd-mp-head">
+        <span class="icd-mp-label">Modules</span>
+        <a [href]="'/courses/instructor-course-edit/' + formation.id" target="_blank" class="icd-add-btn">
+          <i class="isax isax-edit-2"></i> Modifier
+        </a>
+      </div>
 
-          <div class="d-flex align-items-center gap-2 gap-sm-3 gap-xl-4 flex-wrap justify-content-md-start justify-content-center">
-            <p class="fw-medium text-white d-flex align-items-center mb-0">
-              <img class="me-2" src="./assets/img/icons/book.svg" alt="img">
-              {{ formation.modules?.length || 0 }}+ Modules
-            </p>
-            <p class="fw-medium text-white d-flex align-items-center mb-0">
-              <img class="me-2" src="./assets/img/icons/timer-start.svg" alt="img">
-              {{ formation.duree_totale }}h
-            </p>
-            <p class="fw-medium text-white d-flex align-items-center mb-0">
-              <img class="me-2" src="./assets/img/icons/people.svg" alt="img">
-              {{ formation.nb_inscrits || 0 }} étudiants inscrits
-            </p>
-            <span class="badge badge-sm rounded-pill bg-warning fs-12">
-              {{ formation.categorie?.nom }}
+      <div *ngFor="let mod of formation.modules; let mi = index" class="icd-module">
+        <!-- module header -->
+        <div class="icd-mod-hd" [class.open]="openModules[mod.id]" (click)="toggleModule(mod.id)">
+          <div class="icd-mod-num">{{ mi + 1 }}</div>
+          <span class="icd-mod-name">{{ mod.titre }}</span>
+          <i class="isax isax-arrow-right-3 icd-mod-arr"></i>
+        </div>
+
+        <!-- module sections -->
+        <div class="icd-mod-body" *ngIf="openModules[mod.id]">
+          <div *ngFor="let sec of mod.sections"
+               class="icd-sec-item"
+               [class.active]="selectedSection?.id === sec.id"
+               (click)="selectSection(sec, mod)">
+            <i class="isax icd-sec-icon"
+               [class.isax-video-circle]="sec.type==='video'"
+               [class.isax-document-text]="sec.type==='document' || sec.type==='pdf'"
+               [class.isax-award]="sec.type==='quiz'"></i>
+            <span class="icd-sec-name">{{ sec.titre }}</span>
+            <span class="icd-sec-badge"
+                  [class.badge-vid]="sec.type==='video'"
+                  [class.badge-doc]="sec.type==='document'||sec.type==='pdf'"
+                  [class.badge-quiz]="sec.type==='quiz'">
+              {{ sec.type === 'video' ? 'Vidéo' : sec.type === 'quiz' ? 'Quiz' : 'Doc' }}
             </span>
           </div>
-          
-          <div class="d-sm-flex align-items-center justify-content-sm-between mt-5">
-            <div class="d-flex text-start align-items-center justify-content-sm-start justify-content-center">
-              <div class="avatar avatar-lg">
-                <img class="rounded-circle" 
-                     [src]="getImageUrl(formation.formateur?.avatar)" 
-                     alt="Formateur">
-              </div>
-              <div class="ms-2">
-                <h6 class="fs-18 text-white">
-                  <a href="javascript:void(0)">
-                    {{ formation.formateur?.nom || 'Formateur Expert' }}
-                  </a>
-                </h6>
-                <p class="text-white fs-14">Instructeur</p>
-              </div>
-            </div>
-            
-            <div class="d-flex mt-sm-0 mt-2 align-items-center justify-content-sm-start justify-content-center">
-              <i class="fa-solid fa-star text-warning me-1"></i>
-              <i class="fa-solid fa-star text-warning me-1"></i>
-              <i class="fa-solid fa-star text-warning me-1"></i>
-              <i class="fa-solid fa-star text-warning me-1"></i>
-              <i class="fa-solid fa-star text-white me-1"></i>
-              <p class="text-white fs-14">
-                <span class="text-warning">4.0</span> ({{ formation.avis?.length || 15 }})
-              </p>
-            </div>
+
+          <!-- add quiz button -->
+          <div class="icd-add-quiz-row">
+            <button type="button" class="icd-add-quiz-btn" (click)="addQuizToModule(mod)">
+              <i class="isax isax-award"></i> Ajouter un quiz
+            </button>
           </div>
         </div>
       </div>
+
+      <div *ngIf="!formation.modules?.length" class="icd-empty-modules">
+        <i class="isax isax-element-4"></i>
+        <span>Aucun module — modifiez la formation</span>
+      </div>
     </div>
-  </section>
 
-  <!-- Course Detail Section -->
-  <section class="course-details">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8">
-          <div class="course-page-content">
-            
-            <!-- Overview Card -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Aperçu</h5>
-                <h6 class="mb-3">Description du cours</h6>
-                <div [innerHTML]="formation.description"></div>
-                
-                <!-- Compétences Acquises -->
-                <h6 class="mb-3 mt-4" *ngIf="getCompetencesList(formation.competences_acquises).length > 0">
-                  Compétences acquises
-                </h6>
-                <ul class="custom-list" *ngIf="getCompetencesList(formation.competences_acquises).length > 0">
-                  <li class="list-items" *ngFor="let competence of getCompetencesList(formation.competences_acquises)">
-                    {{ competence }}
-                  </li>
-                </ul>
-                
-                <!-- Prérequis -->
-                <h6 class="mb-3 mt-4" *ngIf="formation.prerequis">Prérequis</h6>
-                <p *ngIf="formation.prerequis">{{ formation.prerequis }}</p>
-                
-                <!-- Outils Requis -->
-                <h6 class="mb-3 mt-4" *ngIf="getOutilsList(formation.outils_requis).length > 0">
-                  Outils requis
-                </h6>
-                <ul class="custom-list mb-0" *ngIf="getOutilsList(formation.outils_requis).length > 0">
-                  <li class="list-items" *ngFor="let outil of getOutilsList(formation.outils_requis)">
-                    {{ outil }}
-                  </li>
-                </ul>
-              </div>
+    <!-- ── RIGHT : editor area ──────────────────────────────────────────── -->
+    <div class="icd-editor">
+
+      <!-- empty state -->
+      <div *ngIf="!selectedSection" class="icd-editor-empty">
+        <i class="isax isax-award"></i>
+        <div>Sélectionnez un quiz dans la liste des modules</div>
+        <small>ou ajoutez un quiz à un module existant</small>
+      </div>
+
+      <!-- quiz editor -->
+      <ng-container *ngIf="selectedSection && selectedSection.type === 'quiz' && activeQuiz">
+
+        <!-- editor topbar -->
+        <div class="icd-etb">
+          <div>
+            <div class="icd-etb-title">{{ activeQuiz.titre }}</div>
+            <div class="icd-etb-sub" *ngIf="activeQuiz.statistics">
+              Passé par {{ activeQuiz.statistics.total_participants }} apprenants
+              · Score moyen : {{ activeQuiz.statistics.note_moyenne }}%
             </div>
-
-            <!-- Course Content Card -->
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between flex-wrap">
-                  <h5 class="subs-title mb-2 mb-sm-3">Contenu du cours</h5>
-                  <h6 class="text-gray-7 mb-3">
-                    {{ formation.modules?.length || 0 }} Modules
-                    <span class="text-secondary">{{ formation.duree_totale }}h</span>
-                  </h6>
-                </div>
-                
-                <div class="accordion accordion-customicon1 accordions-items-seperate p-0" 
-                     id="accordioncustomicon1Example">
-                  
-                  <div class="accordion-item" 
-                       *ngFor="let module of formation.modules; let i = index" 
-                       data-aos="fade-up">
-                    <h2 class="accordion-header" [id]="'headingcustomicon1' + i">
-                      <button class="accordion-button collapsed" 
-                              type="button" 
-                              data-bs-toggle="collapse" 
-                              [attr.data-bs-target]="'#collapsecustomicon1' + i" 
-                              aria-expanded="false" 
-                              [attr.aria-controls]="'collapsecustomicon1' + i">
-                        Module {{ i + 1 }}: {{ module.titre }}
-                        <i class="fa-solid fa-chevron-down"></i>
-                      </button>
-                    </h2>
-                    
-                    <div [id]="'collapsecustomicon1' + i" 
-                         class="accordion-collapse collapse" 
-                         [attr.aria-labelledby]="'headingcustomicon1' + i" 
-                         data-bs-parent="#accordioncustomicon1Example">
-                      <div class="accordion-body p-0">
-                        <ul *ngIf="module.sections?.length > 0">
-                          <li class="p-4 px-3 d-flex justify-content-between" 
-                              *ngFor="let section of module.sections; let j = index">
-                            <p class="mb-0">
-                              <img class="me-2" src="./assets/img/icons/play.svg" alt="img">
-                              Leçon {{ i + 1 }}.{{ j + 1 }} {{ section.titre }}
-                            </p>
-                            <div class="d-flex gap-xl-5 gap-3">
-                              <a href="javascript:void(0);" 
-                                class="preview-link"
-                                (click)="previewSection(section)">
-                                Aperçu
-                              </a>
-                              <p class="mb-0">{{ section.duree_estimee || '5' }}min</p>
-                            </div>
-                          </li>
-                        </ul>
-                        
-                        <div class="text-center py-4" *ngIf="!module.sections?.length">
-                          <p class="text-muted mb-0">Contenu en cours de préparation...</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Module par défaut si pas de modules -->
-                  <div class="accordion-item" *ngIf="!formation.modules?.length" data-aos="fade-up">
-                    <h2 class="accordion-header" id="headingcustomicon1default">
-                      <button class="accordion-button collapsed" 
-                              type="button" 
-                              data-bs-toggle="collapse" 
-                              data-bs-target="#collapsecustomicon1default" 
-                              aria-expanded="false" 
-                              aria-controls="collapsecustomicon1default">
-                        Introduction au cours
-                        <i class="fa-solid fa-chevron-down"></i>
-                      </button>
-                    </h2>
-                    <div id="collapsecustomicon1default" 
-                         class="accordion-collapse collapse" 
-                         aria-labelledby="headingcustomicon1default" 
-                         data-bs-parent="#accordioncustomicon1Example">
-                      <div class="accordion-body p-0">
-                        <ul>
-                          <li class="p-4 px-3 d-flex justify-content-between">
-                            <p class="mb-0">
-                              <img class="me-2" src="./assets/img/icons/play.svg" alt="img">
-                              Leçon 1.1 Présentation du cours
-                            </p>
-                            <div class="d-flex gap-xl-5 gap-3">
-                              <a href="javascript:void(0);" class="preview-link">Aperçu</a>
-                              <p class="mb-0">5min</p>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Instructor Card -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">À propos de l'instructeur</h5>
-                
-                <div class="d-flex align-items-center justify-content-between mt-4 gap-2 flex-wrap">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar avatar-lg">
-                      <img class="rounded-circle" 
-                           [src]="getImageUrl(formation.formateur?.avatar)" 
-                           alt="Formateur">
-                    </div>
-                    <div class="ms-2">
-                      <h5 class="fs-18 fw-semibold">
-                        <a href="javascript:void(0)">
-                          {{ formation.formateur?.nom || 'Expert Formateur' }}
-                        </a>
-                      </h5>
-                      <p class="mb-0">{{ formation.formateur?.fonction || 'Formateur Expert' }}</p>
-                    </div>
-                  </div>
-                  
-                  <div class="d-flex align-items-center">
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <p class="mb-0">4.5</p>
-                  </div>
-                </div>
-                
-                <div class="course-info align-items-center d-flex gap-2 gap-xl-3 mt-3 mb-3 flex-wrap">
-                  <p class="fw-medium d-flex align-items-center fs-14 mb-0">
-                    <img class="me-2" src="./assets/img/icons/play2.svg" alt="img">
-                    {{ formation.formateur?.nb_formations || 1 }} Cours
-                  </p>
-                  <p class="fw-medium d-flex align-items-center fs-14 mb-0">
-                    <img class="me-2" src="./assets/img/icons/book2.svg" alt="img">
-                    {{ formation.modules?.length || 0 }}+ Modules
-                  </p>
-                  <p class="fw-medium d-flex align-items-center fs-14 mb-0">
-                    <img class="me-2" src="./assets/img/icons/timer-start2.svg" alt="img">
-                    {{ formation.duree_totale }}h
-                  </p>
-                  <p class="fw-medium d-flex align-items-center fs-14 mb-0">
-                    <img class="me-2" src="./assets/img/icons/people.svg" alt="img">
-                    {{ formation.nb_inscrits || 0 }} étudiants
-                  </p>
-                </div>
-                
-                <p>{{ formation.formateur?.bio || 'Expert dans son domaine avec plusieurs années d\'expérience en formation professionnelle.' }}</p>
-              </div>
-            </div>
-
-            <!-- Reviews Section -->
-            <!-- <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Avis des étudiants</h5>
-                
-                <div class="review-summary mb-4">
-                  <div class="d-flex align-items-center mb-3">
-                    <div class="rating-display me-4">
-                      <h2 class="mb-0">4.0</h2>
-                      <div class="stars">
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-muted"></i>
-                      </div>
-                      <p class="mb-0 text-muted">{{ formation.avis?.length || 15 }} avis</p>
-                    </div>
-                  </div>
-                </div> -->
-
-                <!-- Sample Review -->
-                <!-- <div class="review-item border-bottom pb-3 mb-3">
-                  <div class="d-flex align-items-center mb-2">
-                    <div class="avatar avatar-sm me-2">
-                      <img class="rounded-circle" src="./assets/img/avatar/avatar1.jpg" alt="User">
-                    </div>
-                    <div>
-                      <h6 class="mb-0">Marie Dupont</h6>
-                      <div class="stars-sm">
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="mb-0">Excellente formation ! Les concepts sont très bien expliqués et les exercices pratiques sont parfaits pour assimiler les notions.</p>
-                </div> -->
-              <!-- </div> -->
-            <!-- </div> -->
-
-            <!-- Comments Form Card -->
-            <!-- <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Laisser un avis</h5>
-                <form class="course-details-form" #commentForm="ngForm" (ngSubmit)="submitComment()">
-                  <div class="row">
-                    <div class="col-sm-6">
-                      <div class="mb-3">
-                        <label class="form-label fs-14 fw-medium text-gray-7">Nom *</label>
-                        <input class="form-control fs-14 text-gray-7" 
-                               type="text" 
-                               [(ngModel)]="newComment.nom"
-                               name="nom"
-                               required>
-                      </div>
-                    </div>
-                    <div class="col-sm-6">
-                      <div class="mb-3">
-                        <label class="form-label fs-14 fw-medium text-gray-7">Email *</label>
-                        <input class="form-control fs-14 text-gray-7" 
-                               type="email" 
-                               [(ngModel)]="newComment.email"
-                               name="email"
-                               required>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <div class="mb-3">
-                        <label class="form-label fs-14 fw-medium text-gray-7">Note</label>
-                        <div class="rating-input">
-                          <i class="fa-solid fa-star" 
-                             *ngFor="let star of [1,2,3,4,5]; let i = index"
-                             [class.text-warning]="i < (newComment.note || 0)"
-                             [class.text-muted]="i >= (newComment.note || 0)"
-                             (click)="setRating(i + 1)"></i>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <div class="mb-3">
-                        <label class="form-label fs-14 fw-medium text-gray-7">Votre avis *</label>
-                        <textarea class="form-control fs-14 text-gray-7"
-                                  rows="4"
-                                  [(ngModel)]="newComment.commentaire"
-                                  name="commentaire"
-                                  placeholder="Partagez votre expérience avec cette formation..."
-                                  required></textarea>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <button type="submit" 
-                              class="btn btn-primary"
-                              [disabled]="submittingComment || !commentForm.valid">
-                        {{ submittingComment ? 'Envoi en cours...' : 'Publier l\'avis' }}
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div> -->
+          </div>
+          <span class="icd-etb-badge">{{ activeQuiz.questions?.length || 0 }} questions</span>
+          <div class="icd-etb-actions">
+            <button type="button" class="icd-sm-btn" [disabled]="savingQuiz" (click)="saveQuiz()">
+              <i class="isax isax-device-message"></i>
+              {{ savingQuiz ? 'Sauvegarde…' : 'Enregistrer' }}
+            </button>
           </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-          <div class="course-sidebar-sec">
-            
-            <!-- Video/Price Card -->
-            <div class="card">
-              <div class="card-body">
-                
-                <!-- Video Preview -->
-                <div class="position-relative mb-4" *ngIf="isYouTubeUrl(formation.media_url)">
-      <div class="ratio ratio-16x9">
-        <iframe 
-          [src]="getYouTubeEmbedUrl(formation.media_url)"
-          title="Aperçu de la formation"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-        </iframe>
-      </div>
-    </div>
-    
-    <!-- Regular Video Preview -->
-    <div class="position-relative mb-4" *ngIf="getMediaUrl(formation.media_url) && !isYouTubeUrl(formation.media_url)">
-      <video class="img-fluid w-100 rounded" 
-             controls
-             [poster]="getImageUrl(formation.image_couverture)">
-        <source [src]="getMediaUrl(formation.media_url)" type="video/mp4">
-        Votre navigateur ne supporte pas la vidéo.
-      </video>
-    </div>
-    
-    <!-- Image Preview if no video -->
-    <div class="position-relative mb-4" *ngIf="!formation.media_url">
-      <img class="img-fluid rounded w-100" 
-           [src]="getImageUrl(formation.image_couverture)" 
-           alt="Couverture du cours"
-           [style.height.px]="200"
-           style="object-fit: cover;">
-      
-      <!-- Play button overlay for YouTube -->
-      <div class="play-button-overlay" 
-           *ngIf="formation.media_url && isYouTubeUrl(formation.media_url)"
-           (click)="openYouTubeVideo(formation.media_url)">
-        <i class="fas fa-play-circle fa-3x text-white"></i>
-      </div>
-    </div>
-                
-                <!-- Image Preview if no video
-                <div class="position-relative mb-4" *ngIf="!formation.media_url">
-                  <img class="img-fluid rounded w-100" 
-                       [src]="getImageUrl(formation.image_couverture)" 
-                       alt="Couverture du cours"
-                       [style.height.px]="200"
-                       style="object-fit: cover;">
-                </div> -->
-                
-                <!-- Price Section -->
-                <div class="text-center mb-4">
-                  <h2 *ngIf="formation.prix == 0 || formation.prix == '0.00'" class="text-success fs-30 mb-0">
-                    GRATUIT
-                  </h2>
-                  <h2 *ngIf="formation.prix > 0" class="text-primary fs-30 mb-0">
-                    {{ formation.prix }}FCFA
-                  </h2>
-                  <p class="text-muted mb-0" *ngIf="formation.prix_original && formation.prix_original > formation.prix">
-                    <span class="text-decoration-line-through">{{ formation.prix_original }}FCFA</span>
-                    <span class="badge bg-success ms-2">
-                      -{{ calculateDiscount(formation.prix, formation.prix_original) }}%
-                    </span>
-                  </p>
-                </div>
-                
-                <!-- Enrollment Button -->
-                <div class="d-grid mb-3">
-                  <!-- <button class="btn btn-primary btn-lg" 
-                          *ngIf="formation.prix == 0 || formation.prix == '0.00'">
-                    <i class="fas fa-play me-2"></i>
-                    Commencer gratuitement
-                  </button> -->
-                  <button class="btn btn-primary btn-lg" 
-                          >
-                          <a [routerLink]="['/courses/instructor-course-edit', formation.id]" 
-                               title="Modifier">
-                                <!-- <i class="isax isax-edit-2"></i> -->
+        <div class="icd-qeditor">
 
-                                Mettre à jour la formation
-                            </a>
-                    <!-- <i class="fas fa-shopping-cart me-2"></i> -->
-                </button>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="d-flex gap-2 mb-3">
-                  <button class="btn btn-outline-secondary flex-fill">
-                    <i class="fas fa-heart me-1"></i>
-                    Favoris
+          <!-- settings row -->
+          <div class="icd-qsettings">
+            <div class="icd-qset-title">Paramètres du quiz</div>
+            <div class="icd-qset-grid">
+              <div class="icd-qset-field">
+                <label class="icd-qset-label">Score de réussite (%)</label>
+                <input type="number" class="icd-qset-inp" [(ngModel)]="activeQuiz.score_minimum" min="0" max="100" title="Score de réussite en pourcentage">
+              </div>
+              <div class="icd-qset-field">
+                <label class="icd-qset-label">Tentatives autorisées</label>
+                <select class="icd-qset-inp" [(ngModel)]="activeQuiz.tentatives_max">
+                  <option [value]="1">1 tentative</option>
+                  <option [value]="2">2 tentatives</option>
+                  <option [value]="3">3 tentatives</option>
+                  <option [value]="0">Illimitées</option>
+                </select>
+              </div>
+              <div class="icd-qset-field">
+                <label class="icd-qset-label">Durée (minutes)</label>
+                <input type="number" class="icd-qset-inp" [(ngModel)]="activeQuiz.duree_minutes" min="0" title="Durée du quiz en minutes">
+              </div>
+            </div>
+          </div>
+
+          <!-- questions list -->
+          <div class="icd-questions">
+            <div *ngFor="let q of activeQuiz.questions; let qi = index"
+                 class="icd-qcard"
+                 [class.expanded]="expandedQuestion === q.id">
+
+              <!-- question header -->
+              <div class="icd-qcard-hd" (click)="toggleQuestion(q.id)">
+                <div class="icd-qnum">{{ qi + 1 }}</div>
+                <span class="icd-qtext">{{ q.question_text || 'Nouvelle question' }}</span>
+                <span class="icd-qtype-badge">{{ getTypeLabel(q.type) }}</span>
+                <span class="icd-qpts">{{ q.points }} pt{{ q.points > 1 ? 's' : '' }}</span>
+                <div class="icd-qcard-actions">
+                  <button type="button" class="icd-qbtn" title="Dupliquer" (click)="duplicateQuestion(q, $event)">
+                    <i class="isax isax-copy"></i>
                   </button>
-                  <button class="btn btn-outline-secondary flex-fill" (click)="shareFormation()">
-                    <i class="fas fa-share me-1"></i>
-                    Partager
+                  <button type="button" class="icd-qbtn danger" title="Supprimer" (click)="deleteQuestion(q, $event)">
+                    <i class="isax isax-trash"></i>
                   </button>
                 </div>
-                
-                <!-- Money back guarantee -->
-                <div class="text-center">
-                  <p class="text-muted fs-14 mb-0">
-                    <i class="fas fa-shield-alt me-1"></i>
-                   Formaion complète
-                  </p>
+              </div>
+
+              <!-- question body (expanded) -->
+              <div class="icd-qcard-body" *ngIf="expandedQuestion === q.id">
+                <input type="text" class="icd-qprompt" [(ngModel)]="q.question_text"
+                       placeholder="Énoncé de la question…">
+
+                <!-- points -->
+                <div class="icd-pts-row">
+                  <label class="icd-pts-label">Points :</label>
+                  <input type="number" class="icd-pts-inp" [(ngModel)]="q.points" min="1" max="10" title="Points attribués à cette question">
                 </div>
-              </div>
-            </div>
 
-            <!-- Course Includes Card -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Ce cours comprend :</h5>
-                <ul class="list-unstyled course-includes">
-                  <li class="mb-2">
-                    <i class="fas fa-play-circle text-primary me-2"></i>
-                    {{ formation.duree_totale }}h de contenu vidéo
-                  </li>
-                  <li class="mb-2">
-                    <i class="fas fa-download text-primary me-2"></i>
-                    {{ formation.modules?.length || 0 }} ressources téléchargeables
-                  </li>
-                  <li class="mb-2">
-                    <i class="fas fa-infinity text-primary me-2"></i>
-                    Accès à vie complet
-                  </li>
-                  <li class="mb-2">
-                    <i class="fas fa-mobile-alt text-primary me-2"></i>
-                    Accès sur mobile et tablette
-                  </li>
-                  <li class="mb-2" *ngIf="formation.est_certifiante">
-                    <i class="fas fa-certificate text-primary me-2"></i>
-                    Certificat d'achèvement
-                  </li>
-                  <li class="mb-0">
-                    <i class="fas fa-users text-primary me-2"></i>
-                    Accès à la communauté
-                  </li>
-                </ul>
-              </div>
-            </div>
+                <!-- options for multiple_choice / true_false -->
+                <div *ngIf="q.type !== 'text'" class="icd-options">
+                  <div *ngFor="let opt of q.reponses; let oi = index" class="icd-opt-row">
+                    <div class="icd-opt-check"
+                         [class.correct]="opt.is_correct"
+                         (click)="toggleCorrect(q, opt)">
+                      <i class="isax isax-tick-circle" *ngIf="opt.is_correct"></i>
+                    </div>
+                    <input type="text" class="icd-opt-inp" [class.correct]="opt.is_correct"
+                           [(ngModel)]="opt.reponse_text" placeholder="Réponse…">
+                    <i class="isax isax-trash icd-opt-del"
+                       *ngIf="q.type !== 'true_false'"
+                       (click)="removeOption(q, oi)"></i>
+                  </div>
+                  <button type="button" class="icd-add-opt"
+                          *ngIf="q.type === 'multiple_choice'"
+                          (click)="addOption(q)">
+                    <i class="isax isax-add-circle"></i> Ajouter une option
+                  </button>
+                </div>
 
-            <!-- Course Features Card -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Informations sur le cours</h5>
-                <ul class="list-unstyled course-features">
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-users text-muted me-2"></i>
-                      Étudiants inscrits
-                    </span>
-                    <strong>{{ formation.nb_inscrits || 0 }}</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-clock text-muted me-2"></i>
-                      Durée totale
-                    </span>
-                    <strong>{{ formation.duree_totale }}h</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-book text-muted me-2"></i>
-                      Nombre de modules
-                    </span>
-                    <strong>{{ formation.modules?.length || 0 }}</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-signal text-muted me-2"></i>
-                      Niveau
-                    </span>
-                    <strong>{{ getNiveauLabel(formation.niveau) }}</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-globe text-muted me-2"></i>
-                      Langue
-                    </span>
-                    <strong>{{ getLangueLabel(formation.langue) }}</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-0">
-                    <span>
-                      <i class="fas fa-calendar text-muted me-2"></i>
-                      Dernière mise à jour
-                    </span>
-                    <strong>{{ formatDate(formation.updated_at) }}</strong>
-                  </li>
-                </ul>
-              </div>
-            </div>
+                <!-- text answer hint -->
+                <div *ngIf="q.type === 'text'" class="icd-text-hint">
+                  Réponse libre — évaluée manuellement par le formateur
+                </div>
 
-            <!-- Tags Card -->
-            <div class="card" *ngIf="getTagsList(formation.tags).length > 0">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Tags</h5>
-                <div class="tags-container">
-                  <span class="badge bg-light text-dark me-1 mb-1" 
-                        *ngFor="let tag of getTagsList(formation.tags)">
-                    {{ tag }}
-                  </span>
+                <!-- explanation -->
+                <div class="icd-expl-row">
+                  <label class="icd-expl-label">Explication :</label>
+                  <input type="text" class="icd-expl-inp" [(ngModel)]="q.explication"
+                         placeholder="Affiché à l'apprenant après sa réponse…">
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- add question bar -->
+          <div class="icd-add-bar">
+            <button type="button" class="icd-aq-btn" (click)="addQuestion('multiple_choice')">
+              <i class="isax isax-record-circle"></i> Choix unique
+            </button>
+            <button type="button" class="icd-aq-btn" (click)="addQuestion('multiple_choice_multi')">
+              <i class="isax isax-tick-square"></i> Choix multiple
+            </button>
+            <button type="button" class="icd-aq-btn" (click)="addQuestion('true_false')">
+              <i class="isax isax-toggle-on-circle"></i> Vrai / Faux
+            </button>
+            <button type="button" class="icd-aq-btn" (click)="addQuestion('text')">
+              <i class="isax isax-edit"></i> Texte libre
+            </button>
+          </div>
+
+        </div><!-- /icd-qeditor -->
+      </ng-container>
+
+      <!-- section preview (non-quiz) -->
+      <div *ngIf="selectedSection && selectedSection.type !== 'quiz'" class="icd-section-preview">
+        <div class="icd-sp-head">
+          <span class="icd-sp-badge"
+                [class.badge-vid]="selectedSection.type==='video'"
+                [class.badge-doc]="selectedSection.type==='pdf'||selectedSection.type==='document'||selectedSection.type==='text'||selectedSection.type==='texte'||selectedSection.type==='reading'"
+                [class.badge-res]="selectedSection.type==='ressource'||selectedSection.type==='exercice'">
+            <i class="isax"
+               [class.isax-video-circle]="selectedSection.type==='video'"
+               [class.isax-document-text]="selectedSection.type==='pdf'||selectedSection.type==='document'||selectedSection.type==='text'||selectedSection.type==='texte'||selectedSection.type==='reading'"
+               [class.isax-link-2]="selectedSection.type==='ressource'||selectedSection.type==='exercice'"></i>
+            {{ selectedSection.type === 'video' ? 'Vidéo' : selectedSection.type === 'pdf' ? 'PDF' : selectedSection.type === 'ressource' ? 'Ressource' : 'Lecture' }}
+          </span>
+          <h3 class="icd-sp-title">{{ selectedSection.titre }}</h3>
+          <div class="icd-sp-meta">
+            <span *ngIf="selectedSection.duree_estimee"><i class="isax isax-clock me-1"></i>{{ selectedSection.duree_estimee }} min</span>
+            <span class="ms-3"><i class="isax isax-flag me-1"></i>{{ selectedSection.obligatoire ? 'Obligatoire' : 'Optionnelle' }}</span>
+          </div>
+        </div>
+        <div class="icd-sp-body">
+          <div *ngIf="selectedSection.description || selectedSection.contenu" class="icd-sp-content">
+            <h5 class="icd-sp-section-label">Contenu</h5>
+            <p>{{ selectedSection.description || selectedSection.contenu }}</p>
+          </div>
+          <div *ngIf="selectedSection.ressources" class="icd-sp-resource mt-3">
+            <h5 class="icd-sp-section-label">Ressource</h5>
+            <a [href]="selectedSection.ressources" target="_blank" class="icd-sp-link">
+              <i class="isax isax-link-2 me-1"></i>Ouvrir la ressource
+            </a>
+          </div>
+          <div *ngIf="!selectedSection.description && !selectedSection.contenu && !selectedSection.ressources" class="icd-editor-empty">
+            <i class="isax isax-document-text"></i>
+            <div>{{ selectedSection.titre }}</div>
+            <small>Aucun contenu défini pour cette section</small>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-</div>
 
-<!-- No Formation Found -->
-<div *ngIf="!formation && !loading && !error" class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-6 text-center py-5">
-      <i class="fas fa-search fa-3x text-muted mb-3"></i>
-      <h4>Formation non trouvée</h4>
-      <p class="text-muted">La formation que vous recherchez n'existe pas ou n'est plus disponible.</p>
-      <a routerLink="/formations" class="btn btn-primary">
-        <i class="fas fa-arrow-left me-2"></i>
-        Retour aux formations
-      </a>
+      <!-- quiz section with no quiz yet -->
+      <div *ngIf="selectedSection && selectedSection.type === 'quiz' && !activeQuiz && !loadingQuiz"
+           class="icd-editor-empty">
+        <i class="isax isax-award"></i>
+        <div>Quiz introuvable</div>
+        <button type="button" class="icd-sm-btn mt-2" (click)="createQuizForSection(selectedSection, selectedModule)">
+          <i class="isax isax-add-circle"></i> Créer le quiz
+        </button>
+      </div>
+
+      <div *ngIf="loadingQuiz" class="icd-editor-empty">
+        <div class="spinner-border text-primary spinner-border-sm"></div>
+        <span>Chargement du quiz…</span>
+      </div>
+
+    </div><!-- /icd-editor -->
+  </div><!-- /icd-layout -->
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB : RÉSULTATS QUIZ                                                  -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab==='stats'" class="icd-stats">
+
+    <div *ngIf="loadingStats" class="icd-loader"><div class="spinner-border text-primary"></div></div>
+
+    <ng-container *ngIf="!loadingStats">
+
+      <!-- quiz selector -->
+      <div class="icd-stats-toolbar">
+        <select class="ip-select" [(ngModel)]="selectedQuizId" (change)="loadQuizStats()">
+          <option value="">Sélectionner un quiz…</option>
+          <option *ngFor="let q of allFormationQuizzes" [value]="q.id">{{ q.titre }}</option>
+        </select>
+      </div>
+
+      <ng-container *ngIf="quizStats">
+        <!-- KPI cards -->
+        <div class="icd-stats-grid">
+          <div class="icd-stat-card">
+            <div class="icd-sc-label">Apprenants ayant passé</div>
+            <div class="icd-sc-val">{{ quizStats.total_participants || 0 }}/{{ formation.nb_inscrits || '?' }}</div>
+            <div class="icd-sc-sub neutral">{{ getParticipationRate() }}% de participation</div>
+          </div>
+          <div class="icd-stat-card">
+            <div class="icd-sc-label">Score moyen</div>
+            <div class="icd-sc-val">{{ quizStats.note_moyenne || 0 }}%</div>
+            <div class="icd-sc-sub" [class.up]="(quizStats.note_moyenne||0) >= (activeQuiz?.score_minimum||70)"
+                 [class.down]="(quizStats.note_moyenne||0) < (activeQuiz?.score_minimum||70)">
+              {{ (quizStats.note_moyenne||0) >= (activeQuiz?.score_minimum||70) ? 'Au-dessus du seuil' : 'Sous le seuil' }}
+            </div>
+          </div>
+          <div class="icd-stat-card">
+            <div class="icd-sc-label">Taux de réussite</div>
+            <div class="icd-sc-val">{{ getReussiteRate() }}%</div>
+            <div class="icd-sc-sub up">{{ quizStats.nb_reussis || 0 }} réussis</div>
+          </div>
+          <div class="icd-stat-card">
+            <div class="icd-sc-label">Résultats totaux</div>
+            <div class="icd-sc-val">{{ quizStats.total_participants || 0 }}</div>
+            <div class="icd-sc-sub neutral">tentatives enregistrées</div>
+          </div>
+        </div>
+
+        <!-- score distribution -->
+        <div class="icd-dist-card">
+          <div class="icd-dist-title">Distribution des scores</div>
+          <div *ngFor="let band of scoreBands" class="icd-dist-row">
+            <span class="icd-dist-label">{{ band.label }}</span>
+            <div class="icd-dist-bar">
+              <div class="icd-dist-fill" [class]="band.color" [style.width.%]="band.pct"></div>
+            </div>
+            <span class="icd-dist-count" [class]="band.textColor">{{ band.count }} apprenants</span>
+          </div>
+        </div>
+
+        <!-- per-question rates -->
+        <div class="icd-qa-card" *ngIf="questionStats.length > 0">
+          <div class="icd-qa-title">Taux de bonne réponse par question</div>
+          <div *ngFor="let qs of questionStats; let i = index" class="icd-qa-row">
+            <span class="icd-qa-num">Q{{ i + 1 }}</span>
+            <span class="icd-qa-text">{{ qs.question }}</span>
+            <div class="icd-qa-bar">
+              <div class="icd-qa-fill"
+                   [class.fill-g]="qs.pct >= 70"
+                   [class.fill-a]="qs.pct >= 50 && qs.pct < 70"
+                   [class.fill-r]="qs.pct < 50"
+                   [style.width.%]="qs.pct"></div>
+            </div>
+            <span class="icd-qa-pct"
+                  [class.pct-g]="qs.pct >= 70"
+                  [class.pct-a]="qs.pct >= 50 && qs.pct < 70"
+                  [class.pct-r]="qs.pct < 50">{{ qs.pct }}%</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <div *ngIf="!quizStats && !loadingStats" class="icd-editor-empty">
+        <i class="isax isax-chart-2"></i>
+        <span>Sélectionnez un quiz pour voir les résultats</span>
+      </div>
+    </ng-container>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB : INFORMATIONS                                                   -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab==='info'" class="icd-info">
+    <div class="icd-info-grid">
+
+      <div class="icd-info-card">
+        <h6 class="icd-info-h">Informations générales</h6>
+        <table class="icd-info-table">
+          <tr><td>Titre</td><td class="fw">{{ formation.titre }}</td></tr>
+          <tr><td>Catégorie</td><td>{{ formation.categorie?.nom || '—' }}</td></tr>
+          <tr><td>Niveau</td><td>{{ getNiveauLabel(formation.niveau) }}</td></tr>
+          <tr><td>Langue</td><td>{{ getLangueLabel(formation.langue) }}</td></tr>
+          <tr><td>Durée totale</td><td>{{ formation.duree_totale }}h</td></tr>
+          <tr><td>Prix</td><td>{{ formation.prix == 0 ? 'Gratuit' : formation.prix + ' FCFA' }}</td></tr>
+          <tr><td>Statut</td><td>
+            <span class="icd-statut" [class.published]="formation.est_publie">
+              {{ formation.est_publie ? 'Publié' : 'Brouillon' }}
+            </span>
+          </td></tr>
+        </table>
+      </div>
+
+      <div class="icd-info-card">
+        <h6 class="icd-info-h">Statistiques</h6>
+        <table class="icd-info-table">
+          <tr><td>Modules</td><td class="fw">{{ formation.modules?.length || 0 }}</td></tr>
+          <tr><td>Apprenants inscrits</td><td class="fw">{{ formation.nb_inscrits || 0 }}</td></tr>
+          <tr><td>Taux de complétion</td><td class="fw">{{ formation.taux_completion || 0 }}%</td></tr>
+          <tr><td>Créé le</td><td>{{ formatDate(formation.created_at) }}</td></tr>
+          <tr><td>Mis à jour le</td><td>{{ formatDate(formation.updated_at) }}</td></tr>
+        </table>
+        <a [href]="'/courses/instructor-course-edit/' + formation.id" target="_blank" class="icd-edit-link">
+          <i class="isax isax-edit-2"></i> Modifier la formation
+        </a>
+      </div>
+
+      <div class="icd-info-card" *ngIf="formation.description">
+        <h6 class="icd-info-h">Description</h6>
+        <div class="icd-desc" [innerHTML]="formation.description"></div>
+      </div>
     </div>
   </div>
+
+</ng-container>
+
+<!-- No formation -->
+<div *ngIf="!formation && !loading && !error" class="icd-editor-empty">
+  <i class="isax isax-book-1"></i>
+  <span>Formation introuvable</span>
+  <a [routerLink]="routes.instructorCourse" class="icd-sm-btn mt-2">Retour aux formations</a>
 </div>

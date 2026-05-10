@@ -20,10 +20,15 @@ export class SuperadminTicketsComponent implements OnInit {
 
   stats = { total: 0, ouvert: 0, en_cours: 0, resolu: 0 };
 
-  searchQuery    = '';
-  filterStatut   = '';
-  filterPriorite = '';
-  filterCategorie = '';
+  searchQuery     = '';
+  filterStatut    = '';
+  filterPriorite  = '';
+
+  // Pagination
+  currentPage  = 1;
+  totalPages   = 1;
+  totalItems   = 0;
+  readonly pageSize = 15;
 
   newMessage     = '';
   sendingMessage = false;
@@ -34,45 +39,56 @@ export class SuperadminTicketsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTickets();
-    this.loadStats();
   }
 
   loadTickets(): void {
     this.loading = true;
-    const p: Record<string, string> = {};
-    if (this.filterStatut)    p['statut']    = this.filterStatut;
-    if (this.filterPriorite)  p['priorite']  = this.filterPriorite;
-    if (this.filterCategorie) p['categorie'] = this.filterCategorie;
-    if (this.searchQuery)     p['search']    = this.searchQuery;
+    const p: any = { page: this.currentPage, par_page: this.pageSize };
+    if (this.filterStatut)   p['statut']   = this.filterStatut;
+    if (this.filterPriorite) p['priorite'] = this.filterPriorite;
+    if (this.searchQuery)    p['search']   = this.searchQuery;
 
+    // Superadmin voit TOUT — pas de filtre entreprise ni user
     this.ticketService.getTickets(p).subscribe({
       next: (res) => {
-        this.tickets = res.data?.data || res.data || [];
+        const paginated = res.data;
+        this.tickets    = paginated.data || [];
+        this.totalItems = paginated.total || 0;
+        this.totalPages = paginated.last_page || 1;
+        this.currentPage = paginated.current_page || 1;
+        this.computeStats();
         this.loading = false;
-        this.computeStatsFromList();
       },
       error: () => { this.loading = false; }
     });
   }
 
-  loadStats(): void {
-    this.ticketService.getStatistiques().subscribe({
-      next: (res) => {
-        const s = res.data || {};
-        this.stats.total    = s.total    || this.stats.total;
-        this.stats.ouvert   = s.par_statut?.ouvert   || s.ouvert   || this.stats.ouvert;
-        this.stats.en_cours = s.par_statut?.en_cours || s.en_cours || this.stats.en_cours;
-        this.stats.resolu   = s.par_statut?.resolu   || s.resolu   || this.stats.resolu;
-      },
-      error: () => {}
-    });
-  }
-
-  private computeStatsFromList(): void {
-    this.stats.total    = this.tickets.length;
+  private computeStats(): void {
+    this.stats.total    = this.totalItems;
     this.stats.ouvert   = this.tickets.filter(t => t.statut === 'ouvert').length;
     this.stats.en_cours = this.tickets.filter(t => t.statut === 'en_cours').length;
     this.stats.resolu   = this.tickets.filter(t => t.statut === 'resolu').length;
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.loadTickets();
+  }
+
+  onSearch(): void {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => { this.currentPage = 1; this.loadTickets(); }, 400);
+  }
+
+  applyFilter(): void { this.currentPage = 1; this.loadTickets(); }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const start = Math.max(1, this.currentPage - 2);
+    const end   = Math.min(this.totalPages, this.currentPage + 2);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
   }
 
   selectTicket(ticket: Ticket): void {
@@ -81,25 +97,12 @@ export class SuperadminTicketsComponent implements OnInit {
     this.selectedTicket = ticket;
     this.newMessage = '';
     this.ticketService.getTicketById(ticket.id).subscribe({
-      next: (res) => {
-        this.selectedTicket = res.data || res;
-        this.loadingDetail = false;
-      },
+      next: (res) => { this.selectedTicket = res.data || res; this.loadingDetail = false; },
       error: () => { this.loadingDetail = false; }
     });
   }
 
-  closeDetail(): void {
-    this.selectedTicket = null;
-    this.newMessage = '';
-  }
-
-  onSearch(): void {
-    clearTimeout(this.searchTimeout);
-    this.searchTimeout = setTimeout(() => this.loadTickets(), 400);
-  }
-
-  applyFilter(): void { this.loadTickets(); }
+  closeDetail(): void { this.selectedTicket = null; this.newMessage = ''; }
 
   envoyerMessage(): void {
     if (!this.newMessage.trim() || !this.selectedTicket) return;
@@ -107,18 +110,9 @@ export class SuperadminTicketsComponent implements OnInit {
     const texte = this.newMessage;
     this.ticketService.ajouterMessage(this.selectedTicket.id, { contenu: texte }).subscribe({
       next: (res) => {
-        const msg = res.data || {
-          id: Date.now(), contenu: texte,
-          created_at: new Date().toISOString(),
-          auteur: { name: 'Moi', id: 0, email: '' },
-          est_interne: false, type: 'reponse',
-        };
+        const msg = res.data || { id: Date.now(), contenu: texte, created_at: new Date().toISOString(), auteur: { name: 'Moi', id: 0, email: '' } };
         if (this.selectedTicket) {
-          this.selectedTicket = {
-            ...this.selectedTicket,
-            messages: [...(this.selectedTicket.messages || []), msg],
-            nombre_reponses: (this.selectedTicket.nombre_reponses || 0) + 1,
-          };
+          this.selectedTicket = { ...this.selectedTicket, messages: [...(this.selectedTicket.messages || []), msg], nombre_reponses: (this.selectedTicket.nombre_reponses || 0) + 1 };
         }
         this.newMessage = '';
         this.sendingMessage = false;
@@ -135,7 +129,7 @@ export class SuperadminTicketsComponent implements OnInit {
         this.selectedTicket = { ...this.selectedTicket!, statut };
         const idx = this.tickets.findIndex(t => t.id === id);
         if (idx >= 0) this.tickets[idx] = { ...this.tickets[idx], statut };
-        this.computeStatsFromList();
+        this.computeStats();
       },
       error: () => {}
     });
@@ -147,32 +141,22 @@ export class SuperadminTicketsComponent implements OnInit {
   }
 
   getPClass(p: string): string {
-    const m: Record<string, string> = {
-      basse: 'p-basse', moyenne: 'p-moyenne', haute: 'p-haute', critique: 'p-critique'
-    };
+    const m: Record<string, string> = { basse: 'p-basse', moyenne: 'p-moyenne', haute: 'p-haute', critique: 'p-critique' };
     return m[p] || 'p-basse';
   }
 
   getSClass(s: string): string {
-    const m: Record<string, string> = {
-      ouvert: 's-ouvert', en_cours: 's-encours', en_attente: 's-attente',
-      resolu: 's-resolu', ferme: 's-ferme', annule: 's-annule'
-    };
+    const m: Record<string, string> = { ouvert: 's-ouvert', en_cours: 's-encours', en_attente: 's-attente', resolu: 's-resolu', ferme: 's-ferme', annule: 's-annule' };
     return m[s] || 's-ouvert';
   }
 
   getSLabel(s: string): string {
-    const m: Record<string, string> = {
-      ouvert: 'Ouvert', en_cours: 'En cours', en_attente: 'En attente',
-      resolu: 'Résolu', ferme: 'Fermé', annule: 'Annulé'
-    };
+    const m: Record<string, string> = { ouvert: 'Ouvert', en_cours: 'En cours', en_attente: 'En attente', resolu: 'Résolu', ferme: 'Fermé', annule: 'Annulé' };
     return m[s] || s;
   }
 
   getPLabel(p: string): string {
-    const m: Record<string, string> = {
-      basse: 'Basse', moyenne: 'Moyenne', haute: 'Haute', critique: 'Critique'
-    };
+    const m: Record<string, string> = { basse: 'Basse', moyenne: 'Moyenne', haute: 'Haute', critique: 'Critique' };
     return m[p] || p;
   }
 }

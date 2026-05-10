@@ -27,9 +27,10 @@ export interface Question {
   id?: number;
   quizzes_id: number;
   question_text: string;
-  type: 'multiple_choice' | 'true_false' | 'text';
+  type: 'multiple_choice' | 'multiple_choice_multi' | 'true_false' | 'text';
   points: number;
   ordre: number;
+  explication?: string;
   created_at?: string;
   updated_at?: string;
   reponses?: QuestionAnswer[];

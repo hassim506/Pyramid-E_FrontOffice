@@ -24,20 +24,21 @@ export class InstructorTicketsComponent implements OnInit {
   searchQuery  = '';
   filterStatut = '';
 
-  newTicket = {
-    sujet: '',
-    description: '',
-    categorie: 'technique',
-    priorite: 'moyenne',
-    type: 'incident',
-  };
-  submitting = false;
+  // Pagination
+  currentPage  = 1;
+  totalPages   = 1;
+  totalItems   = 0;
+  readonly pageSize = 15;
+
+  newTicket = { sujet: '', description: '', categorie: 'technique', priorite: 'moyenne', type: 'incident' };
+  submitting  = false;
   submitError = '';
 
   newMessage     = '';
   sendingMessage = false;
 
   private searchTimeout: any;
+  private currentUser: any;
 
   constructor(
     private ticketService: TicketService,
@@ -45,19 +46,26 @@ export class InstructorTicketsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.currentUser = this.authService.getUser();
     this.loadTickets();
   }
 
   loadTickets(): void {
     this.loading = true;
-    const p: Record<string, string> = {};
+    // Formateur voit uniquement SES tickets (filtre par user_id)
+    const p: any = { page: this.currentPage, par_page: this.pageSize };
+    if (this.currentUser?.id) p['user_id'] = this.currentUser.id;
     if (this.filterStatut) p['statut'] = this.filterStatut;
     if (this.searchQuery)  p['search'] = this.searchQuery;
 
     this.ticketService.getTickets(p).subscribe({
       next: (res) => {
-        this.tickets = res.data?.data || res.data || [];
-        this.stats.total  = this.tickets.length;
+        const paginated = res.data;
+        this.tickets     = paginated.data || [];
+        this.totalItems  = paginated.total || 0;
+        this.totalPages  = paginated.last_page || 1;
+        this.currentPage = paginated.current_page || 1;
+        this.stats.total   = this.totalItems;
         this.stats.enCours = this.tickets.filter(t => ['ouvert','en_cours','en_attente'].includes(t.statut)).length;
         this.stats.resolu  = this.tickets.filter(t => t.statut === 'resolu').length;
         this.loading = false;
@@ -66,12 +74,26 @@ export class InstructorTicketsComponent implements OnInit {
     });
   }
 
-  onSearch(): void {
-    clearTimeout(this.searchTimeout);
-    this.searchTimeout = setTimeout(() => this.loadTickets(), 400);
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.loadTickets();
   }
 
-  applyFilter(): void { this.loadTickets(); }
+  onSearch(): void {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => { this.currentPage = 1; this.loadTickets(); }, 400);
+  }
+
+  applyFilter(): void { this.currentPage = 1; this.loadTickets(); }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const start = Math.max(1, this.currentPage - 2);
+    const end   = Math.min(this.totalPages, this.currentPage + 2);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }
 
   selectTicket(ticket: Ticket): void {
     if (this.selectedTicket?.id === ticket.id) { this.selectedTicket = null; return; }
@@ -90,7 +112,8 @@ export class InstructorTicketsComponent implements OnInit {
   }
 
   soumettre(): void {
-    if (!this.newTicket.sujet.trim() || !this.newTicket.description.trim()) return;
+    if (!this.newTicket.sujet.trim()) { this.submitError = 'Le sujet est obligatoire.'; return; }
+    if (this.newTicket.description.trim().length < 10) { this.submitError = 'La description doit contenir au moins 10 caractères.'; return; }
     this.submitting = true;
     this.submitError = '';
     this.ticketService.createTicket(this.newTicket as Partial<Ticket>).subscribe({
@@ -98,11 +121,17 @@ export class InstructorTicketsComponent implements OnInit {
         this.submitting = false;
         this.showCreateForm = false;
         this.newTicket = { sujet: '', description: '', categorie: 'technique', priorite: 'moyenne', type: 'incident' };
+        this.currentPage = 1;
         this.loadTickets();
       },
       error: (err) => {
         this.submitting = false;
-        this.submitError = err?.error?.message || 'Une erreur est survenue.';
+        const errors = err?.error?.errors;
+        if (errors) {
+          this.submitError = Object.values(errors).flat().join(' ');
+        } else {
+          this.submitError = err?.error?.message || 'Une erreur est survenue.';
+        }
       }
     });
   }
@@ -113,16 +142,9 @@ export class InstructorTicketsComponent implements OnInit {
     const texte = this.newMessage;
     this.ticketService.ajouterMessage(this.selectedTicket.id, { contenu: texte }).subscribe({
       next: (res) => {
-        const msg = res.data || {
-          id: Date.now(), contenu: texte,
-          created_at: new Date().toISOString(),
-          auteur: { name: 'Moi', id: 0, email: '' },
-        };
+        const msg = res.data || { id: Date.now(), contenu: texte, created_at: new Date().toISOString(), auteur: { name: 'Moi', id: 0, email: '' } };
         if (this.selectedTicket) {
-          this.selectedTicket = {
-            ...this.selectedTicket,
-            messages: [...(this.selectedTicket.messages || []), msg],
-          };
+          this.selectedTicket = { ...this.selectedTicket, messages: [...(this.selectedTicket.messages || []), msg] };
         }
         this.newMessage = '';
         this.sendingMessage = false;
@@ -137,32 +159,22 @@ export class InstructorTicketsComponent implements OnInit {
   }
 
   getPClass(p: string): string {
-    const m: Record<string, string> = {
-      basse: 'p-basse', moyenne: 'p-moyenne', haute: 'p-haute', critique: 'p-critique'
-    };
+    const m: Record<string, string> = { basse: 'p-basse', moyenne: 'p-moyenne', haute: 'p-haute', critique: 'p-critique' };
     return m[p] || 'p-basse';
   }
 
   getSClass(s: string): string {
-    const m: Record<string, string> = {
-      ouvert: 's-ouvert', en_cours: 's-encours', en_attente: 's-attente',
-      resolu: 's-resolu', ferme: 's-ferme', annule: 's-annule'
-    };
+    const m: Record<string, string> = { ouvert: 's-ouvert', en_cours: 's-encours', en_attente: 's-attente', resolu: 's-resolu', ferme: 's-ferme', annule: 's-annule' };
     return m[s] || 's-ouvert';
   }
 
   getSLabel(s: string): string {
-    const m: Record<string, string> = {
-      ouvert: 'Ouvert', en_cours: 'En cours', en_attente: 'En attente',
-      resolu: 'Résolu', ferme: 'Fermé', annule: 'Annulé'
-    };
+    const m: Record<string, string> = { ouvert: 'Ouvert', en_cours: 'En cours', en_attente: 'En attente', resolu: 'Résolu', ferme: 'Fermé', annule: 'Annulé' };
     return m[s] || s;
   }
 
   getPLabel(p: string): string {
-    const m: Record<string, string> = {
-      basse: 'Basse', moyenne: 'Moyenne', haute: 'Haute', critique: 'Critique'
-    };
+    const m: Record<string, string> = { basse: 'Basse', moyenne: 'Moyenne', haute: 'Haute', critique: 'Critique' };
     return m[p] || p;
   }
 }

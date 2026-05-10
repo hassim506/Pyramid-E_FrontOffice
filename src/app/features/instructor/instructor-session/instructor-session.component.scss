@@ -1,0 +1,184 @@
+// ── TOKENS ──────────────────────────────────────────────────────────────────
+$primary:    #534AB7;
+$radius:     10px;
+$border:     #E9ECEF;
+$text-muted: #6C757D;
+
+// ── LOADER ───────────────────────────────────────────────────────────────────
+.ip-loader {
+  display: flex; justify-content: center; align-items: center;
+  min-height: 200px;
+}
+
+// ── PAGE HEADER ───────────────────────────────────────────────────────────────
+.ip-page-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+
+  &__title { font-size: 18px; font-weight: 600; color: #1A1A2E; margin: 0 0 4px; }
+  &__sub   { font-size: 13px; color: $text-muted; margin: 0; }
+}
+
+.ip-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #EEF2FF; color: $primary;
+  font-size: 12px; font-weight: 500;
+  padding: 1px 8px; border-radius: 20px; margin-left: 6px;
+}
+
+// ── BUTTONS ───────────────────────────────────────────────────────────────────
+.ip-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: $radius;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: none; transition: all .15s;
+
+  i { font-size: 16px; }
+
+  &--outline {
+    background: #fff; color: $primary; border: 1px solid $primary;
+    &:hover { background: #EEF2FF; }
+  }
+}
+
+// ── TOOLBAR ───────────────────────────────────────────────────────────────────
+.ip-toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ip-search {
+  height: 36px; border: 1px solid $border; border-radius: 8px;
+  padding: 0 12px; font-size: 13px; outline: none; min-width: 240px;
+  transition: border-color .15s;
+  &:focus { border-color: $primary; }
+}
+
+.ip-select {
+  height: 36px; border: 1px solid $border; border-radius: 8px;
+  padding: 0 10px; font-size: 13px; outline: none; background: #fff;
+  cursor: pointer;
+  &:focus { border-color: $primary; }
+}
+
+// ── CARD ──────────────────────────────────────────────────────────────────────
+.ip-card {
+  background: #fff; border: 1px solid $border; border-radius: $radius;
+  overflow: hidden;
+}
+
+// ── TABLE ─────────────────────────────────────────────────────────────────────
+.ip-table {
+  margin: 0;
+
+  thead th {
+    background: #F8F9FA; border-bottom: 1px solid $border;
+    font-size: 11px; font-weight: 600; color: $text-muted;
+    text-transform: uppercase; letter-spacing: .05em;
+    padding: 10px 14px; white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 12px 14px; border-bottom: 1px solid lighten($border, 2%);
+    vertical-align: middle; font-size: 13px;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #FAFBFF; }
+}
+
+// ── SESSION CELL ──────────────────────────────────────────────────────────────
+.ip-session-cell { display: flex; align-items: flex-start; gap: 10px; }
+
+.ip-session-icon {
+  width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+  background: #EEF2FF; color: $primary;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+.ip-session-title  { font-size: 13px; font-weight: 500; color: #1A1A2E; }
+.ip-session-sub    { font-size: 11px; color: $text-muted; font-family: monospace; margin-top: 1px; }
+.ip-session-formation { font-size: 11px; color: $primary; margin-top: 2px; }
+
+// ── DATE CELL ─────────────────────────────────────────────────────────────────
+.ip-date-cell {
+  display: flex; flex-direction: column; gap: 2px; font-size: 12px;
+}
+.ip-date-start { color: #1A1A2E; font-weight: 500; }
+.ip-date-arrow { color: $text-muted; font-size: 11px; }
+.ip-date-end   { color: $text-muted; }
+
+// ── TYPE BADGE ────────────────────────────────────────────────────────────────
+.ip-type-badge {
+  display: inline-block; padding: 3px 8px; border-radius: 6px;
+  font-size: 11px; font-weight: 500;
+
+  &.ip-type-presentiel  { background: #EFF6FF; color: #2563EB; }
+  &.ip-type-distanciel  { background: #FFFBEB; color: #D97706; }
+  &.ip-type-hybride     { background: #F0FDF4; color: #16A34A; }
+}
+
+// ── STATUT BADGE ─────────────────────────────────────────────────────────────
+.ip-statut-badge {
+  display: inline-block; padding: 3px 8px; border-radius: 6px;
+  font-size: 11px; font-weight: 500;
+
+  &.ip-statut-planifiee { background: #EFF6FF; color: #2563EB; }
+  &.ip-statut-en_cours  { background: #ECFDF5; color: #059669; }
+  &.ip-statut-terminee  { background: #F8F9FA; color: #6C757D; }
+  &.ip-statut-annulee   { background: #FFF5F5; color: #DC3545; }
+}
+
+// ── PARTICIPANTS ──────────────────────────────────────────────────────────────
+.ip-participants { display: flex; flex-direction: column; gap: 4px; }
+
+.ip-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #F1F3F5; color: #495057;
+  font-size: 11px; padding: 3px 8px; border-radius: 20px;
+}
+
+.ip-mini-bar {
+  width: 80px; height: 4px; background: #E9ECEF; border-radius: 4px; overflow: hidden;
+}
+.ip-mini-fill { height: 100%; background: $primary; border-radius: 4px; }
+
+// ── ACTION BUTTON ─────────────────────────────────────────────────────────────
+.ip-action-btn {
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; border: 1px solid $border;
+  background: #fff; color: $text-muted; cursor: pointer;
+  font-size: 14px; transition: all .12s;
+
+  &:hover { border-color: $primary; color: $primary; background: #EEF2FF; }
+}
+
+// ── EMPTY ROW ─────────────────────────────────────────────────────────────────
+.ip-empty {
+  text-align: center; padding: 48px 0;
+  color: $text-muted; font-size: 13px;
+  i { font-size: 32px; display: block; margin-bottom: 8px; opacity: .4; }
+}
+
+// ── PAGINATION ────────────────────────────────────────────────────────────────
+.ip-pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-top: 1px solid $border;
+  flex-wrap: wrap; gap: 8px;
+}
+
+.pg-info { font-size: 12px; color: $text-muted; }
+
+.pg-controls { display: flex; align-items: center; gap: 4px; }
+
+.pg-btn {
+  min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; border: 1px solid $border;
+  background: #fff; color: $text-muted; cursor: pointer;
+  font-size: 12px; transition: all .12s; padding: 0 8px;
+
+  &:hover:not(:disabled) { border-color: $primary; color: $primary; background: #EEF2FF; }
+  &.active { background: $primary; border-color: $primary; color: #fff; }
+  &:disabled { opacity: .4; cursor: not-allowed; }
+}

@@ -1,157 +1,132 @@
-<div class="content">
-  <div class="page-header">
-    <div class="page-title">
-      <h4>Mes Sessions de Formation</h4>
-      <h6>Liste de vos sessions assignées</h6>
-    </div>
-    <div class="page-btn">
-      <button type="button" class="btn btn-filters" (click)="loadSessions()">
-        <i class="fa fa-refresh me-2"></i>Actualiser
-      </button>
-    </div>
-  </div>
-
-  <!-- Filtres -->
-  <div class="card">
-    <div class="card-body">
-      <div class="row">
-        <div class="col-lg-4">
-          <div class="form-group">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Rechercher par titre, code ou formation..."
-              [(ngModel)]="searchDataValue"
-              (input)="searchData($any($event.target).value)">
-          </div>
-        </div>
-        <div class="col-lg-4">
-          <div class="form-group">
-            <select class="form-control" [(ngModel)]="selectedStatut" (change)="filterByStatut()">
-              <option value="">Tous les statuts</option>
-              <option value="planifiee">Planifiée</option>
-              <option value="en_cours">En cours</option>
-              <option value="terminee">Terminée</option>
-              <option value="annulee">Annulée</option>
-            </select>
-          </div>
-        </div>
-        <div class="col-lg-4">
-          <div class="form-group">
-            <select class="form-control" [(ngModel)]="selectedType" (change)="filterByType()">
-              <option value="">Tous les types</option>
-              <option value="presentiel">Présentiel</option>
-              <option value="distanciel">Distanciel</option>
-              <option value="hybride">Hybride</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Erreur -->
-  <div *ngIf="error" class="alert alert-danger alert-dismissible">
-    {{ error }}
-    <button type="button" class="btn-close" (click)="clearError()"></button>
-  </div>
-
-  <!-- Tableau -->
-  <div class="card">
-    <div class="card-body">
-      <div *ngIf="loading" class="text-center py-5">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Chargement...</span>
-        </div>
-        <p class="mt-2">Chargement de vos sessions...</p>
-      </div>
-
-      <div *ngIf="!loading" class="table-responsive">
-        <table class="table table-hover" matSort (matSortChange)="sortData($event)">
-          <thead class="thead-light">
-            <tr>
-              <th mat-sort-header="titre">Session</th>
-              <th mat-sort-header="date_debut">Date début</th>
-              <th>Type</th>
-              <th mat-sort-header="statut">Statut</th>
-              <th>Participants</th>
-              <th>Lieu</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="tableData.length === 0">
-              <td colspan="7" class="text-center py-4">
-                <i class="fa fa-inbox fa-2x text-muted mb-2 d-block"></i>
-                <span class="text-muted">Aucune session trouvée</span>
-              </td>
-            </tr>
-            <tr *ngFor="let session of tableData; trackBy: trackBySessionId">
-              <td>
-                <div class="d-flex align-items-center">
-                  <div class="flex-shrink-0 me-3">
-                    <div class="avatar avatar-md bg-primary-light rounded d-flex align-items-center justify-content-center">
-                      <i class="fa fa-calendar text-primary"></i>
-                    </div>
-                  </div>
-                  <div>
-                    <h6 class="mb-1">{{ session.titre }}</h6>
-                    <small class="text-muted d-block">{{ session.code_session }}</small>
-                    <small class="text-muted">{{ session.formation?.titre }}</small>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <strong>{{ formatDate(session.date_debut) }}</strong><br>
-                <small class="text-muted">→ {{ formatDate(session.date_fin) }}</small>
-              </td>
-              <td>
-                <span [class]="getTypeClass(session.type)">{{ session.type | titlecase }}</span>
-              </td>
-              <td>
-                <span [class]="getStatutClass(session.statut)">
-                  {{ getStatutDisplay(session.statut) }}
-                </span>
-              </td>
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="badge bg-info">
-                    {{ session.nombre_inscrits || 0 }}/{{ session.capacite_max }}
-                  </span>
-                  <div class="progress flex-grow-1" style="height: 6px; min-width: 60px;">
-                    <div
-                      class="progress-bar"
-                      [style.width.%]="(session.nombre_inscrits || 0) / session.capacite_max * 100">
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td>{{ session.lieu }}</td>
-              <td>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-primary"
-                  title="Voir détails"
-                  (click)="viewDetails(session)">
-                  <i class="fa fa-eye"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      <app-custom-pagination
-        *ngIf="!loading && totalData > pageSize"
-        [totalItems]="totalData"
-        [itemsPerPage]="pageSize"
-        [currentPage]="currentPage"
-        (pageChange)="onPageChange($event)">
-      </app-custom-pagination>
-    </div>
-  </div>
+<!-- Loading -->
+<div *ngIf="loading" class="ip-loader">
+  <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement...</span></div>
 </div>
+
+<!-- Error -->
+<div *ngIf="error" class="alert alert-danger alert-dismissible">
+  {{ error }}
+  <button type="button" class="btn-close" (click)="clearError()"></button>
+</div>
+
+<ng-container *ngIf="!loading">
+
+  <!-- Page header -->
+  <div class="ip-page-head">
+    <div>
+      <h5 class="ip-page-head__title">Mes sessions <span class="ip-count">{{ totalData }}</span></h5>
+      <p class="ip-page-head__sub">Vos sessions de formation assignées</p>
+    </div>
+    <button type="button" class="ip-btn ip-btn--outline" (click)="loadSessions()">
+      <i class="isax isax-refresh-2"></i> Actualiser
+    </button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="ip-toolbar">
+    <input type="text" class="ip-search" placeholder="Rechercher session, code, formation…"
+           [(ngModel)]="searchDataValue" (input)="searchData($any($event.target).value)">
+    <select class="ip-select" [(ngModel)]="selectedStatut" (change)="filterByStatut()">
+      <option value="">Tous les statuts</option>
+      <option value="planifiee">Planifiée</option>
+      <option value="en_cours">En cours</option>
+      <option value="terminee">Terminée</option>
+      <option value="annulee">Annulée</option>
+    </select>
+    <select class="ip-select" [(ngModel)]="selectedType" (change)="filterByType()">
+      <option value="">Tous les types</option>
+      <option value="presentiel">Présentiel</option>
+      <option value="distanciel">Distanciel</option>
+      <option value="hybride">Hybride</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="ip-card">
+    <div class="table-responsive">
+      <table class="table ip-table" matSort (matSortChange)="sortData($event)">
+        <thead>
+          <tr>
+            <th mat-sort-header="titre">Session</th>
+            <th mat-sort-header="date_debut">Dates</th>
+            <th>Type</th>
+            <th mat-sort-header="statut">Statut</th>
+            <th>Participants</th>
+            <th>Lieu</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of tableData; trackBy: trackBySessionId">
+            <td>
+              <div class="ip-session-cell">
+                <div class="ip-session-icon"><i class="isax isax-calendar-1"></i></div>
+                <div>
+                  <div class="ip-session-title">{{ s.titre }}</div>
+                  <div class="ip-session-sub">{{ s.code_session }}</div>
+                  <div class="ip-session-formation">{{ s.formation?.titre }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="ip-date-cell">
+                <span class="ip-date-start">{{ formatDate(s.date_debut) }}</span>
+                <span class="ip-date-arrow">→</span>
+                <span class="ip-date-end">{{ formatDate(s.date_fin) }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="ip-type-badge ip-type-{{ s.type }}">{{ s.type | titlecase }}</span>
+            </td>
+            <td>
+              <span class="ip-statut-badge ip-statut-{{ s.statut }}">{{ getStatutDisplay(s.statut) }}</span>
+            </td>
+            <td>
+              <div class="ip-participants">
+                <span class="ip-pill">{{ s.nombre_inscrits || 0 }}/{{ s.capacite_max }}</span>
+                <div class="ip-mini-bar">
+                  <div class="ip-mini-fill" [style.width.%]="(s.nombre_inscrits || 0) / s.capacite_max * 100"></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="text-muted">{{ s.lieu || '—' }}</span></td>
+            <td>
+              <button type="button" class="ip-action-btn" title="Détails" (click)="viewDetails(s)">
+                <i class="isax isax-eye"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="tableData.length === 0">
+            <td colspan="7" class="ip-empty">
+              <i class="isax isax-calendar-1"></i>
+              <span>Aucune session trouvée</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="ip-pagination" *ngIf="totalData > pageSize">
+      <span class="pg-info">{{ totalData }} session{{ totalData > 1 ? 's' : '' }}</span>
+      <div class="pg-controls">
+        <button type="button" class="pg-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button type="button" class="pg-btn"
+                *ngFor="let p of getPageNumbers()"
+                [class.active]="p === currentPage"
+                (click)="onPageChange(p)">{{ p }}</button>
+        <button type="button" class="pg-btn"
+                [disabled]="currentPage * pageSize >= totalData"
+                (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-2"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ng-container>
 
 <!-- Modal détails -->
 <div class="modal fade" id="sessionDetailsModal" tabindex="-1" aria-hidden="true">
@@ -162,37 +137,35 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" *ngIf="selectedSession">
-        <div class="row">
+        <div class="row g-3">
           <div class="col-md-6">
-            <h6>Informations générales</h6>
-            <p><strong>Titre :</strong> {{ selectedSession.titre }}</p>
-            <p><strong>Code :</strong> {{ selectedSession.code_session }}</p>
-            <p><strong>Formation :</strong> {{ selectedSession.formation?.titre }}</p>
-            <p>
-              <strong>Statut :</strong>
-              <span [class]="getStatutClass(selectedSession.statut)" class="ms-2">
-                {{ getStatutDisplay(selectedSession.statut) }}
-              </span>
-            </p>
+            <h6 class="fw-semibold mb-3">Informations générales</h6>
+            <table class="table table-sm table-borderless">
+              <tr><td class="text-muted">Titre</td><td class="fw-medium">{{ selectedSession.titre }}</td></tr>
+              <tr><td class="text-muted">Code</td><td>{{ selectedSession.code_session }}</td></tr>
+              <tr><td class="text-muted">Formation</td><td>{{ selectedSession.formation?.titre }}</td></tr>
+              <tr><td class="text-muted">Statut</td>
+                <td><span class="ip-statut-badge ip-statut-{{ selectedSession.statut }}">{{ getStatutDisplay(selectedSession.statut) }}</span></td>
+              </tr>
+            </table>
           </div>
           <div class="col-md-6">
-            <h6>Planning</h6>
-            <p><strong>Date début :</strong> {{ formatDate(selectedSession.date_debut) }}</p>
-            <p><strong>Date fin :</strong> {{ formatDate(selectedSession.date_fin) }}</p>
-            <p><strong>Type :</strong> {{ selectedSession.type | titlecase }}</p>
-            <p><strong>Lieu :</strong> {{ selectedSession.lieu }}</p>
-            <p>
-              <strong>Participants :</strong>
-              {{ selectedSession.nombre_inscrits || 0 }} / {{ selectedSession.capacite_max }}
-            </p>
+            <h6 class="fw-semibold mb-3">Planning</h6>
+            <table class="table table-sm table-borderless">
+              <tr><td class="text-muted">Début</td><td>{{ formatDate(selectedSession.date_debut) }}</td></tr>
+              <tr><td class="text-muted">Fin</td><td>{{ formatDate(selectedSession.date_fin) }}</td></tr>
+              <tr><td class="text-muted">Type</td><td>{{ selectedSession.type | titlecase }}</td></tr>
+              <tr><td class="text-muted">Lieu</td><td>{{ selectedSession.lieu || '—' }}</td></tr>
+              <tr><td class="text-muted">Participants</td><td>{{ selectedSession.nombre_inscrits || 0 }}/{{ selectedSession.capacite_max }}</td></tr>
+            </table>
           </div>
           <div class="col-12" *ngIf="selectedSession.description">
-            <h6>Description</h6>
-            <p>{{ selectedSession.description }}</p>
+            <h6 class="fw-semibold mb-2">Description</h6>
+            <p class="text-muted">{{ selectedSession.description }}</p>
           </div>
           <div class="col-12" *ngIf="selectedSession.instructions_acces">
-            <h6>Instructions d'accès</h6>
-            <p>{{ selectedSession.instructions_acces }}</p>
+            <h6 class="fw-semibold mb-2">Instructions d'accès</h6>
+            <p class="text-muted">{{ selectedSession.instructions_acces }}</p>
           </div>
         </div>
       </div>

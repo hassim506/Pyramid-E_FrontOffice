@@ -1,0 +1,208 @@
+// ── TOKENS ──────────────────────────────────────────────────────────────────
+$bg:       #1A1035;
+$active:   #534AB7;
+$border:   rgba(255,255,255,.07);
+$text:     rgba(255,255,255,.52);
+$text-hi:  rgba(255,255,255,.9);
+$text-dim: rgba(255,255,255,.25);
+$radius:   8px;
+
+:host { display: block; padding: 0 !important; }
+
+.sb-shell {
+  background: $bg;
+  display: flex; flex-direction: column;
+  min-height: calc(100vh - 80px);
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+// ── LOGO ─────────────────────────────────────────────────────────────────────
+.sb-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 16px 12px;
+  border-bottom: 0.5px solid $border;
+  flex-shrink: 0;
+
+  &-mark {
+    width: 32px; height: 32px; border-radius: $radius;
+    background: $active;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 500; color: #fff; flex-shrink: 0;
+  }
+  &-text { font-size: 14px; font-weight: 500; color: #fff; }
+  &-sub  { font-size: 10px; color: $text-dim; margin-top: 1px; }
+}
+
+// ── PROFILE CARD ─────────────────────────────────────────────────────────────
+.sb-profile {
+  margin: 10px 10px 6px;
+  background: rgba(255,255,255,.05);
+  border: 0.5px solid $border;
+  border-radius: $radius;
+  padding: 10px 12px;
+  flex-shrink: 0;
+}
+
+.prof-row { display: flex; align-items: center; gap: 10px; }
+
+.prof-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: $active; color: #CECBF6;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500; flex-shrink: 0;
+}
+
+.prof-name { font-size: 12px; font-weight: 500; color: #fff; }
+.prof-role { font-size: 10px; color: rgba(255,255,255,.38); margin-top: 1px; }
+
+.prof-stats {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px; padding-top: 7px;
+  border-top: 0.5px solid $border;
+}
+
+.pstat {
+  display: flex; flex-direction: column; align-items: center; flex: 1;
+  &-v { font-size: 13px; font-weight: 500; color: #CECBF6; }
+  &-l { font-size: 9px; color: $text-dim; text-transform: uppercase; letter-spacing: .04em; margin-top: 1px; }
+}
+.pstat-sep { width: 0.5px; height: 24px; background: rgba(255,255,255,.1); }
+
+// ── SCROLL AREA ───────────────────────────────────────────────────────────────
+.sb-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0 8px;
+  &::-webkit-scrollbar       { width: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
+}
+
+// ── SECTION LABEL ─────────────────────────────────────────────────────────────
+.sb-section-label {
+  font-size: 10px; font-weight: 500; color: $text-dim;
+  text-transform: uppercase; letter-spacing: .07em;
+  padding: 10px 18px 4px;
+}
+
+// ── DIVIDER ───────────────────────────────────────────────────────────────────
+.sb-divider { height: 0.5px; background: $border; margin: 6px 14px; }
+
+// ── ITEM ──────────────────────────────────────────────────────────────────────
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 12px; margin: 1px 8px;
+  border-radius: $radius; cursor: pointer; color: $text;
+  font-size: 13px; text-decoration: none;
+  transition: background .12s, color .12s;
+
+  i.icon { font-size: 17px; flex-shrink: 0; }
+
+  &:hover { background: rgba(255,255,255,.07); color: $text-hi; }
+  &.active { background: $active; color: #fff; i.icon { color: #fff; } }
+}
+
+.sb-item-label { flex: 1; }
+
+// ── BADGE ─────────────────────────────────────────────────────────────────────
+.sb-badge {
+  font-size: 10px; padding: 2px 7px; border-radius: 20px;
+  font-weight: 500; flex: none; width: fit-content; line-height: 1.4;
+
+  &--red    { background: #791F1F; color: #F7C1C1; }
+  &--amber  { background: #633806; color: #FAC775; }
+  &--gray   { background: rgba(255,255,255,.1); color: rgba(255,255,255,.55); }
+  &--green  { background: #27500A; color: #C0DD97; }
+  &--purple { background: #3C3489; color: #CECBF6; }
+}
+
+// ── GROUP (accordion) ─────────────────────────────────────────────────────────
+.sb-group { margin: 1px 8px; }
+
+.sb-group-header {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 12px; border-radius: $radius;
+  cursor: pointer; color: $text; font-size: 13px;
+  transition: color .12s;
+
+  &:hover { color: $text-hi; }
+  &.open  { color: $text-hi; }
+
+  i.icon { font-size: 17px; flex-shrink: 0; }
+  span:not(.sb-badge) { flex: 1; }
+  i.arr { font-size: 12px; transition: transform .15s; }
+  &.open i.arr { transform: rotate(90deg); }
+}
+
+.sb-sub {
+  padding-left: 10px;
+  border-left: 0.5px solid rgba(255,255,255,.1);
+  margin: 2px 0 4px 22px;
+}
+
+.sb-sub-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px; border-radius: $radius;
+  cursor: pointer; color: rgba(255,255,255,.42);
+  font-size: 12px; text-decoration: none;
+  transition: background .1s, color .1s;
+
+  i { font-size: 14px; }
+  span:not(.sb-badge) { flex: 1; }
+
+  &:hover { color: rgba(255,255,255,.85); background: rgba(255,255,255,.05); }
+  &.active { color: #AFA9EC; }
+}
+
+// ── PROGRESS CARD ─────────────────────────────────────────────────────────────
+.sb-progress-card {
+  margin: 8px 10px;
+  background: rgba(255,255,255,.04);
+  border: 0.5px solid $border;
+  border-radius: $radius;
+  padding: 10px 12px;
+}
+
+.pc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 9px;
+}
+.pc-title { font-size: 10px; color: $text-dim; text-transform: uppercase; letter-spacing: .05em; }
+.pc-period { font-size: 11px; color: #AFA9EC; font-weight: 500; }
+
+.pc-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 5px;
+  &:last-child { margin-bottom: 0; }
+}
+.pc-name {
+  font-size: 11px; color: rgba(255,255,255,.5);
+  flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pc-bar-wrap { width: 64px; height: 4px; background: rgba(255,255,255,.1); border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+.pc-fill { height: 100%; border-radius: 4px; background: #7F77DD; }
+.pc-pct { font-size: 10px; color: rgba(255,255,255,.4); min-width: 26px; text-align: right; }
+
+// ── BOTTOM ────────────────────────────────────────────────────────────────────
+.sb-bottom {
+  border-top: 0.5px solid $border;
+  padding: 8px 10px 12px; flex-shrink: 0;
+}
+
+.sb-bottom-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px; border-radius: $radius;
+  cursor: pointer; color: rgba(255,255,255,.42);
+  font-size: 12px; text-decoration: none;
+  transition: background .12s, color .12s;
+
+  i { font-size: 15px; }
+
+  &:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.8); }
+  &.active { color: rgba(255,255,255,.8); }
+
+  &.logout {
+    color: rgba(175,169,236,.6);
+    &:hover { background: rgba(83,74,183,.2); color: #CECBF6; }
+  }
+}
