@@ -1,1 +1,0 @@
-import{Ub as n,Vb as o,qb as s,sc as a}from"./chunk-LHSUXSSU.js";import"./chunk-EQDQRRRY.js";var i=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=s({type:t,selectors:[["app-user-details"]],decls:2,vars:0,template:function(e,m){e&1&&(n(0,"p"),a(1,"user-details works!"),o())},encapsulation:2})};export{i as UserDetailsComponent};

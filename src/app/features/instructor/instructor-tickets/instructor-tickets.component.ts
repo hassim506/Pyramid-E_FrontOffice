@@ -1,110 +1,168 @@
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { Sort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Router } from '@angular/router';
-import { apiResultFormat, instructorAnnouncement, instructorTicket, pageSelection } from '../../../shared/models/model';
-import { PaginationService, tablePageSize } from '../../../shared/service/custom-pagination/pagination.service';
-import { DataService } from '../../../shared/service/data/data.service';
-import { routes } from '../../../shared/service/routes/routes';
-import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
-import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
+import { TicketService, Ticket } from '../../../shared/service/ticket/ticket.service';
+import { AuthService } from '../../../shared/service/authentification/auth.service';
+import { routes } from '../../../shared/service/routes/routes';
 
 @Component({
-    selector: 'app-instructor-tickets',
-    templateUrl: './instructor-tickets.component.html',
-    styleUrls: ['./instructor-tickets.component.scss'],
-    imports:[CommonModule,MatSelectModule,FormsModule,CustomPaginationComponent,MatSortModule]
+  selector: 'app-instructor-tickets',
+  templateUrl: './instructor-tickets.component.html',
+  styleUrls: ['./instructor-tickets.component.scss'],
+  imports: [CommonModule, FormsModule]
 })
-export class InstructorTicketsComponent {
+export class InstructorTicketsComponent implements OnInit {
   public routes = routes;
-  // pagination variables
-  public pageSize = 10;
-  public tableData: instructorTicket[] = [];
-  public tableDataCopy: instructorTicket[] = [];
-  public actualData: instructorTicket[] = [];
-  public currentPage = 1;
-  public skip = 0;
-  public limit: number = this.pageSize;
-  public serialNumberArray: number[] = [];
-  public totalData = 0;       
-  public pageSelection: pageSelection[] = [];
-  dataSource!: MatTableDataSource<instructorTicket>;
-  public searchDataValue = '';
+
+  tickets: Ticket[] = [];
+  selectedTicket: Ticket | null = null;
+  loading = false;
+  showCreateForm = false;
+
+  stats = { total: 0, enCours: 0, resolu: 0 };
+
+  searchQuery  = '';
+  filterStatut = '';
+
+  newTicket = {
+    sujet: '',
+    description: '',
+    categorie: 'technique',
+    priorite: 'moyenne',
+    type: 'incident',
+  };
+  submitting = false;
+  submitError = '';
+
+  newMessage     = '';
+  sendingMessage = false;
+
+  private searchTimeout: any;
+
   constructor(
-    private data: DataService,
-    private router: Router,
-    private pagination: PaginationService
-  ) {
-    this.data.getInstructionTicket().subscribe((apiRes: apiResultFormat) => {
-      this.actualData = apiRes.data;
-      this.pagination.tablePageSize.subscribe((res: tablePageSize) => {
-        if (this.router.url == this.routes.instructorTickets) {
-          this.getTableData({ skip: res.skip, limit: res.limit });
-          this.pageSize = res.pageSize;
+    private ticketService: TicketService,
+    private authService: AuthService,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadTickets();
+  }
+
+  loadTickets(): void {
+    this.loading = true;
+    const p: Record<string, string> = {};
+    if (this.filterStatut) p['statut'] = this.filterStatut;
+    if (this.searchQuery)  p['search'] = this.searchQuery;
+
+    this.ticketService.getTickets(p).subscribe({
+      next: (res) => {
+        this.tickets = res.data?.data || res.data || [];
+        this.stats.total  = this.tickets.length;
+        this.stats.enCours = this.tickets.filter(t => ['ouvert','en_cours','en_attente'].includes(t.statut)).length;
+        this.stats.resolu  = this.tickets.filter(t => t.statut === 'resolu').length;
+        this.loading = false;
+      },
+      error: () => { this.loading = false; }
+    });
+  }
+
+  onSearch(): void {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => this.loadTickets(), 400);
+  }
+
+  applyFilter(): void { this.loadTickets(); }
+
+  selectTicket(ticket: Ticket): void {
+    if (this.selectedTicket?.id === ticket.id) { this.selectedTicket = null; return; }
+    this.showCreateForm = false;
+    this.ticketService.getTicketById(ticket.id).subscribe({
+      next: (res) => { this.selectedTicket = res.data || res; },
+      error: () => {}
+    });
+  }
+
+  closeDetail(): void { this.selectedTicket = null; }
+
+  toggleCreateForm(): void {
+    this.showCreateForm = !this.showCreateForm;
+    if (this.showCreateForm) { this.selectedTicket = null; this.submitError = ''; }
+  }
+
+  soumettre(): void {
+    if (!this.newTicket.sujet.trim() || !this.newTicket.description.trim()) return;
+    this.submitting = true;
+    this.submitError = '';
+    this.ticketService.createTicket(this.newTicket as Partial<Ticket>).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.showCreateForm = false;
+        this.newTicket = { sujet: '', description: '', categorie: 'technique', priorite: 'moyenne', type: 'incident' };
+        this.loadTickets();
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.submitError = err?.error?.message || 'Une erreur est survenue.';
+      }
+    });
+  }
+
+  envoyerMessage(): void {
+    if (!this.newMessage.trim() || !this.selectedTicket) return;
+    this.sendingMessage = true;
+    const texte = this.newMessage;
+    this.ticketService.ajouterMessage(this.selectedTicket.id, { contenu: texte }).subscribe({
+      next: (res) => {
+        const msg = res.data || {
+          id: Date.now(), contenu: texte,
+          created_at: new Date().toISOString(),
+          auteur: { name: 'Moi', id: 0, email: '' },
+        };
+        if (this.selectedTicket) {
+          this.selectedTicket = {
+            ...this.selectedTicket,
+            messages: [...(this.selectedTicket.messages || []), msg],
+          };
         }
-      });
-    });
-  }
-  private getTableData(pageOption: pageSelection): void {
-    this.data.getInstructionTicket().subscribe((apiRes: apiResultFormat) => {
-      this.tableData = [];
-      this.tableDataCopy = [];
-      this.serialNumberArray = [];
-      this.totalData = apiRes.totalData;
-      apiRes.data.map((res: instructorTicket, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= pageOption.skip && serialNumber <= pageOption.limit) {
-          res.sNo = serialNumber;
-          this.tableData.push(res);
-          this.tableDataCopy.push(res);
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
-      this.dataSource = new MatTableDataSource<instructorTicket>(this.actualData);
-      this.pagination.calculatePageSize.next({
-        totalData: this.totalData,
-        pageSize: this.pageSize,
-        tableData: this.tableData,
-        tableDataCopy: this.tableDataCopy,
-        serialNumberArray: this.serialNumberArray,
-      });
+        this.newMessage = '';
+        this.sendingMessage = false;
+      },
+      error: () => { this.sendingMessage = false; }
     });
   }
 
-  public searchData(value: string): void {
-    if (value == '') {
-      this.tableData = this.tableDataCopy;
-    } else {
-      this.dataSource.filter = value.trim().toLowerCase();
-      this.tableData = this.dataSource.filteredData;
-    }
+  getInitials(name: string | undefined | null): string {
+    if (!name) return '??';
+    return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
   }
 
-  public sortData(sort: Sort) {
-    const data = this.tableData.slice();
-
-    if (!sort.active || sort.direction === '') {
-      this.tableData = data;
-    } else {
-      this.tableData = data.sort((a, b) => {
-        const aValue = (a as never)[sort.active];
-
-        const bValue = (b as never)[sort.active];
-        return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
-      });
-    }
+  getPClass(p: string): string {
+    const m: Record<string, string> = {
+      basse: 'p-basse', moyenne: 'p-moyenne', haute: 'p-haute', critique: 'p-critique'
+    };
+    return m[p] || 'p-basse';
   }
-  public changePageSize(pageSize: number): void {
-    this.pageSelection = [];
-    this.limit = pageSize;
-    this.skip = 0;
-    this.currentPage = 1;
-    this.pagination.tablePageSize.next({
-      skip: this.skip,
-      limit: this.limit,
-      pageSize: this.pageSize,
-    });
+
+  getSClass(s: string): string {
+    const m: Record<string, string> = {
+      ouvert: 's-ouvert', en_cours: 's-encours', en_attente: 's-attente',
+      resolu: 's-resolu', ferme: 's-ferme', annule: 's-annule'
+    };
+    return m[s] || 's-ouvert';
+  }
+
+  getSLabel(s: string): string {
+    const m: Record<string, string> = {
+      ouvert: 'Ouvert', en_cours: 'En cours', en_attente: 'En attente',
+      resolu: 'Résolu', ferme: 'Fermé', annule: 'Annulé'
+    };
+    return m[s] || s;
+  }
+
+  getPLabel(p: string): string {
+    const m: Record<string, string> = {
+      basse: 'Basse', moyenne: 'Moyenne', haute: 'Haute', critique: 'Critique'
+    };
+    return m[p] || p;
   }
 }

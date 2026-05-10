@@ -1,277 +1,199 @@
-<div class="page-content">
-  <div class="page-title d-flex align-items-center justify-content-between mb-4">
-    <div>
-      <h4 class="fw-bold mb-1">Gestion des Demandes de Session</h4>
-      <p class="text-muted mb-0">Validez ou refusez les demandes de session de vos employés</p>
+<div class="page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <h1>Demandes de session</h1>
+      <p>Gérez et traitez les demandes d'inscription aux sessions de formation</p>
     </div>
-    <div class="d-flex align-items-center gap-2">
-      <div class="d-flex align-items-center gap-3 me-3" *ngIf="hasData">
-        <div class="text-center">
-          <div class="fw-bold text-primary fs-5">{{ totalDemandes }}</div>
-          <small class="text-muted">Total</small>
-        </div>
-        <div class="text-center">
-          <div class="fw-bold text-warning fs-5">{{ demandesEnAttente }}</div>
-          <small class="text-muted">En attente</small>
-        </div>
-        <div class="text-center">
-          <div class="fw-bold text-success fs-5">{{ demandesValidees }}</div>
-          <small class="text-muted">Validées</small>
-        </div>
-        <div class="text-center" *ngIf="demandesRefusees > 0">
-          <div class="fw-bold text-danger fs-5">{{ demandesRefusees }}</div>
-          <small class="text-muted">Refusées</small>
-        </div>
-      </div>
-      <button class="btn btn-outline-primary" (click)="refreshData()" [disabled]="loading">
-        <i class="isax isax-refresh" [class.fa-spin]="loading"></i>
-        <span class="ms-1 d-none d-sm-inline">Actualiser</span>
+    <div class="page-header__actions">
+      <button type="button" class="btn-outline">
+        <i class="isax isax-export"></i> Exporter
+      </button>
+      <button type="button" class="btn-primary" (click)="refreshData()" [disabled]="loading">
+        <i class="isax isax-refresh"></i> Actualiser
       </button>
     </div>
   </div>
 
-  <div class="alert alert-success alert-dismissible fade show" *ngIf="successMessage" role="alert">
-    <i class="isax isax-tick-circle me-2"></i>{{ successMessage }}
-    <button type="button" class="btn-close" (click)="clearMessages()"></button>
-  </div>
-  <div class="alert alert-danger alert-dismissible fade show" *ngIf="error" role="alert">
-    <i class="isax isax-warning-2 me-2"></i>{{ error }}
-    <button type="button" class="btn-close" (click)="clearMessages()"></button>
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi__icon ki-amber"><i class="isax isax-clock"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">En attente</div>
+        <div class="kpi__val">{{ demandesEnAttente }}</div>
+        <div class="kpi__delta">à traiter</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-green"><i class="isax isax-tick-circle"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Approuvées</div>
+        <div class="kpi__val">{{ demandesValidees }}</div>
+        <div class="kpi__delta">cette période</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-red"><i class="isax isax-close-circle"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Refusées</div>
+        <div class="kpi__val">{{ demandesRefusees }}</div>
+        <div class="kpi__delta">cette période</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-amber"><i class="isax isax-calendar-1"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Total</div>
+        <div class="kpi__val">{{ totalDemandes }}</div>
+        <div class="kpi__delta">sessions</div>
+      </div>
+    </div>
   </div>
 
-  <!-- Filtres -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <div class="row g-3">
-        <div class="col-lg-4">
-          <div class="input-group">
-            <span class="input-group-text"><i class="isax isax-search-normal-1"></i></span>
-            <input [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }" type="search"
-                   (ngModelChange)="searchData(searchDataValue)" class="form-control"
-                   placeholder="Rechercher session, employé..." [disabled]="loading">
+  <!-- Main card -->
+  <div class="main-card">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="isax isax-search-normal-1"></i>
+        <input type="search" placeholder="Rechercher session, employé..."
+               [(ngModel)]="searchDataValue" [ngModelOptions]="{standalone:true}"
+               (ngModelChange)="searchData($event)">
+      </div>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'en_attente'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'en_attente' ? 'tous' : 'en_attente')">
+        <i class="isax isax-clock"></i> En attente
+      </button>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'validee'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'validee' ? 'tous' : 'validee')">
+        <i class="isax isax-tick-circle"></i> Approuvées
+      </button>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'refusee'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'refusee' ? 'tous' : 'refusee')">
+        <i class="isax isax-close-circle"></i> Refusées
+      </button>
+      <div class="toolbar-spacer"></div>
+      <button type="button" class="sort-btn">
+        <i class="isax isax-arrow-3"></i> Plus récent
+      </button>
+    </div>
+
+    <!-- Alerts -->
+    <div *ngIf="successMessage" class="alert alert--ok">
+      <i class="isax isax-tick-circle"></i> {{ successMessage }}
+      <button type="button" class="alert__close" (click)="clearMessages()"><i class="isax isax-close-circle"></i></button>
+    </div>
+    <div *ngIf="error" class="alert alert--err">
+      <i class="isax isax-warning-2"></i> {{ error }}
+      <button type="button" class="alert__close" (click)="clearMessages()"><i class="isax isax-close-circle"></i></button>
+    </div>
+
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="skeletons">
+      <div *ngFor="let i of [1,2,3,4,5]" class="sk-item"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && !hasData" class="empty-state">
+      <i class="isax isax-calendar-1"></i>
+      <p>Aucune demande de session</p>
+    </div>
+
+    <!-- Demande list -->
+    <div *ngIf="!loading && hasData" class="demande-list">
+      <div *ngFor="let d of tableData; trackBy: trackByDemandeId" class="demande-item">
+
+        <!-- Left: avatar + type line -->
+        <div class="d-left">
+          <div class="d-av">{{ (d.employe?.prenom?.charAt(0) || '') + (d.employe?.nom?.charAt(0) || '') }}</div>
+          <div class="d-type-line tl-sess"></div>
+        </div>
+
+        <!-- Body -->
+        <div class="d-body">
+          <div class="d-name">{{ d.employe?.name || 'Employé inconnu' }}</div>
+          <div class="d-company">{{ d.employe?.email || '—' }}</div>
+          <div class="d-time">{{ formatDate(d.created_at) }}</div>
+
+          <div class="d-title">{{ d.session_formation?.titre || ('Session #' + d.session_formation_id) }}</div>
+
+          <div class="d-meta">
+            <span *ngIf="d.session_formation?.date_debut">
+              <i class="isax isax-calendar-1"></i> {{ formatDate(d.session_formation?.date_debut) }}
+            </span>
+            <span *ngIf="d.session_formation?.lieu">
+              <i class="isax isax-location"></i> {{ d.session_formation?.lieu }}
+            </span>
+            <span class="pb pb-{{ d.priorite }}">{{ d.priorite_display }}</span>
+          </div>
+
+          <div *ngIf="d.motif_demande" class="d-msg" [title]="d.motif_demande">
+            "{{ d.motif_demande }}"
           </div>
         </div>
-        <div class="col-lg-3">
-          <select class="form-select" [(ngModel)]="selectedStatutFilter"
-                  (ngModelChange)="onStatutFilterChange($event)" [disabled]="loading">
-            <option *ngFor="let filter of statutFilters" [value]="filter.value">
-              {{ filter.label }} ({{ filter.count }})
-            </option>
-          </select>
-        </div>
-        <div class="col-lg-3">
-          <select class="form-select" [(ngModel)]="selectedPrioriteFilter"
-                  (ngModelChange)="onPrioriteFilterChange($event)" [disabled]="loading">
-            <option value="tous">Toutes les priorités</option>
-            <option value="basse">Basse</option>
-            <option value="normale">Normale</option>
-            <option value="haute">Haute</option>
-            <option value="urgente">Urgente</option>
-          </select>
-        </div>
-        <div class="col-lg-2 text-end">
-          <small class="text-muted" *ngIf="hasData">{{ tableData.length }} résultat(s)</small>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Chargement -->
-  <div class="d-flex justify-content-center p-5" *ngIf="loading">
-    <div class="text-center">
-      <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">Chargement...</span>
-      </div>
-      <p class="text-muted fs-6">Chargement des demandes...</p>
-    </div>
-  </div>
-
-  <!-- État vide -->
-  <div class="card text-center py-5" *ngIf="showEmptyState">
-    <div class="card-body">
-      <i class="isax isax-document display-1 text-muted mb-4 d-block"></i>
-      <h5 class="fw-bold mb-3">Aucune demande de session</h5>
-      <p class="text-muted mb-4">Aucune demande de session n'a été soumise pour le moment.</p>
-    </div>
-  </div>
-
-  <!-- Tableau -->
-  <div class="card" *ngIf="hasData && !loading">
-    <div class="card-header bg-white border-bottom">
-      <div class="d-flex align-items-center justify-content-between">
-        <h6 class="mb-0 fw-bold">
-          <i class="isax isax-document me-2 text-primary"></i>Demandes de Session
-        </h6>
-        <div class="d-flex align-items-center gap-2">
-          <span class="badge bg-light text-dark">{{ tableData.length }} affichée(s)</span>
-          <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                    data-bs-toggle="dropdown">{{ pageSize }} par page</button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="javascript:void(0)" (click)="changePageSize(5)">5 par page</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" (click)="changePageSize(10)">10 par page</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" (click)="changePageSize(25)">25 par page</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" (click)="changePageSize(50)">50 par page</a></li>
-            </ul>
+        <!-- Right: badges + actions -->
+        <div class="d-right">
+          <div class="d-badges">
+            <span class="sb"
+              [class.sb-pending]="d.statut === 'en_attente'"
+              [class.sb-approved]="d.statut === 'validee'"
+              [class.sb-rejected]="d.statut === 'refusee'"
+              [class.sb-cancelled]="d.statut === 'annulee'">
+              {{ d.statut_display }}
+            </span>
+            <span class="tb tb-sess">Session</span>
+          </div>
+          <div class="action-row">
+            <button *ngIf="canValidate(d)" type="button" class="act-btn act-approve" title="Approuver"
+                    [disabled]="validatingIds.has(d.id)" (click)="validerDemande(d)">
+              <span *ngIf="validatingIds.has(d.id)" class="act-spin"></span>
+              <i *ngIf="!validatingIds.has(d.id)" class="isax isax-tick-circle"></i>
+              Approuver
+            </button>
+            <button *ngIf="canRefuse(d)" type="button" class="act-btn act-reject" title="Refuser"
+                    [disabled]="refusingIds.has(d.id)" (click)="refuserDemande(d)">
+              <span *ngIf="refusingIds.has(d.id)" class="act-spin"></span>
+              <i *ngIf="!refusingIds.has(d.id)" class="isax isax-close-circle"></i>
+              Refuser
+            </button>
+            <button *ngIf="canCancel(d)" type="button" class="act-btn act-cancel" title="Annuler" (click)="annulerDemande(d)">
+              <i class="isax isax-minus-circle"></i>
+            </button>
           </div>
         </div>
+
+      </div>
+
+      <!-- Empty filtered -->
+      <div *ngIf="!tableData.length" class="empty-state">
+        <i class="isax isax-search-normal-1"></i>
+        <p>Aucun résultat</p>
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table matSort (matSortChange)="sortData($event)" class="table table-hover mb-0">
-        <thead class="table-light">
-        <tr>
-          <th mat-sort-header="session" class="fw-semibold">
-            <i class="isax isax-calendar me-1"></i>Session
-          </th>
-          <th mat-sort-header="employe" class="fw-semibold">
-            <i class="isax isax-profile-2user me-1"></i>Employé
-          </th>
-          <th mat-sort-header="priorite" class="fw-semibold">
-            <i class="isax isax-flag me-1"></i>Priorité
-          </th>
-          <th mat-sort-header="created_at" class="fw-semibold">
-            <i class="isax isax-calendar me-1"></i>Date demande
-          </th>
-          <th mat-sort-header="date_souhaitee_debut" class="fw-semibold">
-            <i class="isax isax-clock me-1"></i>Date souhaitée
-          </th>
-          <th mat-sort-header="statut" class="fw-semibold">
-            <i class="isax isax-status me-1"></i>Statut
-          </th>
-          <th class="fw-semibold">Motif</th>
-          <th class="text-end fw-semibold">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let demande of tableData; trackBy: trackByDemandeId" class="align-middle">
-
-          <!-- Session -->
-          <td>
-            <div class="d-flex align-items-start">
-              <div class="avatar avatar-md bg-primary text-white rounded me-3 d-flex align-items-center justify-content-center">
-                <i class="isax isax-calendar-1"></i>
-              </div>
-              <div>
-                <div class="fw-semibold text-dark mb-1">
-                  {{ demande.session_formation?.titre || ('Session #' + demande.session_formation_id) }}
-                </div>
-                <small class="text-muted" *ngIf="demande.session_formation">
-                  {{ formatDate(demande.session_formation.date_debut) }}
-                  <span *ngIf="demande.session_formation.date_fin"> → {{ formatDate(demande.session_formation.date_fin) }}</span>
-                </small>
-                <div class="mt-1" *ngIf="demande.session_formation?.lieu">
-                  <small class="text-muted">
-                    <i class="isax isax-location me-1"></i>{{ demande.session_formation?.lieu }}
-                  </small>
-                </div>
-              </div>
-            </div>
-          </td>
-
-          <!-- Employé -->
-          <td>
-            <div class="d-flex align-items-center">
-              <div class="avatar avatar-md bg-info text-white rounded me-3 d-flex align-items-center justify-content-center">
-                <span class="fw-bold">{{ demande.employe?.prenom?.charAt(0) || '' }}{{ demande.employe?.nom?.charAt(0) || '' }}</span>
-              </div>
-              <div>
-                <div class="fw-medium text-dark">{{ demande.employe?.name || 'Employé inconnu' }}</div>
-                <small class="text-muted">{{ demande.employe?.email || 'Email non renseigné' }}</small>
-                <div class="mt-1">
-                  <small class="text-muted">{{ demande.employe?.fonction || 'Fonction non définie' }}</small>
-                </div>
-              </div>
-            </div>
-          </td>
-
-          <!-- Priorité -->
-          <td>
-            <span [class]="getPrioriteClass(demande.priorite ?? undefined)">{{ demande.priorite_display }}</span>
-          </td>
-
-          <!-- Date demande -->
-          <td>
-            <div class="d-flex align-items-center">
-              <i class="isax isax-calendar text-muted me-2"></i>
-              <span>{{ formatDate(demande.created_at) }}</span>
-            </div>
-          </td>
-
-          <!-- Date souhaitée -->
-          <td>
-            <div class="d-flex align-items-center">
-              <i class="isax isax-clock text-muted me-2"></i>
-              <span>{{ formatDate(demande.date_souhaitee_debut ?? undefined) }}</span>
-            </div>
-          </td>
-
-          <!-- Statut -->
-          <td>
-            <span [class]="getStatutClass(demande.statut)">{{ demande.statut_display }}</span>
-            <div *ngIf="demande.date_validation" class="mt-1">
-              <small class="text-muted">Validé le {{ formatDate(demande.date_validation) }}</small>
-            </div>
-          </td>
-
-          <!-- Motif -->
-          <td>
-            <div class="text-truncate" style="max-width: 200px;" [title]="demande.motif_demande">
-              {{ demande.motif_demande || 'Aucun motif' }}
-            </div>
-            <div *ngIf="demande.commentaire_rh" class="mt-1">
-              <small class="text-muted fw-medium">RH:</small>
-              <small class="text-muted d-block text-truncate" style="max-width: 200px;" [title]="demande.commentaire_rh">
-                {{ demande.commentaire_rh }}
-              </small>
-            </div>
-          </td>
-
-          <!-- Actions -->
-          <td class="text-end">
-            <div class="btn-group btn-group-sm" role="group">
-              <button class="btn btn-outline-success" (click)="validerDemande(demande)"
-                      [disabled]="!canValidate(demande) || validatingIds.has(demande.id)"
-                      *ngIf="canValidate(demande)" title="Valider la demande">
-                <span *ngIf="validatingIds.has(demande.id)" class="spinner-border spinner-border-sm me-1"></span>
-                <i class="isax isax-tick-circle" *ngIf="!validatingIds.has(demande.id)"></i>
-              </button>
-              <button class="btn btn-outline-danger" (click)="refuserDemande(demande)"
-                      [disabled]="!canRefuse(demande) || refusingIds.has(demande.id)"
-                      *ngIf="canRefuse(demande)" title="Refuser la demande">
-                <span *ngIf="refusingIds.has(demande.id)" class="spinner-border spinner-border-sm me-1"></span>
-                <i class="isax isax-close-circle" *ngIf="!refusingIds.has(demande.id)"></i>
-              </button>
-              <button class="btn btn-outline-warning" (click)="annulerDemande(demande)"
-                      [disabled]="!canCancel(demande)" *ngIf="canCancel(demande)" title="Annuler la demande">
-                <i class="isax isax-close-circle"></i>
-              </button>
-              <button class="btn btn-outline-info" title="Voir les détails">
-                <i class="isax isax-eye"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-
-        <tr *ngIf="tableData.length === 0 && searchDataValue && !loading">
-          <td colspan="8" class="text-center py-5">
-            <div class="text-muted">
-              <i class="isax isax-search-normal-1 display-6 mb-3 d-block opacity-50"></i>
-              <h6 class="fw-bold">Aucun résultat pour "{{ searchDataValue }}"</h6>
-              <p class="mb-0 small">Essayez avec d'autres termes de recherche.</p>
-              <button class="btn btn-sm btn-outline-primary mt-2" (click)="searchDataValue = ''; searchData('')">
-                <i class="isax isax-refresh me-1"></i>Effacer la recherche
-              </button>
-            </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <span>Affichage {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > totalData ? totalData : currentPage * pageSize }} sur {{ totalData }} demandes</span>
+      <div class="pagination__pages">
+        <button type="button" class="pag-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button type="button" *ngFor="let p of pagesArray; let i = index"
+                class="pag-btn" [class.active]="currentPage === i + 1"
+                (click)="onPageChange(i + 1)">{{ i + 1 }}</button>
+        <button type="button" class="pag-btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
     </div>
 
-    <div class="card-footer bg-white border-top" *ngIf="hasData">
-      <app-custom-pagination></app-custom-pagination>
-    </div>
   </div>
+
 </div>

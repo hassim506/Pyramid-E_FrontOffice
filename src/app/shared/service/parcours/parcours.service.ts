@@ -112,7 +112,7 @@ export interface ProgressionRequest {
 
 export interface FormationsUpdateRequest {
   formations: {
-    formation_id: number;
+    id: number;
     ordre: number;
     obligatoire: boolean;
   }[];
@@ -149,7 +149,11 @@ getRhParcours(): Observable<ParcoursResponse> {
   }).pipe(
     map(response => {
       const all = response.parcours || [];
-      const filtered = all.filter((p: Parcours) => p.entreprise_id === entrepriseId);
+      // Comparaison loose (== au lieu de ===) : PHP peut retourner entreprise_id en string
+      // On normalise aussi actif en booléen (PHP retourne 0/1)
+      const filtered = all
+        .filter((p: Parcours) => Number(p.entreprise_id) === Number(entrepriseId))
+        .map((p: Parcours) => ({ ...p, actif: Boolean(p.actif) }));
       return { ...response, parcours: filtered };
     })
   );

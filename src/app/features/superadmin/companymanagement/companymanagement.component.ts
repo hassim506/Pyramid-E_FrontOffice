@@ -10,8 +10,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { Company, Client } from '../../../shared/models/client-company.models';
+import { firstValueFrom } from 'rxjs';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
 import { CompanyAddComponent } from '../company-add/company-add.component';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 
 @Component({
   selector: 'app-companymanagement',
@@ -53,7 +55,8 @@ export class CompanyManagementComponent {
     private data: DataService,
     private router: Router,
     private pagination: PaginationService,
-    private clientCompanyService: ClientCompanyService // Nouveau service
+    private clientCompanyService: ClientCompanyService,
+    private formationService: FormationService
   ) {
     this.getCompanyList();
     this.pagination.tablePageSize.subscribe((res: tablePageSize) => {
@@ -478,6 +481,33 @@ getStatusLabel(statut: string): string {
 
   private generateId(): number {
     return Math.max(...this.actualData.map(c => c.id), 0) + 1;
+  }
+
+  statsLoading = false;
+
+  selectCompany(company: Company): void {
+    this.selectedCompany = company;
+    if (company.formations_count === undefined && company.employes_count === undefined) {
+      this.statsLoading = true;
+      Promise.all([
+        firstValueFrom(this.clientCompanyService.getCompany(company.id)).catch(() => null),
+        firstValueFrom(this.formationService.getFormationsByEntreprise(company.id)).catch(() => null),
+      ]).then(([detailRes, formRes]) => {
+        if (this.selectedCompany?.id !== company.id) return;
+        const detail = (detailRes as any)?.entreprise || (detailRes as any)?.data || detailRes || {};
+        const formations: any[] = (formRes as any)?.formations ?? (formRes as any)?.data ?? [];
+        const actives = formations.filter((f: any) => f.est_publie && f.inscription_ouverte).length;
+        this.selectedCompany = {
+          ...this.selectedCompany!,
+          formations_count:         formations.length,
+          formations_actives_count: actives,
+          employes_count:           (detail as any).employes_count ?? (detail as any).users?.length ?? company.taille_effectif ?? 0,
+          taux_completion:          (detail as any).taux_completion ?? 0,
+          certificats_count:        (detail as any).certificats_count ?? 0,
+        };
+        this.statsLoading = false;
+      });
+    }
   }
 
   getCompanyInitials(name: string): string {

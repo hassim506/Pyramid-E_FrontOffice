@@ -1,253 +1,258 @@
-@media (min-width: 992px) {
-    .container, .container-lg, .container-md, .container-sm {
-        max-width: 1066px !important;
-    }
+// ─────────────────────────────────────────────────────
+// ADMINRH SIDEBAR — dark design
+// ─────────────────────────────────────────────────────
+$bg:        #0F172A;
+$bg-item:   rgba(255,255,255,.07);
+$active:    #1D4ED8;
+$text:      rgba(255,255,255,.6);
+$text-hi:   rgba(255,255,255,.9);
+$text-dim:  rgba(255,255,255,.3);
+$border:    rgba(255,255,255,.08);
+$sub-line:  rgba(255,255,255,.1);
+$radius:    8px;
+
+:host {
+  display: block;
+  padding: 0 !important;
 }
 
-/* =====================================
-   SIDEBAR LMS ENTREPRISE – WHITE PRO
-===================================== */
-
-// ------------------------------------------------
-// VARIABLES
-// ------------------------------------------------
-$primary:     #11a9b7;
-$primary-dark:#0e8f9b;
-$accent:      #eea51c;
-$text-dark:   #1e293b;
-$text-mid:    #334155;
-$text-muted:  #64748b;
-$border:      #e2e8f0;
-$bg-hover:    #f3f4f6;
-$bg-light:    #f8fafc;
-$radius:      10px;
-$radius-lg:   12px;
-$transition:  all 0.25s ease;
-
-// ------------------------------------------------
-// CONTENEUR
-// ------------------------------------------------
-.settings-sidebar {
-  width: 280px;
-  height: 100vh;
-  background: #ffffff;
-  border-right: 1px solid #e5e7eb;
-  padding: 1.5rem 1rem;
-  position: relative;
-  overflow: visible;
-  transition: width 0.3s ease;
+.sb-shell {
+  background: $bg;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 24px;
 }
 
-// ------------------------------------------------
-// TOGGLE
-// ------------------------------------------------
-.sidebar-toggle {
-  text-align: right;
-  margin-bottom: 1.5rem;
-  cursor: pointer;
-  font-size: 1.2rem;
-  color: $text-muted;
-}
+// ── LOGO ──────────────────────────────────────
+.sb-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 14px;
+  border-bottom: 0.5px solid $border;
+  flex-shrink: 0;
 
-// ------------------------------------------------
-// MENU PRINCIPAL
-// ------------------------------------------------
-.main-menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-// ------------------------------------------------
-// ITEM COMMUN (menu-item et submenu-item)
-// ------------------------------------------------
-%item-base {
-  position: relative;
-  margin-bottom: 0.4rem;
-
-  > a {
+  &-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: $radius;
+    background: #1D9E75;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 0.9rem;
-    border-radius: $radius;
-    font-size: 0.9rem;
+    justify-content: center;
+    font-size: 14px;
     font-weight: 500;
-    color: $text-dark;
-    text-decoration: none;
-    transition: $transition;
-
-    i:first-child {
-      font-size: 1rem;
-      color: $text-muted;
-    }
-
-    &:hover {
-      background: $bg-hover;
-      color: $accent;
-    }
-
-    &.active {
-      background: linear-gradient(90deg, $primary, $primary-dark);
-      color: #fff;
-
-      i { color: #fff; }
-    }
+    color: #fff;
+    flex-shrink: 0;
   }
 
-  &.active > a {
-    background: linear-gradient(90deg, $primary, $primary-dark);
+  &-text { font-size: 14px; font-weight: 500; color: #fff; }
+  &-sub  { font-size: 10px; color: $text-dim; margin-top: 1px; }
+}
+
+// ── USER CARD ─────────────────────────────────
+.sb-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  margin: 10px 10px 4px;
+  border-radius: $radius;
+  background: rgba(255,255,255,.06);
+  flex-shrink: 0;
+}
+
+.sb-av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #534AB7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: #CECBF6;
+  flex-shrink: 0;
+}
+
+.sb-uname { font-size: 12px; font-weight: 500; color: #fff; }
+.sb-urole { font-size: 10px; color: $text-dim; }
+
+// ── SCROLL AREA ───────────────────────────────
+.sb-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 0 10px;
+
+  &::-webkit-scrollbar       { width: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+}
+
+// ── SECTION ───────────────────────────────────
+.sb-section { margin-bottom: 4px; }
+
+.sb-section-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: $text-dim;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  padding: 10px 18px 4px;
+}
+
+.sb-divider {
+  height: 0.5px;
+  background: $border;
+  margin: 6px 14px;
+}
+
+// ── ITEM ──────────────────────────────────────
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px;
+  margin: 1px 8px;
+  border-radius: $radius;
+  cursor: pointer;
+  color: $text;
+  font-size: 13px;
+  text-decoration: none;
+  transition: background .12s, color .12s;
+
+  i { font-size: 16px; flex-shrink: 0; }
+
+  &:hover {
+    background: $bg-item;
+    color: $text-hi;
+  }
+
+  &.active {
+    background: $active;
     color: #fff;
 
     i { color: #fff; }
   }
 }
 
-.menu-item    { @extend %item-base; }
-.submenu-item { @extend %item-base; }
+.sb-item-label { flex: 1; }
 
-// Flèche
-.submenu-arrow {
-  font-size: 0.8rem;
-  opacity: 0.6;
-  margin-left: auto;
+.sb-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.7);
+  font-weight: 500;
+  flex: none;
+  width: fit-content;
+  line-height: 1.4;
+
+  &.notif       { background: #DC2626; color: #fff; }
+  &--red        { background: #DC2626; color: #fff; }
+  &--amber      { background: #D97706; color: #fff; }
 }
 
-// ------------------------------------------------
-// SOUS-MENU DROPDOWN (apparaît à droite)
-// ------------------------------------------------
-%submenu-base {
-  position: absolute;
-  top: 0;
-  left: 100%;
-  min-width: 220px;
-  background: #ffffff;
-  border: 1px solid $border;
-  border-radius: $radius-lg;
-  padding: 0.5rem 0;
-  list-style: none;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(10px);
-  transition: $transition;
-  z-index: 999;
+.sb-sub-label {
+  flex: 1;
 }
 
-%submenu-link {
+// ── GROUP (accordion) ─────────────────────────
+.sb-group { margin: 1px 8px; }
+
+.sb-group-header {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 0.6rem 1rem;
-  font-size: 0.85rem;
-  color: $text-mid;
-  text-decoration: none;
-  transition: 0.2s ease;
-
-  &:hover {
-    background: $bg-light;
-    color: $accent;
-
-    .demande-label { color: $accent; }
-  }
-
-  &.active .demande-label {
-    color: $primary;
-    font-weight: 700;
-  }
-}
-
-// .has-submenu (classes minuscules — menu principal)
-.has-submenu {
-  .submenu {
-    @extend %submenu-base;
-  }
-
-  &:hover > .submenu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(0);
-  }
-
-  .submenu li a {
-    @extend %submenu-link;
-  }
-}
-
-// .has-Submenu (classes majuscules — rétro-compatibilité)
-.has-Submenu {
-  .Submenu {
-    @extend %submenu-base;
-  }
-
-  &:hover > .Submenu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(0);
-  }
-
-  .Submenu li a {
-    @extend %submenu-link;
-  }
-}
-
-// ------------------------------------------------
-// SOUS-MENU DE "MES DEMANDES"
-// Items avec pastille + label + description
-// ------------------------------------------------
-.demande-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 4px;
-
-  &--blue   { background: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, .15); }
-  &--purple { background: #7c3aed; box-shadow: 0 0 0 3px rgba(124, 58, 237, .15); }
-  &--green  { background: #16a34a; box-shadow: 0 0 0 3px rgba(22, 163,  74, .15); }
-  &--orange { background: #ea580c; box-shadow: 0 0 0 3px rgba(234, 88,  12, .15); }
-}
-
-.demande-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.demande-label {
+  align-items: center;
+  gap: 9px;
+  padding: 7px 6px;
+  border-radius: $radius;
+  cursor: pointer;
+  color: $text;
   font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-  line-height: 1.3;
-  transition: color 0.15s ease;
-}
+  transition: color .12s;
 
-.demande-desc {
-  font-size: 10.5px;
-  color: #9ca3af;
-  line-height: 1.3;
-}
+  &:hover { color: $text-hi; }
+  &.open  { color: $text-hi; }
 
-// ------------------------------------------------
-// MODE RÉDUIT (collapsed)
-// ------------------------------------------------
-.settings-sidebar.collapsed {
-  width: 80px;
+  i.icon { font-size: 16px; flex-shrink: 0; }
+  span:not(.sb-badge) { flex: 1; }
 
-  span,
-  .submenu-arrow,
-  .demande-desc {
-    display: none;
+  i.arr {
+    font-size: 12px;
+    transition: transform .15s;
   }
+
+  &.open i.arr { transform: rotate(90deg); }
 }
 
-// ------------------------------------------------
-// DÉCONNEXION
-// ------------------------------------------------
-.logout a {
-  color: #ef4444;
+.sb-sub {
+  padding-left: 10px;
+  border-left: 0.5px solid $sub-line;
+  margin: 2px 0 4px 22px;
+}
+
+.sb-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: $radius;
+  cursor: pointer;
+  color: rgba(255,255,255,.5);
+  font-size: 12px;
+  text-decoration: none;
+  transition: background .1s, color .1s;
+
+  i { font-size: 14px; }
 
   &:hover {
-    background: rgba(239, 68, 68, 0.1);
+    color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.05);
+  }
+
+  &.active { color: #93C5FD; }
+}
+
+// ── BOTTOM ────────────────────────────────────
+.sb-bottom {
+  padding: 10px 10px 14px;
+  border-top: 0.5px solid $border;
+  flex-shrink: 0;
+}
+
+.sb-bottom-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  border-radius: $radius;
+  cursor: pointer;
+  color: rgba(255,255,255,.5);
+  font-size: 12px;
+  text-decoration: none;
+  transition: background .12s, color .12s;
+
+  i { font-size: 15px; }
+
+  &:hover {
+    background: $bg-item;
+    color: rgba(255,255,255,.8);
+  }
+
+  &.active { color: rgba(255,255,255,.85); }
+
+  &.logout {
+    color: rgba(220,38,38,.7);
+
+    &:hover {
+      background: rgba(220,38,38,.1);
+      color: #FCA5A5;
+    }
   }
 }

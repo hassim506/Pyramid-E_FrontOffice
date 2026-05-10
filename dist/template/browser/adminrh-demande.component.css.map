@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/adminrh/adminrh-demande/adminrh-demande.component.scss"],
+  "sourcesContent": [".avatar {\r\n  width: 40px;\r\n  height: 40px;\r\n  font-size: 0.875rem;\r\n  \r\n  &.avatar-md {\r\n    width: 48px;\r\n    height: 48px;\r\n    font-size: 1rem;\r\n  }\r\n}\r\n\r\n.badge {\r\n  font-size: 0.75rem;\r\n}\r\n\r\n.text-truncate {\r\n  white-space: nowrap;\r\n  overflow: hidden;\r\n  text-overflow: ellipsis;\r\n}\r\n\r\n.btn-group-sm .btn {\r\n  padding: 0.25rem 0.5rem;\r\n  font-size: 0.875rem;\r\n}\r\n\r\n.spinner-border-sm {\r\n  width: 0.875rem;\r\n  height: 0.875rem;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .d-none.d-sm-inline {\r\n    display: none !important;\r\n  }\r\n  \r\n  .avatar.avatar-md {\r\n    width: 40px;\r\n    height: 40px;\r\n    font-size: 0.875rem;\r\n  }\r\n}"],
+  "mappings": ";AAAA,CAAA;AACE,SAAA;AACA,UAAA;AACA,aAAA;;AAEA,CALF,MAKE,CAAA;AACE,SAAA;AACA,UAAA;AACA,aAAA;;AAIJ,CAAA;AACE,aAAA;;AAGF,CAAA;AACE,eAAA;AACA,YAAA;AACA,iBAAA;;AAGF,CAAA,aAAA,CAAA;AACE,WAAA,QAAA;AACA,aAAA;;AAGF,CAAA;AACE,SAAA;AACA,UAAA;;AAGF,OAAA,CAAA,SAAA,EAAA;AACE,GAAA,MAAA,CAAA;AACE,aAAA;;AAGF,GArCF,MAqCE,CAhCA;AAiCE,WAAA;AACA,YAAA;AACA,eAAA;;;",
+  "names": []
+}

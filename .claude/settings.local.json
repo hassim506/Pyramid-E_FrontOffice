@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat \"C:/Users/mouhamed.faye/AppData/Local/Temp/claude/c--Project-Pyramide-Dev-Front-end-angular/c1d8dd60-edf3-4792-a707-24030baa8016/tasks/bt7md209z.output\" 2>/dev/null | tail -40)",
+      "Read(//c/Users/mouhamed.faye/AppData/Local/Temp/claude/c--Project-Pyramide-Dev-Front-end-angular/c1d8dd60-edf3-4792-a707-24030baa8016/tasks/**)",
+      "Bash(grep -v \"^$\")",
+      "Bash(npx ng *)"
+    ]
+  }
+}

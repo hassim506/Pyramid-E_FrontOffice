@@ -551,4 +551,13 @@ private loadDemandes(): void {
   get showEmptyState(): boolean {
     return !this.loading && !this.hasData && !this.error;
   }
+
+  get totalPages(): number { return Math.ceil(this.totalData / this.pageSize); }
+  get pagesArray(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i); }
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.skip = (page - 1) * this.pageSize;
+    this.limit = page * this.pageSize;
+    this.pagination.tablePageSize.next({ skip: this.skip, limit: this.limit, pageSize: this.pageSize });
+  }
 }

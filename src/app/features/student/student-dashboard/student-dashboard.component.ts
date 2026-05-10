@@ -127,13 +127,13 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   private loadStatsFallback(): void {
     Promise.all([
-      this.formationsService.getMesFormations().toPromise(),
-      this.demandeFormationService.getMesDemandes().toPromise(),
-      this.formationsService.getMyCertificates().toPromise(),
+      this.formationsService.getMesFormations().toPromise().catch(() => null),
+      this.demandeFormationService.getMesDemandes().toPromise().catch(() => null),
+      this.formationsService.getMyCertificates().toPromise().catch(() => null),
     ]).then(([formRes, demRes, certRes]: any[]) => {
-      const formations = formRes?.formations  ?? [];
-      const demandes   = demRes?.demandes     ?? [];
-      const certs      = certRes?.certificats ?? [];
+      const formations = formRes?.formations ?? formRes?.data ?? [];
+      const demandes   = demRes?.demandes    ?? demRes?.data  ?? [];
+      const certs      = certRes?.certificats ?? certRes?.data ?? certRes?.certificates ?? [];
 
       const terminees = formations.filter((f: any) => f.statut_formation === 'termine');
       const enCours   = formations.filter((f: any) => f.statut_formation === 'en_cours');

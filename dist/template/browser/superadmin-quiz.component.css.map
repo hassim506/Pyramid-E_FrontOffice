@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/superadmin/superadmin-quiz/superadmin-quiz.component.scss"],
+  "sourcesContent": ["/* filepath: c:\\Project\\Pyramide\\Dev\\Front-end\\angular\\src\\app\\features\\quiz\\quiz-list\\quiz-list.component.scss */\r\n.badge-success {\r\n  background-color: #198754 !important;\r\n}\r\n\r\n.badge-secondary {\r\n  background-color: #6c757d !important;\r\n}\r\n\r\n.table th {\r\n  border-top: none;\r\n  font-weight: 600;\r\n  font-size: 0.875rem;\r\n  color: #6c757d;\r\n  text-transform: uppercase;\r\n  letter-spacing: 0.5px;\r\n}\r\n\r\n.btn-group-sm .btn {\r\n  padding: 0.25rem 0.5rem;\r\n}\r\n\r\n.card-header {\r\n  background-color: #f8f9fa;\r\n  border-bottom: 1px solid #dee2e6;\r\n}\r\n\r\n.text-truncate {\r\n  overflow: hidden;\r\n  text-overflow: ellipsis;\r\n  white-space: nowrap;\r\n}\r\n\r\n.spinner-border {\r\n  width: 3rem;\r\n  height: 3rem;\r\n}"],
+  "mappings": ";AACA,CAAA;AACE,oBAAA;;AAGF,CAAA;AACE,oBAAA;;AAGF,CAAA,MAAA;AACE,cAAA;AACA,eAAA;AACA,aAAA;AACA,SAAA;AACA,kBAAA;AACA,kBAAA;;AAGF,CAAA,aAAA,CAAA;AACE,WAAA,QAAA;;AAGF,CAAA;AACE,oBAAA;AACA,iBAAA,IAAA,MAAA;;AAGF,CAAA;AACE,YAAA;AACA,iBAAA;AACA,eAAA;;AAGF,CAAA;AACE,SAAA;AACA,UAAA;;",
+  "names": []
+}

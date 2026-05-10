@@ -23,8 +23,16 @@ export class UserService {
     return this.http.get<any>(`${this.baseUrl}/users`, { headers: this.getHeaders() });
   }
 
+  getEmployesByEntreprise(entrepriseId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/entreprises/${entrepriseId}/employes`, { headers: this.getHeaders() });
+  }
+
   getMyUsers(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/mes-utilisateurs-rh`, { headers: this.getHeaders() });
+  }
+
+  getFormateurs(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/adminrh/formateurs`, { headers: this.getHeaders() });
   }
 
   getMyUsersgroup(): Observable<any> {

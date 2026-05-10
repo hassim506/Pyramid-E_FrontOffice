@@ -1,283 +1,393 @@
-<div class="container-fluid">
-  <!-- En-tête avec titre et boutons d'action -->
-  <div class="page-header d-flex align-items-center justify-content-between mb-4">
-    <div>
-      <h3 class="page-title mb-0">Gestion des Utilisateurs</h3>
-    </div>
-    <div class="d-flex flex-wrap gap-2">
-      <button class="btn btn-outline-primary" (click)="downloadTemplate()">
-        <i class="fas fa-download me-1"></i>Télécharger Template
-      </button>
-      <button class="btn btn-warning" (click)="openImportDialog()">
-        <i class="fas fa-upload me-1"></i>Importer
-      </button>
-      <button class="btn btn-primary" (click)="openNew()">
-        <i class="fas fa-plus me-1"></i>Ajouter Utilisateur
-      </button>
-    </div>
+<!-- ── SHELL ── -->
+<div class="ul-shell">
+
+  <!-- ── TOP BAR ── -->
+  <div class="ul-topbar">
+    <i class="isax isax-people ul-topbar__icon"></i>
+    <h1 class="ul-topbar__title">Utilisateurs & rôles</h1>
+    <span class="ul-topbar__stats">
+      {{ totalData }} utilisateur{{ totalData > 1 ? 's' : '' }}
+      · {{ rolesCount }} rôle{{ rolesCount > 1 ? 's' : '' }}
+      · {{ entreprisesCount }} entreprise{{ entreprisesCount > 1 ? 's' : '' }}
+    </span>
+    <a *ngIf="entrepriseId" routerLink="/superadmin/superadmin-companymanagement"
+       class="ul-back"><i class="isax isax-arrow-left-2 me-1"></i>Retour aux entreprises</a>
   </div>
 
-  <!-- Messages d'erreur -->
-  <div class="alert alert-danger" *ngIf="error" role="alert">
-    <i class="fas fa-exclamation-triangle me-2"></i>{{error}}
+  <!-- ── TABS ── -->
+  <div class="ul-tabbar">
+    <button class="ul-tab" [class.ul-tab--active]="activeTab === 'users'"
+            (click)="setTab('users')">Utilisateurs</button>
+    <button class="ul-tab" [class.ul-tab--active]="activeTab === 'roles'"
+            (click)="setTab('roles')">Rôles & permissions</button>
+    <button class="ul-tab" [class.ul-tab--active]="activeTab === 'matrix'"
+            (click)="setTab('matrix')">Matrice d'accès</button>
   </div>
 
-  <!-- Indicateur de chargement -->
-  <div *ngIf="loading" class="d-flex justify-content-center p-4">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Chargement...</span>
+  <!-- ════════════════════════════════════════════
+       TAB 1 : UTILISATEURS
+  ════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'users'">
+
+    <!-- Toolbar -->
+    <div class="ul-toolbar">
+      <div class="ul-search">
+        <i class="isax isax-search-normal-1 ul-search__icon"></i>
+        <input type="search" class="ul-search__input"
+               placeholder="Rechercher un utilisateur..."
+               [(ngModel)]="searchDataValue" [ngModelOptions]="{standalone: true}"
+               (ngModelChange)="searchData($event)">
+      </div>
+
+      <!-- Filtre Rôle -->
+      <div class="ul-filter-group" (clickOutside)="showRoleDropdown = false">
+        <button class="ul-filter" [class.ul-filter--on]="!!selectedRoleFilter"
+                (click)="showRoleDropdown = !showRoleDropdown">
+          <i class="isax isax-filter"></i> Rôle
+          <span *ngIf="selectedRoleFilter" class="ul-filter__chip">{{ selectedRoleFilter }}</span>
+        </button>
+        <div class="ul-dropdown" *ngIf="showRoleDropdown">
+          <div class="ul-dropdown__item" (click)="setRoleFilter('')">Tous les rôles</div>
+          <div class="ul-dropdown__item"
+               *ngFor="let r of availableRoles"
+               [class.ul-dropdown__item--on]="selectedRoleFilter === r"
+               (click)="setRoleFilter(r)">{{ r }}</div>
+        </div>
+      </div>
+
+      <!-- Filtre Entreprise -->
+      <button class="ul-filter" [class.ul-filter--on]="!!entrepriseId">
+        <i class="isax isax-building"></i>
+        {{ entrepriseId ? ('Entreprise #' + entrepriseId) : 'Entreprise' }}
+      </button>
+
+      <!-- Filtre Statut -->
+      <div class="ul-filter-group" (clickOutside)="showStatutDropdown = false">
+        <button class="ul-filter" [class.ul-filter--on]="selectedStatutFilter !== ''"
+                (click)="showStatutDropdown = !showStatutDropdown">
+          <i class="isax isax-tick-circle"></i> Statut
+          <span *ngIf="selectedStatutFilter !== ''" class="ul-filter__chip">
+            {{ selectedStatutFilter === '1' ? 'Actif' : 'Inactif' }}
+          </span>
+        </button>
+        <div class="ul-dropdown" *ngIf="showStatutDropdown">
+          <div class="ul-dropdown__item" (click)="setStatutFilter('')">Tous</div>
+          <div class="ul-dropdown__item"
+               [class.ul-dropdown__item--on]="selectedStatutFilter === '1'"
+               (click)="setStatutFilter('1')">Actif</div>
+          <div class="ul-dropdown__item"
+               [class.ul-dropdown__item--on]="selectedStatutFilter === '0'"
+               (click)="setStatutFilter('0')">Inactif</div>
+        </div>
+      </div>
+
+      <button class="ul-filter" (click)="openImportDialog()">
+        <i class="isax isax-import"></i> Importer
+      </button>
+      <button class="ul-filter" (click)="downloadTemplate()">
+        <i class="isax isax-export"></i> Template
+      </button>
+
+      <button class="ul-add-btn" (click)="openNew()">
+        <i class="isax isax-add"></i> Nouvel utilisateur
+      </button>
     </div>
-  </div>
 
-  <!-- Barre de recherche -->
-  <div class="row justify-content-end mb-3" *ngIf="!loading">
-    <div class="col-lg-3 col-md-6">
-      <div class="input-group">
-        <input 
-          type="text" 
-          class="form-control" 
-          placeholder="Rechercher..." 
-          [(ngModel)]="searchDataValue" 
-          (keyup)="searchData(searchDataValue)"
-          aria-label="Rechercher des utilisateurs">
-        <button class="btn btn-outline-secondary" type="button">
-          <i class="isax isax-search-normal-15"></i>
+    <!-- Erreur -->
+    <div *ngIf="error" class="ul-alert">
+      <i class="isax isax-warning-2"></i> {{ error }}
+    </div>
+
+    <!-- Skeleton loading -->
+    <div *ngIf="loading" class="ul-skeletons">
+      <div *ngFor="let i of [1,2,3,4,5]" class="ul-skeleton-row"></div>
+    </div>
+
+    <!-- Tableau -->
+    <table class="ul-table" *ngIf="!loading">
+      <thead>
+        <tr>
+          <th style="width:28%">Utilisateur</th>
+          <th style="width:16%">Rôle</th>
+          <th style="width:16%">Entreprise</th>
+          <th style="width:12%">Statut</th>
+          <th style="width:14%">Dernière activité</th>
+          <th style="width:14%">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of tableData; trackBy: trackById">
+          <td>
+            <div class="ul-user">
+              <div class="ul-avatar" [attr.data-role]="getRoleKey(getRoleName(u))">
+                {{ getInitials(u) }}
+              </div>
+              <div>
+                <div class="ul-user__name">{{ getDisplayName(u) }}</div>
+                <div class="ul-user__email">{{ u.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="ul-role-badge" [attr.data-role]="getRoleKey(getRoleName(u))">
+              <i [class]="'isax ' + getRoleIcon(getRoleName(u))"></i>
+              {{ getRoleName(u) }}
+            </span>
+          </td>
+          <td>
+            <span *ngIf="u.entreprise?.nom" class="ul-cie">{{ u.entreprise!.nom }}</span>
+            <span *ngIf="!u.entreprise?.nom" class="ul-cie-none">— Plateforme</span>
+          </td>
+          <td>
+            <span class="ul-statut" [attr.data-s]="u.statut === 1 ? 'actif' : 'inactif'">
+              <i [class]="'isax ' + (u.statut === 1 ? 'isax-tick-circle' : 'isax-minus-cirlce')"></i>
+              {{ u.statut === 1 ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          <td class="ul-date">{{ formatDate(u.updated_at) }}</td>
+          <td>
+            <div class="ul-actions">
+              <button class="ul-act" title="Modifier" (click)="editUser(u)">
+                <i class="isax isax-edit"></i>
+              </button>
+              <button class="ul-act ul-act--warn" *ngIf="u.statut === 1"
+                      title="Archiver" (click)="archiveUser(u)">
+                <i class="isax isax-archive"></i>
+              </button>
+              <button class="ul-act ul-act--ok" *ngIf="u.statut === 0"
+                      title="Réactiver" (click)="reactivateUser(u)">
+                <i class="isax isax-refresh"></i>
+              </button>
+              <button class="ul-act ul-act--del" title="Supprimer" (click)="deleteUser(u.id)">
+                <i class="isax isax-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="!tableData.length">
+          <td colspan="6" class="ul-empty">
+            <i class="isax isax-people d-block mb-2" style="font-size:2rem;"></i>
+            Aucun utilisateur trouvé
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="ul-pager" *ngIf="!loading && totalData > pageSize">
+      <span class="ul-pager__info">
+        {{ skip + 1 }}–{{ skip + tableData.length }} sur {{ totalData }}
+      </span>
+      <div class="ul-pager__btns">
+        <button class="ul-pager__btn" [disabled]="currentPage === 1"
+                (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button *ngFor="let p of pageSelection; let i = index"
+                class="ul-pager__btn"
+                [class.ul-pager__btn--active]="currentPage === i + 1"
+                (click)="onPageChange(i + 1)">{{ i + 1 }}</button>
+        <button class="ul-pager__btn"
+                [disabled]="currentPage === pageSelection.length || !pageSelection.length"
+                (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-3"></i>
         </button>
       </div>
     </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════
+       TAB 2 : RÔLES & PERMISSIONS
+       Embedded SuperadminRoleComponent (full CRUD)
+  ════════════════════════════════════════════ -->
+  <div class="ul-role-embed" *ngIf="activeTab === 'roles'">
+    <app-superadmin-role></app-superadmin-role>
   </div>
 
-  <!-- Tableau des utilisateurs -->
-  <div class="card" *ngIf="!loading">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table matSort (matSortChange)="sortData($event)" class="table table-hover mb-0">
-          <thead class="table-light">
-            <tr>
-              <th mat-sort-header="nom" scope="col">Nom</th>
-              <th mat-sort-header="email" scope="col">Email</th>
-              <th scope="col">Numéro</th>
-              <th mat-sort-header="fonction" scope="col">Fonction</th>
-              <th scope="col">Entreprise</th>
-              <th scope="col">Rôle</th>
-              <th mat-sort-header="statut" scope="col">Statut</th>
-              <th scope="col" class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let data of tableData; let i = index">
-              <td>
-                <div class="d-flex align-items-center">
-                  <a [routerLink]="['/superadmin/user-details', data.id]" 
-                     class="text-decoration-none">
-                    <span class="fw-medium">{{data.name || (data.prenom + ' ' + data.nom)}}</span>
-                  </a>
-                </div>
-              </td>
-              <td>
-                <span class="text-muted">{{data.email}}</span>
-              </td>
-              <td>
-                <span class="text-muted">{{data.numero || 'N/A'}}</span>
-              </td>
-              <td>
-                <span class="text-muted">{{data.fonction || 'N/A'}}</span>
-              </td>
-              <td>
-                <span class="text-muted">{{data.entreprise?.nom || 'N/A'}}</span>
-              </td>
-              <td>
-                <span [class]="getRoleBadgeClass(getRoleName(data))">
-                  {{getRoleName(data)}}
-                </span>
-              </td>
-              <td>
-                <span [class]="getStatutBadgeClass(data.statut)">
-                  {{data.statut === 1 ? 'Actif' : 'Inactif'}}
-                </span>
-              </td>
-              <td>
-                <div class="d-flex justify-content-center gap-1">
-                  <button 
-                    class="btn btn-sm btn-outline-primary" 
-                    (click)="editUser(data)"
-                    title="Modifier">
-                    <i class="isax isax-edit"></i>
-                  </button>
-                  
-                  <button 
-                    *ngIf="data.statut === 1" 
-                    class="btn btn-sm btn-outline-warning" 
-                    (click)="archiveUser(data)"
-                    title="Archiver">
-                    <i class="isax isax-archive"></i>
-                  </button>
-                  
-                  <button 
-                    *ngIf="data.statut === 0" 
-                    class="btn btn-sm btn-outline-success" 
-                    (click)="reactivateUser(data)"
-                    title="Réactiver">
-                    <i class="isax isax-refresh"></i>
-                  </button>
-                  
-                  <button 
-                    class="btn btn-sm btn-outline-danger" 
-                    (click)="deleteUser(data.id)"
-                    title="Supprimer">
-                    <i class="isax isax-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <!-- ════════════════════════════════════════════
+       TAB 3 : MATRICE D'ACCÈS
+  ════════════════════════════════════════════ -->
+  <div class="ul-matrix-wrap" *ngIf="activeTab === 'matrix'">
+    <table class="ul-matrix">
+      <thead>
+        <tr>
+          <th style="width:38%">Permission</th>
+          <th>Superadmin</th>
+          <th>Admin RH</th>
+          <th>Formateur</th>
+          <th>Employé</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Gestion des entreprises -->
+        <tr><td class="ul-matrix__group" colspan="5">Gestion des entreprises</td></tr>
+        <tr>
+          <td>Créer / supprimer une entreprise</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Voir toutes les entreprises</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <!-- Gestion des utilisateurs -->
+        <tr><td class="ul-matrix__group" colspan="5">Gestion des utilisateurs</td></tr>
+        <tr>
+          <td>Créer / modifier un utilisateur</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Attribuer un rôle</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Désactiver un compte</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <!-- Formations & contenus -->
+        <tr><td class="ul-matrix__group" colspan="5">Formations & contenus</td></tr>
+        <tr>
+          <td>Créer une formation</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Valider une demande de formation</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Accéder à ses formations</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Gérer les quiz</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <!-- Suivi & statistiques -->
+        <tr><td class="ul-matrix__group" colspan="5">Suivi & statistiques</td></tr>
+        <tr>
+          <td>Statistiques globales plateforme</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Statistiques de son entreprise</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Voir sa propre progression</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Télécharger un certificat</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="ul-matrix__legend">
+      <span><span class="ul-c-yes">✓</span> Accès complet</span>
+      <span><span class="ul-c-partial">◐</span> Accès limité (son périmètre)</span>
+      <span><span class="ul-c-no">—</span> Aucun accès</span>
     </div>
   </div>
 
-  <!-- Message si aucune donnée -->
-  <div *ngIf="!loading && totalData === 0" class="text-center py-5">
-    <i class="fas fa-users fa-3x text-muted mb-3"></i>
-    <h5 class="text-muted">Aucun utilisateur trouvé</h5>
-    <p class="text-muted">Commencez par ajouter des utilisateurs ou ajustez vos critères de recherche.</p>
-  </div>
-
-  <!-- Pagination -->
-  <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="totalData > 0 && !loading">
-    <div class="text-muted small">
-      Affichage de {{skip + 1}} à {{skip + tableData.length}} sur {{totalData}} utilisateur{{totalData > 1 ? 's' : ''}}
-    </div>
-    <nav aria-label="Navigation des pages">
-      <ul class="pagination mb-0">
-        <li class="page-item" [class.disabled]="currentPage === 1">
-          <a class="page-link" (click)="onPageChange(currentPage - 1)" href="javascript:void(0)"
-             [attr.aria-disabled]="currentPage === 1">
-            <i class="isax isax-arrow-left-2"></i>
-            <span class="visually-hidden">Page précédente</span>
-          </a>
-        </li>
-        <li class="page-item" 
-            *ngFor="let page of pageSelection; let i = index" 
-            [class.active]="currentPage === i + 1">
-          <a class="page-link" (click)="onPageChange(i + 1)" href="javascript:void(0)"
-             [attr.aria-current]="currentPage === i + 1 ? 'page' : null">
-            {{i + 1}}
-          </a>
-        </li>
-        <li class="page-item" [class.disabled]="currentPage === pageSelection.length">
-          <a class="page-link" (click)="onPageChange(currentPage + 1)" href="javascript:void(0)"
-             [attr.aria-disabled]="currentPage === pageSelection.length">
-            <i class="isax isax-arrow-right-3"></i>
-            <span class="visually-hidden">Page suivante</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
 </div>
 
-<!-- Modal d'import -->
-<div class="modal" 
-     [class.show]="showImportDialog" 
-     [style.display]="showImportDialog ? 'block' : 'none'" 
-     tabindex="-1" 
+<!-- ── MODAL IMPORT ── -->
+<div class="modal"
+     [class.show]="showImportDialog"
+     [style.display]="showImportDialog ? 'block' : 'none'"
+     tabindex="-1"
      *ngIf="showImportDialog"
-     role="dialog"
-     aria-labelledby="importModalTitle"
-     aria-hidden="false">
+     role="dialog">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="importModalTitle">
-          <i class="fas fa-upload me-2"></i>Importer des Utilisateurs
-        </h5>
-        <button type="button" 
-                class="btn-close" 
-                (click)="closeImportDialog()"
-                aria-label="Fermer"></button>
+        <h5 class="modal-title"><i class="isax isax-import me-2"></i>Importer des utilisateurs</h5>
+        <button type="button" class="btn-close" (click)="closeImportDialog()"></button>
       </div>
-      
       <div class="modal-body">
-        <form>
-          <div class="mb-3">
-            <label for="fileInput" class="form-label">Fichier Excel/CSV</label>
-            <input 
-              id="fileInput"
-              type="file" 
-              class="form-control" 
-              (change)="onFileSelected($event)" 
-              accept=".xlsx,.xls,.csv" 
-              [disabled]="isImporting">
-            <div class="form-text">
-              <i class="fas fa-info-circle me-1"></i>
-              Formats acceptés: .xlsx, .xls, .csv
+        <div class="mb-3">
+          <label for="fileInput" class="form-label">Fichier Excel / CSV</label>
+          <input id="fileInput" type="file" class="form-control"
+                 (change)="onFileSelected($event)" accept=".xlsx,.xls,.csv" [disabled]="isImporting">
+          <div class="form-text">Formats acceptés : .xlsx, .xls, .csv</div>
+        </div>
+        <div *ngIf="selectedFile" class="alert alert-info">
+          <strong>{{ selectedFile.name }}</strong>
+          <small class="text-muted ms-1">({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)</small>
+        </div>
+        <div *ngIf="isImporting" class="mb-3">
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                 role="progressbar" [style.width.%]="importProgress"
+                 [attr.aria-valuenow]="importProgress" aria-valuemin="0" aria-valuemax="100">
+              {{ importProgress }}%
             </div>
           </div>
-          
-          <div *ngIf="selectedFile" class="alert alert-info">
-            <i class="fas fa-file me-2"></i>
-            <strong>Fichier sélectionné:</strong> {{selectedFile.name}} 
-            <small class="text-muted">({{(selectedFile.size / 1024 / 1024).toFixed(2)}} MB)</small>
-          </div>
-          
-          <!-- Barre de progression -->
-          <div *ngIf="isImporting" class="mb-3">
-            <label class="form-label">Progression de l'import</label>
-            <div class="progress">
-              <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                   role="progressbar" 
-                   [style.width.%]="importProgress"
-                   [attr.aria-valuenow]="importProgress"
-                   aria-valuemin="0"
-                   aria-valuemax="100">
-                {{importProgress}}%
-              </div>
-            </div>
-          </div>
-        </form>
-        
+        </div>
         <div class="alert alert-warning">
-          <h6 class="alert-heading">
-            <i class="fas fa-exclamation-triangle me-2"></i>Instructions importantes
-          </h6>
-          <ul class="mb-0 mt-2">
+          <h6 class="alert-heading"><i class="isax isax-warning-2 me-1"></i>Instructions</h6>
+          <ul class="mb-0 mt-2 small">
             <li>Téléchargez d'abord le template pour voir la structure requise</li>
-            <li>Remplissez le fichier avec les données des utilisateurs</li>
-            <li>Les colonnes obligatoires sont: <strong>nom, prenom, email, role_id</strong></li>
-            <li>Les utilisateurs existants (même email) seront mis à jour</li>
-            <li>Vérifiez que les données sont correctement formatées</li>
+            <li>Colonnes obligatoires : <strong>nom, prenom, email, role_id</strong></li>
+            <li>Les utilisateurs avec le même email seront mis à jour</li>
           </ul>
         </div>
       </div>
-      
       <div class="modal-footer">
-        <button type="button" 
-                class="btn btn-secondary" 
-                (click)="closeImportDialog()" 
-                [disabled]="isImporting">
-          <i class="fas fa-times me-1"></i>Annuler
-        </button>
-        <button type="button" 
-                class="btn btn-primary" 
-                (click)="importUsers()" 
-                [disabled]="!selectedFile || isImporting">
-          <span *ngIf="isImporting" class="spinner-border spinner-border-sm me-2"></span>
-          <i *ngIf="!isImporting" class="fas fa-upload me-1"></i>
-          {{isImporting ? 'Import en cours...' : 'Importer'}}
+        <button class="btn btn-secondary" (click)="closeImportDialog()" [disabled]="isImporting">Annuler</button>
+        <button class="btn btn-primary" (click)="importUsers()" [disabled]="!selectedFile || isImporting">
+          <span *ngIf="isImporting" class="spinner-border spinner-border-sm me-1"></span>
+          {{ isImporting ? 'Import en cours...' : 'Importer' }}
         </button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Backdrop du modal -->
 <div class="modal-backdrop fade" [class.show]="showImportDialog" *ngIf="showImportDialog"></div>
 
-<!-- Composant d'ajout/édition d'utilisateur -->
-<app-user-add 
-  [visible]="userDialog" 
-  [isEditMode]="isEditMode" 
+<!-- ── USER ADD/EDIT ── -->
+<app-user-add
+  [visible]="userDialog"
+  [isEditMode]="isEditMode"
   [userData]="selectedUser"
   (onClose)="hideDialog()"
   (onSave)="refreshData()">

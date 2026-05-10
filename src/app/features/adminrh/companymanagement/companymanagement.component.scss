@@ -1,35 +1,251 @@
-:host ::ng-deep {
-  .p-toolbar {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 1rem;
+$primary:   #069b8f;
+$dark:      #0f172a;
+$gray-50:   #f8fafc;
+$gray-100:  #f1f5f9;
+$gray-200:  #e2e8f0;
+$gray-300:  #cbd5e1;
+$gray-400:  #94a3b8;
+$gray-500:  #64748b;
+$gray-600:  #475569;
+$gray-700:  #334155;
+$radius-md: 10px;
+$radius-lg: 14px;
+$shadow-sm: 0 1px 3px rgba(0,0,0,.07);
+$shadow-md: 0 4px 16px rgba(0,0,0,.09);
+
+// ── Page wrapper ───────────────────────────────────
+.page-content {
+  padding: 0;
+}
+
+// ── Page title section ─────────────────────────────
+.page-title {
+  h4 { font-size: 1.25rem; color: $dark; }
+
+  p.text-muted { font-size: .85rem; }
+
+  // Quick stat chips in the header
+  .fw-bold.text-primary { font-size: 1.1rem; color: $primary !important; }
+  .fw-bold.text-success  { font-size: 1.1rem; }
+  .fw-bold.text-warning  { font-size: 1.1rem; }
+
+  small.text-muted { font-size: .72rem; }
+}
+
+// ── Buttons (override Bootstrap to match brand) ────
+.btn-primary {
+  background-color: $primary !important;
+  border-color: $primary !important;
+  font-size: .85rem;
+  border-radius: 8px;
+
+  &:hover:not(:disabled) { background-color: darken($primary, 8%) !important; }
+}
+
+.btn-outline-primary {
+  color: $primary !important;
+  border-color: $primary !important;
+  font-size: .85rem;
+  border-radius: 8px;
+
+  &:hover:not(:disabled) { background-color: rgba($primary, .07) !important; }
+}
+
+// ── Alerts ─────────────────────────────────────────
+.alert {
+  border-radius: $radius-md;
+  font-size: .875rem;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &.alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    .btn-close { filter: none; opacity: .5; }
   }
 
-  .p-datatable {
-    .p-datatable-header {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      padding: 1rem;
-    }
+  &.alert-danger {
+    background: #fff1f0;
+    color: #c0392b;
+    border: 1px solid #f5c6c3;
+    .btn-close { filter: none; opacity: .5; }
+  }
+}
 
-    .p-datatable-thead > tr > th {
-      background-color: #e9ecef;
-    }
+// ── Search card ────────────────────────────────────
+.card {
+  border: 1px solid $gray-200 !important;
+  border-radius: $radius-lg !important;
+  box-shadow: $shadow-sm !important;
+
+  .card-body { padding: 16px 20px; }
+
+  .card-header {
+    background: #fff !important;
+    padding: 14px 20px;
+    border-bottom: 1px solid $gray-100 !important;
+    border-radius: $radius-lg $radius-lg 0 0 !important;
+
+    h6 { font-size: .9rem; color: $dark; }
   }
 
-  .p-dialog {
-    .p-dialog-header {
-      background-color: #f8f9fa;
-    }
+  .card-footer {
+    background: #fff !important;
+    padding: 10px 20px;
+    border-top: 1px solid $gray-100 !important;
+    border-radius: 0 0 $radius-lg $radius-lg !important;
+  }
+}
+
+.input-group-text {
+  background: $gray-50;
+  border: 1px solid $gray-200;
+  color: $gray-400;
+  border-right: none;
+}
+
+.form-control {
+  border: 1px solid $gray-200;
+  border-radius: 0 8px 8px 0 !important;
+  font-size: .85rem;
+  background: $gray-50;
+  color: $dark;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, .12);
+    background: #fff;
   }
 
-  .field {
-    margin-bottom: 1.5rem;
+  &::placeholder { color: $gray-400; }
+}
 
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
+// ── Empty state card ───────────────────────────────
+.display-1 { font-size: 3rem !important; }
+
+// ── Table ──────────────────────────────────────────
+.table-responsive { border-radius: 0; }
+
+.table {
+  font-size: .85rem;
+  color: $dark;
+  margin-bottom: 0;
+
+  // Header
+  &.table-hover thead.table-light tr th {
+    background: $gray-50 !important;
+    color: $gray-500;
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 12px 14px;
+    border-bottom: 1px solid $gray-200;
+    white-space: nowrap;
+  }
+
+  // Rows
+  tbody tr {
+    border-bottom: 1px solid $gray-100;
+    transition: background .12s;
+
+    &:last-child { border-bottom: none; }
+
+    &:hover { background: $gray-50 !important; }
+
+    td {
+      padding: 12px 14px;
+      vertical-align: middle;
+      color: $dark;
     }
   }
 }
+
+// Avatar circles in table
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: .78rem;
+  font-weight: 700;
+
+  &.bg-primary { background: linear-gradient(135deg, $primary, darken($primary, 12%)) !important; }
+}
+
+// Badges in table
+.badge {
+  font-size: .73rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  &.bg-light { background: $gray-100 !important; color: $gray-600 !important; }
+  &.bg-dark   { color: $dark !important; }
+
+  &.bg-success { background: #dcfce7 !important; color: #166534 !important; }
+  &.bg-warning { background: #fff3cd !important; color: #92400e !important; }
+  &.bg-danger  { background: #fff1f0 !important; color: #991b1b !important; }
+  &.bg-secondary { background: $gray-200 !important; color: $gray-600 !important; }
+
+  &.font-monospace { font-family: 'Courier New', monospace; font-size: .78rem; }
+}
+
+// ── Action buttons in table ─────────────────────────
+.btn-group-sm {
+  .btn {
+    padding: 4px 9px;
+    font-size: .78rem;
+    border-radius: 7px !important;
+    line-height: 1.4;
+
+    &.btn-outline-primary  { color: $primary; border-color: $primary; &:hover { background: rgba($primary,.08); } }
+    &.btn-outline-danger   { &:hover { background: rgba(#dc3545,.07); } }
+    &.btn-outline-info     { &:hover { background: rgba(#0ea5e9,.07); } }
+    &.btn-outline-warning  { &:hover { background: rgba(#f59e0b,.07); } }
+    &.btn-outline-success  { &:hover { background: rgba(#22c55e,.07); } }
+    &.btn-outline-secondary{ &:hover { background: $gray-100; } }
+  }
+}
+
+// ── Dropdown (page size) ───────────────────────────
+.dropdown-menu {
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  box-shadow: $shadow-md;
+  font-size: .83rem;
+  padding: 4px;
+
+  .dropdown-item {
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: $dark;
+    &:hover { background: $gray-100; }
+    &:active { background: rgba($primary, .1); color: $primary; }
+  }
+}
+
+// ── Spinner ────────────────────────────────────────
+.spinner-border.text-primary { color: $primary !important; }
+
+// ── Link overrides ─────────────────────────────────
+a.text-dark {
+  text-decoration: none;
+  color: $dark !important;
+  font-weight: 600;
+
+  &:hover { color: $primary !important; }
+}
+
+a.fw-semibold {
+  &:hover { color: $primary !important; }
+}
+
+// ── Search results "no match" row ──────────────────
+.display-6 { font-size: 1.6rem !important; color: $gray-300; }

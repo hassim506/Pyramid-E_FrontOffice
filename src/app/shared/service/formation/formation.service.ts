@@ -34,11 +34,10 @@ unpublishFormation(id: number): Observable<any> {
     };
   }
 
-  // /adminrh/formations
-
+  // /adminrh/formations — filtered by the RH's entreprise
   getFormationsrh(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/formations`, { 
-      headers: this.getHeaders() 
+    return this.http.get<any>(`${this.baseUrl}/adminrh/formations`, {
+      headers: this.getHeaders()
     });
   }
    getFormationsformateur(): Observable<any> {
@@ -51,9 +50,19 @@ unpublishFormation(id: number): Observable<any> {
       headers: this.getHeaders() 
     });
   }
-  getFormations(p0: { page: number; limit: number; }): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/formations`, { 
-      headers: this.getHeaders() 
+  getFormations(p0: { page: number; limit: number; entreprise_id?: number }): Observable<any> {
+    const params: any = {};
+    if (p0.entreprise_id) params['entreprise_id'] = p0.entreprise_id;
+    return this.http.get<any>(`${this.baseUrl}/formations`, {
+      headers: this.getHeaders(),
+      params,
+    });
+  }
+
+  getFormationsByEntreprise(entrepriseId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/formations`, {
+      headers: this.getHeaders(),
+      params: { entreprise_id: entrepriseId },
     });
   }
 

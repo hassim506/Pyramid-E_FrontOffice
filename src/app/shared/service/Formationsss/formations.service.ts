@@ -167,7 +167,7 @@ export class FormationsService {
       .set('periode', params.periode)
       .set('annee',   String(params.annee))
       .set('mois',    String(params.mois));
-    return this.http.get(`${this.apiUrl}/mes-statistiques-dashboard`, { params: httpParams });
+    return this.http.get(`${this.apiUrl}/mes-statistiques-dashboard`, { headers: this.getHeaders(), params: httpParams });
   }
 
   // ===============================

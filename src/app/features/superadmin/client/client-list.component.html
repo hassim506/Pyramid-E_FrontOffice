@@ -1,96 +1,255 @@
-<div class="page-title d-flex align-items-center justify-content-between">
-    <h5 class="fw-bold">Gestion des Clients</h5>
-    <div class="d-flex align-items-center list-icons">
-        <button class="btn btn-outline-primary me-2" (click)="refreshData()" [disabled]="loading">
-            <i class="isax isax-refresh" [class.fa-spin]="loading"></i>
+<!-- ── SHELL ── -->
+<div class="cl-shell">
+
+  <!-- ── HEADER ── -->
+  <div class="cl-header">
+    <div class="cl-header__left">
+      <h1 class="cl-header__title">Clients</h1>
+      <span class="cl-header__count">{{ actualData.length }} client{{ actualData.length > 1 ? 's' : '' }}</span>
+    </div>
+    <div class="cl-header__right">
+      <button type="button" class="cl-btn cl-btn--ghost" (click)="refreshData()" [disabled]="loading">
+        <i class="isax isax-refresh" [class.cl-spin]="loading"></i>
+        Actualiser
+      </button>
+      <button type="button" class="cl-btn cl-btn--primary" (click)="openNew()">
+        <i class="isax isax-add"></i>
+        Nouveau client
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ALERTS ── -->
+  <div *ngIf="error" class="cl-alert cl-alert--danger">
+    <i class="isax isax-warning-2 me-2"></i>{{ error }}
+    <button type="button" class="cl-alert__close" (click)="error = ''"><i class="isax isax-close-circle"></i></button>
+  </div>
+
+  <!-- ── BODY ── -->
+  <div class="cl-body">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="cl-sidebar">
+
+      <!-- Search -->
+      <div class="cl-sidebar__search">
+        <i class="isax isax-search-normal-1 cl-sidebar__search-icon"></i>
+        <input type="search"
+               class="cl-sidebar__search-input"
+               placeholder="Rechercher..."
+               [(ngModel)]="searchDataValue"
+               [ngModelOptions]="{ standalone: true }"
+               (ngModelChange)="searchData(searchDataValue)">
+      </div>
+
+      <!-- Loading skeleton -->
+      <div *ngIf="loading" class="cl-sidebar__loading">
+        <div class="cl-skeleton" *ngFor="let i of [1,2,3,4,5]"></div>
+      </div>
+
+      <!-- List -->
+      <ul class="cl-list" *ngIf="!loading">
+        <li *ngFor="let client of tableData"
+            class="cl-list__item"
+            [class.cl-list__item--active]="selectedClient?.id === client.id"
+            (click)="selectClient(client)">
+          <div class="cl-list__avatar" [attr.data-type]="client.type">
+            {{ getClientInitials(client.nom) }}
+          </div>
+          <div class="cl-list__info">
+            <span class="cl-list__name">{{ client.nom }}</span>
+            <span class="cl-list__sub">{{ client.type | titlecase }} · {{ client.secteur_activite }}</span>
+          </div>
+          <span class="cl-list__dot" [attr.data-status]="client.statut"></span>
+        </li>
+
+        <li *ngIf="!tableData.length" class="cl-list__empty">
+          <i class="isax isax-people d-block mb-2"></i>
+          <small>Aucun client trouvé</small>
+        </li>
+      </ul>
+
+      <!-- Pagination -->
+      <div class="cl-sidebar__pager">
+        <app-custom-pagination/>
+      </div>
+    </aside>
+
+    <!-- ══ DETAIL PANEL ══ -->
+    <main class="cl-detail">
+
+      <!-- Empty state -->
+      <div *ngIf="!selectedClient && !loading" class="cl-empty-state">
+        <div class="cl-empty-state__icon"><i class="isax isax-people"></i></div>
+        <h3>Sélectionnez un client</h3>
+        <p>Choisissez un client dans la liste pour voir ses informations.</p>
+        <button type="button" class="cl-btn cl-btn--primary mt-3" (click)="openNew()">
+          <i class="isax isax-add me-1"></i>Créer un client
         </button>
-        <a href="javascript:void(0);" class="active me-2" (click)="openNew()"><i class="isax isax-add"></i></a>
-    </div>
-</div>
+      </div>
 
-<!-- Ajouter une alerte d'erreur si nécessaire -->
-<div class="alert alert-danger" *ngIf="error">
-    {{error}}
-</div>
+      <ng-container *ngIf="selectedClient">
 
-<!-- Ajouter un spinner de loading -->
-<div *ngIf="loading" class="d-flex justify-content-center p-4">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Chargement...</span>
-    </div>
-</div>
-
-<div class="row justify-content-end">
-    <div class="col-md-4">
-        <div class="input-icon mb-3">
-            <span class="input-icon-addon">
-                <i class="isax isax-search-normal-14"></i>
-            </span>
-            <input [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }" type="search" (ngModelChange)="searchData(searchDataValue)" class="form-control form-control-md" placeholder="Rechercher...">
+        <!-- ── DETAIL HEADER ── -->
+        <div class="cl-detail-header">
+          <div class="cl-detail-header__avatar" [attr.data-type]="selectedClient.type">
+            {{ getClientInitials(selectedClient.nom) }}
+          </div>
+          <div class="cl-detail-header__info">
+            <h2 class="cl-detail-header__name">{{ selectedClient.nom }}</h2>
+            <div class="cl-detail-header__meta">
+              <span class="cl-badge" [attr.data-status]="selectedClient.statut">
+                {{ selectedClient.statut | titlecase }}
+              </span>
+              <span class="cl-badge cl-badge--type">{{ selectedClient.type | titlecase }}</span>
+              <span class="cl-meta-chip" *ngIf="selectedClient.secteur_activite">
+                <i class="isax isax-category me-1"></i>{{ selectedClient.secteur_activite }}
+              </span>
+              <span class="cl-meta-chip" *ngIf="selectedClient.pays">
+                <i class="isax isax-global me-1"></i>
+                {{ getCountryFlag(selectedClient.pays) }} {{ getCountryName(selectedClient.pays) }}
+              </span>
+            </div>
+          </div>
+          <div class="cl-detail-header__actions">
+            <button type="button" class="cl-btn cl-btn--outline" (click)="editClient(selectedClient)">
+              <i class="isax isax-edit me-1"></i>Modifier
+            </button>
+            <a [routerLink]="['/superadmin/superadmin-client-details', selectedClient.id]"
+               class="cl-btn cl-btn--ghost">
+              <i class="isax isax-eye me-1"></i>Détails
+            </a>
+            <button type="button" class="cl-btn cl-btn--ghost cl-btn--danger"
+                    (click)="deleteClient(selectedClient)">
+              <i class="isax isax-trash"></i>
+            </button>
+          </div>
         </div>
-    </div>
-</div>
-<div class="table-responsive custom-table">
-    <table matSort (matSortChange)="sortData($event)" class="table">
-        <thead class="thead-light">
-            <tr>
-                <th>NINEA</th>
-                <th>Nom du client</th>
-                <th>Type</th>
-                <th>Email</th>
-                <th>Téléphone</th>
-                <th>Secteur</th>
-                <th>Pays</th>
 
-                <th>Taille</th>
-                <th>Statut</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (data of tableData;track data){
-            <tr>
-                <td><a [routerLink]="['/superadmin/superadmin-client-details', data.id]" class="text-primary">{{data.ninea}}</a></td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar-md avatar-rounded flex-shrink-0 me-2 bg-primary text-white d-flex align-items-center justify-content-center">
-                            <i class="isax isax-people"></i>
-                        </div>
-                        <a [routerLink]="['/superadmin/superadmin-client-details', data.id]"><p class="fs-14 mb-0">{{data.nom}}</p></a>
+        <!-- ── KPI ROW ── -->
+        <div class="cl-kpi-row">
+          <div class="cl-kpi-card">
+            <div class="cl-kpi-card__icon cl-kpi-card__icon--purple"><i class="isax isax-building"></i></div>
+            <div class="cl-kpi-card__body">
+              <span class="cl-kpi-card__value">{{ selectedClient.entreprises?.length || '—' }}</span>
+              <span class="cl-kpi-card__label">Entreprises</span>
+            </div>
+          </div>
+          <div class="cl-kpi-card">
+            <div class="cl-kpi-card__icon cl-kpi-card__icon--blue"><i class="isax isax-people"></i></div>
+            <div class="cl-kpi-card__body">
+              <span class="cl-kpi-card__value">{{ selectedClient.taille || '—' }}</span>
+              <span class="cl-kpi-card__label">Taille</span>
+            </div>
+          </div>
+          <div class="cl-kpi-card">
+            <div class="cl-kpi-card__icon cl-kpi-card__icon--teal"><i class="isax isax-calendar"></i></div>
+            <div class="cl-kpi-card__body">
+              <span class="cl-kpi-card__value">{{ formatDate(selectedClient.date_contrat) || '—' }}</span>
+              <span class="cl-kpi-card__label">Date contrat</span>
+            </div>
+          </div>
+          <div class="cl-kpi-card">
+            <div class="cl-kpi-card__icon cl-kpi-card__icon--orange"><i class="isax isax-timer"></i></div>
+            <div class="cl-kpi-card__body">
+              <span class="cl-kpi-card__value">{{ formatDate(selectedClient.date_fin_contrat) || '—' }}</span>
+              <span class="cl-kpi-card__label">Fin contrat</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── DETAIL GRID ── -->
+        <div class="cl-detail-grid">
+
+          <!-- Informations générales -->
+          <div class="cl-card">
+            <div class="cl-card__header">
+              <i class="isax isax-people cl-card__icon"></i>
+              <h3 class="cl-card__title">Informations générales</h3>
+            </div>
+            <div class="cl-card__body">
+              <div class="cl-info-list">
+                <div class="cl-info-row">
+                  <span class="cl-info-row__label">NINEA</span>
+                  <span class="cl-info-row__value cl-mono">{{ selectedClient.ninea || '—' }}</span>
+                </div>
+                <div class="cl-info-row">
+                  <span class="cl-info-row__label">Email</span>
+                  <span class="cl-info-row__value">
+                    <a [href]="'mailto:' + selectedClient.email" class="cl-link">{{ selectedClient.email }}</a>
+                  </span>
+                </div>
+                <div class="cl-info-row">
+                  <span class="cl-info-row__label">Téléphone</span>
+                  <span class="cl-info-row__value">{{ selectedClient.telephone || '—' }}</span>
+                </div>
+                <div class="cl-info-row">
+                  <span class="cl-info-row__label">Adresse</span>
+                  <span class="cl-info-row__value">{{ selectedClient.adresse || '—' }}</span>
+                </div>
+                <div class="cl-info-row">
+                  <span class="cl-info-row__label">Pays</span>
+                  <span class="cl-info-row__value">
+                    {{ getCountryFlag(selectedClient.pays || '') }}
+                    {{ getCountryName(selectedClient.pays || '') }}
+                  </span>
+                </div>
+                <div class="cl-info-row">
+                  <span class="cl-info-row__label">Secteur</span>
+                  <span class="cl-info-row__value">{{ selectedClient.secteur_activite || '—' }}</span>
+                </div>
+                <div class="cl-info-row">
+                  <span class="cl-info-row__label">Contact principal</span>
+                  <span class="cl-info-row__value">{{ selectedClient.contact_principal || '—' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Entreprises associées -->
+          <div class="cl-card">
+            <div class="cl-card__header">
+              <i class="isax isax-building cl-card__icon"></i>
+              <h3 class="cl-card__title">Entreprises associées</h3>
+            </div>
+            <div class="cl-card__body">
+              <ng-container *ngIf="selectedClient.entreprises?.length; else noEntreprises">
+                <ul class="cl-company-list">
+                  <li *ngFor="let ent of selectedClient.entreprises" class="cl-company-item">
+                    <div class="cl-company-item__avatar">
+                      {{ getClientInitials(ent.nom) }}
                     </div>
-                </td>
-                <td>
-                    <span class="badge bg-info">{{data.type | titlecase}}</span>
-                </td>
-                <td>{{data.email}}</td>
-                <td>{{data.telephone}}</td>
-                <td>{{data.secteur_activite}}</td>
-               <td>
-    {{ getCountryFlag(data?.pays || '') }} {{ getCountryName(data?.pays || '') }}
-</td>      
-                <td>{{data.taille}}</td>
-                <td>
-                    <span [class]="getStatusClass(data.statut)">{{data.statut | titlecase}}</span>
-                </td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" (click)="editClient(data)"><i class="isax isax-edit"></i></a>
-                        <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" (click)="deleteClient(data)"><i class="isax isax-trash"></i></a>
+                    <div class="cl-company-item__info">
+                      <span class="cl-company-item__name">{{ ent.nom }}</span>
+                      <span class="cl-company-item__meta">{{ ent.secteur_activite }}</span>
                     </div>
-                </td>
-            </tr>
-            }
-        </tbody>
-    </table>
+                    <span class="cl-badge" [attr.data-status]="ent.statut">
+                      {{ ent.statut | titlecase }}
+                    </span>
+                  </li>
+                </ul>
+              </ng-container>
+              <ng-template #noEntreprises>
+                <div class="cl-info-empty">
+                  <i class="isax isax-building d-block mb-1"></i>
+                  <small>Aucune entreprise associée</small>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+
+        </div>
+
+      </ng-container>
+    </main>
+  </div>
+
 </div>
-<!-- /pagination -->
-<app-custom-pagination/>
 
-<!-- /pagination -->
-
-<app-client-add 
-  [visible]="clientDialog" 
-  [isEditMode]="isEditMode" 
+<!-- ── DIALOGS ── -->
+<app-client-add
+  [visible]="clientDialog"
+  [isEditMode]="isEditMode"
   [clientData]="selectedClient"
   (onClose)="hideDialog()"
   (onSave)="refreshData()">

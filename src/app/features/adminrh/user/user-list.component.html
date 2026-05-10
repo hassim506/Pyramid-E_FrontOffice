@@ -1,120 +1,281 @@
-<div class="page-title d-flex align-items-center justify-content-between">
-    <h5 class="fw-bold">Gestion des Utilisateurs</h5>
-    <div class="d-flex align-items-center list-icons">
-        <button class="btn btn-primary" (click)="openNew()">
-            <i class="isax isax-add me-1"></i>Ajouter un utilisateur
+<!-- ── SHELL ── -->
+<div class="ul-shell">
+
+  <!-- ── TOP BAR ── -->
+  <div class="ul-topbar">
+    <i class="isax isax-people ul-topbar__icon"></i>
+    <h1 class="ul-topbar__title">Utilisateurs & rôles</h1>
+    <span class="ul-topbar__stats">
+      {{ totalData }} utilisateur{{ totalData > 1 ? 's' : '' }}
+      · {{ rolesCount }} rôle{{ rolesCount > 1 ? 's' : '' }}
+      · {{ entreprisesCount }} entreprise{{ entreprisesCount > 1 ? 's' : '' }}
+    </span>
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="ul-tabbar">
+    <button type="button" class="ul-tab" [class.ul-tab--active]="activeTab === 'users'"
+            (click)="setTab('users')">Utilisateurs</button>
+    <button type="button" class="ul-tab" [class.ul-tab--active]="activeTab === 'roles'"
+            (click)="setTab('roles')">Rôles & permissions</button>
+    <button type="button" class="ul-tab" [class.ul-tab--active]="activeTab === 'matrix'"
+            (click)="setTab('matrix')">Matrice d'accès</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TAB 1 : UTILISATEURS
+  ════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'users'">
+
+    <!-- Toolbar -->
+    <div class="ul-toolbar">
+      <div class="ul-search">
+        <i class="isax isax-search-normal-1 ul-search__icon"></i>
+        <input type="search" class="ul-search__input"
+               placeholder="Rechercher un utilisateur..."
+               [(ngModel)]="searchDataValue" [ngModelOptions]="{standalone: true}"
+               (ngModelChange)="searchData($event)">
+      </div>
+
+      <!-- Filtre Rôle -->
+      <div class="ul-filter-group" (click)="$event.stopPropagation()">
+        <button type="button" class="ul-filter" [class.ul-filter--on]="!!selectedRoleFilter"
+                (click)="showRoleDropdown = !showRoleDropdown">
+          <i class="isax isax-filter"></i> Rôle
+          <span *ngIf="selectedRoleFilter" class="ul-filter__chip">{{ selectedRoleFilter }}</span>
         </button>
-    </div>
-</div>
-
-<div class="alert alert-danger" *ngIf="error">
-    {{error}}
-</div>
-
-<div *ngIf="loading" class="d-flex justify-content-center p-4">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Chargement...</span>
-    </div>
-</div>
-
-<div class="row justify-content-end">
-    <div class="col-lg-3 col-md-6">
-        <div class="d-flex align-items-center form-wrap search-course">
-            <input type="text" class="form-control" placeholder="Rechercher..." [(ngModel)]="searchDataValue" (keyup)="searchData(searchDataValue)">
-            <button class="btn btn-search">
-                <i class="isax isax-search-normal-15"></i>
-            </button>
+        <div class="ul-dropdown" *ngIf="showRoleDropdown">
+          <div class="ul-dropdown__item" (click)="setRoleFilter('')">Tous les rôles</div>
+          <div class="ul-dropdown__item"
+               *ngFor="let r of availableRoles"
+               [class.ul-dropdown__item--on]="selectedRoleFilter === r"
+               (click)="setRoleFilter(r)">{{ r }}</div>
         </div>
-    </div>
-</div>
+      </div>
 
-<div class="table-responsive custom-table">
-    <table matSort (matSortChange)="sortData($event)" class="table">
-        <thead>
-            <tr>
-                <th mat-sort-header="nom">Nom</th>
-                <th mat-sort-header="email">Email</th>
-                <th>Numéro</th>
-                <th mat-sort-header="fonction">Fonction</th>
-                <th>Entreprise</th>
-                <th mat-sort-header="statut">Statut</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let data of tableData; let i = index">
-                <td>
-                    <div class="d-flex align-items-center">
-                        <a [routerLink]="['/superadmin/user-details', data.id]">
-                            <p class="fs-14 mb-0">{{data.name || (data.prenom + ' ' + data.nom)}}</p>
-                        </a>
-                    </div>
-                </td>
-                <td>{{data.email}}</td>
-                <td>{{data.numero || 'N/A'}}</td>   
-                <td>{{data.fonction || 'N/A'}}</td>
-                <td>{{data.entreprise?.nom || 'N/A'}}</td>
-                <td>
-                    <span [class]="getStatutBadgeClass(data.statut)">
-                        {{data.statut === 1 ? 'Actif' : 'Inactif'}}
-                    </span>
-                </td>
-                <td>
-    <div class="d-flex align-items-center">
-        <button class="btn btn-sm btn-light me-2" (click)="editUser(data)">
-            <i class="isax isax-edit"></i>
+      <!-- Filtre Statut -->
+      <div class="ul-filter-group" (click)="$event.stopPropagation()">
+        <button type="button" class="ul-filter" [class.ul-filter--on]="selectedStatutFilter !== ''"
+                (click)="showStatutDropdown = !showStatutDropdown">
+          <i class="isax isax-tick-circle"></i> Statut
+          <span *ngIf="selectedStatutFilter !== ''" class="ul-filter__chip">
+            {{ selectedStatutFilter === '1' ? 'Actif' : 'Inactif' }}
+          </span>
         </button>
-        <!-- <button class="btn btn-sm btn-danger me-2" (click)="deleteUser(data.id)">
-            <i class="isax isax-trash"></i>
-        </button> -->
-        <!-- Bouton Archiver pour les utilisateurs actifs -->
-        <button 
-            *ngIf="data.statut === 1" 
-            class="btn btn-outline-warning" 
-            (click)="archiveUser(data)">
-            <i class="isax isax-archive"></i> Archiver
-        </button>
-        <!-- Bouton Réactiver pour les utilisateurs inactifs -->
-        <button 
-            *ngIf="data.statut === 0" 
-            class="btn btn-sm btn-success" 
-            (click)="reactivateUser(data)">
-            <i class="isax isax-refresh"></i> Réactiver
-        </button>
+        <div class="ul-dropdown" *ngIf="showStatutDropdown">
+          <div class="ul-dropdown__item" (click)="setStatutFilter('')">Tous</div>
+          <div class="ul-dropdown__item"
+               [class.ul-dropdown__item--on]="selectedStatutFilter === '1'"
+               (click)="setStatutFilter('1')">Actif</div>
+          <div class="ul-dropdown__item"
+               [class.ul-dropdown__item--on]="selectedStatutFilter === '0'"
+               (click)="setStatutFilter('0')">Inactif</div>
+        </div>
+      </div>
+
+      <button type="button" class="ul-add-btn" (click)="openNew()">
+        <i class="isax isax-add"></i> Nouvel utilisateur
+      </button>
     </div>
-</td>
-            </tr>
-        </tbody>
+
+    <!-- Erreur -->
+    <div *ngIf="error" class="ul-alert">
+      <i class="isax isax-warning-2"></i> {{ error }}
+    </div>
+
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="ul-skeletons">
+      <div *ngFor="let i of [1,2,3,4,5]" class="ul-skeleton-row"></div>
+    </div>
+
+    <!-- Tableau -->
+    <table class="ul-table" *ngIf="!loading">
+      <thead>
+        <tr>
+          <th style="width:28%">Utilisateur</th>
+          <th style="width:16%">Rôle</th>
+          <th style="width:18%">Entreprise</th>
+          <th style="width:13%">Statut</th>
+          <th style="width:13%">Dernière activité</th>
+          <th style="width:12%">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of tableData; trackBy: trackById">
+          <td>
+            <div class="ul-user">
+              <div class="ul-avatar" [attr.data-role]="getRoleKey(getRoleName(u))">
+                {{ getInitials(u) }}
+              </div>
+              <div>
+                <div class="ul-user__name">{{ getDisplayName(u) }}</div>
+                <div class="ul-user__email">{{ u.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="ul-role-badge" [attr.data-role]="getRoleKey(getRoleName(u))">
+              <i [class]="'isax ' + getRoleIcon(getRoleName(u))"></i>
+              {{ getRoleName(u) }}
+            </span>
+          </td>
+          <td>
+            <span *ngIf="u.entreprise?.nom" class="ul-cie">{{ u.entreprise!.nom }}</span>
+            <span *ngIf="!u.entreprise?.nom" class="ul-cie-none">—</span>
+          </td>
+          <td>
+            <span class="ul-statut" [attr.data-s]="u.statut === 1 ? 'actif' : 'inactif'">
+              <i [class]="'isax ' + (u.statut === 1 ? 'isax-tick-circle' : 'isax-minus-cirlce')"></i>
+              {{ u.statut === 1 ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          <td class="ul-date">{{ formatDate(u.updated_at) }}</td>
+          <td>
+            <div class="ul-actions">
+              <button type="button" class="ul-act" title="Modifier" (click)="editUser(u)">
+                <i class="isax isax-edit"></i>
+              </button>
+              <button type="button" class="ul-act ul-act--warn" *ngIf="u.statut === 1"
+                      title="Archiver" (click)="archiveUser(u)">
+                <i class="isax isax-archive"></i>
+              </button>
+              <button type="button" class="ul-act ul-act--ok" *ngIf="u.statut === 0"
+                      title="Réactiver" (click)="reactivateUser(u)">
+                <i class="isax isax-refresh"></i>
+              </button>
+              <button type="button" class="ul-act ul-act--del" title="Supprimer"
+                      (click)="deleteUser(u.id)">
+                <i class="isax isax-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="!tableData.length">
+          <td colspan="6" class="ul-empty">
+            <i class="isax isax-people d-block mb-2" style="font-size:2rem;"></i>
+            Aucun utilisateur trouvé
+          </td>
+        </tr>
+      </tbody>
     </table>
-</div>
 
-<!-- Pagination -->
-<div class="d-flex justify-content-between align-items-center mt-3" *ngIf="totalData > 0">
-    <div class="text-muted">
-        Affichage de {{skip + 1}} à {{skip + tableData.length}} sur {{totalData}} utilisateurs
+    <!-- Pagination -->
+    <div class="ul-pager" *ngIf="!loading && totalData > pageSize">
+      <span class="ul-pager__info">
+        {{ skip + 1 }}–{{ skip + tableData.length }} sur {{ totalData }}
+      </span>
+      <div class="ul-pager__btns">
+        <button type="button" class="ul-pager__btn" [disabled]="currentPage === 1"
+                (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button type="button" *ngFor="let p of pageSelection; let i = index"
+                class="ul-pager__btn"
+                [class.ul-pager__btn--active]="currentPage === i + 1"
+                (click)="onPageChange(i + 1)">{{ i + 1 }}</button>
+        <button type="button" class="ul-pager__btn"
+                [disabled]="currentPage === pageSelection.length || !pageSelection.length"
+                (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
     </div>
-    <nav aria-label="Pagination">
-        <ul class="pagination mb-0">
-            <li class="page-item" [class.disabled]="currentPage === 1">
-                <a class="page-link" (click)="onPageChange(currentPage - 1)" href="javascript:void(0)">
-                    <i class="isax isax-arrow-left-2"></i>
-                </a>
-            </li>
-            <li class="page-item" *ngFor="let page of pageSelection; let i = index" [class.active]="currentPage === i + 1">
-                <a class="page-link" (click)="onPageChange(i + 1)" href="javascript:void(0)">{{i + 1}}</a>
-            </li>
-            <li class="page-item" [class.disabled]="currentPage === pageSelection.length">
-                <a class="page-link" (click)="onPageChange(currentPage + 1)" href="javascript:void(0)">
-                    <i class="isax isax-arrow-right-3"></i>
-                </a>
-            </li>
-        </ul>
-    </nav>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════
+       TAB 2 : RÔLES & PERMISSIONS
+  ════════════════════════════════════════════ -->
+  <div class="ul-role-embed" *ngIf="activeTab === 'roles'">
+    <app-adminrh-role></app-adminrh-role>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TAB 3 : MATRICE D'ACCÈS
+  ════════════════════════════════════════════ -->
+  <div class="ul-matrix-wrap" *ngIf="activeTab === 'matrix'">
+    <table class="ul-matrix">
+      <thead>
+        <tr>
+          <th style="width:40%">Permission</th>
+          <th>Admin RH</th>
+          <th>Formateur</th>
+          <th>Employé</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="ul-matrix__group" colspan="4">Gestion des utilisateurs</td></tr>
+        <tr>
+          <td>Créer / modifier un utilisateur</td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Désactiver un compte</td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr><td class="ul-matrix__group" colspan="4">Formations & contenus</td></tr>
+        <tr>
+          <td>Créer une formation</td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Valider une demande de formation</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Accéder à ses formations</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Gérer les quiz</td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr><td class="ul-matrix__group" colspan="4">Suivi & statistiques</td></tr>
+        <tr>
+          <td>Statistiques de son entreprise</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Voir sa propre progression</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Télécharger un certificat</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="ul-matrix__legend">
+      <span><span class="ul-c-yes">✓</span> Accès complet</span>
+      <span><span class="ul-c-partial">◐</span> Accès limité (son périmètre)</span>
+      <span><span class="ul-c-no">—</span> Aucun accès</span>
+    </div>
+  </div>
+
 </div>
 
-<app-user-add 
-  [visible]="userDialog" 
-  [isEditMode]="isEditMode" 
+<!-- ── USER ADD/EDIT ── -->
+<app-user-add
+  [visible]="userDialog"
+  [isEditMode]="isEditMode"
   [userData]="selectedUser"
   (onClose)="hideDialog()"
   (onSave)="refreshData()">
