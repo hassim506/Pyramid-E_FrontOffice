@@ -257,14 +257,13 @@
       n2.d(e2, { A: function() {
         return i;
       }, X: function() {
-        return o;
+        return s;
       } });
       var r2 = n2(6003);
       class i extends r2.TextBlot {
       }
-      const s = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-      function o(t3) {
-        return t3.replace(/[&<>"']/g, ((t4) => s[t4]));
+      function s(t3) {
+        return t3.replace(/[&<>"']/g, ((t4) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[t4]));
       }
     }, 3729: function(t2, e2, n2) {
       "use strict";
@@ -747,7 +746,7 @@
       function m(t3, e3, n3) {
         let r3 = arguments.length > 3 && void 0 !== arguments[3] && arguments[3];
         if ("html" in t3 && "function" == typeof t3.html) return t3.html(e3, n3);
-        if (t3 instanceof d.A) return (0, d.X)(t3.value().slice(e3, e3 + n3)).replaceAll(" ", "&nbsp;");
+        if (t3 instanceof d.A) return (0, d.X)(t3.value().slice(e3, e3 + n3));
         if (t3 instanceof i.ParentBlot) {
           if ("list-container" === t3.statics.blotName) {
             const r4 = [];
@@ -986,7 +985,7 @@
         static DEFAULTS = { bounds: null, modules: { clipboard: true, keyboard: true, history: true, uploader: true }, placeholder: "", readOnly: false, registry: R, theme: "default" };
         static events = N.A.events;
         static sources = N.A.sources;
-        static version = "2.0.3";
+        static version = "2.0.2";
         static imports = { delta: o(), parchment: i, "core/module": q.A, "core/theme": L.A };
         static debug(t3) {
           true === t3 && (t3 = "log"), w.A.level(t3);
@@ -1640,7 +1639,11 @@ ${(0, l.X)(this.code(t3, e3))}
           if (0 === r3.trim().length && r3.includes("\n") && !(function(t4, e4) {
             return t4.previousElementSibling && t4.nextElementSibling && !j2(t4.previousElementSibling, e4) && !j2(t4.nextElementSibling, e4);
           })(t3, n3)) return e3;
-          r3 = r3.replace(/[^\S\u00a0]/g, " "), r3 = r3.replace(/ {2,}/g, " "), (null == t3.previousSibling && null != t3.parentElement && j2(t3.parentElement, n3) || t3.previousSibling instanceof Element && j2(t3.previousSibling, n3)) && (r3 = r3.replace(/^ /, "")), (null == t3.nextSibling && null != t3.parentElement && j2(t3.parentElement, n3) || t3.nextSibling instanceof Element && j2(t3.nextSibling, n3)) && (r3 = r3.replace(/ $/, "")), r3 = r3.replaceAll("\xA0", " ");
+          const i2 = (t4, e4) => {
+            const n4 = e4.replace(/[^\u00a0]/g, "");
+            return n4.length < 1 && t4 ? " " : n4;
+          };
+          r3 = r3.replace(/\r\n/g, " ").replace(/\n/g, " "), r3 = r3.replace(/\s\s+/g, i2.bind(i2, true)), (null == t3.previousSibling && null != t3.parentElement && j2(t3.parentElement, n3) || t3.previousSibling instanceof Element && j2(t3.previousSibling, n3)) && (r3 = r3.replace(/^\s+/, i2.bind(i2, false))), (null == t3.nextSibling && null != t3.parentElement && j2(t3.parentElement, n3) || t3.nextSibling instanceof Element && j2(t3.nextSibling, n3)) && (r3 = r3.replace(/\s+$/, i2.bind(i2, false)));
         }
         return e3.insert(r3);
       }], [Node.TEXT_NODE, M], ["br", function(t3, e3) {

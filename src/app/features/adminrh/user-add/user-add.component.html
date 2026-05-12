@@ -38,6 +38,16 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Matricule</label>
+                            <input type="text" class="form-control" formControlName="matricule">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Direction</label>
+                            <input type="text" class="form-control" formControlName="direction">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Fonction</label>
                             <input type="text" class="form-control" formControlName="fonction">
                         </div>
@@ -46,11 +56,7 @@
                             <label class="form-label">Rôle <span class="text-danger">*</span></label>
                             <select class="form-select" formControlName="role_id">
                                 <option value="">Sélectionner un rôle</option>
-                                <option value="1">Super Admin</option>
-                                <option value="2">Employé</option>
-                                <option value="3">Formateur</option>
-                                <option value="4">Responsable RH</option>
-                                <option value="5">Responsable RH Groupe</option>
+                                <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
                             </select>
                             <div *ngIf="userForm.get('role_id')?.invalid && userForm.get('role_id')?.touched" class="text-danger mt-1">
                                 <small>Le rôle est requis</small>
@@ -73,29 +79,50 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6 mb-3" *ngIf="!isEditMode">
-                            <label class="form-label">Mot de passe <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" formControlName="password">
+                        <!-- Toggle modifier le mot de passe (mode édition) -->
+                        <div class="col-md-12 mb-2" *ngIf="isEditMode">
+                            <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    (click)="togglePasswordFields()">
+                                <i class="isax me-1" [class.isax-lock]="!showPasswordFields" [class.isax-lock-slash]="showPasswordFields"></i>
+                                {{ showPasswordFields ? 'Annuler le changement de mot de passe' : 'Modifier le mot de passe' }}
+                            </button>
+                        </div>
+
+                        <div class="col-md-6 mb-3" *ngIf="showPasswordFields">
+                            <label class="form-label">Mot de passe <span *ngIf="!isEditMode" class="text-danger">*</span></label>
+                            <input type="password" class="form-control" formControlName="password"
+                                   placeholder="{{ isEditMode ? 'Nouveau mot de passe' : '' }}">
                             <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="text-danger mt-1">
                                 <small>Mot de passe requis (min. 8 caractères)</small>
                             </div>
                         </div>
 
-                        <div class="col-md-6 mb-3" *ngIf="!isEditMode">
-                            <label class="form-label">Confirmer le mot de passe <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" formControlName="password_confirmation">
+                        <div class="col-md-6 mb-3" *ngIf="showPasswordFields">
+                            <label class="form-label">Confirmer le mot de passe <span *ngIf="!isEditMode" class="text-danger">*</span></label>
+                            <input type="password" class="form-control" formControlName="password_confirmation"
+                                   [class.is-invalid]="userForm.hasError('passwordMismatch') && userForm.get('password_confirmation')?.touched"
+                                   placeholder="{{ isEditMode ? 'Confirmer le nouveau mot de passe' : '' }}">
                             <div *ngIf="userForm.get('password_confirmation')?.invalid && userForm.get('password_confirmation')?.touched" class="text-danger mt-1">
                                 <small>Confirmation du mot de passe requise</small>
+                            </div>
+                            <div *ngIf="userForm.hasError('passwordMismatch') && userForm.get('password_confirmation')?.touched" class="text-danger mt-1">
+                                <small>Les mots de passe ne correspondent pas</small>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
+            <!-- Erreur API ou validation -->
+            <div *ngIf="errorMessage" class="mx-3 mb-2 alert alert-danger alert-dismissible py-2 mb-0" role="alert">
+                <i class="isax isax-warning-2 me-2"></i>{{ errorMessage }}
+                <button type="button" class="btn-close btn-close-sm" (click)="errorMessage = ''"></button>
+            </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" (click)="hideDialog()">
                     <i class="isax isax-close-circle me-1"></i>Annuler
                 </button>
-                <button type="button" class="btn btn-primary" (click)="saveUser()" [disabled]="!userForm.valid || loading">
+                <button type="button" class="btn btn-primary" (click)="saveUser()" [disabled]="loading">
                     <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
                     <i *ngIf="!loading" class="isax isax-tick-circle me-1"></i>
                     {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}

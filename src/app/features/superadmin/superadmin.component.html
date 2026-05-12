@@ -1,6 +1,6 @@
 <!-- Breadcrumb -->
 @if (last !== 'view') {
-  <div class="breadcrumb-bar text-center">
+  <!-- <div class="breadcrumb-bar text-center">
     <div class="container">
       <div class="row">
         <div class="col-md-12 col-12">
@@ -16,43 +16,80 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 }
 <!-- /Breadcrumb -->
 <div class="content">
   <div class="container">
-      <!-- Bannière profil super admin - Toujours visible -->
-      <div class="superadmin-profile">
-          <div class="superadmin-profile-bg">
-              <!-- <img src="assets/img/bg/card-bg-01.png" class="superadmin-profile-bg-1" alt=""> -->
+      <!-- Header Superadmin Gouvernance Globale -->
+      <div class="sa-header">
+        <div class="sa-header-top-label">SUPERADMIN — GOUVERNANCE GLOBALE</div>
+
+        <div class="sa-header-main">
+          <div class="sa-header-identity">
+            <div class="sa-av">{{ getInitials() }}</div>
+            <div class="sa-id-info">
+              <h5 class="sa-name">{{ getFullName() }}</h5>
+              <p class="sa-role">
+                <i class="isax isax-refresh-circle"></i>
+                Superadministrateur · Pyramid e LMS
+              </p>
+              <span class="sa-access-badge">Accès total plateforme</span>
+            </div>
           </div>
-          <div class="row align-items-center row-gap-3 superadmin-profile">
-              <div class="col-md-6">
-                  <div class="d-flex align-items-center">
-                      <span class="avatar flex-shrink-0 avatar-xxl avatar-rounded me-3 border border-white border-3 position-relative">
-                          <div class="avatar-placeholder">
-                            {{ getInitials() }}
-                          </div>
-                          <span class="verify-tick"><i class="isax isax-verify5"></i></span>
-                      </span>
-                      <div>
-                          <h5 class="mb-1 text-white d-inline-flex align-items-center">
-                            {{ getFullName() }}
-                            <a [routerLink]="routes.superadminProfile" class="link-light fs-16 ms-2">
-                              <i class="isax isax-edit-2"></i>
-                            </a>
-                          </h5>
-                          <!-- <p class="text-light">{{ getRoleName() }}</p> -->
-                      </div>
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <div class="d-flex align-items-center flex-wrap gap-3 justify-content-md-end">
-                      <a [routerLink]="routes.superadminCompanyAdd" class="btn btn-white rounded-pill">Ajouter Entreprise  </a>
-                      <a [routerLink]="routes.superadmin_dashboard" class="btn btn-secondary rounded-pill">Tableau de bords Super Admin</a>
-                  </div>
-              </div>
+          <div class="sa-header-actions">
+            <a [routerLink]="routes.superadminCompanyAdd" title="Ajouter une entreprise">
+              <i class="isax isax-add-circle"></i>Ajouter entreprise
+            </a>
+            <a [routerLink]="routes.superadmin_dashboard" title="Tableau de bord Super Admin">
+              <i class="isax isax-chart-square"></i>Tableau de bord
+            </a>
           </div>
+        </div>
+
+        <div class="sa-stats-row">
+          <div class="sa-stat">
+            <div class="sa-stat-val">{{ headerStats.entreprises | number }}</div>
+            <div class="sa-stat-lbl">ENTREPRISES</div>
+            <div class="sa-stat-sub text-success">+{{ headerStats.entreprisesGrowth }} ce mois</div>
+          </div>
+          <div class="sa-stat-divider"></div>
+          <div class="sa-stat">
+            <div class="sa-stat-val">{{ headerStats.utilisateurs | number }}</div>
+            <div class="sa-stat-lbl">UTILISATEURS</div>
+            <div class="sa-stat-sub text-success">+{{ headerStats.utilisateursGrowth }}</div>
+          </div>
+          <div class="sa-stat-divider"></div>
+          <div class="sa-stat">
+            <div class="sa-stat-val">{{ headerStats.formations | number }}</div>
+            <div class="sa-stat-lbl">FORMATIONS</div>
+            <div class="sa-stat-sub sa-cyan">actives</div>
+          </div>
+          <div class="sa-stat-divider"></div>
+          <div class="sa-stat">
+            <div class="sa-stat-val">{{ headerStats.demandes | number }}</div>
+            <div class="sa-stat-lbl">DEMANDES</div>
+            <div class="sa-stat-sub text-danger">en attente</div>
+          </div>
+          <div class="sa-stat-divider"></div>
+          <div class="sa-stat">
+            <div class="sa-stat-val">{{ headerStats.certificats | number }}</div>
+            <div class="sa-stat-lbl">CERTIFICATS</div>
+            <div class="sa-stat-sub text-success">délivrés</div>
+          </div>
+        </div>
+
+        <div class="sa-alerts-row">
+          <span class="sa-alert sa-alert-danger">
+            <i class="isax isax-warning-2"></i>{{ headerStats.ticketsUrgents }} tickets urgents
+          </span>
+          <span class="sa-alert sa-alert-warning">
+            <i class="isax isax-clock"></i>{{ headerStats.certificatsExpirant }} certificats expirent &lt;30j
+          </span>
+          <span class="sa-alert sa-alert-info">
+            <i class="isax isax-people"></i>{{ headerStats.comptesEnAttente }} comptes en attente de validation
+          </span>
+        </div>
       </div>
 
       <!-- Contenu selon la route -->

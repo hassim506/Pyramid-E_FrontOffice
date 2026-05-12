@@ -92,12 +92,13 @@
     <table class="ul-table" *ngIf="!loading">
       <thead>
         <tr>
-          <th style="width:28%">Utilisateur</th>
-          <th style="width:16%">Rôle</th>
-          <th style="width:18%">Entreprise</th>
-          <th style="width:13%">Statut</th>
-          <th style="width:13%">Dernière activité</th>
-          <th style="width:12%">Actions</th>
+          <th style="width:26%">Utilisateur</th>
+          <th style="width:12%">Matricule</th>
+          <th style="width:13%">Direction</th>
+          <th style="width:13%">Rôle</th>
+          <th style="width:10%">Statut</th>
+          <th style="width:11%">Dernière activité</th>
+          <th style="width:15%">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -114,14 +115,16 @@
             </div>
           </td>
           <td>
+            <span class="ul-meta ul-meta--mono">{{ u.matricule || '—' }}</span>
+          </td>
+          <td>
+            <span class="ul-meta">{{ u.direction || '—' }}</span>
+          </td>
+          <td>
             <span class="ul-role-badge" [attr.data-role]="getRoleKey(getRoleName(u))">
               <i [class]="'isax ' + getRoleIcon(getRoleName(u))"></i>
               {{ getRoleName(u) }}
             </span>
-          </td>
-          <td>
-            <span *ngIf="u.entreprise?.nom" class="ul-cie">{{ u.entreprise!.nom }}</span>
-            <span *ngIf="!u.entreprise?.nom" class="ul-cie-none">—</span>
           </td>
           <td>
             <span class="ul-statut" [attr.data-s]="u.statut === 1 ? 'actif' : 'inactif'">

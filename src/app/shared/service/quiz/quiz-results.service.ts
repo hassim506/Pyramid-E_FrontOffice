@@ -2,6 +2,22 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface QuizResultQuiz {
+  id: number;
+  titre: string;
+  formation_id: number | null;
+  score_minimum: number;
+}
+
+export interface QuizResultUser {
+  id: number;
+  name: string;
+  prenom: string;
+  nom: string;
+  matricule: string;
+  fonction: string;
+}
+
 export interface QuizResult {
   id: number;
   quiz_id: number;
@@ -13,6 +29,8 @@ export interface QuizResult {
   est_reussi: boolean;
   created_at: string;
   updated_at: string;
+  quiz?: QuizResultQuiz;
+  user?: QuizResultUser;
 }
 
 export interface QuizResultsResponse {
@@ -22,9 +40,7 @@ export interface QuizResultsResponse {
   results: QuizResult[];
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class QuizResultsService {
   private apiUrl = 'http://127.0.0.1:8000/api';
 

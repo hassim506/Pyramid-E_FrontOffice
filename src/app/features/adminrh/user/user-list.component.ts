@@ -134,11 +134,13 @@ export class UserListComponent implements OnInit {
     if (this.searchDataValue.trim()) {
       const q = this.searchDataValue.toLowerCase();
       data = data.filter(u =>
-        u.nom?.toLowerCase().includes(q)      ||
-        u.prenom?.toLowerCase().includes(q)   ||
-        u.email?.toLowerCase().includes(q)    ||
-        u.fonction?.toLowerCase().includes(q) ||
-        u.numero?.toLowerCase().includes(q)
+        u.nom?.toLowerCase().includes(q)        ||
+        u.prenom?.toLowerCase().includes(q)     ||
+        u.email?.toLowerCase().includes(q)      ||
+        u.fonction?.toLowerCase().includes(q)   ||
+        u.numero?.toLowerCase().includes(q)     ||
+        u.matricule?.toLowerCase().includes(q)  ||
+        u.direction?.toLowerCase().includes(q)
       );
     }
 

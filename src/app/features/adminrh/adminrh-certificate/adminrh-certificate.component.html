@@ -1,158 +1,673 @@
+<!-- Loading -->
+<div *ngIf="loading" class="ip-loader">
+  <div class="spinner-border" role="status"><span class="visually-hidden">Chargement…</span></div>
+</div>
 
-    <div class="certificate">
-        <div class="page-title d-flex align-items-center justify-content-between">
-            <h5>Certificates</h5>
-            <div>
-                <a href="javascript:void(0);" class="btn btn-secondary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#add_certificate">
-                    <i class="isax isax-add-circle me-1"></i>Add Certificate
-                </a>
-            </div>
+<!-- Error -->
+<div *ngIf="error" class="alert alert-danger alert-dismissible">
+  {{ error }}
+  <button type="button" class="btn-close" (click)="error = ''"></button>
+</div>
+
+<ng-container *ngIf="!loading">
+
+  <!-- ── Page header ──────────────────────────────────────────────────────── -->
+  <div class="ip-page-head">
+    <div>
+      <h5 class="ip-page-head__title">Admin RH — personnalisation &amp; gestion</h5>
+      <p class="ip-page-head__sub">Personnalisez le modèle et gérez les certificats délivrés à vos employés</p>
+    </div>
+    <div class="ip-head-actions">
+      <button type="button" class="ip-btn"
+              [class.ip-btn--primary]="activeTab === 'certificats'"
+              [class.ip-btn--ghost]="activeTab !== 'certificats'"
+              (click)="activeTab = 'certificats'; loadCertificats()">
+        <i class="isax isax-award"></i> Voir tous les certificats
+      </button>
+      <button type="button" class="ip-btn"
+              [class.ip-btn--primary]="activeTab === 'personnalisation'"
+              [class.ip-btn--ghost]="activeTab !== 'personnalisation'"
+              (click)="activeTab = 'personnalisation'">
+        <i class="isax isax-setting-2"></i> Personnaliser le modèle
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB : Personnalisation                                                -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'personnalisation'" class="ip-customizer-layout">
+
+    <!-- ── Left panel ──────────────────────────────────────────────────── -->
+    <div class="ip-panel">
+
+      <!-- Section: Modèle de base -->
+      <div class="ip-section">
+        <div class="ip-section-head"><i class="isax isax-document"></i> Identité entreprise</div>
+
+        <div class="ip-field">
+          <label class="ip-label">Nom de l'entreprise</label>
+          <input type="text" class="ip-input" [(ngModel)]="config.entreprise_nom"
+                 placeholder="Ex. TechNova Sénégal">
         </div>
-        <div class="p-0">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="mb-3">
-                              <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><img class="img-fluid rounded" src="./assets/img/instructor/certificate-1.jpg" alt="img"></a>
-                            </div>
-                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-2">
-                            <h6>Certificate 01</h6>
-                            <ul class="edit-delete-icon d-flex align-items-center">
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><i class="isax isax-eye"></i></a></li>
-                                <li><a href="javascript:void(0);"><i class="isax isax-edit-2"></i></a></li>
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><img class="img-fluid rounded" src="./assets/img/instructor/certificate-2.jpg" alt="img"></a>
-                            </div>
-                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-2">
-                            <h6>Certificate 02</h6>
-                            <ul class="edit-delete-icon d-flex align-items-center">
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><i class="isax isax-eye"></i></a></li>
-                                <li><a href="javascript:void(0);"><i class="isax isax-edit-2"></i></a></li>
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><img class="img-fluid rounded" src="./assets/img/instructor/certificate-3.jpg" alt="img"></a>
-                            </div>
-                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-2">
-                            <h6>Certificate 03</h6>
-                            <ul class="edit-delete-icon d-flex align-items-center">
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><i class="isax isax-eye"></i></a></li>
-                                <li><a href="javascript:void(0);"><i class="isax isax-edit-2"></i></a></li>
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><img class="img-fluid rounded" src="./assets/img/instructor/certificate-4.jpg" alt="img"></a>
-                            </div>
-                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-2">
-                            <h6>Certificate 04</h6>
-                            <ul class="edit-delete-icon d-flex align-items-center">
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_certificate"><i class="isax isax-eye"></i></a></li>
-                                <li><a href="javascript:void(0);"><i class="isax isax-edit-2"></i></a></li>
-                                <li><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="ip-field">
+          <label class="ip-label">Sous-titre</label>
+          <input type="text" class="ip-input" [(ngModel)]="config.entreprise_sous_titre"
+                 placeholder="Learning Management System">
         </div>
+        <div class="ip-field">
+          <label class="ip-label">Logo (URL)</label>
+          <input type="text" class="ip-input" [(ngModel)]="config.logo_url"
+                 placeholder="https://…/logo.png">
+        </div>
+
+        <div class="ip-field">
+          <label class="ip-label">Couleur principale</label>
+          <div class="ip-palette-row">
+            <button *ngFor="let c of palette" type="button"
+                    class="ip-palette-swatch"
+                    [style.background]="c"
+                    [class.ip-palette-swatch--active]="config.couleur_principale === c"
+                    (click)="setPalette(c)"></button>
+            <input type="color" class="ip-color-pick" [(ngModel)]="config.couleur_principale"
+                   title="Couleur personnalisée">
+          </div>
+        </div>
+
+        <div class="ip-field">
+          <label class="ip-label">Couleur de fond du certificat</label>
+          <div class="ip-palette-row">
+            <button type="button" class="ip-palette-swatch"
+                    style="background:#FAFBFF; border:1px solid #dee2e6;"
+                    [class.ip-palette-swatch--active]="config.bg_couleur === '#FAFBFF'"
+                    (click)="config.bg_couleur = '#FAFBFF'"></button>
+            <button type="button" class="ip-palette-swatch"
+                    style="background:#fff; border:1px solid #dee2e6;"
+                    [class.ip-palette-swatch--active]="config.bg_couleur === '#fff'"
+                    (click)="config.bg_couleur = '#fff'"></button>
+            <button type="button" class="ip-palette-swatch"
+                    style="background:#F0FFF4; border:1px solid #dee2e6;"
+                    [class.ip-palette-swatch--active]="config.bg_couleur === '#F0FFF4'"
+                    (click)="config.bg_couleur = '#F0FFF4'"></button>
+            <button type="button" class="ip-palette-swatch"
+                    style="background:#EFF6FF; border:1px solid #dee2e6;"
+                    [class.ip-palette-swatch--active]="config.bg_couleur === '#EFF6FF'"
+                    (click)="config.bg_couleur = '#EFF6FF'"></button>
+            <input type="color" class="ip-color-pick" [(ngModel)]="config.bg_couleur"
+                   title="Couleur personnalisée">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Textes -->
+      <div class="ip-section">
+        <div class="ip-section-head"><i class="isax isax-text"></i> Textes du certificat</div>
+
+        <div class="ip-field">
+          <label class="ip-label">Intitulé d'accroche</label>
+          <input type="text" class="ip-input" [(ngModel)]="config.accroche"
+                 placeholder="a complété avec succès la formation">
+        </div>
+        <div class="ip-field">
+          <label class="ip-label">Signataire</label>
+          <input type="text" class="ip-input" [(ngModel)]="config.signataire_nom"
+                 placeholder="Prénom Nom">
+        </div>
+        <div class="ip-field">
+          <label class="ip-label">Rôle du signataire</label>
+          <input type="text" class="ip-input" [(ngModel)]="config.signataire_role"
+                 placeholder="Responsable RH, TechNova Sénégal">
+        </div>
+        <div class="ip-field">
+          <label class="ip-label">Durée de validité</label>
+          <input type="text" class="ip-input" [(ngModel)]="config.duree_validite"
+                 placeholder="1 an">
+        </div>
+      </div>
+
+      <!-- Section: Options & sécurité -->
+      <div class="ip-section">
+        <div class="ip-section-head"><i class="isax isax-shield-tick"></i> Options &amp; sécurité</div>
+
+        <div class="ip-toggle-row">
+          <div>
+            <div class="ip-toggle-label">Score et durée visibles</div>
+            <div class="ip-toggle-sub">Affichés sur le certificat</div>
+          </div>
+          <label class="ip-switch">
+            <input type="checkbox" [(ngModel)]="config.show_score">
+            <span class="ip-switch-track"></span>
+          </label>
+        </div>
+        <div class="ip-toggle-row">
+          <div>
+            <div class="ip-toggle-label">Durée totale</div>
+            <div class="ip-toggle-sub">Heures de formation</div>
+          </div>
+          <label class="ip-switch">
+            <input type="checkbox" [(ngModel)]="config.show_duree">
+            <span class="ip-switch-track"></span>
+          </label>
+        </div>
+        <div class="ip-toggle-row">
+          <div>
+            <div class="ip-toggle-label">Nom du formateur</div>
+            <div class="ip-toggle-sub">Signature du formateur</div>
+          </div>
+          <label class="ip-switch">
+            <input type="checkbox" [(ngModel)]="config.show_formateur">
+            <span class="ip-switch-track"></span>
+          </label>
+        </div>
+        <div class="ip-toggle-row">
+          <div>
+            <div class="ip-toggle-label">QR code de vérification</div>
+            <div class="ip-toggle-sub">Lien de validation publique</div>
+          </div>
+          <label class="ip-switch">
+            <input type="checkbox" [(ngModel)]="config.show_qr">
+            <span class="ip-switch-track"></span>
+          </label>
+        </div>
+        <div class="ip-toggle-row">
+          <div>
+            <div class="ip-toggle-label">Numéro unique visible</div>
+            <div class="ip-toggle-sub">Référence traçable</div>
+          </div>
+          <label class="ip-switch">
+            <input type="checkbox" [(ngModel)]="config.show_numero">
+            <span class="ip-switch-track"></span>
+          </label>
+        </div>
+        <div class="ip-toggle-row">
+          <div>
+            <div class="ip-toggle-label">Date d'expiration</div>
+            <div class="ip-toggle-sub">Valide jusqu'au…</div>
+          </div>
+          <label class="ip-switch">
+            <input type="checkbox" [(ngModel)]="config.show_date_expiration">
+            <span class="ip-switch-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Save -->
+      <div class="ip-save-row">
+        <div *ngIf="saveSuccess" class="ip-save-ok">
+          <i class="isax isax-tick-circle"></i> Modèle enregistré
+        </div>
+        <button type="button" class="ip-btn ip-btn--primary ip-btn--wide"
+                [disabled]="saving" (click)="saveModele()">
+          <i class="isax isax-save-2"></i>
+          {{ saving ? 'Enregistrement…' : 'Enregistrer le modèle' }}
+        </button>
+      </div>
     </div>
 
+    <!-- ── Right panel: live preview ───────────────────────────────────── -->
+    <div class="ip-preview-col">
+      <div class="ip-preview-head">
+        <span><i class="isax isax-eye"></i> Aperçu en temps réel — modèle appliqué à toutes les formations</span>
+        <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm"
+                [disabled]="downloading" (click)="downloadPreview()">
+          <i [class]="downloading ? 'isax isax-refresh ip-spin' : 'isax isax-document-download'"></i>
+          {{ downloading ? 'Génération…' : 'Exporter PDF' }}
+        </button>
+      </div>
 
-    			<!-- Add Question -->
-			<div class="modal fade" id="add_certificate">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5>Add New Certificate</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body pb-0">
-								<div class="mb-3">
-									<label class="form-label">Attachments</label>
-									<div class="file-upload drag-file w-100 d-flex align-items-center justify-content-center flex-column">
-										<span class="upload-img mb-2"><i class="isax isax-folder5 fs-24"></i></span>
-										<p class="mb-1 fs-12">Drag and drop your files</p>
-										<p class="mb-2 fs-12">Accept File Type: doc,docx,jpg,jpeg,png,txt,pdf</p>
-										<input type="file" accept="video/image">
-										<span class="btn btn-secondary rounded-pill"><i class="isax isax-document-upload me-1"></i>Upload</span>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn btn-light rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Submit</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Add Question -->
+      <!-- Certificate card preview -->
+      <div class="ip-cert-card" [style.background]="config.bg_couleur">
+        <!-- Accent bar -->
+        <div class="ip-cert-card__bar" [style.background]="config.couleur_principale"></div>
 
-			<div class="modal fade" id="view_certificate">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5>View Certificate</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<div class="modal-body">
-							<div><img src="assets/img/icon/certificate.svg" class="img-fluid" alt=""></div>
-							<div class="text-end mt-4">
-								<a href="javascript:void(0);" class="btn btn-secondary rounded-pill"><i class="isax isax-import me-2"></i>Download</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+        <!-- Header row -->
+        <div class="ip-cert-card__header">
+          <div class="ip-cert-card__logo-wrap">
+            <img *ngIf="config.logo_url" [src]="config.logo_url" class="ip-cert-card__logo-img"
+                 alt="logo" onerror="this.style.display='none'">
+            <div *ngIf="!config.logo_url" class="ip-cert-card__logo-mark"
+                 [style.background]="config.couleur_principale">
+              {{ getInitials(config.entreprise_nom || 'E') }}
+            </div>
+          </div>
+          <div class="ip-cert-card__header-text">
+            <div class="ip-cert-card__company">{{ config.entreprise_nom || 'Votre Entreprise' }}</div>
+            <div class="ip-cert-card__company-sub">{{ config.entreprise_sous_titre }}</div>
+          </div>
+          <div *ngIf="config.show_numero" class="ip-cert-card__num">N° CERT-2025-0091</div>
+        </div>
 
-			<!-- Delete Modal -->
-			<div class="modal fade" id="delete_modal">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-body text-center custom-modal-body">
-							<span class="avatar avatar-lg bg-gray-100 rounded-circle mb-2">
-								<i class="isax isax-trash fs-24 text-danger"></i>
-							</span>
-							<div>
-								<h4 class="mb-2">Delete Certificate</h4>
-								<p class="mb-3">Are you sure you want to delete certificate?</p>
-								<div class="d-flex align-items-center justify-content-center">
-									<a href="javascript:void(0);" class="btn bg-gray-100 rounded-pill me-2" data-bs-dismiss="modal">Cancel</a>
-									<a href="javascript:void(0);" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Yes, Delete</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- /Delete Modal -->
+        <!-- Body -->
+        <div class="ip-cert-card__body">
+          <div class="ip-cert-card__label">CERTIFICAT DE RÉUSSITE</div>
+          <div class="ip-cert-card__name">Moussa Ndiaye</div>
+          <div class="ip-cert-card__accroche">{{ config.accroche }}</div>
+          <div class="ip-cert-card__formation" [style.color]="config.couleur_principale">
+            Cybersécurité &amp; protection des données
+          </div>
+
+          <!-- Stats row -->
+          <div class="ip-cert-card__stats" *ngIf="config.show_score || config.show_duree">
+            <div *ngIf="config.show_score" class="ip-cert-card__stat">
+              <div class="ip-cert-card__stat-val" [style.color]="config.couleur_principale">87%</div>
+              <div class="ip-cert-card__stat-label">Score obtenu</div>
+            </div>
+            <div *ngIf="config.show_score && config.show_duree" class="ip-cert-card__stat-sep"></div>
+            <div *ngIf="config.show_duree" class="ip-cert-card__stat">
+              <div class="ip-cert-card__stat-val">8h</div>
+              <div class="ip-cert-card__stat-label">Durée totale</div>
+            </div>
+          </div>
+
+          <!-- Signature row -->
+          <div class="ip-cert-card__sig-row">
+            <div *ngIf="config.signataire_nom || config.signataire_role" class="ip-cert-card__sig">
+              <div class="ip-cert-card__sig-line"></div>
+              <div class="ip-cert-card__sig-name">{{ config.signataire_nom || 'Signataire' }}</div>
+              <div class="ip-cert-card__sig-role">{{ config.signataire_role }}</div>
+            </div>
+            <div *ngIf="config.show_formateur" class="ip-cert-card__sig">
+              <div class="ip-cert-card__sig-line"></div>
+              <div class="ip-cert-card__sig-name">Ibrahima Sow</div>
+              <div class="ip-cert-card__sig-role" [style.color]="config.couleur_principale">
+                Formateur · Cybersécurité
+              </div>
+            </div>
+            <div *ngIf="config.show_qr" class="ip-cert-card__qr">
+              <i class="isax isax-scan-barcode"></i>
+            </div>
+          </div>
+
+          <!-- Validity -->
+          <div class="ip-cert-card__validity">
+            Délivré le 15 janvier 2025
+            <ng-container *ngIf="config.show_date_expiration">
+              · Valide jusqu'au 15 janvier 2025 ({{ config.duree_validite }})
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recently issued -->
+      <div class="ip-recent-head">CERTIFICATS RÉCEMMENT DÉLIVRÉS</div>
+      <div class="ip-card">
+        <div class="table-responsive">
+          <table class="table ip-table">
+            <thead>
+              <tr>
+                <th>Employé</th>
+                <th>Formation</th>
+                <th>Score</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cert of filteredCertificats | slice:0:5">
+                <td>
+                  <div class="ip-user-cell">
+                    <div class="ip-avatar"
+                         [style.background]="getAvatarStyle(cert.employe_id).bg"
+                         [style.color]="getAvatarStyle(cert.employe_id).color">
+                      {{ getInitials(cert.employe?.name || '') }}
+                    </div>
+                    <div>
+                      <div class="ip-user-name">{{ cert.employe?.prenom }} {{ cert.employe?.nom }}</div>
+                      <div class="ip-user-sub">{{ cert.date_delivrance | date:'d MMM yyyy' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="ip-formation-name">{{ cert.formation?.titre }}</span></td>
+                <td>
+                  <span *ngIf="cert.score_final" class="ip-score-badge"
+                        [style.color]="getScoreColor(cert.score_final)"
+                        [style.background]="parseFloat(cert.score_final) >= 80 ? '#ECFDF5' : parseFloat(cert.score_final) >= 60 ? '#FFFBEB' : '#FFF5F5'">
+                    {{ cert.score_final }}%
+                  </span>
+                  <span *ngIf="!cert.score_final" class="text-muted">—</span>
+                </td>
+                <td>
+                  <span class="ip-cert-badge"
+                        [class.ip-cert-badge--valide]="cert.statut === 'valide'"
+                        [class.ip-cert-badge--expire]="cert.statut === 'expiré'"
+                        [class.ip-cert-badge--revoque]="cert.statut === 'révoqué'">
+                    <i class="fa-solid fa-circle"></i>
+                    {{ cert.statut === 'valide' ? 'Délivré' : cert.statut === 'expiré' ? 'Expiré' : 'Révoqué' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="ip-actions">
+                    <button type="button" class="ip-action-btn" title="Détails" (click)="openDetails(cert)">
+                      <i class="isax isax-eye"></i>
+                    </button>
+                    <button type="button" class="ip-action-btn" title="Télécharger PDF"
+                            [disabled]="downloading" (click)="downloadPdf(cert)">
+                      <i [class]="downloading ? 'isax isax-refresh ip-spin' : 'isax isax-document-download'"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredCertificats.length === 0">
+                <td colspan="5" class="ip-empty">
+                  <i class="isax isax-award"></i>
+                  <span>Aucun certificat trouvé</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB : Tous les certificats                                            -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'certificats'">
+
+    <!-- Sync bar -->
+    <div class="ip-sync-bar">
+      <span class="ip-sync-hint">
+        <i class="isax isax-info-circle"></i>
+        Les certificats sont générés automatiquement à la fin des formations certifiantes.
+      </span>
+      <div class="ip-sync-right">
+        <span *ngIf="syncResult" class="ip-sync-ok">
+          <i class="isax isax-tick-circle"></i> {{ syncResult }}
+        </span>
+        <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm"
+                [disabled]="syncing" (click)="syncCertificats()">
+          <i class="isax isax-refresh" [class.ip-spin]="syncing"></i>
+          {{ syncing ? 'Synchronisation…' : 'Synchroniser' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="ip-kpi-row">
+      <div class="ip-kpi-card">
+        <div class="ip-kpi-icon"><i class="isax isax-award"></i></div>
+        <div>
+          <div class="ip-kpi-label">Total certificats</div>
+          <div class="ip-kpi-value">{{ totalCertificats }}</div>
+        </div>
+      </div>
+      <div class="ip-kpi-card">
+        <div class="ip-kpi-icon ip-kpi-icon--success"><i class="isax isax-tick-circle"></i></div>
+        <div>
+          <div class="ip-kpi-label">Valides</div>
+          <div class="ip-kpi-value">{{ totalValides }}</div>
+        </div>
+      </div>
+      <div class="ip-kpi-card">
+        <div class="ip-kpi-icon ip-kpi-icon--warn"><i class="isax isax-clock"></i></div>
+        <div>
+          <div class="ip-kpi-label">Expirés</div>
+          <div class="ip-kpi-value">{{ totalExpires }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="ip-card ip-filter-card">
+      <div class="ip-filter-row">
+        <div class="ip-filter-group ip-filter-group--search">
+          <div class="ip-input-icon-wrap">
+            <i class="isax isax-search-normal ip-input-icon"></i>
+            <input type="text" class="ip-input ip-input--icon"
+                   [(ngModel)]="filterSearch" (ngModelChange)="applyFilters()"
+                   placeholder="Rechercher par employé, formation, code…">
+          </div>
+        </div>
+        <div class="ip-filter-group">
+          <select class="ip-input" [(ngModel)]="filterStatut" (ngModelChange)="applyFilters()">
+            <option value="all">Tous les statuts</option>
+            <option value="valide">Valide</option>
+            <option value="expiré">Expiré</option>
+            <option value="révoqué">Révoqué</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="ip-card">
+      <div class="table-responsive">
+        <table class="table ip-table">
+          <thead>
+            <tr>
+              <th>Employé</th>
+              <th>Formation</th>
+              <th>Score</th>
+              <th>Formateur</th>
+              <th>Délivré le</th>
+              <th>Expiration</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cert of paginatedCertificats">
+              <td>
+                <div class="ip-user-cell">
+                  <div class="ip-avatar"
+                       [style.background]="getAvatarStyle(cert.employe_id).bg"
+                       [style.color]="getAvatarStyle(cert.employe_id).color">
+                    {{ getInitials(cert.employe?.name || '') }}
+                  </div>
+                  <div>
+                    <div class="ip-user-name">{{ cert.employe?.prenom }} {{ cert.employe?.nom }}</div>
+                    <div class="ip-user-sub">{{ cert.employe?.fonction }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="ip-formation-name">{{ cert.formation?.titre }}</div>
+                <div class="ip-formation-meta" *ngIf="cert.formation?.duree_totale">
+                  <i class="isax isax-clock"></i> {{ cert.formation?.duree_totale }}h
+                </div>
+              </td>
+              <td>
+                <span *ngIf="cert.score_final" class="ip-score-badge"
+                      [style.color]="getScoreColor(cert.score_final)"
+                      [style.background]="parseFloat(cert.score_final) >= 80 ? '#ECFDF5' : parseFloat(cert.score_final) >= 60 ? '#FFFBEB' : '#FFF5F5'">
+                  {{ cert.score_final }}%
+                </span>
+                <span *ngIf="!cert.score_final" class="text-muted">—</span>
+              </td>
+              <td>
+                <span class="text-muted" *ngIf="cert.formateur">
+                  {{ cert.formateur?.prenom }} {{ cert.formateur?.nom }}
+                </span>
+                <span class="text-muted" *ngIf="!cert.formateur">—</span>
+              </td>
+              <td><span class="text-muted">{{ cert.date_delivrance | date:'dd/MM/yyyy' }}</span></td>
+              <td>
+                <span *ngIf="cert.date_expiration && isExpiringSoon(cert)" class="ip-expire-warn">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  {{ cert.date_expiration | date:'dd/MM/yyyy' }}
+                </span>
+                <span *ngIf="cert.date_expiration && !isExpiringSoon(cert)" class="text-muted">
+                  {{ cert.date_expiration | date:'dd/MM/yyyy' }}
+                </span>
+                <span *ngIf="!cert.date_expiration" class="text-muted">Illimitée</span>
+              </td>
+              <td>
+                <span class="ip-cert-badge"
+                      [class.ip-cert-badge--valide]="cert.statut === 'valide'"
+                      [class.ip-cert-badge--expire]="cert.statut === 'expiré'"
+                      [class.ip-cert-badge--revoque]="cert.statut === 'révoqué'">
+                  <i class="fa-solid fa-circle"></i>
+                  {{ cert.statut === 'valide' ? 'Valide' : cert.statut === 'expiré' ? 'Expiré' : 'Révoqué' }}
+                </span>
+              </td>
+              <td>
+                <div class="ip-actions">
+                  <button type="button" class="ip-action-btn" title="Détails" (click)="openDetails(cert)">
+                    <i class="isax isax-eye"></i>
+                  </button>
+                  <button type="button" class="ip-action-btn" title="Télécharger PDF"
+                          [disabled]="downloading" (click)="downloadPdf(cert)">
+                    <i [class]="downloading ? 'isax isax-refresh ip-spin' : 'isax isax-document-download'"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredCertificats.length === 0">
+              <td colspan="8" class="ip-empty">
+                <i class="isax isax-award"></i>
+                <span>Aucun certificat trouvé</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="ip-pagination">
+      <span class="ip-pagination__info">
+        {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ pageEnd }}
+        sur {{ filteredCertificats.length }} certificats
+      </span>
+      <div class="ip-pagination__controls">
+        <button class="ip-pg-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <ng-container *ngFor="let p of pageNumbers">
+          <span *ngIf="p === -1" class="ip-pg-ellipsis">…</span>
+          <button *ngIf="p !== -1" class="ip-pg-btn"
+                  [class.ip-pg-btn--active]="p === currentPage"
+                  (click)="goToPage(p)">{{ p }}</button>
+        </ng-container>
+        <button class="ip-pg-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
+    </div>
+
+  </ng-container>
+
+</ng-container>
+
+<!-- ── MODAL DÉTAILS ──────────────────────────────────────────────────────── -->
+<div class="modal fade" id="arh_cert_details_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered ip-modal-dialog">
+    <div class="modal-content ip-modal-content" *ngIf="selectedCert">
+
+      <div class="ip-cert-accent" [style.background]="config.couleur_principale"></div>
+
+      <div class="ip-modal-header">
+        <div class="ip-modal-icon" [style.background]="config.couleur_principale + '20'"
+             [style.color]="config.couleur_principale">
+          <i class="isax isax-award"></i>
+        </div>
+        <div>
+          <h5 class="ip-modal-title">Certificat de réussite</h5>
+          <p class="ip-modal-sub">N° {{ selectedCert.code_unique }}</p>
+        </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="ip-modal-divider"></div>
+
+      <div class="ip-modal-body">
+        <div class="ip-cert-preview" [style.background]="config.bg_couleur">
+
+          <div class="ip-cert-logo">
+            <img *ngIf="config.logo_url" [src]="config.logo_url" class="ip-cert-card__logo-img" alt="logo"
+                 style="width:36px;height:36px;object-fit:contain;">
+            <div *ngIf="!config.logo_url" class="ip-cert-logo-mark"
+                 [style.background]="config.couleur_principale">
+              {{ getInitials(config.entreprise_nom || 'E') }}
+            </div>
+            <div>
+              <div class="ip-cert-logo-text">{{ config.entreprise_nom || selectedCert.employe?.prenom + ' ' + selectedCert.employe?.nom }}</div>
+              <div class="ip-cert-logo-sub">{{ config.entreprise_sous_titre }}</div>
+            </div>
+          </div>
+
+          <div class="ip-cert-label">Certificat de réussite</div>
+          <div class="ip-cert-action-text">{{ config.accroche }}</div>
+          <div class="ip-cert-formation-title" [style.color]="config.couleur_principale">
+            {{ selectedCert.formation?.titre }}
+          </div>
+
+          <div class="ip-cert-score-row" *ngIf="config.show_score || config.show_duree">
+            <div *ngIf="config.show_score" class="ip-cert-score-item">
+              <div class="ip-cert-score-val" [style.color]="config.couleur_principale">
+                {{ selectedCert.score_final }}%
+              </div>
+              <div class="ip-cert-score-label">Score obtenu</div>
+            </div>
+            <div *ngIf="config.show_score && config.show_duree" class="ip-cert-divider-v"></div>
+            <div *ngIf="config.show_duree" class="ip-cert-score-item">
+              <div class="ip-cert-score-val">{{ selectedCert.formation?.duree_totale || '—' }}h</div>
+              <div class="ip-cert-score-label">Durée totale</div>
+            </div>
+          </div>
+
+          <div class="ip-cert-sig-row">
+            <div class="ip-cert-sig">
+              <div class="ip-cert-sig-line"></div>
+              <div class="ip-cert-sig-name">{{ config.signataire_nom || '—' }}</div>
+              <div class="ip-cert-sig-role">{{ config.signataire_role }}</div>
+            </div>
+            <div *ngIf="config.show_formateur" class="ip-cert-sig">
+              <div class="ip-cert-sig-line"></div>
+              <div class="ip-cert-sig-name">{{ selectedCert.formateur?.prenom }} {{ selectedCert.formateur?.nom }}</div>
+              <div class="ip-cert-sig-role" [style.color]="config.couleur_principale">
+                Formateur · {{ selectedCert.formation?.titre }}
+              </div>
+            </div>
+            <div *ngIf="config.show_qr" class="ip-cert-qr"><i class="isax isax-scan-barcode"></i></div>
+          </div>
+
+          <div class="ip-cert-validity">
+            Délivré le {{ selectedCert.date_delivrance | date:'dd MMMM yyyy' : '' : 'fr-FR' }}
+            <ng-container *ngIf="config.show_date_expiration && selectedCert.date_expiration">
+              · Valide jusqu'au {{ selectedCert.date_expiration | date:'dd MMMM yyyy' : '' : 'fr-FR' }}
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="ip-detail-row ip-detail-row--mt">
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap"><i class="isax isax-tag"></i></div>
+            <div>
+              <div class="ip-detail-label">Code unique</div>
+              <div class="ip-detail-value ip-detail-value--mono">{{ selectedCert.code_unique }}</div>
+            </div>
+          </div>
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap"><i class="isax isax-status"></i></div>
+            <div>
+              <div class="ip-detail-label">Statut</div>
+              <div>
+                <span class="ip-cert-badge"
+                      [class.ip-cert-badge--valide]="selectedCert.statut === 'valide'"
+                      [class.ip-cert-badge--expire]="selectedCert.statut === 'expiré'"
+                      [class.ip-cert-badge--revoque]="selectedCert.statut === 'révoqué'">
+                  <i class="fa-solid fa-circle"></i>
+                  {{ selectedCert.statut === 'valide' ? 'Valide' : selectedCert.statut === 'expiré' ? 'Expiré' : 'Révoqué' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ip-modal-divider"></div>
+      <div class="ip-modal-footer">
+        <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Fermer</button>
+        <button type="button" class="ip-btn ip-btn--primary"
+                [style.background]="config.couleur_principale"
+                [disabled]="downloading"
+                (click)="downloadPdf(selectedCert)">
+          <i [class]="downloading ? 'isax isax-refresh ip-spin' : 'isax isax-document-download'"></i>
+          {{ downloading ? 'Génération…' : 'Télécharger PDF' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

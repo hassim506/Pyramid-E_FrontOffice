@@ -157,6 +157,7 @@ export const routes = {
   adminrhQuiz: '/adminrh/adminrh-quiz',
   adminrhQuizResult: '/adminrh/adminrh-quiz-results',
   adminrhCertificate: '/adminrh/adminrh-certificate',
+  adminrhCertificateModele: '/adminrh/adminrh-certificate-modele',
   adminrhEarning: '/adminrh/adminrh-earnings',
   adminrhStatements: '/adminrh/adminrh-statements',
   adminrhCompanyManagement: '/adminrh/adminrh-companymanagement',

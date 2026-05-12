@@ -104,9 +104,23 @@
       <a [routerLink]="routes.adminrhQuizResult" routerLinkActive="active" class="sb-item">
         <i class="isax isax-medal-star"></i><span class="sb-item-label">Résultats Quiz</span>
       </a>
-      <a [routerLink]="routes.adminrhCertificate" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-note-21"></i><span class="sb-item-label">Certificats</span>
-      </a>
+      <!-- Certificats -->
+      <div class="sb-group">
+        <div class="sb-group-header" [class.open]="openGroups['certificats']"
+             (click)="toggleGroup('certificats')">
+          <i class="isax isax-note-21 icon"></i>
+          <span>Certificats</span>
+          <i class="isax isax-arrow-right-3 arr"></i>
+        </div>
+        <div class="sb-sub" *ngIf="openGroups['certificats']">
+          <a [routerLink]="routes.adminrhCertificateModele" routerLinkActive="active" class="sb-sub-item">
+            <i class="isax isax-setting-2"></i> Personnaliser le modèle
+          </a>
+          <a [routerLink]="routes.adminrhCertificate" routerLinkActive="active" class="sb-sub-item">
+            <i class="isax isax-award"></i> Certificats obtenus
+          </a>
+        </div>
+      </div>
     </div>
 
     <div class="sb-divider"></div>

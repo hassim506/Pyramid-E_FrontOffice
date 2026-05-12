@@ -1,0 +1,1219 @@
+import {
+  DemandeFormationService
+} from "./chunk-QSH6SDU4.js";
+import {
+  CustomPaginationComponent
+} from "./chunk-Z2HA3X3F.js";
+import {
+  MatSortModule
+} from "./chunk-62IXQG2C.js";
+import {
+  PaginationService
+} from "./chunk-YIMRJUCQ.js";
+import {
+  MatTableDataSource
+} from "./chunk-IBHFC2JC.js";
+import "./chunk-G5NIWSXA.js";
+import "./chunk-WYKMS2OJ.js";
+import "./chunk-5FDCLFRJ.js";
+import "./chunk-D4V2IZRR.js";
+import "./chunk-AHGPUK2P.js";
+import {
+  AuthService
+} from "./chunk-REZZRIDN.js";
+import "./chunk-FKX6UC3I.js";
+import {
+  routes
+} from "./chunk-W6FAPSPW.js";
+import {
+  DefaultValueAccessor,
+  FormsModule,
+  NgControlStatus,
+  NgModel
+} from "./chunk-AK2M3J6O.js";
+import {
+  Router,
+  RouterLink
+} from "./chunk-AJNKO2CX.js";
+import "./chunk-FZP3BRBS.js";
+import "./chunk-GSAJL664.js";
+import {
+  CommonModule,
+  NgForOf,
+  NgIf
+} from "./chunk-3IMMP55I.js";
+import {
+  Component,
+  setClassMetadata,
+  ɵsetClassDebugInfo,
+  ɵɵadvance,
+  ɵɵclassMap,
+  ɵɵclassProp,
+  ɵɵdefineComponent,
+  ɵɵdirectiveInject,
+  ɵɵelement,
+  ɵɵelementEnd,
+  ɵɵelementStart,
+  ɵɵgetCurrentView,
+  ɵɵinterpolate1,
+  ɵɵlistener,
+  ɵɵnextContext,
+  ɵɵproperty,
+  ɵɵpureFunction0,
+  ɵɵresetView,
+  ɵɵrestoreView,
+  ɵɵtemplate,
+  ɵɵtext,
+  ɵɵtextInterpolate,
+  ɵɵtextInterpolate1,
+  ɵɵtextInterpolate3,
+  ɵɵtwoWayBindingSet,
+  ɵɵtwoWayListener,
+  ɵɵtwoWayProperty
+} from "./chunk-UPBSS6WA.js";
+import "./chunk-4MWRP73S.js";
+
+// src/app/features/adminrh/adminrh-demande-session/adminrh-demande-session.component.ts
+var _c0 = () => ({ standalone: true });
+var _c1 = () => [1, 2, 3, 4, 5];
+function AdminrhDemandeSessionComponent_div_73_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r1 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 36);
+    \u0275\u0275element(1, "i", 17);
+    \u0275\u0275text(2);
+    \u0275\u0275elementStart(3, "button", 37);
+    \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_div_73_Template_button_click_3_listener() {
+      \u0275\u0275restoreView(_r1);
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.clearMessages());
+    });
+    \u0275\u0275element(4, "i", 19);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", ctx_r1.successMessage, " ");
+  }
+}
+function AdminrhDemandeSessionComponent_div_74_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r3 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 38);
+    \u0275\u0275element(1, "i", 39);
+    \u0275\u0275text(2);
+    \u0275\u0275elementStart(3, "button", 37);
+    \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_div_74_Template_button_click_3_listener() {
+      \u0275\u0275restoreView(_r3);
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.clearMessages());
+    });
+    \u0275\u0275element(4, "i", 19);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", ctx_r1.error, " ");
+  }
+}
+function AdminrhDemandeSessionComponent_div_75_div_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "div", 42);
+  }
+}
+function AdminrhDemandeSessionComponent_div_75_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 40);
+    \u0275\u0275template(1, AdminrhDemandeSessionComponent_div_75_div_1_Template, 1, 0, "div", 41);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", \u0275\u0275pureFunction0(1, _c1));
+  }
+}
+function AdminrhDemandeSessionComponent_div_76_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 43);
+    \u0275\u0275element(1, "i", 20);
+    \u0275\u0275elementStart(2, "p");
+    \u0275\u0275text(3, "Aucune demande de session");
+    \u0275\u0275elementEnd()();
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_span_15_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span");
+    \u0275\u0275element(1, "i", 20);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const d_r4 = \u0275\u0275nextContext().$implicit;
+    const ctx_r1 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", ctx_r1.formatDate(d_r4.session_formation == null ? null : d_r4.session_formation.date_debut), " ");
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_span_16_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span");
+    \u0275\u0275element(1, "i", 66);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const d_r4 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", d_r4.session_formation == null ? null : d_r4.session_formation.lieu, " ");
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_div_19_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 67);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const d_r4 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("title", d_r4.motif_demande);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(' "', d_r4.motif_demande, '" ');
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_button_27_span_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "span", 71);
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_button_27_i_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "i", 17);
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_button_27_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r5 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 68);
+    \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_div_77_div_1_button_27_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r5);
+      const d_r4 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r1.validerDemande(d_r4));
+    });
+    \u0275\u0275template(1, AdminrhDemandeSessionComponent_div_77_div_1_button_27_span_1_Template, 1, 0, "span", 69)(2, AdminrhDemandeSessionComponent_div_77_div_1_button_27_i_2_Template, 1, 0, "i", 70);
+    \u0275\u0275text(3, " Approuver ");
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const d_r4 = \u0275\u0275nextContext().$implicit;
+    const ctx_r1 = \u0275\u0275nextContext(2);
+    \u0275\u0275property("disabled", ctx_r1.validatingIds.has(d_r4.id));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r1.validatingIds.has(d_r4.id));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", !ctx_r1.validatingIds.has(d_r4.id));
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_button_28_span_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "span", 71);
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_button_28_i_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "i", 19);
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_button_28_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r6 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 72);
+    \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_div_77_div_1_button_28_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r6);
+      const d_r4 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r1.refuserDemande(d_r4));
+    });
+    \u0275\u0275template(1, AdminrhDemandeSessionComponent_div_77_div_1_button_28_span_1_Template, 1, 0, "span", 69)(2, AdminrhDemandeSessionComponent_div_77_div_1_button_28_i_2_Template, 1, 0, "i", 73);
+    \u0275\u0275text(3, " Refuser ");
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const d_r4 = \u0275\u0275nextContext().$implicit;
+    const ctx_r1 = \u0275\u0275nextContext(2);
+    \u0275\u0275property("disabled", ctx_r1.refusingIds.has(d_r4.id));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r1.refusingIds.has(d_r4.id));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", !ctx_r1.refusingIds.has(d_r4.id));
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_button_29_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r7 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 74);
+    \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_div_77_div_1_button_29_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r7);
+      const d_r4 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r1.annulerDemande(d_r4));
+    });
+    \u0275\u0275element(1, "i", 75);
+    \u0275\u0275elementEnd();
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 46)(1, "div", 47)(2, "div", 48);
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(4, "div", 49);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "div", 50)(6, "div", 51);
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "div", 52);
+    \u0275\u0275text(9);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(10, "div", 53);
+    \u0275\u0275text(11);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "div", 54);
+    \u0275\u0275text(13);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(14, "div", 55);
+    \u0275\u0275template(15, AdminrhDemandeSessionComponent_div_77_div_1_span_15_Template, 3, 1, "span", 56)(16, AdminrhDemandeSessionComponent_div_77_div_1_span_16_Template, 3, 1, "span", 56);
+    \u0275\u0275elementStart(17, "span");
+    \u0275\u0275text(18);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(19, AdminrhDemandeSessionComponent_div_77_div_1_div_19_Template, 2, 2, "div", 57);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(20, "div", 58)(21, "div", 59)(22, "span", 60);
+    \u0275\u0275text(23);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(24, "span", 61);
+    \u0275\u0275text(25, "Session");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(26, "div", 62);
+    \u0275\u0275template(27, AdminrhDemandeSessionComponent_div_77_div_1_button_27_Template, 4, 3, "button", 63)(28, AdminrhDemandeSessionComponent_div_77_div_1_button_28_Template, 4, 3, "button", 64)(29, AdminrhDemandeSessionComponent_div_77_div_1_button_29_Template, 2, 0, "button", 65);
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const d_r4 = ctx.$implicit;
+    const ctx_r1 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(((d_r4.employe == null ? null : d_r4.employe.prenom == null ? null : d_r4.employe.prenom.charAt(0)) || "") + ((d_r4.employe == null ? null : d_r4.employe.nom == null ? null : d_r4.employe.nom.charAt(0)) || ""));
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate((d_r4.employe == null ? null : d_r4.employe.name) || "Employ\xE9 inconnu");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate((d_r4.employe == null ? null : d_r4.employe.email) || "\u2014");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(ctx_r1.formatDate(d_r4.created_at));
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate((d_r4.session_formation == null ? null : d_r4.session_formation.titre) || "Session #" + d_r4.session_formation_id);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", d_r4.session_formation == null ? null : d_r4.session_formation.date_debut);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", d_r4.session_formation == null ? null : d_r4.session_formation.lieu);
+    \u0275\u0275advance();
+    \u0275\u0275classMap(\u0275\u0275interpolate1("pb pb-", d_r4.priorite));
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(d_r4.priorite_display);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", d_r4.motif_demande);
+    \u0275\u0275advance(3);
+    \u0275\u0275classProp("sb-pending", d_r4.statut === "en_attente")("sb-approved", d_r4.statut === "validee")("sb-rejected", d_r4.statut === "refusee")("sb-cancelled", d_r4.statut === "annulee");
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", d_r4.statut_display, " ");
+    \u0275\u0275advance(4);
+    \u0275\u0275property("ngIf", ctx_r1.canValidate(d_r4));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r1.canRefuse(d_r4));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r1.canCancel(d_r4));
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_div_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 43);
+    \u0275\u0275element(1, "i", 24);
+    \u0275\u0275elementStart(2, "p");
+    \u0275\u0275text(3, "Aucun r\xE9sultat");
+    \u0275\u0275elementEnd()();
+  }
+}
+function AdminrhDemandeSessionComponent_div_77_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 44);
+    \u0275\u0275template(1, AdminrhDemandeSessionComponent_div_77_div_1_Template, 30, 24, "div", 45)(2, AdminrhDemandeSessionComponent_div_77_div_2_Template, 4, 0, "div", 33);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r1.tableData)("ngForTrackBy", ctx_r1.trackByDemandeId);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", !ctx_r1.tableData.length);
+  }
+}
+function AdminrhDemandeSessionComponent_div_78_button_6_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r9 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 82);
+    \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_div_78_button_6_Template_button_click_0_listener() {
+      const i_r10 = \u0275\u0275restoreView(_r9).index;
+      const ctx_r1 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r1.onPageChange(i_r10 + 1));
+    });
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const i_r10 = ctx.index;
+    const ctx_r1 = \u0275\u0275nextContext(2);
+    \u0275\u0275classProp("active", ctx_r1.currentPage === i_r10 + 1);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(i_r10 + 1);
+  }
+}
+function AdminrhDemandeSessionComponent_div_78_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r8 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 76)(1, "span");
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 77)(4, "button", 78);
+    \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_div_78_Template_button_click_4_listener() {
+      \u0275\u0275restoreView(_r8);
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.onPageChange(ctx_r1.currentPage - 1));
+    });
+    \u0275\u0275element(5, "i", 79);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(6, AdminrhDemandeSessionComponent_div_78_button_6_Template, 2, 3, "button", 80);
+    \u0275\u0275elementStart(7, "button", 78);
+    \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_div_78_Template_button_click_7_listener() {
+      \u0275\u0275restoreView(_r8);
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.onPageChange(ctx_r1.currentPage + 1));
+    });
+    \u0275\u0275element(8, "i", 81);
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate3("Affichage ", (ctx_r1.currentPage - 1) * ctx_r1.pageSize + 1, "\u2013", ctx_r1.currentPage * ctx_r1.pageSize > ctx_r1.totalData ? ctx_r1.totalData : ctx_r1.currentPage * ctx_r1.pageSize, " sur ", ctx_r1.totalData, " demandes");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("disabled", ctx_r1.currentPage === 1);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngForOf", ctx_r1.pagesArray);
+    \u0275\u0275advance();
+    \u0275\u0275property("disabled", ctx_r1.currentPage === ctx_r1.totalPages);
+  }
+}
+var AdminrhDemandeSessionComponent = class _AdminrhDemandeSessionComponent {
+  router;
+  pagination;
+  demandeFormationService;
+  authService;
+  routes = routes;
+  // Variables de pagination
+  pageSize = 10;
+  tableData = [];
+  tableDataCopy = [];
+  actualData = [];
+  allSessionDemandes = [];
+  currentPage = 1;
+  skip = 0;
+  limit = this.pageSize;
+  serialNumberArray = [];
+  totalData = 0;
+  pageSelection = [];
+  dataSource;
+  searchDataValue = "";
+  // Variables de gestion d'état
+  loading = false;
+  error = "";
+  successMessage = "";
+  // Filtres
+  selectedStatutFilter = "tous";
+  selectedPrioriteFilter = "tous";
+  // Données utilisateur connecté
+  currentUser;
+  // Statistiques
+  stats = {};
+  // Filtres de statut
+  statutFilters = [
+    { value: "tous", label: "Tous les statuts", count: 0, color: "secondary" },
+    { value: "en_attente", label: "En attente", count: 0, color: "warning" },
+    { value: "validee", label: "Valid\xE9es", count: 0, color: "success" },
+    { value: "refusee", label: "Refus\xE9es", count: 0, color: "danger" },
+    { value: "annulee", label: "Annul\xE9es", count: 0, color: "secondary" }
+  ];
+  // Actions en cours
+  validatingIds = /* @__PURE__ */ new Set();
+  refusingIds = /* @__PURE__ */ new Set();
+  constructor(router, pagination, demandeFormationService, authService) {
+    this.router = router;
+    this.pagination = pagination;
+    this.demandeFormationService = demandeFormationService;
+    this.authService = authService;
+    this.pagination.tablePageSize.subscribe((res) => {
+      if (this.router.url === "/adminrh/adminrh-demande" || this.router.url.includes("adminrh-demande")) {
+        this.getTableData({ skip: res.skip, limit: res.limit });
+        this.pageSize = res.pageSize;
+      }
+    });
+  }
+  ngOnInit() {
+    this.initializeUser();
+    this.loadDemandes();
+  }
+  // === INITIALISATION ===
+  initializeUser() {
+    this.currentUser = this.authService.getUser();
+    if (!this.currentUser) {
+      this.error = "Utilisateur non connect\xE9. Veuillez vous reconnecter.";
+      console.error("\u274C Aucun utilisateur connect\xE9");
+      return;
+    }
+    console.log("\u{1F464} Utilisateur connect\xE9:", this.currentUser);
+  }
+  loadDemandes() {
+    if (!this.currentUser) {
+      this.error = "Utilisateur non connect\xE9.";
+      return;
+    }
+    this.loading = true;
+    this.error = "";
+    this.successMessage = "";
+    console.log("\u{1F504} Chargement des demandes de session...");
+    this.demandeFormationService.getDemandesFormation().subscribe({
+      next: (response) => {
+        console.log("\u{1F4E6} R\xE9ponse API demandes session:", response);
+        try {
+          const sessionDemandes = (response.demandes || []).filter((d) => d.type_demande === "session");
+          this.stats = {
+            total: sessionDemandes.length,
+            en_attente: sessionDemandes.filter((d) => d.statut === "en_attente").length,
+            validees: sessionDemandes.filter((d) => d.statut === "validee").length,
+            refusees: sessionDemandes.filter((d) => d.statut === "refusee").length,
+            annulees: sessionDemandes.filter((d) => d.statut === "annulee").length
+          };
+          this.updateStatutFilters();
+          if (sessionDemandes.length === 0) {
+            this.allSessionDemandes = [];
+            this.actualData = [];
+            this.totalData = 0;
+            this.getTableData({ skip: 0, limit: this.pageSize });
+            this.loading = false;
+            this.error = "Aucune demande de session trouv\xE9e.";
+            return;
+          }
+          this.allSessionDemandes = sessionDemandes;
+          this.applyFilters();
+          this.loading = false;
+          console.log("\u2705 Demandes de session charg\xE9es:", this.allSessionDemandes.length);
+        } catch (err) {
+          console.error("\u274C Erreur lors du traitement des donn\xE9es:", err);
+          this.handleLoadError(new Error("Erreur lors du traitement des donn\xE9es"));
+        }
+      },
+      error: (error) => {
+        console.error("\u274C Erreur lors du chargement des demandes:", error);
+        this.handleLoadError(error);
+      }
+    });
+  }
+  updateStatutFilters() {
+    const statsMap = {
+      "tous": "total",
+      "en_attente": "en_attente",
+      "validee": "validees",
+      "refusee": "refusees",
+      "annulee": "annulees"
+    };
+    this.statutFilters.forEach((filter) => {
+      filter.count = this.stats[statsMap[filter.value] ?? filter.value] || 0;
+    });
+  }
+  handleLoadError(error) {
+    this.error = this.getErrorMessage(error);
+    this.loading = false;
+    this.actualData = [];
+    this.getTableData({ skip: 0, limit: this.pageSize });
+  }
+  getTableData(pageOption) {
+    this.tableData = [];
+    this.tableDataCopy = [];
+    this.serialNumberArray = [];
+    this.actualData.forEach((demande, index) => {
+      const serialNumber = index + 1;
+      if (index >= pageOption.skip && serialNumber <= pageOption.limit) {
+        this.tableData.push(demande);
+        this.tableDataCopy.push(demande);
+        this.serialNumberArray.push(serialNumber);
+      }
+    });
+    this.dataSource = new MatTableDataSource(this.actualData);
+    this.pagination.calculatePageSize.next({
+      totalData: this.totalData,
+      pageSize: this.pageSize,
+      tableData: this.tableData,
+      tableDataCopy: this.tableDataCopy,
+      serialNumberArray: this.serialNumberArray
+    });
+    console.log("\u{1F4CA} Donn\xE9es du tableau mises \xE0 jour:", {
+      totalData: this.totalData,
+      tableData: this.tableData.length,
+      pageSize: this.pageSize
+    });
+  }
+  // === MÉTHODES DE FILTRAGE ===
+  applyFilters() {
+    let filteredData = [...this.allSessionDemandes];
+    if (this.selectedStatutFilter !== "tous") {
+      filteredData = filteredData.filter((demande) => demande.statut === this.selectedStatutFilter);
+    }
+    if (this.selectedPrioriteFilter !== "tous") {
+      filteredData = filteredData.filter((demande) => demande.priorite === this.selectedPrioriteFilter);
+    }
+    if (this.searchDataValue.trim()) {
+      const searchValue = this.searchDataValue.toLowerCase().trim();
+      filteredData = filteredData.filter((demande) => this.matchesSearch(demande, searchValue));
+    }
+    this.actualData = filteredData;
+    this.totalData = this.actualData.length;
+    this.getTableData({ skip: 0, limit: this.pageSize });
+  }
+  onStatutFilterChange(statut) {
+    this.selectedStatutFilter = statut;
+    this.applyFilters();
+  }
+  onPrioriteFilterChange(priorite) {
+    this.selectedPrioriteFilter = priorite;
+    this.applyFilters();
+  }
+  // === MÉTHODES DE RECHERCHE ET TRI ===
+  searchData(value) {
+    this.searchDataValue = value;
+    this.applyFilters();
+    console.log(`\u{1F50D} Recherche "${value}": ${this.actualData.length} r\xE9sultats`);
+  }
+  matchesSearch(demande, searchValue) {
+    const normalizeString = (str) => {
+      return String(str || "").toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    };
+    const fields = [
+      demande.session_formation?.titre,
+      demande.employe?.name,
+      demande.employe?.email,
+      demande.motif_demande,
+      demande.objectifs_personnels,
+      demande.statut_display,
+      demande.priorite_display
+    ];
+    const normalizedSearch = normalizeString(searchValue);
+    return fields.some((field) => normalizeString(field).includes(normalizedSearch));
+  }
+  sortData(sort) {
+    const data = [...this.tableData];
+    if (!sort.active || sort.direction === "") {
+      this.tableData = data;
+      return;
+    }
+    this.tableData = data.sort((a, b) => {
+      const result = this.compareValues(a, b, sort.active);
+      return sort.direction === "asc" ? result : -result;
+    });
+  }
+  compareValues(a, b, sortField) {
+    let aValue = "";
+    let bValue = "";
+    switch (sortField) {
+      case "session":
+        aValue = a.session_formation?.titre || "";
+        bValue = b.session_formation?.titre || "";
+        break;
+      case "employe":
+        aValue = a.employe?.name || "";
+        bValue = b.employe?.name || "";
+        break;
+      case "statut":
+        aValue = a.statut_display || "";
+        bValue = b.statut_display || "";
+        break;
+      case "priorite":
+        aValue = a.priorite_display || "";
+        bValue = b.priorite_display || "";
+        break;
+      case "created_at":
+        aValue = new Date(a.created_at || 0).getTime();
+        bValue = new Date(b.created_at || 0).getTime();
+        break;
+      case "date_souhaitee_debut":
+        aValue = new Date(a.date_souhaitee_debut || 0).getTime();
+        bValue = new Date(b.date_souhaitee_debut || 0).getTime();
+        break;
+      default:
+        aValue = String(a[sortField] || "");
+        bValue = String(b[sortField] || "");
+    }
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return aValue - bValue;
+    }
+    return String(aValue).localeCompare(String(bValue));
+  }
+  // === MÉTHODES D'ACTIONS ===
+  refreshData() {
+    console.log("\u{1F504} Actualisation des donn\xE9es...");
+    this.searchDataValue = "";
+    this.selectedStatutFilter = "tous";
+    this.selectedPrioriteFilter = "tous";
+    this.clearMessages();
+    this.loadDemandes();
+  }
+  // Valider une demande
+  validerDemande(demande, commentaire = "") {
+    if (this.validatingIds.has(demande.id))
+      return;
+    const confirmMessage = `\xCAtes-vous s\xFBr de vouloir valider la demande de session "${demande.session_formation?.titre}" pour ${demande.employe?.name} ?`;
+    if (confirm(confirmMessage)) {
+      this.validatingIds.add(demande.id);
+      this.clearMessages();
+      const data = commentaire ? { commentaire_rh: commentaire } : {};
+      this.demandeFormationService.validerDemande(demande.id, data).subscribe({
+        next: () => {
+          this.successMessage = `Demande de session valid\xE9e avec succ\xE8s.`;
+          this.validatingIds.delete(demande.id);
+          this.refreshData();
+        },
+        error: (error) => {
+          console.error("\u274C Erreur lors de la validation:", error);
+          this.error = "Erreur lors de la validation de la demande.";
+          this.validatingIds.delete(demande.id);
+        }
+      });
+    }
+  }
+  refuserDemande(demande) {
+    if (this.refusingIds.has(demande.id))
+      return;
+    const motif = prompt(`Pourquoi refusez-vous la demande de session "${demande.session_formation?.titre}" pour ${demande.employe?.name} ?
+
+Veuillez saisir un motif :`);
+    if (motif === null)
+      return;
+    if (!motif.trim()) {
+      this.error = "Un motif de refus est obligatoire.";
+      return;
+    }
+    this.refusingIds.add(demande.id);
+    this.clearMessages();
+    this.demandeFormationService.refuserDemande(demande.id, { commentaire_rh: motif }).subscribe({
+      next: () => {
+        this.successMessage = `Demande de session refus\xE9e.`;
+        this.refusingIds.delete(demande.id);
+        this.refreshData();
+      },
+      error: (error) => {
+        console.error("\u274C Erreur lors du refus:", error);
+        this.error = "Erreur lors du refus de la demande.";
+        this.refusingIds.delete(demande.id);
+      }
+    });
+  }
+  annulerDemande(demande) {
+    const confirmMessage = `\xCAtes-vous s\xFBr de vouloir annuler la demande de session "${demande.session_formation?.titre}" pour ${demande.employe?.name} ?`;
+    if (confirm(confirmMessage)) {
+      this.clearMessages();
+      this.demandeFormationService.annulerDemande(demande.id).subscribe({
+        next: () => {
+          this.successMessage = `Demande de session annul\xE9e.`;
+          this.refreshData();
+        },
+        error: (error) => {
+          console.error("\u274C Erreur lors de l'annulation:", error);
+          this.error = "Erreur lors de l'annulation de la demande.";
+        }
+      });
+    }
+  }
+  clearMessages() {
+    this.error = "";
+    this.successMessage = "";
+  }
+  // === MÉTHODES UTILITAIRES ===
+  getStatutClass(statut) {
+    const statutMap = {
+      "en_attente": "badge bg-warning",
+      "validee": "badge bg-success",
+      "refusee": "badge bg-danger",
+      "annulee": "badge bg-secondary"
+    };
+    return statutMap[statut] || "badge bg-secondary";
+  }
+  // ============================================================
+  // REMPLACE ces 3 méthodes dans adminrh-demande.component.ts
+  // ============================================================
+  // ✅ Corrigé : priorite peut être undefined
+  getPrioriteClass(priorite) {
+    const prioriteMap = {
+      "basse": "badge bg-light text-dark",
+      "normale": "badge bg-info",
+      "haute": "badge bg-warning",
+      "urgente": "badge bg-danger"
+    };
+    return prioriteMap[priorite ?? ""] || "badge bg-secondary";
+  }
+  // ✅ Corrigé : date peut être string | null | undefined
+  formatDate(date) {
+    if (!date)
+      return "Non sp\xE9cifi\xE9";
+    try {
+      return new Date(date).toLocaleDateString("fr-FR");
+    } catch {
+      return "Date invalide";
+    }
+  }
+  // ✅ Corrigé : date peut être string | null | undefined
+  formatDateTime(date) {
+    if (!date)
+      return "Non sp\xE9cifi\xE9";
+    try {
+      return new Date(date).toLocaleString("fr-FR");
+    } catch {
+      return "Date invalide";
+    }
+  }
+  canValidate(demande) {
+    return demande.statut === "en_attente" && !this.validatingIds.has(demande.id);
+  }
+  canRefuse(demande) {
+    return demande.statut === "en_attente" && !this.refusingIds.has(demande.id);
+  }
+  canCancel(demande) {
+    return ["en_attente", "validee"].includes(demande.statut);
+  }
+  trackByDemandeId(index, demande) {
+    return demande.id;
+  }
+  changePageSize(pageSize) {
+    this.pageSelection = [];
+    this.limit = pageSize;
+    this.skip = 0;
+    this.currentPage = 1;
+    this.pageSize = pageSize;
+    this.pagination.tablePageSize.next({
+      skip: this.skip,
+      limit: this.limit,
+      pageSize: this.pageSize
+    });
+  }
+  getErrorMessage(error) {
+    const errorMap = {
+      403: "Vous n'avez pas les droits pour acc\xE9der aux demandes de formation.",
+      401: "Session expir\xE9e. Veuillez vous reconnecter.",
+      500: "Erreur serveur. Veuillez r\xE9essayer plus tard.",
+      404: "Aucune demande trouv\xE9e."
+    };
+    if (error?.status && errorMap[error.status]) {
+      return errorMap[error.status];
+    }
+    if (!navigator.onLine) {
+      return "Pas de connexion internet.";
+    }
+    return "Erreur lors du chargement des donn\xE9es.";
+  }
+  // === GETTERS POUR LES STATISTIQUES ===
+  get totalDemandes() {
+    return this.stats.total || 0;
+  }
+  get demandesEnAttente() {
+    return this.stats.en_attente || 0;
+  }
+  get demandesValidees() {
+    return this.stats.validees || 0;
+  }
+  get demandesRefusees() {
+    return this.stats.refusees || 0;
+  }
+  get hasData() {
+    return this.actualData.length > 0;
+  }
+  get showEmptyState() {
+    return !this.loading && !this.hasData && !this.error;
+  }
+  get totalPages() {
+    return Math.ceil(this.totalData / this.pageSize);
+  }
+  get pagesArray() {
+    return Array.from({ length: this.totalPages }, (_, i) => i);
+  }
+  onPageChange(page) {
+    this.currentPage = page;
+    this.skip = (page - 1) * this.pageSize;
+    this.limit = page * this.pageSize;
+    this.pagination.tablePageSize.next({ skip: this.skip, limit: this.limit, pageSize: this.pageSize });
+  }
+  static \u0275fac = function AdminrhDemandeSessionComponent_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _AdminrhDemandeSessionComponent)(\u0275\u0275directiveInject(Router), \u0275\u0275directiveInject(PaginationService), \u0275\u0275directiveInject(DemandeFormationService), \u0275\u0275directiveInject(AuthService));
+  };
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _AdminrhDemandeSessionComponent, selectors: [["app-adminrh-demande-session"]], decls: 79, vars: 20, consts: [[1, "page"], [1, "page-header"], [1, "page-header__left"], [1, "page-header__actions"], ["type", "button", 1, "btn-outline"], [1, "isax", "isax-export"], ["type", "button", 1, "btn-primary", 3, "click", "disabled"], [1, "isax", "isax-refresh"], [1, "kpi-row"], [1, "kpi"], [1, "kpi__icon", "ki-amber"], [1, "isax", "isax-clock"], [1, "kpi__body"], [1, "kpi__label"], [1, "kpi__val"], [1, "kpi__delta"], [1, "kpi__icon", "ki-green"], [1, "isax", "isax-tick-circle"], [1, "kpi__icon", "ki-red"], [1, "isax", "isax-close-circle"], [1, "isax", "isax-calendar-1"], [1, "main-card"], [1, "toolbar"], [1, "search-box"], [1, "isax", "isax-search-normal-1"], ["type", "search", "placeholder", "Rechercher session, employ\xE9...", 3, "ngModelChange", "ngModel", "ngModelOptions"], ["type", "button", 1, "filter-chip", 3, "click"], [1, "toolbar-spacer"], ["type", "button", 1, "sort-btn"], [1, "isax", "isax-arrow-3"], ["class", "alert alert--ok", 4, "ngIf"], ["class", "alert alert--err", 4, "ngIf"], ["class", "skeletons", 4, "ngIf"], ["class", "empty-state", 4, "ngIf"], ["class", "demande-list", 4, "ngIf"], ["class", "pagination", 4, "ngIf"], [1, "alert", "alert--ok"], ["type", "button", 1, "alert__close", 3, "click"], [1, "alert", "alert--err"], [1, "isax", "isax-warning-2"], [1, "skeletons"], ["class", "sk-item", 4, "ngFor", "ngForOf"], [1, "sk-item"], [1, "empty-state"], [1, "demande-list"], ["class", "demande-item", 4, "ngFor", "ngForOf", "ngForTrackBy"], [1, "demande-item"], [1, "d-left"], [1, "d-av"], [1, "d-type-line", "tl-sess"], [1, "d-body"], [1, "d-name"], [1, "d-company"], [1, "d-time"], [1, "d-title"], [1, "d-meta"], [4, "ngIf"], ["class", "d-msg", 3, "title", 4, "ngIf"], [1, "d-right"], [1, "d-badges"], [1, "sb"], [1, "tb", "tb-sess"], [1, "action-row"], ["type", "button", "class", "act-btn act-approve", "title", "Approuver", 3, "disabled", "click", 4, "ngIf"], ["type", "button", "class", "act-btn act-reject", "title", "Refuser", 3, "disabled", "click", 4, "ngIf"], ["type", "button", "class", "act-btn act-cancel", "title", "Annuler", 3, "click", 4, "ngIf"], [1, "isax", "isax-location"], [1, "d-msg", 3, "title"], ["type", "button", "title", "Approuver", 1, "act-btn", "act-approve", 3, "click", "disabled"], ["class", "act-spin", 4, "ngIf"], ["class", "isax isax-tick-circle", 4, "ngIf"], [1, "act-spin"], ["type", "button", "title", "Refuser", 1, "act-btn", "act-reject", 3, "click", "disabled"], ["class", "isax isax-close-circle", 4, "ngIf"], ["type", "button", "title", "Annuler", 1, "act-btn", "act-cancel", 3, "click"], [1, "isax", "isax-minus-circle"], [1, "pagination"], [1, "pagination__pages"], ["type", "button", 1, "pag-btn", 3, "click", "disabled"], [1, "isax", "isax-arrow-left-2"], ["type", "button", "class", "pag-btn", 3, "active", "click", 4, "ngFor", "ngForOf"], [1, "isax", "isax-arrow-right-3"], ["type", "button", 1, "pag-btn", 3, "click"]], template: function AdminrhDemandeSessionComponent_Template(rf, ctx) {
+    if (rf & 1) {
+      \u0275\u0275elementStart(0, "div", 0)(1, "div", 1)(2, "div", 2)(3, "h1");
+      \u0275\u0275text(4, "Demandes de session");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(5, "p");
+      \u0275\u0275text(6, "G\xE9rez et traitez les demandes d'inscription aux sessions de formation");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(7, "div", 3)(8, "button", 4);
+      \u0275\u0275element(9, "i", 5);
+      \u0275\u0275text(10, " Exporter ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(11, "button", 6);
+      \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_Template_button_click_11_listener() {
+        return ctx.refreshData();
+      });
+      \u0275\u0275element(12, "i", 7);
+      \u0275\u0275text(13, " Actualiser ");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(14, "div", 8)(15, "div", 9)(16, "div", 10);
+      \u0275\u0275element(17, "i", 11);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(18, "div", 12)(19, "div", 13);
+      \u0275\u0275text(20, "En attente");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(21, "div", 14);
+      \u0275\u0275text(22);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(23, "div", 15);
+      \u0275\u0275text(24, "\xE0 traiter");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(25, "div", 9)(26, "div", 16);
+      \u0275\u0275element(27, "i", 17);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(28, "div", 12)(29, "div", 13);
+      \u0275\u0275text(30, "Approuv\xE9es");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(31, "div", 14);
+      \u0275\u0275text(32);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(33, "div", 15);
+      \u0275\u0275text(34, "cette p\xE9riode");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(35, "div", 9)(36, "div", 18);
+      \u0275\u0275element(37, "i", 19);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(38, "div", 12)(39, "div", 13);
+      \u0275\u0275text(40, "Refus\xE9es");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(41, "div", 14);
+      \u0275\u0275text(42);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(43, "div", 15);
+      \u0275\u0275text(44, "cette p\xE9riode");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(45, "div", 9)(46, "div", 10);
+      \u0275\u0275element(47, "i", 20);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(48, "div", 12)(49, "div", 13);
+      \u0275\u0275text(50, "Total");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(51, "div", 14);
+      \u0275\u0275text(52);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(53, "div", 15);
+      \u0275\u0275text(54, "sessions");
+      \u0275\u0275elementEnd()()()();
+      \u0275\u0275elementStart(55, "div", 21)(56, "div", 22)(57, "div", 23);
+      \u0275\u0275element(58, "i", 24);
+      \u0275\u0275elementStart(59, "input", 25);
+      \u0275\u0275twoWayListener("ngModelChange", function AdminrhDemandeSessionComponent_Template_input_ngModelChange_59_listener($event) {
+        \u0275\u0275twoWayBindingSet(ctx.searchDataValue, $event) || (ctx.searchDataValue = $event);
+        return $event;
+      });
+      \u0275\u0275listener("ngModelChange", function AdminrhDemandeSessionComponent_Template_input_ngModelChange_59_listener($event) {
+        return ctx.searchData($event);
+      });
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(60, "button", 26);
+      \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_Template_button_click_60_listener() {
+        return ctx.onStatutFilterChange(ctx.selectedStatutFilter === "en_attente" ? "tous" : "en_attente");
+      });
+      \u0275\u0275element(61, "i", 11);
+      \u0275\u0275text(62, " En attente ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(63, "button", 26);
+      \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_Template_button_click_63_listener() {
+        return ctx.onStatutFilterChange(ctx.selectedStatutFilter === "validee" ? "tous" : "validee");
+      });
+      \u0275\u0275element(64, "i", 17);
+      \u0275\u0275text(65, " Approuv\xE9es ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(66, "button", 26);
+      \u0275\u0275listener("click", function AdminrhDemandeSessionComponent_Template_button_click_66_listener() {
+        return ctx.onStatutFilterChange(ctx.selectedStatutFilter === "refusee" ? "tous" : "refusee");
+      });
+      \u0275\u0275element(67, "i", 19);
+      \u0275\u0275text(68, " Refus\xE9es ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275element(69, "div", 27);
+      \u0275\u0275elementStart(70, "button", 28);
+      \u0275\u0275element(71, "i", 29);
+      \u0275\u0275text(72, " Plus r\xE9cent ");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275template(73, AdminrhDemandeSessionComponent_div_73_Template, 5, 1, "div", 30)(74, AdminrhDemandeSessionComponent_div_74_Template, 5, 1, "div", 31)(75, AdminrhDemandeSessionComponent_div_75_Template, 2, 2, "div", 32)(76, AdminrhDemandeSessionComponent_div_76_Template, 4, 0, "div", 33)(77, AdminrhDemandeSessionComponent_div_77_Template, 3, 3, "div", 34)(78, AdminrhDemandeSessionComponent_div_78_Template, 9, 6, "div", 35);
+      \u0275\u0275elementEnd()();
+    }
+    if (rf & 2) {
+      \u0275\u0275advance(11);
+      \u0275\u0275property("disabled", ctx.loading);
+      \u0275\u0275advance(11);
+      \u0275\u0275textInterpolate(ctx.demandesEnAttente);
+      \u0275\u0275advance(10);
+      \u0275\u0275textInterpolate(ctx.demandesValidees);
+      \u0275\u0275advance(10);
+      \u0275\u0275textInterpolate(ctx.demandesRefusees);
+      \u0275\u0275advance(10);
+      \u0275\u0275textInterpolate(ctx.totalDemandes);
+      \u0275\u0275advance(7);
+      \u0275\u0275twoWayProperty("ngModel", ctx.searchDataValue);
+      \u0275\u0275property("ngModelOptions", \u0275\u0275pureFunction0(19, _c0));
+      \u0275\u0275advance();
+      \u0275\u0275classProp("active", ctx.selectedStatutFilter === "en_attente");
+      \u0275\u0275advance(3);
+      \u0275\u0275classProp("active", ctx.selectedStatutFilter === "validee");
+      \u0275\u0275advance(3);
+      \u0275\u0275classProp("active", ctx.selectedStatutFilter === "refusee");
+      \u0275\u0275advance(7);
+      \u0275\u0275property("ngIf", ctx.successMessage);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.error);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.loading);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", !ctx.loading && !ctx.hasData);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", !ctx.loading && ctx.hasData);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.totalPages > 1);
+    }
+  }, dependencies: [FormsModule, DefaultValueAccessor, NgControlStatus, NgModel, CommonModule, NgForOf, NgIf, MatSortModule], styles: ["\n\n.page[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n  padding: 0 0 24px;\n}\n.page-header[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 12px;\n  flex-wrap: wrap;\n}\n.page-header__left[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n  font-size: 20px;\n  font-weight: 600;\n  color: #111827;\n  margin: 0 0 4px;\n}\n.page-header__left[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  font-size: 13px;\n  color: #6B7280;\n  margin: 0;\n}\n.page-header__actions[_ngcontent-%COMP%] {\n  display: flex;\n  gap: 8px;\n  align-items: center;\n}\n.btn-outline[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 7px 14px;\n  font-size: 13px;\n  font-weight: 500;\n  color: #374151;\n  border: 1px solid #E5E7EB;\n  border-radius: 8px;\n  background: #fff;\n  cursor: pointer;\n  transition: background 0.12s, border-color 0.12s;\n}\n.btn-outline[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  font-size: 14px;\n}\n.btn-outline[_ngcontent-%COMP%]:hover {\n  background: #F9FAFB;\n  border-color: #D1D5DB;\n}\n.btn-primary[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 7px 14px;\n  font-size: 13px;\n  font-weight: 500;\n  color: #fff;\n  background: #185FA5;\n  border: none;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: opacity 0.12s;\n}\n.btn-primary[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  font-size: 14px;\n}\n.btn-primary[_ngcontent-%COMP%]:hover {\n  opacity: 0.88;\n}\n.btn-primary[_ngcontent-%COMP%]:disabled {\n  opacity: 0.5;\n  cursor: not-allowed;\n}\n.kpi-row[_ngcontent-%COMP%] {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  gap: 12px;\n}\n@media (max-width: 900px) {\n  .kpi-row[_ngcontent-%COMP%] {\n    grid-template-columns: repeat(2, 1fr);\n  }\n}\n@media (max-width: 480px) {\n  .kpi-row[_ngcontent-%COMP%] {\n    grid-template-columns: 1fr;\n  }\n}\n.kpi[_ngcontent-%COMP%] {\n  background: #fff;\n  border: 1px solid #E5E7EB;\n  border-radius: 12px;\n  padding: 14px 16px;\n  display: flex;\n  align-items: flex-start;\n  gap: 14px;\n}\n.kpi__icon[_ngcontent-%COMP%] {\n  width: 38px;\n  height: 38px;\n  border-radius: 8px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 18px;\n  flex-shrink: 0;\n}\n.kpi__icon.ki-amber[_ngcontent-%COMP%] {\n  background: #FEF3C7;\n  color: #BA7517;\n}\n.kpi__icon.ki-blue[_ngcontent-%COMP%] {\n  background: #DBEAFE;\n  color: #185FA5;\n}\n.kpi__icon.ki-green[_ngcontent-%COMP%] {\n  background: #DCFCE7;\n  color: #166534;\n}\n.kpi__icon.ki-red[_ngcontent-%COMP%] {\n  background: #FEE2E2;\n  color: #991B1B;\n}\n.kpi__icon.ki-purple[_ngcontent-%COMP%] {\n  background: #EDE9FE;\n  color: #7C3AED;\n}\n.kpi__icon.ki-teal[_ngcontent-%COMP%] {\n  background: #CCFBF1;\n  color: #0F766E;\n}\n.kpi__body[_ngcontent-%COMP%] {\n  flex: 1;\n  min-width: 0;\n}\n.kpi__label[_ngcontent-%COMP%] {\n  font-size: 12px;\n  color: #6B7280;\n  margin-bottom: 4px;\n}\n.kpi__val[_ngcontent-%COMP%] {\n  font-size: 24px;\n  font-weight: 600;\n  color: #111827;\n  line-height: 1;\n}\n.kpi__delta[_ngcontent-%COMP%] {\n  font-size: 11px;\n  margin-top: 3px;\n  color: #9CA3AF;\n}\n.main-card[_ngcontent-%COMP%] {\n  background: #fff;\n  border: 1px solid #E5E7EB;\n  border-radius: 16px;\n  overflow: hidden;\n}\n.tab-bar[_ngcontent-%COMP%] {\n  display: flex;\n  border-bottom: 1px solid #E5E7EB;\n  padding: 0 16px;\n  gap: 4px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.tab-bar[_ngcontent-%COMP%]::-webkit-scrollbar {\n  display: none;\n}\n.tab[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 12px 14px;\n  font-size: 13px;\n  font-weight: 500;\n  color: #6B7280;\n  border-bottom: 2px solid transparent;\n  cursor: pointer;\n  white-space: nowrap;\n  background: none;\n  border-top: none;\n  border-left: none;\n  border-right: none;\n  transition: color 0.12s, border-color 0.12s;\n}\n.tab[_ngcontent-%COMP%]   .tab-count[_ngcontent-%COMP%] {\n  background: #F3F4F6;\n  color: #6B7280;\n  border-radius: 20px;\n  font-size: 11px;\n  padding: 1px 7px;\n  font-weight: 600;\n  transition: background 0.12s, color 0.12s;\n}\n.tab[_ngcontent-%COMP%]:hover {\n  color: #374151;\n}\n.tab.active[_ngcontent-%COMP%] {\n  color: #185FA5;\n  border-bottom-color: #185FA5;\n}\n.tab.active[_ngcontent-%COMP%]   .tab-count[_ngcontent-%COMP%] {\n  background: #DBEAFE;\n  color: #185FA5;\n}\n.toolbar[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 8px;\n  padding: 12px 16px;\n  border-bottom: 1px solid #E5E7EB;\n}\n.search-box[_ngcontent-%COMP%] {\n  position: relative;\n  flex: 1;\n  min-width: 180px;\n  max-width: 280px;\n}\n.search-box[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  position: absolute;\n  left: 10px;\n  top: 50%;\n  transform: translateY(-50%);\n  font-size: 14px;\n  color: #9CA3AF;\n  pointer-events: none;\n}\n.search-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  width: 100%;\n  padding: 7px 10px 7px 32px;\n  font-size: 13px;\n  border: 1px solid #E5E7EB;\n  border-radius: 8px;\n  background: #F9FAFB;\n  outline: none;\n  color: #374151;\n  transition: border-color 0.15s, background 0.15s;\n}\n.search-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]::placeholder {\n  color: #9CA3AF;\n}\n.search-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]:focus {\n  border-color: #185FA5;\n  background: #fff;\n}\n.filter-chip[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 5px 11px;\n  font-size: 12px;\n  font-weight: 500;\n  color: #4B5563;\n  border: 1px solid #E5E7EB;\n  border-radius: 20px;\n  background: #fff;\n  cursor: pointer;\n  transition:\n    background 0.12s,\n    border-color 0.12s,\n    color 0.12s;\n  white-space: nowrap;\n}\n.filter-chip[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  font-size: 13px;\n}\n.filter-chip[_ngcontent-%COMP%]:hover {\n  background: #F9FAFB;\n  border-color: #D1D5DB;\n}\n.filter-chip.active[_ngcontent-%COMP%] {\n  background: #DBEAFE;\n  border-color: #185FA5;\n  color: #185FA5;\n}\n.toolbar-spacer[_ngcontent-%COMP%] {\n  margin-left: auto;\n}\n.sort-btn[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 5px 11px;\n  font-size: 12px;\n  font-weight: 500;\n  color: #4B5563;\n  border: 1px solid #E5E7EB;\n  border-radius: 8px;\n  background: #fff;\n  cursor: pointer;\n  transition: background 0.12s;\n}\n.sort-btn[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  font-size: 13px;\n}\n.sort-btn[_ngcontent-%COMP%]:hover {\n  background: #F9FAFB;\n}\n.alert[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin: 12px 16px 0;\n  padding: 9px 14px;\n  border-radius: 8px;\n  font-size: 13px;\n  border-left: 3px solid;\n}\n.alert__close[_ngcontent-%COMP%] {\n  margin-left: auto;\n  background: none;\n  border: none;\n  cursor: pointer;\n  font-size: 15px;\n  color: inherit;\n  opacity: 0.65;\n  padding: 0;\n}\n.alert__close[_ngcontent-%COMP%]:hover {\n  opacity: 1;\n}\n.alert--ok[_ngcontent-%COMP%] {\n  background: #F0FDF4;\n  border-color: #4ADE80;\n  color: #166534;\n}\n.alert--err[_ngcontent-%COMP%] {\n  background: #FEF2F2;\n  border-color: #F87171;\n  color: #991B1B;\n}\n.skeletons[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  gap: 1px;\n}\n.sk-item[_ngcontent-%COMP%] {\n  height: 84px;\n  background: #F3F4F6;\n  animation: _ngcontent-%COMP%_shimmer 1.4s ease-in-out infinite;\n}\n.sk-item[_ngcontent-%COMP%]:first-child {\n  border-radius: 12px 12px 0 0;\n}\n.sk-item[_ngcontent-%COMP%]:last-child {\n  border-radius: 0 0 12px 12px;\n}\n@keyframes _ngcontent-%COMP%_shimmer {\n  0%, 100% {\n    opacity: 1;\n  }\n  50% {\n    opacity: 0.45;\n  }\n}\n.empty-state[_ngcontent-%COMP%] {\n  text-align: center;\n  padding: 52px 20px;\n  color: #9CA3AF;\n}\n.empty-state[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  font-size: 2.8rem;\n  display: block;\n  margin-bottom: 12px;\n  opacity: 0.5;\n}\n.empty-state[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  font-size: 14px;\n  margin: 0;\n}\n.demande-list[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n}\n.demande-item[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: flex-start;\n  gap: 0;\n  padding: 16px;\n  border-bottom: 1px solid #F3F4F6;\n  transition: background 0.1s;\n}\n.demande-item[_ngcontent-%COMP%]:last-child {\n  border-bottom: none;\n}\n.demande-item[_ngcontent-%COMP%]:hover {\n  background: #F9FAFB;\n}\n.d-left[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 0;\n  margin-right: 14px;\n  flex-shrink: 0;\n}\n.d-av[_ngcontent-%COMP%] {\n  width: 38px;\n  height: 38px;\n  border-radius: 50%;\n  background: #DBEAFE;\n  color: #185FA5;\n  font-size: 13px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n  letter-spacing: 0.02em;\n  text-transform: uppercase;\n}\n.d-type-line[_ngcontent-%COMP%] {\n  width: 2px;\n  flex: 1;\n  min-height: 20px;\n  margin-top: 4px;\n  border-radius: 2px;\n}\n.d-type-line.tl-form[_ngcontent-%COMP%] {\n  background: #185FA5;\n}\n.d-type-line.tl-parc[_ngcontent-%COMP%] {\n  background: #7C3AED;\n}\n.d-type-line.tl-cat[_ngcontent-%COMP%] {\n  background: #0F766E;\n}\n.d-type-line.tl-sess[_ngcontent-%COMP%] {\n  background: #BA7517;\n}\n.d-body[_ngcontent-%COMP%] {\n  flex: 1;\n  min-width: 0;\n}\n.d-name[_ngcontent-%COMP%] {\n  font-size: 13px;\n  font-weight: 600;\n  color: #111827;\n}\n.d-company[_ngcontent-%COMP%] {\n  font-size: 12px;\n  color: #9CA3AF;\n  margin-top: 1px;\n}\n.d-time[_ngcontent-%COMP%] {\n  font-size: 11px;\n  color: #9CA3AF;\n  margin-top: 1px;\n}\n.d-title[_ngcontent-%COMP%] {\n  margin-top: 7px;\n  font-size: 14px;\n  font-weight: 500;\n  color: #1F2937;\n}\n.d-meta[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin-top: 5px;\n  font-size: 12px;\n  color: #6B7280;\n}\n.d-meta[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n}\n.d-meta[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  font-size: 13px;\n}\n.d-msg[_ngcontent-%COMP%] {\n  margin-top: 8px;\n  padding: 7px 10px;\n  background: #F9FAFB;\n  border-left: 3px solid #E5E7EB;\n  border-radius: 0 6px 6px 0;\n  font-size: 12px;\n  color: #4B5563;\n  font-style: italic;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  max-width: 480px;\n}\n.d-right[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: flex-end;\n  gap: 8px;\n  margin-left: 16px;\n  flex-shrink: 0;\n}\n.d-badges[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  flex-wrap: wrap;\n  justify-content: flex-end;\n}\n.sb[_ngcontent-%COMP%] {\n  font-size: 11px;\n  font-weight: 600;\n  padding: 3px 9px;\n  border-radius: 20px;\n  white-space: nowrap;\n}\n.sb-pending[_ngcontent-%COMP%] {\n  background: #FEF3C7;\n  color: #BA7517;\n}\n.sb-approved[_ngcontent-%COMP%] {\n  background: #DCFCE7;\n  color: #166534;\n}\n.sb-rejected[_ngcontent-%COMP%] {\n  background: #FEE2E2;\n  color: #991B1B;\n}\n.sb-cancelled[_ngcontent-%COMP%] {\n  background: #F3F4F6;\n  color: #4B5563;\n}\n.tb[_ngcontent-%COMP%] {\n  font-size: 11px;\n  font-weight: 500;\n  padding: 3px 9px;\n  border-radius: 20px;\n  white-space: nowrap;\n}\n.tb-form[_ngcontent-%COMP%] {\n  background: #DBEAFE;\n  color: #185FA5;\n}\n.tb-parc[_ngcontent-%COMP%] {\n  background: #EDE9FE;\n  color: #7C3AED;\n}\n.tb-cat[_ngcontent-%COMP%] {\n  background: #CCFBF1;\n  color: #0F766E;\n}\n.tb-sess[_ngcontent-%COMP%] {\n  background: #FEF3C7;\n  color: #BA7517;\n}\n.pb[_ngcontent-%COMP%] {\n  font-size: 11px;\n  font-weight: 500;\n  padding: 3px 9px;\n  border-radius: 20px;\n  white-space: nowrap;\n}\n.pb-basse[_ngcontent-%COMP%] {\n  background: #F3F4F6;\n  color: #4B5563;\n}\n.pb-normale[_ngcontent-%COMP%] {\n  background: #DBEAFE;\n  color: #185FA5;\n}\n.pb-haute[_ngcontent-%COMP%] {\n  background: #FEF3C7;\n  color: #BA7517;\n}\n.pb-urgente[_ngcontent-%COMP%] {\n  background: #FEE2E2;\n  color: #991B1B;\n}\n.action-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.act-btn[_ngcontent-%COMP%] {\n  height: 30px;\n  padding: 0 10px;\n  font-size: 12px;\n  font-weight: 500;\n  border-radius: 6px;\n  border: 1px solid #E5E7EB;\n  cursor: pointer;\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  background: #fff;\n  color: #4B5563;\n  transition:\n    background 0.12s,\n    color 0.12s,\n    border-color 0.12s;\n  white-space: nowrap;\n}\n.act-btn[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  font-size: 13px;\n}\n.act-btn[_ngcontent-%COMP%]:disabled {\n  opacity: 0.4;\n  cursor: not-allowed;\n}\n.act-btn.act-approve[_ngcontent-%COMP%]:not(:disabled):hover {\n  background: #DCFCE7;\n  color: #166534;\n  border-color: #86EFAC;\n}\n.act-btn.act-reject[_ngcontent-%COMP%]:not(:disabled):hover {\n  background: #FEE2E2;\n  color: #991B1B;\n  border-color: #FCA5A5;\n}\n.act-btn.act-cancel[_ngcontent-%COMP%]:not(:disabled):hover {\n  background: #FEF3C7;\n  color: #BA7517;\n  border-color: #FCD34D;\n}\n.act-btn.act-view[_ngcontent-%COMP%]:not(:disabled):hover {\n  background: #DBEAFE;\n  color: #185FA5;\n  border-color: #93C5FD;\n}\n.act-spin[_ngcontent-%COMP%] {\n  display: inline-block;\n  width: 11px;\n  height: 11px;\n  border: 2px solid currentColor;\n  border-right-color: transparent;\n  border-radius: 50%;\n  animation: _ngcontent-%COMP%_dspin 0.6s linear infinite;\n}\n@keyframes _ngcontent-%COMP%_dspin {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.pagination[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 12px 16px;\n  border-top: 1px solid #E5E7EB;\n  font-size: 12px;\n  color: #6B7280;\n  flex-wrap: wrap;\n  gap: 8px;\n}\n.pagination__pages[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n}\n.pag-btn[_ngcontent-%COMP%] {\n  min-width: 30px;\n  height: 30px;\n  padding: 0 8px;\n  font-size: 12px;\n  border: 1px solid #E5E7EB;\n  border-radius: 6px;\n  background: #fff;\n  cursor: pointer;\n  color: #4B5563;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: background 0.12s;\n}\n.pag-btn[_ngcontent-%COMP%]:hover:not(:disabled) {\n  background: #F3F4F6;\n}\n.pag-btn.active[_ngcontent-%COMP%] {\n  background: #185FA5;\n  border-color: #185FA5;\n  color: #fff;\n  font-weight: 600;\n}\n.pag-btn[_ngcontent-%COMP%]:disabled {\n  opacity: 0.4;\n  cursor: not-allowed;\n}\n@media (max-width: 640px) {\n  .d-right[_ngcontent-%COMP%] {\n    flex-direction: row;\n    align-items: center;\n    margin-left: 0;\n    margin-top: 10px;\n  }\n  .demande-item[_ngcontent-%COMP%] {\n    flex-wrap: wrap;\n  }\n  .d-msg[_ngcontent-%COMP%] {\n    max-width: 100%;\n  }\n}\n/*# sourceMappingURL=adminrh-demande-session.component.css.map */"] });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AdminrhDemandeSessionComponent, [{
+    type: Component,
+    args: [{ selector: "app-adminrh-demande-session", standalone: true, imports: [RouterLink, FormsModule, CommonModule, MatSortModule, CustomPaginationComponent], template: `<div class="page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <h1>Demandes de session</h1>
+      <p>G\xE9rez et traitez les demandes d'inscription aux sessions de formation</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn-outline">
+        <i class="isax isax-export"></i> Exporter
+      </button>
+      <button type="button" class="btn-primary" (click)="refreshData()" [disabled]="loading">
+        <i class="isax isax-refresh"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi__icon ki-amber"><i class="isax isax-clock"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">En attente</div>
+        <div class="kpi__val">{{ demandesEnAttente }}</div>
+        <div class="kpi__delta">\xE0 traiter</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-green"><i class="isax isax-tick-circle"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Approuv\xE9es</div>
+        <div class="kpi__val">{{ demandesValidees }}</div>
+        <div class="kpi__delta">cette p\xE9riode</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-red"><i class="isax isax-close-circle"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Refus\xE9es</div>
+        <div class="kpi__val">{{ demandesRefusees }}</div>
+        <div class="kpi__delta">cette p\xE9riode</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-amber"><i class="isax isax-calendar-1"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Total</div>
+        <div class="kpi__val">{{ totalDemandes }}</div>
+        <div class="kpi__delta">sessions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main card -->
+  <div class="main-card">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="isax isax-search-normal-1"></i>
+        <input type="search" placeholder="Rechercher session, employ\xE9..."
+               [(ngModel)]="searchDataValue" [ngModelOptions]="{standalone:true}"
+               (ngModelChange)="searchData($event)">
+      </div>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'en_attente'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'en_attente' ? 'tous' : 'en_attente')">
+        <i class="isax isax-clock"></i> En attente
+      </button>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'validee'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'validee' ? 'tous' : 'validee')">
+        <i class="isax isax-tick-circle"></i> Approuv\xE9es
+      </button>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'refusee'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'refusee' ? 'tous' : 'refusee')">
+        <i class="isax isax-close-circle"></i> Refus\xE9es
+      </button>
+      <div class="toolbar-spacer"></div>
+      <button type="button" class="sort-btn">
+        <i class="isax isax-arrow-3"></i> Plus r\xE9cent
+      </button>
+    </div>
+
+    <!-- Alerts -->
+    <div *ngIf="successMessage" class="alert alert--ok">
+      <i class="isax isax-tick-circle"></i> {{ successMessage }}
+      <button type="button" class="alert__close" (click)="clearMessages()"><i class="isax isax-close-circle"></i></button>
+    </div>
+    <div *ngIf="error" class="alert alert--err">
+      <i class="isax isax-warning-2"></i> {{ error }}
+      <button type="button" class="alert__close" (click)="clearMessages()"><i class="isax isax-close-circle"></i></button>
+    </div>
+
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="skeletons">
+      <div *ngFor="let i of [1,2,3,4,5]" class="sk-item"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && !hasData" class="empty-state">
+      <i class="isax isax-calendar-1"></i>
+      <p>Aucune demande de session</p>
+    </div>
+
+    <!-- Demande list -->
+    <div *ngIf="!loading && hasData" class="demande-list">
+      <div *ngFor="let d of tableData; trackBy: trackByDemandeId" class="demande-item">
+
+        <!-- Left: avatar + type line -->
+        <div class="d-left">
+          <div class="d-av">{{ (d.employe?.prenom?.charAt(0) || '') + (d.employe?.nom?.charAt(0) || '') }}</div>
+          <div class="d-type-line tl-sess"></div>
+        </div>
+
+        <!-- Body -->
+        <div class="d-body">
+          <div class="d-name">{{ d.employe?.name || 'Employ\xE9 inconnu' }}</div>
+          <div class="d-company">{{ d.employe?.email || '\u2014' }}</div>
+          <div class="d-time">{{ formatDate(d.created_at) }}</div>
+
+          <div class="d-title">{{ d.session_formation?.titre || ('Session #' + d.session_formation_id) }}</div>
+
+          <div class="d-meta">
+            <span *ngIf="d.session_formation?.date_debut">
+              <i class="isax isax-calendar-1"></i> {{ formatDate(d.session_formation?.date_debut) }}
+            </span>
+            <span *ngIf="d.session_formation?.lieu">
+              <i class="isax isax-location"></i> {{ d.session_formation?.lieu }}
+            </span>
+            <span class="pb pb-{{ d.priorite }}">{{ d.priorite_display }}</span>
+          </div>
+
+          <div *ngIf="d.motif_demande" class="d-msg" [title]="d.motif_demande">
+            "{{ d.motif_demande }}"
+          </div>
+        </div>
+
+        <!-- Right: badges + actions -->
+        <div class="d-right">
+          <div class="d-badges">
+            <span class="sb"
+              [class.sb-pending]="d.statut === 'en_attente'"
+              [class.sb-approved]="d.statut === 'validee'"
+              [class.sb-rejected]="d.statut === 'refusee'"
+              [class.sb-cancelled]="d.statut === 'annulee'">
+              {{ d.statut_display }}
+            </span>
+            <span class="tb tb-sess">Session</span>
+          </div>
+          <div class="action-row">
+            <button *ngIf="canValidate(d)" type="button" class="act-btn act-approve" title="Approuver"
+                    [disabled]="validatingIds.has(d.id)" (click)="validerDemande(d)">
+              <span *ngIf="validatingIds.has(d.id)" class="act-spin"></span>
+              <i *ngIf="!validatingIds.has(d.id)" class="isax isax-tick-circle"></i>
+              Approuver
+            </button>
+            <button *ngIf="canRefuse(d)" type="button" class="act-btn act-reject" title="Refuser"
+                    [disabled]="refusingIds.has(d.id)" (click)="refuserDemande(d)">
+              <span *ngIf="refusingIds.has(d.id)" class="act-spin"></span>
+              <i *ngIf="!refusingIds.has(d.id)" class="isax isax-close-circle"></i>
+              Refuser
+            </button>
+            <button *ngIf="canCancel(d)" type="button" class="act-btn act-cancel" title="Annuler" (click)="annulerDemande(d)">
+              <i class="isax isax-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Empty filtered -->
+      <div *ngIf="!tableData.length" class="empty-state">
+        <i class="isax isax-search-normal-1"></i>
+        <p>Aucun r\xE9sultat</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <span>Affichage {{ (currentPage - 1) * pageSize + 1 }}\u2013{{ currentPage * pageSize > totalData ? totalData : currentPage * pageSize }} sur {{ totalData }} demandes</span>
+      <div class="pagination__pages">
+        <button type="button" class="pag-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button type="button" *ngFor="let p of pagesArray; let i = index"
+                class="pag-btn" [class.active]="currentPage === i + 1"
+                (click)="onPageChange(i + 1)">{{ i + 1 }}</button>
+        <button type="button" class="pag-btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+`, styles: ["/* src/app/features/adminrh/adminrh-demande-session/adminrh-demande-session.component.scss */\n.page {\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n  padding: 0 0 24px;\n}\n.page-header {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 12px;\n  flex-wrap: wrap;\n}\n.page-header__left h1 {\n  font-size: 20px;\n  font-weight: 600;\n  color: #111827;\n  margin: 0 0 4px;\n}\n.page-header__left p {\n  font-size: 13px;\n  color: #6B7280;\n  margin: 0;\n}\n.page-header__actions {\n  display: flex;\n  gap: 8px;\n  align-items: center;\n}\n.btn-outline {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 7px 14px;\n  font-size: 13px;\n  font-weight: 500;\n  color: #374151;\n  border: 1px solid #E5E7EB;\n  border-radius: 8px;\n  background: #fff;\n  cursor: pointer;\n  transition: background 0.12s, border-color 0.12s;\n}\n.btn-outline i {\n  font-size: 14px;\n}\n.btn-outline:hover {\n  background: #F9FAFB;\n  border-color: #D1D5DB;\n}\n.btn-primary {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 7px 14px;\n  font-size: 13px;\n  font-weight: 500;\n  color: #fff;\n  background: #185FA5;\n  border: none;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: opacity 0.12s;\n}\n.btn-primary i {\n  font-size: 14px;\n}\n.btn-primary:hover {\n  opacity: 0.88;\n}\n.btn-primary:disabled {\n  opacity: 0.5;\n  cursor: not-allowed;\n}\n.kpi-row {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  gap: 12px;\n}\n@media (max-width: 900px) {\n  .kpi-row {\n    grid-template-columns: repeat(2, 1fr);\n  }\n}\n@media (max-width: 480px) {\n  .kpi-row {\n    grid-template-columns: 1fr;\n  }\n}\n.kpi {\n  background: #fff;\n  border: 1px solid #E5E7EB;\n  border-radius: 12px;\n  padding: 14px 16px;\n  display: flex;\n  align-items: flex-start;\n  gap: 14px;\n}\n.kpi__icon {\n  width: 38px;\n  height: 38px;\n  border-radius: 8px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 18px;\n  flex-shrink: 0;\n}\n.kpi__icon.ki-amber {\n  background: #FEF3C7;\n  color: #BA7517;\n}\n.kpi__icon.ki-blue {\n  background: #DBEAFE;\n  color: #185FA5;\n}\n.kpi__icon.ki-green {\n  background: #DCFCE7;\n  color: #166534;\n}\n.kpi__icon.ki-red {\n  background: #FEE2E2;\n  color: #991B1B;\n}\n.kpi__icon.ki-purple {\n  background: #EDE9FE;\n  color: #7C3AED;\n}\n.kpi__icon.ki-teal {\n  background: #CCFBF1;\n  color: #0F766E;\n}\n.kpi__body {\n  flex: 1;\n  min-width: 0;\n}\n.kpi__label {\n  font-size: 12px;\n  color: #6B7280;\n  margin-bottom: 4px;\n}\n.kpi__val {\n  font-size: 24px;\n  font-weight: 600;\n  color: #111827;\n  line-height: 1;\n}\n.kpi__delta {\n  font-size: 11px;\n  margin-top: 3px;\n  color: #9CA3AF;\n}\n.main-card {\n  background: #fff;\n  border: 1px solid #E5E7EB;\n  border-radius: 16px;\n  overflow: hidden;\n}\n.tab-bar {\n  display: flex;\n  border-bottom: 1px solid #E5E7EB;\n  padding: 0 16px;\n  gap: 4px;\n  overflow-x: auto;\n  scrollbar-width: none;\n}\n.tab-bar::-webkit-scrollbar {\n  display: none;\n}\n.tab {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 12px 14px;\n  font-size: 13px;\n  font-weight: 500;\n  color: #6B7280;\n  border-bottom: 2px solid transparent;\n  cursor: pointer;\n  white-space: nowrap;\n  background: none;\n  border-top: none;\n  border-left: none;\n  border-right: none;\n  transition: color 0.12s, border-color 0.12s;\n}\n.tab .tab-count {\n  background: #F3F4F6;\n  color: #6B7280;\n  border-radius: 20px;\n  font-size: 11px;\n  padding: 1px 7px;\n  font-weight: 600;\n  transition: background 0.12s, color 0.12s;\n}\n.tab:hover {\n  color: #374151;\n}\n.tab.active {\n  color: #185FA5;\n  border-bottom-color: #185FA5;\n}\n.tab.active .tab-count {\n  background: #DBEAFE;\n  color: #185FA5;\n}\n.toolbar {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 8px;\n  padding: 12px 16px;\n  border-bottom: 1px solid #E5E7EB;\n}\n.search-box {\n  position: relative;\n  flex: 1;\n  min-width: 180px;\n  max-width: 280px;\n}\n.search-box i {\n  position: absolute;\n  left: 10px;\n  top: 50%;\n  transform: translateY(-50%);\n  font-size: 14px;\n  color: #9CA3AF;\n  pointer-events: none;\n}\n.search-box input {\n  width: 100%;\n  padding: 7px 10px 7px 32px;\n  font-size: 13px;\n  border: 1px solid #E5E7EB;\n  border-radius: 8px;\n  background: #F9FAFB;\n  outline: none;\n  color: #374151;\n  transition: border-color 0.15s, background 0.15s;\n}\n.search-box input::placeholder {\n  color: #9CA3AF;\n}\n.search-box input:focus {\n  border-color: #185FA5;\n  background: #fff;\n}\n.filter-chip {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 5px 11px;\n  font-size: 12px;\n  font-weight: 500;\n  color: #4B5563;\n  border: 1px solid #E5E7EB;\n  border-radius: 20px;\n  background: #fff;\n  cursor: pointer;\n  transition:\n    background 0.12s,\n    border-color 0.12s,\n    color 0.12s;\n  white-space: nowrap;\n}\n.filter-chip i {\n  font-size: 13px;\n}\n.filter-chip:hover {\n  background: #F9FAFB;\n  border-color: #D1D5DB;\n}\n.filter-chip.active {\n  background: #DBEAFE;\n  border-color: #185FA5;\n  color: #185FA5;\n}\n.toolbar-spacer {\n  margin-left: auto;\n}\n.sort-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  padding: 5px 11px;\n  font-size: 12px;\n  font-weight: 500;\n  color: #4B5563;\n  border: 1px solid #E5E7EB;\n  border-radius: 8px;\n  background: #fff;\n  cursor: pointer;\n  transition: background 0.12s;\n}\n.sort-btn i {\n  font-size: 13px;\n}\n.sort-btn:hover {\n  background: #F9FAFB;\n}\n.alert {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin: 12px 16px 0;\n  padding: 9px 14px;\n  border-radius: 8px;\n  font-size: 13px;\n  border-left: 3px solid;\n}\n.alert__close {\n  margin-left: auto;\n  background: none;\n  border: none;\n  cursor: pointer;\n  font-size: 15px;\n  color: inherit;\n  opacity: 0.65;\n  padding: 0;\n}\n.alert__close:hover {\n  opacity: 1;\n}\n.alert--ok {\n  background: #F0FDF4;\n  border-color: #4ADE80;\n  color: #166534;\n}\n.alert--err {\n  background: #FEF2F2;\n  border-color: #F87171;\n  color: #991B1B;\n}\n.skeletons {\n  display: flex;\n  flex-direction: column;\n  gap: 1px;\n}\n.sk-item {\n  height: 84px;\n  background: #F3F4F6;\n  animation: shimmer 1.4s ease-in-out infinite;\n}\n.sk-item:first-child {\n  border-radius: 12px 12px 0 0;\n}\n.sk-item:last-child {\n  border-radius: 0 0 12px 12px;\n}\n@keyframes shimmer {\n  0%, 100% {\n    opacity: 1;\n  }\n  50% {\n    opacity: 0.45;\n  }\n}\n.empty-state {\n  text-align: center;\n  padding: 52px 20px;\n  color: #9CA3AF;\n}\n.empty-state i {\n  font-size: 2.8rem;\n  display: block;\n  margin-bottom: 12px;\n  opacity: 0.5;\n}\n.empty-state p {\n  font-size: 14px;\n  margin: 0;\n}\n.demande-list {\n  display: flex;\n  flex-direction: column;\n}\n.demande-item {\n  display: flex;\n  align-items: flex-start;\n  gap: 0;\n  padding: 16px;\n  border-bottom: 1px solid #F3F4F6;\n  transition: background 0.1s;\n}\n.demande-item:last-child {\n  border-bottom: none;\n}\n.demande-item:hover {\n  background: #F9FAFB;\n}\n.d-left {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 0;\n  margin-right: 14px;\n  flex-shrink: 0;\n}\n.d-av {\n  width: 38px;\n  height: 38px;\n  border-radius: 50%;\n  background: #DBEAFE;\n  color: #185FA5;\n  font-size: 13px;\n  font-weight: 700;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n  letter-spacing: 0.02em;\n  text-transform: uppercase;\n}\n.d-type-line {\n  width: 2px;\n  flex: 1;\n  min-height: 20px;\n  margin-top: 4px;\n  border-radius: 2px;\n}\n.d-type-line.tl-form {\n  background: #185FA5;\n}\n.d-type-line.tl-parc {\n  background: #7C3AED;\n}\n.d-type-line.tl-cat {\n  background: #0F766E;\n}\n.d-type-line.tl-sess {\n  background: #BA7517;\n}\n.d-body {\n  flex: 1;\n  min-width: 0;\n}\n.d-name {\n  font-size: 13px;\n  font-weight: 600;\n  color: #111827;\n}\n.d-company {\n  font-size: 12px;\n  color: #9CA3AF;\n  margin-top: 1px;\n}\n.d-time {\n  font-size: 11px;\n  color: #9CA3AF;\n  margin-top: 1px;\n}\n.d-title {\n  margin-top: 7px;\n  font-size: 14px;\n  font-weight: 500;\n  color: #1F2937;\n}\n.d-meta {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin-top: 5px;\n  font-size: 12px;\n  color: #6B7280;\n}\n.d-meta span {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n}\n.d-meta i {\n  font-size: 13px;\n}\n.d-msg {\n  margin-top: 8px;\n  padding: 7px 10px;\n  background: #F9FAFB;\n  border-left: 3px solid #E5E7EB;\n  border-radius: 0 6px 6px 0;\n  font-size: 12px;\n  color: #4B5563;\n  font-style: italic;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  max-width: 480px;\n}\n.d-right {\n  display: flex;\n  flex-direction: column;\n  align-items: flex-end;\n  gap: 8px;\n  margin-left: 16px;\n  flex-shrink: 0;\n}\n.d-badges {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  flex-wrap: wrap;\n  justify-content: flex-end;\n}\n.sb {\n  font-size: 11px;\n  font-weight: 600;\n  padding: 3px 9px;\n  border-radius: 20px;\n  white-space: nowrap;\n}\n.sb-pending {\n  background: #FEF3C7;\n  color: #BA7517;\n}\n.sb-approved {\n  background: #DCFCE7;\n  color: #166534;\n}\n.sb-rejected {\n  background: #FEE2E2;\n  color: #991B1B;\n}\n.sb-cancelled {\n  background: #F3F4F6;\n  color: #4B5563;\n}\n.tb {\n  font-size: 11px;\n  font-weight: 500;\n  padding: 3px 9px;\n  border-radius: 20px;\n  white-space: nowrap;\n}\n.tb-form {\n  background: #DBEAFE;\n  color: #185FA5;\n}\n.tb-parc {\n  background: #EDE9FE;\n  color: #7C3AED;\n}\n.tb-cat {\n  background: #CCFBF1;\n  color: #0F766E;\n}\n.tb-sess {\n  background: #FEF3C7;\n  color: #BA7517;\n}\n.pb {\n  font-size: 11px;\n  font-weight: 500;\n  padding: 3px 9px;\n  border-radius: 20px;\n  white-space: nowrap;\n}\n.pb-basse {\n  background: #F3F4F6;\n  color: #4B5563;\n}\n.pb-normale {\n  background: #DBEAFE;\n  color: #185FA5;\n}\n.pb-haute {\n  background: #FEF3C7;\n  color: #BA7517;\n}\n.pb-urgente {\n  background: #FEE2E2;\n  color: #991B1B;\n}\n.action-row {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n}\n.act-btn {\n  height: 30px;\n  padding: 0 10px;\n  font-size: 12px;\n  font-weight: 500;\n  border-radius: 6px;\n  border: 1px solid #E5E7EB;\n  cursor: pointer;\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  background: #fff;\n  color: #4B5563;\n  transition:\n    background 0.12s,\n    color 0.12s,\n    border-color 0.12s;\n  white-space: nowrap;\n}\n.act-btn i {\n  font-size: 13px;\n}\n.act-btn:disabled {\n  opacity: 0.4;\n  cursor: not-allowed;\n}\n.act-btn.act-approve:not(:disabled):hover {\n  background: #DCFCE7;\n  color: #166534;\n  border-color: #86EFAC;\n}\n.act-btn.act-reject:not(:disabled):hover {\n  background: #FEE2E2;\n  color: #991B1B;\n  border-color: #FCA5A5;\n}\n.act-btn.act-cancel:not(:disabled):hover {\n  background: #FEF3C7;\n  color: #BA7517;\n  border-color: #FCD34D;\n}\n.act-btn.act-view:not(:disabled):hover {\n  background: #DBEAFE;\n  color: #185FA5;\n  border-color: #93C5FD;\n}\n.act-spin {\n  display: inline-block;\n  width: 11px;\n  height: 11px;\n  border: 2px solid currentColor;\n  border-right-color: transparent;\n  border-radius: 50%;\n  animation: dspin 0.6s linear infinite;\n}\n@keyframes dspin {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.pagination {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 12px 16px;\n  border-top: 1px solid #E5E7EB;\n  font-size: 12px;\n  color: #6B7280;\n  flex-wrap: wrap;\n  gap: 8px;\n}\n.pagination__pages {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n}\n.pag-btn {\n  min-width: 30px;\n  height: 30px;\n  padding: 0 8px;\n  font-size: 12px;\n  border: 1px solid #E5E7EB;\n  border-radius: 6px;\n  background: #fff;\n  cursor: pointer;\n  color: #4B5563;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: background 0.12s;\n}\n.pag-btn:hover:not(:disabled) {\n  background: #F3F4F6;\n}\n.pag-btn.active {\n  background: #185FA5;\n  border-color: #185FA5;\n  color: #fff;\n  font-weight: 600;\n}\n.pag-btn:disabled {\n  opacity: 0.4;\n  cursor: not-allowed;\n}\n@media (max-width: 640px) {\n  .d-right {\n    flex-direction: row;\n    align-items: center;\n    margin-left: 0;\n    margin-top: 10px;\n  }\n  .demande-item {\n    flex-wrap: wrap;\n  }\n  .d-msg {\n    max-width: 100%;\n  }\n}\n/*# sourceMappingURL=adminrh-demande-session.component.css.map */\n"] }]
+  }], () => [{ type: Router }, { type: PaginationService }, { type: DemandeFormationService }, { type: AuthService }], null);
+})();
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(AdminrhDemandeSessionComponent, { className: "AdminrhDemandeSessionComponent", filePath: "src/app/features/adminrh/adminrh-demande-session/adminrh-demande-session.component.ts", lineNumber: 29 });
+})();
+export {
+  AdminrhDemandeSessionComponent
+};
+//# sourceMappingURL=chunk-BI7UIUAS.js.map

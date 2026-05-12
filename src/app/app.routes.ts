@@ -175,6 +175,7 @@ export const routes: Routes = [
                 {path:'adminrh-quiz-details',loadComponent:()=>import ('./features/adminrh/adminrh-quiz-details/adminrh-quiz-details.component').then((m)=>m.AdminrhQuizDetailsComponent)},
                 {path:'adminrh-quiz',loadComponent:()=>import ('./features/adminrh/adminrh-quiz/adminrh-quiz.component').then((m)=>m.AdminrhQuizComponent)},
                 {path:'adminrh-certificate',loadComponent:()=>import ('./features/adminrh/adminrh-certificate/adminrh-certificate.component').then((m)=>m.AdminrhCertificateComponent)},
+                {path:'adminrh-certificate-modele',loadComponent:()=>import ('./features/adminrh/adminrh-certificate/adminrh-certificate.component').then((m)=>m.AdminrhCertificateComponent)},
                 {path:'adminrh-certifier',loadComponent:()=>import ('./features/adminrh/adminrh-certifier/adminrh-certifier.component').then((m)=>m.AdminrhCertifierComponent)},
                 {path:'adminrh-categorie',loadComponent:()=>import ('./features/adminrh/adminrh-categorie/adminrh-categorie.component').then((m)=>m.AdminrhCategorieComponent)},
 

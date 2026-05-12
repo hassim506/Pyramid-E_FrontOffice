@@ -69,17 +69,28 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6 mb-3" *ngIf="!isEditMode">
-                            <label class="form-label">Mot de passe <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" formControlName="password">
+                        <!-- Toggle modifier le mot de passe (mode édition) -->
+                        <div class="col-md-12 mb-2" *ngIf="isEditMode">
+                            <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    (click)="togglePasswordFields()">
+                                <i class="isax me-1" [class.isax-lock]="!showPasswordFields" [class.isax-lock-slash]="showPasswordFields"></i>
+                                {{ showPasswordFields ? 'Annuler le changement de mot de passe' : 'Modifier le mot de passe' }}
+                            </button>
+                        </div>
+
+                        <div class="col-md-6 mb-3" *ngIf="showPasswordFields">
+                            <label class="form-label">Mot de passe <span *ngIf="!isEditMode" class="text-danger">*</span></label>
+                            <input type="password" class="form-control" formControlName="password"
+                                   [placeholder]="isEditMode ? 'Nouveau mot de passe' : ''">
                             <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="text-danger mt-1">
                                 <small>Mot de passe requis (min. 8 caractères)</small>
                             </div>
                         </div>
 
-                        <div class="col-md-6 mb-3" *ngIf="!isEditMode">
-                            <label class="form-label">Confirmer le mot de passe <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" formControlName="password_confirmation">
+                        <div class="col-md-6 mb-3" *ngIf="showPasswordFields">
+                            <label class="form-label">Confirmer le mot de passe <span *ngIf="!isEditMode" class="text-danger">*</span></label>
+                            <input type="password" class="form-control" formControlName="password_confirmation"
+                                   [placeholder]="isEditMode ? 'Confirmer le nouveau mot de passe' : ''">
                             <div *ngIf="userForm.get('password_confirmation')?.invalid && userForm.get('password_confirmation')?.touched" class="text-danger mt-1">
                                 <small>Confirmation du mot de passe requise</small>
                             </div>
@@ -88,36 +99,15 @@
                 </form>
             </div>
                 <div class="modal-footer">
-  <!-- Debug info - à supprimer après résolution -->
-  <small class="text-muted me-auto">
-    Mode: {{isEditMode ? 'Édition' : 'Création'}} | 
-    Formulaire valide: {{userForm.valid}} | 
-    Loading: {{loading}}
-  </small>
-  
-  <button type="button" class="btn btn-secondary me-2" (click)="hideDialog()" [disabled]="loading">
-    Annuler
-  </button>
-  
-  <button 
-    type="button" 
-    class="btn btn-primary" 
-    (click)="saveUser()" 
-    [disabled]="!userForm.valid || loading">
-    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
-    {{isEditMode ? 'Mettre à jour' : 'Créer'}}
-  </button>
-</div>
-            <!-- <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="hideDialog()">
-                    <i class="isax isax-close-circle me-1"></i>Annuler
-                </button>
-                <button type="button" class="btn btn-primary" (click)="saveUser()" [disabled]="!userForm.valid || loading">
-                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
-                    <i *ngIf="!loading" class="isax isax-tick-circle me-1"></i>
-                    {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
-                </button>
-            </div> -->
+                    <button type="button" class="btn btn-secondary" (click)="hideDialog()" [disabled]="loading">
+                        <i class="isax isax-close-circle me-1"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-primary" (click)="saveUser()" [disabled]="!userForm.valid || loading">
+                        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                        <i *ngIf="!loading" class="isax isax-tick-circle me-1"></i>
+                        {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
+                    </button>
+                </div>
         </div>
     </div>
 </div>

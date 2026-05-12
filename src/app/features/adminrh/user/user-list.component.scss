@@ -345,6 +345,13 @@ $radius-lg: 12px;
 
 .ul-date { font-size: 12px; color: $gray-400; }
 
+.ul-meta {
+  font-size: 12px;
+  color: $gray-600;
+
+  &--mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+}
+
 // ─────────────────────────────────────────
 // ACTIONS
 // ─────────────────────────────────────────

@@ -1,5 +1,5 @@
 <!-- Loading -->
-<div *ngIf="loading" class="ip-loader">
+<div *ngIf="loading && quizzes.length === 0" class="ip-loader">
   <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement...</span></div>
 </div>
 
@@ -9,7 +9,7 @@
   <button type="button" class="btn-close" (click)="error = ''"></button>
 </div>
 
-<ng-container *ngIf="!loading">
+<ng-container *ngIf="!loading || quizzes.length > 0">
 
   <!-- Page header -->
   <div class="ip-page-head">
@@ -74,14 +74,12 @@
             </td>
             <td>
               <div class="ip-actions">
-                <a [routerLink]="['/instructor/instructor-quiz-questions', quiz.id]"
-                   class="ip-action-btn" title="Questions">
+                <button type="button" class="ip-action-btn" title="Détails" (click)="openDetailsModal(quiz)">
                   <i class="isax isax-eye"></i>
-                </a>
-                <a [routerLink]="['/quizes', quiz.id, 'edit']"
-                   class="ip-action-btn" title="Modifier">
+                </button>
+                <button type="button" class="ip-action-btn" title="Modifier" (click)="openEditModal(quiz)">
                   <i class="isax isax-edit-2"></i>
-                </a>
+                </button>
                 <button type="button" class="ip-action-btn text-danger" title="Supprimer"
                         (click)="deleteQuiz(quiz)">
                   <i class="isax isax-trash"></i>
@@ -101,3 +99,227 @@
   </div>
 
 </ng-container>
+
+<!-- ── MODAL DÉTAILS ─────────────────────────────────────────────────────── -->
+<div class="modal fade" id="quiz_details_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered ip-modal-dialog">
+    <div class="modal-content ip-modal-content" *ngIf="selectedQuiz">
+
+      <!-- Header -->
+      <div class="ip-modal-header">
+        <div class="ip-modal-icon">
+          <i class="isax isax-award"></i>
+        </div>
+        <div>
+          <h5 class="ip-modal-title">Détails du quiz</h5>
+          <p class="ip-modal-sub">Informations complètes sur le quiz</p>
+        </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="ip-modal-divider"></div>
+
+      <!-- Body -->
+      <div class="ip-modal-body">
+
+        <div class="ip-detail-block">
+          <div class="ip-detail-icon-wrap">
+            <i class="isax isax-award"></i>
+          </div>
+          <div>
+            <div class="ip-detail-label">Titre</div>
+            <div class="ip-detail-value">{{ selectedQuiz.titre }}</div>
+          </div>
+        </div>
+
+        <div class="ip-detail-block" *ngIf="selectedQuiz.description">
+          <div class="ip-detail-icon-wrap">
+            <i class="isax isax-document-text"></i>
+          </div>
+          <div>
+            <div class="ip-detail-label">Description</div>
+            <div class="ip-detail-value">{{ selectedQuiz.description }}</div>
+          </div>
+        </div>
+
+        <div class="ip-detail-row">
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-book-1"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Formation associée</div>
+              <div class="ip-detail-value">Formation #{{ selectedQuiz.formation_id }}</div>
+            </div>
+          </div>
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-clock"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Durée</div>
+              <div class="ip-detail-value">{{ selectedQuiz.duree_minutes ? selectedQuiz.duree_minutes + ' min' : 'Non définie' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ip-detail-row">
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-medal-star"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Score minimum</div>
+              <div class="ip-detail-value">{{ selectedQuiz.score_minimum ? selectedQuiz.score_minimum + '%' : 'Non défini' }}</div>
+            </div>
+          </div>
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-repeat"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Tentatives max</div>
+              <div class="ip-detail-value">{{ selectedQuiz.tentatives_max ?? 'Illimitées' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ip-detail-row">
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-status"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Statut</div>
+              <div>
+                <span class="ip-status-badge" [class.ip-status-active]="selectedQuiz.is_active" [class.ip-status-inactive]="!selectedQuiz.is_active">
+                  <i class="fa-solid fa-circle"></i>
+                  {{ selectedQuiz.is_active ? 'Actif' : 'Inactif' }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-calendar"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Créé le</div>
+              <div class="ip-detail-value">{{ selectedQuiz.created_at | date:'dd/MM/yyyy' }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ip-modal-divider"></div>
+
+      <!-- Footer -->
+      <div class="ip-modal-footer">
+        <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Fermer</button>
+        <a [routerLink]="['/instructor/instructor-quiz-questions', selectedQuiz.id]"
+           class="ip-btn ip-btn--primary" data-bs-dismiss="modal">
+          <i class="isax isax-eye"></i> Voir les questions
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL MODIFICATION ────────────────────────────────────────────────── -->
+<div class="modal fade" id="quiz_edit_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered ip-modal-dialog">
+    <div class="modal-content ip-modal-content">
+
+      <!-- Header -->
+      <div class="ip-modal-header">
+        <div class="ip-modal-icon">
+          <i class="isax isax-edit-2"></i>
+        </div>
+        <div>
+          <h5 class="ip-modal-title">Modifier le quiz</h5>
+          <p class="ip-modal-sub">Mettez à jour les informations du quiz</p>
+        </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="ip-modal-divider"></div>
+
+      <!-- Body -->
+      <div class="ip-modal-body" *ngIf="editForm">
+        <form [formGroup]="editForm">
+
+          <div class="ip-field">
+            <label class="ip-label">Titre <span class="ip-required">*</span></label>
+            <input type="text" class="ip-input" formControlName="titre" placeholder="Titre du quiz">
+          </div>
+
+          <div class="ip-field">
+            <label class="ip-label">Description</label>
+            <textarea class="ip-input ip-textarea" formControlName="description" rows="3"
+                      placeholder="Description du quiz (optionnel)"></textarea>
+          </div>
+
+          <div class="ip-field-row">
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Durée (minutes)</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-clock ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="duree_minutes"
+                       placeholder="Ex. : 30" min="1">
+              </div>
+            </div>
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Score minimum (%)</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-medal-star ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="score_minimum"
+                       placeholder="Ex. : 60" min="0" max="100">
+              </div>
+            </div>
+          </div>
+
+          <div class="ip-field-row">
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Tentatives maximum</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-repeat ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="tentatives_max"
+                       placeholder="Illimitées si vide" min="1">
+              </div>
+            </div>
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Statut</label>
+              <div class="ip-toggle-row">
+                <span class="ip-toggle-label">{{ editForm.get('is_active')?.value ? 'Actif' : 'Inactif' }}</span>
+                <label class="ip-toggle">
+                  <input type="checkbox" formControlName="is_active">
+                  <span class="ip-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="editError" class="alert alert-danger mt-2 py-2 small">{{ editError }}</div>
+
+        </form>
+      </div>
+
+      <div class="ip-modal-divider"></div>
+
+      <!-- Footer -->
+      <div class="ip-modal-footer">
+        <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="ip-btn ip-btn--primary"
+                [disabled]="editForm?.invalid || saving"
+                (click)="saveEdit()">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm me-1"></span>
+          <i *ngIf="!saving" class="isax isax-tick-circle me-1"></i>
+          Enregistrer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

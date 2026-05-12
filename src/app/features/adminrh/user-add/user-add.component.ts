@@ -21,9 +21,12 @@ export class UserAddComponent implements OnInit, OnChanges {
   @Output() onSave = new EventEmitter<void>();
 
   userForm!: FormGroup;
-  loading: boolean = false;
+  loading = false;
+  errorMessage = '';
   clients: Client[] = [];
   companies: Company[] = [];
+  roles: any[] = [];
+  showPasswordFields = false;
 
   constructor(
     private fb: FormBuilder,
@@ -35,30 +38,79 @@ export class UserAddComponent implements OnInit, OnChanges {
     this.initForm();
     this.loadClients();
     this.loadCompanies();
+    this.loadRoles();
+  }
+
+  loadRoles(): void {
+    this.userService.getRoles().subscribe({
+      next: (response: any) => {
+        if (Array.isArray(response)) this.roles = response;
+        else if (response?.data) this.roles = response.data;
+        else if (response?.roles) this.roles = response.roles;
+        else this.roles = [];
+      },
+      error: () => {
+        this.roles = [
+          { id: 2, name: 'Employé' },
+          { id: 3, name: 'Formateur' },
+          { id: 4, name: 'Responsable RH' },
+          { id: 5, name: 'Responsable RH Groupe' },
+        ];
+      }
+    });
   }
 
   
   ngOnChanges() {
+    this.errorMessage = '';
     if (this.visible && this.userData && this.isEditMode) {
+      this.showPasswordFields = false;
+      this.initForm();
       this.populateForm();
     } else if (this.visible && !this.isEditMode) {
+      this.showPasswordFields = true;
+      this.initForm();
       this.resetForm();
     }
   }
 
   initForm() {
+    const pwValidators = (!this.isEditMode) ? [Validators.required, Validators.minLength(8)] : [];
     this.userForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prenom: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       numero: [''],
+      matricule: [''],
+      direction: [''],
       fonction: [''],
       role_id: ['', Validators.required],
       entreprise_id: [''],
       statut: [1, Validators.required],
-      password: ['', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]],
-      password_confirmation: ['', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]]
+      password: ['', pwValidators],
+      password_confirmation: ['', pwValidators],
     });
+    this.userForm.addValidators(this.passwordMatchValidator);
+  }
+
+  private passwordMatchValidator(control: { get: (k: string) => any }) {
+    const pw  = control.get('password')?.value;
+    const pwc = control.get('password_confirmation')?.value;
+    if (!pw && !pwc) return null;
+    return pw === pwc ? null : { passwordMismatch: true };
+  }
+
+  togglePasswordFields(): void {
+    this.showPasswordFields = !this.showPasswordFields;
+    const pwValidators = this.showPasswordFields ? [Validators.required, Validators.minLength(8)] : [];
+    this.userForm.get('password')?.setValidators(pwValidators);
+    this.userForm.get('password_confirmation')?.setValidators(pwValidators);
+    this.userForm.get('password')?.updateValueAndValidity();
+    this.userForm.get('password_confirmation')?.updateValueAndValidity();
+    this.userForm.updateValueAndValidity();
+    if (!this.showPasswordFields) {
+      this.userForm.patchValue({ password: '', password_confirmation: '' });
+    }
   }
 
   loadClients() {
@@ -81,14 +133,20 @@ export class UserAddComponent implements OnInit, OnChanges {
 
   populateForm() {
     if (this.userData) {
+      const rawRoleId = this.userData.role
+        ? (typeof this.userData.role === 'object' ? (this.userData.role as any).id : this.userData.role_id)
+        : this.userData.role_id;
+
       this.userForm.patchValue({
-        nom: this.userData.nom,
-        prenom: this.userData.prenom,
-        email: this.userData.email,
-        numero: this.userData.numero,
-        fonction: this.userData.fonction,
-        role_id: this.userData.role,
-        entreprise_id: this.userData.entreprise_id,
+        nom: this.userData.nom || '',
+        prenom: this.userData.prenom || '',
+        email: this.userData.email || '',
+        numero: this.userData.numero || '',
+        matricule: this.userData.matricule || '',
+        direction: this.userData.direction || '',
+        fonction: this.userData.fonction || '',
+        role_id: rawRoleId ? String(rawRoleId) : '',
+        entreprise_id: this.userData.entreprise_id || '',
         statut: this.userData.statut
       });
     }
@@ -99,10 +157,14 @@ export class UserAddComponent implements OnInit, OnChanges {
   }
 
   saveUser() {
+  this.errorMessage = '';
   if (this.userForm.invalid) {
     Object.keys(this.userForm.controls).forEach(key => {
       this.userForm.get(key)?.markAsTouched();
     });
+    if (this.userForm.hasError('passwordMismatch')) {
+      this.errorMessage = 'Les mots de passe ne correspondent pas.';
+    }
     return;
   }
 
@@ -126,70 +188,28 @@ export class UserAddComponent implements OnInit, OnChanges {
   // Ajouter created_by (supposons que c'est l'utilisateur connecté avec ID 1)
   formData.created_by = 1;
 
-  console.log('===== DONNÉES ENVOYÉES =====');
-  console.log(JSON.stringify(formData, null, 2));
-  console.log('============================');
-
   if (this.isEditMode && this.userData) {
-    // En mode édition, supprimer password si vide
     if (!formData.password) {
       delete formData.password;
       delete formData.password_confirmation;
     }
 
     this.userService.updateUser(this.userData.id, formData).subscribe({
-      next: (response) => {
-        console.log('Utilisateur mis à jour:', response);
-        this.loading = false;
-        this.onSave.emit();
-        this.hideDialog();
-      },
+      next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
       error: (error) => {
-        console.error('===== ERREUR COMPLÈTE =====');
-        console.error('Status:', error.status);
-        console.error('Error object:', error);
-        console.error('Error.error:', error.error);
-        console.error('Error.error.errors:', error.error?.errors);
-        console.error('Error.error.message:', error.error?.message);
-        console.error('============================');
-        
-        let errorMessage = 'Erreur lors de la mise à jour';
-        if (error.error?.errors) {
-          errorMessage = Object.values(error.error.errors).flat().join('\n');
-        } else if (error.error?.message) {
-          errorMessage = error.error.message;
-        }
-        
-        alert(errorMessage);
+        this.errorMessage = error.error?.errors
+          ? Object.values(error.error.errors).flat().join(' · ')
+          : error.error?.message || 'Erreur lors de la mise à jour.';
         this.loading = false;
       }
     });
   } else {
     this.userService.createUser(formData).subscribe({
-      next: (response) => {
-        console.log('Utilisateur créé:', response);
-        this.loading = false;
-        this.onSave.emit();
-        this.hideDialog();
-      },
+      next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
       error: (error) => {
-        console.error('===== ERREUR COMPLÈTE =====');
-        console.error('Status:', error.status);
-        console.error('Error object:', error);
-        console.error('Error.error:', error.error);
-        console.error('Error.error.errors:', error.error?.errors);
-        console.error('Error.error.message:', error.error?.message);
-        console.error('============================');
-        
-        let errorMessage = 'Erreur lors de la création';
-        if (error.error?.errors) {
-          // Erreurs de validation Laravel
-          errorMessage = Object.values(error.error.errors).flat().join('\n');
-        } else if (error.error?.message) {
-          errorMessage = error.error.message;
-        }
-        
-        alert(errorMessage);
+        this.errorMessage = error.error?.errors
+          ? Object.values(error.error.errors).flat().join(' · ')
+          : error.error?.message || 'Erreur lors de la création.';
         this.loading = false;
       }
     });

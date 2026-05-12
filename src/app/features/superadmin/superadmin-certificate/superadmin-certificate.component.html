@@ -1,275 +1,314 @@
-<div class="certificate">
-  <div class="page-title d-flex align-items-center justify-content-between mb-4">
-    <h5>Gestion des Certificats</h5>
+<!-- Loading -->
+<div *ngIf="loading" class="ip-loader">
+  <div class="spinner-border" role="status"><span class="visually-hidden">Chargement...</span></div>
+</div>
+
+<!-- Error -->
+<div *ngIf="error" class="alert alert-danger alert-dismissible">
+  {{ error }}
+  <button type="button" class="btn-close" (click)="error = ''"></button>
+</div>
+
+<ng-container *ngIf="!loading">
+
+  <!-- Page header -->
+  <div class="ip-page-head">
     <div>
-      <button class="btn btn-primary me-2" (click)="loadCertificates()">
-        <i class="isax isax-refresh-circle me-1"></i>Actualiser
-      </button>
+      <h5 class="ip-page-head__title">
+        Certificats <span class="ip-count">{{ filteredCertificates.length }}</span>
+      </h5>
+      <p class="ip-page-head__sub">Gérez tous les certificats délivrés sur la plateforme</p>
+    </div>
+    <button type="button" class="ip-btn ip-btn--ghost" (click)="loadCertificates()">
+      <i class="isax isax-refresh"></i> Actualiser
+    </button>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="ip-kpi-row">
+    <div class="ip-kpi-card">
+      <div class="ip-kpi-icon"><i class="isax isax-award"></i></div>
+      <div>
+        <div class="ip-kpi-label">Total</div>
+        <div class="ip-kpi-value">{{ certificates.length }}</div>
+      </div>
+    </div>
+    <div class="ip-kpi-card">
+      <div class="ip-kpi-icon ip-kpi-icon--success"><i class="isax isax-tick-circle"></i></div>
+      <div>
+        <div class="ip-kpi-label">Valides</div>
+        <div class="ip-kpi-value">{{ totalValides }}</div>
+      </div>
+    </div>
+    <div class="ip-kpi-card">
+      <div class="ip-kpi-icon ip-kpi-icon--warn"><i class="isax isax-clock"></i></div>
+      <div>
+        <div class="ip-kpi-label">Expirés</div>
+        <div class="ip-kpi-value">{{ totalExpires }}</div>
+      </div>
+    </div>
+    <div class="ip-kpi-card">
+      <div class="ip-kpi-icon ip-kpi-icon--danger"><i class="isax isax-close-circle"></i></div>
+      <div>
+        <div class="ip-kpi-label">Révoqués</div>
+        <div class="ip-kpi-value">{{ totalRevoques }}</div>
+      </div>
     </div>
   </div>
 
-  <!-- Filtres et recherche -->
-  <div class="row mb-4">
-    <div class="col-md-4">
-      <div class="form-group">
-        <label class="form-label">Rechercher</label>
-        <input 
-          type="text" 
-          class="form-control" 
-          placeholder="Code, employé, formation..."
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="applyFilters()">
+  <!-- Filters -->
+  <div class="ip-card ip-filter-card">
+    <div class="ip-filter-row">
+      <div class="ip-filter-group ip-filter-group--search">
+        <div class="ip-input-icon-wrap">
+          <i class="isax isax-search-normal ip-input-icon"></i>
+          <input type="text" class="ip-input ip-input--icon"
+                 [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()"
+                 placeholder="Code, employé, formation…">
+        </div>
       </div>
-    </div>
-    <div class="col-md-3">
-      <div class="form-group">
-        <label class="form-label">Statut</label>
-        <select class="form-control" [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()">
+      <div class="ip-filter-group">
+        <select class="ip-input" [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()">
           <option value="">Tous les statuts</option>
           <option value="valide">Valide</option>
           <option value="expiré">Expiré</option>
           <option value="révoqué">Révoqué</option>
         </select>
       </div>
-    </div>
-    <div class="col-md-3">
-      <div class="form-group">
-        <label class="form-label">Entreprise</label>
-        <select class="form-control" [(ngModel)]="selectedEntreprise" (ngModelChange)="applyFilters()">
+      <div class="ip-filter-group">
+        <select class="ip-input" [(ngModel)]="selectedEntreprise" (ngModelChange)="applyFilters()">
           <option value="">Toutes les entreprises</option>
-          <option *ngFor="let entreprise of getUniqueEntreprises()" [value]="entreprise.id">
-            {{entreprise.nom}}
-          </option>
+          <option *ngFor="let e of getUniqueEntreprises()" [value]="e.id">{{ e.nom }}</option>
         </select>
       </div>
     </div>
-    <div class="col-md-2">
-      <div class="form-group">
-        <label class="form-label">Résultats</label>
-        <div class="form-control-plaintext">
-          {{filteredCertificates.length}} certificat(s)
+  </div>
+
+  <!-- Table -->
+  <div class="ip-card">
+    <div class="table-responsive">
+      <table class="table ip-table">
+        <thead>
+          <tr>
+            <th>Employé</th>
+            <th>Formation</th>
+            <th>Entreprise</th>
+            <th>Score</th>
+            <th>Délivré le</th>
+            <th>Expiration</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cert of getPaginatedCertificates()">
+            <td>
+              <div class="ip-user-cell">
+                <div class="ip-avatar"
+                     [style.background]="getAvatarStyle(cert.employe_id).bg"
+                     [style.color]="getAvatarStyle(cert.employe_id).color">
+                  {{ getInitials(cert.employe?.name || '') }}
+                </div>
+                <div>
+                  <div class="ip-user-name">{{ cert.employe?.prenom }} {{ cert.employe?.nom }}</div>
+                  <div class="ip-user-sub">{{ cert.employe?.fonction }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="ip-formation-name">{{ cert.formation?.titre }}</div>
+            </td>
+            <td>
+              <span class="ip-pill">
+                <i class="isax isax-building"></i> {{ cert.entreprise?.nom || '—' }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="cert.score_final" class="ip-score-badge"
+                    [style.color]="getScoreColor(cert.score_final)"
+                    [style.background]="parseFloat(cert.score_final) >= 80 ? '#ECFDF5' : parseFloat(cert.score_final) >= 60 ? '#FFFBEB' : '#FFF5F5'">
+                {{ cert.score_final }}%
+              </span>
+              <span *ngIf="!cert.score_final" class="text-muted">—</span>
+            </td>
+            <td><span class="text-muted">{{ cert.date_delivrance | date:'dd/MM/yyyy' }}</span></td>
+            <td>
+              <span *ngIf="cert.date_expiration && isExpiringSoon(cert)" class="ip-expire-warn">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                {{ cert.date_expiration | date:'dd/MM/yyyy' }}
+              </span>
+              <span *ngIf="cert.date_expiration && !isExpiringSoon(cert)" class="text-muted">
+                {{ cert.date_expiration | date:'dd/MM/yyyy' }}
+              </span>
+              <span *ngIf="!cert.date_expiration" class="text-muted">Illimitée</span>
+            </td>
+            <td>
+              <span class="ip-cert-badge"
+                    [class.ip-cert-badge--valide]="cert.statut === 'valide'"
+                    [class.ip-cert-badge--expire]="cert.statut === 'expiré'"
+                    [class.ip-cert-badge--revoque]="cert.statut === 'révoqué'">
+                <i class="fa-solid fa-circle"></i>
+                {{ cert.statut === 'valide' ? 'Valide' : cert.statut === 'expiré' ? 'Expiré' : 'Révoqué' }}
+              </span>
+            </td>
+            <td>
+              <div class="ip-actions">
+                <button type="button" class="ip-action-btn" title="Détails" (click)="openDetails(cert)">
+                  <i class="isax isax-eye"></i>
+                </button>
+                <button type="button" class="ip-action-btn" title="Télécharger PDF"
+                        (click)="downloadPdf(cert)">
+                  <i class="isax isax-document-download"></i>
+                </button>
+                <button type="button" *ngIf="cert.statut === 'valide'"
+                        class="ip-action-btn ip-action-btn--warn" title="Révoquer"
+                        (click)="revoke(cert)">
+                  <i class="isax isax-close-circle"></i>
+                </button>
+                <button type="button" *ngIf="cert.statut === 'révoqué'"
+                        class="ip-action-btn ip-action-btn--success" title="Réactiver"
+                        (click)="reactivate(cert)">
+                  <i class="isax isax-tick-circle"></i>
+                </button>
+                <button type="button" class="ip-action-btn text-danger" title="Supprimer"
+                        (click)="delete(cert)">
+                  <i class="isax isax-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredCertificates.length === 0">
+            <td colspan="8" class="ip-empty">
+              <i class="isax isax-award"></i>
+              <span>Aucun certificat trouvé</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="ip-pagination">
+      <button type="button" class="ip-page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        <i class="isax isax-arrow-left-2"></i>
+      </button>
+      <ng-container *ngFor="let p of pages">
+        <span *ngIf="p === -1" class="ip-page-ellipsis">…</span>
+        <button *ngIf="p !== -1" type="button" class="ip-page-btn"
+                [class.ip-page-btn--active]="p === currentPage"
+                (click)="goToPage(p)">{{ p }}</button>
+      </ng-container>
+      <button type="button" class="ip-page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+        <i class="isax isax-arrow-right-3"></i>
+      </button>
+    </div>
+  </div>
+
+</ng-container>
+
+<!-- ── MODAL DÉTAILS ─────────────────────────────────────────────────────── -->
+<div class="modal fade" id="sa_cert_details_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered ip-modal-dialog">
+    <div class="modal-content ip-modal-content" *ngIf="selectedCertificate">
+
+      <div class="ip-cert-accent" [style.background]="getScoreColor(selectedCertificate.score_final)"></div>
+
+      <div class="ip-modal-header">
+        <div class="ip-modal-icon"><i class="isax isax-award"></i></div>
+        <div>
+          <h5 class="ip-modal-title">Certificat de réussite</h5>
+          <p class="ip-modal-sub">N° {{ selectedCertificate.code_unique }}</p>
         </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
       </div>
-    </div>
-  </div>
+      <div class="ip-modal-divider"></div>
 
-  <!-- Message d'erreur -->
-  <div *ngIf="error" class="alert alert-danger mb-4">
-    {{error}}
-  </div>
+      <div class="ip-modal-body">
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-4">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Chargement...</span>
-    </div>
-  </div>
-
-  <!-- Liste des certificats -->
-  <div class="row">
-    <div *ngFor="let certificate of getPaginatedCertificates()" class="col-md-6 col-lg-4 mb-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <h6 class="card-title mb-0">{{certificate.code_unique}}</h6>
-            <span [class]="getStatusClass(certificate.statut)">{{certificate.statut}}</span>
-          </div>
-          
-          <div class="mb-2">
-            <strong>Employé:</strong> {{certificate.employe.prenom}} {{certificate.employe.nom}}
-          </div>
-          
-          <div class="mb-2">
-            <strong>Formation:</strong> {{certificate.formation.titre}}
-          </div>
-          
-          <div class="mb-2">
-            <strong>Entreprise:</strong> {{certificate.entreprise.nom}}
-          </div>
-          
-          <div class="mb-2">
-            <strong>Délivré le:</strong> {{formatDate(certificate.date_delivrance)}}
-          </div>
-          
-          <div *ngIf="certificate.date_expiration" class="mb-2">
-            <strong>Expire le:</strong> 
-            <span [class]="isExpired(certificate) ? 'text-danger' : 'text-muted'">
-              {{formatDate(certificate.date_expiration)}}
-            </span>
-          </div>
-          
-          <div *ngIf="certificate.score_final" class="mb-3">
-            <strong>Score:</strong> {{certificate.score_final}}%
-          </div>
-
-          <div class="d-flex justify-content-between">
-            <div class="btn-group">
-              <button 
-                class="btn btn-sm btn-outline-primary" 
-                (click)="viewCertificate(certificate)"
-                data-bs-toggle="modal" 
-                data-bs-target="#view_certificate">
-                <i class="isax isax-eye"></i>
-              </button>
-              
-              <button 
-                class="btn btn-sm btn-outline-success" 
-                (click)="downloadCertificate(certificate)">
-                <i class="isax isax-import"></i>
-              </button>
+        <div class="ip-cert-preview">
+          <div class="ip-cert-logo">
+            <div class="ip-cert-logo-mark" [style.background]="getScoreColor(selectedCertificate.score_final)">
+              {{ getInitials(selectedCertificate.employe?.name || '') }}
             </div>
+            <div>
+              <div class="ip-cert-logo-text">{{ selectedCertificate.employe?.prenom }} {{ selectedCertificate.employe?.nom }}</div>
+              <div class="ip-cert-logo-sub">{{ selectedCertificate.employe?.fonction }}</div>
+            </div>
+          </div>
+          <div class="ip-cert-label">Certificat de réussite</div>
+          <div class="ip-cert-action-text">a complété avec succès la formation</div>
+          <div class="ip-cert-formation-title" [style.color]="getScoreColor(selectedCertificate.score_final)">
+            {{ selectedCertificate.formation?.titre }}
+          </div>
+          <div class="ip-cert-score-row">
+            <div class="ip-cert-score-item">
+              <div class="ip-cert-score-val" [style.color]="getScoreColor(selectedCertificate.score_final)">
+                {{ selectedCertificate.score_final }}%
+              </div>
+              <div class="ip-cert-score-label">Score obtenu</div>
+            </div>
+            <div class="ip-cert-divider-v"></div>
+            <div class="ip-cert-score-item">
+              <div class="ip-cert-score-val">{{ selectedCertificate.formation?.duree_totale || '—' }}h</div>
+              <div class="ip-cert-score-label">Durée totale</div>
+            </div>
+          </div>
+          <div class="ip-cert-sig-row">
+            <div class="ip-cert-sig">
+              <div class="ip-cert-sig-line"></div>
+              <div class="ip-cert-sig-name">{{ selectedCertificate.formateur?.prenom }} {{ selectedCertificate.formateur?.nom }}</div>
+              <div class="ip-cert-sig-role">Formateur · {{ selectedCertificate.formation?.titre }}</div>
+            </div>
+            <div class="ip-cert-qr"><i class="isax isax-scan-barcode"></i></div>
+          </div>
+          <div class="ip-cert-validity">
+            Délivré le {{ selectedCertificate.date_delivrance | date:'dd MMMM yyyy' : '' : 'fr-FR' }}
+            <ng-container *ngIf="selectedCertificate.date_expiration">
+              · Valide jusqu'au {{ selectedCertificate.date_expiration | date:'dd MMMM yyyy' : '' : 'fr-FR' }}
+            </ng-container>
+          </div>
+        </div>
 
-            <div class="btn-group">
-              <button 
-                *ngIf="certificate.statut === 'valide'"
-                class="btn btn-sm btn-outline-warning" 
-                (click)="revokeCertificate(certificate)">
-                <i class="isax isax-close-circle"></i>
-              </button>
-              
-              <button 
-                *ngIf="certificate.statut === 'révoqué'"
-                class="btn btn-sm btn-outline-success" 
-                (click)="reactivateCertificate(certificate)">
-                <i class="isax isax-check-circle"></i>
-              </button>
-              
-              <button 
-                class="btn btn-sm btn-outline-danger" 
-                (click)="deleteCertificate(certificate)">
-                <i class="isax isax-trash"></i>
-              </button>
+        <div class="ip-detail-row ip-detail-row--mt">
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap"><i class="isax isax-tag"></i></div>
+            <div>
+              <div class="ip-detail-label">Code unique</div>
+              <div class="ip-detail-value ip-detail-value--mono">{{ selectedCertificate.code_unique }}</div>
+            </div>
+          </div>
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap"><i class="isax isax-status"></i></div>
+            <div>
+              <div class="ip-detail-label">Statut</div>
+              <div>
+                <span class="ip-cert-badge"
+                      [class.ip-cert-badge--valide]="selectedCertificate.statut === 'valide'"
+                      [class.ip-cert-badge--expire]="selectedCertificate.statut === 'expiré'"
+                      [class.ip-cert-badge--revoque]="selectedCertificate.statut === 'révoqué'">
+                  <i class="fa-solid fa-circle"></i>
+                  {{ selectedCertificate.statut === 'valide' ? 'Valide' : selectedCertificate.statut === 'expiré' ? 'Expiré' : 'Révoqué' }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
-    </div>
-  </div>
-
-  <!-- Message si aucun résultat -->
-  <div *ngIf="!loading && filteredCertificates.length === 0" class="text-center py-5">
-    <i class="isax isax-document-text display-1 text-muted mb-3"></i>
-    <h5 class="text-muted">Aucun certificat trouvé</h5>
-    <p class="text-muted">Modifiez vos critères de recherche ou filtres.</p>
-  </div>
-
-  <!-- Pagination -->
-  <div *ngIf="totalPages > 1" class="d-flex justify-content-center mt-4">
-    <nav aria-label="Pagination des certificats">
-      <ul class="pagination">
-        <li class="page-item" [class.disabled]="currentPage === 1">
-          <button class="page-link" (click)="prevPage()" [disabled]="currentPage === 1">
-            <i class="isax isax-arrow-left-2"></i>
-          </button>
-        </li>
-        
-        <li class="page-item active">
-          <span class="page-link">{{currentPage}} / {{totalPages}}</span>
-        </li>
-        
-        <li class="page-item" [class.disabled]="currentPage === totalPages">
-          <button class="page-link" (click)="nextPage()" [disabled]="currentPage === totalPages">
-            <i class="isax isax-arrow-right-3"></i>
-          </button>
-        </li>
-      </ul>
-    </nav>
-  </div>
-</div>
-
-<!-- Modal de visualisation -->
-<div class="modal fade" id="view_certificate">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5>Détails du Certificat</h5>
-        <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-          <i class="isax isax-close-circle5"></i>
+      <div class="ip-modal-divider"></div>
+      <div class="ip-modal-footer">
+        <button type="button" *ngIf="selectedCertificate.statut === 'valide'"
+                class="ip-btn ip-btn--danger" data-bs-dismiss="modal"
+                (click)="revoke(selectedCertificate)">
+          <i class="isax isax-close-circle"></i> Révoquer
+        </button>
+        <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Fermer</button>
+        <button type="button" class="ip-btn ip-btn--primary"
+                (click)="downloadPdf(selectedCertificate)">
+          <i class="isax isax-document-download"></i> Télécharger PDF
         </button>
       </div>
-      <div class="modal-body" *ngIf="selectedCertificate">
-        <div class="row">
-          <div class="col-md-6">
-            <h6>Informations générales</h6>
-            <table class="table table-borderless">
-              <tr>
-                <td><strong>Code unique:</strong></td>
-                <td>{{selectedCertificate.code_unique}}</td>
-              </tr>
-              <tr>
-                <td><strong>Statut:</strong></td>
-                <td><span [class]="getStatusClass(selectedCertificate.statut)">{{selectedCertificate.statut}}</span></td>
-              </tr>
-              <tr>
-                <td><strong>Date de délivrance:</strong></td>
-                <td>{{formatDate(selectedCertificate.date_delivrance)}}</td>
-              </tr>
-              <tr *ngIf="selectedCertificate.date_expiration">
-                <td><strong>Date d'expiration:</strong></td>
-                <td>{{formatDate(selectedCertificate.date_expiration)}}</td>
-              </tr>
-              <tr *ngIf="selectedCertificate.score_final">
-                <td><strong>Score final:</strong></td>
-                <td>{{selectedCertificate.score_final}}%</td>
-              </tr>
-            </table>
-          </div>
-          
-          <div class="col-md-6">
-            <h6>Détails</h6>
-            <table class="table table-borderless">
-              <tr>
-                <td><strong>Employé:</strong></td>
-                <td>{{selectedCertificate.employe.prenom}} {{selectedCertificate.employe.nom}}</td>
-              </tr>
-              <tr>
-                <td><strong>Email:</strong></td>
-                <td>{{selectedCertificate.employe.email}}</td>
-              </tr>
-              <tr>
-                <td><strong>Fonction:</strong></td>
-                <td>{{selectedCertificate.employe.fonction}}</td>
-              </tr>
-              <tr>
-                <td><strong>Formation:</strong></td>
-                <td>{{selectedCertificate.formation.titre}}</td>
-              </tr>
-              <tr>
-                <td><strong>Formateur:</strong></td>
-                <td>{{selectedCertificate.formateur.prenom}} {{selectedCertificate.formateur.nom}}</td>
-              </tr>
-              <tr>
-                <td><strong>Entreprise:</strong></td>
-                <td>{{selectedCertificate.entreprise.nom}}</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-        
-        <div class="text-center mt-4">
-          <button 
-            class="btn btn-primary me-2" 
-            (click)="downloadCertificate(selectedCertificate)">
-            <i class="isax isax-import me-2"></i>Télécharger PDF
-          </button>
-          
-          <button 
-            *ngIf="selectedCertificate.statut === 'valide'"
-            class="btn btn-warning me-2" 
-            (click)="revokeCertificate(selectedCertificate)"
-            data-bs-dismiss="modal">
-            <i class="isax isax-close-circle me-2"></i>Révoquer
-          </button>
-          
-          <button 
-            *ngIf="selectedCertificate.statut === 'révoqué'"
-            class="btn btn-success me-2" 
-            (click)="reactivateCertificate(selectedCertificate)"
-            data-bs-dismiss="modal">
-            <i class="isax isax-check-circle me-2"></i>Réactiver
-          </button>
-        </div>
-      </div>
+
     </div>
   </div>
 </div>

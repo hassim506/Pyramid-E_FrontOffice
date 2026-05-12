@@ -3,7 +3,7 @@ import { CommonService } from '../../../../shared/service/common/common.service'
 import { AuthService } from '../../../../shared/service/authentification/auth.service';
 import { routes } from '../../../../shared/service/routes/routes';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DemandeFormationService } from '../../../../shared/service/demande/demande-formation.service';
 import { SessionFormationService, SessionFormationResponse } from '../../../../shared/service/session/session-formation.service';
 
@@ -61,6 +61,7 @@ export class AdminrhSidebarComponent implements OnInit {
     private authService: AuthService,
     private demandeService: DemandeFormationService,
     private sessionService: SessionFormationService,
+    private router: Router,
   ) {
     this.common.base.subscribe((base: string) => { this.base = base; });
     this.common.page.subscribe((page: string) => { this.page = page; });
@@ -70,6 +71,9 @@ export class AdminrhSidebarComponent implements OnInit {
   ngOnInit(): void {
     this.currentUser = this.authService.getUser();
     this.loadBadgeCounts();
+    if (this.router.url.includes('certificate')) {
+      this.openGroups['certificats'] = true;
+    }
   }
 
   private loadBadgeCounts(): void {
