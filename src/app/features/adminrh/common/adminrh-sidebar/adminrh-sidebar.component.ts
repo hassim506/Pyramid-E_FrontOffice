@@ -6,6 +6,9 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DemandeFormationService } from '../../../../shared/service/demande/demande-formation.service';
 import { SessionFormationService, SessionFormationResponse } from '../../../../shared/service/session/session-formation.service';
+import { UserService } from '../../../../shared/service/user/user.service';
+import { CertificatService } from '../../../../shared/service/certificat/certificat.service';
+import { TicketService } from '../../../../shared/service/ticket/ticket.service';
 
 @Component({
     selector: 'app-adminrh-sidebar',
@@ -20,13 +23,20 @@ export class AdminrhSidebarComponent implements OnInit {
   public last = '';
   currentUser: any;
 
-  demandesEnAttenteCount: number = 0;
-  sessionsAVenirCount: number = 0;
+  demandesEnAttenteCount = 0;
+  sessionsAVenirCount    = 0;
+  certificatsCount       = 0;
+  messagesCount          = 0;
+  ticketsCount           = 0;
+  employes               = 0;
+  tauxCompletion         = 73;
+
+  quotaUsed  = 18;
+  quotaTotal = 25;
+  get quotaPercent() { return Math.round((this.quotaUsed / this.quotaTotal) * 100); }
 
   openGroups: Record<string, boolean> = {
-    formations: false,
-    demandes:   false,
-    utilisateurs: true,
+    demandes: false,
   };
 
   toggleGroup(key: string): void {
@@ -53,7 +63,12 @@ export class AdminrhSidebarComponent implements OnInit {
 
   getRoleLabel(): string {
     const u = this.currentUser;
-    return u?.role?.name || (u?.role_id === 5 ? 'RH Groupe' : 'Admin RH');
+    return u?.role?.name || (u?.role_id === 5 ? 'RH Groupe' : 'Administratrice RH');
+  }
+
+  getEntrepriseName(): string {
+    const u = this.currentUser;
+    return u?.entreprise?.nom || u?.entreprise_nom || 'Entreprise';
   }
 
   constructor(
@@ -61,6 +76,9 @@ export class AdminrhSidebarComponent implements OnInit {
     private authService: AuthService,
     private demandeService: DemandeFormationService,
     private sessionService: SessionFormationService,
+    private userService: UserService,
+    private certificatService: CertificatService,
+    private ticketService: TicketService,
     private router: Router,
   ) {
     this.common.base.subscribe((base: string) => { this.base = base; });
@@ -71,8 +89,8 @@ export class AdminrhSidebarComponent implements OnInit {
   ngOnInit(): void {
     this.currentUser = this.authService.getUser();
     this.loadBadgeCounts();
-    if (this.router.url.includes('certificate')) {
-      this.openGroups['certificats'] = true;
+    if (this.router.url.includes('demande')) {
+      this.openGroups['demandes'] = true;
     }
   }
 
@@ -91,6 +109,27 @@ export class AdminrhSidebarComponent implements OnInit {
         today.setHours(0, 0, 0, 0);
         this.sessionsAVenirCount = (res.sessions || [])
           .filter(s => s.date_debut != null && new Date(s.date_debut) > today).length;
+      },
+      error: () => {}
+    });
+
+    this.userService.getUsers().subscribe({
+      next: (res: any) => {
+        const arr = res?.utilisateurs || res?.data || res?.users || (Array.isArray(res) ? res : []);
+        this.employes = arr.length;
+      },
+      error: () => {}
+    });
+
+    this.certificatService.getCertificats().subscribe({
+      next: (certs: any[]) => { this.certificatsCount = certs?.length || 0; },
+      error: () => {}
+    });
+
+    this.ticketService.getTickets().subscribe({
+      next: (res: any) => {
+        const arr = res?.tickets || res?.data || (Array.isArray(res) ? res : []);
+        this.ticketsCount = arr.filter((t: any) => t.statut === 'ouvert').length;
       },
       error: () => {}
     });

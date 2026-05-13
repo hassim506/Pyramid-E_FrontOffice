@@ -127,6 +127,8 @@ export const routes: Routes = [
                 {path:'superadmin-statements',loadComponent:()=>import ('./features/superadmin/superadmin-statements/superadmin-statements.component').then((m)=>m.SuperadminStatementsComponent)},
                 {path:'superadmin-course',loadComponent:()=>import ('./features/superadmin/superadmin-course/superadmin-course.component').then((m)=>m.SuperadminCourseComponent)},
                 {path:'superadmin-course-grid',loadComponent:()=>import ('./features/superadmin/superadmin-course-grid/superadmin-course-grid.component').then((m)=>m.SuperadminCourseGridComponent)},
+                {path:'superadmin-session',loadComponent:()=>import ('./features/superadmin/superadmin-session/superadmin-session.component').then((m)=>m.SuperadminSessionComponent)},
+                {path:'superadmin-parcours',loadComponent:()=>import ('./features/superadmin/superadmin-parcours/superadmin-parcours.component').then((m)=>m.SuperadminParcoursComponent)},
                 {path:'superadmin-message',loadComponent:()=>import ('./features/superadmin/superadmin-message/superadmin-message.component').then((m)=>m.SuperadminMessageComponent)},
                 {path:'superadmin-assignment',loadComponent:()=>import ('./features/superadmin/superadmin-assignment/superadmin-assignment.component').then((m)=>m.SuperadminAssignmentComponent)},
                 {path:'students-list',loadComponent:()=>import ('./features/superadmin/students-list/students-list.component').then((m)=>m.StudentsListComponent)},

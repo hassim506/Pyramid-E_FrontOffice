@@ -2,19 +2,44 @@
 
   <!-- ── LOGO ── -->
   <div class="sb-logo">
-    <div class="sb-logo-mark">L</div>
+    <div class="sb-logo-mark">P</div>
     <div>
-      <div class="sb-logo-text">LMS Pro</div>
-      <div class="sb-logo-sub">Admin RH</div>
+      <div class="sb-logo-text">Pyramide LMS</div>
+      <span class="sb-logo-badge">Espace Admin RH</span>
     </div>
   </div>
 
-  <!-- ── USER ── -->
-  <div class="sb-user">
+  <!-- ── PROFIL ── -->
+  <div class="sb-profile">
     <div class="sb-av">{{ getInitials() }}</div>
-    <div>
-      <div class="sb-uname">{{ getDisplayName() }}</div>
-      <div class="sb-urole">{{ getRoleLabel() }}</div>
+    <div class="sb-profile-info">
+      <div class="sb-pname">{{ getDisplayName() }}</div>
+      <div class="sb-prole">{{ getRoleLabel() }}</div>
+      <div class="sb-pcompany">
+        <i class="isax isax-buildings-2"></i>{{ getEntrepriseName() }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MINI-STATS ── -->
+  <div class="sb-ministats">
+    <div class="sb-ministat">
+      <div class="sb-ministat-val">{{ employes }}</div>
+      <div class="sb-ministat-lbl">EMPLOYÉS</div>
+    </div>
+    <div class="sb-ministat-div"></div>
+    <div class="sb-ministat">
+      <div class="sb-ministat-val">{{ tauxCompletion }}%</div>
+      <div class="sb-ministat-lbl">COMPLÉTION</div>
+    </div>
+    <div class="sb-ministat-div"></div>
+    <div class="sb-ministat sb-ministat--warn" *ngIf="demandesEnAttenteCount > 0">
+      <div class="sb-ministat-val">{{ demandesEnAttenteCount }}</div>
+      <div class="sb-ministat-lbl">EN ATTENTE</div>
+    </div>
+    <div class="sb-ministat" *ngIf="demandesEnAttenteCount === 0">
+      <div class="sb-ministat-val">0</div>
+      <div class="sb-ministat-lbl">EN ATTENTE</div>
     </div>
   </div>
 
@@ -25,168 +50,162 @@
     <div class="sb-section">
       <div class="sb-section-label">Vue d'ensemble</div>
       <a [routerLink]="routes.adminrh_dashboard" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-grid-3"></i><span class="sb-item-label">Tableau de bord</span>
+        <i class="isax isax-grid-3"></i>
+        <span class="sb-item-label">Tableau de bord</span>
       </a>
       <a [routerLink]="routes.adminrhAnnouncements" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-volume-high"></i><span class="sb-item-label">Annonces</span>
+        <i class="isax isax-chart-square"></i>
+        <span class="sb-item-label">Statistiques RH</span>
       </a>
     </div>
 
     <div class="sb-divider"></div>
 
-    <!-- PÉDAGOGIE -->
+    <!-- MON ENTREPRISE -->
     <div class="sb-section">
-      <div class="sb-section-label">Pédagogie</div>
+      <div class="sb-section-label">Mon entreprise</div>
 
-      <!-- Nos formations -->
-      <div class="sb-group">
-        <div class="sb-group-header" [class.open]="openGroups['formations']"
-             (click)="toggleGroup('formations')">
-          <i class="isax isax-play-circle icon"></i>
-          <span>Nos formations</span>
-          <i class="isax isax-arrow-right-3 arr"></i>
-        </div>
-        <div class="sb-sub" *ngIf="openGroups['formations']">
-          <a [routerLink]="routes.adminrhCourse"    routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-book-1"></i> Formations
-          </a>
-          <a [routerLink]="routes.adminrhCatalogue" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-category"></i> Catalogues
-          </a>
-          <a [routerLink]="routes.adminrhParcours"  routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-route-square"></i> Parcours
-          </a>
-          <a [routerLink]="routes.adminrhSession" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-calendar-1"></i>
-            <span class="sb-sub-label">Sessions</span>
-            <span *ngIf="sessionsAVenirCount > 0" class="sb-badge sb-badge--amber">{{ sessionsAVenirCount }} à venir</span>
-          </a>
-          <a [routerLink]="routes.adminrhCategorie" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-tag"></i> Catégories
-          </a>
-        </div>
-      </div>
+      <a [routerLink]="routes.adminrhUserList" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-people"></i>
+        <span class="sb-item-label">Employés</span>
+        <span *ngIf="employes > 0" class="sb-badge">{{ employes }}</span>
+      </a>
 
-      <!-- Nos demandes -->
+      <!-- Demandes avec sous-items -->
       <div class="sb-group">
         <div class="sb-group-header" [class.open]="openGroups['demandes']"
              (click)="toggleGroup('demandes')">
           <i class="isax isax-document-text icon"></i>
-          <span>Nos demandes</span>
+          <span>Demandes</span>
           <span *ngIf="demandesEnAttenteCount > 0" class="sb-badge sb-badge--red">{{ demandesEnAttenteCount }}</span>
           <i class="isax isax-arrow-right-3 arr"></i>
         </div>
         <div class="sb-sub" *ngIf="openGroups['demandes']">
           <a [routerLink]="routes.AdminrhDemande" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-document-text"></i>
             <span class="sb-sub-label">Formations</span>
-            <span *ngIf="demandesEnAttenteCount > 0" class="sb-badge sb-badge--red">{{ demandesEnAttenteCount }}</span>
-          </a>
-          <a [routerLink]="routes.AdminrhDemandeSession" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-calendar-1"></i>
-            <span class="sb-sub-label">Sessions</span>
+            <span *ngIf="demandesEnAttenteCount > 0" class="sb-badge sb-badge--red sb-badge--sm">{{ demandesEnAttenteCount }}</span>
           </a>
           <a [routerLink]="routes.AdminrhDemandeParcours" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-route-square"></i> Parcours
+            <span class="sb-sub-label">Parcours</span>
           </a>
           <a [routerLink]="routes.AdminrhDemandeCatalogue" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-category"></i> Catalogues
+            <span class="sb-sub-label">Catalogue</span>
           </a>
         </div>
       </div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- FORMATION -->
+    <div class="sb-section">
+      <div class="sb-section-label">Formation</div>
+
+      <a [routerLink]="routes.adminrhCatalogue" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-category"></i>
+        <span class="sb-item-label">Catalogue</span>
+      </a>
+
+      <a [routerLink]="routes.adminrhCourse" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-book-1"></i>
+        <span class="sb-item-label">Formations</span>
+      </a>
+
+      <a [routerLink]="routes.adminrhParcours" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-route-square"></i>
+        <span class="sb-item-label">Parcours</span>
+      </a>
+
+      <a [routerLink]="routes.adminrhSession" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-calendar-1"></i>
+        <span class="sb-item-label">Sessions</span>
+        <span *ngIf="sessionsAVenirCount > 0" class="sb-badge sb-badge--amber">{{ sessionsAVenirCount }} à venir</span>
+      </a>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- SUIVI & PERFORMANCE -->
+    <div class="sb-section">
+      <div class="sb-section-label">Suivi & Performance</div>
 
       <a [routerLink]="routes.adminrhAssignment" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-clipboard-text"></i><span class="sb-item-label">Assignments</span>
+        <i class="isax isax-chart-2"></i>
+        <span class="sb-item-label">Progression employés</span>
       </a>
-      <a [routerLink]="routes.adminrhQuiz" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-award"></i><span class="sb-item-label">Quiz</span>
-      </a>
+
       <a [routerLink]="routes.adminrhQuizResult" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-medal-star"></i><span class="sb-item-label">Résultats Quiz</span>
+        <i class="isax isax-medal-star"></i>
+        <span class="sb-item-label">Résultats quiz</span>
       </a>
-      <!-- Certificats -->
-      <div class="sb-group">
-        <div class="sb-group-header" [class.open]="openGroups['certificats']"
-             (click)="toggleGroup('certificats')">
-          <i class="isax isax-note-21 icon"></i>
-          <span>Certificats</span>
-          <i class="isax isax-arrow-right-3 arr"></i>
-        </div>
-        <div class="sb-sub" *ngIf="openGroups['certificats']">
-          <a [routerLink]="routes.adminrhCertificateModele" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-setting-2"></i> Personnaliser le modèle
-          </a>
-          <a [routerLink]="routes.adminrhCertificate" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-award"></i> Certificats obtenus
-          </a>
-        </div>
-      </div>
-    </div>
 
-    <div class="sb-divider"></div>
-
-    <!-- UTILISATEURS & ACCÈS -->
-    <div class="sb-section">
-      <div class="sb-section-label">Utilisateurs & accès</div>
-
-      <div class="sb-group">
-        <div class="sb-group-header" [class.open]="openGroups['utilisateurs']"
-             (click)="toggleGroup('utilisateurs')">
-          <i class="isax isax-profile-2user icon"></i>
-          <span>Gestion utilisateurs</span>
-          <i class="isax isax-arrow-right-3 arr"></i>
-        </div>
-        <div class="sb-sub" *ngIf="openGroups['utilisateurs']">
-          <a [routerLink]="routes.adminrhUserList" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-people"></i> Tous les utilisateurs
-          </a>
-          <a *ngIf="isHoldingAdmin()"
-             [routerLink]="routes.adminrhUserGroupList" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-profile-2user"></i> Utilisateurs du groupe
-          </a>
-          <a [routerLink]="routes.adminrhRole" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-shield-tick"></i> Rôles
-          </a>
-          <a [routerLink]="routes.adminrhPermission" routerLinkActive="active" class="sb-sub-item">
-            <i class="isax isax-lock"></i> Permissions
-          </a>
-        </div>
-      </div>
-
-      <a [routerLink]="routes.adminrhCompanyManagement" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-building"></i><span class="sb-item-label">Entreprises</span>
+      <a [routerLink]="routes.adminrhCertificate" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-note-21"></i>
+        <span class="sb-item-label">Certificats délivrés</span>
+        <span *ngIf="certificatsCount > 0" class="sb-badge sb-badge--teal">{{ certificatsCount }}</span>
       </a>
-    </div>
 
-    <div class="sb-divider"></div>
-
-    <!-- FINANCE -->
-    <div class="sb-section">
-      <div class="sb-section-label">Finance</div>
       <a [routerLink]="routes.adminrhStatements" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-receipt-item"></i><span class="sb-item-label">Déclarations</span>
+        <i class="isax isax-receipt-item"></i>
+        <span class="sb-item-label">Rapports</span>
       </a>
     </div>
 
     <div class="sb-divider"></div>
 
-    <!-- SUPPORT -->
+    <!-- COMMUNICATION -->
     <div class="sb-section">
-      <div class="sb-section-label">Support</div>
+      <div class="sb-section-label">Communication</div>
+
+      <a [routerLink]="routes.adminrhMessage" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-messages-3"></i>
+        <span class="sb-item-label">Messages</span>
+        <span *ngIf="messagesCount > 0" class="sb-badge sb-badge--red">{{ messagesCount }}</span>
+      </a>
+
       <a [routerLink]="routes.adminrh_tickets" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-ticket"></i><span class="sb-item-label">Tickets support</span>
+        <i class="isax isax-ticket"></i>
+        <span class="sb-item-label">Tickets support</span>
+        <span *ngIf="ticketsCount > 0" class="sb-badge">{{ ticketsCount }}</span>
+      </a>
+
+      <a [routerLink]="routes.adminrhAnnouncements" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-volume-high"></i>
+        <span class="sb-item-label">Annonces</span>
       </a>
     </div>
 
   </div><!-- /sb-scroll -->
 
+  <!-- ── WIDGET ALERTE DEMANDES ── -->
+  <div class="sb-widget-alert" *ngIf="demandesEnAttenteCount > 0">
+    <div class="sb-widget-alert-title">
+      <i class="isax isax-warning-2"></i>
+      {{ demandesEnAttenteCount }} demandes non traitées
+    </div>
+    <div class="sb-widget-alert-sub">En attente depuis plus de 48h</div>
+    <a [routerLink]="routes.AdminrhDemande" class="sb-widget-alert-link">Traiter maintenant →</a>
+  </div>
+
+  <!-- ── WIDGET QUOTA ── -->
+  <div class="sb-widget-quota">
+    <div class="sb-quota-header">
+      <span class="sb-quota-lbl">QUOTA FORMATIONS</span>
+      <span class="sb-quota-val">{{ quotaUsed }}/{{ quotaTotal }}</span>
+    </div>
+    <div class="sb-quota-bar">
+      <div class="sb-quota-fill" [style.width.%]="quotaPercent"></div>
+    </div>
+    <div class="sb-quota-sub">{{ quotaTotal - quotaUsed }} formations disponibles sur votre plan</div>
+  </div>
+
   <!-- ── BOTTOM ── -->
   <div class="sb-bottom">
+    <a [routerLink]="routes.adminrhSettings" routerLinkActive="active" class="sb-bottom-item">
+      <i class="isax isax-setting-2"></i> Paramètres entreprise
+    </a>
     <a [routerLink]="routes.adminrhProfile" routerLinkActive="active" class="sb-bottom-item">
       <i class="isax isax-user-square"></i> Mon profil
-    </a>
-    <a [routerLink]="routes.adminrhSettings" routerLinkActive="active" class="sb-bottom-item">
-      <i class="isax isax-setting-2"></i> Paramètres
     </a>
     <a [routerLink]="routes.login" class="sb-bottom-item logout">
       <i class="isax isax-logout"></i> Déconnexion

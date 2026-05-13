@@ -1,23 +1,100 @@
-// Pour que toutes les cards aient la même hauteur
-.row.mb-4 > [class^="col-"] .card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: stretch;
+@import '../../adminrh/adminrh-course/adminrh-course.component';
+
+// ── Thumbnail ─────────────────────────────────
+.ac-thumb {
+  position: relative;
+  width: 108px;
+  height: 68px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
-// Optionnel : pour que le contenu prenne toute la hauteur
-.row.mb-4 > [class^="col-"] .card .card-body {
-  flex: 1 1 auto;
+.ac-thumb-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+// ── Category pill ─────────────────────────────
+.ac-cat-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+// ── Instructor cell ───────────────────────────
+.ac-instructor {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ac-instructor-av {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #E6F1FB;
+  color: #185FA5;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.formation-image {
-  width: 100px !important;
-  height: 70px !important;
-  object-fit: cover;
-  border: 1px solid #dee2e6;
-  border-radius: 0.375rem;
+// ── Link style ────────────────────────────────
+.ac-link {
+  color: #185FA5;
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
+// ── Extra select ─────────────────────────────
+.ac-select {
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .15s;
+
+  &:focus { border-color: #185FA5; }
+}
+
+// ── Topbar info ───────────────────────────────
+.ac-topbar-info {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+// ── Alert close ───────────────────────────────
+.ac-alert-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: .6;
+  font-size: 14px;
+
+  &:hover { opacity: 1; }
 }

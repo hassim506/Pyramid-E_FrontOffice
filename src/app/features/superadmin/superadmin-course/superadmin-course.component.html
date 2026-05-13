@@ -1,381 +1,194 @@
-<!-- Statistiques avec icônes et animations -->
-<div class="row mb-4">
-    <div class="col-xxl col-lg-4 col-md-6 mb-3">
-        <div class="card bg-success shadow-sm border-0">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="fw-medium mb-1 text-white">Formations Actives</h6>
-                        <h4 class="fw-bold text-white mb-0">{{ stats.active }}</h4>
-                    </div>
-                    <div class="text-white opacity-75">
-                        <i class="isax isax-tick-circle fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xxl col-lg-4 col-md-6 mb-3">
-        <div class="card bg-warning shadow-sm border-0">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="fw-medium mb-1 text-white">En Attente</h6>
-                        <h4 class="fw-bold text-white mb-0">{{ stats.pending }}</h4>
-                    </div>
-                    <div class="text-white opacity-75">
-                        <i class="isax isax-clock fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xxl col-lg-4 col-md-6 mb-3">
-        <div class="card bg-info shadow-sm border-0">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="fw-medium mb-1 text-white">Brouillons</h6>
-                        <h4 class="fw-bold text-white mb-0">{{ stats.draft }}</h4>
-                    </div>
-                    <div class="text-white opacity-75">
-                        <i class="isax isax-document fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xxl col-lg-4 col-md-6 mb-3">
-        <div class="card bg-success shadow-sm border-0" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="fw-medium mb-1 text-white">Formations Gratuites</h6>
-                        <h4 class="fw-bold text-white mb-0">{{ stats.free }}</h4>
-                    </div>
-                    <div class="text-white opacity-75">
-                        <i class="isax isax-gift fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xxl col-lg-4 col-md-6 mb-3">
-        <div class="card bg-primary shadow-sm border-0" style="background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%) !important;">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="fw-medium mb-1 text-white">Formations Payantes</h6>
-                        <h4 class="fw-bold text-white mb-0">{{ stats.paid }}</h4>
-                    </div>
-                    <div class="text-white opacity-75">
-                        <i class="isax isax-dollar-circle fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="ac-shell">
 
-<!-- États d'erreur et de chargement -->
-<div class="alert alert-danger alert-dismissible fade show" *ngIf="error" role="alert">
-    <i class="isax isax-warning-2 me-2"></i>
-    {{ error }}
-    <button type="button" class="btn-close" (click)="error = ''" aria-label="Close"></button>
-</div>
-
-<div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
-    <div class="text-center">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Chargement...</span>
-        </div>
-        <p class="mt-3 text-muted">Chargement des formations...</p>
+  <!-- ── Topbar ── -->
+  <div class="ac-topbar">
+    <button type="button" class="ac-tab active">
+      <i class="isax isax-task"></i>Liste
+    </button>
+    <a [routerLink]="routes.superadminCourseGrid" class="ac-tab">
+      <i class="isax isax-element-3"></i>Grille
+    </a>
+    <span class="ac-spacer"></span>
+    <div style="display:flex;align-items:center;padding:0 10px;">
+      <span class="ac-topbar-info">{{ totalData }} formation{{ totalData !== 1 ? 's' : '' }}</span>
     </div>
-</div>
+  </div>
 
-<!-- En-tête avec navigation -->
-<div class="page-title d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h5 class="fw-bold mb-1">Formations de l'Entreprise</h5>
-        <small class="text-muted">Gérez toutes les formations de votre organisation</small>
+  <!-- ── KPI ── -->
+  <div class="ac-kpi-row">
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-tick-circle"></i>Publiées</div>
+      <div class="ac-kpi__val">{{ stats.active }}</div>
+      <div class="ac-kpi__delta up">actives</div>
     </div>
-    <div class="d-flex align-items-center">
-        <div class="btn-group me-3" role="group">
-            <a [routerLink]="routes.superadminCourse" 
-               class="btn btn-outline-primary active">
-                <i class="isax isax-task me-1"></i>
-                Liste
-            </a>
-            <a [routerLink]="routes.superadminCourseGrid" 
-               class="btn btn-outline-primary">
-                <i class="isax isax-element-3 me-1"></i>
-                Grille
-            </a>
-        </div>
-        <!-- <button class="btn btn-primary">
-            <i class="isax isax-add me-1"></i>
-            Nouvelle Formation
-        </button> -->
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-clock"></i>En attente</div>
+      <div class="ac-kpi__val">{{ stats.pending }}</div>
+      <div class="ac-kpi__delta neutral">à valider</div>
     </div>
-</div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-document"></i>Brouillons</div>
+      <div class="ac-kpi__val">{{ stats.draft }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-gift"></i>Gratuites</div>
+      <div class="ac-kpi__val">{{ stats.free }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-dollar-circle"></i>Payantes</div>
+      <div class="ac-kpi__val">{{ stats.paid }}</div>
+    </div>
+  </div>
 
-<!-- Filtres et recherche -->
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label fw-medium">Filtrer par statut</label>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" 
-                            type="button" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false">
-                        <i class="isax isax-filter me-2"></i>
-                        {{ selectedStatus || 'Tous les statuts' }}
-                    </button>
-                    <ul class="dropdown-menu w-100">
-                        <li><a class="dropdown-item" href="javascript:void(0);" (click)="filterByStatus('')">
-                            <i class="isax isax-tick-circle me-2 text-success"></i>Tous les statuts
-                        </a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);" (click)="filterByStatus('published')">
-                            <i class="isax isax-tick-circle me-2 text-success"></i>Publiées
-                        </a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);" (click)="filterByStatus('pending')">
-                            <i class="isax isax-clock me-2 text-warning"></i>En Attente
-                        </a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);" (click)="filterByStatus('draft')">
-                            <i class="isax isax-document me-2 text-info"></i>Brouillons
-                        </a></li>
-                    </ul>
-                </div>
+  <!-- ── Toolbar ── -->
+  <div class="ac-toolbar">
+    <div class="ac-search">
+      <i class="isax isax-search-normal ac-search__icon"></i>
+      <input class="ac-search__input" type="text"
+             [(ngModel)]="searchDataValue"
+             (ngModelChange)="searchData($event)"
+             placeholder="Titre, formateur, catégorie…">
+    </div>
+    <!-- Statut filter chips -->
+    <button type="button" class="ac-chip" [class.ac-chip--on]="selectedStatus===''"
+            (click)="filterByStatus('')">Tous</button>
+    <button type="button" class="ac-chip" [class.ac-chip--on]="selectedStatus==='published'"
+            (click)="filterByStatus('published')">
+      <i class="isax isax-tick-circle"></i>Publiées
+    </button>
+    <button type="button" class="ac-chip" [class.ac-chip--on]="selectedStatus==='pending'"
+            (click)="filterByStatus('pending')">
+      <i class="isax isax-clock"></i>En attente
+    </button>
+    <button type="button" class="ac-chip" [class.ac-chip--on]="selectedStatus==='draft'"
+            (click)="filterByStatus('draft')">
+      <i class="isax isax-document"></i>Brouillons
+    </button>
+    <span class="ac-spacer"></span>
+    <select class="ac-select" title="Taille de page" [(ngModel)]="pageSize" (change)="PageSize()">
+      <option value="5">5 / page</option>
+      <option value="10">10 / page</option>
+      <option value="25">25 / page</option>
+      <option value="50">50 / page</option>
+    </select>
+  </div>
+
+  <!-- ── Alert ── -->
+  <div class="ac-alert" *ngIf="error">
+    <i class="isax isax-warning-2"></i>{{ error }}
+    <button type="button" class="ac-alert-close" (click)="error=''"><i class="isax isax-close-circle"></i></button>
+  </div>
+
+  <!-- ── Loading ── -->
+  <div class="ac-empty" *ngIf="loading">
+    <i class="isax isax-book-1"></i>Chargement des formations…
+  </div>
+
+  <!-- ── Table ── -->
+  <ng-container *ngIf="!loading">
+    <table class="ac-table" *ngIf="formations.length > 0">
+      <thead>
+        <tr>
+          <th style="width:136px;">Formation</th>
+          <th>Titre</th>
+          <th style="width:110px;">Catégorie</th>
+          <th style="width:150px;">Formateur</th>
+          <th style="width:80px;text-align:center;">Participants</th>
+          <th style="width:90px;text-align:center;">Coût</th>
+          <th style="width:72px;text-align:center;">Durée</th>
+          <th style="width:88px;text-align:center;">Statut</th>
+          <th style="width:80px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let f of formations; trackBy: trackByFormation">
+          <!-- Image -->
+          <td style="padding:8px 14px;">
+            <div class="ac-thumb">
+              <img [src]="getDefaultImage(f)" [alt]="f.titre"
+                   onerror="this.src='assets/img/course/course-01.jpg'">
+              <span class="ac-thumb-badge">{{ f.nombre_modules || 0 }}</span>
             </div>
-            
-            <div class="col-md-3">
-                <label class="form-label fw-medium">Taille de page</label>
-                <select class="form-select" [(ngModel)]="pageSize" (change)="PageSize()">
-                    <option value="5">5 par page</option>
-                    <option value="10">10 par page</option>
-                    <option value="25">25 par page</option>
-                    <option value="50">50 par page</option>
-                </select>
+          </td>
+          <!-- Titre -->
+          <td>
+            <a [routerLink]="[routes.courseDetails, f.id]" class="ac-table-name ac-link">{{ f.titre }}</a>
+            <div class="ac-table-sub">
+              <span *ngIf="f.niveau_display || f.niveau">{{ f.niveau_display || f.niveau }}</span>
+              <span *ngIf="f.langue"> · {{ f.langue }}</span>
             </div>
-            
-            <div class="col-md-6">
-                <label class="form-label fw-medium">Rechercher</label>
-                <div class="position-relative">
-                    <input [(ngModel)]="searchDataValue" 
-                           type="search" 
-                           (ngModelChange)="searchData(searchDataValue)" 
-                           class="form-control ps-5" 
-                           placeholder="Rechercher par titre, description, formateur ou catégorie...">
-                    <div class="position-absolute top-50 start-0 translate-middle-y ms-3">
-                        <i class="isax isax-search-normal-1 text-muted"></i>
-                    </div>
-                    <button *ngIf="searchDataValue" 
-                            class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2"
-                            (click)="searchDataValue = ''; searchData('')"
-                            type="button">
-                        <i class="isax isax-close-circle"></i>
-                    </button>
-                </div>
+          </td>
+          <!-- Catégorie -->
+          <td>
+            <span class="ac-cat-pill"
+                  [style.background]="(f.categorie?.couleur || '#6c757d') + '22'"
+                  [style.color]="f.categorie?.couleur || '#6c757d'">
+              {{ f.categorie?.nom || '—' }}
+            </span>
+          </td>
+          <!-- Formateur -->
+          <td>
+            <div class="ac-instructor">
+              <div class="ac-instructor-av">{{ (f.formateur?.prenom?.[0] ?? 'F') + (f.formateur?.nom?.[0] ?? '') }}</div>
+              <div>
+                <div class="ac-table-name" style="font-size:12px;">{{ f.formateur_nom || 'Non assigné' }}</div>
+                <div class="ac-table-sub" *ngIf="f.formateur?.fonction">{{ f.formateur?.fonction }}</div>
+              </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tableau des formations -->
-<div class="card border-0 shadow-sm" *ngIf="!loading">
-    <div class="card-header bg-white border-bottom">
-        <div class="d-flex align-items-center justify-content-between">
-            <h6 class="mb-0 fw-medium">
-                <i class="isax isax-book me-2 text-primary"></i>
-                Liste des Formations ({{ totalData }} résultats)
-            </h6>
-            <small class="text-muted">
-                Affichage {{ serialNumberArray[0] || 0 }} - {{ serialNumberArray[serialNumberArray.length - 1] || 0 }} sur {{ totalData }}
-            </small>
-        </div>
-    </div>
-    
-    <div class="table-responsive">
-        <table matSort (matSortChange)="sortData($event)" class="table table-hover mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th mat-sort-header="titre" class="ps-4">
-                        <i class="isax isax-book me-1"></i>Formation
-                    </th>
-                    <th>
-                        <i class="isax isax-category me-1"></i>Catégorie
-                    </th>
-                    <th mat-sort-header="formateur">
-                        <i class="isax isax-user me-1"></i>Formateur
-                    </th>
-                    <th mat-sort-header="participants" class="text-center">
-                        <i class="isax isax-people me-1"></i>Participants
-                    </th>
-                    <th mat-sort-header="prix" class="text-center">
-                        <i class="isax isax-dollar-circle me-1"></i>Coût
-                    </th>
-                    <th mat-sort-header="duree" class="text-center">
-                        <i class="isax isax-clock me-1"></i>Durée
-                    </th>
-                    <th class="text-center">Statut</th>
-                    <th class="text-center pe-4">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let formation of formations; trackBy: trackByFormation" 
-                    class="align-middle">
-                    <td class="ps-2">
-    <div class="d-flex align-items-center">
-        <div class="position-relative me-3" style="min-width: 120px; flex-shrink: 0;">
-            <img class="rounded" 
-                 [src]="getDefaultImage(formation)" 
-                 [alt]="formation.titre"
-                 style="width: 120px !important; height: 75px !important; object-fit: cover; border: 1px solid #dee2e6;"
-                 onerror="this.src='assets/img/course/course-01.jpg'">
-            <div class="position-absolute top-0 end-0 translate-middle">
-                <span class="badge bg-primary rounded-circle" 
-                      style="width: 22px; height: 22px; font-size: 10px; display: flex; align-items: center; justify-content: center;">
-                    {{ formation.nombre_modules || 0 }}
-                </span>
+          </td>
+          <!-- Participants -->
+          <td style="text-align:center;font-size:13px;">{{ f.nb_max_participants || 0 }}</td>
+          <!-- Prix -->
+          <td style="text-align:center;">
+            <span class="ac-status" [attr.data-s]="isFormationGratuite(f) ? 'pub' : 'pending'">
+              {{ formatPrix(f.prix) }}
+            </span>
+          </td>
+          <!-- Durée -->
+          <td style="text-align:center;font-size:13px;">{{ f.duree_totale || 0 }}h</td>
+          <!-- Statut -->
+          <td style="text-align:center;">
+            <span class="ac-status" [attr.data-s]="f.est_publie && f.inscription_ouverte ? 'pub' : !f.est_publie ? 'draft' : 'done'">
+              {{ getStatusText(f) }}
+            </span>
+          </td>
+          <!-- Actions -->
+          <td>
+            <div class="ac-actions">
+              <a [routerLink]="[routes.courseDetails, f.id]" class="ac-act" title="Voir">
+                <i class="isax isax-eye"></i>
+              </a>
+              <a [routerLink]="[routes.courseDetails, f.id]" class="ac-act" title="Modifier">
+                <i class="isax isax-edit-2"></i>
+              </a>
+              <button type="button" class="ac-act ac-act--del" (click)="deleteFormation(f)" title="Supprimer">
+                <i class="isax isax-trash"></i>
+              </button>
             </div>
-        </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1 fw-medium">
-                                    <a [routerLink]="[routes.courseDetails, formation.id]"
-                                       class="text-decoration-none text-dark">
-                                        {{ formation.titre }}
-                                    </a>
-                                </h6>
-                                <div class="d-flex align-items-center text-muted small">
-                                    <span class="me-3">
-                                        <i class="isax isax-flag me-1"></i>
-                                        {{ formation.niveau_display || formation.niveau }}
-                                    </span>
-                                    <span class="me-3">
-                                        <i class="isax isax-language-square me-1"></i>
-                                        {{ formation.langue || 'FR' }}
-                                    </span>
-                                    <span>
-                                        <i class="isax isax-star me-1"></i>
-                                        {{ formation.difficulte }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    
-                    <td>
-                        <span class="badge rounded-pill" 
-                              [style.background-color]="formation.categorie?.couleur || '#6c757d'"
-                              style="color: white; font-size: 11px;">
-                            {{ formation.categorie?.nom || 'Non définie' }}
-                        </span>
-                    </td>
-                    
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-sm me-2 bg-gradient-primary text-white d-flex align-items-center justify-content-center rounded-circle">
-                                {{ (formation.formateur?.prenom?.charAt(0) || 'F') + (formation.formateur?.nom?.charAt(0) || 'X') }}
-                            </div>
-                            <div>
-                                <div class="fw-medium fs-14 mb-0">{{ formation.formateur_nom || 'Non assigné' }}</div>
-                                <small class="text-muted">{{ formation.formateur?.fonction || '' }}</small>
-                            </div>
-                        </div>
-                    </td>
-                    
-                    <td class="text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                            <i class="isax isax-people me-1 text-muted"></i>
-                            <span class="fw-medium">{{ formation.nb_max_participants || 0 }}</span>
-                        </div>
-                    </td>
-                    
-                    <td class="text-center">
-                        <span [ngClass]="{'badge bg-success': isFormationGratuite(formation), 'fw-medium text-primary': !isFormationGratuite(formation)}">
-                            {{ formatPrix(formation.prix) }}
-                        </span>
-                    </td>
-                    
-                    <td class="text-center">
-                        <span class="badge bg-light text-dark">
-                            <i class="isax isax-clock me-1"></i>
-                            {{ formation.duree_totale || 0 }}h
-                        </span>
-                    </td>
-                    
-                    <td class="text-center">
-                        <span class="badge d-inline-flex align-items-center" 
-                              [ngClass]="getStatusClass(formation)">
-                            <i class="fa-solid fa-circle fs-6 me-1"></i>
-                            {{ getStatusText(formation) }}
-                        </span>
-                    </td>
-                    
-                    <td class="text-center pe-4">
-                        <div class="btn-group" role="group">
-                            <a [routerLink]="[routes.courseDetails, formation.id]" 
-                               class="btn btn-sm btn-outline-info" 
-                               title="Voir les détails">
-                                <i class="isax isax-eye"></i>
-                            </a>
-                            <a [routerLink]="[routes.courseDetails, formation.id]" 
-                               class="btn btn-sm btn-outline-primary" 
-                               title="Modifier">
-                                <i class="isax isax-edit-2"></i>
-                            </a>
-                            <button class="btn btn-sm btn-outline-danger" 
-                                    (click)="deleteFormation(formation)" 
-                                    title="Supprimer">
-                                <i class="isax isax-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-<!-- Message si aucune formation -->
-<div *ngIf="!loading && formations.length === 0" class="text-center py-5">
-    <div class="mb-4">
-        <i class="isax isax-book text-muted" style="font-size: 4rem;"></i>
+    <!-- Empty -->
+    <div class="ac-empty" *ngIf="formations.length === 0">
+      <i class="isax isax-book-1"></i>
+      {{ searchDataValue || selectedStatus ? 'Aucun résultat pour ces filtres' : 'Aucune formation trouvée' }}
+      <button type="button" class="ac-chip" style="margin-top:10px;"
+              *ngIf="searchDataValue || selectedStatus"
+              (click)="searchDataValue=''; filterByStatus('')">
+        <i class="isax isax-refresh"></i>Réinitialiser
+      </button>
     </div>
-    <h5 class="text-muted mb-3">Aucune formation trouvée</h5>
-    <p class="text-muted mb-4">
-        <span *ngIf="searchDataValue || selectedStatus">
-            Aucun résultat ne correspond à vos critères de recherche.
-        </span>
-        <span *ngIf="!searchDataValue && !selectedStatus">
-            Il n'y a actuellement aucune formation pour votre entreprise.
-        </span>
-    </p>
-    <div class="d-flex gap-2 justify-content-center">
-        <button *ngIf="searchDataValue || selectedStatus" 
-                class="btn btn-outline-primary" 
-                (click)="searchDataValue = ''; selectedStatus = ''; searchData('')">
-            <i class="isax isax-refresh me-1"></i>
-            Réinitialiser les filtres
-        </button>
-        <button class="btn btn-primary">
-            <i class="isax isax-add me-1"></i>
-            Créer une formation
-        </button>
-    </div>
-</div>
 
-<!-- Pagination avec logique user-list -->
-<app-custom-pagination
-    *ngIf="!loading && formations.length > 0 && totalData > pageSize"
-    [totalItems]="totalData"
-    [pageSize]="pageSize"
-    [currentPage]="currentPage"
-    (pageChange)="onPageChange($event)">
-</app-custom-pagination>
+    <!-- Pagination -->
+    <app-custom-pagination
+      *ngIf="formations.length > 0 && totalData > pageSize"
+      [totalItems]="totalData"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      (pageChange)="onPageChange($event)">
+    </app-custom-pagination>
+  </ng-container>
+
+</div>

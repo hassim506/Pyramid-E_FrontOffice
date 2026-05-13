@@ -1,153 +1,242 @@
-$gold-ashanti: #D4AF37;
-$main-green: #ffeccf;
-$main-green: #ffeccf;
-$main-green-dark: #f4d9af;
-$main-green-hover: #a3d9a5;
 // ═══════════════════════════════════════════════════════════════════════════════
-// AVATAR PLACEHOLDER - Simple
+// ADMIN RH HEADER — style clair avec accent vert (image de référence)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
+$green:       #1a7a4a;
+$green-light: #e8f5ee;
+$green-mid:   #2da05e;
+$warn-bg:     #fff8ee;
+$warn-border: #f5c77e;
+$warn-text:   #b45309;
+$text-dark:   #1a1a2e;
+$text-muted:  #6b7280;
+$radius:      14px;
+
+.content {
+  padding: 21px 0 !important;
+}
+
+.arh-header {
+  background: #fff;
+  border-radius: $radius;
+  border: 1px solid #e5e7eb;
+  padding: 20px 24px 0;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.arh-header-top-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: $text-muted;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+// ── Carte identité + actions ──────────────────────────
+.arh-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.arh-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.arh-av {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: $gold-ashanti;
-  color: white;
+  background: $green-light;
+  color: $green;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: 1px;
+  border: 2px solid $green-mid;
+  flex-shrink: 0;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// ADMINRH PROFILE - Simple et épuré
-// ═══════════════════════════════════════════════════════════════════════════════
+.arh-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: $text-dark;
+  margin: 0 0 3px;
+}
 
-.adminrh-profile {
-  background: $main-green !important;
-  border-radius: 16px;
-  padding: 5px 10px;
-  margin-bottom: 24px;
-  
-  .avatar {
-    border: 2px solid white;
+.arh-company {
+  font-size: 12px;
+  color: $text-muted;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  i { font-size: 13px; color: $green-mid; }
+}
+
+.arh-role-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 12px;
+  border-radius: 20px;
+  background: $green-light;
+  color: $green;
+  border: 1px solid darken($green-light, 8%);
+  font-weight: 500;
+}
+
+// ── Boutons ───────────────────────────────────────────
+.arh-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.arh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all .15s;
+
+  i { font-size: 15px; }
+
+  &.arh-btn-outline {
+    background: #fff;
+    color: $text-dark;
+    border: 1px solid #d1d5db;
+
+    &:hover { border-color: $green-mid; color: $green; }
   }
-  
-  h5 {
-    color: #000000 !important;
-    font-weight: 600;
-    margin-bottom: 0;
+
+  &.arh-btn-primary {
+    background: $green;
+    color: #fff;
+    border: 1px solid $green;
+
+    &:hover { background: darken($green, 6%); }
   }
-  
-  p {
-    margin-bottom: 0;
-    color: rgba(0, 0, 0, 0.7) !important;
-    font-weight: 400;
+}
+
+// ── Stats row ─────────────────────────────────────────
+.arh-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px 0 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.arh-stat {
+  background: #f8fafc;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border-top: 3px solid transparent;
+  transition: box-shadow .15s;
+
+  &:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+
+  &--warn {
+    background: $warn-bg;
+    border-color: $warn-border;
+    border-top-color: #f59e0b;
   }
-  
-  .verify-tick {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: $gold-ashanti;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
+}
+
+.arh-stat-val {
+  font-size: 26px;
+  font-weight: 700;
+  color: $text-dark;
+  line-height: 1.1;
+}
+
+.arh-stat-lbl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: $text-muted;
+  margin: 5px 0 4px;
+
+  i { font-size: 13px; }
+}
+
+.arh-stat-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: #16a34a;
+
+  &.arh-sub-down {
+    color: #dc2626;
     display: flex;
     align-items: center;
-    justify-content: center;
-    border: 2px solid white;
-    
-    i {
-      color: white;
-      font-size: 10px;
-    }
+    gap: 3px;
+    i { font-size: 11px; }
+  }
+
+  &.arh-sub-warn {
+    color: $warn-text;
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// BOUTONS SIMPLES ET ÉLÉGANTS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-.adminrh-profile {
-  
-  .btn-white {
-    background: $main-green;
-    color: #333333;
-    border: 1px solid #b87d23;
-    font-weight: 500;
-    font-size: 0.875rem;
-    padding: 10px 20px;
-    border-radius: 20px;
-    
-    &:hover {
-      background: #f8f9fa;
-      color: #000000;
-    }
-  }
-  
-  .btn-secondary {
-    background: #b87d23;
-    color: white;
-    border: 1px solid #b87d23;
-    font-weight: 500;
-    font-size: 0.875rem;
-    padding: 10px 20px;
-    border-radius: 20px;
-    
-    &:hover {
-      background: $main-green;
-      border-color: #b87d23;
-      color: #000000;
-    }
-  }
+// ── Alerte demandes ───────────────────────────────────
+.arh-alert-row {
+  border-top: 1px solid #f0f0f0;
+  padding: 12px 0;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// RESPONSIVE
-// ═══════════════════════════════════════════════════════════════════════════════
+.arh-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: $warn-text;
+  background: $warn-bg;
+  border: 1px solid $warn-border;
+  border-radius: 8px;
+  padding: 10px 16px;
 
+  i { font-size: 15px; flex-shrink: 0; }
+
+  span { flex: 1; }
+}
+
+.arh-alert-link {
+  font-weight: 600;
+  color: $text-dark;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 5px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12px;
+  transition: border-color .15s;
+
+  &:hover { border-color: $green-mid; color: $green; }
+}
+
+// ── Responsive ────────────────────────────────────────
 @media (max-width: 768px) {
-  .adminrh-profile {
-    padding: 5px 10px;
-    border-radius: 12px;
-    
-    .avatar-xxl {
-      width: 60px !important;
-      height: 60px !important;
-    }
-    
-    .avatar-placeholder {
-      font-size: 20px;
-    }
-    
-    h5 {
-      font-size: 1rem;
-    }
-    
-    .btn-white,
-    .btn-secondary {
-      padding: 8px 16px;
-      font-size: 0.8rem;
-    }
-  }
+  .arh-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .arh-stat-val  { font-size: 20px; }
 }
 
-@media (max-width: 576px) {
-  .adminrh-profile {
-    padding: 16px 20px;
-    
-    .d-flex.align-items-center.flex-wrap {
-      flex-direction: column;
-      gap: 12px;
-      
-      .btn-white,
-      .btn-secondary {
-        width: 100%;
-        text-align: center;
-      }
-    }
-  }
+@media (max-width: 480px) {
+  .arh-stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
 }

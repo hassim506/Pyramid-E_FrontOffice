@@ -1,10 +1,11 @@
 // ── TOKENS ──────────────────────────────────────────────────────────────────
-$bg:       #1A1035;
-$active:   #534AB7;
+$bg:       #3D2B1F;          // Cuir chaud — brun acajou profond
+$active:   #C17B3A;          // Caramel — accent chaud
+$active-bg: rgba(193,123,58,.18);
 $border:   rgba(255,255,255,.07);
 $text:     rgba(255,255,255,.52);
 $text-hi:  rgba(255,255,255,.9);
-$text-dim: rgba(255,255,255,.25);
+$text-dim: rgba(255,255,255,.28);
 $radius:   8px;
 
 :host { display: block; padding: 0 !important; }
@@ -30,6 +31,7 @@ $radius:   8px;
     background: $active;
     display: flex; align-items: center; justify-content: center;
     font-size: 14px; font-weight: 500; color: #fff; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(193,123,58,.4);
   }
   &-text { font-size: 14px; font-weight: 500; color: #fff; }
   &-sub  { font-size: 10px; color: $text-dim; margin-top: 1px; }
@@ -49,9 +51,10 @@ $radius:   8px;
 
 .prof-av {
   width: 34px; height: 34px; border-radius: 50%;
-  background: $active; color: #CECBF6;
+  background: $active; color: #fff;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 500; flex-shrink: 0;
+  font-size: 12px; font-weight: 600; flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,.25);
 }
 
 .prof-name { font-size: 12px; font-weight: 500; color: #fff; }
@@ -65,7 +68,7 @@ $radius:   8px;
 
 .pstat {
   display: flex; flex-direction: column; align-items: center; flex: 1;
-  &-v { font-size: 13px; font-weight: 500; color: #CECBF6; }
+  &-v { font-size: 13px; font-weight: 600; color: rgba(255,220,160,.9); }
   &-l { font-size: 9px; color: $text-dim; text-transform: uppercase; letter-spacing: .04em; margin-top: 1px; }
 }
 .pstat-sep { width: 0.5px; height: 24px; background: rgba(255,255,255,.1); }
@@ -99,7 +102,7 @@ $radius:   8px;
   i.icon { font-size: 17px; flex-shrink: 0; }
 
   &:hover { background: rgba(255,255,255,.07); color: $text-hi; }
-  &.active { background: $active; color: #fff; i.icon { color: #fff; } }
+  &.active { background: $active; color: #fff; i.icon { color: #fff; } font-weight: 500; }
 }
 
 .sb-item-label { flex: 1; }
@@ -110,10 +113,11 @@ $radius:   8px;
   font-weight: 500; flex: none; width: fit-content; line-height: 1.4;
 
   &--red    { background: #791F1F; color: #F7C1C1; }
-  &--amber  { background: #633806; color: #FAC775; }
+  &--amber  { background: rgba(193,123,58,.35); color: #FAC775; }
   &--gray   { background: rgba(255,255,255,.1); color: rgba(255,255,255,.55); }
   &--green  { background: #27500A; color: #C0DD97; }
-  &--purple { background: #3C3489; color: #CECBF6; }
+  &--purple { background: rgba(193,123,58,.25); color: rgba(255,220,160,.9); }
+  &--caramel { background: rgba(193,123,58,.3); color: rgba(255,220,160,.95); }
 }
 
 // ── GROUP (accordion) ─────────────────────────────────────────────────────────
@@ -202,7 +206,7 @@ $radius:   8px;
   &.active { color: rgba(255,255,255,.8); }
 
   &.logout {
-    color: rgba(175,169,236,.6);
-    &:hover { background: rgba(83,74,183,.2); color: #CECBF6; }
+    color: rgba(255,200,150,.5);
+    &:hover { background: rgba(193,123,58,.15); color: rgba(255,220,160,.85); }
   }
 }

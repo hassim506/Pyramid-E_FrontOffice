@@ -1,0 +1,56 @@
+@import '../../adminrh/adminrh-course/adminrh-course.component';
+
+// ── Instructor cell ───────────────────────────
+.ac-instructor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ac-instructor-av {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #E6F1FB;
+  color: #185FA5;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// ── Extra select ─────────────────────────────
+.ac-select {
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .15s;
+
+  &:focus { border-color: #185FA5; }
+}
+
+// ── Topbar info ───────────────────────────────
+.ac-topbar-info {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+// ── Alert close ───────────────────────────────
+.ac-alert-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: .6;
+  font-size: 14px;
+
+  &:hover { opacity: 1; }
+}

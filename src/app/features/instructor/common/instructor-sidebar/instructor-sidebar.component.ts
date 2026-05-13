@@ -4,6 +4,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonService } from '../../../../shared/service/common/common.service';
 import { AuthService } from '../../../../shared/service/authentification/auth.service';
 import { FormationService } from '../../../../shared/service/formation/formation.service';
+import { SessionFormationService } from '../../../../shared/service/session/session-formation.service';
 import { routes } from '../../../../shared/service/routes/routes';
 
 interface ProgressBar { name: string; pct: number; }
@@ -24,6 +25,7 @@ export class InstructorSidebarComponent implements OnInit {
   formationsCount   = 0;
   apprenantCount    = 0;
   completionRate    = 0;
+  sessionsAVenir    = 0;
   progressBars: ProgressBar[] = [];
 
   openGroups: Record<string, boolean> = {
@@ -36,6 +38,7 @@ export class InstructorSidebarComponent implements OnInit {
     private common: CommonService,
     private authService: AuthService,
     private formationService: FormationService,
+    private sessionService: SessionFormationService,
   ) {
     this.common.base.subscribe((v: string) => this.base = v);
     this.common.page.subscribe((v: string) => this.page = v);
@@ -45,6 +48,7 @@ export class InstructorSidebarComponent implements OnInit {
   ngOnInit(): void {
     this.currentUser = this.authService.getUser();
     this.loadStats();
+    this.loadSessionsAVenir();
   }
 
   private loadStats(): void {
@@ -73,6 +77,24 @@ export class InstructorSidebarComponent implements OnInit {
             name: f.titre || 'Formation',
             pct: Math.round(f.taux_completion ?? f.completion ?? 0),
           }));
+      },
+      error: () => {}
+    });
+  }
+
+  private loadSessionsAVenir(): void {
+    const user = this.authService.getUser();
+    const formateurId = user?.id;
+    const params = formateurId ? { formateur_id: formateurId, statut: 'planifiee' } : { statut: 'planifiee' };
+
+    this.sessionService.getAllSessionsRH(params).subscribe({
+      next: (res) => {
+        if (res?.status && res.sessions) {
+          const now = new Date();
+          this.sessionsAVenir = res.sessions.filter(s =>
+            s.statut === 'planifiee' && new Date(s.date_debut) >= now
+          ).length;
+        }
       },
       error: () => {}
     });

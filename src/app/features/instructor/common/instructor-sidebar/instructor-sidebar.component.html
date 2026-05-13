@@ -61,7 +61,7 @@
            (click)="toggleGroup('formations')">
         <i class="isax isax-book icon"></i>
         <span>Mes formations</span>
-        <span *ngIf="formationsCount > 0" class="sb-badge sb-badge--purple">{{ formationsCount }}</span>
+        <span *ngIf="formationsCount > 0" class="sb-badge sb-badge--caramel">{{ formationsCount }}</span>
         <i class="isax isax-arrow-right-3 arr"></i>
       </div>
       <div class="sb-sub" *ngIf="openGroups['formations']">
@@ -139,6 +139,7 @@
     <a [routerLink]="routes.instructorSession" routerLinkActive="active" class="sb-item">
       <i class="isax isax-calendar-1 icon"></i>
       <span class="sb-item-label">Mes sessions</span>
+      <span *ngIf="sessionsAVenir > 0" class="sb-badge sb-badge--caramel">{{ sessionsAVenir }} à venir</span>
     </a>
 
     <div class="sb-divider"></div>

@@ -130,6 +130,8 @@ export const routes = {
   superadminQuizResult: '/superadmin/superadmin-quiz-results',
   superadminCourse: '/superadmin/superadmin-course',
   superadminCourseGrid: '/superadmin/superadmin-course-grid',
+  superadminSession: '/superadmin/superadmin-session',
+  superadminParcours: '/superadmin/superadmin-parcours',
   superadminTickets: '/superadmin/superadmin-tickets',
   superadminMessage: '/superadmin/superadmin-message',
   superadminQuizDetails: '/superadmin/superadmin-quiz-details',

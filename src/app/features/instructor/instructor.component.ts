@@ -1,4 +1,4 @@
-import { NavigationStart, NavigationEnd, Router, Event as RouterEvent, RouterModule } from '@angular/router';
+import { NavigationEnd, Router, Event as RouterEvent, RouterModule } from '@angular/router';
 import { routes } from '../../shared/service/routes/routes';
 import { CommonModule } from '@angular/common';
 import { FeatherIconModule } from '../../shared/module/feather.module';
@@ -6,7 +6,8 @@ import { SharedModule } from 'primeng/api';
 import { InstructorSidebarComponent } from './common/instructor-sidebar/instructor-sidebar.component';
 import { Component, OnInit } from '@angular/core';
 import { User } from '../../shared/models/user.models';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SessionFormationService } from '../../shared/service/session/session-formation.service';
+import { FormationService } from '../../shared/service/formation/formation.service';
 
 @Component({
     selector: 'app-instructor',
@@ -25,73 +26,130 @@ export class InstructorComponent implements OnInit {
   public last: string = '';
   instructorProfile: User | null = null;
 
-  constructor(private router: Router) {
+  headerStats = { formations: 0, apprenants: 0, enDifficulte: 0, sessionsAVenir: 0 };
+  nextSession: { titre: string; date: string; delai: string } | null = null;
+
+  constructor(
+    private router: Router,
+    private sessionService: SessionFormationService,
+    private formationService: FormationService,
+  ) {
     this.router.events.subscribe((data: RouterEvent) => {
       if (data instanceof NavigationEnd) {
-        this.last = data.url.split('/')[data.url.split('/').length - 1];
+        this.last = data.url.split('/').pop() || '';
       }
     });
   }
 
   ngOnInit(): void {
     this.loadInstructorProfile();
+    this.loadFormationStats();
+    this.loadSessionStats();
   }
 
   loadInstructorProfile(): void {
     try {
-      const userDataString = localStorage.getItem('pyramide_user');
-      if (userDataString) {
-        const currentUser: any = JSON.parse(userDataString);
-        
-        // Ajouter le champ role si absent
-        if (!currentUser.role && currentUser.role_id === 3) {
-          currentUser.role = 'Instructeur';
-        }
-        
-        this.instructorProfile = currentUser as User;
+      const raw = localStorage.getItem('pyramide_user');
+      if (raw) {
+        const user: any = JSON.parse(raw);
+        if (!user.role && user.role_id === 3) user.role = 'Formateur';
+        this.instructorProfile = user as User;
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement du profil:', error);
+    } catch (e) {
+      console.error('Erreur profil instructor:', e);
     }
+  }
+
+  private loadFormationStats(): void {
+    this.formationService.getFormationsformateur().subscribe({
+      next: (res) => {
+        const formations = res.formations || [];
+        this.headerStats.formations = formations.length;
+        this.headerStats.apprenants = formations.reduce((s: number, f: any) => s + (f.nb_participants ?? 0), 0);
+        this.headerStats.enDifficulte = formations.reduce((s: number, f: any) => s + (f.nb_en_difficulte ?? 0), 0);
+      },
+      error: () => {}
+    });
+  }
+
+  private loadSessionStats(): void {
+    const user = this.instructorProfile;
+    const params: any = { statut: 'planifiee' };
+    if (user?.id) params['formateur_id'] = user.id;
+
+    this.sessionService.getAllSessionsRH(params).subscribe({
+      next: (res) => {
+        if (res?.status && res.sessions) {
+          const now = new Date();
+          const upcoming = res.sessions
+            .filter(s => s.statut === 'planifiee' && new Date(s.date_debut) >= now)
+            .sort((a, b) => new Date(a.date_debut).getTime() - new Date(b.date_debut).getTime());
+
+          this.headerStats.sessionsAVenir = upcoming.length;
+
+          if (upcoming.length > 0) {
+            const s = upcoming[0];
+            const d = new Date(s.date_debut);
+            const diffDays = Math.ceil((d.getTime() - now.getTime()) / 86400000);
+            this.nextSession = {
+              titre: s.titre,
+              date: d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+              delai: diffDays === 0 ? "Aujourd'hui" : diffDays === 1 ? 'Demain' : `Dans ${diffDays} jours`
+            };
+          }
+        }
+      },
+      error: () => {}
+    });
   }
 
   getFullName(): string {
     if (!this.instructorProfile) return 'Utilisateur';
-    return `${this.instructorProfile.prenom} ${this.instructorProfile.nom}`;
-  }
-
-  public getRoleName(user: User): string {
-    if (!user.role) {
-      return 'Non défini';
-    }
-    
-    // Check if role is an object with a name property
-    if (typeof user.role === 'object' && user.role !== null && 'name' in user.role) {
-      return (user.role as { name: string }).name;
-    }
-    
-    // Check if role is a string
-    if (typeof user.role === 'string') {
-      return user.role;
-    }
-    
-    return 'Non défini';
+    return `${this.instructorProfile.prenom || ''} ${this.instructorProfile.nom || ''}`.trim();
   }
 
   getInitials(): string {
     if (!this.instructorProfile) return 'U';
-    const firstNameInitial = this.instructorProfile.prenom?.charAt(0) || '';
-    const lastNameInitial = this.instructorProfile.nom?.charAt(0) || '';
-    return (firstNameInitial + lastNameInitial).toUpperCase();
+    return ((this.instructorProfile.prenom?.[0] ?? '') + (this.instructorProfile.nom?.[0] ?? '')).toUpperCase() || 'U';
+  }
+
+  getFonction(): string {
+    return this.instructorProfile?.fonction || 'Formateur';
+  }
+
+  getEntrepriseName(): string {
+    return this.instructorProfile?.entreprise?.nom ||
+           this.instructorProfile?.client?.nom || '';
+  }
+
+  getSpecialites(): { icon: string; label: string }[] {
+    const tags: { icon: string; label: string }[] = [];
+    const fn = this.instructorProfile?.fonction?.toLowerCase() || '';
+
+    if (fn.includes('tech') || fn.includes('info') || fn.includes('dev')) {
+      tags.push({ icon: 'isax-cpu', label: 'Technologie' });
+    }
+    if (fn.includes('cyber') || fn.includes('sécur')) {
+      tags.push({ icon: 'isax-shield-tick', label: 'Cybersécurité' });
+    }
+    if (this.instructorProfile?.entreprise?.nom || this.instructorProfile?.client?.nom) {
+      tags.push({ icon: 'isax-note-21', label: 'Certifiant' });
+    }
+
+    return tags.length ? tags : [
+      { icon: 'isax-book-1',     label: 'Formation' },
+      { icon: 'isax-note-21',    label: 'Certifiant' }
+    ];
+  }
+
+  public getRoleName(user: User): string {
+    if (!user.role) return 'Non défini';
+    if (typeof user.role === 'object' && 'name' in user.role) return user.role.name;
+    if (typeof user.role === 'string') return user.role;
+    return 'Non défini';
   }
 
   getUserAvatar(): string {
-    // Si vous avez un champ avatar dans votre modèle User
-    if (this.instructorProfile && (this.instructorProfile as any).avatar) {
-      return (this.instructorProfile as any).avatar;
-    }
-    return 'assets/img/user/user-01.jpg';
+    return (this.instructorProfile as any)?.avatar || 'assets/img/user/user-01.jpg';
   }
 }
-  
-  
