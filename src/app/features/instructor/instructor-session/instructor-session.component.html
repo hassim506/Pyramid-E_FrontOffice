@@ -3,7 +3,14 @@
   <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement...</span></div>
 </div>
 
-<!-- Error -->
+<!-- Alerts -->
+<div *ngIf="zoomError" class="ip-alert ip-alert--err">
+  <i class="isax isax-video-slash"></i> {{ zoomError }}
+  <button type="button" class="ip-alert__close" (click)="zoomError=''"><i class="isax isax-close-circle"></i></button>
+</div>
+<div *ngIf="zoomSuccess" class="ip-alert ip-alert--ok">
+  <i class="isax isax-video-circle"></i> {{ zoomSuccess }}
+</div>
 <div *ngIf="error" class="alert alert-danger alert-dismissible">
   {{ error }}
   <button type="button" class="btn-close" (click)="clearError()"></button>
@@ -53,11 +60,13 @@
             <th mat-sort-header="statut">Statut</th>
             <th>Participants</th>
             <th>Lieu</th>
+            <th>Zoom</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let s of tableData; trackBy: trackBySessionId">
+          <tr *ngFor="let s of tableData; trackBy: trackBySessionId"
+              (mouseenter)="loadZoomMeeting(s)">
             <td>
               <div class="ip-session-cell">
                 <div class="ip-session-icon"><i class="isax isax-calendar-1"></i></div>
@@ -90,6 +99,42 @@
               </div>
             </td>
             <td><span class="text-muted">{{ s.lieu || '—' }}</span></td>
+
+            <!-- Zoom -->
+            <td class="ip-zoom-cell">
+              <ng-container *ngIf="s.type === 'presentiel'">
+                <span class="ip-zoom-na">—</span>
+              </ng-container>
+              <ng-container *ngIf="s.type !== 'presentiel'">
+                <span *ngIf="zoomLoading[s.id]" class="ip-zoom-spin"><i class="isax isax-refresh-2"></i></span>
+                <!-- Créer -->
+                <ng-container *ngIf="!zoomLoading[s.id] && !zoomMeetings[s.id] && s.statut !== 'terminee' && s.statut !== 'annulee'">
+                  <button type="button" class="ip-zoom-create" (click)="createZoomMeeting(s)">
+                    <i class="isax isax-video-add"></i> Créer
+                  </button>
+                </ng-container>
+                <!-- Meeting existant -->
+                <ng-container *ngIf="!zoomLoading[s.id] && zoomMeetings[s.id]">
+                  <div class="ip-zoom-badge" [class.ip-zoom-badge--live]="isZoomAccessible(s)">
+                    <i class="isax isax-video-circle"></i>
+                    <span>{{ isZoomAccessible(s) ? 'En direct' : getZoomDelai(s) }}</span>
+                  </div>
+                  <div class="ip-zoom-btns">
+                    <button type="button" class="ip-zoom-btn ip-zoom-btn--start"
+                            title="Démarrer (hôte)" (click)="startMeeting(s)"
+                            [class.ip-zoom-btn--live]="isZoomAccessible(s)">
+                      <i class="isax isax-video-play"></i>
+                      <span>{{ isZoomAccessible(s) ? 'Démarrer' : 'Lien hôte' }}</span>
+                    </button>
+                    <button type="button" class="ip-zoom-btn ip-zoom-btn--del"
+                            title="Supprimer meeting" (click)="deleteZoomMeeting(s)">
+                      <i class="isax isax-trash"></i>
+                    </button>
+                  </div>
+                </ng-container>
+              </ng-container>
+            </td>
+
             <td>
               <button type="button" class="ip-action-btn" title="Détails" (click)="viewDetails(s)">
                 <i class="isax isax-eye"></i>
@@ -97,7 +142,7 @@
             </td>
           </tr>
           <tr *ngIf="tableData.length === 0">
-            <td colspan="7" class="ip-empty">
+            <td colspan="8" class="ip-empty">
               <i class="isax isax-calendar-1"></i>
               <span>Aucune session trouvée</span>
             </td>
@@ -166,6 +211,50 @@
           <div class="col-12" *ngIf="selectedSession.instructions_acces">
             <h6 class="fw-semibold mb-2">Instructions d'accès</h6>
             <p class="text-muted">{{ selectedSession.instructions_acces }}</p>
+          </div>
+
+          <!-- Zoom section dans la modale -->
+          <div class="col-12" *ngIf="selectedSession.type !== 'presentiel'">
+            <h6 class="fw-semibold mb-2"><i class="isax isax-video-circle me-1"></i>Meeting Zoom</h6>
+            <div *ngIf="zoomLoading[selectedSession.id]" class="ip-zoom-spin">
+              <i class="isax isax-refresh-2"></i> Chargement...
+            </div>
+            <ng-container *ngIf="!zoomLoading[selectedSession.id]">
+              <ng-container *ngIf="!zoomMeetings[selectedSession.id]">
+                <p class="text-muted mb-2">Aucun meeting Zoom créé pour cette session.</p>
+                <button *ngIf="selectedSession.statut !== 'terminee' && selectedSession.statut !== 'annulee'"
+                        type="button" class="ip-zoom-create" (click)="createZoomMeeting(selectedSession)">
+                  <i class="isax isax-video-add"></i> Créer le meeting Zoom
+                </button>
+              </ng-container>
+              <ng-container *ngIf="zoomMeetings[selectedSession.id] as m">
+                <div class="ip-zoom-modal-info">
+                  <div class="ip-zoom-modal-row">
+                    <span class="label">Statut</span>
+                    <span class="ip-zoom-badge" [class.ip-zoom-badge--live]="isZoomAccessible(selectedSession)">
+                      <i class="isax isax-video-circle"></i>
+                      {{ isZoomAccessible(selectedSession) ? 'En direct' : getZoomDelai(selectedSession) }}
+                    </span>
+                  </div>
+                  <div class="ip-zoom-modal-row">
+                    <span class="label">Mot de passe</span>
+                    <span>{{ m.password || '—' }}</span>
+                  </div>
+                  <div class="ip-zoom-modal-row" *ngIf="m.recording_url">
+                    <span class="label">Enregistrement</span>
+                    <a [href]="m.recording_url" target="_blank" class="ip-zoom-link">
+                      <i class="isax isax-video-play"></i> Voir l'enregistrement
+                    </a>
+                  </div>
+                </div>
+                <button type="button" class="ip-zoom-btn ip-zoom-btn--start mt-2"
+                        [class.ip-zoom-btn--live]="isZoomAccessible(selectedSession)"
+                        (click)="startMeeting(selectedSession)">
+                  <i class="isax isax-video-play"></i>
+                  {{ isZoomAccessible(selectedSession) ? 'Démarrer maintenant' : 'Ouvrir lien hôte' }}
+                </button>
+              </ng-container>
+            </ng-container>
           </div>
         </div>
       </div>

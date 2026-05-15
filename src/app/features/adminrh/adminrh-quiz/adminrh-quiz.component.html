@@ -197,6 +197,10 @@
       <div class="ip-modal-divider"></div>
       <div class="ip-modal-footer">
         <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Fermer</button>
+        <a [routerLink]="['/adminrh/adminrh-quiz-questions', selectedQuiz?.id]"
+           class="ip-btn ip-btn--primary" data-bs-dismiss="modal">
+          <i class="isax isax-eye"></i> Voir les questions
+        </a>
       </div>
 
     </div>

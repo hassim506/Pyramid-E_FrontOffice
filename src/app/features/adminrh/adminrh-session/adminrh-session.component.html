@@ -7,6 +7,7 @@
       <input type="search" class="ss-search__input" placeholder="Rechercher une session..."
              [(ngModel)]="searchValue" (ngModelChange)="applyFilters()">
     </div>
+
     <select class="ss-select" [(ngModel)]="filterStatut" (ngModelChange)="applyFilters()">
       <option value="">Tous les statuts</option>
       <option value="planifiee">Planifiée</option>
@@ -14,6 +15,7 @@
       <option value="terminee">Terminée</option>
       <option value="annulee">Annulée</option>
     </select>
+
     <select class="ss-select" [(ngModel)]="filterType" (ngModelChange)="applyFilters()">
       <option value="">Tous les types</option>
       <option value="presentiel">Présentiel</option>
@@ -27,6 +29,10 @@
   </div>
 
   <!-- Alerts -->
+  <div *ngIf="zoomError" class="ss-alert ss-alert--err">
+    <i class="isax isax-video-slash"></i> {{ zoomError }}
+    <button type="button" class="ss-alert__close" (click)="zoomError=''"><i class="isax isax-close-circle"></i></button>
+  </div>
   <div *ngIf="error" class="ss-alert ss-alert--err">
     <i class="isax isax-warning-2"></i> {{ error }}
     <button type="button" class="ss-alert__close" (click)="clearMessages()"><i class="isax isax-close-circle"></i></button>
@@ -72,11 +78,13 @@
           <th>Statut</th>
           <th>Places</th>
           <th>Formateur</th>
+          <th>Zoom</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let s of pagedSessions; trackBy: trackById" class="ss-row">
+        <tr *ngFor="let s of pagedSessions; trackBy: trackById" class="ss-row"
+            (mouseenter)="loadZoomMeeting(s)">
           <td>
             <div class="ss-row__name">{{ s.titre || s.formation?.titre || '—' }}</div>
             <div class="ss-row__sub">{{ s.code_session }}</div>
@@ -91,7 +99,7 @@
             </span>
           </td>
           <td>
-            <span class="ss-statut" [attr.data-s]="statutKey(s.statut)">{{ statutLabel(s.statut) }}</span>
+            <span class="ss-statut" [attr.data-s]="statutKey(resolvedStatut(s))">{{ statutLabel(resolvedStatut(s)) }}</span>
           </td>
           <td>
             <div class="ss-places">
@@ -105,27 +113,76 @@
           <td>
             <div class="ss-row__name">{{ s.formateur?.name || (s.formateur?.prenom + ' ' + s.formateur?.nom) || '—' }}</div>
           </td>
+          <!-- Zoom -->
+          <td class="ss-zoom-cell">
+            <ng-container *ngIf="s.type === 'presentiel' || isSessionPassed(s)">
+              <span class="ss-zoom-na">—</span>
+            </ng-container>
+            <ng-container *ngIf="s.type !== 'presentiel' && !isSessionPassed(s)">
+              <span *ngIf="zoomLoading[s.id]" class="ss-zoom-spin"><i class="isax isax-refresh-2"></i></span>
+              <!-- Pas encore de meeting -->
+              <ng-container *ngIf="!zoomLoading[s.id] && !zoomMeetings[s.id] && s.statut !== 'annulee'">
+                <button type="button" class="ss-zoom-create" title="Créer meeting Zoom" (click)="createZoomMeeting(s)">
+                  <i class="isax isax-video-add"></i> Créer
+                </button>
+              </ng-container>
+              <!-- Meeting existant -->
+              <ng-container *ngIf="!zoomLoading[s.id] && zoomMeetings[s.id]">
+                <div class="ss-zoom-badge" [class.ss-zoom-badge--live]="isZoomAccessible(s)">
+                  <i class="isax isax-video-circle"></i>
+                  <span>{{ isZoomAccessible(s) ? 'En direct' : getZoomDelai(s) }}</span>
+                </div>
+                <div class="ss-zoom-btns">
+                  <button type="button" class="ss-zoom-btn ss-zoom-btn--join"
+                          title="Démarrer (lien hôte)" (click)="openZoomLink(s)">
+                    <i class="isax isax-video-play"></i>
+                  </button>
+                  <button type="button" class="ss-zoom-btn ss-zoom-btn--copy"
+                          title="Copier le lien participants" (click)="copyJoinLink(s)">
+                    <i class="isax isax-copy"></i>
+                  </button>
+                  <button type="button" class="ss-zoom-btn ss-zoom-btn--del"
+                          title="Supprimer meeting" (click)="deleteZoomMeeting(s)">
+                    <i class="isax isax-trash"></i>
+                  </button>
+                </div>
+                <div class="ss-zoom-pwd" *ngIf="zoomMeetings[s.id]?.password">
+                  <i class="isax isax-key"></i> {{ zoomMeetings[s.id]?.password }}
+                </div>
+              </ng-container>
+            </ng-container>
+          </td>
+
           <td>
             <div class="ss-actions">
+              <!-- Toujours visible -->
               <button type="button" class="ss-act" title="Voir" (click)="openView(s)">
                 <i class="isax isax-eye"></i>
               </button>
-              <button type="button" class="ss-act" title="Modifier" (click)="openEdit(s)"
-                      [disabled]="s.statut === 'annulee' || s.statut === 'terminee'">
-                <i class="isax isax-edit-2"></i>
+              <!-- Participants (sessions passées uniquement) -->
+              <button type="button" class="ss-act ss-act--pp" title="Voir les participants"
+                      *ngIf="isSessionPassed(s)" (click)="openParticipants(s)">
+                <i class="isax isax-people"></i>
               </button>
-              <button type="button" class="ss-act ss-act--warn" title="Annuler"
-                      *ngIf="s.statut === 'planifiee'" (click)="cancelSession(s)">
-                <i class="isax isax-close-circle"></i>
-              </button>
-              <button type="button" class="ss-act ss-act--del" title="Supprimer" (click)="deleteSession(s)">
-                <i class="isax isax-trash"></i>
-              </button>
+              <!-- Masqués si date passée -->
+              <ng-container *ngIf="!isSessionPassed(s)">
+                <button type="button" class="ss-act" title="Modifier" (click)="openEdit(s)"
+                        [disabled]="s.statut === 'annulee'">
+                  <i class="isax isax-edit-2"></i>
+                </button>
+                <button type="button" class="ss-act ss-act--warn" title="Annuler"
+                        *ngIf="s.statut === 'planifiee'" (click)="cancelSession(s)">
+                  <i class="isax isax-close-circle"></i>
+                </button>
+                <button type="button" class="ss-act ss-act--del" title="Supprimer" (click)="deleteSession(s)">
+                  <i class="isax isax-trash"></i>
+                </button>
+              </ng-container>
             </div>
           </td>
         </tr>
         <tr *ngIf="!sessions.length">
-          <td colspan="7" class="ss-empty">
+          <td colspan="8" class="ss-empty">
             <i class="isax isax-calendar-1"></i>
             <p>Aucune session trouvée</p>
           </td>
@@ -254,8 +311,30 @@
         </div>
 
         <div class="sw-field sw-field--full" *ngIf="wizardType !== 'presentiel'">
-          <label class="sw-label">Lien de connexion <span class="sw-req">*</span></label>
-          <div class="sw-location-block">
+          <label class="sw-label">Lien de connexion</label>
+
+          <!-- Zoom meeting existant : affiche le join_url -->
+          <div *ngIf="wizardSelected && zoomMeetings[wizardSelected.id]" class="sw-zoom-info-block">
+            <div class="sw-zoom-info-row">
+              <i class="isax isax-video-circle" style="color:#2D8CFF"></i>
+              <span class="sw-zoom-info-label">Lien Zoom participants :</span>
+              <a [href]="zoomMeetings[wizardSelected.id]!.join_url" target="_blank" class="sw-zoom-info-link">
+                {{ zoomMeetings[wizardSelected.id]!.join_url }}
+              </a>
+              <button type="button" class="sw-zoom-copy-btn"
+                      title="Copier" (click)="copyJoinLink(wizardSelected)">
+                <i class="isax isax-copy"></i>
+              </button>
+            </div>
+            <div class="sw-zoom-info-row" *ngIf="zoomMeetings[wizardSelected.id]!.password">
+              <i class="isax isax-key" style="color:#6b7280"></i>
+              <span class="sw-zoom-info-label">Mot de passe :</span>
+              <span>{{ zoomMeetings[wizardSelected.id]!.password }}</span>
+            </div>
+          </div>
+
+          <!-- Champ manuel (Meet, Teams, ou si pas de Zoom) -->
+          <div class="sw-location-block" *ngIf="!wizardSelected || !zoomMeetings[wizardSelected.id]">
             <div class="sw-lb-row">
               <i class="isax isax-link"></i>
               <input class="sw-lb-input" type="text" formControlName="lien"
@@ -269,7 +348,9 @@
                      [attr.readonly]="wizardMode === 'view' ? '' : null">
             </div>
           </div>
-          <span class="sw-hint">Le lien sera envoyé automatiquement aux participants inscrits</span>
+          <span class="sw-hint">
+            Laissez vide si vous utilisez Zoom — le lien sera généré automatiquement après création
+          </span>
         </div>
 
         <!-- Titre personnalisé -->
@@ -458,6 +539,88 @@
       </button>
       <button type="button" *ngIf="wizardStep === 3 && wizardMode === 'view'"
               class="sw-btn-primary" (click)="closeWizard()">Fermer</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     POPUP PARTICIPANTS
+════════════════════════════════════════════ -->
+<div class="pp-overlay" *ngIf="participantsPopupOpen" (click)="closeParticipants()">
+  <div class="pp-panel" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="pp-head">
+      <div class="pp-head__icon"><i class="isax isax-people"></i></div>
+      <div class="pp-head__text">
+        <div class="pp-head__title">Participants</div>
+        <div class="pp-head__sub" *ngIf="participantsSession">
+          {{ participantsSession.titre || participantsSession.formation?.titre || '—' }}
+          <span class="pp-head__code">· {{ participantsSession.code_session }}</span>
+        </div>
+      </div>
+      <button type="button" class="pp-close" (click)="closeParticipants()">
+        <i class="isax isax-close-circle"></i>
+      </button>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="pp-stats" *ngIf="participantsStats">
+      <div class="pp-stat">
+        <span class="pp-stat__val">{{ participantsStats.total_participants }}</span>
+        <span class="pp-stat__lbl">Total</span>
+      </div>
+      <div class="pp-stat">
+        <span class="pp-stat__val pp-stat__val--ok">{{ participantsStats.confirmes }}</span>
+        <span class="pp-stat__lbl">Confirmés</span>
+      </div>
+      <div class="pp-stat">
+        <span class="pp-stat__val pp-stat__val--done">{{ participantsStats.termines }}</span>
+        <span class="pp-stat__lbl">Terminés</span>
+      </div>
+      <div class="pp-stat">
+        <span class="pp-stat__val pp-stat__val--warn">{{ participantsStats.liste_attente }}</span>
+        <span class="pp-stat__lbl">En attente</span>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="pp-search">
+      <i class="isax isax-search-normal-1"></i>
+      <input type="search" placeholder="Rechercher un participant..."
+             [(ngModel)]="participantsQuery">
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="participantsLoading" class="pp-loading">
+      <i class="isax isax-refresh-2 pp-spin"></i> Chargement...
+    </div>
+
+    <!-- Liste -->
+    <div class="pp-list" *ngIf="!participantsLoading">
+      <div *ngFor="let p of filteredParticipants" class="pp-item">
+        <div class="pp-av">{{ participantInitials(p) }}</div>
+        <div class="pp-info">
+          <div class="pp-name">{{ p.prenom }} {{ p.nom }}</div>
+          <div class="pp-email">{{ p.email }}</div>
+        </div>
+        <div class="pp-right">
+          <span class="pp-badge" [ngClass]="participantStatutClass(p)">
+            {{ participantStatutLabel(p) }}
+          </span>
+          <span class="pp-cert" *ngIf="p.certificat_obtenu" title="Certificat obtenu">
+            <i class="isax isax-medal-star"></i>
+          </span>
+          <span class="pp-score" *ngIf="p.note_finale != null">
+            {{ p.note_finale }}/20
+          </span>
+        </div>
+      </div>
+      <div *ngIf="!filteredParticipants.length" class="pp-empty">
+        <i class="isax isax-people"></i>
+        <p>Aucun participant trouvé</p>
+      </div>
     </div>
 
   </div>

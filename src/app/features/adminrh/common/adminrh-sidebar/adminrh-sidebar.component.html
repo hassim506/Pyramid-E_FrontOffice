@@ -134,14 +134,27 @@
         <span class="sb-item-label">Progression employés</span>
       </a>
 
-      <a [routerLink]="routes.adminrhQuizResult" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-medal-star"></i>
-        <span class="sb-item-label">Résultats quiz</span>
-      </a>
+      <!-- Quiz groupe pliant -->
+      <div class="sb-group">
+        <div class="sb-group-header" [class.open]="openGroups['quiz']"
+             (click)="toggleGroup('quiz')">
+          <i class="isax isax-award icon"></i>
+          <span>Quiz &amp; évaluations</span>
+          <i class="isax isax-arrow-right-3 arr"></i>
+        </div>
+        <div class="sb-sub" *ngIf="openGroups['quiz']">
+          <a [routerLink]="routes.adminrhQuiz" routerLinkActive="active" class="sb-sub-item">
+            <span class="sb-sub-label">Tous les quiz</span>
+          </a>
+          <a [routerLink]="routes.adminrhQuizResult" routerLinkActive="active" class="sb-sub-item">
+            <span class="sb-sub-label">Résultats &amp; scores</span>
+          </a>
+        </div>
+      </div>
 
       <a [routerLink]="routes.adminrhCertificate" routerLinkActive="active" class="sb-item">
         <i class="isax isax-note-21"></i>
-        <span class="sb-item-label">Certificats délivrés</span>
+        <span class="sb-item-label">Certificats</span>
         <span *ngIf="certificatsCount > 0" class="sb-badge sb-badge--teal">{{ certificatsCount }}</span>
       </a>
 
@@ -157,11 +170,11 @@
     <div class="sb-section">
       <div class="sb-section-label">Communication</div>
 
-      <a [routerLink]="routes.adminrhMessage" routerLinkActive="active" class="sb-item">
+      <!-- <a [routerLink]="routes.adminrhMessage" routerLinkActive="active" class="sb-item">
         <i class="isax isax-messages-3"></i>
         <span class="sb-item-label">Messages</span>
         <span *ngIf="messagesCount > 0" class="sb-badge sb-badge--red">{{ messagesCount }}</span>
-      </a>
+      </a> -->
 
       <a [routerLink]="routes.adminrh_tickets" routerLinkActive="active" class="sb-item">
         <i class="isax isax-ticket"></i>
@@ -169,10 +182,10 @@
         <span *ngIf="ticketsCount > 0" class="sb-badge">{{ ticketsCount }}</span>
       </a>
 
-      <a [routerLink]="routes.adminrhAnnouncements" routerLinkActive="active" class="sb-item">
+      <!-- <a [routerLink]="routes.adminrhAnnouncements" routerLinkActive="active" class="sb-item">
         <i class="isax isax-volume-high"></i>
         <span class="sb-item-label">Annonces</span>
-      </a>
+      </a> -->
     </div>
 
   </div><!-- /sb-scroll -->
@@ -201,7 +214,7 @@
 
   <!-- ── BOTTOM ── -->
   <div class="sb-bottom">
-    <a [routerLink]="routes.adminrhSettings" routerLinkActive="active" class="sb-bottom-item">
+    <a [routerLink]="routes.adminrhCompanyManagement" routerLinkActive="active" class="sb-bottom-item sb-item" >
       <i class="isax isax-setting-2"></i> Paramètres entreprise
     </a>
     <a [routerLink]="routes.adminrhProfile" routerLinkActive="active" class="sb-bottom-item">

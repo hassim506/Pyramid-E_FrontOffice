@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CertificatService, Certificat, CertConfig, DEFAULT_CERT_CONFIG } from '../../../shared/service/certificat/certificat.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
+import { environment } from '../../../../environments/environment';
 
 const DEFAULT_CONFIG: CertConfig = { ...DEFAULT_CERT_CONFIG };
 
@@ -47,7 +48,7 @@ export class AdminrhCertificateComponent implements OnInit {
   get totalExpires(): number { return this.certificats.filter(c => c.statut === 'expiré').length; }
   get totalCertificats(): number { return this.certificats.length; }
 
-  private get apiUrl(): string { return 'http://127.0.0.1:8000/api'; }
+  private get apiUrl(): string { return environment.apiUrl; }
   private get entrepriseId(): number { return this.auth.getUser()?.entreprise_id ?? 0; }
 
   constructor(

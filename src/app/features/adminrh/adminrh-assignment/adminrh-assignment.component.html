@@ -1,287 +1,261 @@
+<!-- ══════════════════════════════════════════════════════════════════
+     PAGE PROGRESSION EMPLOYÉS
+══════════════════════════════════════════════════════════════════ -->
 
-    <div class="page-title d-flex align-items-center justify-content-between">
-        <h5 class="fw-bold">Assignments</h5>
-        <div>
-            <a href="javascript:void(0);" class="btn btn-secondary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#add_assignment">
-                <i class="isax isax-add-circle me-1"></i>Add Assignment
-            </a>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-8">
-            <div class="mb-3">
-                <div class="dropdown">
-                    <a href="javascript:void(0);" class="dropdown-toggle text-gray-6 btn  rounded border d-inline-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
-                        Status
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end p-3">
-                        <li>
-                            <a href="javascript:void(0);" class="dropdown-item rounded-1">Published</a>
-                        </li>
-                        <li>
-                            <a href="javascript:void(0);" class="dropdown-item rounded-1">Draft</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="input-icon mb-3">
-                <span class="input-icon-addon">
-                    <i class="isax isax-search-normal-14"></i>
-                </span>
-                <input type="email" class="form-control form-control-md" placeholder="Search">
-            </div>
-        </div>
-    </div>
-    <div class="table-responsive custom-table">
-        <table class="table">
-            <thead class="thead-light">
-                <tr>
-                    <th>Assignment Name</th>
-                    <th>Total Marks</th>
-                    <th>Total Submit</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (data of tableData;track data){
+<div class="pg-header">
+  <div class="pg-header__left">
+    <h5 class="pg-header__title">Progression des employés</h5>
+    <p class="pg-header__sub">Suivi individuel de la formation</p>
+  </div>
+  <button type="button" class="pg-header__refresh" (click)="loadData()" title="Actualiser">
+    <i class="isax isax-refresh-2"></i>
+  </button>
+</div>
 
-                    <tr>
-                        <td>
-                            <div>
-                                <h6 class="mb-1"><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#view_assignment">{{data.assignmentName}}</a></h6>
-                                <p>Course: {{data.course}}</p>
-                            </div>
-                        </td>
-                        <td>{{data.totalMarks}}</td>
-                        <td>{{data.totalSubmit}}</td>
-                        <td><span class="badge badge-sm d-inline-flex align-items-center me-1" [ngClass]="data.status==='Published'?'bg-success':'bg-skyblue'"><i class="fa-solid fa-circle fs-5 me-1"></i>{{data.status}}</span></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon"><i class="isax isax-edit-2" data-bs-toggle="modal" data-bs-target="#edit_assignment"></i></a>
-                                <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                }
-                
-            </tbody>
+<!-- ── KPI row ──────────────────────────────────────────────────── -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-card__icon kpi-card__icon--green"><i class="isax isax-people"></i></div>
+    <div class="kpi-card__body">
+      <span class="kpi-card__value">{{ loading ? '…' : kpiActifs }}</span>
+      <span class="kpi-card__label">Apprenants actifs</span>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-card__icon kpi-card__icon--blue"><i class="isax isax-chart-2"></i></div>
+    <div class="kpi-card__body">
+      <span class="kpi-card__value">{{ loading ? '…' : kpiCompletionMoy + ' %' }}</span>
+      <span class="kpi-card__label">Complétion moyenne</span>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-card__icon kpi-card__icon--gold"><i class="isax isax-medal"></i></div>
+    <div class="kpi-card__body">
+      <span class="kpi-card__value">{{ loading ? '…' : kpiCertifiesMois }}</span>
+      <span class="kpi-card__label">Certifiés ce mois</span>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-card__icon kpi-card__icon--red"><i class="isax isax-danger"></i></div>
+    <div class="kpi-card__body">
+      <span class="kpi-card__value">{{ loading ? '…' : kpiDifficulte }}</span>
+      <span class="kpi-card__label">En difficulté</span>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-card__icon kpi-card__icon--purple"><i class="isax isax-profile-2user"></i></div>
+    <div class="kpi-card__body">
+      <span class="kpi-card__value">{{ loading ? '…' : kpiTotal }}</span>
+      <span class="kpi-card__label">Total employés</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main layout ───────────────────────────────────────────────── -->
+<div class="pg-layout">
+
+  <!-- LEFT: Table + Chart ─────────────────────────────────────── -->
+  <div class="pg-layout__main">
+
+    <!-- Filters -->
+    <div class="pg-toolbar">
+      <div class="pg-toolbar__search">
+        <i class="isax isax-search-normal-1"></i>
+        <input type="text" placeholder="Rechercher un employé…" [(ngModel)]="searchQuery">
+      </div>
+      <div class="pg-toolbar__filters">
+        <button type="button" class="pg-filter-btn" [class.active]="filterStatut==='tous'"       (click)="filterStatut='tous'">Tous</button>
+        <button type="button" class="pg-filter-btn" [class.active]="filterStatut==='actif'"      (click)="filterStatut='actif'">Actifs</button>
+        <button type="button" class="pg-filter-btn" [class.active]="filterStatut==='certifie'"   (click)="filterStatut='certifie'">Certifiés</button>
+        <button type="button" class="pg-filter-btn" [class.active]="filterStatut==='difficulte'" (click)="filterStatut='difficulte'">En difficulté</button>
+        <button type="button" class="pg-filter-btn" [class.active]="filterStatut==='inactif'"    (click)="filterStatut='inactif'">Inactifs</button>
+      </div>
+    </div>
+
+    <!-- Loading skeleton -->
+    @if (loading) {
+      <div class="pg-loading">
+        <div class="pg-skeleton" *ngFor="let x of [1,2,3,4,5]"></div>
+      </div>
+    }
+
+    <!-- Employee Table -->
+    @if (!loading) {
+      <div class="emp-table-wrap">
+        <table class="emp-table">
+          <thead>
+            <tr>
+              <th>Employé</th>
+              <th>Formations</th>
+              <th>Progression</th>
+              <th>Score quiz</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (emp of pagedEmployees; track emp.id) {
+              <tr class="emp-row">
+                <td class="emp-row__name-cell">
+                  <div class="emp-av">{{ getInitials(emp.nom) }}</div>
+                  <div class="emp-info">
+                    <span class="emp-info__name">{{ emp.nom }}</span>
+                    <span class="emp-info__email">{{ emp.email }}</span>
+                  </div>
+                </td>
+                <td class="emp-row__count-cell">
+                  <span class="emp-count">{{ emp.formations_en_cours }}</span>
+                  <span class="emp-count__label">en cours / {{ emp.formations_total }} total</span>
+                </td>
+                <td class="emp-row__progress-cell">
+                  <div class="emp-progress">
+                    <div class="emp-progress__bar">
+                      <div class="emp-progress__fill emp-progress__fill--{{ getProgressClass(emp.progression_moyenne) }}"
+                           [style.width.%]="emp.progression_moyenne"></div>
+                    </div>
+                    <span class="emp-progress__pct">{{ emp.progression_moyenne }}%</span>
+                  </div>
+                </td>
+                <td class="emp-row__score-cell">
+                  <span class="emp-score emp-score--{{ getScoreClass(emp.score_moyen) }}">
+                    {{ emp.score_moyen > 0 ? (emp.score_moyen + ' %') : '—' }}
+                  </span>
+                </td>
+                <td class="emp-row__statut-cell">
+                  <span class="emp-statut emp-statut--{{ getStatut(emp) }}">{{ getStatutLabel(emp) }}</span>
+                </td>
+              </tr>
+            }
+            @if (!filteredEmployees.length) {
+              <tr>
+                <td colspan="5" class="emp-table__empty">
+                  <i class="isax isax-people"></i>
+                  <span>Aucun employé trouvé</span>
+                </td>
+              </tr>
+            }
+          </tbody>
         </table>
-    </div>
+      </div>
 
-    <!-- Add Assignment -->
-			<div class="modal fade" id="add_assignment">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Add New Assignments</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body pb-0">
-								<div class="row">
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Course <span class="text-danger"> *</span></label>
-											<mat-select class="custom-mat-select select" placeholder="Select">
-												<mat-option value="1">Select</mat-option>
-												<mat-option value="1">Information About UI/UX Design Degree</mat-option>
-												<mat-option value="1">Wordpress for Beginners - Master Wordpress Quickly</mat-option>
-												<mat-option value="1">Introduction to Python Programming</mat-option>
-											</mat-select>
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Assingment Title <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control">
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Description</label>
-											<textarea class="form-control" placeholder="Enter Description"></textarea>
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Instructions <span class="text-danger"> *</span></label>
-											<textarea rows="4" class="form-control">Enter Instructions</textarea>
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3 ngxdate">
-											<label class="form-label">Last Date <span class="text-danger"> *</span></label>
-											<div class="input-icon-end position-relative ">
-												<input type="text" class="form-control datetimepicker" bsDatepicker container=".ngxdate" [bsConfig]="{ adaptivePosition: true }" placeholder="dd/mm/yyyy">
-												<span class="input-icon-addon">
-													<i class="isax isax-calendar"></i>
-												</span>
-											</div>
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Status <span class="text-danger"> *</span></label>
-											<mat-select class="custom-mat-select select" placeholder="Select"> 
-												<mat-option value="1">Select</mat-option>
-												<mat-option value="1">Published</mat-option>
-												<mat-option value="1">Draft</mat-option>
-											</mat-select>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn bg-gray-100 rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Submit</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Add Assignment -->
+      <!-- Pagination -->
+      @if (filteredEmployees.length > pageSize) {
+        <div class="pg-pagination">
+          <span class="pg-pagination__info">
+            {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > filteredEmployees.length ? filteredEmployees.length : currentPage * pageSize }} sur {{ filteredEmployees.length }}
+          </span>
+          <div class="pg-pagination__controls">
+            <button type="button" class="pg-pg-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+              <i class="isax isax-arrow-left-2"></i>
+            </button>
+            @for (n of pageNumbers; track n) {
+              @if (n === -1) {
+                <span class="pg-pg-ellipsis">…</span>
+              } @else {
+                <button type="button" class="pg-pg-btn" [class.active]="n === currentPage" (click)="goToPage(n)">{{ n }}</button>
+              }
+            }
+            <button type="button" class="pg-pg-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+              <i class="isax isax-arrow-right-3"></i>
+            </button>
+          </div>
+          <div class="pg-pagination__size">
+            <select [(ngModel)]="pageSize" (ngModelChange)="currentPage=1">
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="25">25</option>
+              <option [value]="50">50</option>
+            </select>
+            <span>par page</span>
+          </div>
+        </div>
+      }
 
-			<!-- Edit Assignment -->
-			<div class="modal fade" id="edit_assignment">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Edit Assignments</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Course <span class="text-danger"> *</span></label>
-											<mat-select class="custom-mat-select select" placeholder="Information About UI/UX Design Degree">
-												<mat-option value="1">Select</mat-option>
-												<mat-option value="1">Information About UI/UX Design Degree</mat-option>
-												<mat-option value="1">Wordpress for Beginners - Master Wordpress Quickly</mat-option>
-												<mat-option value="1">Introduction to Python Programming</mat-option>
-											</mat-select>
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Assingment Title <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control" value="Building Your First Landing Page">
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Description</label>
-											<textarea class="form-control">Enter Description</textarea>
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Instructions <span class="text-danger"> *</span></label>
-											<textarea rows="4" class="form-control">Enter Instructions</textarea>
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3 mb-md-0 ngxdate1">
-											<label class="form-label">Last Date <span class="text-danger"> *</span></label>
-											<div class="input-icon-end position-relative">
-												<input type="text" class="form-control datetimepicker" bsDatepicker container=".ngxdate1" [bsConfig]="{ adaptivePosition: true }" placeholder="dd/mm/yyyy" value="02-05-2024">
-												<span class="input-icon-addon">
-													<i class="isax isax-calendar"></i>
-												</span>
-											</div>
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-0">
-											<label class="form-label">Status <span class="text-danger"> *</span></label>
-											<mat-select class="custom-mat-select select" placeholder="Published"> 
-												<mat-option value="1">Select</mat-option>
-												<mat-option value="1">Published</mat-option>
-												<mat-option value="1">Draft</mat-option>
-											</mat-select>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn bg-gray-100 rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Submit</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Edit Assignment -->
+      <!-- Formation completion chart -->
+      @if (topFormations.length) {
+        <div class="chart-card">
+          <div class="chart-card__head">
+            <h6 class="chart-card__title">Complétion par formation</h6>
+          </div>
+          <div class="chart-bars">
+            @for (f of topFormations; track f.id) {
+              <div class="chart-row">
+                <span class="chart-row__label" title="{{ f.titre }}">{{ f.titre }}</span>
+                <div class="chart-row__track">
+                  <div class="chart-row__fill" [style.width.%]="f.taux"></div>
+                </div>
+                <span class="chart-row__pct">{{ f.taux }}%</span>
+                <span class="chart-row__count">{{ f.inscrits }} inscrits</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
 
-			<!-- Assignment Details -->
-			<div class="modal fade" id="view_assignment">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Assignments Details</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<div class="modal-body">
-							<div class="mb-4">
-								<h6 class="mb-1">Course</h6>
-								<p>Introduction to Programming - Python & Java</p>
-							</div>
-							<div class="mb-4">
-								<h6 class="mb-1">Title</h6>
-								<p>Guest Lecture Announcement</p>
-							</div>
-							<div class="mb-4">
-								<h6 class="mb-1">Description</h6>
-								<p>I am excited to inform you that we will be having a guest lecture from , an expert . 
-									This will be an excellent opportunity to gain insight into and ask any questions you might have. 
-									Please make every effort to attend, as participation will count towards.
-								</p>
-							</div>
-							<div class="mb-4">
-								<h6 class="mb-1">Instructions</h6>
-								<p>Explain the specific instructions or requirements for the assignment. For example, 
-									"The assignment should be 3-5 
-									pages long, formatted in APA style. You must use at least 5 peer-reviewed articles.
-								</p>
-							</div>
-							<div class="mb-0">
-								<h6 class="mb-1">Last Date</h6>
-								<p>26 Jul 2025</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- /Assignment Details -->
+  <!-- RIGHT: Sidebar ──────────────────────────────────────────── -->
+  @if (!loading) {
+    <aside class="pg-sidebar">
 
-			<!-- Delete Modal -->
-			<div class="modal fade" id="delete_modal">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-body text-center custom-modal-body">
-							<span class="avatar avatar-lg bg-danger-transparent rounded-circle mb-2">
-								<i class="isax isax-trash fs-24 text-danger"></i>
-							</span>
-							<div>
-								<h4 class="mb-2">Delete Assignments</h4>
-								<p class="mb-3">Are you sure you want to delete assignments?</p>
-								<div class="d-flex align-items-center justify-content-center">
-									<a href="javascript:void(0);" class="btn bg-gray-100 rounded-pill me-2" data-bs-dismiss="modal">Cancel</a>
-									<a href="javascript:void(0);" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Yes, Delete</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- /Delete Modal -->
+      <!-- Alertes & actions -->
+      <div class="sidebar-card">
+        <div class="sidebar-card__head">
+          <i class="isax isax-notification-bing"></i>
+          <h6>Alertes & actions requises</h6>
+        </div>
+        @if (!alertes.length) {
+          <p class="sidebar-card__empty">Aucune alerte active</p>
+        }
+        @for (a of alertes; track a.message) {
+          <div class="alerte alerte--{{ a.type }}">
+            <i class="isax {{ a.icon }}"></i>
+            <span class="alerte__msg">{{ a.message }}</span>
+            <span class="alerte__count">{{ a.count }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Derniers certificats -->
+      <div class="sidebar-card">
+        <div class="sidebar-card__head">
+          <i class="isax isax-medal"></i>
+          <h6>Derniers certificats délivrés</h6>
+        </div>
+        @if (!recentCerts.length) {
+          <p class="sidebar-card__empty">Aucun certificat récent</p>
+        }
+        @for (c of recentCerts; track c.id) {
+          <div class="cert-item">
+            <div class="cert-item__av">
+              <i class="isax isax-award"></i>
+            </div>
+            <div class="cert-item__body">
+              <span class="cert-item__nom">{{ c.user?.name || c.employe?.name || '—' }}</span>
+              <span class="cert-item__formation">{{ c.formation?.titre || c.titre || '—' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Répartition des statuts -->
+      <div class="sidebar-card">
+        <div class="sidebar-card__head">
+          <i class="isax isax-chart-2"></i>
+          <h6>Répartition des statuts</h6>
+        </div>
+        <div class="distrib">
+          @for (s of statutDistribution; track s.label) {
+            <div class="distrib__row">
+              <span class="distrib__label">{{ s.label }}</span>
+              <div class="distrib__track">
+                <div class="distrib__fill" [style.width.%]="s.pct" [style.background]="s.color"></div>
+              </div>
+              <span class="distrib__pct">{{ s.pct }}%</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </aside>
+  }
+</div>

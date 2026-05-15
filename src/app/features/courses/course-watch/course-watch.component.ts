@@ -7,6 +7,9 @@ import { FormationService } from '../../../shared/service/formation/formation.se
 import { ProgressionService } from '../../../shared/service/progression/progression.service';
 import { QuizService } from '../../../shared/service/quiz/quiz.service';
 import { routes } from '../../../shared/service/routes/routes';
+import { environment } from '../../../../environments/environment';
+
+const STORAGE_BASE = environment.apiUrl.replace(/\/api$/, '') + '/storage';
 
 @Component({
   selector: 'app-course-watch',
@@ -107,8 +110,7 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
 
   private processImages(): void {
     if (this.formation.image_couverture && !this.formation.image_couverture.startsWith('http')) {
-      this.formation.image_couverture =
-        `http://localhost:8000/storage/${this.formation.image_couverture}`;
+      this.formation.image_couverture = `${STORAGE_BASE}/${this.formation.image_couverture}`;
     }
   }
 
@@ -421,20 +423,20 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
     }
     const full = url.startsWith('http')
       ? url
-      : `http://localhost:8000/storage/${url}`;
+      : `${STORAGE_BASE}/${url}`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(full);
   }
 
   getPdfUrl(raw: any): SafeResourceUrl {
     const url = this.resolveResourceUrl(raw);
-    const full = url.startsWith('http') ? url : `http://localhost:8000/storage/${url}`;
+    const full = url.startsWith('http') ? url : `${STORAGE_BASE}/${url}`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(full);
   }
 
   getImageUrl(url: string | null): string {
     if (!url) return 'assets/img/course/courses-06.jpg';
     if (url.startsWith('http')) return url;
-    return `http://localhost:8000/storage/${url}`;
+    return `${STORAGE_BASE}/${url}`;
   }
 
   /** Retourne true si la section a une ressource exploitable */

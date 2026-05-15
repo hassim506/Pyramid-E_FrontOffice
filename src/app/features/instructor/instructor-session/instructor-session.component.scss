@@ -182,3 +182,65 @@ $text-muted: #6C757D;
   &.active { background: $primary; border-color: $primary; color: #fff; }
   &:disabled { opacity: .4; cursor: not-allowed; }
 }
+
+
+// ── Zoom ─────────────────────────────────────────────────────────────────────
+.ip-alert {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+  &--err { background: #FEF2F2; color: #DC2626; border: 1px solid #fecaca; }
+  &--ok  { background: #ECFDF5; color: #059669; border: 1px solid #6ee7b7; }
+  &__close { background: none; border: none; cursor: pointer; margin-left: auto; font-size: 14px; }
+}
+
+.ip-zoom-cell { white-space: nowrap; }
+.ip-zoom-na   { color: #9ca3af; font-size: 12px; }
+
+.ip-zoom-spin {
+  color: #534AB7; font-size: 13px;
+  i { display: inline-block; animation: spin .8s linear infinite; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ip-zoom-create {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; font-size: 11px; font-weight: 500;
+  color: #534AB7; background: #EEF2FF; border: 1px solid #c7d2fe;
+  border-radius: 20px; cursor: pointer; transition: background .15s;
+  &:hover { background: #e0e7ff; }
+  i { font-size: 13px; }
+}
+
+.ip-zoom-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  background: #f0f4ff; color: #534AB7; border: 1px solid #c7d2fe;
+  i { font-size: 12px; }
+  &--live {
+    background: #ecfdf5; color: #059669; border-color: #6ee7b7;
+    animation: pulse-live 1.5s ease-in-out infinite;
+  }
+}
+@keyframes pulse-live { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+
+.ip-zoom-btns { display: flex; gap: 4px; margin-top: 4px; }
+
+.ip-zoom-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 6px; border: 1px solid;
+  font-size: 11px; font-weight: 500; cursor: pointer; transition: opacity .15s;
+  i { font-size: 13px; }
+
+  &--start { background: #EEF2FF; color: #534AB7; border-color: #c7d2fe; }
+  &--start.ip-zoom-btn--live { background: #534AB7; color: #fff; border-color: #534AB7; }
+  &--del   { background: #FEF2F2; color: #DC2626; border-color: #fecaca; padding: 4px 6px; }
+  &:hover:not(:disabled) { opacity: .8; }
+  &:disabled { opacity: .4; cursor: not-allowed; }
+}
+
+.ip-zoom-modal-info { background: #f8fafc; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+.ip-zoom-modal-row  {
+  display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0;
+  .label { color: #6c757d; min-width: 120px; }
+}
+.ip-zoom-link { color: #534AB7; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }

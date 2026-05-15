@@ -852,6 +852,288 @@ $radius-lg: 12px;
   &:disabled { opacity: .5; cursor: not-allowed; }
 }
 
+// ── Bouton participants ───────────────────────
+.ss-act--pp {
+  background: #F0F7FF;
+  color: #185FA5;
+  border-color: #b3d4ff;
+  &:hover { background: #dbeafe; }
+}
+
+// ── Popup participants ────────────────────────
+.pp-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn .15s ease;
+}
+
+.pp-panel {
+  background: #fff;
+  border-radius: 14px;
+  width: 520px;
+  max-width: 95vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  animation: slideUp .2s ease;
+}
+
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.pp-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &__icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: #EBF4FF; color: #185FA5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  &__text { flex: 1; min-width: 0; }
+  &__title { font-size: 15px; font-weight: 600; color: #111; }
+  &__sub { font-size: 12px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  &__code { color: #9ca3af; }
+}
+
+.pp-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 18px; color: #9ca3af;
+  &:hover { color: #374151; }
+}
+
+.pp-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pp-stat {
+  background: #fafbfc;
+  padding: 10px 12px;
+  text-align: center;
+  &__val { display: block; font-size: 20px; font-weight: 700; color: #111; }
+  &__val--ok   { color: #059669; }
+  &__val--done { color: #185FA5; }
+  &__val--warn { color: #d97706; }
+  &__lbl { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: .4px; }
+}
+
+.pp-search {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  i { color: #9ca3af; font-size: 15px; }
+  input {
+    flex: 1; border: none; outline: none;
+    font-size: 13px; color: #374151;
+    background: transparent;
+    &::placeholder { color: #c4c8cf; }
+  }
+}
+
+.pp-loading {
+  display: flex; align-items: center; gap: 8px;
+  padding: 24px; color: #6b7280; font-size: 13px;
+  justify-content: center;
+}
+
+.pp-spin { display: inline-block; animation: spin .8s linear infinite; }
+
+.pp-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px 0;
+}
+
+.pp-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  transition: background .12s;
+  &:hover { background: #f8fafc; }
+}
+
+.pp-av {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #E6F1FB; color: #185FA5;
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.pp-info { flex: 1; min-width: 0; }
+.pp-name  { font-size: 13px; font-weight: 500; color: #111; }
+.pp-email { font-size: 11px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.pp-right {
+  display: flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
+}
+
+.pp-badge {
+  padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  &.pp-done { background: #EBF4FF; color: #185FA5; }
+  &.pp-ok   { background: #ECFDF5; color: #059669; }
+  &.pp-wait { background: #FEF3C7; color: #D97706; }
+}
+
+.pp-cert { color: #F59E0B; font-size: 15px; }
+
+.pp-score {
+  font-size: 11px; font-weight: 600; color: #374151;
+  background: #f3f4f6; padding: 2px 6px; border-radius: 6px;
+}
+
+.pp-empty {
+  text-align: center; padding: 32px 20px; color: #9ca3af;
+  i { font-size: 28px; display: block; margin-bottom: 8px; }
+  p { font-size: 13px; margin: 0; }
+}
+
+// ── Zoom column ───────────────────────────────
+.ss-zoom-cell { white-space: nowrap; }
+
+.ss-zoom-na { color: $gray-400; font-size: 12px; }
+
+.ss-zoom-spin i {
+  display: inline-block;
+  font-size: 14px;
+  color: #2D8CFF;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ss-zoom-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #2D8CFF;
+  background: #EBF4FF;
+  border: 1px solid #b3d4ff;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background .15s;
+  &:hover { background: #d4eaff; }
+  i { font-size: 13px; }
+}
+
+.ss-zoom-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #f0f4ff;
+  color: #4b6bfb;
+  border: 1px solid #c7d2fe;
+  i { font-size: 12px; }
+
+  &--live {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #6ee7b7;
+    animation: pulse-live 1.5s ease-in-out infinite;
+  }
+}
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .7; }
+}
+
+.ss-zoom-btns {
+  display: inline-flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.ss-zoom-pwd {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 3px;
+  i { font-size: 11px; }
+}
+
+.ss-zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity .15s;
+
+  &--join  { background: #EBF4FF; color: #2D8CFF; border-color: #b3d4ff; }
+  &--copy  { background: #F0FDF4; color: #16a34a; border-color: #bbf7d0; }
+  &--del   { background: #FEF2F2; color: #DC2626; border-color: #fecaca; }
+  &:disabled { opacity: .4; cursor: not-allowed; }
+  &:hover:not(:disabled) { opacity: .8; }
+}
+
+// ── Zoom dans la modale wizard ────────────────
+.sw-zoom-info-block {
+  background: #EBF4FF;
+  border: 1px solid #b3d4ff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+
+.sw-zoom-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #1e3a5f;
+  padding: 3px 0;
+}
+
+.sw-zoom-info-label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sw-zoom-info-link {
+  color: #2D8CFF;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+  &:hover { text-decoration: underline; }
+}
+
+.sw-zoom-copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2D8CFF;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  &:hover { background: rgba(45,140,255,.1); }
+}
+
 @media (max-width: 768px) {
   .ss-kpi-row  { grid-template-columns: repeat(2, 1fr); }
   .sw-mode-grid { grid-template-columns: 1fr; }

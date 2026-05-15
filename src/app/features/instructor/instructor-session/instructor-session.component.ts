@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { SessionFormationService, SessionFormation } from '../../../shared/service/session/session-formation.service';
+import { ZoomMeetingService, ZoomMeeting } from '../../../shared/zoom/zoom-meeting.service';
 
 @Component({
   selector: 'app-instructor-session',
@@ -34,7 +35,16 @@ export class InstructorSessionComponent implements OnInit {
 
   private formateurId: number | null = null;
 
-  constructor(private sessionService: SessionFormationService) {}
+  // ── Zoom ──────────────────────────────────────
+  zoomMeetings: Record<number, ZoomMeeting | null> = {};
+  zoomLoading: Record<number, boolean> = {};
+  zoomError = '';
+  zoomSuccess = '';
+
+  constructor(
+    private sessionService: SessionFormationService,
+    private zoomService: ZoomMeetingService
+  ) {}
 
   ngOnInit(): void {
     try {
@@ -197,4 +207,62 @@ export class InstructorSessionComponent implements OnInit {
   }
 
   clearError(): void { this.error = ''; }
+
+  // ── Zoom methods ──────────────────────────────
+  loadZoomMeeting(s: SessionFormation): void {
+    if (s.type === 'presentiel' || this.zoomMeetings[s.id] !== undefined) return;
+    this.zoomLoading[s.id] = true;
+    this.zoomService.getMeetingBySession(s.id).subscribe({
+      next: (res) => { this.zoomMeetings[s.id] = res.meeting ?? null; this.zoomLoading[s.id] = false; },
+      error: ()    => { this.zoomMeetings[s.id] = null;               this.zoomLoading[s.id] = false; }
+    });
+  }
+
+  createZoomMeeting(s: SessionFormation): void {
+    this.zoomLoading[s.id] = true;
+    this.zoomError = '';
+    this.zoomService.createMeeting(s.id).subscribe({
+      next: (res) => {
+        this.zoomMeetings[s.id] = res.meeting;
+        this.zoomLoading[s.id] = false;
+        this.zoomSuccess = 'Meeting Zoom créé. Le lien a été envoyé aux participants.';
+        setTimeout(() => this.zoomSuccess = '', 5000);
+      },
+      error: (err) => {
+        this.zoomLoading[s.id] = false;
+        this.zoomError = err.error?.message || 'Erreur lors de la création du meeting Zoom.';
+      }
+    });
+  }
+
+  startMeeting(s: SessionFormation): void {
+    const m = this.zoomMeetings[s.id];
+    if (!m) return;
+    window.open(m.start_url, '_blank');
+  }
+
+  deleteZoomMeeting(s: SessionFormation): void {
+    const m = this.zoomMeetings[s.id];
+    if (!m || !confirm('Supprimer le meeting Zoom de cette session ?')) return;
+    this.zoomLoading[s.id] = true;
+    this.zoomService.deleteMeeting(m.id).subscribe({
+      next: () => {
+        this.zoomMeetings[s.id] = null;
+        this.zoomLoading[s.id] = false;
+        this.zoomSuccess = 'Meeting Zoom supprimé.';
+        setTimeout(() => this.zoomSuccess = '', 4000);
+      },
+      error: () => { this.zoomLoading[s.id] = false; this.zoomError = 'Erreur lors de la suppression.'; }
+    });
+  }
+
+  isZoomAccessible(s: SessionFormation): boolean {
+    const m = this.zoomMeetings[s.id];
+    return m ? this.zoomService.isAccessible(m) : false;
+  }
+
+  getZoomDelai(s: SessionFormation): string {
+    const m = this.zoomMeetings[s.id];
+    return m ? this.zoomService.getDelai(m) : '';
+  }
 }

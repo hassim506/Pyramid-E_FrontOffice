@@ -172,6 +172,7 @@ export const routes: Routes = [
                 {path:'adminrh-user-add',loadComponent:()=>import ('./features/adminrh/user-add/user-add.component').then((m)=>m.UserAddComponent)},
                 {path:'adminrh-demande',loadComponent:()=>import ('./features/adminrh/adminrh-demande/adminrh-demande.component').then((m)=>m.AdminrhDemandeComponent)},
                 {path:'adminrh-announcements',loadComponent:()=>import ('./features/adminrh/adminrh-announcements/adminrh-announcements.component').then((m)=>m.AdminrhAnnouncementsComponent)},
+                {path:'adminrh-quiz-questions/:quizId',loadComponent:()=>import ('./features/adminrh/adminrh-quiz-questions/adminrh-quiz-questions.component').then((m)=>m.AdminrhQuizQuestionsComponent)},
                 {path:'adminrh-quiz-questions',loadComponent:()=>import ('./features/adminrh/adminrh-quiz-questions/adminrh-quiz-questions.component').then((m)=>m.AdminrhQuizQuestionsComponent)},
                 {path:'adminrh-quiz-results',loadComponent:()=>import ('./features/adminrh/adminrh-quiz-results/adminrh-quiz-results.component').then((m)=>m.AdminrhQuizResultsComponent)},
                 {path:'adminrh-quiz-details',loadComponent:()=>import ('./features/adminrh/adminrh-quiz-details/adminrh-quiz-details.component').then((m)=>m.AdminrhQuizDetailsComponent)},

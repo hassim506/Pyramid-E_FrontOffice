@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { environment } from '../../../../environments/environment';
 
 export interface CertificatEmploye {
   id: number;
@@ -94,8 +95,8 @@ export const DEFAULT_CERT_CONFIG: CertConfig = {
 
 @Injectable({ providedIn: 'root' })
 export class CertificatService {
-  static readonly baseUrl = 'http://127.0.0.1:8000';
-  private apiUrl = `${CertificatService.baseUrl}/api`;
+  static readonly baseUrl = environment.apiUrl.replace(/\/api$/, '');
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

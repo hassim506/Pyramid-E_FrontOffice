@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CertificatService, Certificat } from '../../../shared/service/certificat/certificat.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-instructor-certificate',
@@ -23,7 +24,7 @@ export class InstructorCertificateComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 10;
 
-  private apiUrl = 'http://127.0.0.1:8000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private certService: CertificatService) {}
 

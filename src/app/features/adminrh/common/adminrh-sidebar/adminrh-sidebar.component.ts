@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription, interval } from 'rxjs';
 import { CommonService } from '../../../../shared/service/common/common.service';
 import { AuthService } from '../../../../shared/service/authentification/auth.service';
 import { routes } from '../../../../shared/service/routes/routes';
@@ -16,7 +17,8 @@ import { TicketService } from '../../../../shared/service/ticket/ticket.service'
     styleUrl: './adminrh-sidebar.component.scss',
     imports: [CommonModule, RouterLink, RouterLinkActive]
 })
-export class AdminrhSidebarComponent implements OnInit {
+export class AdminrhSidebarComponent implements OnInit, OnDestroy {
+  private refreshSub?: Subscription;
   public routes = routes;
   public base = '';
   public page = '';
@@ -37,6 +39,7 @@ export class AdminrhSidebarComponent implements OnInit {
 
   openGroups: Record<string, boolean> = {
     demandes: false,
+    quiz: false,
   };
 
   toggleGroup(key: string): void {
@@ -92,6 +95,27 @@ export class AdminrhSidebarComponent implements OnInit {
     if (this.router.url.includes('demande')) {
       this.openGroups['demandes'] = true;
     }
+    if (this.router.url.includes('quiz')) {
+      this.openGroups['quiz'] = true;
+    }
+    // Rafraîchir les badges toutes les 60s
+    this.refreshSub = interval(60000).subscribe(() => this.loadSessionsBadge());
+  }
+
+  ngOnDestroy(): void {
+    this.refreshSub?.unsubscribe();
+  }
+
+  loadSessionsBadge(): void {
+    this.sessionService.getAllSessionsRH().subscribe({
+      next: (res: SessionFormationResponse) => {
+        const now = new Date();
+        this.sessionsAVenirCount = (res.sessions || [])
+          .filter(s => s.statut === 'planifiee' && s.date_debut != null && new Date(s.date_debut) >= now)
+          .length;
+      },
+      error: () => {}
+    });
   }
 
   private loadBadgeCounts(): void {
@@ -103,15 +127,7 @@ export class AdminrhSidebarComponent implements OnInit {
       error: () => {}
     });
 
-    this.sessionService.getAllSessionsRH().subscribe({
-      next: (res: SessionFormationResponse) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        this.sessionsAVenirCount = (res.sessions || [])
-          .filter(s => s.date_debut != null && new Date(s.date_debut) > today).length;
-      },
-      error: () => {}
-    });
+    this.loadSessionsBadge();
 
     this.userService.getUsers().subscribe({
       next: (res: any) => {

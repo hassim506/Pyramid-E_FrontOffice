@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { SessionFormationService, SessionFormation } from '../../../shared/service/session/session-formation.service';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { UserService } from '../../../shared/service/user/user.service';
+import { ZoomMeetingService, ZoomMeeting } from '../../../shared/zoom/zoom-meeting.service';
 
 @Component({
   selector: 'app-adminrh-session',
@@ -71,10 +72,72 @@ export class AdminrhSessionComponent implements OnInit {
     { key: 'hybride',     label: 'Hybride',     sub: 'Mix présentiel + distanciel',           icon: 'isax-monitor' },
   ];
 
+  // ── Participants popup ────────────────────────
+  participantsPopupOpen = false;
+  participantsSession: SessionFormation | null = null;
+  participantsList: any[] = [];
+  participantsStats: any = null;
+  participantsLoading = false;
+  participantsQuery = '';
+
+  get filteredParticipants(): any[] {
+    const q = this.participantsQuery.toLowerCase().trim();
+    if (!q) return this.participantsList;
+    return this.participantsList.filter(p =>
+      (p.prenom + ' ' + p.nom).toLowerCase().includes(q) ||
+      p.email?.toLowerCase().includes(q)
+    );
+  }
+
+  openParticipants(s: SessionFormation): void {
+    this.participantsSession = s;
+    this.participantsList = [];
+    this.participantsStats = null;
+    this.participantsQuery = '';
+    this.participantsLoading = true;
+    this.participantsPopupOpen = true;
+    this.sessionService.getSessionParticipants(s.id).subscribe({
+      next: (res) => {
+        this.participantsList = res.participants || [];
+        this.participantsStats = res.statistiques || null;
+        this.participantsLoading = false;
+      },
+      error: () => { this.participantsLoading = false; }
+    });
+  }
+
+  closeParticipants(): void { this.participantsPopupOpen = false; }
+
+  participantInitials(p: any): string {
+    return ((p.prenom?.[0] || '') + (p.nom?.[0] || '')).toUpperCase() || '?';
+  }
+
+  participantStatutClass(p: any): string {
+    const s = p.statut_participation || p.statut_inscription;
+    if (s === 'termine') return 'pp-done';
+    if (s === 'confirme' || s === 'inscrit') return 'pp-ok';
+    return 'pp-wait';
+  }
+
+  participantStatutLabel(p: any): string {
+    const s = p.statut_participation || p.statut_inscription;
+    const m: Record<string, string> = {
+      termine: 'Terminé', confirme: 'Confirmé',
+      inscrit: 'Inscrit', liste_attente: 'En attente'
+    };
+    return m[s] || s;
+  }
+
+  // ── Zoom state ────────────────────────────────
+  zoomMeetings: Record<number, ZoomMeeting | null> = {};
+  zoomLoading: Record<number, boolean> = {};
+  zoomError = '';
+
   constructor(
     private sessionService: SessionFormationService,
     private formationService: FormationService,
     private userService: UserService,
+    private zoomService: ZoomMeetingService,
     private fb: FormBuilder
   ) {}
 
@@ -184,6 +247,7 @@ export class AdminrhSessionComponent implements OnInit {
     this.selectedParticipants = [];
     this.initStep1Form(s);
     this.wizardOpen = true;
+    if (s.type !== 'presentiel') this.loadZoomMeeting(s, true);
   }
 
   openView(s: SessionFormation): void {
@@ -199,6 +263,7 @@ export class AdminrhSessionComponent implements OnInit {
     this.heureFin   = new Date(s.date_fin).toTimeString().slice(0, 5);
     this.initStep1Form(s);
     this.wizardOpen = true;
+    if (s.type !== 'presentiel') this.loadZoomMeeting(s, true);
   }
 
   closeWizard(): void { this.wizardOpen = false; }
@@ -429,14 +494,19 @@ export class AdminrhSessionComponent implements OnInit {
     return new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  statutKey(s: string): string {
+  statutKey(statut: string): string {
     const m: Record<string, string> = { planifiee: 'plan', en_cours: 'live', terminee: 'done', annulee: 'cancel' };
-    return m[s] || 'plan';
+    return m[statut] || 'plan';
   }
 
-  statutLabel(s: string): string {
+  statutLabel(statut: string): string {
     const m: Record<string, string> = { planifiee: 'Planifiée', en_cours: 'En cours', terminee: 'Terminée', annulee: 'Annulée' };
-    return m[s] || s;
+    return m[statut] || statut;
+  }
+
+  resolvedStatut(s: SessionFormation): string {
+    if (this.isSessionPassed(s) && s.statut !== 'annulee') return 'terminee';
+    return s.statut;
   }
 
   countByStatut(statut: string): number {
@@ -445,5 +515,85 @@ export class AdminrhSessionComponent implements OnInit {
 
   trackById(_i: number, s: SessionFormation): number { return s.id; }
 
+  isSessionPassed(s: SessionFormation): boolean {
+    return !!s.date_fin && new Date(s.date_fin) < new Date();
+  }
+
   clearMessages(): void { this.error = ''; this.successMessage = ''; }
+
+  // ── Zoom ──────────────────────────────────────
+  loadZoomMeeting(s: SessionFormation, force = false): void {
+    if (s.type === 'presentiel') return;
+    if (!force && this.zoomMeetings[s.id] !== undefined) return;
+    this.zoomLoading[s.id] = true;
+    this.zoomService.getMeetingBySession(s.id).subscribe({
+      next: (res) => { this.zoomMeetings[s.id] = res.meeting ?? null; this.zoomLoading[s.id] = false; },
+      error: ()    => { this.zoomMeetings[s.id] = null;               this.zoomLoading[s.id] = false; }
+    });
+  }
+
+  createZoomMeeting(s: SessionFormation): void {
+    this.zoomLoading[s.id] = true;
+    this.zoomError = '';
+    this.zoomService.createMeeting(s.id).subscribe({
+      next: (res) => {
+        this.zoomMeetings[s.id] = res.meeting;
+        this.zoomLoading[s.id] = false;
+        this.successMessage = 'Meeting Zoom créé avec succès.';
+      },
+      error: (err) => {
+        this.zoomLoading[s.id] = false;
+        this.zoomError = err.error?.message || 'Erreur lors de la création du meeting Zoom.';
+      }
+    });
+  }
+
+  deleteZoomMeeting(s: SessionFormation): void {
+    const m = this.zoomMeetings[s.id];
+    if (!m || !confirm('Supprimer le meeting Zoom de cette session ?')) return;
+    this.zoomLoading[s.id] = true;
+    this.zoomService.deleteMeeting(m.id).subscribe({
+      next: () => {
+        this.zoomMeetings[s.id] = null;
+        this.zoomLoading[s.id] = false;
+        this.successMessage = 'Meeting Zoom supprimé.';
+      },
+      error: () => { this.zoomLoading[s.id] = false; this.zoomError = 'Erreur lors de la suppression.'; }
+    });
+  }
+
+  openZoomLink(s: SessionFormation): void {
+    const m = this.zoomMeetings[s.id];
+    if (!m) return;
+    window.open(m.start_url, '_blank');
+  }
+
+  copyJoinLink(s: SessionFormation): void {
+    const m = this.zoomMeetings[s.id];
+    if (!m) return;
+    navigator.clipboard.writeText(m.join_url).then(() => {
+      this.successMessage = 'Lien participants copié dans le presse-papier.';
+      setTimeout(() => this.successMessage = '', 3000);
+    });
+  }
+
+  getZoomDelai(s: SessionFormation): string {
+    // Utilise date_debut de la session (pas scheduled_at du meeting qui peut être périmé)
+    const diff = new Date(s.date_debut).getTime() - Date.now();
+    if (diff <= 0) return 'En cours';
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `Dans ${mins} min`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `Dans ${hrs}h`;
+    return `Dans ${Math.floor(hrs / 24)} j`;
+  }
+
+  isZoomAccessible(s: SessionFormation): boolean {
+    if (!this.zoomMeetings[s.id]) return false;
+    const now     = Date.now();
+    const start   = new Date(s.date_debut).getTime();
+    const end     = new Date(s.date_fin).getTime();
+    const openAt  = start - 15 * 60 * 1000;
+    return now >= openAt && now <= end;
+  }
 }

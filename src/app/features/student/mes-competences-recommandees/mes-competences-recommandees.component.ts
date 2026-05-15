@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule }      from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { environment } from '../../../../environments/environment';
 
 interface FormationRecommandee {
   formation_id:    number;
@@ -30,7 +31,7 @@ export class MesCompetencesRecommandeesComponent implements OnInit {
   recherche  = '';
   tri: SortOption = 'competences';
 
-  private readonly imageBase = 'http://localhost:8000/storage/';
+  private readonly imageBase = environment.apiUrl.replace(/\/api$/, '') + '/storage/';
 
   constructor(
     private formationsService: FormationsService,

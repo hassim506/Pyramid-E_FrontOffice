@@ -408,6 +408,13 @@ changeSessionStatus(
   /**
    * Gestion globale des erreurs
    */
+  getSessionParticipants(sessionId: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/sessions-formation/${sessionId}/participants`,
+      this.httpOptions
+    );
+  }
+
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed:`, error);

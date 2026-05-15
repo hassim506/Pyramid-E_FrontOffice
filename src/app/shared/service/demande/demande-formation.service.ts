@@ -5,12 +5,13 @@ import { catchError } from 'rxjs/operators';
 import { DemandeFormationResponse, ActionDemandeRequest } from '../../models/formation.models';
 // import { Role, RoleResponse, AssignRoleRequest } from '../../models/role.models';
 import { AuthService } from '../authentification/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DemandeFormationService {
-  private apiUrl = 'http://127.0.0.1:8000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,
