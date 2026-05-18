@@ -4,29 +4,15 @@ import { RouterModule } from '@angular/router';
 import { routes } from '../../../../shared/service/routes/routes';
 import { CommonService } from '../../../../shared/service/common/common.service';
 
-
 @Component({
-    selector: 'app-student-sidebar',
-    templateUrl: './student-sidebar.component.html',
-    styleUrl: './student-sidebar.component.scss',
-    imports: [CommonModule, RouterModule],
+  selector: 'app-student-sidebar',
+  templateUrl: './student-sidebar.component.html',
+  styleUrl: './student-sidebar.component.scss',
+  imports: [CommonModule, RouterModule],
 })
 export class StudentSidebarComponent {
   public routes = routes;
-  public base = '';
-  public page = '';
-  public last = '';
   isCollapsed = false;
 
-  constructor(private common: CommonService) {
-    this.common.base.subscribe((base: string) => {
-      this.base = base;
-    });
-    this.common.page.subscribe((page: string) => {
-      this.page = page;
-    });
-    this.common.last.subscribe((last: string) => {
-      this.last = last;
-    });
-  }
+  constructor(private common: CommonService) {}
 }

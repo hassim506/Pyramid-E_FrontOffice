@@ -26,6 +26,135 @@ export class AdminrhSessionComponent implements OnInit {
   filterStatut = '';
   filterType = '';
 
+  // ── Vue Liste / Calendrier ────────────────────
+  viewMode: 'list' | 'calendar' = 'list';
+
+  // ── Calendrier principal ──────────────────────
+  mainCalYear  = new Date().getFullYear();
+  mainCalMonth = new Date().getMonth();
+
+  get mainCalMonthLabel(): string {
+    return new Date(this.mainCalYear, this.mainCalMonth, 1)
+      .toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  }
+
+  getMainCalendarDays(): { date: Date; sessions: SessionFormation[] }[] {
+    const firstDay = new Date(this.mainCalYear, this.mainCalMonth, 1);
+    const lastDay  = new Date(this.mainCalYear, this.mainCalMonth + 1, 0);
+    const offset   = (firstDay.getDay() + 6) % 7;
+    const days: { date: Date; sessions: SessionFormation[] }[] = [];
+    for (let i = 0; i < offset; i++) {
+      days.push({ date: new Date(this.mainCalYear, this.mainCalMonth, -offset + i + 1), sessions: [] });
+    }
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const date = new Date(this.mainCalYear, this.mainCalMonth, d);
+      const daySessions = this.allSessions.filter(s => {
+        const sd = new Date(s.date_debut);
+        return sd.getDate() === d && sd.getMonth() === this.mainCalMonth && sd.getFullYear() === this.mainCalYear;
+      });
+      days.push({ date, sessions: daySessions });
+    }
+    return days;
+  }
+
+  isCurrentMonth(d: Date): boolean {
+    return d.getMonth() === this.mainCalMonth && d.getFullYear() === this.mainCalYear;
+  }
+
+  isTodayDate(d: Date): boolean {
+    const t = new Date();
+    return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
+  }
+
+  mainCalPrev(): void {
+    if (this.mainCalMonth === 0) { this.mainCalMonth = 11; this.mainCalYear--; }
+    else this.mainCalMonth--;
+  }
+
+  mainCalNext(): void {
+    if (this.mainCalMonth === 11) { this.mainCalMonth = 0; this.mainCalYear++; }
+    else this.mainCalMonth++;
+  }
+
+  getSessionTypeClass(s: SessionFormation): string {
+    return s.type === 'distanciel' ? 'ss-cal__event--dist' : s.type === 'hybride' ? 'ss-cal__event--hybr' : '';
+  }
+
+  // ── Modal inscription rapide ──────────────────
+  inscriptionOpen    = false;
+  inscriptionSession: SessionFormation | null = null;
+  inscriptionSearch  = '';
+  inscriptionSelected: any[] = [];
+  inscriptionSaving  = false;
+  inscriptionError   = '';
+  inscriptionSuccess = '';
+
+  get inscriptionFiltered(): any[] {
+    const q = this.inscriptionSearch.toLowerCase().trim();
+    const alreadyIn = new Set((this.inscriptionSession as any)?._participants?.map((p: any) => p.id) ?? []);
+    return this.allUsers.filter(u =>
+      !alreadyIn.has(u.id) &&
+      (!q || (u.name || u.prenom + ' ' + u.nom || '').toLowerCase().includes(q) || u.email?.toLowerCase().includes(q))
+    );
+  }
+
+  openInscription(s: SessionFormation): void {
+    this.inscriptionSession  = s;
+    this.inscriptionSelected = [];
+    this.inscriptionSearch   = '';
+    this.inscriptionError    = '';
+    this.inscriptionSuccess  = '';
+    this.inscriptionOpen     = true;
+  }
+
+  closeInscription(): void { this.inscriptionOpen = false; }
+
+  toggleInscriptionUser(u: any): void {
+    const cap = this.inscriptionSession?.capacite_max ?? 999;
+    const idx = this.inscriptionSelected.findIndex(x => x.id === u.id);
+    if (idx > -1) { this.inscriptionSelected.splice(idx, 1); }
+    else if (this.inscriptionSelected.length < cap) { this.inscriptionSelected.push(u); }
+  }
+
+  isInscriptionSelected(u: any): boolean {
+    return this.inscriptionSelected.some(x => x.id === u.id);
+  }
+
+  submitInscription(): void {
+    if (!this.inscriptionSession || !this.inscriptionSelected.length) return;
+    this.inscriptionSaving = true;
+    this.inscriptionError  = '';
+    const sid = this.inscriptionSession.id;
+    let done = 0;
+    let errors = 0;
+    for (const u of this.inscriptionSelected) {
+      this.sessionService.inscrireEmploye(sid, u.id).subscribe({
+        next: () => {
+          done++;
+          // Mise à jour locale immédiate du compteur
+          if (this.inscriptionSession) {
+            const s = this.allSessions.find(x => x.id === this.inscriptionSession!.id);
+            if (s) s.nombre_inscrits = (s.nombre_inscrits || 0) + 1;
+          }
+          if (done + errors === this.inscriptionSelected.length) {
+            this.inscriptionSaving  = false;
+            this.inscriptionSuccess = `${done} employé(s) inscrit(s) avec succès.`;
+            this.inscriptionSelected = [];
+            this.loadSessions();
+            setTimeout(() => { this.inscriptionSuccess = ''; this.closeInscription(); }, 2500);
+          }
+        },
+        error: (err) => {
+          errors++;
+          if (done + errors === this.inscriptionSelected.length) {
+            this.inscriptionSaving = false;
+            this.inscriptionError  = err.error?.message || `${errors} inscription(s) en erreur.`;
+          }
+        }
+      });
+    }
+  }
+
   // Pagination
   currentPage = 1;
   pageSize = 10;

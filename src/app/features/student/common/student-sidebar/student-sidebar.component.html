@@ -22,13 +22,13 @@
         <span>Mes formations</span>
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
-        <ul class="submenu">
-          <li><a [routerLink]="routes.studentMyCourses" routerLinkActive="active">Formations</a></li>
-          <li><a [routerLink]="routes.student_CataloguesAssignes" routerLinkActive="active">Catalogues</a></li>
-          <li><a [routerLink]="routes.student_ParcoursAssignes" routerLinkActive="active">Parcours</a></li>
-          <li><a [routerLink]="routes.student_SessionsAcceptees" routerLinkActive="active">Sessions</a></li>
-          <li><a>Feedback formateur</a></li>
-        </ul>
+      <ul class="submenu">
+        <li><a [routerLink]="routes.studentMyCourses" routerLinkActive="active">Formations</a></li>
+        <li><a [routerLink]="routes.student_CataloguesAssignes" routerLinkActive="active">Catalogues</a></li>
+        <li><a [routerLink]="routes.student_ParcoursAssignes" routerLinkActive="active">Parcours</a></li>
+        <li><a [routerLink]="routes.student_SessionsAcceptees" routerLinkActive="active">Sessions</a></li>
+        <li><a>Feedback formateur</a></li>
+      </ul>
     </li>
 
     <!-- ================= MES DEMANDES ================= -->
@@ -39,26 +39,10 @@
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
       <ul class="submenu">
-        <li>
-          <a [routerLink]="routes.student_DemandeFormation" routerLinkActive="active">
-            <span>Formations</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLink]="routes.student_DemandeSession" routerLinkActive="active">
-            <span>Sessions</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLink]="routes.student_DemandeParcours" routerLinkActive="active">
-            <span>Parcours</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLink]="routes.student_DemandeCatalogue" routerLinkActive="active">
-            <span>Catalogues</span>
-          </a>
-        </li>
+        <li><a [routerLink]="routes.studentDemande" routerLinkActive="active"><span>Formations</span></a></li>
+        <li><a [routerLink]="routes.student_DemandeSession" routerLinkActive="active"><span>Sessions</span></a></li>
+        <li><a [routerLink]="routes.student_DemandeParcours" routerLinkActive="active"><span>Parcours</span></a></li>
+        <li><a [routerLink]="routes.student_DemandeCatalogue" routerLinkActive="active"><span>Catalogues</span></a></li>
       </ul>
     </li>
 
@@ -86,10 +70,8 @@
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
       <ul class="submenu">
-       <li><a [routerLink]="routes.student_MesCompetences" routerLinkActive="active">Compétences acquises</a></li>
-       <li><a [routerLink]="routes.student_CompetencesRecommandees" routerLinkActive="active">
-          Compétences recommandées
-        </a></li>
+        <li><a [routerLink]="routes.student_MesCompetences" routerLinkActive="active">Compétences acquises</a></li>
+        <li><a [routerLink]="routes.student_CompetencesRecommandees" routerLinkActive="active">Compétences recommandées</a></li>
       </ul>
     </li>
 
@@ -101,7 +83,7 @@
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
       <ul class="submenu">
-        <li><a>Mes certificats</a></li>
+        <li><a [routerLink]="routes.studentCertificat" routerLinkActive="active">Mes certificats</a></li>
         <li><a>Mes habilitations</a></li>
         <li><a>Gamification / Mes badges</a></li>
       </ul>

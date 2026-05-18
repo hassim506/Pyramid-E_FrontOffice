@@ -1,166 +1,198 @@
-<!-- Breadcrumb -->
-@if (last !== 'view') {
-  <div class="breadcrumb-bar text-center">
+<div class="content">
+  <div class="container">
+
+    <!-- ═══════════════════════════════════════════
+         BANDE EN-TÊTE EMPLOYÉ
+    ═══════════════════════════════════════════ -->
+    <div class="emp-header">
+
+      <!-- Label section -->
+      <div class="emp-top-label">EMPLOYÉ — ESPACE APPRENANT</div>
+
+      <!-- Carte identité + boutons -->
+      <div class="emp-card">
+
+        <!-- Décoration fond -->
+        <div class="emp-card-deco" aria-hidden="true"></div>
+
+        <!-- Gauche : avatar + infos + greeting -->
+        <div class="emp-identity">
+          <div class="emp-av">{{ userInitials }}</div>
+          <div class="emp-id-info">
+            <h5 class="emp-name">{{ userName }}</h5>
+            <p class="emp-role-line">
+              {{ userRole }}<span *ngIf="userFonction"> · {{ userFonction }}</span>
+            </p>
+            <p class="emp-company" *ngIf="userEntreprise">
+              <i class="isax isax-building-3"></i>
+              <a [routerLink]="routes.studentProfile" class="emp-company-link">{{ userEntreprise }}</a>
+            </p>
+            <p class="emp-greeting">
+              Bon retour, <strong>{{ prenom }}</strong> 👋
+              <span class="emp-greeting-count">— {{ formationsEnCours.length }} formation{{ formationsEnCours.length !== 1 ? 's' : '' }} en cours</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Droite : boutons -->
+        <div class="emp-actions">
+          <a [routerLink]="routes.studentMyCourses" class="emp-btn emp-btn-outline">
+            <i class="isax isax-search-normal-1"></i>Explorer
+          </a>
+          <a [routerLink]="routes.studentDemande" class="emp-btn emp-btn-primary">
+            <i class="isax isax-add"></i>Demander une formation
+          </a>
+        </div>
+      </div>
+
+      <!-- Formations en cours -->
+      <div class="emp-formations-row" *ngIf="formationsEnCours.length > 0">
+        <div class="emp-formations-header">
+          <span class="emp-formations-title">MES FORMATIONS EN COURS</span>
+          <span class="emp-completion">{{ completionGlobale }}% de complétion globale</span>
+        </div>
+        <div class="emp-formations-list">
+          <div class="emp-formation-item" *ngFor="let f of formationsEnCours">
+            <span class="emp-formation-name">{{ f.titre }}</span>
+            <div class="emp-formation-bar">
+              <div class="emp-formation-bar__fill"
+                   [class]="getProgressionClass(f.progression)"
+                   [style.width.%]="f.progression"></div>
+            </div>
+            <span class="emp-formation-pct" [class]="'pct--' + getProgressionClass(f.progression)">{{ f.progression }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Badges bottom -->
+      <div class="emp-badges-row">
+        <div class="emp-badge emp-badge--cert">
+          <i class="isax isax-medal"></i>
+          <span>Certificats obtenus</span>
+          <strong>{{ nbCertificats }}</strong>
+        </div>
+        <div class="emp-badge emp-badge--warn" *ngIf="nbExpireBientot > 0">
+          <i class="isax isax-clock"></i>
+          <span>Expire bientôt</span>
+          <strong>{{ nbExpireBientot }}</strong>
+        </div>
+        <div class="emp-badge emp-badge--session" *ngIf="prochainSession">
+          <i class="isax isax-calendar-1"></i>
+          <span>Prochaine session · {{ prochainSession }}</span>
+        </div>
+      </div>
+
+    </div>
+    <!-- /emp-header -->
+
+    <!-- Layout sidebar + contenu -->
+    <div class="row">
+      <app-student-sidebar class="col-lg-3"></app-student-sidebar>
+      <div class="col-lg-9">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-bg">
+    <img src="assets/img/bg/footer-bg-01.png" class="footer-bg-1" alt="">
+    <img src="assets/img/bg/footer-bg-02.png" class="footer-bg-2" alt="">
+  </div>
+  <div class="footer-top">
     <div class="container">
-      <div class="row">
-        <div class="col-md-12 col-12">
-          <div class="breadcrumb-list">
-            <h2 class="breadcrumb-title">{{ last | titlecase }}</h2>
-            <nav aria-label="breadcrumb" class="page-breadcrumb">
-              <ol class="breadcrumb justify-content-center mb-0">
-                <li class="breadcrumb-item"><a [routerLink] = "routes.home3">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ last | titlecase }}</li>
-              </ol>
-            </nav>
+      <div class="row row-gap-4">
+        <div class="col-lg-4">
+          <div class="footer-about">
+            <div class="footer-logo">
+              <img src="assets/img/logo.png" alt="">
+            </div>
+            <p>Platform designed to help organizations, educators, and learners manage, deliver, and track learning and training activities.</p>
+            <div class="d-flex align-items-center">
+              <a href="javascript:void(0);" class="me-2" title="App Store"><img src="assets/img/icon/appstore.svg" alt="App Store"></a>
+              <a href="javascript:void(0);" title="Google Play"><img src="assets/img/icon/googleplay.svg" alt="Google Play"></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="row row-gap-4">
+            <div class="col-lg-3">
+              <div class="footer-widget footer-menu">
+                <h5 class="footer-title">Espace Formateur</h5>
+                <ul>
+                  <li><a [routerLink]="routes.courseGrid">Mentorat</a></li>
+                  <li><a [routerLink]="routes.login">Connexion</a></li>
+                  <li><a [routerLink]="routes.register">Inscription</a></li>
+                  <li><a [routerLink]="routes.courseList">Booking</a></li>
+                  <li><a [routerLink]="routes.students_Dashboard">Tableau de Bord Employé</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="footer-widget footer-menu">
+                <h5 class="footer-title">Espace Employé</h5>
+                <ul>
+                  <li><a href="javascript:void(0);">Appointments</a></li>
+                  <li><a [routerLink]="routes.instructorMessage">Chat</a></li>
+                  <li><a [routerLink]="routes.login">Login</a></li>
+                  <li><a [routerLink]="routes.register">Register</a></li>
+                  <li><a [routerLink]="routes.instructor_dashboard">Tableau de Bord Formateur</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="footer-widget footer-contact">
+                <h5 class="footer-title">Newsletter</h5>
+                <div class="subscribe-input">
+                  <form action="javascript:void(0);">
+                    <input type="email" class="form-control" placeholder="Entrer votre Adresse Mail">
+                    <button type="submit" class="btn btn-primary btn-sm inline-flex align-items-center">
+                      <i class="isax isax-send-2 me-1"></i>S'abonner
+                    </button>
+                  </form>
+                </div>
+                <div class="footer-contact-info">
+                  <div class="footer-address d-flex align-items-center">
+                    <img src="assets/img/icon/icon-20.svg" alt="Img" class="img-fluid me-2">
+                    <p>3556 Beech Street, San Francisco,<br>California, CA 94108</p>
+                  </div>
+                  <div class="footer-address d-flex align-items-center">
+                    <img src="assets/img/icon/icon-19.svg" alt="Img" class="img-fluid me-2">
+                    <p>dreamslms&#64;pyramid.com</p>
+                  </div>
+                  <div class="footer-address d-flex align-items-center">
+                    <img src="assets/img/icon/icon-21.svg" alt="Img" class="img-fluid me-2">
+                    <p>+19 123-456-7890</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-}
-<!-- /Breadcrumb -->
-<div class="content">
-  <div class="container">
-  <!-- profile box -->
-  <div class="profile-card overflow-hidden bg-blue-gradient2 mb-5 p-5">
-      <div class="profile-card-bg">
-          <img src="assets/img/bg/card-bg-01.png" class="profile-card-bg-1" alt="">
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="row row-gap-2">
+        <div class="col-md-6">
+          <div class="text-center text-md-start">
+            <p class="text-white">Copyright &copy; 2025 DreamsLMS. All rights reserved.</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div>
+            <ul class="d-flex align-items-center justify-content-center justify-content-md-end footer-link">
+              <li><a [routerLink]="routes.page_term_condition">Terms & Conditions</a></li>
+              <li><a [routerLink]="routes.page_privacy_policy">Privacy Policy</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
-	   <div class="row align-items-center row-gap-3 adminrh-profile">
-              <div class="col-md-6">
-                  <div class="d-flex align-items-center">
-                      <span class="avatar flex-shrink-0 avatar-xxl avatar-rounded me-3 border border-white border-3 position-relative">
-                          <div class="avatar-placeholder">
-                            {{ getInitials() }}
-                          </div>
-                          <span class="verify-tick"><i class="isax isax-verify5"></i></span>
-                      </span>
-                      <div>
-                          <h5 class="mb-1 text-white d-inline-flex align-items-center">
-                            {{ getFullName() }}
-                            <a [routerLink]="routes.adminrhProfile" class="link-light fs-16 ms-2">
-                              <i class="isax isax-edit-2"></i>
-                            </a>
-                          </h5>
-                          <!-- <p class="text-light">{{ getRoleName() }}</p> -->
-                      </div>
-                  </div>
-              </div>
-              <div class="col-md-6">
-                 
-              </div>
-          </div>
-          
+    </div>
   </div>
-  <!-- profile box -->
-      <div class="row">
-          <!-- sidebar -->
-          <div class="col-lg-3 ">
-              <app-student-sidebar/>
-          </div>
-          <!-- sidebar -->
-          <div class="col-lg-9">
-              <router-outlet></router-outlet>
-          </div>
-      </div>
-  </div>
-</div>
-
-		<!-- Footer -->
-		<footer class="footer">
-			<div class="footer-bg">
-				<img src="assets/img/bg/footer-bg-01.png" class="footer-bg-1" alt="">
-				<img src="assets/img/bg/footer-bg-02.png" class="footer-bg-2" alt="">
-			</div>
-			<div class="footer-top">
-				<div class="container">
-					<div class="row row-gap-4">
-						<div class="col-lg-4">
-							<div class="footer-about">
-								<div class="footer-logo">
-									<img src="assets/img/logo.png" alt="">
-								</div>
-								<p>Platform designed to help organizations, educators, and learners manage, deliver, and track learning and training activities.</p>
-								<div class="d-flex align-items-center">
-									<a href="javascript:void(0);" class="me-2"><img src="assets/img/icon/appstore.svg" alt=""></a>
-									<a href="javascript:void(0);"><img src="assets/img/icon/googleplay.svg" alt=""></a>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-8">
-							<div class="row row-gap-4">
-								<div class="col-lg-3">
-									<div class="footer-widget footer-menu">
-										<h5 class="footer-title">Espace Formateur</h5>
-										<ul>
-											<li><a [routerLink]="routes.courseGrid">Mentorat</a></li>
-											<li><a [routerLink]="routes.login">Connexion</a></li>
-											<li><a [routerLink]="routes.register">Inscription</a></li>
-											<li><a [routerLink]="routes.courseList">Booking</a></li>
-											<li><a [routerLink]="routes.students_Dashboard">Tableau de Bord Employé</a></li>
-										</ul>
-									</div>
-								</div>
-								<div class="col-lg-3">
-									<div class="footer-widget footer-menu">
-										<h5 class="footer-title">Espace Employé</h5>
-										<ul>
-											<li><a href="javascript:void(0);">Appointments</a></li>
-											<li><a [routerLink]="routes.instructorMessage">Chat</a></li>
-											<li><a [routerLink]="routes.login">Login</a></li>
-											<li><a [routerLink]="routes.register">Register</a></li>
-											<li><a [routerLink]="routes.instructor_dashboard">Tableau de Bord Formateur</a></li>
-										</ul>
-									</div>
-								</div>
-								<div class="col-lg-6">
-									<div class="footer-widget footer-contact">
-										<h5 class="footer-title">Newsletter</h5>
-										<div class="subscribe-input">
-											<form action="javascript:void(0);">
-												<input type="email" class="form-control" placeholder="Entrer votre Adresse Mail">
-												<button type="submit" class="btn btn-primary btn-sm inline-flex align-items-center"><i class="isax isax-send-2 me-1"></i>S'abonner</button>
-											</form>
-										</div>
-										<div class="footer-contact-info">
-											<div class="footer-address d-flex align-items-center">
-												<img src="assets/img/icon/icon-20.svg" alt="Img" class="img-fluid me-2">
-												<p> 3556  Beech Street, San Francisco,<br> California, CA 94108 </p>
-											</div>
-											<div class="footer-address d-flex align-items-center">
-												<img src="assets/img/icon/icon-19.svg" alt="Img" class="img-fluid me-2">
-												<p>dreamslms&#64;pyramid.com</p>
-											</div>
-											<div class="footer-address d-flex align-items-center">
-												<img src="assets/img/icon/icon-21.svg" alt="Img" class="img-fluid me-2">
-												<p>+19 123-456-7890</p>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="footer-bottom">
-				<div class="container">
-					<div class="row row-gap-2">
-						<div class="col-md-6">
-							<div class="text-center text-md-start">
-								<p class="text-white">Copyright &copy; 2025 DreamsLMS. All rights reserved.</p>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<div>
-								<ul class="d-flex align-items-center justify-content-center justify-content-md-end footer-link">
-									<li><a [routerLink]="routes.page_term_condition">Terms & Conditions</a></li>
-									<li><a [routerLink]="routes.page_privacy_policy">Privacy Policy</a></li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</footer>
-		<!-- /Footer -->
+</footer>
+<!-- /Footer -->

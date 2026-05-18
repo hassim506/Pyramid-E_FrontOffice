@@ -14,7 +14,9 @@ export const routes: Routes = [
             { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
             { path: 'set-password', loadComponent: () => import('./auth/set-password/set-password.component').then(m => m.SetPasswordComponent) },
             { path: 'otp', loadComponent: () => import('./auth/otp/otp.component').then(m => m.OtpComponent) },
-            { path: 'lock-screen', loadComponent: () => import('./auth/lock-screen/lock-screen.component').then(m => m.LockScreenComponent) }
+            { path: 'lock-screen', loadComponent: () => import('./auth/lock-screen/lock-screen.component').then(m => m.LockScreenComponent) },
+            { path: 'magic-verify', loadComponent: () => import('./auth/magic-verify/magic-verify.component').then(m => m.MagicVerifyComponent) },
+            { path: 'activate',    loadComponent: () => import('./auth/activate/activate.component').then(m => m.ActivateComponent) }
         ]
 },
     // ══════════════════════════════════════════════════════════════════════
@@ -190,7 +192,9 @@ export const routes: Routes = [
 
 
                 {path:'adminrh-earnings',loadComponent:()=>import ('./features/adminrh/adminrh-earnings/adminrh-earnings.component').then((m)=>m.AdminrhEarningsComponent)},
+                {path:'adminrh-rapport',loadComponent:()=>import ('./features/adminrh/adminrh-statements/adminrh-statements.component').then((m)=>m.AdminrhStatementsComponent)},
                 {path:'adminrh-statements',loadComponent:()=>import ('./features/adminrh/adminrh-statements/adminrh-statements.component').then((m)=>m.AdminrhStatementsComponent)},
+
                 {path:'adminrh-course',loadComponent:()=>import ('./features/adminrh/adminrh-course/adminrh-course.component').then((m)=>m.AdminrhCourseComponent)},
                 {path:'adminrh-course-grid',loadComponent:()=>import ('./features/adminrh/adminrh-course-grid/adminrh-course-grid.component').then((m)=>m.AdminrhCourseGridComponent)},
                 {path:'adminrh-session',loadComponent:()=>import ('./features/adminrh/adminrh-session/adminrh-session.component').then((m)=>m.AdminrhSessionComponent)},
@@ -281,6 +285,8 @@ export const routes: Routes = [
         {path:'student-quiz-questions/:id',loadComponent:()=>import ('./features/student/student-quiz-questions/student-quiz-questions.component').then((m)=>m.StudentQuizQuestionsComponent)},
         {path:'student-planning',loadComponent:()=>import ('./features/student/student-planning/student-planning.component').then((m)=>m.StudentPlanningComponent)},
         {path:'student-certificate',loadComponent:()=>import ('./features/student/student-certificate/student-certificate.component').then((m)=>m.StudentCertificateComponent)},
+        {path:'student-demande',loadComponent:()=>import ('./features/student/student-demande/student-demande.component').then((m)=>m.StudentDemandeComponent)},
+
         {path:'mes-competences',loadComponent:()=>import ('./features/student/mes-competences/mes-competences.component').then((m)=>m.MesCompetencesComponent)},
         {path:'mes-competences-recommandees',loadComponent:()=>import ('./features/student/mes-competences-recommandees/mes-competences-recommandees.component').then((m)=>m.MesCompetencesRecommandeesComponent)},
         {path:'student-message',loadComponent:()=>import ('./features/student/student-message/student-message.component').then((m)=>m.StudentMessageComponent)},
@@ -306,6 +312,7 @@ export const routes: Routes = [
     ]
 
 },
+{ path: 'verify-certificate', loadComponent: () => import('./features/verify-certificate/verify-certificate.component').then(m => m.VerifyCertificateComponent) },
 { path: 'under-construction', loadComponent: () => import('./features/pages/under-construction/under-construction.component').then(m => m.UnderConstructionComponent) },
 { path: 'coming-soon', loadComponent: () => import('./features/pages/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent) },
 

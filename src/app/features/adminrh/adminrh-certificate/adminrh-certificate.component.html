@@ -297,7 +297,6 @@
               <tr>
                 <th>Employé</th>
                 <th>Formation</th>
-                <th>Score</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>
@@ -318,14 +317,6 @@
                   </div>
                 </td>
                 <td><span class="ip-formation-name">{{ cert.formation?.titre }}</span></td>
-                <td>
-                  <span *ngIf="cert.score_final" class="ip-score-badge"
-                        [style.color]="getScoreColor(cert.score_final)"
-                        [style.background]="parseFloat(cert.score_final) >= 80 ? '#ECFDF5' : parseFloat(cert.score_final) >= 60 ? '#FFFBEB' : '#FFF5F5'">
-                    {{ cert.score_final }}%
-                  </span>
-                  <span *ngIf="!cert.score_final" class="text-muted">—</span>
-                </td>
                 <td>
                   <span class="ip-cert-badge"
                         [class.ip-cert-badge--valide]="cert.statut === 'valide'"
@@ -348,7 +339,7 @@
                 </td>
               </tr>
               <tr *ngIf="filteredCertificats.length === 0">
-                <td colspan="5" class="ip-empty">
+                <td colspan="4" class="ip-empty">
                   <i class="isax isax-award"></i>
                   <span>Aucun certificat trouvé</span>
                 </td>
@@ -438,7 +429,6 @@
             <tr>
               <th>Employé</th>
               <th>Formation</th>
-              <th>Score</th>
               <th>Formateur</th>
               <th>Délivré le</th>
               <th>Expiration</th>
@@ -466,14 +456,6 @@
                 <div class="ip-formation-meta" *ngIf="cert.formation?.duree_totale">
                   <i class="isax isax-clock"></i> {{ cert.formation?.duree_totale }}h
                 </div>
-              </td>
-              <td>
-                <span *ngIf="cert.score_final" class="ip-score-badge"
-                      [style.color]="getScoreColor(cert.score_final)"
-                      [style.background]="parseFloat(cert.score_final) >= 80 ? '#ECFDF5' : parseFloat(cert.score_final) >= 60 ? '#FFFBEB' : '#FFF5F5'">
-                  {{ cert.score_final }}%
-                </span>
-                <span *ngIf="!cert.score_final" class="text-muted">—</span>
               </td>
               <td>
                 <span class="text-muted" *ngIf="cert.formateur">
@@ -514,7 +496,7 @@
               </td>
             </tr>
             <tr *ngIf="filteredCertificats.length === 0">
-              <td colspan="8" class="ip-empty">
+              <td colspan="7" class="ip-empty">
                 <i class="isax isax-award"></i>
                 <span>Aucun certificat trouvé</span>
               </td>
@@ -592,16 +574,9 @@
             {{ selectedCert.formation?.titre }}
           </div>
 
-          <div class="ip-cert-score-row" *ngIf="config.show_score || config.show_duree">
-            <div *ngIf="config.show_score" class="ip-cert-score-item">
-              <div class="ip-cert-score-val" [style.color]="config.couleur_principale">
-                {{ selectedCert.score_final }}%
-              </div>
-              <div class="ip-cert-score-label">Score obtenu</div>
-            </div>
-            <div *ngIf="config.show_score && config.show_duree" class="ip-cert-divider-v"></div>
-            <div *ngIf="config.show_duree" class="ip-cert-score-item">
-              <div class="ip-cert-score-val">{{ selectedCert.formation?.duree_totale || '—' }}h</div>
+          <div class="ip-cert-score-row" *ngIf="config.show_duree && selectedCert.formation?.duree_totale">
+            <div class="ip-cert-score-item">
+              <div class="ip-cert-score-val">{{ selectedCert.formation?.duree_totale }}h</div>
               <div class="ip-cert-score-label">Durée totale</div>
             </div>
           </div>

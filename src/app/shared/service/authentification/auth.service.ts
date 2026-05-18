@@ -111,6 +111,53 @@ export class AuthService {
         })
       );
   }
+  activateAccount(token: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/activate`, { token })
+      .pipe(
+        tap(response => {
+          const accessToken = response?.access_token || response?.token;
+          if (accessToken) {
+            this.setToken(accessToken);
+            this.setUser(response?.user);
+          }
+        }),
+        catchError(error => this.handleError(error))
+      );
+  }
+
+  sendPasswordResetLink(email: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/auth/forgot-password`, { email })
+      .pipe(catchError(error => this.handleError(error)));
+  }
+
+  resetPassword(token: string, email: string, password: string, passwordConfirmation: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/auth/reset-password`, {
+      token,
+      email,
+      password,
+      password_confirmation: passwordConfirmation,
+    }).pipe(catchError(error => this.handleError(error)));
+  }
+
+  sendMagicLink(email: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/auth/magic-link`, { email })
+      .pipe(catchError(error => this.handleError(error)));
+  }
+
+  verifyMagicLink(token: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/magic-link/verify`, { token })
+      .pipe(
+        tap(response => {
+          const accessToken = response?.access_token || response?.token;
+          if (accessToken) {
+            this.setToken(accessToken);
+            this.setUser(response?.user);
+          }
+        }),
+        catchError(error => this.handleError(error))
+      );
+  }
+
 register(data: any): Observable<any> {
   // Ajouter created_by automatiquement
   const user = this.getUser();

@@ -38,8 +38,9 @@ export class AdminrhSidebarComponent implements OnInit, OnDestroy {
   get quotaPercent() { return Math.round((this.quotaUsed / this.quotaTotal) * 100); }
 
   openGroups: Record<string, boolean> = {
-    demandes: false,
-    quiz: false,
+    demandes:  false,
+    formation: false,
+    quiz:      false,
   };
 
   toggleGroup(key: string): void {
@@ -98,6 +99,11 @@ export class AdminrhSidebarComponent implements OnInit, OnDestroy {
     if (this.router.url.includes('quiz')) {
       this.openGroups['quiz'] = true;
     }
+    if (this.router.url.includes('adminrh-course') ||
+        this.router.url.includes('adminrh-catalogue') ||
+        this.router.url.includes('adminrh-parcours')) {
+      this.openGroups['formation'] = true;
+    }
     // Rafraîchir les badges toutes les 60s
     this.refreshSub = interval(60000).subscribe(() => this.loadSessionsBadge());
   }
@@ -138,7 +144,10 @@ export class AdminrhSidebarComponent implements OnInit, OnDestroy {
     });
 
     this.certificatService.getCertificats().subscribe({
-      next: (certs: any[]) => { this.certificatsCount = certs?.length || 0; },
+      next: (res: any) => {
+        const arr = res?.certificats || res?.data || (Array.isArray(res) ? res : []);
+        this.certificatsCount = arr.length;
+      },
       error: () => {}
     });
 

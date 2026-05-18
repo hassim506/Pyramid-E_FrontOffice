@@ -101,20 +101,26 @@
     <div class="sb-section">
       <div class="sb-section-label">Formation</div>
 
-      <a [routerLink]="routes.adminrhCatalogue" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-category"></i>
-        <span class="sb-item-label">Catalogue</span>
-      </a>
-
-      <a [routerLink]="routes.adminrhCourse" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-book-1"></i>
-        <span class="sb-item-label">Formations</span>
-      </a>
-
-      <a [routerLink]="routes.adminrhParcours" routerLinkActive="active" class="sb-item">
-        <i class="isax isax-route-square"></i>
-        <span class="sb-item-label">Parcours</span>
-      </a>
+      <!-- Formations groupe pliant -->
+      <div class="sb-group">
+        <div class="sb-group-header" [class.open]="openGroups['formation']"
+             (click)="toggleGroup('formation')">
+          <i class="isax isax-book-1 icon"></i>
+          <span>Formations</span>
+          <i class="isax isax-arrow-right-3 arr"></i>
+        </div>
+        <div class="sb-sub" *ngIf="openGroups['formation']">
+          <a [routerLink]="routes.adminrhCourse" routerLinkActive="active" class="sb-sub-item">
+            <span class="sb-sub-label">Formations</span>
+          </a>
+          <a [routerLink]="routes.adminrhCatalogue" routerLinkActive="active" class="sb-sub-item">
+            <span class="sb-sub-label">Catalogue</span>
+          </a>
+          <a [routerLink]="routes.adminrhParcours" routerLinkActive="active" class="sb-sub-item">
+            <span class="sb-sub-label">Parcours</span>
+          </a>
+        </div>
+      </div>
 
       <a [routerLink]="routes.adminrhSession" routerLinkActive="active" class="sb-item">
         <i class="isax isax-calendar-1"></i>

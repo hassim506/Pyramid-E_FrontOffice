@@ -22,6 +22,18 @@
       <option value="distanciel">Distanciel</option>
       <option value="hybride">Hybride</option>
     </select>
+
+    <div class="ss-view-group">
+      <button type="button" class="ss-view-toggle" [class.active]="viewMode === 'list'"
+              (click)="viewMode = 'list'" title="Vue liste">
+        <i class="isax isax-row-vertical"></i>
+      </button>
+      <button type="button" class="ss-view-toggle" [class.active]="viewMode === 'calendar'"
+              (click)="viewMode = 'calendar'" title="Vue calendrier">
+        <i class="isax isax-calendar-1"></i>
+      </button>
+    </div>
+
     <div class="ss-spacer"></div>
     <button type="button" class="ss-add-btn" (click)="openCreate()">
       <i class="isax isax-add"></i> Planifier une session
@@ -67,8 +79,45 @@
     <div *ngFor="let i of [1,2,3,4]" class="ss-skeleton-row"></div>
   </div>
 
-  <!-- Table -->
-  <div *ngIf="!loading" class="ss-table-wrap">
+  <!-- ─── VUE CALENDRIER ─── -->
+  <div *ngIf="!loading && viewMode === 'calendar'" class="ss-cal-wrap">
+    <div class="ss-cal">
+      <div class="ss-cal__nav">
+        <button type="button" class="ss-cal__nav-btn" (click)="mainCalPrev()">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <span class="ss-cal__nav-label">{{ mainCalMonthLabel | titlecase }}</span>
+        <button type="button" class="ss-cal__nav-btn" (click)="mainCalNext()">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
+      <div class="ss-cal__grid">
+        <div class="ss-cal__head" *ngFor="let d of ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim']">{{ d }}</div>
+        <div *ngFor="let cell of getMainCalendarDays()"
+             class="ss-cal__cell"
+             [class.ss-cal__cell--other]="!isCurrentMonth(cell.date)"
+             [class.ss-cal__cell--today]="isTodayDate(cell.date)">
+          <span class="ss-cal__day">{{ cell.date.getDate() }}</span>
+          <div class="ss-cal__events">
+            <div *ngFor="let s of cell.sessions" class="ss-cal__event"
+                 [ngClass]="getSessionTypeClass(s)"
+                 [title]="(s.titre || s.formation?.titre || '') + ' — ' + (s.statut | titlecase)">
+              {{ (s.titre || s.formation?.titre || '—') | slice:0:18 }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Légende -->
+    <div class="ss-cal__legend">
+      <span class="ss-cal__leg-item"><span class="ss-cal__leg-dot ss-cal__leg-dot--pres"></span>Présentiel</span>
+      <span class="ss-cal__leg-item"><span class="ss-cal__leg-dot ss-cal__leg-dot--dist"></span>Distanciel</span>
+      <span class="ss-cal__leg-item"><span class="ss-cal__leg-dot ss-cal__leg-dot--hybr"></span>Hybride</span>
+    </div>
+  </div>
+
+  <!-- ─── VUE LISTE ─── -->
+  <div *ngIf="!loading && viewMode === 'list'" class="ss-table-wrap">
     <table class="ss-table">
       <thead>
         <tr>
@@ -159,13 +208,17 @@
               <button type="button" class="ss-act" title="Voir" (click)="openView(s)">
                 <i class="isax isax-eye"></i>
               </button>
-              <!-- Participants (sessions passées uniquement) -->
+              <!-- Participants : visible pour toutes les sessions -->
               <button type="button" class="ss-act ss-act--pp" title="Voir les participants"
-                      *ngIf="isSessionPassed(s)" (click)="openParticipants(s)">
+                      (click)="openParticipants(s)">
                 <i class="isax isax-people"></i>
               </button>
-              <!-- Masqués si date passée -->
+              <!-- Actions uniquement sur sessions futures -->
               <ng-container *ngIf="!isSessionPassed(s)">
+                <button type="button" class="ss-act ss-act--enroll" title="Inscrire des employés"
+                        *ngIf="s.statut === 'planifiee'" (click)="openInscription(s)">
+                  <i class="isax isax-user-add"></i>
+                </button>
                 <button type="button" class="ss-act" title="Modifier" (click)="openEdit(s)"
                         [disabled]="s.statut === 'annulee'">
                   <i class="isax isax-edit-2"></i>
@@ -204,9 +257,9 @@
         <i class="isax isax-arrow-right-3"></i>
       </button>
     </div>
-  </div>
+  </div><!-- /ss-table-wrap -->
 
-</div>
+</div><!-- /ss-shell -->
 
 <!-- ════════════════════════════════════════════
      WIZARD MODAL – SESSION
@@ -539,6 +592,101 @@
       </button>
       <button type="button" *ngIf="wizardStep === 3 && wizardMode === 'view'"
               class="sw-btn-primary" (click)="closeWizard()">Fermer</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     MODAL INSCRIPTION RAPIDE
+════════════════════════════════════════════ -->
+<div class="ei-overlay" *ngIf="inscriptionOpen" (click)="closeInscription()">
+  <div class="ei-modal" (click)="$event.stopPropagation()">
+
+    <!-- Head -->
+    <div class="ei-head">
+      <div class="ei-head__icon"><i class="isax isax-user-add"></i></div>
+      <div class="ei-head__text">
+        <div class="ei-head__title">Inscrire des employés</div>
+        <div class="ei-head__sub" *ngIf="inscriptionSession">
+          {{ inscriptionSession.titre || inscriptionSession.formation?.titre || '—' }}
+          · <span class="ei-head__date">{{ formatDate(inscriptionSession.date_debut) }}</span>
+          · <span class="ei-head__places">{{ inscriptionSession.nombre_inscrits || 0 }}/{{ inscriptionSession.capacite_max }} places</span>
+        </div>
+      </div>
+      <button type="button" class="ei-close" (click)="closeInscription()">
+        <i class="isax isax-close-circle"></i>
+      </button>
+    </div>
+
+    <!-- Barre de remplissage -->
+    <div class="ei-fill-bar" *ngIf="inscriptionSession">
+      <div class="ei-fill-bar__track">
+        <div class="ei-fill-bar__fill"
+             [style.width.%]="((inscriptionSession.nombre_inscrits || 0) + inscriptionSelected.length) / inscriptionSession.capacite_max * 100">
+        </div>
+      </div>
+      <span class="ei-fill-bar__txt">
+        {{ (inscriptionSession.nombre_inscrits || 0) + inscriptionSelected.length }} / {{ inscriptionSession.capacite_max }} places
+      </span>
+    </div>
+
+    <!-- Search -->
+    <div class="ei-search">
+      <i class="isax isax-search-normal-1"></i>
+      <input type="search" placeholder="Rechercher un employé..."
+             [(ngModel)]="inscriptionSearch">
+    </div>
+
+    <!-- Sélectionnés chips -->
+    <div class="ei-selected-strip" *ngIf="inscriptionSelected.length">
+      <span *ngFor="let u of inscriptionSelected" class="ei-chip">
+        {{ (u.name || u.prenom + ' ' + u.nom) | slice:0:18 }}
+        <i class="isax isax-close-circle" (click)="toggleInscriptionUser(u)"></i>
+      </span>
+    </div>
+
+    <!-- Liste employés -->
+    <div class="ei-list">
+      <div *ngFor="let u of inscriptionFiltered" class="ei-item"
+           [class.ei-item--sel]="isInscriptionSelected(u)"
+           (click)="toggleInscriptionUser(u)">
+        <div class="ei-av">{{ userInitials(u) }}</div>
+        <div class="ei-info">
+          <div class="ei-name">{{ u.name || (u.prenom + ' ' + u.nom) }}</div>
+          <div class="ei-role">{{ u.fonction || u.email || '—' }}</div>
+        </div>
+        <div class="ei-chk" [class.on]="isInscriptionSelected(u)">
+          <i *ngIf="isInscriptionSelected(u)" class="isax isax-tick-circle"></i>
+        </div>
+      </div>
+      <div *ngIf="!inscriptionFiltered.length" class="ei-empty">
+        <i class="isax isax-people"></i>
+        <p>Aucun employé disponible</p>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div *ngIf="inscriptionError" class="ei-alert ei-alert--err">
+      <i class="isax isax-warning-2"></i> {{ inscriptionError }}
+    </div>
+    <div *ngIf="inscriptionSuccess" class="ei-alert ei-alert--ok">
+      <i class="isax isax-tick-circle"></i> {{ inscriptionSuccess }}
+    </div>
+
+    <!-- Footer -->
+    <div class="ei-foot">
+      <button type="button" class="ei-btn-ghost" (click)="closeInscription()">Annuler</button>
+      <div style="flex:1"></div>
+      <span class="ei-foot__count" *ngIf="inscriptionSelected.length">
+        {{ inscriptionSelected.length }} employé(s) sélectionné(s)
+      </span>
+      <button type="button" class="ei-btn-primary"
+              [disabled]="!inscriptionSelected.length || inscriptionSaving"
+              (click)="submitInscription()">
+        <i class="isax isax-user-add"></i>
+        {{ inscriptionSaving ? 'Inscription...' : 'Inscrire' }}
+      </button>
     </div>
 
   </div>

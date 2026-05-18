@@ -1,4 +1,5 @@
 import { AdminrhDemandeComponent } from "../../../features/adminrh/adminrh-demande/adminrh-demande.component";
+import { AdminrhStatementsComponent } from "../../../features/adminrh/adminrh-statements/adminrh-statements.component";
 
 export const routes = {
   // Instructor Routes
@@ -44,6 +45,7 @@ export const routes = {
   course_student: '/student/course-student',
   studentMyCourses: '/student/mes-formations',           // ✅ mes-cours → mes-formations
   student_Certificate: '/student/student-certificate',
+  studentDemande: '/student/student-demande',
   student_Wishlist: '/student/student-wishlist',
   view_invoice_student: '/student/view-invoice',
   transactions_student: '/student/transactions-student',
@@ -86,7 +88,8 @@ export const routes = {
   student_DemandeSession:   '/student/students-session',
   student_DemandeCatalogue: '/student/students-catalogue',
   student_DemandeParcours:  '/student/students-parcours',
-  student_DemandeFormation: '/student/student-certificate',
+  studentCertificat: '/student/student-certificate',
+
 
   // Mes parcours et catalogues assignés
   student_CataloguesAssignes: '/student/mes-catalogues',          // ✅
@@ -161,7 +164,9 @@ export const routes = {
   adminrhCertificate: '/adminrh/adminrh-certificate',
   adminrhCertificateModele: '/adminrh/adminrh-certificate-modele',
   adminrhEarning: '/adminrh/adminrh-earnings',
+  adminrhRapport: '/adminrh/adminrh-rapport',
   adminrhStatements: '/adminrh/adminrh-statements',
+
   adminrhCompanyManagement: '/adminrh/adminrh-companymanagement',
   adminrhCompanydetails: '/adminrh/adminrh-company-details',
   adminrhClientList: '/adminrh/adminrh-client-list',
@@ -234,6 +239,8 @@ export const routes = {
   register: '/auth/register',
   setPassword: '/auth/set-password',
   otp: '/auth/otp',
+  magic_verify: '/auth/magic-verify',
+  activate: '/auth/activate',
   lockScreen: '/auth/lock-screen',
 
   under_construction: '/under-construction',

@@ -410,7 +410,15 @@ changeSessionStatus(
    */
   getSessionParticipants(sessionId: number): Observable<any> {
     return this.http.get<any>(
-      `${this.apiUrl}/sessions-formation/${sessionId}/participants`,
+      `${environment.apiUrl}/sessions-formation/${sessionId}/participants`,
+      this.httpOptions
+    );
+  }
+
+  inscrireEmploye(sessionId: number, userId: number): Observable<any> {
+    return this.http.post<any>(
+      `${environment.apiUrl}/sessions-formation/${sessionId}/inscrire`,
+      { user_id: userId },
       this.httpOptions
     );
   }

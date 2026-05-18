@@ -33,89 +33,169 @@
                               <a [routerLink]="routes.home" class="link-1">Retour à l'Accueil</a>
                           </div>
                           <h1 class="fs-32 fw-bold topic">Connectez-vous à Pyramide-e</h1>
-                          <p class="text-muted mb-4">Formez vous simplement</p>
-                          
-                          <!-- Message d'erreur -->
-                          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-                              <i class="isax isax-close-circle me-2"></i>
-                              {{ errorMessage }}
-                              <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Fermer"></button>
+                          <p class="text-muted mb-3">Formez vous simplement</p>
+
+                          <!-- Toggle mode -->
+                          <div class="login-mode-toggle mb-4">
+                              <button type="button"
+                                      class="lmt-btn"
+                                      [class.active]="loginMode === 'password'"
+                                      (click)="loginMode = 'password'; magicSent = false; magicError = ''">
+                                  <i class="isax isax-lock"></i> Mot de passe
+                              </button>
+                              <button type="button"
+                                      class="lmt-btn"
+                                      [class.active]="loginMode === 'magic'"
+                                      (click)="loginMode = 'magic'; errorMessage = ''">
+                                  <i class="isax isax-sms"></i> Lien par e-mail
+                              </button>
                           </div>
-                          
-                          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mb-3 pb-3">
-                              <!-- Email Field -->
+
+                          <!-- ═══ MODE MOT DE PASSE ═══ -->
+                          <ng-container *ngIf="loginMode === 'password'">
+
+                            <!-- Message d'erreur -->
+                            <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                                <i class="isax isax-close-circle me-2"></i>
+                                {{ errorMessage }}
+                                <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Fermer"></button>
+                            </div>
+
+                            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mb-3 pb-3">
+                                <!-- Email Field -->
+                                <div class="mb-3 position-relative">
+                                    <label class="form-label">Adresse Email<span class="text-danger ms-1">*</span></label>
+                                    <div class="position-relative">
+                                        <input
+                                            type="email"
+                                            class="form-control form-control-lg"
+                                            formControlName="email"
+                                            [class.is-invalid]="f['email'].invalid && f['email'].touched"
+                                            placeholder="Entrez votre adresse email">
+                                        <span><i class="isax isax-sms input-icon text-gray-7 fs-14"></i></span>
+                                    </div>
+                                    <div *ngIf="f['email'].invalid && f['email'].touched" class="invalid-feedback d-block">
+                                        <small *ngIf="f['email'].hasError('required')">L'email est requis</small>
+                                        <small *ngIf="f['email'].hasError('email')">Veuillez entrer un email valide</small>
+                                    </div>
+                                </div>
+
+                                <!-- Password Field -->
+                                <div class="mb-3 position-relative">
+                                    <label class="form-label">Mot de Passe <span class="text-danger ms-1">*</span></label>
+                                    <div class="position-relative" id="passwordInput">
+                                        <input
+                                            [type]="password ? 'text' : 'password'"
+                                            class="pass-inputs form-control form-control-lg"
+                                            formControlName="password"
+                                            [class.is-invalid]="f['password'].invalid && f['password'].touched"
+                                            placeholder="Entrez votre mot de passe">
+                                        <span
+                                            tabindex="0"
+                                            (click)="togglePassword()"
+                                            (keydown.enter)="togglePassword()"
+                                            class="isax toggle-passwords fs-14 cursor-pointer"
+                                            [ngClass]="password ? 'isax-eye' : 'isax-eye-slash'">
+                                        </span>
+                                    </div>
+                                    <div *ngIf="f['password'].invalid && f['password'].touched" class="invalid-feedback d-block">
+                                        <small *ngIf="f['password'].hasError('required')">Le mot de passe est requis</small>
+                                        <small *ngIf="f['password'].hasError('minlength')">Le mot de passe doit contenir au moins 6 caractères</small>
+                                    </div>
+                                </div>
+
+                                <!-- Remember Me & Forgot Password -->
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <div class="remember-me d-flex align-items-center">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            value="true"
+                                            id="flexCheckDefault">
+                                        <label class="form-check-label ms-2" for="flexCheckDefault">
+                                            Se souvenir de moi
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <a [routerLink]="routes.forgot_password" class="link-2">
+                                            Mot de passe oublié ?
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button
+                                        class="btn btn-secondary btn-lg"
+                                        type="submit"
+                                        [disabled]="isLoading || loginForm.invalid">
+                                        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                                        {{ isLoading ? 'Connexion en cours...' : 'Se Connecter' }}
+                                        <i *ngIf="!isLoading" class="isax isax-arrow-right-3 ms-1"></i>
+                                    </button>
+                                </div>
+                            </form>
+
+                          </ng-container>
+
+                          <!-- ═══ MODE MAGIC LINK ═══ -->
+                          <ng-container *ngIf="loginMode === 'magic'">
+
+                            <!-- Succès envoi -->
+                            <div *ngIf="magicSent" class="magic-sent-box mb-3">
+                                <div class="msb-icon"><i class="isax isax-sms-star"></i></div>
+                                <div class="msb-text">
+                                    <div class="msb-title">E-mail envoyé !</div>
+                                    <div class="msb-sub">
+                                        Vérifiez votre boîte de réception à <strong>{{ magicEmail }}</strong>.<br>
+                                        Le lien est valable <strong>15 minutes</strong>.
+                                    </div>
+                                </div>
+                                <button type="button" class="msb-resend" (click)="magicSent = false">
+                                    Renvoyer
+                                </button>
+                            </div>
+
+                            <!-- Formulaire envoi -->
+                            <ng-container *ngIf="!magicSent">
+
+                              <div class="magic-desc mb-3">
+                                  <i class="isax isax-info-circle me-2"></i>
+                                  Entrez votre e-mail. Nous vous enverrons un lien de connexion instantané, sans mot de passe.
+                              </div>
+
+                              <div *ngIf="magicError" class="alert alert-danger mb-3">
+                                  <i class="isax isax-close-circle me-2"></i>{{ magicError }}
+                              </div>
+
                               <div class="mb-3 position-relative">
                                   <label class="form-label">Adresse Email<span class="text-danger ms-1">*</span></label>
                                   <div class="position-relative">
-                                      <input 
-                                          type="email" 
+                                      <input
+                                          type="email"
                                           class="form-control form-control-lg"
-                                          formControlName="email"
-                                          [class.is-invalid]="f['email'].invalid && f['email'].touched"
-                                          placeholder="Entrez votre adresse email">
+                                          [(ngModel)]="magicEmail"
+                                          placeholder="votre@email.com"
+                                          (keydown.enter)="sendMagicLink()">
                                       <span><i class="isax isax-sms input-icon text-gray-7 fs-14"></i></span>
                                   </div>
-                                  <div *ngIf="f['email'].invalid && f['email'].touched" class="invalid-feedback d-block">
-                                      <small *ngIf="f['email'].hasError('required')">L'email est requis</small>
-                                      <small *ngIf="f['email'].hasError('email')">Veuillez entrer un email valide</small>
-                                  </div>
                               </div>
-                              
-                              <!-- Password Field -->
-                              <div class="mb-3 position-relative">
-                                  <label class="form-label">Mot de Passe <span class="text-danger ms-1">*</span></label>
-                                  <div class="position-relative" id="passwordInput">
-                                      <input 
-                                          [type]="password ? 'text' : 'password'" 
-                                          class="pass-inputs form-control form-control-lg"
-                                          formControlName="password"
-                                          [class.is-invalid]="f['password'].invalid && f['password'].touched"
-                                          placeholder="Entrez votre mot de passe">
-                                      <span 
-                                          tabindex="0" 
-                                          (click)="togglePassword()" 
-                                          (keydown.enter)="togglePassword()" 
-                                          class="isax toggle-passwords fs-14 cursor-pointer" 
-                                          [ngClass]="password ? 'isax-eye' : 'isax-eye-slash'">
-                                      </span>
-                                  </div>
-                                  <div *ngIf="f['password'].invalid && f['password'].touched" class="invalid-feedback d-block">
-                                      <small *ngIf="f['password'].hasError('required')">Le mot de passe est requis</small>
-                                      <small *ngIf="f['password'].hasError('minlength')">Le mot de passe doit contenir au moins 6 caractères</small>
-                                  </div>
-                              </div>
-                              
-                              <!-- Remember Me & Forgot Password -->
-                              <div class="d-flex align-items-center justify-content-between mb-4">
-                                  <div class="remember-me d-flex align-items-center">
-                                      <input 
-                                          class="form-check-input" 
-                                          type="checkbox" 
-                                          value="true" 
-                                          id="flexCheckDefault">
-                                      <label class="form-check-label ms-2" for="flexCheckDefault">
-                                          Se souvenir de moi
-                                      </label>
-                                  </div>
-                                  <div>
-                                      <a [routerLink]="routes.forgot_password" class="link-2">
-                                          Mot de passe oublié ?
-                                      </a>
-                                  </div>
-                              </div>
-                              
-                              <!-- Submit Button -->
-                              <div class="d-grid">
-                                  <button 
-                                      class="btn btn-secondary btn-lg" 
-                                      type="submit"
-                                      [disabled]="isLoading || loginForm.invalid">
-                                      <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                                      {{ isLoading ? 'Connexion en cours...' : 'Se Connecter' }}
-                                      <i *ngIf="!isLoading" class="isax isax-arrow-right-3 ms-1"></i>
+
+                              <div class="d-grid mb-3">
+                                  <button
+                                      type="button"
+                                      class="btn btn-secondary btn-lg"
+                                      [disabled]="magicLoading"
+                                      (click)="sendMagicLink()">
+                                      <span *ngIf="magicLoading" class="spinner-border spinner-border-sm me-2"></span>
+                                      <i *ngIf="!magicLoading" class="isax isax-send-2 me-2"></i>
+                                      {{ magicLoading ? 'Envoi en cours…' : 'Envoyer le lien de connexion' }}
                                   </button>
                               </div>
-                          </form>
+
+                            </ng-container>
+
+                          </ng-container>
 
                           <div class="d-flex align-items-center justify-content-center or fs-14 mb-3">
                               Ou

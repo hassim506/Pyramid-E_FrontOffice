@@ -1,193 +1,250 @@
+<!-- ── HEADER ─────────────────────────────────────────────────── -->
+<div class="db-header">
+  <div class="db-header__info">
+    <div class="db-header__title">Tableau de bord — {{ displayName }}</div>
+    <div class="db-header__sub">Vos indicateurs pédagogiques en temps réel</div>
+  </div>
+  <a [routerLink]="routes.instructorStatements" class="db-btn db-btn--blue">
+    <i class="isax isax-receipt-item"></i> Voir les rapports
+  </a>
+</div>
 
- 
-    <div class="row">
-        <div class="col-md-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="icon-box bg-primary-transparent me-2 me-xxl-3 flex-shrink-0">
-                            <img src="assets/img/icon/graduation.svg" alt="">
-                        </span>
-                        <div>
-                            <span class="d-block">Enrolled Courses</span>
-                            <h4 class="fs-24 mt-1">12</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- ── SKELETON / LOADING ──────────────────────────────────────── -->
+@if (loading) {
+  <div class="db-kpi-grid">
+    @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
+      <div class="db-kpi-card db-kpi-card--skeleton"></div>
+    }
+  </div>
+} @else {
+
+  <!-- ── KPIs ──────────────────────────────────────────────────── -->
+  <div class="db-kpi-grid">
+    @for (k of kpis; track k.label) {
+      <div class="db-kpi-card">
+        <div class="db-kpi-icon db-kpi-icon--{{ k.color }}">
+          <i class="isax {{ k.icon }}"></i>
         </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="icon-box bg-secondary-transparent me-2 me-xxl-3 flex-shrink-0">
-                            <img src="assets/img/icon/book.svg" alt="">
-                        </span>
-                        <div>
-                            <span class="d-block">Active Courses</span>
-                            <h4 class="fs-24 mt-1">08</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="db-kpi-body">
+          <div class="db-kpi-val">{{ k.value }}</div>
+          <div class="db-kpi-lbl">{{ k.label }}</div>
+          @if (k.sub) { <div class="db-kpi-sub">{{ k.sub }}</div> }
         </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="icon-box bg-success-transparent me-2 me-xxl-3 flex-shrink-0">
-                            <img src="assets/img/icon/bookmark.svg" alt="">
-                        </span>
-                        <div>
-                            <span class="d-block">Completed Courses</span>
-                            <h4 class="fs-24 mt-1">06</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="icon-box bg-info-transparent me-2 me-xxl-3 flex-shrink-0">
-                            <img src="assets/img/icon/user-octagon.svg" alt="">
-                        </span>
-                        <div>
-                            <span class="d-block">Total Students</span>
-                            <h4 class="fs-24 mt-1">17</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="icon-box bg-blue-transparent me-2 me-xxl-3 flex-shrink-0">
-                            <img src="assets/img/icon/book-2.svg" alt="">
-                        </span>
-                        <div>
-                            <span class="d-block">Total Courses</span>
-                            <h4 class="fs-24 mt-1">11</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="icon-box bg-purple-transparent me-2 me-xxl-3 flex-shrink-0">
-                            <img src="assets/img/icon/money-add.svg" alt="">
-                        </span>
-                        <div>
-                            <span class="d-block">Total Earnings</span>
-                            <h4 class="fs-24 mt-1">$486</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center flex-wrap gap-3 justify-content-between border-bottom mb-2 pb-3">
-                <h5 class="fw-bold">Earnings by Year</h5> 
-                <app-date-range-picker/>
-                
-            </div>
-            <div id="earnnings_chart">
-                <apx-chart
-                [series]="Earningchart.series"
-                [chart]="Earningchart.chart"
-                [xaxis]="Earningchart.xaxis"
-                [yaxis]="Earningchart.yaxis"
-                [stroke]="Earningchart.stroke"
-                [tooltip]="Earningchart.tooltip"
-                [dataLabels]="Earningchart.dataLabels"
-                [fill]="Earningchart.fill"
-                [plotOptions]="Earningchart.plotOptions"
-                [grid]="Earningchart.grid"
-            ></apx-chart>
-            </div>
-        </div>
-    </div>
-    <h5 class="mb-3 fw-bold">Recently Created Courses</h5>
-    <div class="table-responsive custom-table">
-        <table class="table">
-            <thead class="thead-light">
-                <tr>
-                    <th>Courses</th>
-                    <th>Enrolled</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <div class="course-title d-flex align-items-center">
-                            <a [routerLink]="routes.courseDetails" class="avatar avatar-xl flex-shrink-0 me-2"><img src="assets/img/instructor/instructor-table-01.jpg" alt="Img"></a>
-                            <div>
-                                <p class="fw-medium"><a [routerLink]="routes.courseDetails">Complete HTML, CSS and Javascript<br> Course</a></p>
-                            </div>
-                        </div>
-                    </td>
-                    <td>0</td>
-                    <td>Published</td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="course-title d-flex align-items-center">
-                            <a [routerLink]="routes.courseDetails" class="avatar avatar-xl flex-shrink-0 me-2"><img src="assets/img/instructor/instructor-table-02.jpg" alt="Img"></a>
-                            <div>
-                                <p class="fw-medium"><a [routerLink]="routes.courseDetails">Complete Course on Fullstack Web<br> Developer</a></p>
-                            </div>
-                        </div>
-                    </td>
-                    <td>2</td>
-                    <td>Published</td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="course-title d-flex align-items-center">
-                            <a [routerLink]="routes.courseDetails" class="avatar avatar-xl flex-shrink-0 me-2"><img src="assets/img/instructor/instructor-table-03.jpg" alt="Img"></a>
-                            <div>
-                                <p class="fw-medium"><a [routerLink]="routes.courseDetails">Data Science Fundamentals and<br> Advanced Bootcampr</a></p>
-                            </div>
-                        </div>
-                    </td>
-                    <td>2</td>
-                    <td>Published</td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="course-title d-flex align-items-center">
-                            <a [routerLink]="routes.courseDetails" class="avatar avatar-xl flex-shrink-0 me-2"><img src="assets/img/instructor/instructor-table-04.jpg" alt="Img"></a>
-                            <div>
-                                <p class="fw-medium"><a [routerLink]="routes.courseDetails">Master Microservices with Spring Boot<br> and Spring Cloud</a></p>
-                            </div>
-                        </div>
-                    </td>
-                    <td>1</td>
-                    <td>Published</td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="course-title d-flex align-items-center">
-                            <a [routerLink]="routes.courseDetails" class="avatar avatar-xl flex-shrink-0 me-2"><img src="assets/img/instructor/instructor-table-05.jpg" alt="Img"></a>
-                            <div>
-                                <p class="fw-medium"><a [routerLink]="routes.courseDetails">Information About UI/UX Design<br> Degree</a></p>
-                            </div>
-                        </div>
-                    </td>
-                    <td>0</td>
-                    <td>Published</td>
-                </tr>
-            </tbody>
-        </table>
+        @if (k.trend) {
+          <div class="db-kpi-trend db-kpi-trend--{{ k.trend }}">
+            <i class="isax {{ k.trend === 'up' ? 'isax-arrow-up-3' : 'isax-arrow-down-3' }}"></i>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- ── GRILLE CHARTS ─────────────────────────────────────────── -->
+  <div class="db-charts-row">
+
+    <!-- Complétion par formation -->
+    <div class="db-card db-card--chart">
+      <div class="db-card__head">
+        <i class="isax isax-book-1"></i>
+        <span class="db-card__title">Complétion par formation</span>
+        <span class="db-badge db-badge--blue">Top 5</span>
+      </div>
+      @if (completionChart) {
+        <apx-chart
+          [series]="completionChart.series"
+          [chart]="completionChart.chart"
+          [plotOptions]="completionChart.plotOptions"
+          [dataLabels]="completionChart.dataLabels"
+          [xaxis]="completionChart.xaxis"
+          [yaxis]="completionChart.yaxis"
+          [colors]="completionChart.colors"
+          [grid]="completionChart.grid"
+          [tooltip]="completionChart.tooltip">
+        </apx-chart>
+      } @else {
+        <div class="db-empty">Aucune donnée formation</div>
+      }
     </div>
 
-          
+    <!-- Quiz réussite vs abandon -->
+    <div class="db-card db-card--chart db-card--narrow">
+      <div class="db-card__head">
+        <i class="isax isax-award"></i>
+        <span class="db-card__title">Résultats quiz</span>
+      </div>
+      @if (quizChart) {
+        <apx-chart
+          [series]="quizChart.series"
+          [chart]="quizChart.chart"
+          [labels]="quizChart.labels"
+          [colors]="quizChart.colors"
+          [legend]="quizChart.legend"
+          [dataLabels]="quizChart.dataLabels"
+          [plotOptions]="quizChart.plotOptions"
+          [tooltip]="quizChart.tooltip">
+        </apx-chart>
+      } @else {
+        <div class="db-empty">Aucun résultat quiz</div>
+      }
+    </div>
+
+  </div>
+
+  <!-- ── MÉTRIQUES DÉTAILLÉES ───────────────────────────────────── -->
+  <div class="db-metrics-row">
+
+    <!-- Indicateurs pédagogiques -->
+    <div class="db-card">
+      <div class="db-card__head">
+        <i class="isax isax-chart-square"></i>
+        <span class="db-card__title">Indicateurs pédagogiques</span>
+      </div>
+      <div class="db-metric-list">
+
+        <div class="db-metric-item">
+          <span class="db-metric-lbl">Taux participation live</span>
+          <div class="db-metric-bar-wrap">
+            <div class="db-metric-bar">
+              <div class="db-metric-fill db-metric-fill--blue" [style.width.%]="tauxOccupation"></div>
+            </div>
+            <span class="db-metric-val">{{ tauxOccupation }}%</span>
+          </div>
+        </div>
+
+        <div class="db-metric-item">
+          <span class="db-metric-lbl">Taux complétion cours</span>
+          <div class="db-metric-bar-wrap">
+            <div class="db-metric-bar">
+              <div class="db-metric-fill"
+                   [class.db-metric-fill--green]="tauxCompletion >= 70"
+                   [class.db-metric-fill--orange]="tauxCompletion < 70"
+                   [style.width.%]="tauxCompletion"></div>
+            </div>
+            <span class="db-metric-val">{{ tauxCompletion }}%</span>
+          </div>
+        </div>
+
+        <div class="db-metric-item">
+          <span class="db-metric-lbl">Taux abandon quiz</span>
+          <div class="db-metric-bar-wrap">
+            <div class="db-metric-bar">
+              <div class="db-metric-fill"
+                   [class.db-metric-fill--red]="tauxAbandons > 30"
+                   [class.db-metric-fill--green]="tauxAbandons <= 30"
+                   [style.width.%]="tauxAbandons"></div>
+            </div>
+            <span class="db-metric-val">{{ tauxAbandons }}%</span>
+          </div>
+        </div>
+
+        <div class="db-metric-item">
+          <span class="db-metric-lbl">Score moyen quiz</span>
+          <div class="db-metric-bar-wrap">
+            <div class="db-metric-bar">
+              <div class="db-metric-fill db-metric-fill--purple" [style.width.%]="scoreMoyen"></div>
+            </div>
+            <span class="db-metric-val">{{ scoreMoyen }}%</span>
+          </div>
+        </div>
+
+        <div class="db-metric-item">
+          <span class="db-metric-lbl">Taux réussite quiz</span>
+          <div class="db-metric-bar-wrap">
+            <div class="db-metric-bar">
+              <div class="db-metric-fill"
+                   [class.db-metric-fill--green]="tauxReussite >= 60"
+                   [class.db-metric-fill--red]="tauxReussite < 60"
+                   [style.width.%]="tauxReussite"></div>
+            </div>
+            <span class="db-metric-val">{{ tauxReussite }}%</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Résumé consultant -->
+    <div class="db-card">
+      <div class="db-card__head">
+        <i class="isax isax-profile-circle"></i>
+        <span class="db-card__title">Résumé consultant</span>
+      </div>
+      <div class="db-summary-grid">
+        <div class="db-summary-item">
+          <div class="db-summary-val db-summary-val--blue">{{ sessionsAnimees }}</div>
+          <div class="db-summary-lbl">Sessions animées</div>
+        </div>
+        <div class="db-summary-item">
+          <div class="db-summary-val db-summary-val--teal">{{ apprenantsForms }}</div>
+          <div class="db-summary-lbl">Apprenants formés</div>
+        </div>
+        <div class="db-summary-item">
+          <div class="db-summary-val db-summary-val--purple">{{ heuresRealisees }}h</div>
+          <div class="db-summary-lbl">Heures facturables</div>
+        </div>
+        <div class="db-summary-item">
+          <div class="db-summary-val db-summary-val--orange">{{ tauxOccupation }}%</div>
+          <div class="db-summary-lbl">Taux d'occupation</div>
+        </div>
+        <div class="db-summary-item">
+          <div class="db-summary-val db-summary-val--gold">{{ certificatsDeliv }}</div>
+          <div class="db-summary-lbl">Certifications</div>
+        </div>
+        <div class="db-summary-item">
+          <div class="db-summary-val db-summary-val--green">{{ formationsCount }}</div>
+          <div class="db-summary-lbl">Formations actives</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── TABLE FORMATIONS ───────────────────────────────────────── -->
+  <div class="db-card db-card--table">
+    <div class="db-card__head">
+      <i class="isax isax-book-1"></i>
+      <span class="db-card__title">Mes formations</span>
+      <a [routerLink]="routes.instructorCourse" class="db-link">Tout voir →</a>
+    </div>
+    <div class="db-table-wrap">
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Formation</th>
+            <th class="db-th-center">Inscrits</th>
+            <th>Complétion</th>
+            <th class="db-th-center">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (!formations.length) {
+            <tr><td colspan="4" class="db-empty-row">Aucune formation trouvée</td></tr>
+          }
+          @for (f of formations; track f.id) {
+            <tr>
+              <td class="db-td-title">{{ f.titre }}</td>
+              <td class="db-td-center">
+                <span class="db-pill db-pill--blue">{{ f.inscrits }}</span>
+              </td>
+              <td>
+                <div class="db-row-bar">
+                  <div class="db-row-fill"
+                       [class.db-row-fill--green]="f.completion >= 70"
+                       [class.db-row-fill--orange]="f.completion < 70"
+                       [style.width.%]="f.completion"></div>
+                </div>
+                <span class="db-row-pct">{{ f.completion }}%</span>
+              </td>
+              <td class="db-td-center">
+                <span class="db-badge-pill" [ngClass]="getStatutClass(f.statut)">
+                  {{ getStatutLabel(f.statut) }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+}

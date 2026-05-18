@@ -76,7 +76,6 @@
           <tr>
             <th>Employé</th>
             <th>Formation</th>
-            <th>Score</th>
             <th>Formateur</th>
             <th>Délivré le</th>
             <th>Expiration</th>
@@ -100,14 +99,6 @@
               </div>
             </td>
             <td><div class="ip-formation-name">{{ cert.formation?.titre }}</div></td>
-            <td>
-              <span *ngIf="cert.score_final" class="ip-score-badge"
-                    [style.color]="getScoreColor(cert.score_final)"
-                    [style.background]="parseFloat(cert.score_final) >= 80 ? '#ECFDF5' : parseFloat(cert.score_final) >= 60 ? '#FFFBEB' : '#FFF5F5'">
-                {{ cert.score_final }}%
-              </span>
-              <span *ngIf="!cert.score_final" class="text-muted">—</span>
-            </td>
             <td>
               <span class="text-muted" *ngIf="cert.formateur">
                 {{ cert.formateur?.prenom }} {{ cert.formateur?.nom }}
@@ -147,7 +138,7 @@
             </td>
           </tr>
           <tr *ngIf="filteredCertificates.length === 0">
-            <td colspan="8" class="ip-empty">
+            <td colspan="7" class="ip-empty">
               <i class="isax isax-award"></i>
               <span>Aucun certificat trouvé</span>
             </td>
@@ -209,16 +200,9 @@
           <div class="ip-cert-formation-title" [style.color]="getScoreColor(selectedCertificate.score_final)">
             {{ selectedCertificate.formation?.titre }}
           </div>
-          <div class="ip-cert-score-row">
+          <div class="ip-cert-score-row" *ngIf="selectedCertificate.formation?.duree_totale">
             <div class="ip-cert-score-item">
-              <div class="ip-cert-score-val" [style.color]="getScoreColor(selectedCertificate.score_final)">
-                {{ selectedCertificate.score_final }}%
-              </div>
-              <div class="ip-cert-score-label">Score obtenu</div>
-            </div>
-            <div class="ip-cert-divider-v"></div>
-            <div class="ip-cert-score-item">
-              <div class="ip-cert-score-val">{{ selectedCertificate.formation?.duree_totale || '—' }}h</div>
+              <div class="ip-cert-score-val">{{ selectedCertificate.formation?.duree_totale }}h</div>
               <div class="ip-cert-score-label">Durée totale</div>
             </div>
           </div>
