@@ -94,6 +94,7 @@
             <label class="rp-label">Formation spécifique</label>
             <select class="rp-select" [(ngModel)]="formation">
               <option value="toutes">Toutes les formations</option>
+              <option *ngFor="let f of formationOptions" [value]="f.value">{{ f.label }}</option>
             </select>
           </div>
           <div class="rp-field">

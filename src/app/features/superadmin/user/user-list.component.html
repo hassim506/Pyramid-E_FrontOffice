@@ -81,11 +81,14 @@
         </div>
       </div>
 
-      <button class="ul-filter" (click)="openImportDialog()">
+      <button class="ul-import-btn" (click)="openImportDialog()">
         <i class="isax isax-import"></i> Importer
       </button>
-      <button class="ul-filter" (click)="downloadTemplate()">
+      <button class="ul-tpl-btn" (click)="downloadTemplate()">
         <i class="isax isax-export"></i> Template
+      </button>
+      <button class="ul-export-btn" (click)="exportUsers()">
+        <i class="isax isax-document-download"></i> Exporter
       </button>
 
       <button class="ul-add-btn" (click)="openNew()">

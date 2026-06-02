@@ -265,6 +265,30 @@ export class UserListComponent implements OnInit {
     });
   }
 
+  exportUsers(): void {
+    const data = this.tableDataCopy;
+    if (!data.length) { alert('Aucune donnée à exporter'); return; }
+    const headers = ['Nom', 'Prénom', 'Email', 'Rôle', 'Entreprise', 'Direction', 'Matricule', 'Statut', 'Dernière activité'];
+    const rows = data.map(u => [
+      u.nom || '',
+      u.prenom || '',
+      u.email || '',
+      this.getRoleName(u),
+      u.entreprise?.nom || '',
+      u.direction || '',
+      u.matricule || '',
+      u.statut === 1 ? 'Actif' : 'Inactif',
+      this.formatDate(u.updated_at),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `utilisateurs_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
   // ════════════════════════════════════════════
   // HELPERS TEMPLATE
   // ════════════════════════════════════════════

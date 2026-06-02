@@ -495,15 +495,19 @@ getStatusLabel(statut: string): string {
       ]).then(([detailRes, formRes]) => {
         if (this.selectedCompany?.id !== company.id) return;
         const detail = (detailRes as any)?.entreprise || (detailRes as any)?.data || detailRes || {};
+        const stats = (detail as any).statistiques ?? {};
         const formations: any[] = (formRes as any)?.formations ?? (formRes as any)?.data ?? [];
         const actives = formations.filter((f: any) => f.est_publie && f.inscription_ouverte).length;
         this.selectedCompany = {
           ...this.selectedCompany!,
-          formations_count:         formations.length,
-          formations_actives_count: actives,
-          employes_count:           (detail as any).employes_count ?? (detail as any).users?.length ?? company.taille_effectif ?? 0,
-          taux_completion:          (detail as any).taux_completion ?? 0,
-          certificats_count:        (detail as any).certificats_count ?? 0,
+          formations_count:          formations.length,
+          formations_actives_count:  actives,
+          employes_count:            stats.nb_employes            ?? (detail as any).employes_count ?? company.taille_effectif ?? 0,
+          employes_actifs_count:     stats.nb_employes_actifs     ?? 0,
+          total_users_count:         stats.nb_total_users         ?? 0,
+          utilisateurs_actifs_count: stats.nb_utilisateurs_actifs ?? 0,
+          taux_completion:           (detail as any).taux_completion ?? 0,
+          certificats_count:         (detail as any).certificats_count ?? 0,
         };
         this.statsLoading = false;
       });

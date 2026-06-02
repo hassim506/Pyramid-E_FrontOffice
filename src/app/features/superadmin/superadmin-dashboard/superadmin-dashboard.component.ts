@@ -9,6 +9,7 @@ import { UserService } from '../../../shared/service/user/user.service';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
 import { AdminRHStatsService } from '../../../shared/service/stat/adminrh-stat.service';
+import { SuperAdminDashboardService, SuperAdminStats } from '../../../shared/service/stat/superadmin-dashboard.service';
 import { routes } from '../../../shared/service/routes/routes';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
@@ -293,13 +294,31 @@ Statisticschart: any = {
   }
 };
 
+  // ── Nouvelles métriques superadmin ───────────────────────────────────────
+  superStats: SuperAdminStats | null = null;
+  superStatsLoading = true;
+
+  // Graphique croissance mensuelle inscriptions
+  inscriptionsChart: any = {
+    series: [{ name: 'Inscriptions', data: [] }],
+    chart:  { height: 160, type: 'bar', toolbar: { show: false }, sparkline: { enabled: false } },
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
+    dataLabels: { enabled: false },
+    xaxis: { categories: [], labels: { style: { fontSize: '11px' } } },
+    yaxis: { labels: { style: { fontSize: '11px' } } },
+    colors: ['#1D9CFD'],
+    grid: { borderColor: '#f1f1f1' },
+    tooltip: { theme: 'light' },
+  };
+
   constructor(
     private router: Router,
     private dataService: DataService,
     private userService: UserService,
     private formationService: FormationService,
     private clientCompanyService: ClientCompanyService,
-    private adminRHStatsService: AdminRHStatsService
+    private adminRHStatsService: AdminRHStatsService,
+    private superAdminDashboardService: SuperAdminDashboardService
   ) { }
 
   ngOnInit(): void {
@@ -308,27 +327,44 @@ Statisticschart: any = {
 
   private loadDashboardData(): void {
     this.isLoading = true;
+    this.superStatsLoading = true;
 
     forkJoin({
-      users: this.userService.getUsers(),
-      clients: this.clientCompanyService.getClients(),
-      formations: this.formationService.getFormations({ page: 1, limit: 1000 }),
-      companies: this.clientCompanyService.getCompanies(),
-      rhStats: this.adminRHStatsService.getAllStats().pipe(catchError(() => of(null))),
+      users:        this.userService.getUsers(),
+      clients:      this.clientCompanyService.getClients(),
+      formations:   this.formationService.getFormations({ page: 1, limit: 1000 }),
+      companies:    this.clientCompanyService.getCompanies(),
+      rhStats:      this.adminRHStatsService.getAllStats().pipe(catchError(() => of(null))),
       rhFormations: this.adminRHStatsService.getFormationsRecentes().pipe(catchError(() => of([]))),
-      rhMensuel: this.adminRHStatsService.getFormationsParAnnee().pipe(catchError(() => of([])))
+      rhMensuel:    this.adminRHStatsService.getFormationsParAnnee().pipe(catchError(() => of([]))),
+      superStats:   this.superAdminDashboardService.getStats().pipe(catchError(() => of(null))),
     }).subscribe({
       next: (data) => {
         this.processRealData(data);
         this.processRhData(data);
+        this.processSuperStats(data.superStats);
         this.isLoading = false;
       },
       error: (error) => {
         console.error('❌ Erreur lors du chargement des données:', error);
         this.setDefaultData();
         this.isLoading = false;
+        this.superStatsLoading = false;
       }
     });
+  }
+
+  private processSuperStats(res: { status: boolean; data: SuperAdminStats } | null): void {
+    this.superStatsLoading = false;
+    if (!res?.data) return;
+    this.superStats = res.data;
+
+    const cm = res.data.croissance_mensuelle ?? [];
+    this.inscriptionsChart = {
+      ...this.inscriptionsChart,
+      series: [{ name: 'Inscriptions', data: cm.map((m: any) => m.total) }],
+      xaxis:  { ...this.inscriptionsChart.xaxis, categories: cm.map((m: any) => m.mois) },
+    };
   }
 
   private processRhData(data: any): void {

@@ -147,17 +147,40 @@
 
         <!-- ── KPI ROW ── -->
         <div class="cm-kpi-row">
-          <!-- Employés -->
+          <!-- Effectif déclaré -->
+          <div class="cm-kpi-card">
+            <div class="cm-kpi-card__icon cm-kpi-card__icon--blue"><i class="isax isax-building-3"></i></div>
+            <div class="cm-kpi-card__body">
+              <span class="cm-kpi-card__value">
+                <span>{{ selectedCompany.taille_effectif ?? '—' }}</span>
+              </span>
+              <span class="cm-kpi-card__label">Effectif déclaré</span>
+            </div>
+          </div>
+          <!-- Employés inscrits sur la plateforme -->
           <a class="cm-kpi-card cm-kpi-card--link"
              [routerLink]="[routes.superadminUserList]"
              [queryParams]="{entreprise_id: selectedCompany.id}">
             <div class="cm-kpi-card__icon cm-kpi-card__icon--blue"><i class="isax isax-people"></i></div>
             <div class="cm-kpi-card__body">
               <span class="cm-kpi-card__value">
-                <span *ngIf="!statsLoading">{{ selectedCompany.employes_count ?? selectedCompany.taille_effectif ?? '—' }}</span>
+                <span *ngIf="!statsLoading">{{ selectedCompany.employes_count ?? '—' }}</span>
                 <span *ngIf="statsLoading" class="cm-kpi-skeleton"></span>
               </span>
-              <span class="cm-kpi-card__label">Employés <i class="isax isax-arrow-right-3 ms-1"></i></span>
+              <span class="cm-kpi-card__label">Inscrits plateforme <i class="isax isax-arrow-right-3 ms-1"></i></span>
+            </div>
+          </a>
+          <!-- Employés actifs -->
+          <a class="cm-kpi-card cm-kpi-card--link"
+             [routerLink]="[routes.superadminUserList]"
+             [queryParams]="{entreprise_id: selectedCompany.id, statut: 1}">
+            <div class="cm-kpi-card__icon cm-kpi-card__icon--green"><i class="isax isax-user-tick"></i></div>
+            <div class="cm-kpi-card__body">
+              <span class="cm-kpi-card__value">
+                <span *ngIf="!statsLoading">{{ selectedCompany.employes_actifs_count ?? '—' }}</span>
+                <span *ngIf="statsLoading" class="cm-kpi-skeleton"></span>
+              </span>
+              <span class="cm-kpi-card__label">Actifs plateforme <i class="isax isax-arrow-right-3 ms-1"></i></span>
             </div>
           </a>
           <!-- Formations actives -->
@@ -264,8 +287,24 @@
                   <span class="cm-info-row__value">{{ selectedCompany.secteur_activite || '—' }}</span>
                 </div>
                 <div class="cm-info-row">
-                  <span class="cm-info-row__label">Effectif</span>
+                  <span class="cm-info-row__label">Effectif déclaré</span>
                   <span class="cm-info-row__value">{{ selectedCompany.taille_effectif || '—' }} personnes</span>
+                </div>
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">Inscrits plateforme</span>
+                  <span class="cm-info-row__value">
+                    <ng-container *ngIf="!statsLoading">{{ selectedCompany.employes_count ?? '—' }}</ng-container>
+                    <span *ngIf="statsLoading" class="cm-kpi-skeleton" style="width:40px;display:inline-block"></span>
+                  </span>
+                </div>
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">Actifs plateforme</span>
+                  <span class="cm-info-row__value">
+                    <ng-container *ngIf="!statsLoading">
+                      <span class="cm-badge" data-status="active">{{ selectedCompany.employes_actifs_count ?? '—' }}</span>
+                    </ng-container>
+                    <span *ngIf="statsLoading" class="cm-kpi-skeleton" style="width:40px;display:inline-block"></span>
+                  </span>
                 </div>
               </div>
             </div>

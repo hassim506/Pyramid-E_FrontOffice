@@ -53,10 +53,10 @@
         <i class="isax isax-grid-3"></i>
         <span class="sb-item-label">Tableau de bord</span>
       </a>
-      <a [routerLink]="routes.adminrhAnnouncements" routerLinkActive="active" class="sb-item">
+      <!-- <a [routerLink]="routes.adminrhAnnouncements" routerLinkActive="active" class="sb-item">
         <i class="isax isax-chart-square"></i>
         <span class="sb-item-label">Statistiques RH</span>
-      </a>
+      </a> -->
     </div>
 
     <div class="sb-divider"></div>
@@ -172,6 +172,17 @@
 
     <div class="sb-divider"></div>
 
+    <!-- SONDAGES -->
+    <div class="sb-section">
+      <div class="sb-section-label">Sondages</div>
+      <a [routerLink]="routes.adminrhSondage" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-note-21"></i>
+        <span class="sb-item-label">Sondages &amp; enquêtes</span>
+      </a>
+    </div>
+
+    <div class="sb-divider"></div>
+
     <!-- COMMUNICATION -->
     <div class="sb-section">
       <div class="sb-section-label">Communication</div>
@@ -222,6 +233,9 @@
   <div class="sb-bottom">
     <a [routerLink]="routes.adminrhCompanyManagement" routerLinkActive="active" class="sb-bottom-item sb-item" >
       <i class="isax isax-setting-2"></i> Paramètres entreprise
+    </a>
+    <a [routerLink]="routes.adminrhCertificateModele" routerLinkActive="active" class="sb-bottom-item sb-item">
+      <i class="isax isax-award"></i> Personnalisation certificat
     </a>
     <a [routerLink]="routes.adminrhProfile" routerLinkActive="active" class="sb-bottom-item">
       <i class="isax isax-user-square"></i> Mon profil

@@ -433,9 +433,601 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!--  RH — Graphique Évolution Mensuelle RH                   -->
-<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  SÉPARATEUR — Métriques Avancées                                     -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center my-4">
+  <hr class="flex-grow-1">
+  <span class="px-3 fw-bold text-muted small text-uppercase">
+    <i class="fas fa-chart-bar me-2 text-warning"></i>Métriques Avancées
+  </span>
+  <hr class="flex-grow-1">
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 1 — Utilisateurs Actifs (MAU / WAU / Activation / Engagement) -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center mb-3">
+  <h6 class="fw-bold mb-0 text-dark">
+    <i class="isax isax-people me-2 text-primary"></i>Activité Utilisateurs
+  </h6>
+</div>
+<div class="row g-3 mb-4">
+
+  <!-- MAU -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Utilisateurs actifs / mois (MAU)</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.mau ?? '—' }}<span class="fs-14 text-muted ms-1"></span>
+            </h4>
+          </div>
+          <span class="icon-box bg-primary-transparent">
+            <i class="isax isax-people fs-24 text-primary"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAU -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Utilisateurs actifs / semaine (WAU)</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">{{ superStats?.wau ?? '—' }}</h4>
+          </div>
+          <span class="icon-box bg-info-transparent">
+            <i class="isax isax-user-tick fs-24 text-info"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taux activation -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Taux d'activation des comptes</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.taux_activation ?? '—' }}<span class="fs-14 text-muted ms-1">%</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-success-transparent">
+            <i class="isax isax-verify fs-24 text-success"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taux engagement -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Taux d'engagement global</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.taux_engagement ?? '—' }}<span class="fs-14 text-muted ms-1">%</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-warning-transparent">
+            <i class="isax isax-chart-2 fs-24 text-warning"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Croissance mensuelle inscriptions (graphique + valeur) -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white border-bottom">
+        <h6 class="fw-bold mb-0 text-dark">
+          <i class="fas fa-user-plus text-primary me-2"></i>Croissance mensuelle des inscriptions
+        </h6>
+      </div>
+      <div class="card-body">
+        <div *ngIf="!superStatsLoading">
+          <apx-chart
+            [series]="inscriptionsChart.series"
+            [chart]="inscriptionsChart.chart"
+            [xaxis]="inscriptionsChart.xaxis"
+            [yaxis]="inscriptionsChart.yaxis"
+            [plotOptions]="inscriptionsChart.plotOptions"
+            [dataLabels]="inscriptionsChart.dataLabels"
+            [colors]="inscriptionsChart.colors"
+            [grid]="inscriptionsChart.grid"
+            [tooltip]="inscriptionsChart.tooltip">
+          </apx-chart>
+        </div>
+        <div *ngIf="superStatsLoading" class="d-flex justify-content-center align-items-center" style="height:160px">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+        <span class="icon-box bg-primary-transparent mb-3">
+          <i class="fas fa-arrow-trend-up fs-24 text-primary"></i>
+        </span>
+        <p class="text-muted small fw-medium mb-1">Croissance vs mois précédent</p>
+        <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+        <ng-container *ngIf="!superStatsLoading">
+          <h2 class="fw-bold mb-0"
+              [ngClass]="{
+                'text-success': (superStats?.croissance_inscriptions ?? 0) >= 0,
+                'text-danger':  (superStats?.croissance_inscriptions ?? 0) < 0
+              }">
+            {{ (superStats?.croissance_inscriptions ?? 0) >= 0 ? '+' : '' }}{{ superStats?.croissance_inscriptions ?? '—' }}%
+          </h2>
+          <small class="text-muted">ce mois-ci</small>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 2 — Formation : cours, complétion, heures, satisfaction      -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center mb-3">
+  <h6 class="fw-bold mb-0 text-dark">
+    <i class="isax isax-book me-2 text-success"></i>Métriques Formation Avancées
+  </h6>
+</div>
+<div class="row g-3 mb-4">
+
+  <!-- Cours publiés -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Cours publiés (total)</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">{{ superStats?.total_formations_publiees ?? '—' }}</h4>
+          </div>
+          <span class="icon-box bg-success-transparent">
+            <i class="isax isax-book fs-24 text-success"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- % Actifs vs Obsolètes -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Cours actifs vs obsolètes</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.pct_actifs_vs_obsoletes ?? '—' }}<span class="fs-14 text-muted ms-1">% actifs</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-info-transparent">
+            <i class="isax isax-archive fs-24 text-info"></i>
+          </span>
+        </div>
+        <div *ngIf="!superStatsLoading" class="progress mt-2" style="height:4px">
+          <div class="progress-bar bg-success" [style.width.%]="superStats?.pct_actifs_vs_obsoletes ?? 0"
+               role="progressbar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taux complétion global -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Taux moyen de complétion global</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.taux_completion_global ?? '—' }}<span class="fs-14 text-muted ms-1">%</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-primary-transparent">
+            <i class="isax isax-chart-2 fs-24 text-primary"></i>
+          </span>
+        </div>
+        <div *ngIf="!superStatsLoading" class="progress mt-2" style="height:4px">
+          <div class="progress-bar bg-primary" [style.width.%]="superStats?.taux_completion_global ?? 0"
+               role="progressbar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heures consommées -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Heures de formation consommées</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.total_heures_consommees ?? '—' }}<span class="fs-14 text-muted ms-1">h</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-warning-transparent">
+            <i class="isax isax-clock fs-24 text-warning"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="row g-3 mb-4">
+
+  <!-- Score satisfaction NPS -->
+  <div class="col-md-6 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Score moyen satisfaction (NPS formation)</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.score_satisfaction != null ? superStats!.score_satisfaction : '—' }}
+              <span class="fs-14 text-muted ms-1">/100</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-warning-transparent">
+            <i class="isax isax-star fs-24 text-warning"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taux MAJ contenus -->
+  <div class="col-md-6 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Taux de mise à jour des contenus</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.taux_mise_a_jour_contenu ?? '—' }}<span class="fs-14 text-muted ms-1">%</span>
+            </h4>
+            <small *ngIf="!superStatsLoading" class="text-muted">formations mises à jour ces 3 mois</small>
+          </div>
+          <span class="icon-box bg-teal-transparent">
+            <i class="isax isax-refresh fs-24 text-teal"></i>
+          </span>
+        </div>
+        <div *ngIf="!superStatsLoading" class="progress mt-2" style="height:4px">
+          <div class="progress-bar bg-teal" [style.width.%]="superStats?.taux_mise_a_jour_contenu ?? 0"
+               role="progressbar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 3 — Technique : Uptime / Perf / Erreurs                      -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center mb-3">
+  <h6 class="fw-bold mb-0 text-dark">
+    <i class="isax isax-monitor me-2 text-teal"></i>Disponibilité &amp; Performance Technique
+  </h6>
+</div>
+<div class="row g-3 mb-4">
+
+  <!-- Uptime -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Disponibilité plateforme (30j)</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0"
+                [ngClass]="{'text-success': (superStats?.uptime_pct ?? 0) >= 99, 'text-warning': (superStats?.uptime_pct ?? 0) < 99}">
+              {{ superStats?.uptime_pct ?? '—' }}<span class="fs-14 text-muted ms-1">%</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-success-transparent">
+            <i class="isax isax-cpu fs-24 text-success"></i>
+          </span>
+        </div>
+        <div *ngIf="!superStatsLoading" class="progress mt-2" style="height:4px">
+          <div class="progress-bar"
+               [ngClass]="{'bg-success': (superStats?.uptime_pct ?? 0) >= 99, 'bg-warning': (superStats?.uptime_pct ?? 0) < 99}"
+               [style.width.%]="superStats?.uptime_pct ?? 0"
+               role="progressbar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Temps de chargement -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Temps moyen de chargement</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.avg_load_time_ms != null ? superStats!.avg_load_time_ms : '—' }}
+              <span class="fs-14 text-muted ms-1">ms</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-info-transparent">
+            <i class="isax isax-timer fs-24 text-info"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taux d'erreurs -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Taux d'erreurs techniques</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0"
+                [ngClass]="{'text-danger': (superStats?.error_rate_pct ?? 0) > 1, 'text-success': (superStats?.error_rate_pct ?? 0) <= 1}">
+              {{ superStats?.error_rate_pct ?? '—' }}<span class="fs-14 text-muted ms-1">%</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-danger-transparent">
+            <i class="isax isax-danger fs-24 text-danger"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incidents sécurité -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Incidents sécurité / accès (30j)</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0"
+                [ngClass]="{'text-danger': (superStats?.security_incidents ?? 0) > 0, 'text-success': (superStats?.security_incidents ?? 0) === 0}">
+              {{ superStats?.security_incidents ?? 0 }}
+            </h4>
+          </div>
+          <span class="icon-box bg-danger-transparent">
+            <i class="isax isax-shield-slash fs-24 text-danger"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 4 — Support Tickets                                          -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center mb-3">
+  <h6 class="fw-bold mb-0 text-dark">
+    <i class="isax isax-message-question me-2 text-warning"></i>Support Utilisateur
+  </h6>
+</div>
+<div class="row g-3 mb-4">
+
+  <!-- Tickets ouverts -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Tickets ouverts</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0"
+                [ngClass]="{'text-danger': (superStats?.tickets_ouverts ?? 0) > 10, 'text-warning': (superStats?.tickets_ouverts ?? 0) > 0, 'text-success': (superStats?.tickets_ouverts ?? 0) === 0}">
+              {{ superStats?.tickets_ouverts ?? 0 }}
+            </h4>
+          </div>
+          <span class="icon-box bg-warning-transparent">
+            <i class="isax isax-message-question fs-24 text-warning"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tickets résolus -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Tickets résolus</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0 text-success">
+              {{ superStats?.tickets_resolus ?? 0 }}
+            </h4>
+          </div>
+          <span class="icon-box bg-success-transparent">
+            <i class="isax isax-tick-circle fs-24 text-success"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Délai moyen résolution -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Délai moyen de résolution (SLA)</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0">
+              {{ superStats?.delai_moyen_resolution_h != null ? superStats!.delai_moyen_resolution_h : '—' }}
+              <span class="fs-14 text-muted ms-1">h</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-info-transparent">
+            <i class="isax isax-clock fs-24 text-info"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLA respecté % -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">SLA respecté</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0"
+                [ngClass]="{'text-success': (superStats?.sla_respecte_pct ?? 0) >= 90, 'text-warning': (superStats?.sla_respecte_pct ?? 0) < 90}">
+              {{ superStats?.sla_respecte_pct != null ? superStats!.sla_respecte_pct : '—' }}
+              <span class="fs-14 text-muted ms-1">%</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-primary-transparent">
+            <i class="isax isax-shield-tick fs-24 text-primary"></i>
+          </span>
+        </div>
+        <div *ngIf="!superStatsLoading && superStats?.sla_respecte_pct != null" class="progress mt-2" style="height:4px">
+          <div class="progress-bar"
+               [ngClass]="{'bg-success': superStats!.sla_respecte_pct! >= 90, 'bg-warning': superStats!.sla_respecte_pct! < 90}"
+               [style.width.%]="superStats!.sla_respecte_pct!"
+               role="progressbar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  SECTION 5 — Conformité Réglementaire                                 -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center mb-3">
+  <h6 class="fw-bold mb-0 text-dark">
+    <i class="isax isax-shield me-2 text-danger"></i>Conformité &amp; Sécurité
+  </h6>
+</div>
+<div class="row g-3 mb-5">
+
+  <!-- % conformité formations obligatoires -->
+  <div class="col-md-6 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Utilisateurs conformes formations obligatoires</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0"
+                [ngClass]="{'text-success': (superStats?.pct_conformite_formations_obligatoires ?? 0) >= 80, 'text-warning': (superStats?.pct_conformite_formations_obligatoires ?? 0) < 80}">
+              {{ superStats?.pct_conformite_formations_obligatoires ?? '—' }}<span class="fs-14 text-muted ms-1">%</span>
+            </h4>
+          </div>
+          <span class="icon-box bg-success-transparent">
+            <i class="isax isax-shield-tick fs-24 text-success"></i>
+          </span>
+        </div>
+        <div *ngIf="!superStatsLoading" class="progress mt-2" style="height:4px">
+          <div class="progress-bar"
+               [ngClass]="{'bg-success': (superStats?.pct_conformite_formations_obligatoires ?? 0) >= 80, 'bg-warning': (superStats?.pct_conformite_formations_obligatoires ?? 0) < 80}"
+               [style.width.%]="superStats?.pct_conformite_formations_obligatoires ?? 0"
+               role="progressbar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Écarts de conformité -->
+  <div class="col-md-6 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Écarts de conformité</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0"
+                [ngClass]="{'text-danger': (superStats?.nb_ecarts_conformite ?? 0) > 0, 'text-success': (superStats?.nb_ecarts_conformite ?? 0) === 0}">
+              {{ superStats?.nb_ecarts_conformite ?? 0 }}
+            </h4>
+            <small *ngIf="!superStatsLoading" class="text-muted">utilisateurs n'ayant pas terminé une formation obligatoire</small>
+          </div>
+          <span class="icon-box bg-danger-transparent">
+            <i class="isax isax-warning-2 fs-24 text-danger"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incidents sécurité (rappel avec lien audit) -->
+  <div class="col-md-6 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">Incidents sécurité / accès</p>
+            <div *ngIf="superStatsLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!superStatsLoading" class="fw-bold mb-0"
+                [ngClass]="{'text-danger': (superStats?.security_incidents ?? 0) > 0, 'text-success': (superStats?.security_incidents ?? 0) === 0}">
+              {{ superStats?.security_incidents ?? 0 }}
+            </h4>
+            <small *ngIf="!superStatsLoading" class="text-muted">ces 30 derniers jours</small>
+          </div>
+          <span class="icon-box bg-danger-transparent">
+            <i class="isax isax-shield-slash fs-24 text-danger"></i>
+          </span>
+        </div>
+        <div *ngIf="!superStatsLoading" class="mt-2">
+          <a [routerLink]="['/superadmin/audit-logs']" class="btn btn-sm btn-outline-danger">
+            <i class="isax isax-eye me-1"></i>Voir les logs
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  RH — Graphique Évolution Mensuelle RH                                -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
 <div class="card shadow-sm border-0 mb-4">
   <div class="card-header bg-white border-bottom">
     <h5 class="fw-bold mb-1 text-dark">

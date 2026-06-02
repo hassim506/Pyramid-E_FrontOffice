@@ -1,0 +1,274 @@
+<!-- ── PAGE HEADER ──────────────────────────────────────────────── -->
+<div class="rp-header">
+  <div class="rp-header__icon rp-header__icon--purple">
+    <i class="isax isax-receipt-item"></i>
+  </div>
+  <div class="rp-header__info">
+    <div class="rp-header__title">Rapports globaux — toutes entreprises</div>
+    <div class="rp-header__sub">Génération, planification et export · données en temps réel</div>
+  </div>
+  <div class="rp-header__acts">
+    <button type="button" class="rp-btn rp-btn--ghost">
+      <i class="isax isax-clock"></i> Historique
+    </button>
+    <button type="button" class="rp-btn rp-btn--purple" (click)="generate()" [disabled]="generating">
+      @if (generating) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      @else { <i class="isax isax-document-upload"></i> }
+      {{ generating ? 'Génération…' : 'Générer maintenant' }}
+    </button>
+  </div>
+</div>
+
+@if (successMsg) {
+  <div class="rp-toast rp-toast--purple">
+    <i class="isax isax-tick-circle"></i> {{ successMsg }}
+  </div>
+}
+
+<div class="rp-layout">
+
+  <!-- LEFT ───────────────────────────────────────────────────────── -->
+  <div class="rp-layout__left">
+
+    <!-- Type de rapport -->
+    <div class="rp-card">
+      <div class="rp-card__head">
+        <i class="isax isax-grid-2"></i>
+        <span class="rp-card__title">Type de rapport</span>
+      </div>
+      <div class="rp-type-grid">
+        @for (t of types; track t.key) {
+          <div class="rp-type-card"
+               [class.selected-purple]="selectedType === t.key"
+               (click)="selectType(t.key)">
+            <div class="rp-type-icon rp-type-icon--{{ t.color }}">
+              <i class="isax {{ t.icon }}"></i>
+            </div>
+            <div class="rp-type-body">
+              <div class="rp-type-name">{{ t.label }}</div>
+              <div class="rp-type-sub">{{ t.sub }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="rp-card">
+      <div class="rp-card__head">
+        <i class="isax isax-filter"></i>
+        <span class="rp-card__title">Filtres & périmètre</span>
+      </div>
+      <div class="rp-filters">
+        <div class="rp-flt-row rp-flt-row--3">
+          <div class="rp-field">
+            <label class="rp-label">Période</label>
+            <select class="rp-select" [(ngModel)]="periode">
+              <option value="mois">Ce mois</option>
+              <option value="trimestre">Ce trimestre</option>
+              <option value="annee">Cette année</option>
+              <option value="custom">Personnalisée</option>
+            </select>
+          </div>
+          <div class="rp-field">
+            <label class="rp-label">Entreprises</label>
+            <select class="rp-select" [(ngModel)]="entreprise">
+              <option value="toutes">Toutes</option>
+              @for (e of entrepriseOptions; track e.value) {
+                <option [value]="e.value">{{ e.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="rp-field">
+            <label class="rp-label">Format export</label>
+            <select class="rp-select" [(ngModel)]="format">
+              <option value="pdf">PDF</option>
+              <option value="excel">Excel (.xlsx)</option>
+              <option value="csv">CSV</option>
+              <option value="json">JSON</option>
+            </select>
+          </div>
+        </div>
+        <div class="rp-flt-row rp-flt-row--3">
+          <div class="rp-field">
+            <label class="rp-label">Inclure les formations</label>
+            <select class="rp-select" [(ngModel)]="formationsF">
+              <option value="toutes">Toutes</option>
+              <option value="actives">Actives uniquement</option>
+              <option value="terminees">Terminées uniquement</option>
+            </select>
+          </div>
+          <div class="rp-field">
+            <label class="rp-label">Regrouper par</label>
+            <select class="rp-select" [(ngModel)]="groupe">
+              <option value="entreprise">Entreprise</option>
+              <option value="formation">Formation</option>
+              <option value="domaine">Domaine</option>
+            </select>
+          </div>
+          <div class="rp-field">
+            <label class="rp-label">Langue du rapport</label>
+            <select class="rp-select" [(ngModel)]="langue">
+              <option value="fr">Français</option>
+              <option value="en">Anglais</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Planification -->
+    <div class="rp-card">
+      <div class="rp-card__head">
+        <i class="isax isax-clock"></i>
+        <span class="rp-card__title">Planification automatique</span>
+      </div>
+      <div class="rp-schedules">
+        @for (s of schedules; track s.label) {
+          <div class="rp-sched-row">
+            <div class="rp-sched-info">
+              <div class="rp-sched-label">{{ s.label }}</div>
+              <div class="rp-sched-sub">{{ s.sub }}</div>
+            </div>
+            <button type="button" class="rp-toggle rp-toggle--purple" [class.on]="s.on" (click)="s.on = !s.on">
+              <span class="rp-toggle__thumb"></span>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT ──────────────────────────────────────────────────────── -->
+  <div class="rp-layout__right">
+
+    <!-- Aperçu -->
+    <div class="rp-card">
+      <div class="rp-card__head">
+        <i class="isax isax-eye"></i>
+        <span class="rp-card__title">Aperçu du rapport</span>
+        <span class="rp-badge rp-badge--purple">{{ periodeLabel }}</span>
+      </div>
+      <div class="rp-preview">
+        @if (loading) {
+          <div class="rp-preview__loading">
+            <div class="spinner-border spinner-border-sm text-secondary"></div>
+          </div>
+        } @else {
+          <div class="rp-preview__title">Performance globale — {{ periodeLabel }}</div>
+
+          <!-- Utilisateurs -->
+          <div class="rp-preview__section">
+            <div class="rp-preview__section-title"><i class="isax isax-people"></i> Utilisateurs</div>
+            <div class="rp-kpi-row">
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ totalUsers }}</div><div class="rp-kpi__lbl">Total</div></div>
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ activeUsers }}</div><div class="rp-kpi__lbl">Actifs</div></div>
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ completion }}%</div><div class="rp-kpi__lbl">% Certifiés</div></div>
+            </div>
+          </div>
+
+          <!-- Formations & sessions -->
+          <div class="rp-preview__section">
+            <div class="rp-preview__section-title"><i class="isax isax-book"></i> Formations & sessions</div>
+            <div class="rp-kpi-row">
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ totalFormations }}</div><div class="rp-kpi__lbl">Formations</div></div>
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ totalSessions }}</div><div class="rp-kpi__lbl">Sessions</div></div>
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ totalDemandes }}</div><div class="rp-kpi__lbl">Demandes</div></div>
+            </div>
+          </div>
+
+          <!-- Tickets -->
+          <div class="rp-preview__section">
+            <div class="rp-preview__section-title"><i class="isax isax-ticket"></i> Support & tickets</div>
+            <div class="rp-kpi-row">
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ totalTickets }}</div><div class="rp-kpi__lbl">Total</div></div>
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ ticketsOuverts }}</div><div class="rp-kpi__lbl">Ouverts / En cours</div></div>
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ totalTickets - ticketsOuverts }}</div><div class="rp-kpi__lbl">Résolus / Fermés</div></div>
+            </div>
+          </div>
+
+          <!-- Par entreprise -->
+          @if (entreprises.length) {
+            <div class="rp-preview__section">
+              <div class="rp-preview__section-title"><i class="isax isax-buildings-2"></i> Certification par entreprise</div>
+              @for (e of entreprises; track e.label) {
+                <div class="rp-bar-row">
+                  <span class="rp-bar-label" [title]="e.label">{{ e.label }}</span>
+                  <div class="rp-bar-track">
+                    <div class="rp-bar-fill"
+                         [class.rp-bar-fill--purple]="e.pct >= 65"
+                         [class.rp-bar-fill--orange]="e.pct < 65"
+                         [style.width.%]="e.pct"></div>
+                  </div>
+                  <span class="rp-bar-pct">{{ e.pct }}%</span>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Certifications -->
+          <div class="rp-preview__section">
+            <div class="rp-preview__section-title"><i class="isax isax-medal"></i> Certifications</div>
+            <div class="rp-kpi-row">
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ totalCerts }}</div><div class="rp-kpi__lbl">Délivrés</div></div>
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ certExpiring }}</div><div class="rp-kpi__lbl">Expirent &lt;30j</div></div>
+              <div class="rp-kpi"><div class="rp-kpi__val">{{ scoresMoy > 0 ? (scoresMoy + '%') : '—' }}</div><div class="rp-kpi__lbl">Score moy.</div></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Rapports récents -->
+    <div class="rp-card">
+      <div class="rp-card__head">
+        <i class="isax isax-clock-1"></i>
+        <span class="rp-card__title">Rapports récents</span>
+      </div>
+      <div class="rp-hist-list">
+        @for (r of recents; track r.nom) {
+          <div class="rp-hist-item">
+            <div class="rp-hist-icon rp-hist-icon--{{ r.format }}">
+              <i class="isax {{ getFormatIcon(r.format) }}"></i>
+            </div>
+            <div class="rp-hist-info">
+              <div class="rp-hist-name">{{ r.nom }}</div>
+              <div class="rp-hist-meta">{{ r.meta }}</div>
+            </div>
+            <div class="rp-hist-date">{{ r.date }}</div>
+            <button type="button" class="rp-hist-dl" (click)="downloadRecent(r)" title="Télécharger">
+              <i class="isax isax-document-download"></i>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Export rapide -->
+    <div class="rp-card">
+      <div class="rp-card__head">
+        <i class="isax isax-document-download"></i>
+        <span class="rp-card__title">Export rapide</span>
+      </div>
+      <div class="rp-export-grid">
+        <button type="button" class="rp-exp-btn" (click)="exportQuick('pdf')">
+          <i class="isax isax-document rp-exp-icon rp-exp-icon--pdf"></i>
+          <div class="rp-exp-label">PDF</div>
+          <div class="rp-exp-sub">Rapport complet</div>
+        </button>
+        <button type="button" class="rp-exp-btn" (click)="exportQuick('excel')">
+          <i class="isax isax-document-text rp-exp-icon rp-exp-icon--excel"></i>
+          <div class="rp-exp-label">Excel</div>
+          <div class="rp-exp-sub">Données brutes</div>
+        </button>
+        <button type="button" class="rp-exp-btn" (click)="exportQuick('csv')">
+          <i class="isax isax-clipboard-text rp-exp-icon rp-exp-icon--csv"></i>
+          <div class="rp-exp-label">CSV</div>
+          <div class="rp-exp-sub">Export complet</div>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -614,6 +614,14 @@ export class AdminrhSessionComponent implements OnInit {
     });
   }
 
+  archiveSession(s: SessionFormation): void {
+    if (!confirm('Archiver cette session ?')) return;
+    this.sessionService.deleteSessionRH(s.id).subscribe({
+      next: () => { this.successMessage = 'Session archivée.'; this.loadSessions(); },
+      error: () => { this.error = 'Erreur lors de l\'archivage.'; }
+    });
+  }
+
   // ── Utility ───────────────────────────────────
   formatDate(d: string): string {
     return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });

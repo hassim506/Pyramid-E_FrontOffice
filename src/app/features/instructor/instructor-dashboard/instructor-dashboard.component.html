@@ -105,9 +105,10 @@
           <span class="db-metric-lbl">Taux participation live</span>
           <div class="db-metric-bar-wrap">
             <div class="db-metric-bar">
-              <div class="db-metric-fill db-metric-fill--blue" [style.width.%]="tauxOccupation"></div>
+              <div class="db-metric-fill db-metric-fill--blue"
+                   [style.width.%]="dashStats?.taux_participation_live ?? tauxOccupation"></div>
             </div>
-            <span class="db-metric-val">{{ tauxOccupation }}%</span>
+            <span class="db-metric-val">{{ dashStats?.taux_participation_live ?? tauxOccupation }}%</span>
           </div>
         </div>
 
@@ -125,12 +126,12 @@
         </div>
 
         <div class="db-metric-item">
-          <span class="db-metric-lbl">Taux abandon quiz</span>
+          <span class="db-metric-lbl">Taux d'abandon</span>
           <div class="db-metric-bar-wrap">
             <div class="db-metric-bar">
               <div class="db-metric-fill"
-                   [class.db-metric-fill--red]="tauxAbandons > 30"
-                   [class.db-metric-fill--green]="tauxAbandons <= 30"
+                   [class.db-metric-fill--red]="tauxAbandons > 20"
+                   [class.db-metric-fill--green]="tauxAbandons <= 20"
                    [style.width.%]="tauxAbandons"></div>
             </div>
             <span class="db-metric-val">{{ tauxAbandons }}%</span>
@@ -138,17 +139,18 @@
         </div>
 
         <div class="db-metric-item">
-          <span class="db-metric-lbl">Score moyen quiz</span>
+          <span class="db-metric-lbl">Score moyen évaluations</span>
           <div class="db-metric-bar-wrap">
             <div class="db-metric-bar">
-              <div class="db-metric-fill db-metric-fill--purple" [style.width.%]="scoreMoyen"></div>
+              <div class="db-metric-fill db-metric-fill--purple"
+                   [style.width.%]="dashStats?.score_moyen ?? scoreMoyen"></div>
             </div>
-            <span class="db-metric-val">{{ scoreMoyen }}%</span>
+            <span class="db-metric-val">{{ dashStats?.score_moyen ?? scoreMoyen }}%</span>
           </div>
         </div>
 
         <div class="db-metric-item">
-          <span class="db-metric-lbl">Taux réussite quiz</span>
+          <span class="db-metric-lbl">Taux de réussite</span>
           <div class="db-metric-bar-wrap">
             <div class="db-metric-bar">
               <div class="db-metric-fill"
@@ -171,23 +173,23 @@
       </div>
       <div class="db-summary-grid">
         <div class="db-summary-item">
-          <div class="db-summary-val db-summary-val--blue">{{ sessionsAnimees }}</div>
+          <div class="db-summary-val db-summary-val--blue">{{ dashStats?.nb_sessions_animees ?? sessionsAnimees }}</div>
           <div class="db-summary-lbl">Sessions animées</div>
         </div>
         <div class="db-summary-item">
-          <div class="db-summary-val db-summary-val--teal">{{ apprenantsForms }}</div>
-          <div class="db-summary-lbl">Apprenants formés</div>
+          <div class="db-summary-val db-summary-val--teal">{{ dashStats?.nb_apprenants_inscrits ?? apprenantsForms }}</div>
+          <div class="db-summary-lbl">Apprenants inscrits</div>
         </div>
         <div class="db-summary-item">
           <div class="db-summary-val db-summary-val--purple">{{ heuresRealisees }}h</div>
           <div class="db-summary-lbl">Heures facturables</div>
         </div>
         <div class="db-summary-item">
-          <div class="db-summary-val db-summary-val--orange">{{ tauxOccupation }}%</div>
-          <div class="db-summary-lbl">Taux d'occupation</div>
+          <div class="db-summary-val db-summary-val--orange">{{ dashStats?.taux_participation_live ?? tauxOccupation }}%</div>
+          <div class="db-summary-lbl">Taux participation</div>
         </div>
         <div class="db-summary-item">
-          <div class="db-summary-val db-summary-val--gold">{{ certificatsDeliv }}</div>
+          <div class="db-summary-val db-summary-val--gold">{{ dashStats?.nb_certifications ?? certificatsDeliv }}</div>
           <div class="db-summary-lbl">Certifications</div>
         </div>
         <div class="db-summary-item">
@@ -199,8 +201,212 @@
 
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  NOUVEAUX INDICATEURS — données API centralisées              -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+
+  <!-- ── Qualité & Satisfaction ──────────────────────────────────── -->
+  <div class="db-section-title">
+    <i class="isax isax-star"></i> Qualité & Satisfaction
+  </div>
+
+  <div class="db-kpi-grid db-kpi-grid--4">
+
+    <!-- Note moyenne formateur -->
+    <div class="db-card db-card--metric">
+      <div class="db-card__head">
+        <i class="isax isax-profile-circle text-warning"></i>
+        <span class="db-card__title">Note moyenne formateur</span>
+      </div>
+      @if (statsLoading) {
+        <div class="db-kpi-card--skeleton" style="height:48px;border-radius:8px;"></div>
+      } @else if (dashStats?.note_moyenne_formateur != null) {
+        <div class="db-metric-big">
+          <span class="db-metric-big__val">{{ dashStats!.note_moyenne_formateur }}</span>
+          <span class="db-metric-big__unit">/10</span>
+        </div>
+        <div class="db-stars">
+          @for (i of [1,2,3,4,5]; track i) {
+            <i class="isax"
+               [class.isax-star1]="i <= (dashStats!.note_moyenne_formateur! / 2)"
+               [class.isax-star]="i > (dashStats!.note_moyenne_formateur! / 2)"></i>
+          }
+        </div>
+      } @else {
+        <div class="db-empty db-empty--sm">Non encore évalué</div>
+      }
+    </div>
+
+    <!-- NPS formation -->
+    <div class="db-card db-card--metric">
+      <div class="db-card__head">
+        <i class="isax isax-smiley text-success"></i>
+        <span class="db-card__title">NPS formation</span>
+      </div>
+      @if (statsLoading) {
+        <div class="db-kpi-card--skeleton" style="height:48px;border-radius:8px;"></div>
+      } @else if (dashStats?.nps_formation != null) {
+        <div class="db-metric-big">
+          <span class="db-metric-big__val">{{ dashStats!.nps_formation }}</span>
+          <span class="db-metric-big__unit">/10</span>
+        </div>
+        <small class="text-muted">Score satisfaction apprenant</small>
+      } @else {
+        <div class="db-empty db-empty--sm">Pas de données</div>
+      }
+    </div>
+
+    <!-- Feedbacks apprenants -->
+    <div class="db-card db-card--metric">
+      <div class="db-card__head">
+        <i class="isax isax-message text-info"></i>
+        <span class="db-card__title">Feedback qualitatif</span>
+      </div>
+      @if (statsLoading) {
+        <div class="db-kpi-card--skeleton" style="height:48px;border-radius:8px;"></div>
+      } @else {
+        <div class="db-metric-big">
+          <span class="db-metric-big__val">{{ dashStats?.nb_feedbacks_apprenants ?? 0 }}</span>
+          <span class="db-metric-big__unit">commentaires</span>
+        </div>
+        <small class="text-muted">{{ dashStats?.nb_feedbacks_formateur ?? 0 }} annotations formateur</small>
+      }
+    </div>
+
+    <!-- Progression avant / après -->
+    <div class="db-card db-card--metric">
+      <div class="db-card__head">
+        <i class="isax isax-chart-2 text-primary"></i>
+        <span class="db-card__title">Progression avant / après</span>
+      </div>
+      @if (statsLoading) {
+        <div class="db-kpi-card--skeleton" style="height:48px;border-radius:8px;"></div>
+      } @else {
+        <div class="db-progress-compare">
+          <div class="db-progress-compare__item">
+            <span class="db-progress-compare__lbl">Avant</span>
+            <div class="db-metric-bar" style="flex:1; margin:0 8px;">
+              <div class="db-metric-fill db-metric-fill--orange"
+                   [style.width.%]="dashStats?.progression_avant ?? 0"></div>
+            </div>
+            <span class="db-progress-compare__val">{{ dashStats?.progression_avant ?? 0 }}%</span>
+          </div>
+          <div class="db-progress-compare__item">
+            <span class="db-progress-compare__lbl">Après</span>
+            <div class="db-metric-bar" style="flex:1; margin:0 8px;">
+              <div class="db-metric-fill db-metric-fill--green"
+                   [style.width.%]="dashStats?.progression_apres ?? dashStats?.taux_completion_global ?? 0"></div>
+            </div>
+            <span class="db-progress-compare__val">
+              {{ dashStats?.progression_apres ?? dashStats?.taux_completion_global ?? 0 }}%
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- ── Délais & Performance opérationnelle ─────────────────────── -->
+  <div class="db-section-title" style="margin-top:24px;">
+    <i class="isax isax-clock"></i> Délais & Performance opérationnelle
+  </div>
+
+  <div class="db-kpi-grid db-kpi-grid--3">
+
+    <!-- Temps moyen de correction -->
+    <div class="db-card db-card--metric">
+      <div class="db-card__head">
+        <i class="isax isax-edit text-warning"></i>
+        <span class="db-card__title">Temps moyen de correction</span>
+      </div>
+      @if (statsLoading) {
+        <div class="db-kpi-card--skeleton" style="height:48px;border-radius:8px;"></div>
+      } @else if (dashStats?.temps_moyen_correction_h != null) {
+        <div class="db-metric-big">
+          <span class="db-metric-big__val">{{ dashStats!.temps_moyen_correction_h }}</span>
+          <span class="db-metric-big__unit">heures</span>
+        </div>
+        <small class="text-muted">Délai moyen après fin de session</small>
+      } @else {
+        <div class="db-empty db-empty--sm">Pas encore de données</div>
+      }
+    </div>
+
+    <!-- Délai publication résultats -->
+    <div class="db-card db-card--metric">
+      <div class="db-card__head">
+        <i class="isax isax-send-2 text-success"></i>
+        <span class="db-card__title">Délai de publication résultats</span>
+      </div>
+      @if (statsLoading) {
+        <div class="db-kpi-card--skeleton" style="height:48px;border-radius:8px;"></div>
+      } @else if (dashStats?.delai_publication_resultats_h != null) {
+        <div class="db-metric-big">
+          <span class="db-metric-big__val">{{ dashStats!.delai_publication_resultats_h }}</span>
+          <span class="db-metric-big__unit">heures</span>
+        </div>
+        <small class="text-muted">Entre fin session et publication</small>
+      } @else {
+        <div class="db-empty db-empty--sm">Pas encore de données</div>
+      }
+    </div>
+
+    <!-- Nombre de sessions animées (détail) -->
+    <div class="db-card db-card--metric">
+      <div class="db-card__head">
+        <i class="isax isax-calendar-tick text-blue"></i>
+        <span class="db-card__title">Sessions animées</span>
+      </div>
+      @if (statsLoading) {
+        <div class="db-kpi-card--skeleton" style="height:48px;border-radius:8px;"></div>
+      } @else {
+        <div class="db-metric-big">
+          <span class="db-metric-big__val">{{ dashStats?.nb_sessions_animees ?? sessionsAnimees }}</span>
+          <span class="db-metric-big__unit">sessions</span>
+        </div>
+        <div class="db-metric-list" style="margin-top:8px;">
+          <div class="db-metric-item" style="margin-bottom:4px;">
+            <span class="db-metric-lbl" style="font-size:11px;">Terminées</span>
+            <span class="db-metric-val" style="font-size:11px; color:#22c55e;">
+              {{ dashStats?.nb_sessions_terminees ?? 0 }}
+            </span>
+          </div>
+          <div class="db-metric-item">
+            <span class="db-metric-lbl" style="font-size:11px;">Apprenants (sessions)</span>
+            <span class="db-metric-val" style="font-size:11px; color:#1D9CFD;">
+              {{ dashStats?.nb_apprenants_sessions ?? 0 }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- ── Évolution inscriptions ──────────────────────────────────── -->
+  @if (inscriptionsChart) {
+    <div class="db-card" style="margin-top:24px;">
+      <div class="db-card__head">
+        <i class="isax isax-people"></i>
+        <span class="db-card__title">Évolution des inscriptions</span>
+        <span class="db-badge db-badge--blue">6 mois</span>
+      </div>
+      <apx-chart
+        [series]="inscriptionsChart.series"
+        [chart]="inscriptionsChart.chart"
+        [plotOptions]="inscriptionsChart.plotOptions"
+        [dataLabels]="inscriptionsChart.dataLabels"
+        [xaxis]="inscriptionsChart.xaxis"
+        [colors]="inscriptionsChart.colors"
+        [grid]="inscriptionsChart.grid"
+        [tooltip]="inscriptionsChart.tooltip">
+      </apx-chart>
+    </div>
+  }
+
   <!-- ── TABLE FORMATIONS ───────────────────────────────────────── -->
-  <div class="db-card db-card--table">
+  <div class="db-card db-card--table" style="margin-top:24px;">
     <div class="db-card__head">
       <i class="isax isax-book-1"></i>
       <span class="db-card__title">Mes formations</span>

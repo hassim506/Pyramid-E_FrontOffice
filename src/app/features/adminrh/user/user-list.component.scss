@@ -149,6 +149,69 @@ $radius-lg: 12px;
   i { font-size: 13px; }
 }
 
+// ── Bouton Importer ─────────────────────────
+.ul-import-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #BA7517 0%, #D4941E 100%);
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(186,117,23,.35);
+  transition: opacity .15s, transform .1s;
+
+  &:hover { opacity: .88; transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+  i { font-size: 13px; }
+}
+
+// ── Bouton Template ──────────────────────────
+.ul-tpl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #006F78;
+  background: #E6F4F5;
+  border: 1.5px solid #9DD4D8;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+
+  &:hover { background: darken(#E6F4F5, 4%); transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+  i { font-size: 13px; }
+}
+
+// ── Bouton Exporter ──────────────────────────
+.ul-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #006F78, #00949F);
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,111,120,.3);
+  transition: opacity .15s, transform .1s;
+
+  &:hover  { opacity: .88; transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+  i { font-size: 13px; }
+}
+
 .ul-add-btn {
   display: inline-flex;
   align-items: center;
@@ -166,6 +229,204 @@ $radius-lg: 12px;
 
   &:hover { background: darken(#e6f1fb, 5%); }
   i { font-size: 13px; }
+}
+
+// ── Modal Import ─────────────────────────────
+.ul-import-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ul-fade-in .15s ease;
+}
+
+@keyframes ul-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ul-import-modal {
+  background: #fff;
+  border-radius: 14px;
+  width: 460px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  overflow: hidden;
+  animation: ul-slide-up .18s ease;
+
+  @keyframes ul-slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #BA7517 0%, #D4941E 100%);
+    color: #fff;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    i { font-size: 16px; }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.8);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+    transition: color .15s;
+    &:hover { color: #fff; }
+  }
+
+  &__body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid $gray-200;
+  }
+
+  &__cancel {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: $gray-600;
+    background: $gray-100;
+    border: 1px solid $gray-200;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: background .15s;
+    &:hover { background: $gray-200; }
+    &:disabled { opacity: .5; cursor: not-allowed; }
+  }
+
+  &__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #BA7517 0%, #D4941E 100%);
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(186,117,23,.35);
+    transition: opacity .15s;
+    &:hover { opacity: .88; }
+    &:disabled { opacity: .5; cursor: not-allowed; }
+    i { font-size: 14px; }
+  }
+}
+
+// ── Zone de dépôt ────────────────────────────
+.ul-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px 16px;
+  border: 2px dashed $gray-200;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  text-align: center;
+
+  &:hover, &--active {
+    border-color: #BA7517;
+    background: #FAEEDA;
+  }
+
+  &__icon {
+    font-size: 28px;
+    color: #BA7517;
+  }
+
+  &__label {
+    font-size: 13px;
+    color: $gray-600;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong { color: $gray-900; font-size: 13px; }
+    small  { color: $gray-400; font-size: 11px; }
+  }
+}
+
+// ── Barre de progression ─────────────────────
+.ul-import-progress {
+  height: 6px;
+  background: $gray-100;
+  border-radius: 99px;
+  overflow: hidden;
+
+  &__bar {
+    height: 100%;
+    background: linear-gradient(90deg, #BA7517, #E8B84B);
+    border-radius: 99px;
+    transition: width .3s ease;
+  }
+}
+
+// ── Bloc info ────────────────────────────────
+.ul-import-info {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  background: #FAEEDA;
+  border: 1px solid #E9C97E;
+  border-radius: $radius-md;
+  font-size: 12px;
+  color: #8C5410;
+
+  i { font-size: 15px; color: #BA7517; flex-shrink: 0; margin-top: 1px; }
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    li + li { margin-top: 3px; }
+    strong { color: #6B3C10; }
+  }
+}
+
+// ── Spinner inline ───────────────────────────
+.ul-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ul-spin .6s linear infinite;
+}
+
+@keyframes ul-spin {
+  to { transform: rotate(360deg); }
 }
 
 .ul-dropdown {

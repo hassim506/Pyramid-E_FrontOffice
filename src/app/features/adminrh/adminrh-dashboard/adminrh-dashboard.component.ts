@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { AdminRHStatsService, AdminRHStats } from '../../../shared/service/stat/adminrh-stat.service';
+import { AdminRHStatsService, AdminRHDashboardStats } from '../../../shared/service/stat/adminrh-stat.service';
 import { routes } from '../../../shared/service/routes/routes';
 
 export interface FormationRecente {
@@ -33,14 +33,10 @@ export interface AdminRHDashboardMetrics {
   totalFormations: number;
   totalDemandesFormation: number;
   totalSessionsFormation: number;
-
-  // Formations & Sessions
   formationsPubliees: number;
   tauxCompletionGlobal: number;
   sessionsMoisCourant: number;
   heuresConsommees: number;
-
-  // Qualité & Performance
   scoreMoyenFormations: number;
   tauxSatisfaction: number;
   nombreCertifies: number;
@@ -63,10 +59,12 @@ export class AdminrhDashboardComponent implements OnInit {
   routes = routes;
 
   isLoading = true;
+  dashboardStatsLoading = true;
   formationsRecentes: FormationRecente[] = [];
   statistiquesMensuelles: StatistiqueMensuelle[] = [];
 
-  // Métriques principales
+  dashboardStats: AdminRHDashboardStats | null = null;
+
   metrics: AdminRHDashboardMetrics = {
     totalUtilisateurs: 0,
     totalFormateurs: 0,
@@ -83,31 +81,30 @@ export class AdminrhDashboardComponent implements OnInit {
     nombreIncidents: 0
   };
 
-  // Cartes statistiques principales
   statisticsCards = [
-    { type: 'utilisateurs', label: 'Total Utilisateurs',   value: 0, icon: 'fas fa-users',           color: 'primary', growth: 12, progress: 75 },
-    { type: 'formateurs',   label: 'Total Formateurs',     value: 0, icon: 'fas fa-user-tie',        color: 'success', growth: 8,  progress: 60 },
-    { type: 'formations',   label: 'Total Formations',     value: 0, icon: 'fas fa-graduation-cap',  color: 'info',    growth: 15, progress: 85 },
-    { type: 'demandes',     label: 'Demandes Formation',   value: 0, icon: 'fas fa-file-alt',        color: 'warning', growth: 5,  progress: 45 }
+    { type: 'utilisateurs', label: 'Total Utilisateurs',   value: 0, icon: 'fas fa-users',           color: 'primary', growth: 0, progress: 75 },
+    { type: 'formateurs',   label: 'Total Formateurs',     value: 0, icon: 'fas fa-user-tie',        color: 'success', growth: 0, progress: 60 },
+    { type: 'formations',   label: 'Total Formations',     value: 0, icon: 'fas fa-graduation-cap',  color: 'info',    growth: 0, progress: 85 },
+    { type: 'demandes',     label: 'Demandes Formation',   value: 0, icon: 'fas fa-file-alt',        color: 'warning', growth: 0, progress: 45 }
   ];
 
-  // Cartes métriques Formations & Sessions
   get metricsCardsRow1() {
+    const s = this.dashboardStats;
     return [
-      { label: 'Formations publiées',     value: this.metrics.formationsPubliees,      icon: 'isax isax-book',       color: 'success', suffix: '' },
-      { label: 'Taux complétion global',  value: this.metrics.tauxCompletionGlobal,    icon: 'isax isax-chart-2',    color: 'info',    suffix: '%' },
-      { label: 'Sessions ce mois',        value: this.metrics.sessionsMoisCourant,     icon: 'isax isax-calendar',   color: 'primary', suffix: '' },
-      { label: 'Heures consommées',       value: this.metrics.heuresConsommees,        icon: 'isax isax-clock',      color: 'warning', suffix: 'h' },
+      { label: 'Formations publiées',     value: this.metrics.formationsPubliees,        icon: 'isax isax-book',       color: 'success', suffix: '' },
+      { label: 'Taux complétion global',  value: s?.taux_completion_global  ?? this.metrics.tauxCompletionGlobal, icon: 'isax isax-chart-2', color: 'info', suffix: '%' },
+      { label: 'Heures consommées',       value: s?.total_heures_consommees ?? this.metrics.heuresConsommees,     icon: 'isax isax-clock',   color: 'warning', suffix: 'h' },
+      { label: 'Certifications délivrées', value: s?.total_certifications   ?? this.metrics.nombreCertifies,     icon: 'isax isax-award',   color: 'primary', suffix: '' },
     ];
   }
 
-  // Cartes métriques Qualité & Performance
   get metricsCardsRow2() {
+    const s = this.dashboardStats;
     return [
-      { label: 'Score moyen formations',  value: this.metrics.scoreMoyenFormations,    icon: 'isax isax-star',       color: 'warning', suffix: '/5' },
-      { label: 'Taux satisfaction',       value: this.metrics.tauxSatisfaction,        icon: 'isax isax-smiley',     color: 'success', suffix: '%' },
-      { label: 'Total certifiés',         value: this.metrics.nombreCertifies,         icon: 'isax isax-award',      color: 'primary', suffix: '' },
-      { label: 'Incidents signalés',      value: this.metrics.nombreIncidents,         icon: 'isax isax-warning-2',  color: 'danger',  suffix: '' },
+      { label: 'Score satisfaction',      value: s?.score_satisfaction  ?? this.metrics.tauxSatisfaction, icon: 'isax isax-star',     color: 'warning', suffix: '/100' },
+      { label: 'Taux participation',       value: s?.taux_participation  ?? 0,   icon: 'isax isax-people',    color: 'success', suffix: '%' },
+      { label: 'Taux abandon parcours',    value: s?.taux_abandon        ?? 0,   icon: 'isax isax-warning-2', color: 'danger',  suffix: '%' },
+      { label: 'Heures / collaborateur',   value: s?.heures_par_collaborateur ?? 0, icon: 'isax isax-clock',  color: 'info',    suffix: 'h' },
     ];
   }
 
@@ -125,25 +122,14 @@ export class AdminrhDashboardComponent implements OnInit {
       { name: 'Formateurs',   data: [] },
       { name: 'Sessions',     data: [] }
     ],
-    chart: {
-      height: 350,
-      type: 'area',
-      toolbar: { show: true }
-    },
+    chart: { height: 350, type: 'area', toolbar: { show: true } },
     dataLabels: { enabled: false },
     stroke: { curve: 'smooth', width: 2 },
     xaxis: { categories: [], axisBorder: { show: false }, axisTicks: { show: false } },
     yaxis: { title: { text: 'Nombre' } },
     fill: {
       type: 'gradient',
-      gradient: {
-        shade: 'light',
-        type: 'vertical',
-        shadeIntensity: 0.1,
-        opacityFrom: 0.45,
-        opacityTo: 0.05,
-        stops: [20, 100, 100, 100]
-      }
+      gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.1, opacityFrom: 0.45, opacityTo: 0.05, stops: [20, 100, 100, 100] }
     },
     colors: ['#1D9CFD', '#00BFA5', '#FFB64D', '#E91E63'],
     grid: {
@@ -155,9 +141,18 @@ export class AdminrhDashboardComponent implements OnInit {
     tooltip: { shared: true, intersect: false, theme: 'light' }
   };
 
-  constructor(
-    private adminRHStatsService: AdminRHStatsService
-  ) { }
+  inscriptionsChart: any = {
+    series: [{ name: 'Inscriptions', data: [] }],
+    chart: { height: 180, type: 'bar', toolbar: { show: false } },
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
+    dataLabels: { enabled: false },
+    xaxis: { categories: [] },
+    colors: ['#1D9CFD'],
+    grid: { borderColor: '#f1f1f1' },
+    tooltip: { theme: 'light' }
+  };
+
+  constructor(private adminRHStatsService: AdminRHStatsService) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -165,61 +160,55 @@ export class AdminrhDashboardComponent implements OnInit {
 
   private loadDashboardData(): void {
     this.isLoading = true;
+    this.dashboardStatsLoading = true;
 
     forkJoin({
-      stats: this.adminRHStatsService.getAllStats(),
-      formations: this.adminRHStatsService.getFormationsRecentes().pipe(catchError(() => of([]))),
-      mensuel: this.adminRHStatsService.getFormationsParAnnee().pipe(catchError(() => of([])))
+      stats:          this.adminRHStatsService.getAllStats().pipe(catchError(() => of(null))),
+      dashboardStats: this.adminRHStatsService.getDashboardStats().pipe(catchError(() => of(null))),
+      formations:     this.adminRHStatsService.getFormationsRecentes().pipe(catchError(() => of([]))),
+      mensuel:        this.adminRHStatsService.getFormationsParAnnee().pipe(catchError(() => of([])))
     }).subscribe({
       next: (data) => {
         this.processRealData(data);
         this.isLoading = false;
+        this.dashboardStatsLoading = false;
       },
       error: () => {
         this.setDefaultData();
         this.isLoading = false;
+        this.dashboardStatsLoading = false;
       }
     });
   }
 
   private processRealData(data: any): void {
-    // Charger les statistiques de base
     if (data.stats) {
-      this.metrics.totalUtilisateurs = data.stats.totalUtilisateurs || 0;
-      this.metrics.totalFormateurs = data.stats.totalFormateurs || 0;
-      this.metrics.totalFormations = data.stats.totalFormations || 0;
+      this.metrics.totalUtilisateurs      = data.stats.totalUtilisateurs      || 0;
+      this.metrics.totalFormateurs        = data.stats.totalFormateurs        || 0;
+      this.metrics.totalFormations        = data.stats.totalFormations        || 0;
       this.metrics.totalDemandesFormation = data.stats.totalDemandesFormation || 0;
       this.metrics.totalSessionsFormation = data.stats.totalSessionsFormation || 0;
     }
 
-    // Mettre à jour les cartes statistiques
+    if (data.dashboardStats) {
+      this.dashboardStats = data.dashboardStats;
+      this.metrics.tauxCompletionGlobal = data.dashboardStats.taux_completion_global ?? 0;
+      this.metrics.heuresConsommees     = data.dashboardStats.total_heures_consommees ?? 0;
+      this.metrics.nombreCertifies      = data.dashboardStats.total_certifications ?? 0;
+      this.metrics.tauxSatisfaction     = data.dashboardStats.score_satisfaction ?? 0;
+
+      if (data.dashboardStats.croissance_mensuelle?.length) {
+        this.inscriptionsChart = {
+          ...this.inscriptionsChart,
+          series: [{ name: 'Inscriptions', data: data.dashboardStats.croissance_mensuelle.map((m: any) => m.total) }],
+          xaxis: { categories: data.dashboardStats.croissance_mensuelle.map((m: any) => m.mois) }
+        };
+      }
+    }
+
+    this.metrics.formationsPubliees = this.metrics.totalFormations;
     this.updateStatisticsCards();
 
-    // Formations publiées
-    this.metrics.formationsPubliees = Math.max(0, this.metrics.totalFormations);
-
-    // Taux de complétion (exemple : 75%)
-    this.metrics.tauxCompletionGlobal = 75;
-
-    // Sessions du mois
-    this.metrics.sessionsMoisCourant = this.metrics.totalSessionsFormation;
-
-    // Heures consommées
-    this.metrics.heuresConsommees = this.metrics.totalSessionsFormation * 2;
-
-    // Score moyen
-    this.metrics.scoreMoyenFormations = 4.2;
-
-    // Taux satisfaction
-    this.metrics.tauxSatisfaction = 88;
-
-    // Certifiés
-    this.metrics.nombreCertifies = Math.floor(this.metrics.totalUtilisateurs * 0.35);
-
-    // Incidents
-    this.metrics.nombreIncidents = 2;
-
-    // Traiter les formations récentes
     if (Array.isArray(data.formations) && data.formations.length > 0) {
       this.formationsRecentes = data.formations.slice(0, 5).map((f: any) => ({
         id: f.id,
@@ -235,24 +224,22 @@ export class AdminrhDashboardComponent implements OnInit {
       this.formationsRecentes = [];
     }
 
-    // Générer les statistiques mensuelles
     this.generateMonthlyStats(data.mensuel);
   }
 
-  private generateMonthlyStats(mensuelData: any): void {
+  private generateMonthlyStats(_mensuelData: any): void {
     const now = new Date();
     const stats: StatistiqueMensuelle[] = [];
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const label = date.toLocaleDateString('fr-FR', { month: 'short' });
-
       stats.push({
         mois: label.charAt(0).toUpperCase() + label.slice(1),
-        formations: Math.floor(Math.random() * 10) + 5,
+        formations:   Math.floor(Math.random() * 10) + 5,
         utilisateurs: Math.floor(Math.random() * 50) + 20,
-        formateurs: Math.floor(Math.random() * 5) + 2,
-        sessions: Math.floor(Math.random() * 8) + 3
+        formateurs:   Math.floor(Math.random() * 5)  + 2,
+        sessions:     Math.floor(Math.random() * 8)  + 3
       });
     }
 
@@ -295,17 +282,8 @@ export class AdminrhDashboardComponent implements OnInit {
     };
   }
 
-  trackByFormationId(index: number, formation: FormationRecente): string | number {
+  trackByFormationId(_index: number, formation: FormationRecente): string | number {
     return formation.id;
-  }
-
-  getStatusLabel(status: string): string {
-    return ({
-      publie: 'Publié',
-      brouillon: 'Brouillon',
-      en_cours: 'En cours',
-      archive: 'Archivé'
-    } as any)[status] || status;
   }
 
   getRelativeDate(date: Date): string {
@@ -318,13 +296,8 @@ export class AdminrhDashboardComponent implements OnInit {
   }
 
   getStatutLabel(statut: string): string {
-    const statutsMap: { [key: string]: string } = {
-      'publie': 'Publié',
-      'brouillon': 'Brouillon',
-      'archive': 'Archivé',
-      'en_cours': 'En cours'
-    };
-    return statutsMap[statut.toLowerCase()] || statut;
+    const map: Record<string, string> = { publie: 'Publié', brouillon: 'Brouillon', archive: 'Archivé', en_cours: 'En cours' };
+    return map[statut?.toLowerCase()] || statut;
   }
 
   refreshDashboard(): void {

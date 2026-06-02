@@ -1727,3 +1727,8 @@ $cw-green-bd: #79C9AB;
   .ac-card-grid    { grid-template-columns: 1fr; }
   .ac-kpi-row      { grid-template-columns: 1fr 1fr; }
 }
+
+.ac-act--arch {
+  color: #BA7517;
+  &:hover { border-color: #BA7517; color: #BA7517; background: #FAEEDA; }
+}

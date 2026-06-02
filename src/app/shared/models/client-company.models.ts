@@ -39,7 +39,10 @@ export interface Company {
   // Stats (chargées séparément depuis /api/entreprises/{id})
   formations_count?: number;
   formations_actives_count?: number;
-  employes_count?: number;
+  employes_count?: number;        // employés rôle=2 inscrits sur la plateforme
+  employes_actifs_count?: number; // employés rôle=2 avec statut=1 (actifs)
+  total_users_count?: number;     // tous utilisateurs inscrits (toutes rôles)
+  utilisateurs_actifs_count?: number; // tous utilisateurs actifs (statut=1)
   taux_completion?: number;
   certificats_count?: number;
   users?: any[];

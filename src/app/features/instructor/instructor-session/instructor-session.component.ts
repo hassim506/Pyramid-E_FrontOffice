@@ -76,6 +76,10 @@ export class InstructorSessionComponent implements OnInit {
         this.skip = 0;
         this.getTableData();
         this.loading = false;
+
+        // Réinitialiser le cache et charger le Zoom pour les sessions visibles
+        this.zoomMeetings = {};
+        this.loadZoomForVisible();
       },
       error: (err) => {
         console.error('Erreur sessions:', err);
@@ -83,6 +87,18 @@ export class InstructorSessionComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private loadZoomForVisible(): void {
+    this.tableData
+      .filter(s => s.type !== 'presentiel')
+      .forEach(s => {
+        this.zoomLoading[s.id] = true;
+        this.zoomService.getMeetingBySession(s.id).subscribe({
+          next: (res) => { this.zoomMeetings[s.id] = res.meeting ?? null; this.zoomLoading[s.id] = false; },
+          error: ()    => { this.zoomMeetings[s.id] = null;               this.zoomLoading[s.id] = false; }
+        });
+      });
   }
 
   searchData(value: string): void {
@@ -130,6 +146,7 @@ export class InstructorSessionComponent implements OnInit {
     this.currentPage = page;
     this.skip = (page - 1) * this.pageSize;
     this.getTableData();
+    this.loadZoomForVisible();
   }
 
   private getTableData(): void {
@@ -193,7 +210,7 @@ export class InstructorSessionComponent implements OnInit {
     }
   }
 
-  trackBySessionId(index: number, session: SessionFormation): number {
+  trackBySessionId(_index: number, session: SessionFormation): number {
     return session.id;
   }
 
@@ -210,7 +227,8 @@ export class InstructorSessionComponent implements OnInit {
 
   // ── Zoom methods ──────────────────────────────
   loadZoomMeeting(s: SessionFormation): void {
-    if (s.type === 'presentiel' || this.zoomMeetings[s.id] !== undefined) return;
+    // Skip presentiel, already loaded non-null, or currently loading
+    if (s.type === 'presentiel' || this.zoomMeetings[s.id] || this.zoomLoading[s.id]) return;
     this.zoomLoading[s.id] = true;
     this.zoomService.getMeetingBySession(s.id).subscribe({
       next: (res) => { this.zoomMeetings[s.id] = res.meeting ?? null; this.zoomLoading[s.id] = false; },
@@ -259,6 +277,11 @@ export class InstructorSessionComponent implements OnInit {
   isZoomAccessible(s: SessionFormation): boolean {
     const m = this.zoomMeetings[s.id];
     return m ? this.zoomService.isAccessible(m) : false;
+  }
+
+  isZoomExpired(s: SessionFormation): boolean {
+    const m = this.zoomMeetings[s.id];
+    return m ? this.zoomService.isExpired(m) : false;
   }
 
   getZoomDelai(s: SessionFormation): string {

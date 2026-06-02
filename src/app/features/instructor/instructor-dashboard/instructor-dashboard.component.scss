@@ -211,6 +211,67 @@ $card:    #FFFFFF;
 }
 .db-row-pct { font-size: 11px; font-weight: 600; color: $text; vertical-align: middle; }
 
+// ── Section title ─────────────────────────────────────────────────
+.db-section-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; color: $text;
+  margin-bottom: 12px;
+  i { color: $muted; font-size: 15px; }
+}
+
+// ── KPI grid variants ─────────────────────────────────────────────
+.db-kpi-grid--4 {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px;
+  @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 600px)  { grid-template-columns: 1fr; }
+}
+.db-kpi-grid--3 {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;
+  @media (max-width: 900px) { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+// ── Metric card variant ───────────────────────────────────────────
+.db-card--metric {
+  padding: 14px;
+  .db-card__head {
+    border-bottom: none; padding: 0 0 8px 0;
+    i { font-size: 16px; }
+    .db-card__title { font-size: 12px; }
+  }
+}
+
+// ── Big metric value ──────────────────────────────────────────────
+.db-metric-big {
+  display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px;
+  &__val  { font-size: 28px; font-weight: 700; color: $text; line-height: 1; }
+  &__unit { font-size: 12px; color: $muted; font-weight: 500; }
+}
+
+// ── Stars ─────────────────────────────────────────────────────────
+.db-stars {
+  display: flex; gap: 2px; margin-top: 4px;
+  i { font-size: 14px; color: $gold; }
+  .isax-star { color: $border; }
+}
+
+// ── Empty small ───────────────────────────────────────────────────
+.db-empty--sm {
+  height: auto; padding: 12px 0;
+  font-size: 11px; color: $muted;
+  justify-content: flex-start;
+}
+
+// ── Progress compare ──────────────────────────────────────────────
+.db-progress-compare {
+  display: flex; flex-direction: column; gap: 10px; margin-top: 4px;
+  &__item {
+    display: flex; align-items: center; gap: 6px;
+  }
+  &__lbl { font-size: 10px; color: $muted; width: 32px; flex-shrink: 0; }
+  &__val { font-size: 11px; font-weight: 600; color: $text; width: 32px; text-align: right; flex-shrink: 0; }
+}
+
 // ── Pills / badges ────────────────────────────────────────────────
 .db-pill {
   display: inline-flex; align-items: center; justify-content: center;

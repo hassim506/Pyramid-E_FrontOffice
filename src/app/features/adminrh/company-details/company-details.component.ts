@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, TitleCasePipe } from '@angular/common';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Company } from '../../../shared/models/client-company.models';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
-import { UserService } from '../../../shared/service/authentification/user.service';
+import { AuthService } from '../../../shared/service/authentification/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-company-details',
@@ -18,17 +21,26 @@ export class CompanyDetailsComponent implements OnInit {
   loading: boolean = true;
   error: string = '';
   employeeCount: number = 0;
-  employees: any[] = []; // Liste des employés (optionnel)
+  employees: any[] = [];
   loadingEmployees: boolean = false;
+
+  private currentUser: any;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private clientCompanyService: ClientCompanyService,
-    private userService: UserService 
+    private authService: AuthService,
+    private http: HttpClient,
   ) {}
 
+  private get headers(): HttpHeaders {
+    const token = localStorage.getItem('pyramide_token');
+    return new HttpHeaders({ 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' });
+  }
+
   ngOnInit() {
+    this.currentUser = this.authService.getUser();
     this.route.params.subscribe(params => {
       const companyId = +params['id'];
       if (companyId) {
@@ -39,47 +51,43 @@ export class CompanyDetailsComponent implements OnInit {
 
   loadCompanyDetails(id: number) {
     this.loading = true;
-    this.error = '';
-    
-    // Charger les détails de l'entreprise et le nombre d'employés en parallèle
+    this.error   = '';
+
+    // /mes-entreprises/{id} : sans middleware permission, vérifie le périmètre côté contrôleur
+    // /entreprises/{id}/employes : supporte rôle 4 et 5 via peutVoirEmployesEntreprise()
     forkJoin({
-      company: this.clientCompanyService.getCompany(id),
-      employees: this.userService.getUsersByCompany(id)
+      company:   this.http.get<any>(`${environment.apiUrl}/mes-entreprises/${id}`,      { headers: this.headers }).pipe(catchError(() => of(null))),
+      employees: this.http.get<any>(`${environment.apiUrl}/entreprises/${id}/employes`, { headers: this.headers }).pipe(catchError(() => of({ employes: [] }))),
     }).subscribe({
-      next: (response) => {
-        // Charger les détails de l'entreprise
-        this.company = response.company.entreprise || response.company.data || response.company;
-        
-        // Charger les employés
-        const employeesData = response.employees.users || response.employees.data || response.employees;
-        this.employees = Array.isArray(employeesData) ? employeesData : [];
-        this.employeeCount = this.employees.length;
-        this.loading = false;
+      next: ({ company, employees }) => {
+        if (!company || company.status === false) {
+          this.error   = company?.message || 'Accès non autorisé à cette entreprise';
+          this.loading = false;
+          return;
+        }
+        this.company       = company.entreprise || company.data || company;
+        const empData      = employees?.employes || employees?.data || employees?.users || [];
+        this.employees     = Array.isArray(empData) ? empData : [];
+        this.employeeCount = employees?.pagination?.total ?? this.employees.length;
+        this.loading       = false;
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement:', error);
-        this.error = 'Erreur lors du chargement des données';
+      error: () => {
+        this.error   = 'Erreur lors du chargement des données';
         this.loading = false;
       }
     });
   }
 
-  // Méthode alternative si vous voulez charger les employés séparément
   loadEmployeeCount(companyId: number) {
     this.loadingEmployees = true;
-    
-    this.userService.getUsersByCompany(companyId).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/entreprises/${companyId}/employes`, { headers: this.headers }).subscribe({
       next: (response) => {
-        const employeesData = response.users || response.data || response;
-        this.employees = Array.isArray(employeesData) ? employeesData : [];
-        this.employeeCount = this.employees.length;
+        const empData      = response?.employes || response?.data || [];
+        this.employees     = Array.isArray(empData) ? empData : [];
+        this.employeeCount = response?.pagination?.total ?? this.employees.length;
         this.loadingEmployees = false;
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement des employés:', error);
-        this.employeeCount = 0;
-        this.loadingEmployees = false;
-      }
+      error: () => { this.employeeCount = 0; this.loadingEmployees = false; }
     });
   }
 
@@ -94,7 +102,7 @@ export class CompanyDetailsComponent implements OnInit {
 
   // ...existing methods...
   goBack() {
-    this.router.navigate(['/superadmin/company-management']);
+    this.router.navigate(['/adminrh/adminrh-companymanagement']);
   }
 
   editCompany() {
@@ -106,13 +114,17 @@ export class CompanyDetailsComponent implements OnInit {
   deleteCompany() {
     if (this.company && confirm(`Supprimer l'entreprise "${this.company.nom}" ?`)) {
       this.clientCompanyService.deleteCompany(this.company.id).subscribe({
-        next: () => {
-          console.log('Entreprise supprimée');
-          this.router.navigate(['/superadmin/company-management']);
-        },
-        error: (error) => {
-          console.error('Erreur suppression:', error);
-        }
+        next: () => this.router.navigate(['/adminrh/adminrh-companymanagement']),
+        error: (error) => console.error('Erreur suppression:', error)
+      });
+    }
+  }
+
+  archiveCompany() {
+    if (this.company && confirm(`Archiver l'entreprise "${this.company.nom}" ?`)) {
+      this.clientCompanyService.deleteCompany(this.company.id).subscribe({
+        next: () => this.router.navigate(['/adminrh/adminrh-companymanagement']),
+        error: (error) => console.error('Erreur archivage:', error)
       });
     }
   }

@@ -227,9 +227,7 @@
                         *ngIf="s.statut === 'planifiee'" (click)="cancelSession(s)">
                   <i class="isax isax-close-circle"></i>
                 </button>
-                <button type="button" class="ss-act ss-act--del" title="Supprimer" (click)="deleteSession(s)">
-                  <i class="isax isax-trash"></i>
-                </button>
+                <button class="ss-act ss-act--arch" title="Archiver" (click)="archiveSession(s)"><i class="isax isax-archive"></i></button>
               </ng-container>
             </div>
           </td>

@@ -1,5 +1,48 @@
 @import '../adminrh-course/adminrh-course.component';
 
+// ── Pool override (blue theme) ────────────────
+.cw-pool__item.checked,
+.cw-pool__item:hover { background: #e6f1fb; }
+.cw-pool__check.on   { background: #185fa5; border-color: #185fa5; color: #fff; }
+
+// ── Selected chips ────────────────────────────
+.cw-pool-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.cw-pool-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #e6f1fb;
+  color: #185fa5;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #185fa5;
+    padding: 0;
+    line-height: 1;
+    font-size: 13px;
+    display: flex;
+  }
+}
+
+.cw-pool-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
 // ── Catalogue icon cell ───────────────────────
 .cat-icon {
   width: 36px;

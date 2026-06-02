@@ -135,10 +135,9 @@ export class AdminrhSidebarComponent implements OnInit, OnDestroy {
 
     this.loadSessionsBadge();
 
-    this.userService.getUsers().subscribe({
+    this.userService.getMyUsers().subscribe({
       next: (res: any) => {
-        const arr = res?.utilisateurs || res?.data || res?.users || (Array.isArray(res) ? res : []);
-        this.employes = arr.length;
+        this.employes = res?.total ?? res?.users?.length ?? 0;
       },
       error: () => {}
     });

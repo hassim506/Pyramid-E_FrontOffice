@@ -73,11 +73,11 @@
           <tr *ngFor="let f of tableData; trackBy: trackByFormation">
             <td>
               <div class="ip-course-cell">
-                <a [href]="'/courses/instructor-course-details/' + f.id" target="_blank" class="ip-course-img">
+                <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ip-course-img">
                   <img [src]="getFormationImage(f)" [alt]="f.titre" onerror="this.src='assets/img/course/course-01.jpg'">
                 </a>
                 <div>
-                  <a [href]="'/courses/instructor-course-details/' + f.id" target="_blank" class="ip-course-title">{{ f.titre }}</a>
+                  <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ip-course-title">{{ f.titre }}</a>
                   <div class="ip-course-meta">
                     <span><i class="isax isax-video-circle"></i> {{ f.nombre_modules || 0 }} modules</span>
                     <span><i class="isax isax-flag"></i> {{ f.niveau_display || f.niveau || 'N/A' }}</span>
@@ -104,7 +104,7 @@
             </td>
             <td>
               <div class="ip-actions">
-                <a [href]="'/courses/instructor-course-details/' + f.id" target="_blank" class="ip-action-btn" title="Voir">
+                <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ip-action-btn" title="Voir">
                   <i class="isax isax-eye"></i>
                 </a>
                 <a [href]="'/courses/instructor-course-edit/' + f.id" target="_blank" class="ip-action-btn" title="Modifier">
@@ -116,8 +116,8 @@
                         (click)="togglePublishStatus(f)">
                   <i [class]="f.est_publie ? 'isax isax-eye-slash' : 'isax isax-send-2'"></i>
                 </button>
-                <button type="button" class="ip-action-btn text-danger" title="Supprimer" (click)="openDeleteModal(f)">
-                  <i class="isax isax-trash"></i>
+                <button type="button" class="ip-action-btn ip-action-btn--arch" title="Archiver" (click)="archiveFormation(f)">
+                  <i class="isax isax-archive"></i>
                 </button>
               </div>
             </td>
@@ -163,21 +163,3 @@
   </div>
 </div>
 
-<!-- Delete Modal -->
-<div class="modal fade" id="delete_modal">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body text-center custom-modal-body">
-        <span class="avatar avatar-lg bg-danger-transparent rounded-circle mb-2">
-          <i class="isax isax-trash fs-24 text-danger"></i>
-        </span>
-        <h4 class="mb-2">Supprimer la formation</h4>
-        <p class="mb-3">Êtes-vous sûr de vouloir supprimer cette formation ?</p>
-        <div class="d-flex align-items-center justify-content-center gap-2">
-          <button type="button" class="btn bg-gray-100 rounded-pill" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-danger rounded-pill" (click)="confirmDelete()" data-bs-dismiss="modal">Oui, Supprimer</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>

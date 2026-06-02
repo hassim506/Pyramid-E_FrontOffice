@@ -40,8 +40,14 @@ export class RapportExportService {
     const marginL = 14;
     let y = 18;
 
+    // Bande dorée en haut
+    doc.setFillColor(186, 117, 23);
+    doc.rect(0, 0, 210, 10, 'F');
+
+    y = 20;
+
     // Titre
-    doc.setFontSize(16);
+    doc.setFontSize(15);
     doc.setTextColor(30, 41, 59);
     doc.text(title, marginL, y);
     y += 8;
@@ -57,7 +63,7 @@ export class RapportExportService {
 
       // Heading section
       doc.setFontSize(11);
-      doc.setTextColor(83, 74, 183);
+      doc.setTextColor(186, 117, 23);
       doc.text(section.heading, marginL, y);
       y += 6;
 
@@ -73,7 +79,7 @@ export class RapportExportService {
       // En-têtes tableau
       doc.setFontSize(8);
       doc.setTextColor(255, 255, 255);
-      doc.setFillColor(83, 74, 183);
+      doc.setFillColor(186, 117, 23);
       doc.rect(marginL, y, 190 - marginL, 6, 'F');
       headers.forEach((h, i) => doc.text(h, marginL + i * colW + 2, y + 4));
       y += 6;

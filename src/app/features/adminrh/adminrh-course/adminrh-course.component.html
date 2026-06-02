@@ -105,11 +105,11 @@
             <span class="ac-prog__txt">{{ getCompletion(f) > 0 ? getCompletion(f) + '%' : '—' }}</span>
           </div>
           <div class="ac-fcard__actions">
-            <a [routerLink]="[routes.adminrhCourse, f.id]" class="ac-act" title="Voir">
+            <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ac-act" title="Voir">
               <i class="isax isax-eye"></i>
             </a>
-            <button type="button" class="ac-act ac-act--del" title="Supprimer" (click)="deleteFormation(f)">
-              <i class="isax isax-trash"></i>
+            <button type="button" class="ac-act ac-act--arch" title="Archiver" (click)="archiveFormation(f)">
+              <i class="isax isax-archive"></i>
             </button>
           </div>
         </div>
@@ -143,11 +143,11 @@
           <td><span class="ac-status" [attr.data-s]="getStatusKey(f)">{{ getStatusText(f) }}</span></td>
           <td>
             <div class="ac-actions">
-              <a [routerLink]="[routes.adminrhCourse, f.id]" class="ac-act" title="Voir">
+              <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ac-act" title="Voir">
                 <i class="isax isax-eye"></i>
               </a>
-              <button type="button" class="ac-act ac-act--del" title="Supprimer" (click)="deleteFormation(f)">
-                <i class="isax isax-trash"></i>
+              <button type="button" class="ac-act ac-act--arch" title="Archiver" (click)="archiveFormation(f)">
+                <i class="isax isax-archive"></i>
               </button>
             </div>
           </td>

@@ -29,6 +29,10 @@ export class AdminrhCatalogueComponent implements OnInit {
   formationsDisponibles: any[] = [];
   loadingFormations = false;
 
+  // Multi-select pool pour ajout de formations
+  formationsPoolSearch = '';
+  selectedFormationIds: Set<number> = new Set();
+
   // Formulaires
   catalogueForm: FormGroup;
   formationForm: FormGroup;
@@ -231,6 +235,8 @@ export class AdminrhCatalogueComponent implements OnInit {
 
   openFormationModal(catalogue: Catalogue): void {
     this.selectedCatalogue = catalogue;
+    this.selectedFormationIds = new Set();
+    this.formationsPoolSearch = '';
     this.updateFormationsDisponibles();
     this.formationForm.reset({
       formation_id: '',
@@ -239,7 +245,7 @@ export class AdminrhCatalogueComponent implements OnInit {
       est_obligatoire: false,
       conditions_speciales: ''
     });
-    
+
     const modal = new bootstrap.Modal(document.getElementById('formationModal'));
     modal.show();
   }
@@ -351,6 +357,15 @@ export class AdminrhCatalogueComponent implements OnInit {
     });
   }
 
+  archiveCatalogue(catalogue: Catalogue | null): void {
+    if (!catalogue) return;
+    if (!confirm(`Archiver le catalogue "${catalogue.titre}" ?`)) return;
+    this.catalogueService.deleteCatalogue(catalogue.id).subscribe({
+      next: () => { this.success = 'Catalogue archivé.'; this.loadCatalogues(); setTimeout(() => this.success = '', 4000); },
+      error: () => { this.error = 'Erreur lors de l\'archivage.'; }
+    });
+  }
+
   // ==================== UTILITAIRES ====================
 
   resetCatalogueForm(): void {
@@ -457,11 +472,84 @@ export class AdminrhCatalogueComponent implements OnInit {
   }
 
   // Fonctions de tracking pour optimiser le rendu
-  trackByFormationId(index: number, formation: Formation): number {
+  // ==================== MULTI-SELECT POOL ====================
+
+  get filteredFormationsPool(): any[] {
+    const term = this.formationsPoolSearch.toLowerCase();
+    if (!this.selectedCatalogue) return [];
+    const alreadyIn = new Set(this.selectedCatalogue.formations.map(f => f.id));
+    const available = this.formations.filter(f => !alreadyIn.has(f.id) && f.est_publie !== false);
+    return term
+      ? available.filter(f => f.titre?.toLowerCase().includes(term) || f.categorie?.toLowerCase().includes(term))
+      : available;
+  }
+
+  isFormationSelected(id: number): boolean {
+    return this.selectedFormationIds.has(id);
+  }
+
+  toggleFormationInPool(id: number): void {
+    if (this.selectedFormationIds.has(id)) {
+      this.selectedFormationIds.delete(id);
+    } else {
+      this.selectedFormationIds.add(id);
+    }
+  }
+
+  removeSelectedFormation(id: number): void {
+    this.selectedFormationIds.delete(id);
+  }
+
+  get selectedFormationsInPool(): any[] {
+    return this.formations.filter(f => this.selectedFormationIds.has(f.id));
+  }
+
+  get selectedFormationCount(): number {
+    return this.selectedFormationIds.size;
+  }
+
+  ajouterFormationsMultiples(): void {
+    if (!this.selectedCatalogue || this.selectedFormationIds.size === 0) return;
+    this.saving = true;
+    this.error = '';
+
+    const ids = Array.from(this.selectedFormationIds);
+    let completed = 0;
+
+    ids.forEach((formationId, i) => {
+      const formData = {
+        formation_id: formationId,
+        ordre: (this.selectedCatalogue!.formations.length + i + 1),
+        est_featured: false,
+        est_obligatoire: false,
+      };
+      this.catalogueService.ajouterFormation(this.selectedCatalogue!.id, formData as any).subscribe({
+        next: () => {
+          completed++;
+          if (completed === ids.length) {
+            this.saving = false;
+            this.success = `${ids.length} formation(s) ajoutée(s) au catalogue avec succès!`;
+            this.closeModal('formationModal');
+            this.selectedFormationIds = new Set();
+            this.formationsPoolSearch = '';
+            this.loadCatalogues();
+            setTimeout(() => this.success = '', 5000);
+          }
+        },
+        error: (err) => {
+          completed++;
+          this.saving = false;
+          this.error = err.error?.message || 'Erreur lors de l\'ajout.';
+        }
+      });
+    });
+  }
+
+  trackByFormationId(_index: number, formation: Formation): number {
     return formation.id;
   }
 
-  trackByCatalogueId(index: number, catalogue: Catalogue): number {
+  trackByCatalogueId(_index: number, catalogue: Catalogue): number {
     return catalogue.id;
   }
 

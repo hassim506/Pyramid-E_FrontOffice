@@ -65,6 +65,8 @@ export const routes = {
   students_quiz: '/student/student-quiz',
   studentsQuizQuestion: '/student/student-quiz-questions',
   studentsQuiz: '/student/student-quiz',
+  studentMesSondages: '/student/student-mes-sondages',
+  studentSondage: '/student/student-sondage',
   studentProfile: '/student/student-profile',
   student_MesCompetences: '/student/mes-competences',
   student_CompetencesRecommandees:     '/student/mes-competences-recommandees',  // ✅
@@ -112,6 +114,7 @@ export const routes = {
   superadminCertificate: '/superadmin/superadmin-certificate',
   superadminEarning: '/superadmin/superadmin-earnings',
   superadminStatements: '/superadmin/superadmin-statements',
+  superadminRapports : '/superadmin/superadmin-rapports',
   superadminCompanyManagement: '/superadmin/superadmin-companymanagement',
   superadminCompanydetails: '/superadmin/superadmin-company-details',
   superadminClientList: '/superadmin/superadmin-client-list',
@@ -147,6 +150,8 @@ export const routes = {
   superadminDeleteAccount: '/superadmin/settings/superadmin-delete-account',
   superadminChangePassword: '/superadmin/settings/superadmin-change-password',
   superadminSettings: '/superadmin/settings/superadmin-settings',
+  superadminAuditLogs: '/superadmin/superadmin-audit-logs',
+  superadminSondage: '/superadmin/superadmin-sondage',
 
   // Adminrh Routes
   adminrh: '/adminrh/',
@@ -163,6 +168,7 @@ export const routes = {
   adminrhQuizResult: '/adminrh/adminrh-quiz-results',
   adminrhCertificate: '/adminrh/adminrh-certificate',
   adminrhCertificateModele: '/adminrh/adminrh-certificate-modele',
+  adminrhSondage: '/adminrh/adminrh-sondage',
   adminrhEarning: '/adminrh/adminrh-earnings',
   adminrhRapport: '/adminrh/adminrh-rapport',
   adminrhStatements: '/adminrh/adminrh-statements',

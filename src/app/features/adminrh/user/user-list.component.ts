@@ -57,6 +57,12 @@ export class UserListComponent implements OnInit {
   selectedUser: User | null = null;
   currentUser: any = null;
 
+  // ── Import ───────────────────────────────────
+  showImportDialog = false;
+  selectedFile:  File | null = null;
+  isImporting    = false;
+  importProgress = 0;
+
   constructor(
     private userService: UserService,
     private authService: AuthService,
@@ -206,6 +212,78 @@ export class UserListComponent implements OnInit {
   reactivateUser(user: User): void {
     if (!confirm('Réactiver cet utilisateur ?')) return;
     this.userService.updateUser(user.id, { ...user, statut: 1 }).subscribe({ next: () => this.refreshData() });
+  }
+
+  // ════════════════════════════════════════════
+  // IMPORT
+  // ════════════════════════════════════════════
+  openImportDialog(): void  { this.showImportDialog = true; this.selectedFile = null; this.importProgress = 0; }
+  closeImportDialog(): void { this.showImportDialog = false; this.isImporting = false; }
+
+  onFileSelected(event: Event): void {
+    const f = (event.target as HTMLInputElement).files?.[0];
+    if (!f) return;
+    const ok = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                 'application/vnd.ms-excel', 'text/csv'].includes(f.type);
+    this.selectedFile = ok ? f : null;
+    if (!ok) alert('Format non supporté. Utilisez .xlsx, .xls ou .csv');
+  }
+
+  importUsers(): void {
+    if (!this.selectedFile) return;
+    this.isImporting    = true;
+    this.importProgress = 0;
+    this.userService.importUsers(this.selectedFile).subscribe({
+      next: (res) => {
+        this.importProgress = 100;
+        let msg = 'Import réussi !';
+        if (res.created) msg += `\n${res.created} créé(s)`;
+        if (res.updated) msg += `\n${res.updated} mis à jour`;
+        alert(msg);
+        this.refreshData();
+        this.closeImportDialog();
+      },
+      error: (err) => {
+        this.isImporting = false;
+        alert('Erreur lors de l\'import : ' + (err.error?.message ?? err.message));
+      }
+    });
+  }
+
+  downloadTemplate(): void {
+    this.userService.downloadTemplate().subscribe({
+      next: (blob) => {
+        const url  = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url; link.download = 'template_import_users.xlsx';
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => alert('Erreur lors du téléchargement du template')
+    });
+  }
+
+  exportUsers(): void {
+    const data = this.tableDataCopy;
+    if (!data.length) { alert('Aucune donnée à exporter'); return; }
+    const headers = ['Nom', 'Prénom', 'Email', 'Rôle', 'Direction', 'Matricule', 'Statut', 'Dernière activité'];
+    const rows = data.map(u => [
+      u.nom || '',
+      u.prenom || '',
+      u.email || '',
+      this.getRoleName(u),
+      u.direction || '',
+      u.matricule || '',
+      u.statut === 1 ? 'Actif' : 'Inactif',
+      this.formatDate(u.updated_at),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `utilisateurs_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   }
 
   // ════════════════════════════════════════════

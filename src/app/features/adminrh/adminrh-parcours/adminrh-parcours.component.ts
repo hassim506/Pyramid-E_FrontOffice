@@ -26,6 +26,10 @@ export class AdminrhParcoursComponent implements OnInit {
   formations: any[] = [];
   loadingFormations = false;
 
+  // Multi-select formations pour le modal création/édition
+  formationsSearchTerm = '';
+  selectedFormationIds: Set<number> = new Set();
+
   // Pagination
   currentPage = 1;
   totalPages = 1;
@@ -172,6 +176,8 @@ export class AdminrhParcoursComponent implements OnInit {
   openParcoursModal(): void {
     this.editMode = false;
     this.selectedParcours = null;
+    this.selectedFormationIds = new Set();
+    this.formationsSearchTerm = '';
     this.resetForm();
     const modal = new bootstrap.Modal(document.getElementById('parcoursModal'));
     modal.show();
@@ -180,6 +186,8 @@ export class AdminrhParcoursComponent implements OnInit {
   editParcours(parcours: Parcours): void {
     this.editMode = true;
     this.selectedParcours = parcours;
+    this.selectedFormationIds = new Set(parcours.formations.map(f => f.id));
+    this.formationsSearchTerm = '';
     
     // Réinitialiser les FormArrays
     this.clearFormArray(this.objectifs);
@@ -288,6 +296,7 @@ buildParcoursData(): ParcoursRequest {
     statut: Boolean(formValue.actif),
     entreprise_id: entrepriseId,
     image_url: formValue.image_url?.trim() || undefined,
+    formation_ids: Array.from(this.selectedFormationIds),
   };
 }
   // ==================== ACTIONS ====================
@@ -322,6 +331,15 @@ buildParcoursData(): ParcoursRequest {
         console.error('Erreur suppression:', err);
         this.error = err.error?.message || 'Erreur lors de la suppression.';
       }
+    });
+  }
+
+  archiveParcours(parcours: Parcours | null): void {
+    if (!parcours) return;
+    if (!confirm(`Archiver le parcours "${parcours.nom}" ?`)) return;
+    this.parcoursService.deleteParcours(parcours.id).subscribe({
+      next: () => { this.success = 'Parcours archivé.'; this.loadParcours(); setTimeout(() => this.success = '', 4000); },
+      error: (err) => { this.error = err.error?.message || 'Erreur lors de l\'archivage.'; }
     });
   }
 
@@ -402,6 +420,39 @@ buildParcoursData(): ParcoursRequest {
     });
   }
 
+  // ==================== MULTI-SELECT FORMATIONS ====================
+
+  get filteredFormationsPool(): any[] {
+    const term = this.formationsSearchTerm.toLowerCase();
+    return term
+      ? this.formations.filter(f => f.titre?.toLowerCase().includes(term) || f.categorie?.nom?.toLowerCase().includes(term))
+      : this.formations;
+  }
+
+  isFormationSelected(id: number): boolean {
+    return this.selectedFormationIds.has(id);
+  }
+
+  toggleFormation(id: number): void {
+    if (this.selectedFormationIds.has(id)) {
+      this.selectedFormationIds.delete(id);
+    } else {
+      this.selectedFormationIds.add(id);
+    }
+  }
+
+  removeSelectedFormation(id: number): void {
+    this.selectedFormationIds.delete(id);
+  }
+
+  get selectedFormations(): any[] {
+    return this.formations.filter(f => this.selectedFormationIds.has(f.id));
+  }
+
+  get selectedFormationCount(): number {
+    return this.selectedFormationIds.size;
+  }
+
   closeModal(modalId: string): void {
     const modalElement = document.getElementById(modalId);
     if (modalElement) {
@@ -464,11 +515,11 @@ buildParcoursData(): ParcoursRequest {
   }
 
   // Fonctions de tracking pour optimiser le rendu
-  trackByParcoursId(index: number, parcours: Parcours): number {
+  trackByParcoursId(_index: number, parcours: Parcours): number {
     return parcours.id;
   }
 
-  trackByFormationId(index: number, formation: Formation): number {
+  trackByFormationId(_index: number, formation: Formation): number {
     return formation.id;
   }
 }

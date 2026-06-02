@@ -927,4 +927,13 @@ export class AdminrhCourseComponent implements OnInit {
       });
     }
   }
+
+  archiveFormation(formation: Formation): void {
+    if (!confirm(`Archiver la formation "${formation.titre}" ?`)) return;
+    this.loading = true;
+    this.formationService.deleteFormation(formation.id).subscribe({
+      next: () => this.getFormationsList(),
+      error: () => { this.error = 'Erreur lors de l\'archivage'; this.loading = false; }
+    });
+  }
 }

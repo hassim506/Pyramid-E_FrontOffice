@@ -1,1 +1,0 @@
-import{Ac as a,ac as n,bc as o,tb as s}from"./chunk-MZRL72S7.js";import"./chunk-GAL4ENT6.js";var i=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=s({type:t,selectors:[["app-user-details"]],decls:2,vars:0,template:function(e,m){e&1&&(n(0,"p"),a(1,"user-details works!"),o())},encapsulation:2})};export{i as UserDetailsComponent};

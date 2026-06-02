@@ -110,10 +110,10 @@
       <!-- <a [routerLink]="routes.superadminEarning" routerLinkActive="active" class="sb-item">
         <i class="isax isax-wallet-add"></i><span class="sb-item-label">Gains</span>
       </a> -->
-      <a [routerLink]="routes.superadmin_payouts" routerLinkActive="active" class="sb-item">
+      <!-- <a [routerLink]="routes.superadmin_payouts" routerLinkActive="active" class="sb-item">
         <i class="isax isax-coin-1"></i><span class="sb-item-label">Paiements</span>
-      </a>
-      <a [routerLink]="routes.superadminStatements" routerLinkActive="active" class="sb-item">
+      </a> -->
+      <a [routerLink]="routes.superadminRapports" routerLinkActive="active" class="sb-item">
         <i class="isax isax-receipt-item"></i><span class="sb-item-label">Rapports</span>
       </a>
     </div>
@@ -128,6 +128,26 @@
       </a> -->
       <a [routerLink]="routes.superadmin_tickets" routerLinkActive="active" class="sb-item">
         <i class="isax isax-ticket"></i><span class="sb-item-label">Tickets support</span>
+      </a>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- SONDAGES -->
+    <div class="sb-section">
+      <div class="sb-section-label">Sondages</div>
+      <a [routerLink]="routes.superadminSondage" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-note-21"></i><span class="sb-item-label">Sondages &amp; enquêtes</span>
+      </a>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- SÉCURITÉ -->
+    <div class="sb-section">
+      <div class="sb-section-label">Sécurité</div>
+      <a [routerLink]="routes.superadminAuditLogs" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-clipboard-text"></i><span class="sb-item-label">Logs d'audit</span>
       </a>
     </div>
 

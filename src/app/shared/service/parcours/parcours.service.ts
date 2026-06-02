@@ -86,7 +86,8 @@ export interface ParcoursRequest {
   prerequis: string[];
   image_url?: string;
   entreprise_id: number;
-  statut: boolean; 
+  statut: boolean;
+  formation_ids?: number[];
 }
 
 export interface ParcoursResponse {

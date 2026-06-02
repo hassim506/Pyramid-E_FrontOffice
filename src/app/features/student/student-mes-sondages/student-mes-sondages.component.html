@@ -1,0 +1,51 @@
+<div class="sms-wrap">
+
+  <div class="sms-header">
+    <h4 class="sms-title">Mes Sondages</h4>
+    <p class="sms-sub">Participez aux sondages liés à vos formations</p>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="sms-loader">
+    <div class="spinner-border" role="status"></div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!loading && error" class="alert alert-danger">{{ error }}</div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && !error && sondages.length === 0" class="sms-empty">
+    <i class="isax isax-note-21"></i>
+    <p>Aucun sondage disponible pour le moment.</p>
+    <span>Les sondages apparaissent après la fin d'une formation.</span>
+  </div>
+
+  <!-- Grid -->
+  <div *ngIf="!loading && sondages.length > 0" class="sms-grid">
+    <div *ngFor="let s of sondages" class="sms-card" (click)="openSondage(s)">
+
+      <div class="sms-card__top">
+        <span class="sms-badge" [class]="getDeclenchementClass(s.declenchement)">
+          {{ getDeclenchementLabel(s.declenchement) }}
+        </span>
+        <span *ngIf="s.est_obligatoire" class="sms-badge sms-badge--required">Obligatoire</span>
+      </div>
+
+      <h6 class="sms-card__title">{{ s.titre }}</h6>
+      <p class="sms-card__desc" *ngIf="s.description">{{ s.description }}</p>
+      <p class="sms-card__desc sms-muted" *ngIf="!s.description">Aucune description</p>
+
+      <div class="sms-card__meta">
+        <span *ngIf="s.formation"><i class="isax isax-book-1"></i> {{ s.formation.titre }}</span>
+        <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
+        <span *ngIf="s.duree_estimee"><i class="isax isax-clock"></i> ~{{ s.duree_estimee }} min</span>
+      </div>
+
+      <button class="sms-btn">
+        <i class="isax isax-play-circle me-2"></i> Répondre
+      </button>
+
+    </div>
+  </div>
+
+</div>

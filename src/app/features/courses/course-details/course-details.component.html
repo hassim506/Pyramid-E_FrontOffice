@@ -1,86 +1,92 @@
-<!-- Loading State -->
-<div *ngIf="loading" class="d-flex justify-content-center py-5">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Chargement...</span>
-  </div>
+<!-- Loading -->
+<div *ngIf="loading" class="cd-loader">
+  <div class="cd-spin"></div>
 </div>
 
-<!-- Error State -->
-<div *ngIf="error" class="alert alert-danger mx-3" role="alert">
-  <i class="fas fa-exclamation-triangle me-2"></i>
-  {{ error }}
+<!-- Alerts -->
+<div *ngIf="error && !loading" class="cd-alert cd-alert--err">
+  <i class="isax isax-warning-2"></i> {{ error }}
+</div>
+<div *ngIf="success" class="cd-alert cd-alert--ok">
+  <i class="isax isax-tick-circle"></i> {{ success }}
 </div>
 
-<!-- Success State -->
-<div *ngIf="success" class="alert alert-success mx-3" role="alert">
-  <i class="fas fa-check-circle me-2"></i>
-  {{ success }}
-</div>
-
-<!-- Course Details Content -->
+<!-- Main content -->
 <div *ngIf="formation && !loading">
-  
-  <!-- Banner Section -->
- <section class="inner-banner"
-         [style.background-image]="'url(' + getImageUrl(formation.image_couverture) + ')'"
-         [style.background-repeat]="'no-repeat'"
-         [style.background-position]="'center'"
-         [style.background-size]="'cover'"
-         style="position: relative;">
-  
-  <!-- Overlay noir transparent -->
-  <div class="banner-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1;"></div>
-  
-  <div class="container" style="position: relative; z-index: 2;">
-    <div class="row">
-      <div class="col-lg-8">
-        <h1 class="text-white mb-3 mb-sm-2">{{ formation.titre }}</h1>
-        <p class="text-white fs-14 mb-3">{{ formation.short_description }}</p>
 
-          <div class="d-flex align-items-center gap-2 gap-sm-3 gap-xl-4 flex-wrap justify-content-md-start justify-content-center">
-            <p class="fw-medium text-white d-flex align-items-center mb-0">
-              <img class="me-2" src="./assets/img/icons/book.svg" alt="img">
-              {{ formation.modules?.length || 0 }}+ Modules
-            </p>
-            <p class="fw-medium text-white d-flex align-items-center mb-0">
-              <img class="me-2" src="./assets/img/icons/timer-start.svg" alt="img">
-              {{ formation.duree_totale }}h
-            </p>
-            <p class="fw-medium text-white d-flex align-items-center mb-0">
-              <img class="me-2" src="./assets/img/icons/people.svg" alt="img">
-              {{ formation.nb_inscrits || 0 }} étudiants inscrits
-            </p>
-            <span class="badge badge-sm rounded-pill bg-warning fs-12">
-              {{ formation.categorie?.nom }}
-            </span>
-          </div>
-          
-          <div class="d-sm-flex align-items-center justify-content-sm-between mt-5">
-            <div class="d-flex text-start align-items-center justify-content-sm-start justify-content-center">
-              <div class="avatar avatar-lg">
-                <img class="rounded-circle" 
-                     [src]="getImageUrl(formation.formateur?.avatar)" 
-                     alt="Formateur">
+  <!-- ── HERO BANNER ── -->
+  <section class="cd-hero">
+    <div class="cd-hero__bg" [style.background-image]="'url(' + getImageUrl(formation.image_couverture) + ')'"></div>
+    <div class="cd-hero__overlay"></div>
+    <div class="cd-hero__body">
+      <div class="container">
+
+        <!-- Breadcrumb -->
+        <div class="cd-hero-breadcrumb">
+          <a routerLink="/courses">Formations</a>
+          <span>/</span>
+          <span>{{ formation.categorie?.nom || 'Général' }}</span>
+          <span>/</span>
+          <span>{{ formation.titre | slice:0:40 }}{{ formation.titre?.length > 40 ? '…' : '' }}</span>
+        </div>
+
+        <div class="row align-items-start">
+          <div class="col-lg-8">
+            <!-- Category -->
+            <div class="cd-hero-cat">
+              <i class="isax isax-category"></i>
+              {{ formation.categorie?.nom || 'Formation' }}
+            </div>
+
+            <!-- Title -->
+            <h1 class="cd-hero-title">{{ formation.titre }}</h1>
+            <p class="cd-hero-desc">{{ formation.short_description }}</p>
+
+            <!-- Stats row -->
+            <div class="cd-hero-meta">
+              <div class="cd-hero-stat">
+                <i class="isax isax-book-1"></i>
+                <strong>{{ formation.modules?.length || 0 }}</strong> modules
               </div>
-              <div class="ms-2">
-                <h6 class="fs-18 text-white">
-                  <a href="javascript:void(0)">
-                    {{ formation.formateur?.nom || 'Formateur Expert' }}
-                  </a>
-                </h6>
-                <p class="text-white fs-14">Instructeur</p>
+              <div class="cd-hero-stat">
+                <i class="isax isax-clock"></i>
+                <strong>{{ formation.duree_totale || 0 }}h</strong> de contenu
+              </div>
+              <div class="cd-hero-stat">
+                <i class="isax isax-people"></i>
+                <strong>{{ formation.nb_inscrits || 0 }}</strong> inscrits
+              </div>
+              <div class="cd-hero-stat" *ngIf="averageRating > 0">
+                <i class="isax isax-star"></i>
+                <strong>{{ averageRating }}/5</strong>
               </div>
             </div>
-            
-            <div class="d-flex mt-sm-0 mt-2 align-items-center justify-content-sm-start justify-content-center">
-              <i class="fa-solid fa-star text-warning me-1"></i>
-              <i class="fa-solid fa-star text-warning me-1"></i>
-              <i class="fa-solid fa-star text-warning me-1"></i>
-              <i class="fa-solid fa-star text-warning me-1"></i>
-              <i class="fa-solid fa-star text-white me-1"></i>
-              <p class="text-white fs-14">
-                <span class="text-warning">4.0</span> ({{ formation.avis?.length || 15 }})
-              </p>
+
+            <!-- Badges -->
+            <div class="cd-hero-badges">
+              <span class="cd-badge cd-badge--gold">
+                <i class="isax isax-signal"></i> {{ getNiveauLabel(formation.niveau) }}
+              </span>
+              <span class="cd-badge cd-badge--green">
+                <i class="isax isax-monitor"></i> {{ getTypeFormationLabel(formation.type_formation) }}
+              </span>
+              <span class="cd-badge cd-badge--gray" *ngIf="formation.langue">
+                <i class="isax isax-global"></i> {{ getLangueLabel(formation.langue) }}
+              </span>
+              <span class="cd-badge cd-badge--certif" *ngIf="formation.est_certifiante">
+                <i class="isax isax-award"></i> Certifiante
+              </span>
+            </div>
+
+            <!-- Instructor chip -->
+            <div class="cd-hero-instructor" *ngIf="formation.formateur" style="margin-top:20px">
+              <img class="cd-hero-instructor__avatar"
+                   [src]="getImageUrl(formation.formateur?.avatar)"
+                   alt="Formateur">
+              <div>
+                <div class="cd-hero-instructor__name">{{ formation.formateur?.nom || 'Expert Formateur' }}</div>
+                <div class="cd-hero-instructor__role">{{ formation.formateur?.fonction || 'Formateur' }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -88,525 +94,291 @@
     </div>
   </section>
 
-  <!-- Course Detail Section -->
-  <section class="course-details">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8">
-          <div class="course-page-content">
-            
-            <!-- Overview Card -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Aperçu</h5>
-                <h6 class="mb-3">Description du cours</h6>
-                <div [innerHTML]="formation.description"></div>
-                
-                <!-- Compétences Acquises -->
-                <h6 class="mb-3 mt-4" *ngIf="getCompetencesList(formation.competences_acquises).length > 0">
-                  Compétences acquises
-                </h6>
-                <ul class="custom-list" *ngIf="getCompetencesList(formation.competences_acquises).length > 0">
-                  <li class="list-items" *ngFor="let competence of getCompetencesList(formation.competences_acquises)">
-                    {{ competence }}
-                  </li>
-                </ul>
-                
-                <!-- Prérequis -->
-                <h6 class="mb-3 mt-4" *ngIf="formation.prerequis">Prérequis</h6>
-                <p *ngIf="formation.prerequis">{{ formation.prerequis }}</p>
-                
-                <!-- Outils Requis -->
-                <h6 class="mb-3 mt-4" *ngIf="getOutilsList(formation.outils_requis).length > 0">
-                  Outils requis
-                </h6>
-                <ul class="custom-list mb-0" *ngIf="getOutilsList(formation.outils_requis).length > 0">
-                  <li class="list-items" *ngFor="let outil of getOutilsList(formation.outils_requis)">
-                    {{ outil }}
-                  </li>
-                </ul>
+  <!-- ── BODY ── -->
+  <div class="container">
+    <div class="cd-layout">
+
+      <!-- LEFT COLUMN -->
+      <div>
+
+        <!-- Description & Compétences -->
+        <div class="cd-card">
+          <div class="cd-card-head">
+            <h2 class="cd-card-title">Aperçu de la formation</h2>
+          </div>
+          <div class="cd-card-body">
+            <div class="cd-description" [innerHTML]="formation.description"></div>
+
+            <!-- Compétences acquises -->
+            <ng-container *ngIf="getCompetencesList(formation.competences_acquises).length > 0">
+              <div class="cd-section-label" style="margin-top:20px">
+                <i class="isax isax-tick-circle"></i> Compétences acquises
               </div>
-            </div>
+              <ul class="cd-check-list">
+                <li *ngFor="let c of getCompetencesList(formation.competences_acquises)">{{ c }}</li>
+              </ul>
+            </ng-container>
 
-            <!-- Course Content Card -->
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between flex-wrap">
-                  <h5 class="subs-title mb-2 mb-sm-3">Contenu du cours</h5>
-                  <h6 class="text-gray-7 mb-3">
-                    {{ formation.modules?.length || 0 }} Modules
-                    <span class="text-secondary">{{ formation.duree_totale }}h</span>
-                  </h6>
-                </div>
-                
-                <div class="accordion accordion-customicon1 accordions-items-seperate p-0" 
-                     id="accordioncustomicon1Example">
-                  
-                  <div class="accordion-item" 
-                       *ngFor="let module of formation.modules; let i = index" 
-                       data-aos="fade-up">
-                    <h2 class="accordion-header" [id]="'headingcustomicon1' + i">
-                      <button class="accordion-button collapsed" 
-                              type="button" 
-                              data-bs-toggle="collapse" 
-                              [attr.data-bs-target]="'#collapsecustomicon1' + i" 
-                              aria-expanded="false" 
-                              [attr.aria-controls]="'collapsecustomicon1' + i">
-                        Module {{ i + 1 }}: {{ module.titre }}
-                        <i class="fa-solid fa-chevron-down"></i>
-                      </button>
-                    </h2>
-                    
-                    <div [id]="'collapsecustomicon1' + i" 
-                         class="accordion-collapse collapse" 
-                         [attr.aria-labelledby]="'headingcustomicon1' + i" 
-                         data-bs-parent="#accordioncustomicon1Example">
-                      <div class="accordion-body p-0">
-                        <ul *ngIf="module.sections?.length > 0">
-                          <li class="p-4 px-3 d-flex justify-content-between" 
-                              *ngFor="let section of module.sections; let j = index">
-                            <p class="mb-0">
-                              <img class="me-2" src="./assets/img/icons/play.svg" alt="img">
-                              Leçon {{ i + 1 }}.{{ j + 1 }} {{ section.titre }}
-                            </p>
-                            <div class="d-flex gap-xl-5 gap-3">
-                             <a href="javascript:void(0);" 
-                            class="preview-link"
-                            (click)="previewSection(section)">
-                            Aperçu
-                          </a>
-                              <p class="mb-0">{{ section.duree_estimee || '5' }}min</p>
-                            </div>
-                          </li>
-                        </ul>
-                        
-                        <div class="text-center py-4" *ngIf="!module.sections?.length">
-                          <p class="text-muted mb-0">Contenu en cours de préparation...</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Module par défaut si pas de modules -->
-                  <div class="accordion-item" *ngIf="!formation.modules?.length" data-aos="fade-up">
-                    <h2 class="accordion-header" id="headingcustomicon1default">
-                      <button class="accordion-button collapsed" 
-                              type="button" 
-                              data-bs-toggle="collapse" 
-                              data-bs-target="#collapsecustomicon1default" 
-                              aria-expanded="false" 
-                              aria-controls="collapsecustomicon1default">
-                        Introduction au cours
-                        <i class="fa-solid fa-chevron-down"></i>
-                      </button>
-                    </h2>
-                    <div id="collapsecustomicon1default" 
-                         class="accordion-collapse collapse" 
-                         aria-labelledby="headingcustomicon1default" 
-                         data-bs-parent="#accordioncustomicon1Example">
-                      <div class="accordion-body p-0">
-                        <ul>
-                          <li class="p-4 px-3 d-flex justify-content-between">
-                            <p class="mb-0">
-                              <img class="me-2" src="./assets/img/icons/play.svg" alt="img">
-                              Leçon 1.1 Présentation du cours
-                            </p>
-                            <div class="d-flex gap-xl-5 gap-3">
-                              <a href="javascript:void(0);" class="preview-link">Aperçu</a>
-                              <p class="mb-0">5min</p>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <!-- Prérequis -->
+            <ng-container *ngIf="formation.prerequis">
+              <div class="cd-section-label" style="margin-top:20px">
+                <i class="isax isax-info-circle"></i> Prérequis
               </div>
-            </div>
+              <p class="cd-description">{{ formation.prerequis }}</p>
+            </ng-container>
 
-            <!-- Instructor Card -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">À propos de l'instructeur</h5>
-                
-                <div class="d-flex align-items-center justify-content-between mt-4 gap-2 flex-wrap">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar avatar-lg">
-                      <img class="rounded-circle" 
-                           [src]="getImageUrl(formation.formateur?.avatar)" 
-                           alt="Formateur">
-                    </div>
-                    <div class="ms-2">
-                      <h5 class="fs-18 fw-semibold">
-                        <a href="javascript:void(0)">
-                          {{ formation.formateur?.nom || 'Expert Formateur' }}
-                        </a>
-                      </h5>
-                      <p class="mb-0">{{ formation.formateur?.fonction || 'Formateur Expert' }}</p>
-                    </div>
-                  </div>
-                  
-                  <div class="d-flex align-items-center">
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <i class="fa-solid fa-star text-warning me-1"></i>
-                    <p class="mb-0">4.5</p>
-                  </div>
-                </div>
-                
-                <div class="course-info align-items-center d-flex gap-2 gap-xl-3 mt-3 mb-3 flex-wrap">
-                  <p class="fw-medium d-flex align-items-center fs-14 mb-0">
-                    <img class="me-2" src="./assets/img/icons/play2.svg" alt="img">
-                    {{ formation.formateur?.nb_formations || 1 }} Cours
-                  </p>
-                  <p class="fw-medium d-flex align-items-center fs-14 mb-0">
-                    <img class="me-2" src="./assets/img/icons/book2.svg" alt="img">
-                    {{ formation.modules?.length || 0 }}+ Modules
-                  </p>
-                  <p class="fw-medium d-flex align-items-center fs-14 mb-0">
-                    <img class="me-2" src="./assets/img/icons/timer-start2.svg" alt="img">
-                    {{ formation.duree_totale }}h
-                  </p>
-                  <p class="fw-medium d-flex align-items-center fs-14 mb-0">
-                    <img class="me-2" src="./assets/img/icons/people.svg" alt="img">
-                    {{ formation.nb_inscrits || 0 }} étudiants
-                  </p>
-                </div>
-                
-                <p>{{ formation.formateur?.bio || 'Expert dans son domaine avec plusieurs années d\'expérience en formation professionnelle.' }}</p>
+            <!-- Outils requis -->
+            <ng-container *ngIf="getOutilsList(formation.outils_requis).length > 0">
+              <div class="cd-section-label" style="margin-top:20px">
+                <i class="isax isax-setting-2"></i> Outils requis
               </div>
-            </div>
+              <ul class="cd-check-list">
+                <li *ngFor="let o of getOutilsList(formation.outils_requis)">{{ o }}</li>
+              </ul>
+            </ng-container>
+          </div>
+        </div>
 
-            <!-- Reviews Section -->
-            <!-- <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Avis des étudiants</h5>
-                
-                <div class="review-summary mb-4">
-                  <div class="d-flex align-items-center mb-3">
-                    <div class="rating-display me-4">
-                      <h2 class="mb-0">4.0</h2>
-                      <div class="stars">
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-muted"></i>
-                      </div>
-                      <p class="mb-0 text-muted">{{ formation.avis?.length || 15 }} avis</p>
-                    </div>
-                  </div>
-                </div> -->
-
-                <!-- Sample Review -->
-                <!-- <div class="review-item border-bottom pb-3 mb-3">
-                  <div class="d-flex align-items-center mb-2">
-                    <div class="avatar avatar-sm me-2">
-                      <img class="rounded-circle" src="./assets/img/avatar/avatar1.jpg" alt="User">
-                    </div>
+        <!-- Contenu du cours -->
+        <div class="cd-card">
+          <div class="cd-card-head">
+            <h2 class="cd-card-title">Contenu du cours</h2>
+            <span class="cd-card-sub">{{ formation.modules?.length || 0 }} modules · {{ formation.duree_totale || 0 }}h</span>
+          </div>
+          <div class="cd-card-body" style="padding-top:12px; padding-bottom:0;">
+            <div class="cd-accordion">
+              <div *ngIf="!formation.modules?.length" class="cd-acc-item">
+                <div class="cd-acc-head">
+                  <div class="cd-acc-head__left">
+                    <div class="cd-acc-head__num">1</div>
                     <div>
-                      <h6 class="mb-0">Marie Dupont</h6>
-                      <div class="stars-sm">
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
-                        <i class="fa-solid fa-star text-warning"></i>
+                      <div class="cd-acc-head__title">Introduction</div>
+                      <div class="cd-acc-head__meta">Contenu en préparation</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngFor="let module of formation.modules; let i = index" class="cd-acc-item">
+                <div class="cd-acc-head" [class.open]="module._open" (click)="module._open = !module._open">
+                  <div class="cd-acc-head__left">
+                    <div class="cd-acc-head__num">{{ i + 1 }}</div>
+                    <div>
+                      <div class="cd-acc-head__title">{{ module.titre }}</div>
+                      <div class="cd-acc-head__meta">
+                        {{ module.sections?.length || 0 }} leçon{{ (module.sections?.length || 0) !== 1 ? 's' : '' }}
+                        <span *ngIf="module.duree_estimee"> · {{ module.duree_estimee }}min</span>
                       </div>
                     </div>
                   </div>
-                  <p class="mb-0">Excellente formation ! Les concepts sont très bien expliqués et les exercices pratiques sont parfaits pour assimiler les notions.</p>
-                </div> -->
-              <!-- </div> -->
-            <!-- </div> -->
-
-            <!-- Comments Form Card -->
-            <!-- <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Laisser un avis</h5>
-                <form class="course-details-form" #commentForm="ngForm" (ngSubmit)="submitComment()">
-                  <div class="row">
-                    <div class="col-sm-6">
-                      <div class="mb-3">
-                        <label class="form-label fs-14 fw-medium text-gray-7">Nom *</label>
-                        <input class="form-control fs-14 text-gray-7" 
-                               type="text" 
-                               [(ngModel)]="newComment.nom"
-                               name="nom"
-                               required>
-                      </div>
+                  <div class="cd-acc-head__right">
+                    <i class="isax isax-arrow-down cd-acc-head__arrow"></i>
+                  </div>
+                </div>
+                <div class="cd-acc-body" *ngIf="module._open">
+                  <div *ngFor="let section of module.sections; let j = index" class="cd-section-row">
+                    <div class="cd-section-row__left">
+                      <i class="isax isax-play-circle cd-section-row__icon"></i>
+                      <span>{{ i + 1 }}.{{ j + 1 }} {{ section.titre }}</span>
                     </div>
-                    <div class="col-sm-6">
-                      <div class="mb-3">
-                        <label class="form-label fs-14 fw-medium text-gray-7">Email *</label>
-                        <input class="form-control fs-14 text-gray-7" 
-                               type="email" 
-                               [(ngModel)]="newComment.email"
-                               name="email"
-                               required>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <div class="mb-3">
-                        <label class="form-label fs-14 fw-medium text-gray-7">Note</label>
-                        <div class="rating-input">
-                          <i class="fa-solid fa-star" 
-                             *ngFor="let star of [1,2,3,4,5]; let i = index"
-                             [class.text-warning]="i < (newComment.note || 0)"
-                             [class.text-muted]="i >= (newComment.note || 0)"
-                             (click)="setRating(i + 1)"></i>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <div class="mb-3">
-                        <label class="form-label fs-14 fw-medium text-gray-7">Votre avis *</label>
-                        <textarea class="form-control fs-14 text-gray-7"
-                                  rows="4"
-                                  [(ngModel)]="newComment.commentaire"
-                                  name="commentaire"
-                                  placeholder="Partagez votre expérience avec cette formation..."
-                                  required></textarea>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <button type="submit" 
-                              class="btn btn-primary"
-                              [disabled]="submittingComment || !commentForm.valid">
-                        {{ submittingComment ? 'Envoi en cours...' : 'Publier l\'avis' }}
-                      </button>
+                    <div class="cd-section-row__right">
+                      <button class="cd-preview-btn" (click)="previewSection(section)">Aperçu</button>
+                      <span class="cd-section-row__dur">{{ section.duree_estimee || 5 }}min</span>
                     </div>
                   </div>
-                </form>
-              </div>
-            </div> -->
-          </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-          <div class="course-sidebar-sec">
-            
-            <!-- Video/Price Card -->
-            <div class="card">
-              <div class="card-body">
-                
-                <!-- Video Preview -->
-                <div class="position-relative mb-4" *ngIf="isYouTubeUrl(formation.media_url)">
-      <div class="ratio ratio-16x9">
-        <iframe 
-          [src]="getYouTubeEmbedUrl(formation.media_url)"
-          title="Aperçu de la formation"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-        </iframe>
-      </div>
-    </div>
-    
-    <!-- Regular Video Preview -->
-    <div class="position-relative mb-4" *ngIf="getMediaUrl(formation.media_url) && !isYouTubeUrl(formation.media_url)">
-      <video class="img-fluid w-100 rounded" 
-             controls
-             [poster]="getImageUrl(formation.image_couverture)">
-        <source [src]="getMediaUrl(formation.media_url)" type="video/mp4">
-        Votre navigateur ne supporte pas la vidéo.
-      </video>
-    </div>
-    
-    <!-- Image Preview if no video -->
-    <div class="position-relative mb-4" *ngIf="!formation.media_url">
-      <img class="img-fluid rounded w-100" 
-           [src]="getImageUrl(formation.image_couverture)" 
-           alt="Couverture du cours"
-           [style.height.px]="200"
-           style="object-fit: cover;">
-      
-      <!-- Play button overlay for YouTube -->
-      <div class="play-button-overlay" 
-           *ngIf="formation.media_url && isYouTubeUrl(formation.media_url)"
-           (click)="openYouTubeVideo(formation.media_url)">
-        <i class="fas fa-play-circle fa-3x text-white"></i>
-      </div>
-    </div>
-                
-                <!-- Image Preview if no video
-                <div class="position-relative mb-4" *ngIf="!formation.media_url">
-                  <img class="img-fluid rounded w-100" 
-                       [src]="getImageUrl(formation.image_couverture)" 
-                       alt="Couverture du cours"
-                       [style.height.px]="200"
-                       style="object-fit: cover;">
-                </div> -->
-                
-                <!-- Price Section -->
-                <div class="text-center mb-4">
-                  <h2 *ngIf="formation.prix == 0 || formation.prix == '0.00'" class="text-success fs-30 mb-0">
-                    GRATUIT
-                  </h2>
-                  <h2 *ngIf="formation.prix > 0" class="text-primary fs-30 mb-0">
-                    {{ formation.prix }}FCFA
-                  </h2>
-                  <p class="text-muted mb-0" *ngIf="formation.prix_original && formation.prix_original > formation.prix">
-                    <span class="text-decoration-line-through">{{ formation.prix_original }}FCFA</span>
-                    <span class="badge bg-success ms-2">
-                      -{{ calculateDiscount(formation.prix, formation.prix_original) }}%
-                    </span>
-                  </p>
-                </div>
-                
-                <!-- Enrollment Button -->
-                <div class="d-grid mb-3">
-                  <button class="btn btn-primary btn-lg" 
-                          *ngIf="formation.prix == 0 || formation.prix == '0.00'">
-                    <i class="fas fa-play me-2"></i>
-                    Commencer gratuitement
-                  </button>
-                  <button class="btn btn-primary btn-lg" 
-                          *ngIf="formation.prix > 0 && currentUser?.role_id === 2">
-                    <i class="isax isax-document-text5 me-2"></i>
-                    Demander la formation
-                  </button>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="d-flex gap-2 mb-3">
-                  <button class="btn btn-outline-secondary flex-fill">
-                    <i class="fas fa-heart me-1"></i>
-                    Favoris
-                  </button>
-                  <button class="btn btn-outline-secondary flex-fill" (click)="shareFormation()">
-                    <i class="fas fa-share me-1"></i>
-                    Partager
-                  </button>
-                </div>
-                
-                <!-- Money back guarantee -->
-                <div class="text-center">
-                  <p class="text-muted fs-14 mb-0">
-                    <i class="fas fa-shield-alt me-1"></i>
-                    Garantie de remboursement de 30 jours
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Course Includes Card -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Ce cours comprend :</h5>
-                <ul class="list-unstyled course-includes">
-                  <li class="mb-2">
-                    <i class="fas fa-play-circle text-primary me-2"></i>
-                    {{ formation.duree_totale }}h de contenu vidéo
-                  </li>
-                  <li class="mb-2">
-                    <i class="fas fa-download text-primary me-2"></i>
-                    {{ formation.modules?.length || 0 }} ressources téléchargeables
-                  </li>
-                  <li class="mb-2">
-                    <i class="fas fa-infinity text-primary me-2"></i>
-                    Accès à vie complet
-                  </li>
-                  <li class="mb-2">
-                    <i class="fas fa-mobile-alt text-primary me-2"></i>
-                    Accès sur mobile et tablette
-                  </li>
-                  <li class="mb-2" *ngIf="formation.est_certifiante">
-                    <i class="fas fa-certificate text-primary me-2"></i>
-                    Certificat d'achèvement
-                  </li>
-                  <li class="mb-0">
-                    <i class="fas fa-users text-primary me-2"></i>
-                    Accès à la communauté
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Course Features Card -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Informations sur le cours</h5>
-                <ul class="list-unstyled course-features">
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-users text-muted me-2"></i>
-                      Étudiants inscrits
-                    </span>
-                    <strong>{{ formation.nb_inscrits || 0 }}</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-clock text-muted me-2"></i>
-                      Durée totale
-                    </span>
-                    <strong>{{ formation.duree_totale }}h</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-book text-muted me-2"></i>
-                      Nombre de modules
-                    </span>
-                    <strong>{{ formation.modules?.length || 0 }}</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-signal text-muted me-2"></i>
-                      Niveau
-                    </span>
-                    <strong>{{ getNiveauLabel(formation.niveau) }}</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-                    <span>
-                      <i class="fas fa-globe text-muted me-2"></i>
-                      Langue
-                    </span>
-                    <strong>{{ getLangueLabel(formation.langue) }}</strong>
-                  </li>
-                  <li class="d-flex justify-content-between align-items-center mb-0">
-                    <span>
-                      <i class="fas fa-calendar text-muted me-2"></i>
-                      Dernière mise à jour
-                    </span>
-                    <strong>{{ formatDate(formation.updated_at) }}</strong>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Tags Card -->
-            <div class="card" *ngIf="getTagsList(formation.tags).length > 0">
-              <div class="card-body">
-                <h5 class="subs-title mb-3">Tags</h5>
-                <div class="tags-container">
-                  <span class="badge bg-light text-dark me-1 mb-1" 
-                        *ngFor="let tag of getTagsList(formation.tags)">
-                    {{ tag }}
-                  </span>
+                  <div *ngIf="!module.sections?.length" class="cd-section-row" style="justify-content:center; color:#9CA3AF;">
+                    Contenu en cours de préparation
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          <div style="padding-bottom:4px;"></div>
         </div>
-      </div>
-    </div>
-  </section>
-</div>
 
-<!-- No Formation Found -->
-<div *ngIf="!formation && !loading && !error" class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-6 text-center py-5">
-      <i class="fas fa-search fa-3x text-muted mb-3"></i>
-      <h4>Formation non trouvée</h4>
-      <p class="text-muted">La formation que vous recherchez n'existe pas ou n'est plus disponible.</p>
-      <a routerLink="/formations" class="btn btn-primary">
-        <i class="fas fa-arrow-left me-2"></i>
-        Retour aux formations
-      </a>
-    </div>
-  </div>
+        <!-- Formateur -->
+        <div class="cd-card" *ngIf="formation.formateur">
+          <div class="cd-card-head">
+            <h2 class="cd-card-title">À propos du formateur</h2>
+          </div>
+          <div class="cd-card-body">
+            <div class="cd-instructor">
+              <img class="cd-instructor__avatar"
+                   [src]="getImageUrl(formation.formateur?.avatar)"
+                   alt="Formateur">
+              <div>
+                <div class="cd-instructor__name">{{ formation.formateur?.nom || 'Expert Formateur' }}</div>
+                <div class="cd-instructor__role">{{ formation.formateur?.fonction || 'Formateur Expert' }}</div>
+                <div class="cd-instructor-stats">
+                  <div class="cd-inst-stat">
+                    <i class="isax isax-book-1"></i>
+                    <strong>{{ formation.formateur?.nb_formations || 1 }}</strong> formations
+                  </div>
+                  <div class="cd-inst-stat">
+                    <i class="isax isax-people"></i>
+                    <strong>{{ formation.nb_inscrits || 0 }}</strong> apprenants
+                  </div>
+                  <div class="cd-inst-stat">
+                    <i class="isax isax-star"></i>
+                    <strong>4.5</strong>/5
+                  </div>
+                </div>
+                <p class="cd-instructor__bio">
+                  {{ formation.formateur?.bio || 'Expert dans son domaine avec plusieurs années d\'expérience en formation professionnelle.' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="cd-card" *ngIf="getTagsList(formation.tags).length > 0">
+          <div class="cd-card-head">
+            <h2 class="cd-card-title">Mots-clés</h2>
+          </div>
+          <div class="cd-card-body">
+            <div class="cd-tags">
+              <span class="cd-tag" *ngFor="let tag of getTagsList(formation.tags)">{{ tag }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /left -->
+
+      <!-- RIGHT COLUMN (sidebar) -->
+      <div class="cd-sidebar">
+
+        <!-- Price & Enroll Card -->
+        <div class="cd-price-card">
+
+          <!-- Thumb -->
+          <div class="cd-price-thumb">
+            <div class="ratio ratio-16x9" *ngIf="isYouTubeUrl(formation.media_url)">
+              <iframe [src]="getYouTubeEmbedUrl(formation.media_url)"
+                      title="Aperçu" frameborder="0" allowfullscreen></iframe>
+            </div>
+            <video *ngIf="getMediaUrl(formation.media_url) && !isYouTubeUrl(formation.media_url)"
+                   controls [poster]="getImageUrl(formation.image_couverture)">
+              <source [src]="getMediaUrl(formation.media_url)" type="video/mp4">
+            </video>
+            <img *ngIf="!formation.media_url"
+                 [src]="getImageUrl(formation.image_couverture)"
+                 alt="Couverture">
+          </div>
+
+          <div class="cd-price-body">
+            <!-- Prix : uniquement pour les apprenants/employés (role 2) -->
+            <div class="cd-price-tag" *ngIf="currentUser?.role_id === 2">
+              <span *ngIf="formation.prix == 0 || formation.prix == '0.00'" class="cd-price-free">GRATUIT</span>
+              <span *ngIf="formation.prix > 0" class="cd-price-main">{{ formation.prix }} FCFA</span>
+              <span *ngIf="formation.prix_original && formation.prix_original > formation.prix" class="cd-price-old">
+                {{ formation.prix_original }} FCFA
+              </span>
+              <span *ngIf="calculateDiscount(formation.prix, formation.prix_original) > 0" class="cd-price-discount">
+                -{{ calculateDiscount(formation.prix, formation.prix_original) }}%
+              </span>
+            </div>
+
+            <!-- CTA button — adapté selon le rôle -->
+
+            <!-- Formateur (3) : modifier sa formation -->
+            <a *ngIf="currentUser?.role_id === 3"
+               [href]="'/courses/instructor-course-edit/' + formation.id"
+               target="_blank"
+               class="cd-enroll-btn cd-enroll-btn--primary" style="text-decoration:none;">
+              <i class="isax isax-edit-2"></i> Modifier la formation
+            </a>
+
+            <!-- Superadmin (1) / AdminRH (4) / RH Groupe (5) : accès admin -->
+            <a *ngIf="currentUser?.role_id === 1 || currentUser?.role_id === 4 || currentUser?.role_id === 5"
+               [href]="'/courses/instructor-course-edit/' + formation.id"
+               target="_blank"
+               class="cd-enroll-btn cd-enroll-btn--primary" style="text-decoration:none;">
+              <i class="isax isax-setting-2"></i> Gérer la formation
+            </a>
+
+            <!-- Apprenant / Employé (2) : demande via l'organisation -->
+            <button class="cd-enroll-btn cd-enroll-btn--green" *ngIf="currentUser?.role_id === 2">
+              <i class="isax isax-document-text"></i> Demander la formation
+            </button>
+
+            <!-- Secondary actions -->
+            <div class="cd-action-row" style="margin-top:10px;">
+              <button class="cd-action-btn">
+                <i class="isax isax-heart"></i> Favoris
+              </button>
+              <button class="cd-action-btn" (click)="shareFormation()">
+                <i class="isax isax-send-2"></i> Partager
+              </button>
+            </div>
+
+            <div class="cd-guarantee">
+              <i class="isax isax-shield-tick"></i>
+              Garantie remboursement 30 jours
+            </div>
+          </div>
+        </div>
+
+        <!-- Ce cours comprend -->
+        <div class="cd-card">
+          <div class="cd-card-head"><h2 class="cd-card-title">Ce cours comprend</h2></div>
+          <div class="cd-card-body">
+            <ul class="cd-includes">
+              <li><i class="isax isax-play-circle"></i> {{ formation.duree_totale || 0 }}h de contenu vidéo</li>
+              <li><i class="isax isax-document-download"></i> {{ formation.modules?.length || 0 }} ressources téléchargeables</li>
+              <li><i class="isax isax-infinity"></i> Accès à vie</li>
+              <li><i class="isax isax-mobile"></i> Accès mobile et tablette</li>
+              <li *ngIf="formation.est_certifiante"><i class="isax isax-award"></i> Certificat d'achèvement</li>
+              <li><i class="isax isax-people"></i> Accès à la communauté</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Infos formation -->
+        <div class="cd-card">
+          <div class="cd-card-head"><h2 class="cd-card-title">Informations</h2></div>
+          <div class="cd-card-body">
+            <table class="cd-info-table">
+              <tr>
+                <td><i class="isax isax-people"></i> Inscrits</td>
+                <td>{{ formation.nb_inscrits || 0 }}</td>
+              </tr>
+              <tr>
+                <td><i class="isax isax-clock"></i> Durée</td>
+                <td>{{ formation.duree_totale || 0 }}h</td>
+              </tr>
+              <tr>
+                <td><i class="isax isax-book-1"></i> Modules</td>
+                <td>{{ formation.modules?.length || 0 }}</td>
+              </tr>
+              <tr>
+                <td><i class="isax isax-signal"></i> Niveau</td>
+                <td>{{ getNiveauLabel(formation.niveau) }}</td>
+              </tr>
+              <tr>
+                <td><i class="isax isax-global"></i> Langue</td>
+                <td>{{ getLangueLabel(formation.langue) }}</td>
+              </tr>
+              <tr>
+                <td><i class="isax isax-calendar-1"></i> Mis à jour</td>
+                <td>{{ formatDate(formation.updated_at) }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /sidebar -->
+    </div><!-- /cd-layout -->
+  </div><!-- /container -->
+
+</div><!-- /formation -->
+
+<!-- Not found -->
+<div *ngIf="!formation && !loading && !error" class="container" style="padding:80px 0; text-align:center">
+  <i class="isax isax-book-1" style="font-size:3rem; color:#9CA3AF; display:block; margin-bottom:16px;"></i>
+  <h4 style="color:#374151;">Formation introuvable</h4>
+  <p style="color:#9CA3AF; font-size:14px;">La formation que vous recherchez n'existe pas ou n'est plus disponible.</p>
+  <a routerLink="/courses" class="cd-enroll-btn cd-enroll-btn--green" style="display:inline-flex; width:auto; padding:10px 24px; text-decoration:none;">
+    <i class="isax isax-arrow-left"></i> Retour aux formations
+  </a>
 </div>

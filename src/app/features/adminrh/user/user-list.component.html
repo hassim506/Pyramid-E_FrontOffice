@@ -73,6 +73,16 @@
         </div>
       </div>
 
+      <button type="button" class="ul-import-btn" (click)="openImportDialog()">
+        <i class="isax isax-import"></i> Importer
+      </button>
+      <button type="button" class="ul-tpl-btn" (click)="downloadTemplate()">
+        <i class="isax isax-export"></i> Template
+      </button>
+      <button type="button" class="ul-export-btn" (click)="exportUsers()">
+        <i class="isax isax-document-download"></i> Exporter
+      </button>
+
       <button type="button" class="ul-add-btn" (click)="openNew()">
         <i class="isax isax-add"></i> Nouvel utilisateur
       </button>
@@ -145,10 +155,6 @@
               <button type="button" class="ul-act ul-act--ok" *ngIf="u.statut === 0"
                       title="Réactiver" (click)="reactivateUser(u)">
                 <i class="isax isax-refresh"></i>
-              </button>
-              <button type="button" class="ul-act ul-act--del" title="Supprimer"
-                      (click)="deleteUser(u.id)">
-                <i class="isax isax-trash"></i>
               </button>
             </div>
           </td>
@@ -273,6 +279,64 @@
     </div>
   </div>
 
+</div>
+
+<!-- ── MODAL IMPORT ── -->
+<div class="ul-import-overlay" *ngIf="showImportDialog" (click)="closeImportDialog()">
+  <div class="ul-import-modal" (click)="$event.stopPropagation()">
+    <div class="ul-import-modal__head">
+      <div class="ul-import-modal__title">
+        <i class="isax isax-import"></i> Importer des utilisateurs
+      </div>
+      <button type="button" class="ul-import-modal__close" (click)="closeImportDialog()">
+        <i class="isax isax-close-circle"></i>
+      </button>
+    </div>
+
+    <div class="ul-import-modal__body">
+      <!-- Zone de dépôt -->
+      <label class="ul-dropzone" for="rh-file-input" [class.ul-dropzone--active]="!!selectedFile">
+        <i class="isax isax-document-upload ul-dropzone__icon"></i>
+        <span class="ul-dropzone__label" *ngIf="!selectedFile">
+          Cliquer ou glisser votre fichier ici
+          <small>.xlsx · .xls · .csv</small>
+        </span>
+        <span class="ul-dropzone__label" *ngIf="selectedFile">
+          <strong>{{ selectedFile.name }}</strong>
+          <small>{{ (selectedFile.size / 1024).toFixed(0) }} Ko</small>
+        </span>
+        <input id="rh-file-input" type="file" accept=".xlsx,.xls,.csv"
+               (change)="onFileSelected($event)" [disabled]="isImporting" style="display:none">
+      </label>
+
+      <!-- Barre de progression -->
+      <div class="ul-import-progress" *ngIf="isImporting">
+        <div class="ul-import-progress__bar" [style.width.%]="importProgress"></div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="ul-import-info">
+        <i class="isax isax-info-circle"></i>
+        <ul>
+          <li>Téléchargez d'abord le <strong>template</strong> pour voir la structure requise</li>
+          <li>Colonnes obligatoires : <strong>nom, prenom, email, role_id</strong></li>
+          <li>Les utilisateurs avec le même email seront mis à jour automatiquement</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ul-import-modal__foot">
+      <button type="button" class="ul-import-modal__cancel" (click)="closeImportDialog()" [disabled]="isImporting">
+        Annuler
+      </button>
+      <button type="button" class="ul-import-modal__submit"
+              (click)="importUsers()" [disabled]="!selectedFile || isImporting">
+        <span *ngIf="isImporting" class="ul-spinner"></span>
+        <i *ngIf="!isImporting" class="isax isax-import"></i>
+        {{ isImporting ? 'Import en cours…' : 'Importer' }}
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- ── USER ADD/EDIT ── -->

@@ -6,11 +6,9 @@
       <i class="isax isax-category"></i>Catalogues ({{ catalogues.length }})
     </span>
     <span class="ac-spacer"></span>
-    <div style="display:flex;align-items:center;padding:0 10px;">
-      <button type="button" class="ac-add-btn" (click)="openCatalogueModal()">
-        <i class="isax isax-add"></i>Nouveau catalogue
-      </button>
-    </div>
+    <button type="button" class="ac-add-btn" (click)="openCatalogueModal()">
+      <i class="isax isax-add"></i>Nouveau catalogue
+    </button>
   </div>
 
   <!-- ── KPI ── -->
@@ -18,6 +16,7 @@
     <div class="ac-kpi">
       <div class="ac-kpi__label"><i class="isax isax-category"></i>Total</div>
       <div class="ac-kpi__val">{{ catalogues.length }}</div>
+      <div class="ac-kpi__delta neutral">catalogues</div>
     </div>
     <div class="ac-kpi">
       <div class="ac-kpi__label"><i class="isax isax-tick-circle"></i>Publiés</div>
@@ -27,29 +26,36 @@
     <div class="ac-kpi">
       <div class="ac-kpi__label"><i class="isax isax-book-1"></i>Formations totales</div>
       <div class="ac-kpi__val">{{ getTotalFormationsCount() }}</div>
+      <div class="ac-kpi__delta neutral">incluses</div>
     </div>
     <div class="ac-kpi">
       <div class="ac-kpi__label"><i class="isax isax-medal-star"></i>Certifiants</div>
       <div class="ac-kpi__val">{{ getCertifiantCount() }}</div>
+      <div class="ac-kpi__delta neutral">catalogues</div>
     </div>
   </div>
 
   <!-- ── Toolbar ── -->
   <div class="ac-toolbar">
     <div class="ac-search">
-      <i class="isax isax-search-normal ac-search__icon"></i>
-      <input class="ac-search__input" type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un catalogue…">
+      <i class="isax isax-search-normal-1 ac-search__icon"></i>
+      <input class="ac-search__input" type="search" [(ngModel)]="searchTerm" placeholder="Rechercher un catalogue…">
     </div>
-    <select class="ac-select" title="Filtrer par type" [(ngModel)]="selectedType">
-      <option value="">Tous les types</option>
-      <option *ngFor="let t of types" [value]="t.value">{{ t.label }}</option>
-    </select>
-    <select class="ac-select" title="Filtrer par statut" [(ngModel)]="selectedStatus">
-      <option value="">Tous les statuts</option>
-      <option value="active">Publié</option>
-      <option value="inactive">Brouillon</option>
-    </select>
-    <button type="button" class="ac-chip" (click)="clearFilters()" *ngIf="searchTerm || selectedType || selectedStatus">
+    <button type="button" class="ac-chip" [class.ac-chip--on]="selectedType === ''"
+            (click)="selectedType = ''">Tous les types</button>
+    <button type="button" class="ac-chip" *ngFor="let t of types"
+            [class.ac-chip--on]="selectedType === t.value"
+            (click)="selectedType = t.value">{{ t.label }}</button>
+    <div class="ac-view-group" style="margin-left:8px;">
+      <button type="button" class="ac-view-toggle" [class.active]="selectedStatus === ''"
+              (click)="selectedStatus = ''">Tous</button>
+      <button type="button" class="ac-view-toggle" [class.active]="selectedStatus === 'active'"
+              (click)="selectedStatus = 'active'">Publiés</button>
+      <button type="button" class="ac-view-toggle" [class.active]="selectedStatus === 'inactive'"
+              (click)="selectedStatus = 'inactive'">Brouillons</button>
+    </div>
+    <button type="button" class="ac-chip" (click)="clearFilters()"
+            *ngIf="searchTerm || selectedType || selectedStatus">
       <i class="isax isax-close-circle"></i>Effacer
     </button>
     <span class="ac-spacer"></span>
@@ -60,74 +66,75 @@
     <i class="isax isax-tick-circle"></i>{{ success }}
     <button type="button" class="ac-alert-close" (click)="success=''"><i class="isax isax-close-circle"></i></button>
   </div>
-  <div class="ac-alert" *ngIf="error">
+  <div class="ac-alert" *ngIf="error && !saving">
     <i class="isax isax-warning-2"></i>{{ error }}
     <button type="button" class="ac-alert-close" (click)="error=''"><i class="isax isax-close-circle"></i></button>
   </div>
 
-  <!-- ── Loading ── -->
-  <div class="ac-empty" *ngIf="loading">
-    <i class="isax isax-category"></i>Chargement des catalogues…
+  <!-- ── Skeleton ── -->
+  <div *ngIf="loading" class="ac-skeletons">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="ac-skeleton-card"></div>
   </div>
 
-  <!-- ── Table ── -->
+  <!-- ── Card grid ── -->
   <ng-container *ngIf="!loading">
-    <table class="ac-table" *ngIf="filteredCatalogues.length > 0">
-      <thead>
-        <tr>
-          <th style="width:48px;"></th>
-          <th>Catalogue</th>
-          <th style="width:100px;">Type</th>
-          <th style="width:90px;">Niveau</th>
-          <th style="width:80px;text-align:center;">Formations</th>
-          <th style="width:76px;text-align:center;">Durée</th>
-          <th style="width:80px;">Statut</th>
-          <th style="width:100px;"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let cat of filteredCatalogues; trackBy: trackByCatalogueId">
-          <td>
-            <div class="cat-icon" [style.background]="cat.couleur + '22'" [style.color]="cat.couleur">
-              <i [class]="getIconClass(cat.icone)"></i>
-            </div>
-          </td>
-          <td>
-            <div class="ac-table-name">{{ cat.titre }}</div>
-            <div class="ac-table-sub">{{ cat.short_description || cat.description }}</div>
-          </td>
-          <td>
-            <span class="ac-status" data-s="plan">{{ getTypeLabel(cat.type) }}</span>
-          </td>
-          <td>
-            <span class="ac-status" data-s="done">{{ cat.metadata.niveau }}</span>
-          </td>
-          <td style="text-align:center;">
-            <strong style="font-size:13px;color:#111827;">{{ cat.nombre_formations }}</strong>
-            <div style="font-size:11px;color:#9ca3af;">{{ cat.duree_totale }}h total</div>
-          </td>
-          <td style="text-align:center;font-size:13px;font-weight:500;color:#111827;">
-            {{ cat.metadata.duree_moyenne }}h
-          </td>
-          <td>
-            <div style="display:flex;flex-direction:column;gap:3px;">
-              <span class="ac-status" [attr.data-s]="cat.est_publie ? 'pub' : 'draft'">
-                {{ cat.est_publie ? 'Publié' : 'Brouillon' }}
-              </span>
-              <span class="ac-status" data-s="plan" *ngIf="cat.metadata.certificat_disponible" style="font-size:9px;">Certifiant</span>
-            </div>
-          </td>
-          <td>
-            <div class="ac-actions">
-              <button type="button" class="ac-act" (click)="viewCatalogue(cat)" title="Voir"><i class="isax isax-eye"></i></button>
-              <button type="button" class="ac-act" (click)="openFormationModal(cat)" title="Ajouter formation"><i class="isax isax-add-circle"></i></button>
-              <button type="button" class="ac-act" (click)="editCatalogue(cat)" title="Modifier"><i class="isax isax-edit-2"></i></button>
-              <button type="button" class="ac-act ac-act--del" (click)="confirmDelete(cat)" title="Supprimer"><i class="isax isax-trash"></i></button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="ac-card-grid" *ngIf="filteredCatalogues.length > 0">
+      <div *ngFor="let cat of filteredCatalogues; trackBy: trackByCatalogueId" class="ac-fcard">
+
+        <!-- Thumb -->
+        <div class="ac-fcard__thumb" [style.background]="cat.couleur + '22'">
+          <div class="cat-icon" [style.background]="cat.couleur + '33'" [style.color]="cat.couleur"
+               style="width:48px;height:48px;font-size:22px;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+            <i [class]="getIconClass(cat.icone)"></i>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="ac-fcard__body">
+          <div class="ac-fcard__cat"
+               [attr.data-cat]="cat.type === 'technique' ? 'blue' : cat.type === 'management' ? 'teal' : 'default'">
+            {{ getTypeLabel(cat.type) }}
+          </div>
+          <div class="ac-fcard__title">{{ cat.titre }}</div>
+          <div class="ac-fcard__desc" *ngIf="cat.short_description || cat.description">
+            {{ cat.short_description || cat.description }}
+          </div>
+          <div class="ac-fcard__meta">
+            <span><i class="isax isax-book-1"></i> {{ cat.nombre_formations }} formation{{ cat.nombre_formations !== 1 ? 's' : '' }}</span>
+            <span><i class="isax isax-clock"></i> {{ cat.duree_totale }}h total</span>
+            <span><i class="isax isax-chart-square"></i> {{ cat.metadata?.duree_moyenne }}h/form.</span>
+          </div>
+          <div class="ac-fcard__meta" style="margin-top:3px;">
+            <span><i class="isax isax-ranking"></i> {{ cat.metadata?.niveau }}</span>
+            <span *ngIf="cat.metadata?.certificat_disponible">
+              <i class="isax isax-medal-star"></i> Certifiant
+            </span>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="ac-fcard__footer">
+          <span class="ac-status" [attr.data-s]="cat.est_publie ? 'pub' : 'draft'">
+            {{ cat.est_publie ? 'Publié' : 'Brouillon' }}
+          </span>
+          <div class="ac-fcard__actions" style="margin-left:auto;">
+            <button type="button" class="ac-act" title="Voir" (click)="viewCatalogue(cat)">
+              <i class="isax isax-eye"></i>
+            </button>
+            <button type="button" class="ac-act" title="Ajouter formation" (click)="openFormationModal(cat)">
+              <i class="isax isax-add-circle"></i>
+            </button>
+            <button type="button" class="ac-act" title="Modifier" (click)="editCatalogue(cat)">
+              <i class="isax isax-edit-2"></i>
+            </button>
+            <button type="button" class="ac-act ac-act--arch" title="Archiver" (click)="archiveCatalogue(cat)">
+              <i class="isax isax-archive"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
 
     <!-- Empty -->
     <div class="ac-empty" *ngIf="filteredCatalogues.length === 0">
@@ -292,90 +299,93 @@
       <div class="cw-head">
         <div class="cw-head__icon"><i class="isax isax-add-circle"></i></div>
         <div class="cw-head__text">
-          <div class="cw-head__title">Ajouter une formation</div>
+          <div class="cw-head__title">Ajouter des formations</div>
           <div class="cw-head__sub" *ngIf="selectedCatalogue">Catalogue : {{ selectedCatalogue.titre }}</div>
         </div>
         <button type="button" class="cw-close" data-bs-dismiss="modal"><i class="isax isax-close-circle"></i></button>
       </div>
 
-      <form [formGroup]="formationForm" (ngSubmit)="ajouterFormation()">
-        <div class="cw-body">
+      <div class="cw-body">
 
-          <div class="ac-empty" *ngIf="loadingFormations" style="padding:20px 0;">
-            <i class="isax isax-book-1"></i>Chargement des formations…
+        <div class="ac-empty" *ngIf="loadingFormations" style="padding:20px 0;">
+          <i class="isax isax-book-1"></i>Chargement des formations…
+        </div>
+
+        <ng-container *ngIf="!loadingFormations">
+
+          <!-- ── Formations sélectionnées (chips) ── -->
+          <div class="cw-pool-label">
+            Formations sélectionnées
+            <span *ngIf="selectedFormationsInPool.length > 0" style="color:#185fa5;font-weight:500;margin-left:4px;">({{ selectedFormationsInPool.length }})</span>
+          </div>
+          <div class="cw-pool-chips" *ngIf="selectedFormationsInPool.length > 0">
+            <span class="cw-pool-chip" *ngFor="let f of selectedFormationsInPool">
+              {{ f.titre }}
+              <button type="button" (click)="removeSelectedFormation(f.id)">
+                <i class="isax isax-close-circle"></i>
+              </button>
+            </span>
+          </div>
+          <div *ngIf="selectedFormationsInPool.length === 0"
+               style="font-size:11px;color:#9ca3af;margin-bottom:10px;">
+            Cliquez sur une formation ci-dessous pour la sélectionner.
           </div>
 
-          <ng-container *ngIf="!loadingFormations">
-            <div class="cw-field">
-              <label class="cw-label">Formation à ajouter <span class="cw-req">*</span></label>
-              <select class="cw-input" title="Sélectionner une formation" formControlName="formation_id">
-                <option value="">Choisir une formation…</option>
-                <option *ngFor="let f of formationsDisponibles" [value]="f.id">
-                  {{ f.titre }}{{ f.duree_totale ? ' (' + f.duree_totale + 'h)' : '' }}
-                </option>
-              </select>
-              <span class="cw-hint" *ngIf="formationsDisponibles.length === 0">
-                Toutes les formations publiées sont déjà dans ce catalogue.
-              </span>
+          <!-- ── Pool ── -->
+          <div class="cw-pool-label">Catalogue disponible</div>
+          <div class="cw-pool">
+            <div class="cw-pool__search">
+              <i class="isax isax-search-normal-1"></i>
+              <input type="search" [(ngModel)]="formationsPoolSearch" placeholder="Rechercher une formation…">
             </div>
-
-            <!-- Aperçu formation sélectionnée -->
-            <div class="cw-pool__item" style="border:0.5px solid #e5e7eb;border-radius:8px;margin-bottom:12px;cursor:default;"
-                 *ngIf="getSelectedFormationInfo() as sel">
-              <div class="cw-pool__info">
-                <div class="cw-pool__name">{{ sel.titre }}</div>
-                <div class="cw-pool__meta">{{ sel.short_description || sel.description }}</div>
-              </div>
-              <span class="ac-status" data-s="plan" *ngIf="sel.niveau">{{ sel.niveau }}</span>
-            </div>
-
-            <div class="cw-row">
-              <div class="cw-field" style="margin-bottom:0;">
-                <label class="cw-label">Ordre d'affichage <span class="cw-req">*</span></label>
-                <input type="number" class="cw-input" formControlName="ordre" min="1">
-              </div>
-              <div class="cw-field" style="margin-bottom:0;">
-                <label class="cw-label">Options</label>
-                <div class="cw-toggle-inline" style="padding:4px 0;">
-                  <div class="cw-toggle" [class.on]="formationForm.get('est_featured')?.value"
-                       (click)="formationForm.get('est_featured')?.setValue(!formationForm.get('est_featured')?.value)"></div>
-                  <span class="cw-toggle-label">Mise en avant</span>
+            <div class="cw-pool__list" style="max-height:220px;">
+              <div *ngFor="let f of filteredFormationsPool"
+                   class="cw-pool__item" [class.checked]="isFormationSelected(f.id)"
+                   (click)="toggleFormationInPool(f.id)">
+                <div class="cw-pool__check" [class.on]="isFormationSelected(f.id)">
+                  <i class="isax isax-tick" *ngIf="isFormationSelected(f.id)"></i>
                 </div>
-                <div class="cw-toggle-inline" style="padding:4px 0;">
-                  <div class="cw-toggle" [class.on]="formationForm.get('est_obligatoire')?.value"
-                       (click)="formationForm.get('est_obligatoire')?.setValue(!formationForm.get('est_obligatoire')?.value)"></div>
-                  <span class="cw-toggle-label">Obligatoire</span>
+                <div class="cw-pool__info">
+                  <div class="cw-pool__name">{{ f.titre }}</div>
+                  <div class="cw-pool__meta">
+                    {{ f.categorie?.nom || f.type || '—' }}{{ f.duree_totale ? ' · ' + f.duree_totale + 'h' : '' }}
+                    <span *ngIf="f.niveau"> · {{ f.niveau }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div class="cw-field" style="margin-top:12px;">
-              <label class="cw-label">Conditions spéciales</label>
-              <textarea class="cw-input cw-textarea" formControlName="conditions_speciales"
-                        placeholder="Conditions particulières (optionnel)" style="min-height:56px;"></textarea>
-            </div>
-
-            <!-- Info catalogue -->
-            <div class="wz-info-banner" style="background:#e1f5ee;border-color:#79c9ab;color:#085041;" *ngIf="selectedCatalogue">
-              <i class="isax isax-info-circle" style="color:#0f6e56;"></i>
-              <div>
-                <strong>{{ selectedCatalogue.titre }}</strong> —
-                {{ selectedCatalogue.formations.length }} formations · {{ selectedCatalogue.duree_totale }}h · {{ getTypeLabel(selectedCatalogue.type) }}
+              <div class="cw-pool__empty" *ngIf="filteredFormationsPool.length === 0">
+                {{ formations.length === 0 ? 'Aucune formation disponible' : 'Toutes les formations sont déjà dans ce catalogue' }}
               </div>
             </div>
-          </ng-container>
+          </div>
 
-        </div>
+          <div style="font-size:11px;color:#9ca3af;margin-bottom:10px;">
+            L'ordre des formations définit la séquence du catalogue.
+          </div>
 
-        <div class="cw-foot">
-          <button type="button" class="cw-btn-ghost" data-bs-dismiss="modal">Annuler</button>
-          <button type="submit" class="cw-btn-primary"
-                  [disabled]="formationForm.invalid || saving || formationsDisponibles.length === 0">
-            <span class="cw-spinner" *ngIf="saving"></span>
-            Ajouter au catalogue
-          </button>
-        </div>
-      </form>
+          <!-- Info catalogue -->
+          <div class="wz-info-banner" style="background:#e1f5ee;border-color:#79c9ab;color:#085041;" *ngIf="selectedCatalogue">
+            <i class="isax isax-info-circle" style="color:#0f6e56;"></i>
+            <div>
+              <strong>{{ selectedCatalogue.titre }}</strong> —
+              {{ selectedCatalogue.formations.length }} formations · {{ selectedCatalogue.duree_totale }}h · {{ getTypeLabel(selectedCatalogue.type) }}
+            </div>
+          </div>
+
+        </ng-container>
+
+      </div>
+
+      <div class="cw-foot">
+        <button type="button" class="cw-btn-ghost" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="cw-btn-primary"
+                (click)="ajouterFormationsMultiples()"
+                [disabled]="selectedFormationCount === 0 || saving">
+          <span class="cw-spinner" *ngIf="saving"></span>
+          Ajouter ({{ selectedFormationCount }})
+        </button>
+      </div>
+
     </div>
   </div>
 </div>
@@ -417,8 +427,8 @@
             <div class="wz-recap-row"><span class="wz-rl">Durée moyenne</span><span class="wz-rv">{{ selectedCatalogue.metadata.duree_moyenne }}h</span></div>
             <div class="wz-recap-row"><span class="wz-rl">Formations mises en avant</span><span class="wz-rv">{{ getFeaturedFormationsCount(selectedCatalogue.formations) }}</span></div>
             <div class="wz-recap-row" *ngIf="selectedCatalogue.formations.length > 0">
-              <span class="wz-rl">Prix moyen</span>
-              <span class="wz-rv">{{ getAveragePrice(selectedCatalogue.formations) | number:'1.0-0' }} €</span>
+              <span class="wz-rl">Coût moyen</span>
+              <span class="wz-rv">{{ getAveragePrice(selectedCatalogue.formations) | number:'1.0-0' }} F</span>
             </div>
             <div class="wz-recap-row"><span class="wz-rl">Créé le</span><span class="wz-rv">{{ formatDate(selectedCatalogue.created_at) }}</span></div>
           </div>
@@ -439,43 +449,33 @@
             </button>
           </div>
 
-          <div *ngIf="selectedCatalogue.formations.length > 0">
-            <table class="ac-table">
-              <thead>
-                <tr>
-                  <th style="width:50px;">Ordre</th>
-                  <th>Formation</th>
-                  <th style="width:90px;">Niveau</th>
-                  <th style="width:70px;">Durée</th>
-                  <th style="width:70px;">Statut</th>
-                  <th style="width:40px;"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let f of selectedCatalogue.formations; trackBy: trackByFormationId">
-                  <td><span class="ac-status" data-s="plan">{{ f.pivot?.ordre || 1 }}</span></td>
-                  <td>
-                    <div class="ac-table-name">{{ f.titre }}</div>
-                    <div style="display:flex;gap:4px;margin-top:3px;">
-                      <span class="ac-status" data-s="pending" style="font-size:9px;" *ngIf="f.pivot?.est_featured">Featured</span>
-                      <span class="ac-status" data-s="pending" style="font-size:9px;" *ngIf="f.pivot?.est_obligatoire">Obligatoire</span>
-                    </div>
-                  </td>
-                  <td><span class="ac-status" data-s="done">{{ f.niveau }}</span></td>
-                  <td style="font-size:13px;">{{ f.duree_totale }}h</td>
-                  <td>
-                    <span class="ac-status" [attr.data-s]="f.est_publie ? 'pub' : 'draft'">
-                      {{ f.est_publie ? 'Publié' : 'Brouillon' }}
-                    </span>
-                  </td>
-                  <td>
-                    <button type="button" class="ac-act ac-act--del" (click)="retirerFormation(selectedCatalogue!, f)" title="Retirer">
-                      <i class="isax isax-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- Mini card grid for formations in catalogue -->
+          <div class="ac-card-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px;"
+               *ngIf="selectedCatalogue.formations.length > 0">
+            <div *ngFor="let f of selectedCatalogue.formations; trackBy: trackByFormationId"
+                 class="ac-fcard" style="min-height:0;">
+              <div class="ac-fcard__body" style="padding:12px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                  <span class="ac-status" data-s="plan" style="font-size:10px;">{{ f.pivot?.ordre || 1 }}</span>
+                  <span class="ac-status" [attr.data-s]="f.est_publie ? 'pub' : 'draft'" style="font-size:10px;">
+                    {{ f.est_publie ? 'Publié' : 'Brouillon' }}
+                  </span>
+                  <span class="ac-status" data-s="pending" style="font-size:9px;" *ngIf="f.pivot?.est_featured">Featured</span>
+                  <span class="ac-status" data-s="pending" style="font-size:9px;" *ngIf="f.pivot?.est_obligatoire">Obligatoire</span>
+                </div>
+                <div class="ac-fcard__title" style="font-size:12px;margin-bottom:4px;">{{ f.titre }}</div>
+                <div class="ac-fcard__meta" style="font-size:10px;">
+                  <span><i class="isax isax-ranking"></i> {{ f.niveau }}</span>
+                  <span><i class="isax isax-clock"></i> {{ f.duree_totale }}h</span>
+                </div>
+              </div>
+              <div class="ac-fcard__footer" style="padding:6px 12px;">
+                <button type="button" class="ac-act ac-act--del" style="margin-left:auto;"
+                        (click)="retirerFormation(selectedCatalogue!, f)" title="Retirer">
+                  <i class="isax isax-trash"></i>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="ac-empty" style="padding:24px 14px;" *ngIf="selectedCatalogue.formations.length === 0">
@@ -502,23 +502,27 @@
   <div class="modal-dialog" style="max-width:420px;">
     <div class="cw-modal modal-content">
       <div class="cw-head">
-        <div class="cw-head__icon" style="background:#fef2f2;color:#991b1b;"><i class="isax isax-trash"></i></div>
+        <div class="cw-head__icon" style="background:#FAEEDA;color:#BA7517;"><i class="isax isax-archive"></i></div>
         <div class="cw-head__text">
-          <div class="cw-head__title">Supprimer le catalogue</div>
+          <div class="cw-head__title">Archiver le catalogue</div>
           <div class="cw-head__sub" *ngIf="selectedCatalogue">{{ selectedCatalogue.titre }}</div>
         </div>
         <button type="button" class="cw-close" data-bs-dismiss="modal"><i class="isax isax-close-circle"></i></button>
       </div>
       <div class="cw-body">
-        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;">
-          Êtes-vous sûr de vouloir supprimer ce catalogue ?
-          Cette action est <strong>irréversible</strong>.
-        </p>
+        <div class="wz-info-banner" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b;">
+          <i class="isax isax-warning-2" style="color:#dc2626;"></i>
+          <div>
+            Le catalogue sera archivé et masqué. Ses associations avec les formations seront conservées.
+          </div>
+        </div>
       </div>
       <div class="cw-foot">
         <span style="flex:1;"></span>
         <button type="button" class="cw-btn-ghost" data-bs-dismiss="modal">Annuler</button>
-        <button type="button" class="cw-btn-danger" (click)="deleteCatalogue()">Supprimer</button>
+        <button type="button" class="cw-btn-arch" (click)="archiveCatalogue(selectedCatalogue)">
+          <i class="isax isax-archive"></i> Archiver
+        </button>
       </div>
     </div>
   </div>

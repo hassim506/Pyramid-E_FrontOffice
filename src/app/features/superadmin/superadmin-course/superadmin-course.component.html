@@ -112,7 +112,7 @@
           </td>
           <!-- Titre -->
           <td>
-            <a [routerLink]="[routes.courseDetails, f.id]" class="ac-table-name ac-link">{{ f.titre }}</a>
+            <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ac-table-name ac-link">{{ f.titre }}</a>
             <div class="ac-table-sub">
               <span *ngIf="f.niveau_display || f.niveau">{{ f.niveau_display || f.niveau }}</span>
               <span *ngIf="f.langue"> · {{ f.langue }}</span>
@@ -155,10 +155,10 @@
           <!-- Actions -->
           <td>
             <div class="ac-actions">
-              <a [routerLink]="[routes.courseDetails, f.id]" class="ac-act" title="Voir">
+              <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ac-act" title="Voir">
                 <i class="isax isax-eye"></i>
               </a>
-              <a [routerLink]="[routes.courseDetails, f.id]" class="ac-act" title="Modifier">
+              <a [href]="'/courses/instructor-course-edit/' + f.id" target="_blank" class="ac-act" title="Modifier">
                 <i class="isax isax-edit-2"></i>
               </a>
               <button type="button" class="ac-act ac-act--del" (click)="deleteFormation(f)" title="Supprimer">

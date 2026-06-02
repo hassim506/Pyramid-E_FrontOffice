@@ -1,0 +1,473 @@
+<div class="al-page">
+
+  <!-- ── EN-TÊTE ── -->
+  <div class="al-header">
+    <div class="al-header__left">
+      <div class="al-header__icon"><i class="isax isax-clipboard-text"></i></div>
+      <div>
+        <div class="al-header__title">Logs d'audit — Pyramide LMS</div>
+        <div class="al-header__sub">Toutes les actions sur la plateforme · temps réel · rétention 90 jours</div>
+      </div>
+    </div>
+    <div class="al-header__actions">
+      <button class="al-btn al-btn--outline" (click)="refresh()" [disabled]="loading">
+        <i class="isax isax-refresh" [class.spinning]="loading"></i> Actualiser
+      </button>
+      <button class="al-btn al-btn--outline" (click)="exportCSV()">
+        <i class="isax isax-import"></i> Exporter CSV
+      </button>
+      <button class="al-btn al-btn--primary">
+        <i class="isax isax-shield-tick"></i> Rapport sécurité
+      </button>
+    </div>
+  </div>
+
+  <!-- ── KPI ROW ── -->
+  <div class="al-kpi-row">
+    <div class="al-kpi">
+      <div class="al-kpi__top">
+        <span class="al-kpi__label"><i class="isax isax-task-square"></i> Logs aujourd'hui</span>
+        <div class="al-kpi__icon ki-p"><i class="isax isax-task-square"></i></div>
+      </div>
+      <div class="al-kpi__val">{{ kpi.logsToday | number }}</div>
+      <div class="al-kpi__trend" [ngClass]="tendanceClass">{{ tendanceLabel }}</div>
+    </div>
+    <div class="al-kpi">
+      <div class="al-kpi__top">
+        <span class="al-kpi__label"><i class="isax isax-warning-2"></i> Alertes critiques</span>
+        <div class="al-kpi__icon ki-r"><i class="isax isax-warning-2"></i></div>
+      </div>
+      <div class="al-kpi__val">{{ kpi.alertesCritiques }}</div>
+      <div class="al-kpi__trend trend-down" *ngIf="kpi.alertesCritiques > 0">À traiter immédiatement</div>
+      <div class="al-kpi__trend trend-neutral" *ngIf="kpi.alertesCritiques === 0">Aucune alerte</div>
+    </div>
+    <div class="al-kpi">
+      <div class="al-kpi__top">
+        <span class="al-kpi__label"><i class="isax isax-login"></i> Connexions échouées</span>
+        <div class="al-kpi__icon ki-a"><i class="isax isax-login"></i></div>
+      </div>
+      <div class="al-kpi__val">{{ kpi.connexionsEchouees }}</div>
+      <div class="al-kpi__trend trend-down" *ngIf="kpi.connexionsEchouees > 0">Aujourd'hui</div>
+      <div class="al-kpi__trend trend-neutral" *ngIf="kpi.connexionsEchouees === 0">Aucune ce jour</div>
+    </div>
+    <div class="al-kpi">
+      <div class="al-kpi__top">
+        <span class="al-kpi__label"><i class="isax isax-profile-2user"></i> Utilisateurs actifs</span>
+        <div class="al-kpi__icon ki-g"><i class="isax isax-profile-2user"></i></div>
+      </div>
+      <div class="al-kpi__val">{{ kpi.utilisateursActifs }}</div>
+      <div class="al-kpi__trend trend-neutral">Aujourd'hui</div>
+    </div>
+    <div class="al-kpi">
+      <div class="al-kpi__top">
+        <span class="al-kpi__label"><i class="isax isax-trash"></i> Suppressions</span>
+        <div class="al-kpi__icon ki-b"><i class="isax isax-trash"></i></div>
+      </div>
+      <div class="al-kpi__val">{{ kpi.suppressions }}</div>
+      <div class="al-kpi__trend trend-neutral">Ce mois</div>
+    </div>
+  </div>
+
+  <!-- ── CONTENU PRINCIPAL ── -->
+  <div class="al-main">
+
+    <!-- TABLE DES LOGS -->
+    <div class="al-card">
+
+      <!-- Filtres -->
+      <div class="al-filters">
+        <div class="al-filter-row">
+          <div class="al-search">
+            <i class="isax isax-search-normal"></i>
+            <input
+              type="text"
+              placeholder="Rechercher un log, utilisateur, IP..."
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearch()"
+            >
+          </div>
+          <select class="al-sel" [(ngModel)]="filterType" (change)="onFilterChange()">
+            <option value="">Tous les types</option>
+            <option value="connexion">Connexion</option>
+            <option value="echec_connexion">Échec connexion</option>
+            <option value="creation">Création</option>
+            <option value="modification">Modification</option>
+            <option value="suppression">Suppression</option>
+            <option value="export">Export de données</option>
+            <option value="acces_refuse">Accès refusé</option>
+            <option value="revocation">Révocation</option>
+            <option value="approbation">Approbation</option>
+          </select>
+          <select class="al-sel" [(ngModel)]="filterProfile" (change)="onFilterChange()">
+            <option value="">Tous les profils</option>
+            <option value="Super Admin">Superadmin</option>
+            <option value="Admin RH">Admin RH</option>
+            <option value="Formateur">Formateur</option>
+            <option value="Employé">Employé</option>
+          </select>
+          <select class="al-sel" [(ngModel)]="filterCompany" (change)="onFilterChange()">
+            <option value="">Toutes les entreprises</option>
+            <option *ngFor="let e of entreprises" [value]="e.nom">{{ e.nom }}</option>
+          </select>
+          <select class="al-sel" [(ngModel)]="filterSeverity" (change)="onFilterChange()">
+            <option value="">Tous niveaux</option>
+            <option value="info">Info</option>
+            <option value="attention">Avertissement</option>
+            <option value="critique">Critique</option>
+          </select>
+          <div class="al-spacer"></div>
+          <div class="al-date-range">
+            <input class="al-date-inp" type="date" [(ngModel)]="dateFrom" (change)="onFilterChange()">
+            <span class="al-date-sep">→</span>
+            <input class="al-date-inp" type="date" [(ngModel)]="dateTo" (change)="onFilterChange()">
+          </div>
+        </div>
+
+        <!-- Chips filtres actifs -->
+        <div class="al-active-filters" *ngIf="activeChips.length > 0">
+          <span class="al-af-label">Filtres actifs :</span>
+          <div
+            *ngFor="let chip of activeChips"
+            class="al-chip"
+            [ngClass]="chip.class"
+            (click)="removeChip(chip.key)"
+          >
+            <i class="isax" [ngClass]="chip.icon"></i>
+            {{ chip.label }}
+            <span class="al-chip-x">×</span>
+          </div>
+          <span class="al-clear-btn" (click)="clearAllFilters()">Tout effacer</span>
+        </div>
+      </div>
+
+      <!-- État chargement / erreur -->
+      <div class="al-state-row" *ngIf="loading">
+        <span class="al-spinner"></span> Chargement des logs...
+      </div>
+      <div class="al-state-row al-state-error" *ngIf="error && !loading">
+        <i class="isax isax-warning-2"></i> {{ error }}
+        <button class="al-btn al-btn--outline" (click)="refresh()" style="margin-left:8px;">Réessayer</button>
+      </div>
+
+      <!-- Table -->
+      <div class="al-table-wrap" *ngIf="!loading && !error">
+        <table class="al-table">
+          <thead>
+            <tr>
+              <th style="width:13%">Horodatage</th>
+              <th style="width:18%">Acteur</th>
+              <th style="width:13%">Action</th>
+              <th style="width:22%">Cible / Ressource</th>
+              <th style="width:8%">Sévérité</th>
+              <th style="width:13%">IP / Localisation</th>
+              <th style="width:7%">Statut</th>
+              <th style="width:6%">Détail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of logs" [ngClass]="getRowClass(log)">
+
+              <!-- Horodatage -->
+              <td>
+                <div class="al-time">{{ formatTime(log.created_at) }}</div>
+                <div class="al-time-sub">{{ timeAgo(log.created_at) }}</div>
+              </td>
+
+              <!-- Acteur -->
+              <td>
+                <div class="al-actor">
+                  <div class="al-av" [ngClass]="getActorClass(log)">{{ getActorInitials(log) }}</div>
+                  <div class="al-actor-info">
+                    <div class="al-actor-name">{{ log.acteur_nom ?? 'Inconnu' }}</div>
+                    <div class="al-actor-role">
+                      {{ log.acteur_role ?? 'Non authentifié' }}<ng-container *ngIf="log.acteur_entreprise"> · {{ log.acteur_entreprise }}</ng-container>
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Action -->
+              <td>
+                <span class="al-pill" [ngClass]="getActionClass(log.type_action)">
+                  <i class="isax" [ngClass]="getActionIcon(log.type_action)"></i>
+                  {{ getActionLabel(log.type_action) }}
+                </span>
+              </td>
+
+              <!-- Cible -->
+              <td>
+                <div class="al-target">{{ log.libelle_action }}</div>
+                <div class="al-target-sub" *ngIf="log.details">{{ log.details }}</div>
+                <div class="al-event-id">{{ log.reference }}</div>
+              </td>
+
+              <!-- Sévérité -->
+              <td>
+                <span class="al-sev-dot" [ngClass]="getSeverityDotClass(log.severite)"></span>
+                <span class="al-sev-text" [ngClass]="getSeverityTextClass(log.severite)">
+                  {{ getSeverityLabel(log.severite) }}
+                </span>
+              </td>
+
+              <!-- IP -->
+              <td>
+                <div class="al-ip">{{ log.ip_address ?? '—' }}</div>
+                <div class="al-loc">{{ log.localisation ?? '' }}</div>
+              </td>
+
+              <!-- Statut -->
+              <td>
+                <span class="al-status" [ngClass]="getStatusClass(log.statut)">
+                  {{ getStatusLabel(log.statut) }}
+                </span>
+              </td>
+
+              <!-- Détail -->
+              <td>
+                <button class="al-eye-btn" title="Voir détail" (click)="openDetail(log)">
+                  <i class="isax isax-eye"></i>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Aucun résultat -->
+            <tr *ngIf="logs.length === 0 && !loading">
+              <td colspan="8" class="al-empty">
+                <i class="isax isax-search-status"></i>
+                <span>Aucun log trouvé pour les filtres sélectionnés</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="al-pagination" *ngIf="totalItems > 0">
+        <div class="al-pag-size">
+          Lignes par page
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option [value]="25">25</option>
+            <option [value]="50">50</option>
+            <option [value]="100">100</option>
+          </select>
+        </div>
+        <span class="al-pag-info">
+          Affichage {{ displayStart }}–{{ displayEnd }} sur {{ totalItems | number }} événements
+        </span>
+        <div class="al-pag-btns">
+          <button class="al-pag-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+            <i class="isax isax-arrow-left-2"></i>
+          </button>
+          <button
+            *ngFor="let p of pageNumbers"
+            class="al-pag-btn"
+            [class.active]="p === currentPage"
+            (click)="goToPage(p)"
+          >{{ p }}</button>
+          <ng-container *ngIf="totalPages > 4">
+            <span class="al-pag-btn al-pag-dots">...</span>
+            <button class="al-pag-btn" (click)="goToPage(totalPages)">{{ totalPages }}</button>
+          </ng-container>
+          <button class="al-pag-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+            <i class="isax isax-arrow-right-3"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANNEAUX LATÉRAUX ── -->
+    <div class="al-side-panels">
+
+      <!-- Alertes sécurité -->
+      <div class="al-sp-card">
+        <div class="al-sp-head">
+          <i class="isax isax-warning-2 sp-icon-r"></i>
+          <span class="al-sp-title">Alertes sécurité actives</span>
+          <span class="al-sp-badge badge-r" *ngIf="kpi.alertesCritiques > 0">{{ kpi.alertesCritiques }} critiques</span>
+        </div>
+
+        <ng-container *ngIf="securityAlerts.length > 0; else noAlerts">
+          <div *ngFor="let alert of securityAlerts" class="al-alert-item">
+            <div class="al-ai-icon" [ngClass]="alert.iconClass">
+              <i class="isax" [ngClass]="alert.icon"></i>
+            </div>
+            <div class="al-ai-body">
+              <div class="al-ai-title">{{ alert.title }}</div>
+              <div class="al-ai-sub">{{ alert.sub }}</div>
+            </div>
+            <div class="al-ai-time">{{ alert.time }}</div>
+          </div>
+        </ng-container>
+        <ng-template #noAlerts>
+          <div class="al-alert-item">
+            <div class="al-ai-body" style="text-align:center;padding:12px;color:var(--color-text-tertiary);font-size:12px;">
+              Aucune alerte critique aujourd'hui
+            </div>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Répartition des actions -->
+      <div class="al-sp-card">
+        <div class="al-sp-head">
+          <i class="isax isax-chart-2 sp-icon-m"></i>
+          <span class="al-sp-title">Répartition des actions</span>
+        </div>
+        <ng-container *ngIf="actionStats.length > 0; else noStats">
+          <div class="al-stat-row" *ngFor="let stat of actionStats">
+            <span class="al-sr-label">{{ stat.label }}</span>
+            <div class="al-sr-bar">
+              <div class="al-sr-fill" [ngClass]="stat.fillClass" [style.width.%]="stat.barWidth"></div>
+            </div>
+            <span class="al-sr-val">{{ stat.value | number }}</span>
+          </div>
+        </ng-container>
+        <ng-template #noStats>
+          <div class="al-stat-row" style="justify-content:center;color:var(--color-text-tertiary);font-size:12px;">
+            Aucune donnée disponible
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── OVERLAY + DRAWER DÉTAIL ── -->
+<div class="al-overlay" [class.open]="drawerOpen" (click)="closeDetail()"></div>
+
+<div class="al-drawer" [class.open]="drawerOpen" *ngIf="selectedLog">
+
+  <!-- En-tête drawer -->
+  <div class="al-dw-head">
+    <div class="al-dw-title">
+      <span class="al-pill" [ngClass]="getActionClass(selectedLog.type_action)">
+        <i class="isax" [ngClass]="getActionIcon(selectedLog.type_action)"></i>
+        {{ getActionLabel(selectedLog.type_action) }}
+      </span>
+      <span class="al-dw-ref">{{ selectedLog.reference }}</span>
+    </div>
+    <button class="al-dw-close" (click)="closeDetail()">
+      <i class="isax isax-close-square"></i>
+    </button>
+  </div>
+
+  <!-- Corps drawer -->
+  <div class="al-dw-body">
+
+    <!-- Sévérité + Statut -->
+    <div class="al-dw-row al-dw-row--inline">
+      <div class="al-dw-field">
+        <div class="al-dw-label">Sévérité</div>
+        <div class="al-dw-val">
+          <span class="al-sev-dot" [ngClass]="getSeverityDotClass(selectedLog.severite)"></span>
+          <span class="al-sev-text" [ngClass]="getSeverityTextClass(selectedLog.severite)">
+            {{ getSeverityLabel(selectedLog.severite) }}
+          </span>
+        </div>
+      </div>
+      <div class="al-dw-field">
+        <div class="al-dw-label">Statut</div>
+        <div class="al-dw-val">
+          <span class="al-status" [ngClass]="getStatusClass(selectedLog.statut)">
+            {{ getStatusLabel(selectedLog.statut) }}
+          </span>
+        </div>
+      </div>
+      <div class="al-dw-field">
+        <div class="al-dw-label">Horodatage</div>
+        <div class="al-dw-val al-dw-mono">{{ formatTime(selectedLog.created_at) }}</div>
+      </div>
+    </div>
+
+    <!-- Acteur -->
+    <div class="al-dw-section">Acteur</div>
+    <div class="al-dw-row al-dw-row--inline">
+      <div class="al-dw-field">
+        <div class="al-dw-label">Nom</div>
+        <div class="al-dw-val al-actor">
+          <div class="al-av" [ngClass]="getActorClass(selectedLog)">{{ getActorInitials(selectedLog) }}</div>
+          <span>{{ selectedLog.acteur_nom ?? 'Inconnu' }}</span>
+        </div>
+      </div>
+      <div class="al-dw-field">
+        <div class="al-dw-label">Rôle</div>
+        <div class="al-dw-val">{{ selectedLog.acteur_role ?? '—' }}</div>
+      </div>
+      <div class="al-dw-field">
+        <div class="al-dw-label">Entreprise</div>
+        <div class="al-dw-val">{{ selectedLog.acteur_entreprise ?? '—' }}</div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="al-dw-section">Description de l'action</div>
+    <div class="al-dw-box">{{ selectedLog.libelle_action }}</div>
+    <div class="al-dw-box al-dw-muted" *ngIf="selectedLog.details" style="margin-top:6px;">
+      {{ selectedLog.details }}
+    </div>
+
+    <!-- Cible -->
+    <div class="al-dw-section" *ngIf="selectedLog.entite_label || selectedLog.entite_type">Ressource ciblée</div>
+    <div class="al-dw-row al-dw-row--inline" *ngIf="selectedLog.entite_label || selectedLog.entite_type">
+      <div class="al-dw-field" *ngIf="selectedLog.entite_type">
+        <div class="al-dw-label">Type</div>
+        <div class="al-dw-val">{{ selectedLog.entite_type }}</div>
+      </div>
+      <div class="al-dw-field" *ngIf="selectedLog.entite_id">
+        <div class="al-dw-label">ID</div>
+        <div class="al-dw-val al-dw-mono">#{{ selectedLog.entite_id }}</div>
+      </div>
+      <div class="al-dw-field" *ngIf="selectedLog.entite_label">
+        <div class="al-dw-label">Label</div>
+        <div class="al-dw-val">{{ selectedLog.entite_label }}</div>
+      </div>
+    </div>
+
+    <!-- Réseau -->
+    <div class="al-dw-section">Informations réseau</div>
+    <div class="al-dw-row al-dw-row--inline">
+      <div class="al-dw-field">
+        <div class="al-dw-label">Adresse IP</div>
+        <div class="al-dw-val al-dw-mono">
+          {{ selectedLog.ip_address ?? '—' }}
+          <span class="al-tor-badge" *ngIf="selectedLog.est_tor">TOR</span>
+        </div>
+      </div>
+      <div class="al-dw-field">
+        <div class="al-dw-label">Localisation</div>
+        <div class="al-dw-val">{{ selectedLog.localisation ?? '—' }}</div>
+      </div>
+      <div class="al-dw-field" *ngIf="selectedLog.methode_http">
+        <div class="al-dw-label">Méthode HTTP</div>
+        <div class="al-dw-val al-dw-mono">{{ selectedLog.methode_http }} {{ selectedLog.code_http }}</div>
+      </div>
+    </div>
+    <div class="al-dw-row" *ngIf="selectedLog.url">
+      <div class="al-dw-field" style="flex:1">
+        <div class="al-dw-label">URL</div>
+        <div class="al-dw-val al-dw-mono al-dw-overflow">{{ selectedLog.url }}</div>
+      </div>
+    </div>
+    <div class="al-dw-row" *ngIf="selectedLog.user_agent">
+      <div class="al-dw-field" style="flex:1">
+        <div class="al-dw-label">User-Agent</div>
+        <div class="al-dw-val al-dw-muted al-dw-overflow">{{ selectedLog.user_agent }}</div>
+      </div>
+    </div>
+
+    <!-- Données avant / après -->
+    <ng-container *ngIf="selectedLog.avant || selectedLog.apres">
+      <div class="al-dw-section">Modifications</div>
+      <div class="al-dw-diff" *ngIf="selectedLog.avant">
+        <div class="al-dw-diff-label">Avant</div>
+        <pre class="al-dw-pre">{{ selectedLog.avant | json }}</pre>
+      </div>
+      <div class="al-dw-diff al-dw-diff--after" *ngIf="selectedLog.apres">
+        <div class="al-dw-diff-label">Après</div>
+        <pre class="al-dw-pre">{{ selectedLog.apres | json }}</pre>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

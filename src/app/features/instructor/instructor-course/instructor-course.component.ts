@@ -284,7 +284,7 @@ logFormationStatus(formation: any): void {
     if (this.selectedFormation) {
       this.formationService.deleteFormation(this.selectedFormation.id).subscribe({
         next: () => {
-          this.loadFormations(); // Recharger la liste
+          this.loadFormations();
           this.selectedFormation = null;
         },
         error: (error) => {
@@ -292,6 +292,14 @@ logFormationStatus(formation: any): void {
         }
       });
     }
+  }
+
+  archiveFormation(formation: any): void {
+    if (!confirm(`Archiver la formation "${formation.titre}" ?`)) return;
+    this.formationService.deleteFormation(formation.id).subscribe({
+      next: () => this.loadFormations(),
+      error: (error) => console.error('Erreur archivage:', error)
+    });
   }
 
 }

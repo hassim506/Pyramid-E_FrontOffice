@@ -399,3 +399,66 @@
 
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL SONDAGE À CHAUD
+══════════════════════════════════════════════ -->
+<div class="lp-modal-overlay" *ngIf="showSondageModal" (click)="ignorerSondage()">
+  <div class="lp-modal" (click)="$event.stopPropagation()">
+
+    <div class="lp-modal__confetti">
+      <span>🎉</span><span>📋</span><span>✅</span><span>💬</span><span>⭐</span>
+    </div>
+
+    <div class="lp-modal__icon-wrap">
+      <div class="lp-modal__icon-ring"></div>
+      <div class="lp-modal__icon">
+        <i class="isax isax-clipboard-text"></i>
+      </div>
+    </div>
+
+    <h2 class="lp-modal__title">Formation terminée ! 🎉</h2>
+    <p class="lp-modal__sub">
+      Vous avez terminé <strong>{{ formation?.titre }}</strong>.<br>
+      Donnez-nous votre avis en répondant au sondage.
+    </p>
+
+    <div class="lp-modal__quiz-info" *ngIf="sondageAChaud">
+      <div class="lp-modal__quiz-badge">
+        <i class="isax isax-clipboard-text me-2"></i>Sondage de satisfaction
+      </div>
+      <p class="lp-modal__quiz-name">{{ sondageAChaud.titre }}</p>
+      <div class="lp-modal__quiz-meta" *ngIf="sondageAChaud.nombre_questions">
+        <span>
+          <i class="isax isax-note-21 me-1"></i>
+          {{ sondageAChaud.nombre_questions }} question{{ sondageAChaud.nombre_questions !== 1 ? 's' : '' }}
+        </span>
+        <span *ngIf="sondageAChaud.duree_estimee">
+          <i class="isax isax-clock me-1"></i>
+          ~{{ sondageAChaud.duree_estimee }} min
+        </span>
+      </div>
+    </div>
+
+    <div class="lp-modal__actions">
+      <button class="lp-modal__btn lp-modal__btn--primary" (click)="allerAuSondage()">
+        <i class="isax isax-play-circle me-2"></i>
+        Répondre maintenant
+      </button>
+      <button class="lp-modal__btn lp-modal__btn--secondary" (click)="ignorerSondage()">
+        <i class="isax isax-clock me-2"></i>
+        Je le ferai plus tard
+      </button>
+      <button class="lp-modal__btn lp-modal__btn--ghost" (click)="fermerModalSondage()">
+        <i class="isax isax-arrow-left-2 me-2"></i>
+        Retour au tableau de bord
+      </button>
+    </div>
+
+    <p class="lp-modal__note">
+      <i class="isax isax-info-circle me-1"></i>
+      Le sondage restera disponible dans <strong>Mes Sondages</strong>
+    </p>
+
+  </div>
+</div>

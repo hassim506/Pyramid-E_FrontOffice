@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/adminrh/adminrh-permission/adminrh-permission.component.scss"],
+  "sourcesContent": [".page-content {\r\n  padding: 20px;\r\n}\r\n\r\n.pagination {\r\n  .page-link {\r\n    border-radius: 6px;\r\n    margin: 0 2px;\r\n    border: 1px solid #dee2e6;\r\n    color: #6c757d;\r\n    \r\n    &:hover {\r\n      background-color: #f8f9fa;\r\n      border-color: #dee2e6;\r\n    }\r\n  }\r\n  \r\n  .page-item.active .page-link {\r\n    background-color: #007bff;\r\n    border-color: #007bff;\r\n    color: white;\r\n  }\r\n  \r\n  .page-item.disabled .page-link {\r\n    color: #6c757d;\r\n    background-color: #fff;\r\n    border-color: #dee2e6;\r\n  }\r\n}\r\n\r\n.table {\r\n  th {\r\n    font-weight: 600;\r\n    background-color: #f8f9fa;\r\n  }\r\n\r\n  tbody tr {\r\n    transition: all 0.3s ease;\r\n\r\n    &:hover {\r\n      background-color: #f8f9fa;\r\n    }\r\n  }\r\n}\r\n\r\n.modal.show {\r\n  background-color: rgba(0, 0, 0, 0.5);\r\n}"],
+  "mappings": ";AAAA,CAAA;AACE,WAAA;;AAIA,CAAA,WAAA,CAAA;AACE,iBAAA;AACA,UAAA,EAAA;AACA,UAAA,IAAA,MAAA;AACA,SAAA;;AAEA,CANF,WAME,CANF,SAME;AACE,oBAAA;AACA,gBAAA;;AAIJ,CAZA,WAYA,CAAA,SAAA,CAAA,OAAA,CAZA;AAaE,oBAAA;AACA,gBAAA;AACA,SAAA;;AAGF,CAlBA,WAkBA,CANA,SAMA,CAAA,SAAA,CAlBA;AAmBE,SAAA;AACA,oBAAA;AACA,gBAAA;;AAKF,CAAA,MAAA;AACE,eAAA;AACA,oBAAA;;AAGF,CALA,MAKA,MAAA;AACE,cAAA,IAAA,KAAA;;AAEA,CARF,MAQE,MAAA,EAAA;AACE,oBAAA;;AAKN,CAAA,KAAA,CAAA;AACE,oBAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;;",
+  "names": []
+}

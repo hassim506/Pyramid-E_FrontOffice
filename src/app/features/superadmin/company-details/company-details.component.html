@@ -57,17 +57,24 @@
           
           <!-- Statistiques rapides -->
           <div class="row mt-4 g-3">
-            <div class="col-6">
+            <div class="col-4">
               <div class="bg-light rounded p-3">
-                <h5 class="mb-1 text-primary fw-bold">{{ company.taille_effectif || 0 }}</h5>
+                <h5 class="mb-1 text-primary fw-bold">{{ nbEmployesDeclares || 0 }}</h5>
                 <p class="text-muted mb-0 fs-6">Effectif déclaré</p>
               </div>
             </div>
-            <div class="col-6">
+            <div class="col-4">
               <div class="bg-light rounded p-3">
-                <h5 class="mb-1 text-success fw-bold" *ngIf="!loadingEmployees">{{ employeeCount }}</h5>
+                <h5 class="mb-1 text-info fw-bold" *ngIf="!loadingEmployees">{{ nbInscritsPlateforme }}</h5>
+                <div *ngIf="loadingEmployees" class="spinner-border spinner-border-sm text-info"></div>
+                <p class="text-muted mb-0 fs-6">Inscrits</p>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="bg-light rounded p-3">
+                <h5 class="mb-1 text-success fw-bold" *ngIf="!loadingEmployees">{{ nbActifsPlateforme }}</h5>
                 <div *ngIf="loadingEmployees" class="spinner-border spinner-border-sm text-success"></div>
-                <p class="text-muted mb-0 fs-6">Sur la plateforme</p>
+                <p class="text-muted mb-0 fs-6">Actifs</p>
               </div>
             </div>
           </div>
@@ -143,32 +150,48 @@
     <div class="col-xl-8 col-lg-7">
       <!-- Statistiques des employés -->
       <div class="row mb-4">
-        <div class="col-md-6">
-          <div class="card bg-gradient-primary text-white shadow-sm h-100">
+        <div class="col-md-4">
+          <div class="card bg-light shadow-sm h-100">
             <div class="card-body">
               <div class="d-flex align-items-center">
-                <div class="me-3">
-                  <i class="isax isax-people fs-1 opacity-75"></i>
-                </div>
+                <div class="me-3"><i class="isax isax-building-3 fs-1 opacity-75 text-primary"></i></div>
                 <div>
-                  <h3 class="mb-1 fw-bold" *ngIf="!loadingEmployees">{{ employeeCount }}</h3>
-                  <div *ngIf="loadingEmployees" class="spinner-border spinner-border-sm" role="status"></div>
-                  <p class="mb-0 opacity-90">Employés inscrits sur la plateforme</p>
+                  <h3 class="mb-1 fw-bold text-primary">{{ nbEmployesDeclares || 0 }}</h3>
+                  <p class="mb-0 text-muted">Effectif déclaré</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
+          <div class="card bg-gradient-primary text-white shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="me-3"><i class="isax isax-people fs-1 opacity-75"></i></div>
+                <div>
+                  @if (!loadingEmployees) {
+                    <h3 class="mb-1 fw-bold">{{ nbInscritsPlateforme }}</h3>
+                  } @else {
+                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                  }
+                  <p class="mb-0 opacity-90">Inscrits plateforme</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
           <div class="card bg-gradient-success text-white shadow-sm h-100">
             <div class="card-body">
               <div class="d-flex align-items-center">
-                <div class="me-3">
-                  <i class="isax isax-user-tick fs-1 opacity-75"></i>
-                </div>
+                <div class="me-3"><i class="isax isax-user-tick fs-1 opacity-75"></i></div>
                 <div>
-                  <h3 class="mb-1 fw-bold">{{ getActiveEmployeesCount() }}</h3>
-                  <p class="mb-0 opacity-90">Employés actifs</p>
+                  @if (!loadingEmployees) {
+                    <h3 class="mb-1 fw-bold">{{ nbActifsPlateforme }}</h3>
+                  } @else {
+                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                  }
+                  <p class="mb-0 opacity-90">Actifs plateforme</p>
                 </div>
               </div>
             </div>
@@ -233,9 +256,9 @@
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
           <h6 class="mb-0 fw-semibold">
             <i class="isax isax-profile-2user me-2 text-primary"></i>
-            Employés Inscrits ({{ employeeCount }})
+            Employés Inscrits ({{ nbInscritsPlateforme }})
           </h6>
-          <span class="badge bg-primary">{{ employeeCount }} utilisateurs</span>
+          <span class="badge bg-primary">{{ nbInscritsPlateforme }} utilisateurs</span>
         </div>
         <div class="card-body p-0">
           <div class="table-responsive">

@@ -192,4 +192,12 @@ export class InstructorCourseGridComponent implements OnInit {
       });
     }
   }
+
+  archiveFormation(formation: any): void {
+    if (!confirm(`Archiver la formation "${formation.titre}" ?`)) return;
+    this.formationService.deleteFormation(formation.id).subscribe({
+      next: () => this.loadFormations(),
+      error: (error) => console.error('Erreur archivage:', error)
+    });
+  }
 }

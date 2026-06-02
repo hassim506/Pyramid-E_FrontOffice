@@ -52,6 +52,10 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   showQuizFinalModal = false;
   quizFinalData: { id: number; titre: string; score_minimum: number; max_tentatives: number } | null = null;
 
+  // ── Modal Sondage à chaud ─────────────────────────
+  showSondageModal = false;
+  sondageAChaud: any = null;
+
   private sub?: Subscription;
 
   constructor(
@@ -96,6 +100,7 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
     this.currentAnswers = {}; this.quizResults = {}; this.videoError = false;
     this.sidebarOpen = true;
     this.showQuizFinalModal = false; this.quizFinalData = null;
+    this.showSondageModal = false; this.sondageAChaud = null;
   }
 
   loadStructure(): void {
@@ -139,7 +144,7 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   goToPrev(): void { const i = this.getCurrentIndex(); if (i > 0) this.selectSection(this.flatSections[i - 1]); }
   goToNext(): void { const i = this.getCurrentIndex(); if (i < this.flatSections.length - 1) this.selectSection(this.flatSections[i + 1]); }
 
-  // ✅ markCompleted — souscrit à l'Observable et gère quiz_final
+  // ✅ markCompleted — souscrit à l'Observable et gère quiz_final + sondage_a_chaud
   markCompleted(sectionId: number): void {
     this.progressionService.markCompleted(this.formationId, sectionId)
       .subscribe((res: any) => {
@@ -148,6 +153,8 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
         }
         if (res?.est_termine && res?.quiz_final) {
           setTimeout(() => this._ouvrirModalQuizFinal(res.quiz_final), 600);
+        } else if (res?.est_termine && res?.sondage_a_chaud) {
+          setTimeout(() => this._ouvrirModalSondage(res.sondage_a_chaud), 600);
         }
       });
   }
@@ -181,6 +188,8 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
         .subscribe((res: any) => {
           if (res?.est_termine && res?.quiz_final) {
             setTimeout(() => this._ouvrirModalQuizFinal(res.quiz_final), 600);
+          } else if (res?.est_termine && res?.sondage_a_chaud) {
+            setTimeout(() => this._ouvrirModalSondage(res.sondage_a_chaud), 600);
           }
         });
     }
@@ -213,6 +222,27 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
 
   resterEtFairePlusTard(): void {
     this.showQuizFinalModal = false;
+  }
+
+  // ── Modal Sondage à chaud ─────────────────────────
+  private _ouvrirModalSondage(sondage: any): void {
+    this.sondageAChaud      = sondage;
+    this.showSondageModal   = true;
+  }
+
+  allerAuSondage(): void {
+    if (!this.sondageAChaud) return;
+    this.showSondageModal = false;
+    this.router.navigate(['/student/student-sondage', this.sondageAChaud.id]);
+  }
+
+  fermerModalSondage(): void {
+    this.showSondageModal = false;
+    this.goBack();
+  }
+
+  ignorerSondage(): void {
+    this.showSondageModal = false;
   }
 
   // ── Helpers ──────────────────────────────────────

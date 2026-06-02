@@ -244,3 +244,221 @@ $text-muted: #6C757D;
   .label { color: #6c757d; min-width: 120px; }
 }
 .ip-zoom-link { color: #534AB7; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+
+.ip-zoom-badge--done {
+  background: #F3F4F6; color: #9CA3AF; border-color: #E5E7EB;
+}
+
+
+// ── SESSION DETAIL MODAL (sd-*) ───────────────────────────────────────────────
+
+.sd-modal {
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
+}
+
+// Head
+.sd-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #BA7517 0%, #D4941E 60%, #E8B84B 100%);
+  color: #fff;
+  flex-shrink: 0;
+
+  &__icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(255,255,255,.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+
+  &__text { flex: 1; min-width: 0; }
+
+  &__title {
+    font-size: 16px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  &__sub {
+    font-size: 12px; opacity: .8; margin-top: 2px;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  &__badges {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    .ip-type-badge, .ip-statut-badge {
+      border: 1px solid rgba(255,255,255,.3);
+      background: rgba(255,255,255,.15);
+      color: #fff;
+    }
+  }
+}
+
+.sd-close {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(0,0,0,.12); border: none; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
+  transition: background .15s;
+  &:hover { background: rgba(0,0,0,.22); }
+}
+
+.sd-mono { font-family: monospace; letter-spacing: .03em; }
+.sd-sep  { opacity: .6; }
+.sd-muted { color: #9CA3AF; font-size: .9em; }
+
+// Body
+.sd-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #F8FAFC;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+}
+
+// Section label
+.sd-section-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .06em; color: #6B7280;
+  margin-top: 16px; margin-bottom: 10px;
+  i { font-size: 14px; }
+  &:first-child { margin-top: 0; }
+}
+
+// 2-column grid
+.sd-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+// Info card
+.sd-info-card {
+  background: #fff;
+  border: 1px solid #E9ECEF;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  &__icon {
+    width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+  }
+
+  &__label { font-size: 11px; color: #6B7280; margin-bottom: 2px; }
+  &__val   { font-size: 13px; font-weight: 500; color: #1A1A2E; }
+}
+
+.sd-ic--blue   { background: #EFF6FF; color: #2563EB; }
+.sd-ic--purple { background: #F5F3FF; color: #7C3AED; }
+.sd-ic--teal   { background: #F0FDFA; color: #0D9488; }
+.sd-ic--orange { background: #FFF7ED; color: #EA580C; }
+
+// Progress bar
+.sd-pbar-wrap {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.sd-pbar {
+  flex: 1; height: 6px; background: #E9ECEF; border-radius: 10px; overflow: hidden;
+}
+.sd-pbar__fill {
+  height: 100%; background: #BA7517; border-radius: 10px;
+  transition: width .3s;
+}
+.sd-pbar__label { font-size: 12px; color: #6B7280; white-space: nowrap; }
+
+// Text box
+.sd-text-box {
+  background: #fff; border: 1px solid #E9ECEF; border-radius: 10px;
+  padding: 12px 14px; font-size: 13px; color: #374151; line-height: 1.6;
+  white-space: pre-wrap;
+
+  &--note   { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+  &--danger { background: #FFF5F5; border-color: #FECACA; color: #991B1B; }
+}
+
+// Tags
+.sd-tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.sd-tag {
+  display: inline-flex; align-items: center;
+  background: #EFF6FF; color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+  font-size: 11px; font-weight: 500;
+  padding: 3px 10px; border-radius: 20px;
+}
+
+// Recap row (key-value)
+.sd-recap-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; padding: 6px 0;
+  border-bottom: 1px solid #F3F4F6;
+  font-size: 13px;
+  &:last-child { border-bottom: none; }
+}
+.sd-rl { color: #6B7280; flex-shrink: 0; }
+.sd-rv { color: #1A1A2E; font-weight: 500; text-align: right; }
+
+// Zoom card
+.sd-zoom-card {
+  background: #fff;
+  border: 1px solid #E9ECEF;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  &__status { margin-bottom: 8px; }
+  &__actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #F3F4F6; }
+}
+
+.sd-zoom-loading {
+  display: flex; align-items: center; gap: 8px;
+  color: #6B7280; font-size: 13px; padding: 12px 0;
+  i { animation: spin .8s linear infinite; }
+}
+
+.sd-zoom-empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; padding: 20px;
+  background: #fff; border: 1px dashed #D1D5DB;
+  border-radius: 10px; color: #9CA3AF; font-size: 13px; text-align: center;
+  i { font-size: 24px; opacity: .5; }
+}
+
+// Footer
+.sd-foot {
+  padding: 14px 24px;
+  border-top: 1px solid #E9ECEF;
+  background: #fff;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.sd-btn-ghost {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 20px; border-radius: 8px;
+  border: 1px solid #D1D5DB; background: #fff;
+  font-size: 13px; font-weight: 500; color: #374151;
+  cursor: pointer; transition: all .15s;
+  &:hover { background: #F9FAFB; border-color: #9CA3AF; }
+}

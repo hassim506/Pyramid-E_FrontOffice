@@ -75,16 +75,27 @@ export class ZoomMeetingService {
 
   // Helper : le meeting est-il accessible maintenant (15 min avant → fin)
   isAccessible(meeting: ZoomMeeting): boolean {
-    const now      = Date.now();
-    const start    = new Date(meeting.scheduled_at).getTime();
-    const openAt   = start - 15 * 60 * 1000;
-    const closeAt  = start + meeting.duration * 60 * 1000;
+    const now     = Date.now();
+    const start   = new Date(meeting.scheduled_at).getTime();
+    const openAt  = start - 15 * 60 * 1000;
+    const closeAt = start + meeting.duration * 60 * 1000;
     return now >= openAt && now <= closeAt;
+  }
+
+  // Helper : vrai si la session est entièrement passée
+  isExpired(meeting: ZoomMeeting): boolean {
+    const closeAt = new Date(meeting.scheduled_at).getTime() + meeting.duration * 60 * 1000;
+    return Date.now() > closeAt;
   }
 
   // Helper : délai formaté jusqu'au début
   getDelai(meeting: ZoomMeeting): string {
-    const diff = new Date(meeting.scheduled_at).getTime() - Date.now();
+    const now     = Date.now();
+    const start   = new Date(meeting.scheduled_at).getTime();
+    const closeAt = start + meeting.duration * 60 * 1000;
+
+    if (now > closeAt) return 'Terminé';
+    const diff = start - now;
     if (diff <= 0) return 'En cours';
     const mins = Math.floor(diff / 60000);
     if (mins < 60) return `Dans ${mins} min`;

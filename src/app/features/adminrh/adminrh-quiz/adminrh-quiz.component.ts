@@ -103,6 +103,15 @@ export class AdminrhQuizComponent implements OnInit, OnDestroy {
     }
   }
 
+  archiveQuiz(quiz: Quiz): void {
+    if (!confirm(`Archiver le quiz "${quiz.titre}" ?`)) return;
+    const sub = this.quizService.deleteQuiz(quiz.id).subscribe({
+      next: ()     => { this.quizzes = this.quizzes.filter(q => q.id !== quiz.id); },
+      error: (err) => { this.error = 'Erreur lors de l\'archivage'; console.error(err); }
+    });
+    this.subscription.add(sub);
+  }
+
   getStatusClass(quiz: Quiz): string { return quiz.is_active ? 'badge-success' : 'badge-secondary'; }
   getStatusText(quiz: Quiz):  string { return quiz.is_active ? 'Actif' : 'Inactif'; }
 }

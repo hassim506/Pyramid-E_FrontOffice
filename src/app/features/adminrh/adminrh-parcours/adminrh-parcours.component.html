@@ -6,11 +6,9 @@
       <i class="isax isax-route-square"></i>Parcours ({{ totalItems }})
     </span>
     <span class="ac-spacer"></span>
-    <div style="display:flex;align-items:center;padding:0 10px;">
-      <button type="button" class="ac-add-btn" (click)="openParcoursModal()">
-        <i class="isax isax-add"></i>Nouveau parcours
-      </button>
-    </div>
+    <button type="button" class="ac-add-btn" (click)="openParcoursModal()">
+      <i class="isax isax-add"></i>Nouveau parcours
+    </button>
   </div>
 
   <!-- ── KPI ── -->
@@ -18,38 +16,46 @@
     <div class="ac-kpi">
       <div class="ac-kpi__label"><i class="isax isax-route-square"></i>Total</div>
       <div class="ac-kpi__val">{{ totalItems }}</div>
+      <div class="ac-kpi__delta neutral">parcours</div>
     </div>
     <div class="ac-kpi">
       <div class="ac-kpi__label"><i class="isax isax-tick-circle"></i>Actifs</div>
       <div class="ac-kpi__val">{{ getParcoursActifs() }}</div>
-      <div class="ac-kpi__delta up">+{{ getParcoursActifs() }} actifs</div>
+      <div class="ac-kpi__delta up">en cours</div>
     </div>
     <div class="ac-kpi">
       <div class="ac-kpi__label"><i class="isax isax-close-circle"></i>Inactifs</div>
       <div class="ac-kpi__val">{{ getParcoursInactifs() }}</div>
+      <div class="ac-kpi__delta neutral">désactivés</div>
     </div>
     <div class="ac-kpi">
       <div class="ac-kpi__label"><i class="isax isax-book-1"></i>Formations dispo</div>
       <div class="ac-kpi__val">{{ formations.length }}</div>
+      <div class="ac-kpi__delta neutral">cataloguées</div>
     </div>
   </div>
 
   <!-- ── Toolbar ── -->
   <div class="ac-toolbar">
     <div class="ac-search">
-      <i class="isax isax-search-normal ac-search__icon"></i>
-      <input class="ac-search__input" type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un parcours…">
+      <i class="isax isax-search-normal-1 ac-search__icon"></i>
+      <input class="ac-search__input" type="search" [(ngModel)]="searchTerm" placeholder="Rechercher un parcours…">
     </div>
-    <select class="ac-select" title="Filtrer par niveau" [(ngModel)]="selectedNiveau">
-      <option value="">Tous les niveaux</option>
-      <option *ngFor="let n of niveaux" [value]="n.value">{{ n.label }}</option>
-    </select>
-    <select class="ac-select" title="Filtrer par statut" [(ngModel)]="selectedStatut">
-      <option value="">Tous les statuts</option>
-      <option value="actif">Actif</option>
-      <option value="inactif">Inactif</option>
-    </select>
-    <button type="button" class="ac-chip" (click)="clearFilters()" *ngIf="searchTerm || selectedNiveau || selectedStatut">
+    <button type="button" class="ac-chip" [class.ac-chip--on]="selectedNiveau === ''"
+            (click)="selectedNiveau = ''">Tous niveaux</button>
+    <button type="button" class="ac-chip" *ngFor="let n of niveaux"
+            [class.ac-chip--on]="selectedNiveau === n.value"
+            (click)="selectedNiveau = n.value">{{ n.label }}</button>
+    <div class="ac-view-group" style="margin-left:8px;">
+      <button type="button" class="ac-view-toggle" [class.active]="selectedStatut === ''"
+              (click)="selectedStatut = ''">Tous</button>
+      <button type="button" class="ac-view-toggle" [class.active]="selectedStatut === 'actif'"
+              (click)="selectedStatut = 'actif'">Actifs</button>
+      <button type="button" class="ac-view-toggle" [class.active]="selectedStatut === 'inactif'"
+              (click)="selectedStatut = 'inactif'">Inactifs</button>
+    </div>
+    <button type="button" class="ac-chip" (click)="clearFilters()"
+            *ngIf="searchTerm || selectedNiveau || selectedStatut">
       <i class="isax isax-close-circle"></i>Effacer
     </button>
     <span class="ac-spacer"></span>
@@ -65,74 +71,73 @@
     <button type="button" class="ac-alert-close" (click)="error=''"><i class="isax isax-close-circle"></i></button>
   </div>
 
-  <!-- ── Loading ── -->
-  <div class="ac-empty" *ngIf="loading">
-    <i class="isax isax-route-square"></i>Chargement des parcours…
+  <!-- ── Skeleton ── -->
+  <div *ngIf="loading" class="ac-skeletons">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="ac-skeleton-card"></div>
   </div>
 
-  <!-- ── Table ── -->
+  <!-- ── Card grid ── -->
   <ng-container *ngIf="!loading">
-    <table class="ac-table" *ngIf="filteredParcours.length > 0">
-      <thead>
-        <tr>
-          <th style="width:52px;">Image</th>
-          <th>Parcours</th>
-          <th style="width:110px;">Niveau</th>
-          <th style="width:76px;">Durée</th>
-          <th style="width:96px;">Coût</th>
-          <th style="width:90px;text-align:center;">Formations</th>
-          <th style="width:76px;text-align:center;">Inscrits</th>
-          <th style="width:80px;">Statut</th>
-          <th style="width:84px;"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let p of filteredParcours; trackBy: trackByParcoursId">
-          <td>
-            <img [src]="p.image_url || 'assets/images/default-parcours.png'" [alt]="p.nom"
-                 style="width:40px;height:40px;border-radius:6px;object-fit:cover;display:block;">
-          </td>
-          <td>
-            <div class="ac-table-name">{{ p.nom }}</div>
-            <div class="ac-table-sub">{{ formatDate(p.created_at) }}</div>
-          </td>
-          <td>
-            <span class="ac-status"
-                  [attr.data-s]="p.niveau === 'expert' ? 'cancel' : p.niveau === 'avance' ? 'done' : p.niveau === 'intermediaire' ? 'pending' : 'plan'">
-              {{ getNiveauLabel(p.niveau) }}
+    <div class="ac-card-grid" *ngIf="filteredParcours.length > 0">
+      <div *ngFor="let p of filteredParcours; trackBy: trackByParcoursId" class="ac-fcard">
+
+        <!-- Thumb -->
+        <div class="ac-fcard__thumb" [attr.data-th]="p.actif ? 'blue' : 'amber'">
+          <img *ngIf="p.image_url" [src]="p.image_url" [alt]="p.nom" class="ac-fcard__img">
+          <i *ngIf="!p.image_url" class="isax isax-route-square"></i>
+        </div>
+
+        <!-- Body -->
+        <div class="ac-fcard__body">
+          <div class="ac-fcard__cat"
+               [attr.data-cat]="p.niveau === 'expert' ? 'purple' : p.niveau === 'avance' ? 'blue' : p.niveau === 'intermediaire' ? 'teal' : 'default'">
+            {{ getNiveauLabel(p.niveau) }}
+          </div>
+          <div class="ac-fcard__title">{{ p.nom }}</div>
+          <div class="ac-fcard__meta">
+            <span><i class="isax isax-clock"></i> {{ p.duree_estimee }}h</span>
+            <span><i class="isax isax-book-1"></i> {{ p.formations.length }} formations</span>
+            <span><i class="isax isax-people"></i> {{ p.users.length }} inscrits</span>
+          </div>
+          <div class="ac-fcard__meta" style="margin-top:3px;" *ngIf="p.prix && p.prix !== '0'">
+            <span><i class="isax isax-wallet"></i> {{ p.prix }} XOF</span>
+            <span *ngIf="getFormationsObligatoires(p.formations).length > 0">
+              <i class="isax isax-warning-2"></i> {{ getFormationsObligatoires(p.formations).length }} oblig.
             </span>
-          </td>
-          <td style="font-size:13px;font-weight:500;">{{ p.duree_estimee }}h</td>
-          <td style="font-size:12px;color:#4b5563;">{{ p.prix }} XOF</td>
-          <td style="text-align:center;">
-            <strong style="font-size:13px;color:#111827;">{{ p.formations.length }}</strong>
-            <div style="font-size:11px;color:#9ca3af;">{{ getFormationsObligatoires(p.formations).length }} oblig.</div>
-          </td>
-          <td style="text-align:center;font-size:13px;font-weight:500;color:#111827;">{{ p.users.length }}</td>
-          <td>
-            <span class="ac-status" [attr.data-s]="p.actif ? 'pub' : 'draft'">
-              {{ p.actif ? 'Actif' : 'Inactif' }}
-            </span>
-          </td>
-          <td>
-            <div class="ac-actions">
-              <button type="button" class="ac-act" (click)="viewParcours(p)" title="Voir"><i class="isax isax-eye"></i></button>
-              <button type="button" class="ac-act" (click)="editParcours(p)" title="Modifier"><i class="isax isax-edit-2"></i></button>
-              <button type="button" class="ac-act ac-act--del" (click)="confirmDelete(p)" title="Supprimer"><i class="isax isax-trash"></i></button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="ac-fcard__footer">
+          <span class="ac-status" [attr.data-s]="p.actif ? 'pub' : 'draft'">
+            {{ p.actif ? 'Actif' : 'Inactif' }}
+          </span>
+          <div class="ac-fcard__actions" style="margin-left:auto;">
+            <button type="button" class="ac-act" title="Voir" (click)="viewParcours(p)">
+              <i class="isax isax-eye"></i>
+            </button>
+            <button type="button" class="ac-act" title="Modifier" (click)="editParcours(p)">
+              <i class="isax isax-edit-2"></i>
+            </button>
+            <button type="button" class="ac-act ac-act--arch" title="Archiver" (click)="archiveParcours(p)">
+              <i class="isax isax-archive"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
 
     <!-- Empty -->
-    <div class="ac-empty" *ngIf="filteredParcours.length === 0">
+    <div class="ac-empty ac-empty--span" *ngIf="filteredParcours.length === 0">
       <i class="isax isax-route-square"></i>
-      {{ parcours.length === 0 ? 'Aucun parcours créé' : 'Aucun résultat pour ces filtres' }}
-      <button type="button" class="ac-add-btn" style="margin-top:10px;" (click)="openParcoursModal()" *ngIf="parcours.length === 0">
+      <p>{{ parcours.length === 0 ? 'Aucun parcours créé' : 'Aucun résultat pour ces filtres' }}</p>
+      <button type="button" class="ac-add-btn" style="margin-top:10px;"
+              (click)="openParcoursModal()" *ngIf="parcours.length === 0">
         <i class="isax isax-add"></i>Créer un parcours
       </button>
-      <button type="button" class="ac-chip" style="margin-top:10px;" (click)="clearFilters()" *ngIf="parcours.length > 0">
+      <button type="button" class="ac-chip" style="margin-top:10px;"
+              (click)="clearFilters()" *ngIf="parcours.length > 0">
         <i class="isax isax-refresh"></i>Effacer les filtres
       </button>
     </div>
@@ -141,12 +146,14 @@
     <div class="ac-pager" *ngIf="totalPages > 1">
       <span class="ac-pager__info">{{ getPaginationStart() }}–{{ getPaginationEnd() }} sur {{ totalItems }} parcours</span>
       <div class="ac-pager__btns">
-        <button type="button" class="ac-pager__btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+        <button type="button" class="ac-pager__btn" [disabled]="currentPage === 1"
+                (click)="onPageChange(currentPage - 1)">
           <i class="isax isax-arrow-left-3"></i>
         </button>
         <button type="button" class="ac-pager__btn" *ngFor="let pg of pages"
                 [class.active]="pg === currentPage" (click)="onPageChange(pg)">{{ pg }}</button>
-        <button type="button" class="ac-pager__btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+        <button type="button" class="ac-pager__btn" [disabled]="currentPage === totalPages"
+                (click)="onPageChange(currentPage + 1)">
           <i class="isax isax-arrow-right-3"></i>
         </button>
       </div>
@@ -160,7 +167,7 @@
      MODAL CRÉATION / MODIFICATION
 ════════════════════════════════════════════════ -->
 <div class="modal fade" id="parcoursModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable" style="max-width:640px;">
+  <div class="modal-dialog modal-lg" style="max-width:640px;">
     <div class="wz-modal modal-content">
 
       <div class="wz-head">
@@ -172,7 +179,7 @@
         <button type="button" class="wz-close" data-bs-dismiss="modal"><i class="isax isax-close-circle"></i></button>
       </div>
 
-      <form [formGroup]="parcoursForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="parcoursForm" (ngSubmit)="onSubmit()" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
         <div class="wz-body">
 
           <div class="wz-field">
@@ -206,7 +213,7 @@
 
           <div class="wz-row" style="margin-top:12px;">
             <div class="wz-field" style="margin-bottom:0;">
-              <label class="wz-label">Prix (XOF) <span class="wz-req">*</span></label>
+              <label class="wz-label">Coût (XOF) <span class="wz-req">*</span></label>
               <input type="number" class="wz-input" formControlName="prix" min="0" step="0.01">
             </div>
             <div class="wz-field" style="margin-bottom:0;">
@@ -268,11 +275,60 @@
             </div>
           </div>
 
+          <!-- ── Formations du parcours ── -->
+          <div style="margin-top:18px;">
+            <div class="wz-label" style="margin-bottom:8px;">
+              Formations du parcours
+              <span *ngIf="selectedFormations.length > 0" style="font-weight:400;color:#185fa5;margin-left:4px;">({{ selectedFormations.length }} sélectionnée{{ selectedFormations.length > 1 ? 's' : '' }})</span>
+            </div>
+
+            <!-- Chips sélectionnées -->
+            <div class="cw-pool-chips" *ngIf="selectedFormations.length > 0">
+              <span class="cw-pool-chip" *ngFor="let f of selectedFormations">
+                {{ f.titre }}
+                <button type="button" (click)="removeSelectedFormation(f.id)">
+                  <i class="isax isax-close-circle"></i>
+                </button>
+              </span>
+            </div>
+
+            <!-- Pool -->
+            <div class="cw-pool">
+              <div class="cw-pool__search">
+                <i class="isax isax-search-normal-1"></i>
+                <input type="search" [(ngModel)]="formationsSearchTerm" placeholder="Rechercher une formation…">
+              </div>
+              <div class="cw-pool__list" style="max-height:200px;">
+                <div *ngIf="loadingFormations" class="cw-pool__empty">Chargement…</div>
+                <div *ngFor="let f of filteredFormationsPool"
+                     class="cw-pool__item" [class.checked]="isFormationSelected(f.id)"
+                     (click)="toggleFormation(f.id)">
+                  <div class="cw-pool__check" [class.on]="isFormationSelected(f.id)">
+                    <i class="isax isax-tick" *ngIf="isFormationSelected(f.id)"></i>
+                  </div>
+                  <div class="cw-pool__info">
+                    <div class="cw-pool__name">{{ f.titre }}</div>
+                    <div class="cw-pool__meta">
+                      {{ f.categorie?.nom || f.type || '—' }}{{ f.duree_totale ? ' · ' + f.duree_totale + 'h' : '' }}
+                      <span *ngIf="f.niveau"> · {{ f.niveau }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="cw-pool__empty" *ngIf="!loadingFormations && filteredFormationsPool.length === 0">
+                  Aucune formation disponible
+                </div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#9ca3af;">
+              L'ordre des formations définit la séquence du parcours.
+            </div>
+          </div>
+
           <div class="wz-error" *ngIf="error && saving">
             <i class="isax isax-warning-2"></i>{{ error }}
           </div>
 
-        </div><!-- /wz-body -->
+        </div>
 
         <div class="wz-foot">
           <span class="wz-foot__info">{{ editMode ? 'Modification' : 'Création' }} en cours</span>
@@ -313,6 +369,13 @@
             <div class="wz-recap-row"><span class="wz-rl">Coût</span><span class="wz-rv">{{ selectedParcours.prix }} XOF</span></div>
             <div class="wz-recap-row"><span class="wz-rl">Formations incluses</span><span class="wz-rv">{{ selectedParcours.formations.length }} ({{ getFormationsObligatoires(selectedParcours.formations).length }} oblig.)</span></div>
             <div class="wz-recap-row"><span class="wz-rl">Inscrits</span><span class="wz-rv">{{ selectedParcours.users.length }}</span></div>
+            <div class="wz-recap-row"><span class="wz-rl">Statut</span>
+              <span class="wz-rv">
+                <span class="ac-status" [attr.data-s]="selectedParcours.actif ? 'pub' : 'draft'">
+                  {{ selectedParcours.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </span>
+            </div>
             <div class="wz-recap-row"><span class="wz-rl">Créé le</span><span class="wz-rv">{{ formatDate(selectedParcours.created_at) }}</span></div>
           </div>
 
@@ -341,33 +404,24 @@
 
           <div *ngIf="selectedParcours.formations.length > 0">
             <div class="wz-section-label">Formations du parcours ({{ selectedParcours.formations.length }})</div>
-            <table class="ac-table">
-              <thead>
-                <tr>
-                  <th style="width:50px;">Ordre</th>
-                  <th>Formation</th>
-                  <th style="width:100px;">Niveau</th>
-                  <th style="width:70px;">Durée</th>
-                  <th style="width:80px;">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let f of selectedParcours.formations; trackBy: trackByFormationId">
-                  <td><span class="ac-status" data-s="plan">{{ f.pivot?.ordre || '–' }}</span></td>
-                  <td>
-                    <div class="ac-table-name">{{ f.titre }}</div>
-                    <span class="ac-status" data-s="pending" style="margin-top:3px;display:inline-block;" *ngIf="f.pivot?.obligatoire">Obligatoire</span>
-                  </td>
-                  <td><span class="ac-status" data-s="plan">{{ f.niveau }}</span></td>
-                  <td style="font-size:13px;">{{ f.duree_totale }}h</td>
-                  <td>
-                    <span class="ac-status" [attr.data-s]="f.est_publie ? 'pub' : 'draft'">
+            <div class="ac-card-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
+              <div *ngFor="let f of selectedParcours.formations; trackBy: trackByFormationId"
+                   class="ac-fcard" style="min-height:auto;">
+                <div class="ac-fcard__body" style="padding:10px 12px;">
+                  <div class="ac-fcard__cat" data-cat="default">
+                    {{ f.pivot?.ordre ? 'Étape ' + f.pivot?.ordre : '—' }}
+                    <span *ngIf="f.pivot?.obligatoire" style="margin-left:4px;color:#e78a0e;">★</span>
+                  </div>
+                  <div class="ac-fcard__title" style="font-size:12px;">{{ f.titre }}</div>
+                  <div class="ac-fcard__meta">
+                    <span><i class="isax isax-clock"></i> {{ f.duree_totale }}h</span>
+                    <span class="ac-status" style="font-size:9px;" [attr.data-s]="f.est_publie ? 'pub' : 'draft'">
                       {{ f.est_publie ? 'Publié' : 'Brouillon' }}
                     </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -390,24 +444,24 @@
   <div class="modal-dialog" style="max-width:420px;">
     <div class="wz-modal modal-content">
       <div class="wz-head">
-        <div class="wz-head__icon" style="background:#fef2f2;color:#991b1b;"><i class="isax isax-trash"></i></div>
+        <div class="wz-head__icon" style="background:#FAEEDA;color:#BA7517;"><i class="isax isax-archive"></i></div>
         <div class="wz-head__text">
-          <div class="wz-head__title">Supprimer le parcours</div>
+          <div class="wz-head__title">Archiver le parcours</div>
           <div class="wz-head__sub" *ngIf="selectedParcours">{{ selectedParcours.nom }}</div>
         </div>
         <button type="button" class="wz-close" data-bs-dismiss="modal"><i class="isax isax-close-circle"></i></button>
       </div>
       <div class="wz-body">
-        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;">
-          Êtes-vous sûr de vouloir supprimer ce parcours ?
-          Cette action est <strong>irréversible</strong> et supprimera aussi toutes les inscriptions associées.
-        </p>
+        <div class="wz-info-banner" style="background:#fef2f2;border-color:#fca5a5;color:#7f1d1d;">
+          <i class="isax isax-warning-2" style="color:#dc2626;"></i>
+          <span>Le parcours sera archivé et masqué. Les inscriptions associées seront conservées.</span>
+        </div>
       </div>
       <div class="wz-foot">
         <span class="wz-foot__info"></span>
         <button type="button" class="wz-btn-ghost" data-bs-dismiss="modal">Annuler</button>
-        <button type="button" class="wz-btn-danger" (click)="deleteParcours()">
-          Supprimer définitivement
+        <button type="button" class="wz-btn-arch" (click)="archiveParcours(selectedParcours)">
+          <i class="isax isax-archive"></i> Archiver
         </button>
       </div>
     </div>

@@ -17,8 +17,11 @@ export class CompanyDetailsComponent implements OnInit {
   company: Company | null = null;
   loading: boolean = true;
   error: string = '';
-  employeeCount: number = 0;
-  employees: any[] = []; // Liste des employés (optionnel)
+  // Compteurs distincts
+  nbEmployesDeclares: number = 0;      // taille_effectif (RH déclaré)
+  nbInscritsPlateforme: number = 0;    // utilisateurs inscrits en BDD (rôle employé)
+  nbActifsPlateforme: number = 0;      // utilisateurs inscrits ET actifs (statut=1)
+  employees: any[] = [];
   loadingEmployees: boolean = false;
 
   constructor(
@@ -40,20 +43,29 @@ export class CompanyDetailsComponent implements OnInit {
   loadCompanyDetails(id: number) {
     this.loading = true;
     this.error = '';
-    
-    // Charger les détails de l'entreprise et le nombre d'employés en parallèle
+
     forkJoin({
       company: this.clientCompanyService.getCompany(id),
       employees: this.userService.getUsersByCompany(id)
     }).subscribe({
       next: (response) => {
-        // Charger les détails de l'entreprise
-        this.company = response.company.entreprise || response.company.data || response.company;
-        
-        // Charger les employés
+        const detail = response.company.entreprise || response.company.data || response.company;
+        this.company = detail;
+
+        const stats = detail?.statistiques ?? {};
+        this.nbEmployesDeclares   = detail?.taille_effectif        ?? 0;
+        this.nbInscritsPlateforme = stats.nb_employes              ?? 0;
+        this.nbActifsPlateforme   = stats.nb_employes_actifs       ?? 0;
+
         const employeesData = response.employees.users || response.employees.data || response.employees;
         this.employees = Array.isArray(employeesData) ? employeesData : [];
-        this.employeeCount = this.employees.length;
+
+        // Fallback si l'API ne renvoie pas encore les stats
+        if (!stats.nb_employes) {
+          this.nbInscritsPlateforme = this.employees.length;
+          this.nbActifsPlateforme   = this.employees.filter((e: any) => e.statut == 1 || e.est_actif).length;
+        }
+
         this.loading = false;
       },
       error: (error) => {
@@ -64,32 +76,13 @@ export class CompanyDetailsComponent implements OnInit {
     });
   }
 
-  // Méthode alternative si vous voulez charger les employés séparément
-  loadEmployeeCount(companyId: number) {
-    this.loadingEmployees = true;
-    
-    this.userService.getUsersByCompany(companyId).subscribe({
-      next: (response) => {
-        const employeesData = response.users || response.data || response;
-        this.employees = Array.isArray(employeesData) ? employeesData : [];
-        this.employeeCount = this.employees.length;
-        this.loadingEmployees = false;
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des employés:', error);
-        this.employeeCount = 0;
-        this.loadingEmployees = false;
-      }
-    });
-  }
-
   // Méthodes utilitaires pour l'affichage
   getEmployeesByRole(role: string): any[] {
     return this.employees.filter(emp => emp.role === role);
   }
 
   getActiveEmployeesCount(): number {
-    return this.employees.filter(emp => emp.est_actif).length;
+    return this.nbActifsPlateforme;
   }
 
   // ...existing methods...
