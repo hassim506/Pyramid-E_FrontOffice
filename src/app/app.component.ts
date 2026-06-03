@@ -2,10 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { NavigationStart, Router, Event as RouterEvent, RouterOutlet } from '@angular/router';
 import { HasPermissionDirective } from './directive/has-permission-directive.directive';
+import { InactivityService } from './shared/service/inactivity/inactivity.service';
+import { AuthService } from './shared/service/authentification/auth.service';
+
+const AUTH_ROUTES = ['/auth'];
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,CommonModule, HasPermissionDirective],
+  imports: [RouterOutlet, CommonModule, HasPermissionDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -13,12 +17,24 @@ export class AppComponent {
   title = 'template';
   public base = '';
   public page = '';
-  constructor(private router: Router) {
+
+  constructor(
+    private router: Router,
+    private inactivityService: InactivityService,
+    private authService: AuthService
+  ) {
     this.router.events.subscribe((event: RouterEvent) => {
       if (event instanceof NavigationStart) {
         const URL = event.url.split('/');
-        this.base =URL[1] ? URL[1].replace('-',' '): '';
-        this.page = URL[2] ? URL[2].replace('-',' '): '';
+        this.base = URL[1] ? URL[1].replace('-', ' ') : '';
+        this.page = URL[2] ? URL[2].replace('-', ' ') : '';
+
+        const isAuthPage = AUTH_ROUTES.some(r => event.url.startsWith(r));
+        if (isAuthPage || !this.authService.isLoggedIn()) {
+          this.inactivityService.stop();
+        } else {
+          this.inactivityService.start();
+        }
       }
       if(this.base === 'index'){
         this.page = 'Deals Dashboard'

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { forkJoin, of, Subject } from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
 import { DataService } from '../../../shared/service/data/data.service';
 import { User } from '../../../shared/models/user.models';
 import { UserService } from '../../../shared/service/user/user.service';
@@ -60,7 +60,8 @@ export interface EntrepriseRecente {
   templateUrl: './superadmin-dashboard.component.html',
   styleUrls: ['./superadmin-dashboard.component.scss']
 })
-export class SuperAdminDashboardComponent implements OnInit {
+export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   routes = routes;
   
   dashboardData: SuperAdminDashboardData = {
@@ -325,28 +326,32 @@ Statisticschart: any = {
     this.loadDashboardData();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private loadDashboardData(): void {
     this.isLoading = true;
     this.superStatsLoading = true;
 
     forkJoin({
-      users:        this.userService.getUsers(),
-      clients:      this.clientCompanyService.getClients(),
-      formations:   this.formationService.getFormations({ page: 1, limit: 1000 }),
-      companies:    this.clientCompanyService.getCompanies(),
+      users:        this.userService.getUsers().pipe(catchError(() => of(null))),
+      clients:      this.clientCompanyService.getClients().pipe(catchError(() => of(null))),
+      formations:   this.formationService.getFormations({ page: 1, limit: 100 }).pipe(catchError(() => of(null))),
+      companies:    this.clientCompanyService.getCompanies().pipe(catchError(() => of(null))),
       rhStats:      this.adminRHStatsService.getAllStats().pipe(catchError(() => of(null))),
       rhFormations: this.adminRHStatsService.getFormationsRecentes().pipe(catchError(() => of([]))),
       rhMensuel:    this.adminRHStatsService.getFormationsParAnnee().pipe(catchError(() => of([]))),
       superStats:   this.superAdminDashboardService.getStats().pipe(catchError(() => of(null))),
-    }).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
         this.processRealData(data);
         this.processRhData(data);
         this.processSuperStats(data.superStats);
         this.isLoading = false;
       },
-      error: (error) => {
-        console.error('❌ Erreur lors du chargement des données:', error);
+      error: () => {
         this.setDefaultData();
         this.isLoading = false;
         this.superStatsLoading = false;
@@ -436,134 +441,44 @@ Statisticschart: any = {
   trackByRhFormationId(_index: number, f: { id: number }): number {
     return f.id;
   }
-private processRealData(data: any): void {
-  console.log('=== EXTRACTION DES DONNÉES ===');
-  
-  // Extraction robuste des données
-  let companies: any[] = [];
-  let clients: any[] = [];
-  let formations: any[] = [];
-  let users: any[] = [];
-
-  // Extraction COMPANIES - Structure API retournée
-  console.log('📦 Structure companies reçue:', data.companies);
-  
-  if (Array.isArray(data.companies)) {
-    companies = data.companies;
-  } else if (data.companies?.entreprises && Array.isArray(data.companies.entreprises)) {
-    // ✅ VOTRE API RETOURNE { entreprises: [...] }
-    companies = data.companies.entreprises;
-  } else if (data.companies?.data && Array.isArray(data.companies.data)) {
-    companies = data.companies.data;
-  } else if (data.companies?.results && Array.isArray(data.companies.results)) {
-    companies = data.companies.results;
-  } else if (data.companies?.companies && Array.isArray(data.companies.companies)) {
-    companies = data.companies.companies;
-  } else if (data.companies?.['hydra:member'] && Array.isArray(data.companies['hydra:member'])) {
-    companies = data.companies['hydra:member'];
-  } else if (data.companies?.dataList && Array.isArray(data.companies.dataList)) {
-    companies = data.companies.dataList;
-  } else if (data.companies?.items && Array.isArray(data.companies.items)) {
-    companies = data.companies.items;
-  } else {
-    console.warn('⚠️ Structure companies non reconnue:', data.companies);
+private extractArray(data: any, ...keys: string[]): any[] {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    for (const key of keys) {
+      if (Array.isArray(data[key])) return data[key];
+    }
+    return [];
   }
 
-  // Extraction CLIENTS
-  console.log('📦 Structure clients reçue:', data.clients);
-  
-  if (Array.isArray(data.clients)) {
-    clients = data.clients;
-  } else if (data.clients?.clients && Array.isArray(data.clients.clients)) {
-    // Même pattern pour clients
-    clients = data.clients.clients;
-  } else if (data.clients?.data && Array.isArray(data.clients.data)) {
-    clients = data.clients.data;
-  } else if (data.clients?.results && Array.isArray(data.clients.results)) {
-    clients = data.clients.results;
-  } else {
-    console.warn('⚠️ Structure clients non reconnue:', data.clients);
-  }
+  private processRealData(data: any): void {
+    const companies = this.extractArray(data.companies, 'entreprises', 'companies', 'data', 'results', 'items', 'dataList', 'hydra:member');
+    const clients   = this.extractArray(data.clients,   'clients',    'data', 'results');
+    const formations= this.extractArray(data.formations,'formations', 'data', 'results');
+    const users     = this.extractArray(data.users,     'users',      'data', 'results');
 
-  // Extraction FORMATIONS
-  console.log('📦 Structure formations reçue:', data.formations);
-  
-  if (Array.isArray(data.formations)) {
-    formations = data.formations;
-  } else if (data.formations?.formations && Array.isArray(data.formations.formations)) {
-    // Même pattern pour formations
-    formations = data.formations.formations;
-  } else if (data.formations?.data && Array.isArray(data.formations.data)) {
-    formations = data.formations.data;
-  } else if (data.formations?.results && Array.isArray(data.formations.results)) {
-    formations = data.formations.results;
-  } else {
-    console.warn('⚠️ Structure formations non reconnue:', data.formations);
-  }
+    this.dashboardData.totalEntreprises  = companies.length;
+    this.dashboardData.totalClients      = clients.length;
+    this.dashboardData.totalFormations   = formations.length;
+    this.dashboardData.totalUtilisateurs = users.length;
 
-  // Extraction USERS
-  console.log('📦 Structure users reçue:', data.users);
-  
-  if (Array.isArray(data.users)) {
-    users = data.users;
-  } else if (data.users?.users && Array.isArray(data.users.users)) {
-    // Même pattern pour users
-    users = data.users.users;
-  } else if (data.users?.data && Array.isArray(data.users.data)) {
-    users = data.users.data;
-  } else if (data.users?.results && Array.isArray(data.users.results)) {
-    users = data.users.results;
-  } else {
-    console.warn('⚠️ Structure users non reconnue:', data.users);
-  }
-
-  console.log('✅ Données extraites:');
-  console.log('- Entreprises:', companies.length, companies);
-  console.log('- Clients:', clients.length, clients);
-  console.log('- Formations:', formations.length, formations);
-  console.log('- Utilisateurs:', users.length, users);
-
-  // Calculer les totaux
-  this.dashboardData.totalEntreprises = companies.length;
-  this.dashboardData.totalClients = clients.length;
-  this.dashboardData.totalFormations = formations.length;
-  this.dashboardData.totalUtilisateurs = users.length;
-
-  console.log('📊 Totaux calculés:', this.dashboardData);
-
-  // Mettre à jour les cartes
-  this.updateStatisticsCards();
-
-  // Générer les entreprises récentes
-  if (companies.length > 0) {
+    this.updateStatisticsCards();
     this.generateRecentEntreprises(companies, clients, formations);
-  } else {
-    console.warn('⚠️ Aucune entreprise à afficher');
-    this.recentEntreprises = [];
+    this.generateMonthlyStats(companies, clients, formations, users);
   }
-
-  // Générer les statistiques mensuelles
-  this.generateMonthlyStats(companies, clients, formations, users);
-}
 
   private updateStatisticsCards(): void {
     this.statisticsCards[0].value = this.dashboardData.totalEntreprises;
     this.statisticsCards[1].value = this.dashboardData.totalClients;
     this.statisticsCards[2].value = this.dashboardData.totalFormations;
     this.statisticsCards[3].value = this.dashboardData.totalUtilisateurs;
-    
-    console.log('🃏 Cartes mises à jour:', this.statisticsCards.map(c => ({ label: c.label, value: c.value })));
   }
 
   private generateRecentEntreprises(companies: any[], clients: any[], formations: any[]): void {
-    console.log('=== GÉNÉRATION ENTREPRISES RÉCENTES ===');
-    
     if (!companies || companies.length === 0) {
       this.recentEntreprises = [];
       return;
     }
 
-    // Trier par date de création
     const sortedCompanies = [...companies]
       .filter(company => company && company.id)
       .sort((a, b) => {
@@ -599,13 +514,9 @@ private processRealData(data: any): void {
         dateCreation: new Date(company.dateCreation || company.created_at || company.createdAt || company.date_creation)
       };
     });
-
-    console.log('🏢 Entreprises récentes générées:', this.recentEntreprises);
   }
 
   private generateMonthlyStats(companies: any[], clients: any[], formations: any[], users: any[]): void {
-    console.log('=== GÉNÉRATION STATISTIQUES MENSUELLES ===');
-    
     const currentDate = new Date();
     const stats: StatistiqueMensuelle[] = [];
     
@@ -645,29 +556,22 @@ private processRealData(data: any): void {
     }
 
     this.dashboardData.statistiquesMensuelles = stats;
-    console.log('📈 Statistiques mensuelles:', stats);
-    
     this.updateChart(stats);
   }
 
   
   private updateChart(stats: StatistiqueMensuelle[]): void {
-  this.Statisticschart = {
-    ...this.Statisticschart,
-    series: [
-      { name: 'Entreprises', data: stats.map(s => s.entreprises) },
-      { name: 'Clients', data: stats.map(s => s.clients) },
-      { name: 'Formations', data: stats.map(s => s.formations) },
-      { name: 'Utilisateurs', data: stats.map(s => s.utilisateurs) }
-    ],
-    xaxis: {
-      ...this.Statisticschart.xaxis,
-      categories: stats.map(s => s.mois)
-    }
-  };
-  
-  console.log('📊 Graphique mis à jour:', this.Statisticschart);
-}
+    this.Statisticschart = {
+      ...this.Statisticschart,
+      series: [
+        { name: 'Entreprises',  data: stats.map(s => s.entreprises) },
+        { name: 'Clients',      data: stats.map(s => s.clients) },
+        { name: 'Formations',   data: stats.map(s => s.formations) },
+        { name: 'Utilisateurs', data: stats.map(s => s.utilisateurs) }
+      ],
+      xaxis: { ...this.Statisticschart.xaxis, categories: stats.map(s => s.mois) }
+    };
+  }
 
   private setDefaultData(): void {
     this.dashboardData = {
@@ -725,7 +629,6 @@ private processRealData(data: any): void {
   }
 
   refreshData(): void {
-    console.log('🔄 Actualisation des données...');
     this.loadDashboardData();
   }
 }

@@ -45,7 +45,8 @@ export interface LoginResponse {
     avatar?: string;
     created_at?: string;
     updated_at?: string;
-     permissions?: string[]; 
+     permissions?: string[];
+     roles?: string[];
     [key: string]: any;
   };
 }
