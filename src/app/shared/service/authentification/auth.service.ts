@@ -29,6 +29,8 @@ export interface LoginResponse {
   access_token?: string;
   token?: string;
   token_type?: string;
+  permissions?: string[];
+  roles?: string[];
   user?: {
     id: number;
     email: string;
@@ -101,7 +103,12 @@ export class AuthService {
 
           if (isSuccess && token) {
             this.setToken(token);
-            this.setUser(response?.user);
+            const userWithPermissions = {
+              ...response?.user,
+              permissions: response?.permissions || response?.user?.permissions || [],
+              roles: response?.roles || response?.user?.roles || [],
+            };
+            this.setUser(userWithPermissions);
             console.log('Token et utilisateur stockés');
           }
         }),
@@ -118,7 +125,12 @@ export class AuthService {
           const accessToken = response?.access_token || response?.token;
           if (accessToken) {
             this.setToken(accessToken);
-            this.setUser(response?.user);
+            const userWithPermissions = {
+              ...response?.user,
+              permissions: response?.permissions || response?.user?.permissions || [],
+              roles: response?.roles || response?.user?.roles || [],
+            };
+            this.setUser(userWithPermissions);
           }
         }),
         catchError(error => this.handleError(error))
