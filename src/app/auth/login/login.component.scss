@@ -1,3 +1,132 @@
+// ── Carousel banner typography ────────────────────────────────
+.lc-welcome {
+  font-size: 18px;
+  font-weight: 500;
+  color: #1a2e44;
+  margin-bottom: 4px;
+  letter-spacing: 0.01em;
+}
+
+.lc-title {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+
+.lc-brand {
+  color: #c9a227;
+  font-weight: 800;
+}
+
+.lc-lms {
+  color: #1a2e44;
+  font-weight: 700;
+  font-size: 32px;
+  vertical-align: middle;
+  letter-spacing: 0.04em;
+}
+
+.lc-divider {
+  width: 60px;
+  height: 3px;
+  background: #c9a227;
+  border-radius: 4px;
+  margin-bottom: 14px;
+}
+
+.lc-divider-thin {
+  width: 40px;
+  height: 2px;
+  background: #c9a227;
+  border-radius: 4px;
+  margin-bottom: 14px;
+}
+
+.lc-subtitle {
+  font-size: 15px;
+  color: #2c3e50;
+  margin-bottom: 14px;
+  strong { font-weight: 700; }
+}
+
+.lc-paragraph {
+  font-size: 13px;
+  color: #555e6d;
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+// ── Login bg override ─────────────────────────────────────────
+:host ::ng-deep .login-bg {
+  background: #fdf8f1 !important;
+  position: relative !important;
+  overflow: hidden;
+}
+
+:host ::ng-deep .login-content .slick-dots .slick-active {
+  background: #c9a227 !important;
+}
+
+// ── Floating decorative icons ─────────────────────────────────
+.lc-float-icon {
+  position: absolute;
+  z-index: 2;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+// Livre — haut gauche
+.lc-float-book {
+  top: 9%;
+  left: 10%;
+  font-size: 44px;
+  color: #c9a227;
+  opacity: 0.45;
+  transform: rotate(-8deg);
+}
+
+// Chapeau de diplôme — haut droit
+.lc-float-cap {
+  top: 7%;
+  right: 10%;
+  font-size: 44px;
+  color: #c9a227;
+  opacity: 0.45;
+  transform: rotate(6deg);
+}
+
+// Triangle creux — droite milieu
+.lc-float-triangle {
+  right: 7%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  opacity: 0.25;
+  &::before {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-bottom: 32px solid #c9a227;
+  }
+}
+
+// Grille de points — haut gauche coin
+.lc-float-dots {
+  top: 4%;
+  left: 3%;
+  width: 80px;
+  height: 80px;
+  opacity: 0.18;
+  background-image: radial-gradient(circle, #c9a227 1.5px, transparent 1.5px);
+  background-size: 12px 12px;
+}
+
 // ── Login mode toggle ─────────────────────────────────────────
 .login-mode-toggle {
   display: grid;

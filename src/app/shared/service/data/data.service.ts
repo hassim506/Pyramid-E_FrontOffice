@@ -207,27 +207,27 @@ export class DataService {
   public welcomeLogin = [
     {
       img: 'assets/img/auth/auth-1.svg',
-      content1: 'Welcome to',
-      content2: 'Dreams',
-      content3: 'LMS',
-      content4: 'Courses.',
-      paragraph: 'Platform designed to help organizations, educators, and learners manage, deliver, and track learning and training activities.',
+      content1: 'Bienvenue sur',
+      content2: '',
+      content3: 'Pyramide-e',
+      content4: 'LMS',
+      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les apprenants à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
     },
     {
       img: 'assets/img/auth/auth-1.svg',
-      content1: 'Welcome to',
-      content2: 'Dreams',
-      content3: 'LMS',
-      content4: 'Courses.',
-      paragraph: 'Platform designed to help organizations, educators, and learners manage, deliver, and track learning and training activities.',
+      content1: 'Bienvenue sur',
+      content2: '',
+      content3: 'Pyramide-e',
+      content4: 'LMS',
+      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les apprenants à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
     },
     {
       img: 'assets/img/auth/auth-1.svg',
-      content1: 'Welcome to',
-      content2: 'Dreams',
-      content3: 'LMS',
-      content4: 'Courses.',
-      paragraph: 'Platform designed to help organizations, educators, and learners manage, deliver, and track learning and training activities.',
+      content1: 'Bienvenue sur',
+      content2: '',
+      content3: 'Pyramide-e',
+      content4: 'LMS',
+      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les apprenants à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
     },
   ];
 
@@ -981,7 +981,7 @@ export class DataService {
               showSubRoute: false,
               subMenus: [],
             },
-  
+
             {
               menuValue: "Payout",
              route: routes.instructor_payouts,
@@ -998,7 +998,7 @@ export class DataService {
               showSubRoute: false,
               subMenus: [],
             },
-  
+
             {
               menuValue: "Support Ticket",
               route: routes.instructorTickets,
@@ -1011,7 +1011,7 @@ export class DataService {
               menuValue: "Settings",
               route: routes.instructorSettings,
               page:'settings',
-              last:'instructor-settings', 
+              last:'instructor-settings',
               hasSubRoute: false,
               showSubRoute: false,
               subMenus: [],
@@ -1075,7 +1075,7 @@ export class DataService {
               showSubRoute: false,
               subMenus: [],
             },
-  
+
             {
               menuValue: "Reviews",
               route: routes.studentReviews,
@@ -1092,7 +1092,7 @@ export class DataService {
               showSubRoute: false,
               subMenus: [],
             },
-  
+
             {
               menuValue: "Order History",
               route: routes.studentOrderHistory,

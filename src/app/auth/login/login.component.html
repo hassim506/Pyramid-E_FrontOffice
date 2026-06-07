@@ -3,6 +3,11 @@
       <div class="row">
           <!-- Login Banner -->
           <div class="col-md-6 login-bg d-none d-lg-flex">
+              <!-- Floating decorative icons -->
+              <span class="lc-float-icon lc-float-book"><i class="isax isax-book"></i></span>
+              <span class="lc-float-icon lc-float-cap"><i class="isax isax-teacher"></i></span>
+              <span class="lc-float-icon lc-float-triangle"></span>
+              <span class="lc-float-icon lc-float-dots"></span>
               <div class="login-carousel">
                 <ngx-slick-carousel [config]="authSlider">
                   @for (slide of welcomeLogin; track slide) {
@@ -12,8 +17,17 @@
                               <img [src]="slide.img" class="img-fluid" alt="Logo">
                           </div>
                           <div class="mentor-course text-center">
-                              <h3 class="mb-2">{{slide.content1}} <br>{{slide.content2}}<span class="text-secondary">{{slide.content3}}</span> {{slide.content4}}</h3>
-                              <p>{{slide.paragraph}}</p>
+                              <p class="lc-welcome">{{slide.content1}}</p>
+                              <h2 class="lc-title">
+                                  <span class="lc-brand">{{slide.content3}}</span>
+                                  <span class="lc-lms"> {{slide.content4}}</span>
+                              </h2>
+                              <div class="lc-divider mx-auto"></div>
+                              <p class="lc-subtitle">
+                                  Votre plateforme de <strong>formation</strong> et de <strong>développement des compétences</strong>.
+                              </p>
+                              <div class="lc-divider-thin mx-auto"></div>
+                              <p class="lc-paragraph">{{slide.paragraph}}</p>
                           </div>
                       </div>
                   </div>
@@ -197,7 +211,7 @@
 
                           </ng-container>
 
-                          <div class="d-flex align-items-center justify-content-center or fs-14 mb-3">
+                          <!-- <div class="d-flex align-items-center justify-content-center or fs-14 mb-3">
                               Ou
                           </div>
 
@@ -208,13 +222,13 @@
 
                           <div class="fs-14 fw-normal d-flex align-items-center justify-content-center">
                               Vous n'avez pas de compte ?<a [routerLink]="routes.register" class="link-2 ms-1"> Inscrivez-vous</a>
-                          </div>
+                          </div> -->
 
                           <div class="fs-13 text-center text-muted mt-4">
                               <p class="mb-1">Besoin d'aide ? Contactez notre support</p>
                               <p class="mb-0">
-                                  <i class="isax isax-call me-1"></i> +221 XX XXX XX XX | 
-                                  <i class="isax isax-sms ms-2 me-1"></i> support@pyramide.com
+                                  <i class="isax isax-call me-1"></i> +221 77 662 26 82 |
+                                  <i class="isax isax-sms ms-2 me-1"></i> support@pyramide-e.com
                               </p>
                           </div>
 
