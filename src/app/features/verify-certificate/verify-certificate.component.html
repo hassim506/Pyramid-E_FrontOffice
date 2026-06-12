@@ -1,0 +1,87 @@
+<div class="vc-page">
+  <div class="vc-card">
+
+    <!-- Logo -->
+    <div class="vc-logo">
+      <img src="assets/img/logo.png" alt="Pyramide Formation" style="height:48px;">
+    </div>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="state === 'loading'">
+      <div class="vc-icon vc-icon--spin">
+        <i class="isax isax-refresh"></i>
+      </div>
+      <h2 class="vc-title">Vérification en cours…</h2>
+      <p class="vc-sub">Nous vérifions l'authenticité de ce certificat.</p>
+    </ng-container>
+
+    <!-- Valide -->
+    <ng-container *ngIf="state === 'valid'">
+      <div class="vc-badge vc-badge--valid">
+        <i class="isax isax-shield-tick"></i>
+        <span>Certificat authentique</span>
+      </div>
+
+      <h2 class="vc-title">Certificat valide ✓</h2>
+      <p class="vc-sub">Ce certificat est authentique et a été délivré par Pyramide Formation.</p>
+
+      <div class="vc-details">
+        <div class="vc-row">
+          <span class="vc-label">Formation</span>
+          <span class="vc-value">{{ cert.formation }}</span>
+        </div>
+        <div class="vc-row">
+          <span class="vc-label">Titulaire</span>
+          <span class="vc-value">{{ cert.employe }}</span>
+        </div>
+        <div class="vc-row" *ngIf="cert.entreprise">
+          <span class="vc-label">Entreprise</span>
+          <span class="vc-value">{{ cert.entreprise }}</span>
+        </div>
+        <div class="vc-row" *ngIf="cert.formateur?.trim()">
+          <span class="vc-label">Formateur</span>
+          <span class="vc-value">{{ cert.formateur }}</span>
+        </div>
+        <div class="vc-row">
+          <span class="vc-label">Date de délivrance</span>
+          <span class="vc-value">{{ cert.date_delivrance | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="vc-row" *ngIf="cert.date_expiration">
+          <span class="vc-label">Date d'expiration</span>
+          <span class="vc-value">{{ cert.date_expiration | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="vc-row">
+          <span class="vc-label">Code du certificat</span>
+          <span class="vc-value vc-code">{{ cert.code_unique }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Invalide / expiré / révoqué -->
+    <ng-container *ngIf="state === 'invalid'">
+      <div class="vc-badge vc-badge--invalid">
+        <i class="isax isax-shield-slash"></i>
+        <span>Certificat non valide</span>
+      </div>
+
+      <h2 class="vc-title">Certificat introuvable ou non valide</h2>
+      <p class="vc-sub" *ngIf="cert">
+        Ce certificat a le statut <strong>{{ cert.statut }}</strong> et ne peut pas être vérifié comme valide.
+      </p>
+      <p class="vc-sub" *ngIf="!cert">
+        Aucun certificat ne correspond à ce code. Vérifiez que le lien est correct.
+      </p>
+    </ng-container>
+
+    <!-- Erreur réseau -->
+    <ng-container *ngIf="state === 'error'">
+      <div class="vc-icon vc-icon--error">
+        <i class="isax isax-warning-2"></i>
+      </div>
+      <h2 class="vc-title">Erreur de vérification</h2>
+      <p class="vc-sub">{{ errorMsg }}</p>
+    </ng-container>
+
+    <p class="vc-footer">Pyramide Formation — Plateforme de gestion de la formation professionnelle</p>
+  </div>
+</div>

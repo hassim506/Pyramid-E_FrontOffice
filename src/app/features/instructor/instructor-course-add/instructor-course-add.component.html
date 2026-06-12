@@ -1,0 +1,1422 @@
+<!-- Loading State -->
+<div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-3 text-muted">Chargement des données...</p>
+    </div>
+</div>
+
+<!-- Error State -->
+<div *ngIf="error" class="alert alert-danger alert-dismissible fade show mx-3" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>Erreur !</strong> {{ error }}
+    <button type="button" class="btn-close" (click)="error = ''" aria-label="Close"></button>
+</div>
+
+<!-- Success State -->
+<div *ngIf="success" class="alert alert-success alert-dismissible fade show mx-3" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    <strong>Succès !</strong> {{ success }}
+    <button type="button" class="btn-close" (click)="success = ''" aria-label="Close"></button>
+</div>
+
+<!-- Course Form -->
+<div class="content" *ngIf="!loading">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="add-course-item">
+                    
+                    <!-- Progress Wizard -->
+                    <div class="wizard mb-4">
+                        <ul class="form-wizard-steps" id="progressbar2">
+                            <li [ngClass]="{ 'progress-active': currentStep === 0, 'progress-activated': currentStep > 0 }">
+                                <div class="profile-step">
+                                    <span class="dot-active mb-2">
+                                        <span class="number">01</span>
+                                        <span class="tickmark"><i class="fa-solid fa-check"></i></span>
+                                    </span>
+                                    <div class="step-section">
+                                        <p>Informations de base</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li [ngClass]="{ 'progress-active': currentStep === 1, 'progress-activated': currentStep > 1 }">
+                                <div class="profile-step">
+                                    <span class="dot-active mb-2">
+                                        <span class="number">02</span>
+                                        <span class="tickmark"><i class="fa-solid fa-check"></i></span>
+                                    </span>
+                                    <div class="step-section">
+                                        <p>Média</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li [ngClass]="{ 'progress-active': currentStep === 2, 'progress-activated': currentStep > 2 }">
+                                <div class="profile-step">
+                                    <span class="dot-active mb-2">
+                                        <span class="number">03</span>
+                                        <span class="tickmark"><i class="fa-solid fa-check"></i></span>
+                                    </span>
+                                    <div class="step-section">
+                                        <p>Modules & Sections</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li [ngClass]="{ 'progress-active': currentStep === 3, 'progress-activated': currentStep > 3 }">
+                                <div class="profile-step">
+                                    <span class="dot-active mb-2">
+                                        <span class="number">04</span>
+                                        <span class="tickmark"><i class="fa-solid fa-check"></i></span>
+                                    </span>
+                                    <div class="step-section">
+                                        <p>Informations</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li [ngClass]="{ 'progress-active': currentStep === 4, 'progress-activated': currentStep > 4 }">
+                                <div class="profile-step">
+                                    <span class="dot-active mb-2">
+                                        <span class="number">05</span>
+                                        <span class="tickmark"><i class="fa-solid fa-check"></i></span>
+                                    </span>
+                                    <div class="step-section">
+                                        <p>Coût estimatif</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Form Container -->
+                    <div class="form-container">
+         
+                        <!-- Étape 1: Informations de base -->
+                        <div *ngIf="currentStep === 0" class="form-step">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h4 class="card-title mb-4">
+                                        <i class="fas fa-info-circle text-primary me-2"></i>
+                                        Informations de base
+                                    </h4>
+                                    
+                                    <form [formGroup]="basicInfoForm">
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label fw-semibold">Titre de la formation<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" formControlName="titre" 
+                                                       placeholder="Ex: Développement Web avec Angular"
+                                                       [class.is-invalid]="basicInfoForm.get('titre')?.invalid && basicInfoForm.get('titre')?.touched">
+                                                <div class="invalid-feedback">Le titre est requis (min. 5 caractères)</div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-semibold">Catégorie<span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="categorie_formation_id"
+                                                        [class.is-invalid]="basicInfoForm.get('categorie_formation_id')?.invalid && basicInfoForm.get('categorie_formation_id')?.touched">
+                                                    <option value="">Sélectionner une catégorie</option>
+                                                    <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.nom }}</option>
+                                                </select>
+                                                <div class="invalid-feedback">La catégorie est requise</div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-semibold">Niveau<span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="niveau">
+                                                    <option value="debutant">Débutant</option>
+                                                    <option value="intermediaire">Intermédiaire</option>
+                                                    <option value="avance">Avancé</option>
+                                                    <option value="expert">Expert</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-semibold">Langue<span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="langue">
+                                                    <option value="fr">Français</option>
+                                                    <option value="en">Anglais</option>
+                                                    <option value="es">Espagnol</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-semibold">Type de formation<span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="type">
+                                                    <option value="en_ligne">En ligne</option>
+                                                    <option value="presentiel">Présentiel</option>
+                                                    <option value="hybride">Hybride</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-semibold">Nombre max de participants</label>
+                                                <input type="number" class="form-control" formControlName="nb_max_participants" 
+                                                       placeholder="25" min="1">
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label fw-semibold">Description courte<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" formControlName="short_description" 
+                                                       placeholder="Résumé en une phrase"
+                                                       [class.is-invalid]="basicInfoForm.get('short_description')?.invalid && basicInfoForm.get('short_description')?.touched">
+                                                <div class="invalid-feedback">La description courte est requise</div>
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label fw-semibold">Description complète<span class="text-danger">*</span></label>
+                                                <textarea class="form-control" formControlName="description" rows="5"
+                                                          placeholder="Description détaillée de la formation..."
+                                                          [class.is-invalid]="basicInfoForm.get('description')?.invalid && basicInfoForm.get('description')?.touched"></textarea>
+                                                <div class="invalid-feedback">La description est requise</div>
+                                            </div>
+
+                                            <!-- Objectifs pédagogiques -->
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">
+                                                            <i class="fas fa-bullseye text-success me-2"></i>
+                                                            Objectifs pédagogiques
+                                                        </h6>
+                                                        <div *ngFor="let obj of objectifs; let i = index; trackBy: trackByIndex"  class="mb-2">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" [(ngModel)]="objectifs[i]" 
+                                                                       [ngModelOptions]="{standalone: true}"
+                                                                       placeholder="Nouvel objectif">
+                                                                <button class="btn btn-outline-danger" type="button" (click)="removeObjectif(i)">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-primary" type="button" (click)="addObjectif()">
+                                                            <i class="fas fa-plus me-1"></i> Ajouter
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Prérequis -->
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">
+                                                            <i class="fas fa-list-check text-info me-2"></i>
+                                                            Prérequis
+                                                        </h6>
+                                                        <div *ngFor="let req of prerequis; let i = index; trackBy: trackByIndex" class="mb-2">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" [(ngModel)]="prerequis[i]" 
+                                                                       [ngModelOptions]="{standalone: true}"
+                                                                       placeholder="Nouveau prérequis">
+                                                                <button class="btn btn-outline-danger" type="button" (click)="removePrerequis(i)">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-primary" type="button" (click)="addPrerequis()">
+                                                            <i class="fas fa-plus me-1"></i> Ajouter
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" formControlName="est_certifiante" 
+                                                           id="certifiante">
+                                                    <label class="form-check-label" for="certifiante">
+                                                        <i class="fas fa-certificate text-warning me-2"></i>
+                                                        Formation certifiante
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Étape 2: Média -->
+                        <div *ngIf="currentStep === 1" class="form-step">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h4 class="card-title mb-4">
+                                        <i class="fas fa-photo-video text-primary me-2"></i>
+                                        Média de la formation
+                                    </h4>
+                                    
+                                    <div class="alert alert-info mb-4">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Information :</strong> Ajoutez une image de couverture attractive et optionnellement une vidéo de présentation pour donner envie aux apprenants.
+                                    </div>
+                                    
+                                    <form [formGroup]="mediaForm">
+                                        <div class="row">
+                                            <!-- Section Image de couverture -->
+                                            <div class="col-md-12 mb-4">
+                                                <label class="form-label fw-semibold">
+                                                    <i class="fas fa-image me-2"></i>
+                                                    Image de couverture
+                                                </label>
+                                                <div class="upload-area border-2 border-dashed rounded-3 p-4 text-center position-relative"
+                                                     [class.border-primary]="isDragOver"
+                                                     [class.bg-light]="!imagePreview"
+                                                     (dragover)="onDragOver($event)"
+                                                     (dragleave)="onDragLeave($event)"
+                                                     (drop)="onDrop($event)">
+                                                    
+                                                    <input type="file" 
+                                                           #imageInput 
+                                                           (change)="onImageSelected($event)" 
+                                                           accept="image/*" 
+                                                           class="d-none"
+                                                           id="imageUpload">
+                                                    
+                                                    <!-- Zone d'affichage de l'image -->
+                                                    <div *ngIf="imagePreview; else noImageTemplate" class="position-relative">
+                                                        <img [src]="imagePreview" 
+                                                             class="img-fluid rounded shadow-sm" 
+                                                             style="max-height: 300px; max-width: 100%;"
+                                                             alt="Aperçu de l'image">
+                                                        
+                                                        <!-- Boutons d'action sur l'image -->
+                                                        <div class="position-absolute top-0 end-0 m-2">
+                                                            <button type="button" 
+                                                                    class="btn btn-sm btn-danger rounded-circle"
+                                                                    (click)="removeImage()"
+                                                                    title="Supprimer l'image">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                        
+                                                        <!-- Bouton pour changer l'image -->
+                                                        <div class="mt-3">
+                                                            <button type="button" 
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    (click)="imageInput.click()">
+                                                                <i class="fas fa-sync-alt me-2"></i>
+                                                                Changer l'image
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Template quand aucune image -->
+                                                    <ng-template #noImageTemplate>
+                                                        <div class="upload-placeholder" 
+                                                             (click)="imageInput.click()" 
+                                                             style="cursor: pointer;">
+                                                            <div class="upload-icon mb-3">
+                                                                <i class="fas fa-cloud-upload-alt fa-3x text-primary"></i>
+                                                            </div>
+                                                            <h5 class="mb-2">Télécharger une image</h5>
+                                                            <p class="text-muted mb-3">
+                                                                Glissez-déposez votre image ici ou cliquez pour parcourir
+                                                            </p>
+                                                            <button type="button" 
+                                                                    class="btn btn-primary"
+                                                                    (click)="$event.stopPropagation(); imageInput.click()">
+                                                                <i class="fas fa-folder-open me-2"></i>
+                                                                Choisir un fichier
+                                                            </button>
+                                                            <div class="mt-3">
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-info-circle me-1"></i>
+                                                                    Formats acceptés : JPEG, PNG, WebP • Taille max : 5MB • Résolution recommandée : 1200x600px
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </ng-template>
+                                                </div>
+                                                
+                                                <!-- Messages d'erreur pour l'image -->
+                                                <div *ngIf="imageError" class="alert alert-danger mt-2 mb-0 py-2">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    {{ imageError }}
+                                                </div>
+                                            </div>
+
+                                            <!-- Section Vidéo de présentation -->
+                                            <div class="col-md-12 mb-4">
+                                                <label class="form-label fw-semibold">
+                                                    <i class="fas fa-play-circle me-2"></i>
+                                                    Vidéo de présentation <span class="text-muted">(optionnel)</span>
+                                                </label>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">
+                                                            <i class="fab fa-youtube text-danger"></i>
+                                                        </span>
+                                                        <input type="url" 
+                                                               class="form-control" 
+                                                               formControlName="media_url"
+                                                               placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
+                                                               (blur)="validateVideoUrl()"
+                                                               (input)="onVideoUrlChange($event)">
+                                                        <button type="button" 
+                                                                class="btn btn-outline-secondary"
+                                                                *ngIf="mediaForm.get('media_url')?.value"
+                                                                (click)="clearVideoUrl()"
+                                                                title="Effacer l'URL">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <!-- Messages d'aide et d'erreur -->
+                                                    <div class="mt-2">
+                                                        <small class="text-muted d-block">
+                                                            <i class="fas fa-lightbulb me-1"></i>
+                                                            Plateformes supportées : YouTube, Vimeo, ou lien direct vers une vidéo
+                                                        </small>
+                                                        
+                                                        <div *ngIf="videoUrlError" class="text-danger mt-1">
+                                                            <small><i class="fas fa-exclamation-circle me-1"></i>{{ videoUrlError }}</small>
+                                                        </div>
+                                                        
+                                                        <div *ngIf="videoUrlValid && mediaForm.get('media_url')?.value" class="text-success mt-1">
+                                                            <small><i class="fas fa-check-circle me-1"></i>URL vidéo valide</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Aperçu de la vidéo -->
+                                                <div class="video-preview" *ngIf="mediaForm.get('media_url')?.value && videoUrlValid">
+                                                    <div class="card">
+                                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                                            <h6 class="mb-0">
+                                                                <i class="fas fa-eye me-2"></i>
+                                                                Aperçu de la vidéo
+                                                            </h6>
+                                                            <span class="badge bg-success">Vidéo détectée</span>
+                                                        </div>
+                                                        <div class="card-body p-0">
+                                                            <!-- YouTube -->
+                                                            <div *ngIf="isYouTubeUrl(mediaForm.get('media_url')?.value)" class="ratio ratio-16x9">
+                                                                <iframe [src]="getYouTubeEmbedUrl(mediaForm.get('media_url')?.value)"
+                                                                        title="Aperçu YouTube"
+                                                                        frameborder="0"
+                                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                        allowfullscreen
+                                                                        loading="lazy">
+                                                                </iframe>
+                                                            </div>
+                                                            
+                                                            <!-- Vimeo -->
+                                                            <div *ngIf="isVimeoUrl(mediaForm.get('media_url')?.value)" class="ratio ratio-16x9">
+                                                                <iframe [src]="getVimeoEmbedUrl(mediaForm.get('media_url')?.value)"
+                                                                        title="Aperçu Vimeo"
+                                                                        frameborder="0"
+                                                                        allow="autoplay; fullscreen; picture-in-picture"
+                                                                        allowfullscreen
+                                                                        loading="lazy">
+                                                                </iframe>
+                                                            </div>
+                                                            
+                                                            <!-- Vidéo directe -->
+                                                            <div *ngIf="isDirectVideoUrl(mediaForm.get('media_url')?.value)" class="p-3">
+                                                                <video controls 
+                                                                       class="w-100 rounded"
+                                                                       style="max-height: 400px;"
+                                                                       [src]="mediaForm.get('media_url')?.value"
+                                                                       preload="metadata">
+                                                                    Votre navigateur ne supporte pas les vidéos HTML5.
+                                                                </video>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- État par défaut sans vidéo -->
+                                                <div *ngIf="!mediaForm.get('media_url')?.value" class="video-placeholder">
+                                                    <div class="card border-dashed">
+                                                        <div class="card-body text-center py-4">
+                                                            <i class="fas fa-video fa-3x text-muted mb-3"></i>
+                                                            <h6 class="text-muted">Aucune vidéo de présentation</h6>
+                                                            <p class="text-muted small mb-0">
+                                                                Ajoutez une vidéo pour présenter votre formation aux apprenants
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Paramètres vidéo avancés -->
+                                            <div class="col-md-12" *ngIf="mediaForm.get('media_url')?.value && videoUrlValid">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">
+                                                            <i class="fas fa-cog me-2"></i>
+                                                            Paramètres de la vidéo
+                                                        </h6>
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" 
+                                                                           type="checkbox" 
+                                                                           formControlName="video_autoplay"
+                                                                           id="videoAutoplay">
+                                                                    <label class="form-check-label" for="videoAutoplay">
+                                                                        Lecture automatique
+                                                                    </label>
+                                                                    <small class="text-muted d-block">
+                                                                        La vidéo démarre automatiquement (non recommandé)
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" 
+                                                                           type="checkbox" 
+                                                                           formControlName="video_show_controls"
+                                                                           id="videoControls">
+                                                                    <label class="form-check-label" for="videoControls">
+                                                                        Afficher les contrôles
+                                                                    </label>
+                                                                    <small class="text-muted d-block">
+                                                                        Permet aux utilisateurs de contrôler la lecture
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <!-- Résumé de la section -->
+                                    <div class="mt-4 p-3 bg-light rounded">
+                                        <h6 class="mb-2">
+                                            <i class="fas fa-clipboard-check me-2"></i>
+                                            Résumé de cette Partie
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p class="mb-1">
+                                                    <i class="fas fa-image me-2 text-primary"></i>
+                                                    Image de couverture : 
+                                                    <span class="fw-semibold" [class]="imagePreview ? 'text-success' : 'text-muted'">
+                                                        {{ imagePreview ? 'Ajoutée' : 'Non définie' }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p class="mb-1">
+                                                    <i class="fas fa-play-circle me-2 text-primary"></i>
+                                                    Vidéo de présentation : 
+                                                    <span class="fw-semibold" [class]="(mediaForm.get('media_url')?.value && videoUrlValid) ? 'text-success' : 'text-muted'">
+                                                        {{ (mediaForm.get('media_url')?.value && videoUrlValid) ? 'Configurée' : 'Non définie' }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Étape 3: Modules et Sections -->
+                        <div *ngIf="currentStep === 2" class="form-step">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h4 class="card-title mb-0">
+                                            <i class="fas fa-book text-primary me-2"></i>
+                                            Modules et Parties
+                                        </h4>
+                                        <button class="btn btn-primary" (click)="openModuleModal()">
+                                            <i class="fas fa-plus me-2"></i> Ajouter un module
+                                        </button>
+                                    </div>
+
+                                    <!-- Statistiques -->
+                                    <div class="row mb-4" *ngIf="modules.length > 0">
+                                        <div class="col-md-4">
+                                            <div class="card bg-primary text-white">
+                                                <div class="card-body text-center">
+                                                    <h3 class="mb-0">{{ modules.length }}</h3>
+                                                    <small>Modules</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card bg-success text-white">
+                                                <div class="card-body text-center">
+                                                    <h3 class="mb-0">{{ getTotalSections() }}</h3>
+                                                    <small>Parties</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card bg-info text-white">
+                                                <div class="card-body text-center">
+                                                    <h3 class="mb-0">{{ getTotalDuration() }} min</h3>
+                                                    <small>Durée totale</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Liste des modules -->
+                                    <div *ngIf="modules.length > 0" class="accordion" id="modulesAccordion">
+                                        <div *ngFor="let module of modules; let moduleIndex = index" 
+                                             class="accordion-item mb-3 border rounded">
+                                            
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button" type="button" 
+                                                        [class.collapsed]="moduleIndex !== 0"
+                                                        [attr.data-bs-toggle]="'collapse'"
+                                                        [attr.data-bs-target]="'#module-' + moduleIndex">
+                                                    <div class="d-flex align-items-center w-100">
+                                                        <i class="fas fa-grip-vertical me-3 text-muted"></i>
+                                                        <div class="flex-grow-1">
+                                                           <strong>
+                                                            <!-- Module {{ moduleIndex + 1 }}: {{ module.titre }} -->
+
+                                                            {{ module.titre }}
+                                                            <span *ngIf="moduleIndex === 0" class="badge bg-warning text-dark ms-2">
+                                                                <i class="fas fa-lock me-1"></i>Introduction obligatoire
+                                                            </span>
+                                                            </strong>
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                {{ module.sections?.length || 0 }} parties · 
+                                                                {{ getModuleDuration(module) }} min
+                                                            </small>
+                                                        </div>
+                                                        <div class="btn-group me-2" (click)="$event.stopPropagation()">
+                                                            <button class="btn btn-sm btn-outline-primary" 
+                                                                    (click)="editModule(moduleIndex)">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                           <button class="btn btn-sm btn-outline-danger" 
+                                                            (click)="removeModule(moduleIndex)"
+                                                            [disabled]="moduleIndex === 0"
+                                                            [title]="moduleIndex === 0 ? 'Module Introduction obligatoire' : 'Supprimer'">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </h2>
+
+                                            <div [id]="'module-' + moduleIndex" 
+                                                 class="accordion-collapse collapse"
+                                                 [class.show]="moduleIndex === 0"
+                                                 [attr.data-bs-parent]="'#modulesAccordion'">
+                                                <div class="accordion-body">
+                                                    
+                                                    <p class="text-muted mb-3" *ngIf="module.description">
+                                                        {{ module.description }}
+                                                    </p>
+
+                                                    <!-- Liste des sections -->
+                                                    <div class="sections-list mb-3">
+                                                        <div *ngFor="let section of module.sections; let sectionIndex = index" 
+                                                             class="d-flex align-items-center justify-content-between p-3 mb-2 border rounded bg-light">
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="fas fa-play-circle text-success me-3"></i>
+                                                                <div>
+                                                                   <strong>
+                                                            {{ sectionIndex + 1 }}. {{ section.titre }}
+                                                            <span *ngIf="sectionIndex === 0" class="badge bg-warning text-dark ms-2">
+                                                                <i class="fas fa-lock me-1"></i>
+                                                            </span>
+                                                            </strong>
+                                                                    <br>
+                                                                    <small class="text-muted">
+                                                                        {{ section.type }} · {{ section.duree_estimee }} min
+                                                                        <span class="badge bg-success ms-2" *ngIf="section.obligatoire">Obligatoire</span>
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                            <div class="btn-group">
+                                                                <button class="btn btn-sm btn-outline-primary" 
+                                                                        (click)="editSection(moduleIndex, sectionIndex)">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </button>
+                                                               <button class="btn btn-sm btn-outline-danger" 
+                                                                        (click)="removeSection(moduleIndex, sectionIndex)"
+                                                                        [disabled]="sectionIndex === 0"
+                                                                        [title]="sectionIndex === 0 ? 'Section Introduction de la partie' : 'Supprimer'">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Ajouter partie -->
+                                                    <button class="btn btn-sm btn-outline-success" 
+                                                            (click)="openSectionModal(moduleIndex)">
+                                                        <i class="fas fa-plus me-1"></i> Ajouter une partie
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Empty state -->
+                                    <div *ngIf="modules.length === 0" class="text-center py-5">
+                                        <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                                        <h5 class="text-muted">Aucun module créé</h5>
+                                        <p class="text-muted">Commencez par créer votre premier module</p>
+                                        <button class="btn btn-primary" (click)="openModuleModal()">
+                                            <i class="fas fa-plus me-2"></i> Créer le premier module
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+<!-- Étape 4: Informations supplémentaires -->
+<div *ngIf="currentStep === 3" class="form-step">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h4 class="card-title mb-4">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                Informations supplémentaires
+            </h4>
+            
+            <form [formGroup]="additionalInfoForm">
+                <div class="row">
+                    
+                    <!-- Section 1: Détails de formation -->
+                    <div class="col-12 mb-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-cogs me-2"></i>
+                            Détails de la formation
+                        </h5>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Difficulté<span class="text-danger">*</span></label>
+                        <select class="form-select" formControlName="difficulte" 
+                                [class.is-invalid]="additionalInfoForm.get('difficulte')?.invalid && additionalInfoForm.get('difficulte')?.touched">
+                            <option value="facile">Facile</option>
+                            <option value="moyen">Moyen</option>
+                            <option value="difficile">Difficile</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                        <div class="invalid-feedback">Le niveau de difficulté est requis</div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Coût (XOF)<span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" formControlName="prix" 
+                               placeholder="0" min="0" step="0.01"
+                               [class.is-invalid]="additionalInfoForm.get('prix')?.invalid && additionalInfoForm.get('prix')?.touched">
+                        <small class="text-muted">0 pour une formation gratuite</small>
+                        <div class="invalid-feedback">Le coût est requis (0 minimum)</div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Durée totale (heures)</label>
+                        <input type="number" class="form-control" formControlName="duree_totale" 
+                               placeholder="40" min="1" step="0.5"
+                               [class.is-invalid]="additionalInfoForm.get('duree_totale')?.invalid && additionalInfoForm.get('duree_totale')?.touched">
+                        <small class="text-muted">Estimation du temps total nécessaire</small>
+                        <div class="invalid-feedback">La durée doit être d'au moins 1 heure</div>
+                    </div>
+
+                    <!-- Section 2: Contenu et compétences -->
+                    <div class="col-12 mb-4 mt-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            Contenu et compétences
+                        </h5>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Compétences acquises</label>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div *ngFor="let comp of competencesAcquises; let i = index; trackBy: trackByIndex" class="mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" 
+                                               [(ngModel)]="competencesAcquises[i]" 
+                                               [ngModelOptions]="{standalone: true}"
+                                               placeholder="Nouvelle compétence acquise">
+                                        <button class="btn btn-outline-danger" type="button" 
+                                                (click)="removeCompetence(i)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" type="button" 
+                                        (click)="addCompetence()">
+                                    <i class="fas fa-plus me-1"></i> Ajouter une compétence
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Outils requis</label>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div *ngFor="let outil of outilsRequis; let i = index; trackBy: trackByIndex" class="mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" 
+                                               [(ngModel)]="outilsRequis[i]" 
+                                               [ngModelOptions]="{standalone: true}"
+                                               placeholder="Nouvel outil requis">
+                                        <button class="btn btn-outline-danger" type="button" 
+                                                (click)="removeOutil(i)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" type="button" 
+                                        (click)="addOutil()">
+                                    <i class="fas fa-plus me-1"></i> Ajouter un outil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Public et marketing -->
+                    <div class="col-12 mb-4 mt-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-users me-2"></i>
+                            Public cible et marketing
+                        </h5>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-semibold">Public cible</label>
+                        <textarea class="form-control" formControlName="public_cible" rows="3"
+                                  placeholder="À qui s'adresse cette formation ? (ex: développeurs juniors, chefs de projet, étudiants en informatique...)"></textarea>
+                        <small class="text-muted">Décrivez précisément votre audience cible</small>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-semibold">Tags</label>
+                        <input type="text" class="form-control" formControlName="tags" 
+                               placeholder="javascript, angular, web, développement (séparés par des virgules)">
+                        <small class="text-muted">Maximum 10 tags, séparés par des virgules. Utiles pour la recherche.</small>
+                    </div>
+
+                    <!-- Section 4: Paramètres avancés -->
+                    <div class="col-12 mb-4 mt-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-cog me-2"></i>
+                            Paramètres avancés
+                        </h5>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Date de début</label>
+                        <input type="date" class="form-control" formControlName="date_debut">
+                        <small class="text-muted">Date de début prévue (optionnel)</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Date de fin</label>
+                        <input type="date" class="form-control" formControlName="date_fin">
+                        <small class="text-muted">Date de fin prévue (optionnel)</small>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-semibold">Métadonnées (JSON)</label>
+                        <textarea class="form-control" formControlName="metadata" rows="2"
+                                  placeholder='{"version": "1.0", "auteur": "Nom", "copyright": "2024"}'></textarea>
+                        <small class="text-muted">Informations techniques au format JSON (optionnel)</small>
+                    </div>
+
+                    <!-- Section 5: Options de publication -->
+                    <div class="col-12 mb-4 mt-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-toggle-on me-2"></i>
+                            Options de publication
+                        </h5>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" 
+                                   formControlName="inscription_ouverte" id="inscriptionOuverte">
+                            <label class="form-check-label" for="inscriptionOuverte">
+                                <i class="fas fa-door-open text-success me-2"></i>
+                                Inscriptions ouvertes
+                            </label>
+                            <small class="text-muted d-block">
+                                Les utilisateurs peuvent s'inscrire à cette formation
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" 
+                                   formControlName="est_publie" id="estPublie">
+                            <label class="form-check-label" for="estPublie">
+                                <i class="fas fa-eye text-info me-2"></i>
+                                Formation publiée
+                            </label>
+                            <small class="text-muted d-block">
+                                La formation est visible publiquement
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Résumé des informations -->
+                    <div class="col-12 mt-4">
+                        <div class="card bg-light border-left-primary">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-clipboard-check me-2"></i>
+                                    Résumé des informations supplémentaires
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-1">
+                                                <strong>Difficulté:</strong> {{ getDifficulteLabel(additionalInfoForm.get('difficulte')?.value) }}
+                                            </li>
+                                            <li class="mb-1">
+                                                <strong>Coût:</strong> 
+                                                <span [class]="additionalInfoForm.get('prix')?.value == 0 ? 'text-success' : 'text-primary'">
+                                                    {{ additionalInfoForm.get('prix')?.value == 0 ? 'GRATUIT' : additionalInfoForm.get('prix')?.value + 'XOF' }}
+                                                </span>
+                                            </li>
+                                            <li class="mb-1">
+                                                <strong>Durée:</strong> {{ additionalInfoForm.get('duree_totale')?.value || 'Non définie' }}h
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-1">
+                                                <strong>Compétences:</strong> {{ getCompetencesCount() }} définie(s)
+                                            </li>
+                                            <li class="mb-1">
+                                                <strong>Outils requis:</strong> {{ getOutilsCount() }} défini(s)
+                                            </li>
+                                            <li class="mb-1">
+                                                <strong>Inscriptions:</strong> 
+                                                <span [class]="additionalInfoForm.get('inscription_ouverte')?.value ? 'text-success' : 'text-warning'">
+                                                    {{ additionalInfoForm.get('inscription_ouverte')?.value ? 'Ouvertes' : 'Fermées' }}
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>                        
+
+                        <!-- Étape 5: Coût estimatif -->
+                        <div *ngIf="currentStep === 4" class="form-step">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h4 class="card-title mb-4">
+                                        <i class="fas fa-calculator text-primary me-2"></i>
+                                        Estimation des coûts de formation
+                                    </h4>
+                                    
+                                    <div class="alert alert-info mb-4">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Information :</strong> Cette estimation permet aux entreprises d'évaluer le budget nécessaire pour cette formation.
+                                    </div>
+                                    
+                                    <form [formGroup]="pricingForm">
+                                        <div class="row">
+                                            <!-- Coûts de développement -->
+                                            <div class="col-md-12 mb-4">
+                                                <h5 class="text-secondary">
+                                                    <i class="fas fa-code me-2"></i>
+                                                    Coûts de développement
+                                                </h5>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-semibold">Coût de conception (XOF)</label>
+                                                <input type="number" class="form-control" formControlName="cout_conception" 
+                                                       placeholder="2000" step="100" min="0">
+                                                <small class="text-muted">Analyse des besoins, conception pédagogique</small>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-semibold">Coût de production (XOF)</label>
+                                                <input type="number" class="form-control" formControlName="cout_production" 
+                                                       placeholder="5000" step="100" min="0">
+                                                <small class="text-muted">Création du contenu, vidéos, exercices</small>
+                                            </div>
+
+                                            <!-- Coûts de livraison -->
+                                            <div class="col-md-12 mb-4 mt-4">
+                                                <h5 class="text-secondary">
+                                                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                                                    Coûts de livraison
+                                                </h5>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-semibold">Coût formateur par jour (XOF)</label>
+                                                <input type="number" class="form-control" formControlName="cout_formateur_jour" 
+                                                       placeholder="600" step="50" min="0">
+                                                <small class="text-muted">Tarif journalier du formateur</small>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-semibold">Frais logistiques par participant (XOF)</label>
+                                                <input type="number" class="form-control" formControlName="frais_logistique" 
+                                                       placeholder="50" step="10" min="0">
+                                                <small class="text-muted">Matériel, documentation, pauses</small>
+                                            </div>
+
+                                            <!-- Estimation automatique -->
+                                            <div class="col-md-12 mt-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">
+                                                            <i class="fas fa-chart-line text-success me-2"></i>
+                                                            Estimation totale
+                                                        </h5>
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="d-flex justify-content-between">
+                                                                    <span>Coûts de développement :</span>
+                                                                    <strong>{{ getCoutDeveloppement() }} XOF</strong>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between">
+                                                                    <span>Coût formateur ({{ getFormControlValue('nb_jours') || 1 }} jour{{ (getFormControlValue('nb_jours') || 1) > 1 ? 's' : '' }}) :</span>
+                                                                    <strong>{{ getCoutFormateur() }} XOF</strong>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between">
+                                                                    <span>Logistique ({{ getFormControlValue('nb_max_participants') || 1 }} participant{{ (getFormControlValue('nb_max_participants') || 1) > 1 ? 's' : '' }}) :</span>
+                                                                    <strong>{{ getCoutLogistique() }} XOF</strong>
+                                                                </div>
+                                                                <hr>
+                                                                <div class="d-flex justify-content-between">
+                                                                    <span><strong>Coût total estimé :</strong></span>
+                                                                    <strong class="text-success">{{ getCoutTotal() }} XOF</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="d-flex justify-content-between">
+                                                                    <span>Coût par participant :</span>
+                                                                    <strong class="text-primary">{{ getCoutParticipant() }} XOF</strong>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between">
+                                                                    <span>Coût par heure :</span>
+                                                                    <strong class="text-info">{{ getCoutParHeure() }} XOF</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Notes -->
+                                            <div class="col-md-12 mt-3">
+                                                <label class="form-label fw-semibold">Notes sur l'estimation</label>
+                                                <textarea class="form-control" formControlName="notes_estimation" rows="3"
+                                                          placeholder="Précisions sur l'estimation, conditions particulières, options supplémentaires..."></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-outline-secondary" 
+                                    *ngIf="currentStep > 0"
+                                    (click)="prevStep()">
+                                <i class="fas fa-arrow-left me-2"></i> Précédent
+                            </button>
+                            <div class="ms-auto">
+                                <button class="btn btn-primary" 
+                                        *ngIf="currentStep < 4"
+                                        (click)="nextStep()">
+                                    Suivant <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                                <button class="btn btn-success" 
+                                        *ngIf="currentStep === 4"
+                                        (click)="submitCourse()"
+                                        [disabled]="saving">
+                                    <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+                                    <i class="fas fa-check me-2" *ngIf="!saving"></i>
+                                    {{ saving ? 'Enregistrement...' : 'Enregistrer la formation' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Ajouter/Modifier Module -->
+<div class="modal fade" id="moduleModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ editingModuleIndex !== null ? 'Modifier' : 'Nouveau' }} Module</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form #moduleForm="ngForm" (ngSubmit)="saveModule()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Titre du module<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="newModule.titre" 
+                               name="titre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" [(ngModel)]="newModule.description" 
+                                  name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Durée estimée (minutes)</label>
+                        <input type="number" class="form-control" [(ngModel)]="newModule.duree_estimee" 
+                               name="duree" min="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="!moduleForm.valid">
+                        {{ editingModuleIndex !== null ? 'Modifier' : 'Ajouter' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Ajouter/Modifier Section -->
+<div class="modal fade" id="sectionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ editingSectionIndex !== null ? 'Modifier' : 'Nouvelle' }} Section</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form #sectionForm="ngForm" (ngSubmit)="saveSection()">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Titre de la Partie<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" [(ngModel)]="currentSection.titre" 
+                                   name="titre" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type<span class="text-danger">*</span></label>
+                            <select class="form-select" [(ngModel)]="currentSection.type" name="type" required>
+                               <option value="video">Vidéo</option>
+                                <option value="text">Texte</option>
+                                <option value="pdf">PDF</option>
+                                <option value="quiz">Quiz</option>
+                                <option value="exercice">Exercice</option>
+                                <option value="ressource">Ressource</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Durée (minutes)</label>
+                            <input type="number" class="form-control" [(ngModel)]="currentSection.duree_estimee" 
+                                   name="duree" min="0">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" [(ngModel)]="currentSection.contenu" 
+                                      name="contenu" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">URL de la ressource</label>
+                            <input type="url" class="form-control" [(ngModel)]="currentSection.ressources" 
+                                   name="ressources" placeholder="https://...">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" [(ngModel)]="currentSection.obligatoire" 
+                                       name="obligatoire" id="obligatoire">
+                                <label class="form-check-label" for="obligatoire">Partie obligatoire</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" [(ngModel)]="currentSection.visible" 
+                                       name="visible" id="visible">
+                                <label class="form-check-label" for="visible">Partie visible</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="!sectionForm.valid">
+                        {{ editingSectionIndex !== null ? 'Modifier' : 'Ajouter' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Succès -->
+<div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-5">
+                <div class="text-success mb-4">
+                    <i class="fas fa-check-circle fa-5x"></i>
+                </div>
+                <h4 class="mb-3">Formation enregistrée avec succès !</h4>
+                <p class="text-muted mb-4">Votre formation a été enregistrée et l'estimation des coûts est disponible.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button class="btn btn-primary" (click)="goToCoursesList()">
+                        Voir mes formations<!-- Étape 4: Informations supplémentaires -->
+<div *ngIf="currentStep === 3" class="form-step">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h4 class="card-title mb-4">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                Informations supplémentaires
+            </h4>
+            
+            <form [formGroup]="additionalInfoForm">
+                <div class="row">
+                    
+                    <!-- Section 1: Détails de formation -->
+                    <div class="col-12 mb-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-cogs me-2"></i>
+                            Détails de la formation
+                        </h5>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Difficulté<span class="text-danger">*</span></label>
+                        <select class="form-select" formControlName="difficulte" 
+                                [class.is-invalid]="additionalInfoForm.get('difficulte')?.invalid && additionalInfoForm.get('difficulte')?.touched">
+                            <option value="facile">Facile</option>
+                            <option value="moyen">Moyen</option>
+                            <option value="difficile">Difficile</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                        <div class="invalid-feedback">Le niveau de difficulté est requis</div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Coût (XOF)<span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" formControlName="prix" 
+                               placeholder="0" min="0" step="0.01"
+                               [class.is-invalid]="additionalInfoForm.get('prix')?.invalid && additionalInfoForm.get('prix')?.touched">
+                        <small class="text-muted">0 pour une formation gratuite</small>
+                        <div class="invalid-feedback">Le coût est requis (0 minimum)</div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Durée totale (heures)</label>
+                        <input type="number" class="form-control" formControlName="duree_totale" 
+                               placeholder="40" min="1" step="0.5"
+                               [class.is-invalid]="additionalInfoForm.get('duree_totale')?.invalid && additionalInfoForm.get('duree_totale')?.touched">
+                        <small class="text-muted">Estimation du temps total nécessaire</small>
+                        <div class="invalid-feedback">La durée doit être d'au moins 1 heure</div>
+                    </div>
+
+                    <!-- Section 2: Contenu et compétences -->
+                    <div class="col-12 mb-4 mt-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            Contenu et compétences
+                        </h5>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Compétences acquises</label>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div *ngFor="let comp of competencesAcquises; let i = index; trackBy: trackByIndex" class="mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" 
+                                               [(ngModel)]="competencesAcquises[i]" 
+                                               [ngModelOptions]="{standalone: true}"
+                                               placeholder="Nouvelle compétence acquise">
+                                        <button class="btn btn-outline-danger" type="button" 
+                                                (click)="removeCompetence(i)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" type="button" 
+                                        (click)="addCompetence()">
+                                    <i class="fas fa-plus me-1"></i> Ajouter une compétence
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Outils requis</label>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div *ngFor="let outil of outilsRequis; let i = index; trackBy: trackByIndex" class="mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" 
+                                               [(ngModel)]="outilsRequis[i]" 
+                                               [ngModelOptions]="{standalone: true}"
+                                               placeholder="Nouvel outil requis">
+                                        <button class="btn btn-outline-danger" type="button" 
+                                                (click)="removeOutil(i)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" type="button" 
+                                        (click)="addOutil()">
+                                    <i class="fas fa-plus me-1"></i> Ajouter un outil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Public et marketing -->
+                    <div class="col-12 mb-4 mt-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-users me-2"></i>
+                            Public cible et marketing
+                        </h5>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-semibold">Public cible</label>
+                        <textarea class="form-control" formControlName="public_cible" rows="3"
+                                  placeholder="À qui s'adresse cette formation ? (ex: développeurs juniors, chefs de projet, étudiants en informatique...)"></textarea>
+                        <small class="text-muted">Décrivez précisément votre audience cible</small>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-semibold">Tags</label>
+                        <input type="text" class="form-control" formControlName="tags" 
+                               placeholder="javascript, angular, web, développement (séparés par des virgules)">
+                        <small class="text-muted">Maximum 10 tags, séparés par des virgules. Utiles pour la recherche.</small>
+                    </div>
+
+                    <!-- Section 4: Paramètres avancés -->
+                    <div class="col-12 mb-4 mt-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-cog me-2"></i>
+                            Paramètres avancés
+                        </h5>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Date de début</label>
+                        <input type="date" class="form-control" formControlName="date_debut">
+                        <small class="text-muted">Date de début prévue (optionnel)</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Date de fin</label>
+                        <input type="date" class="form-control" formControlName="date_fin">
+                        <small class="text-muted">Date de fin prévue (optionnel)</small>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-semibold">Métadonnées (JSON)</label>
+                        <textarea class="form-control" formControlName="metadata" rows="2"
+                                  placeholder='{"version": "1.0", "auteur": "Nom", "copyright": "2024"}'></textarea>
+                        <small class="text-muted">Informations techniques au format JSON (optionnel)</small>
+                    </div>
+
+                    <!-- Section 5: Options de publication -->
+                    <div class="col-12 mb-4 mt-4">
+                        <h5 class="text-secondary border-bottom pb-2">
+                            <i class="fas fa-toggle-on me-2"></i>
+                            Options de publication
+                        </h5>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" 
+                                   formControlName="inscription_ouverte" id="inscriptionOuverte">
+                            <label class="form-check-label" for="inscriptionOuverte">
+                                <i class="fas fa-door-open text-success me-2"></i>
+                                Inscriptions ouvertes
+                            </label>
+                            <small class="text-muted d-block">
+                                Les utilisateurs peuvent s'inscrire à cette formation
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" 
+                                   formControlName="est_publie" id="estPublie">
+                            <label class="form-check-label" for="estPublie">
+                                <i class="fas fa-eye text-info me-2"></i>
+                                Formation publiée
+                            </label>
+                            <small class="text-muted d-block">
+                                La formation est visible publiquement
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Résumé des informations -->
+                    <div class="col-12 mt-4">
+                        <div class="card bg-light border-left-primary">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-clipboard-check me-2"></i>
+                                    Résumé des informations supplémentaires
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-1">
+                                                <strong>Difficulté:</strong> {{ getDifficulteLabel(additionalInfoForm.get('difficulte')?.value) }}
+                                            </li>
+                                            <li class="mb-1">
+                                                <strong>Coût:</strong> 
+                                                <span [class]="additionalInfoForm.get('prix')?.value == 0 ? 'text-success' : 'text-primary'">
+                                                    {{ additionalInfoForm.get('prix')?.value == 0 ? 'GRATUIT' : additionalInfoForm.get('prix')?.value + 'XOF' }}
+                                                </span>
+                                            </li>
+                                            <li class="mb-1">
+                                                <strong>Durée:</strong> {{ additionalInfoForm.get('duree_totale')?.value || 'Non définie' }}h
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-1">
+                                                <strong>Compétences:</strong> {{ getCompetencesCount() }} définie(s)
+                                            </li>
+                                            <li class="mb-1">
+                                                <strong>Outils requis:</strong> {{ getOutilsCount() }} défini(s)
+                                            </li>
+                                            <li class="mb-1">
+                                                <strong>Inscriptions:</strong> 
+                                                <span [class]="additionalInfoForm.get('inscription_ouverte')?.value ? 'text-success' : 'text-warning'">
+                                                    {{ additionalInfoForm.get('inscription_ouverte')?.value ? 'Ouvertes' : 'Fermées' }}
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+                    </button>
+                    <button class="btn btn-outline-secondary" (click)="createNewCourse()">
+                        Créer une nouvelle formation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

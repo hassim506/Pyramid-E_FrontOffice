@@ -1,275 +1,325 @@
+<!-- Loading -->
+<div *ngIf="loading && quizzes.length === 0" class="ip-loader">
+  <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement...</span></div>
+</div>
 
-    <div class="page-title d-flex align-items-center justify-content-between">
-        <h5 class="fw-bold">Quiz</h5>
+<!-- Error -->
+<div *ngIf="error" class="alert alert-danger alert-dismissible">
+  {{ error }}
+  <button type="button" class="btn-close" (click)="error = ''"></button>
+</div>
+
+<ng-container *ngIf="!loading || quizzes.length > 0">
+
+  <!-- Page header -->
+  <div class="ip-page-head">
+    <div>
+      <h5 class="ip-page-head__title">Quiz & évaluations <span class="ip-count">{{ quizzes.length }}</span></h5>
+      <p class="ip-page-head__sub">Gérez vos quiz et consultez les résultats</p>
+    </div>
+    <a [routerLink]="['/quiz/create']" class="ip-btn ip-btn--primary">
+      <i class="isax isax-add-circle"></i> Nouveau quiz
+    </a>
+  </div>
+
+  <!-- Table -->
+  <div class="ip-card">
+    <div class="table-responsive">
+      <table class="table ip-table">
+        <thead>
+          <tr>
+            <th>Quiz</th>
+            <th>Formation</th>
+            <th>Durée</th>
+            <th>Score min.</th>
+            <th>Statut</th>
+            <th>Créé le</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let quiz of quizzes">
+            <td>
+              <div class="ip-quiz-cell">
+                <div class="ip-quiz-icon"><i class="isax isax-award"></i></div>
+                <div>
+                  <div class="ip-quiz-title">{{ quiz.titre }}</div>
+                  <div class="ip-quiz-desc" *ngIf="quiz.description">{{ quiz.description }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="ip-pill">
+                <i class="isax isax-book-1"></i> Formation #{{ quiz.formation_id }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="quiz.duree_minutes" class="ip-pill">
+                <i class="isax isax-clock"></i> {{ quiz.duree_minutes }} min
+              </span>
+              <span *ngIf="!quiz.duree_minutes" class="text-muted">—</span>
+            </td>
+            <td>
+              <span *ngIf="quiz.score_minimum" class="ip-score">{{ quiz.score_minimum }}%</span>
+              <span *ngIf="!quiz.score_minimum" class="text-muted">—</span>
+            </td>
+            <td>
+              <span class="ip-status-badge" [class.ip-status-active]="quiz.is_active" [class.ip-status-inactive]="!quiz.is_active">
+                <i class="fa-solid fa-circle"></i>
+                {{ quiz.is_active ? 'Actif' : 'Inactif' }}
+              </span>
+            </td>
+            <td>
+              <span class="text-muted">{{ quiz.created_at | date:'dd/MM/yyyy' }}</span>
+            </td>
+            <td>
+              <div class="ip-actions">
+                <button type="button" class="ip-action-btn" title="Détails" (click)="openDetailsModal(quiz)">
+                  <i class="isax isax-eye"></i>
+                </button>
+                <button type="button" class="ip-action-btn" title="Modifier" (click)="openEditModal(quiz)">
+                  <i class="isax isax-edit-2"></i>
+                </button>
+                <button type="button" class="ip-action-btn text-danger" title="Supprimer"
+                        (click)="deleteQuiz(quiz)">
+                  <i class="isax isax-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="quizzes.length === 0">
+            <td colspan="7" class="ip-empty">
+              <i class="isax isax-award"></i>
+              <span>Aucun quiz trouvé</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</ng-container>
+
+<!-- ── MODAL DÉTAILS ─────────────────────────────────────────────────────── -->
+<div class="modal fade" id="quiz_details_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered ip-modal-dialog">
+    <div class="modal-content ip-modal-content" *ngIf="selectedQuiz">
+
+      <!-- Header -->
+      <div class="ip-modal-header">
+        <div class="ip-modal-icon">
+          <i class="isax isax-award"></i>
+        </div>
         <div>
-            <a href="javascript:void(0);" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#add_quiz">Add Quiz</a>
+          <h5 class="ip-modal-title">Détails du quiz</h5>
+          <p class="ip-modal-sub">Informations complètes sur le quiz</p>
         </div>
-    </div>
-    <div class="border rounded-2 p-3 mb-3">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <div>
-                    <h6 class="mb-2"><a [routerLink]="routes.instructorQuizQuestion">Information About UI/UX Design Degree</a></h6>
-                    <div class="question-info d-flex align-items-center">
-                        <p class="d-flex align-items-center fs-14 me-2 pe-2 border-end mb-0"><i class="isax isax-message-question5 text-primary-soft me-2"></i>25 Questions</p>
-                        <p class="d-flex align-items-center fs-14 mb-0"><i class="isax isax-clock5 text-secondary-soft me-2"></i>30 Minutes</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex align-items-center justify-content-end mt-2 mt-md-0">
-                    <a [routerLink]="routes.instructorQuizResult" class="text-info text-decoration-underline fs-12 fw-medium me-3">View Results</a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" data-bs-toggle="modal" data-bs-target="#edit_quiz"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="border rounded-2 p-3 mb-3">
-        <div class="row align-items-center gy-3">
-            <div class="col-md-8">
-                <div>
-                    <h6 class="mb-2"><a [routerLink]="routes.instructorQuizQuestion">Learn JavaScript and Express to become a Expert</a></h6>
-                    <div class="question-info d-flex align-items-center">
-                        <p class="d-flex align-items-center fs-14 me-2 pe-2 border-end mb-0"><i class="isax isax-message-question5 text-primary-soft me-2"></i>15 Questions</p>
-                        <p class="d-flex align-items-center fs-14 mb-0"><i class="isax isax-clock5 text-secondary-soft me-2"></i>25 Minutes</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex align-items-center justify-content-end mt-2 mt-md-0">
-                    <a [routerLink]="routes.instructorQuizResult" class="text-info text-decoration-underline fs-12 fw-medium me-3">View Results</a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" data-bs-toggle="modal" data-bs-target="#edit_quiz"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="border rounded-2 p-3 mb-3">
-        <div class="row align-items-center gy-3">
-            <div class="col-md-8">
-                <div>
-                    <h6 class="mb-2"><a [routerLink]="routes.instructorQuizQuestion">Introduction to Python Programming</a></h6>
-                    <div class="question-info d-flex align-items-center">
-                        <p class="d-flex align-items-center fs-14 me-2 pe-2 border-end mb-0"><i class="isax isax-message-question5 text-primary-soft me-2"></i>22 Questions</p>
-                        <p class="d-flex align-items-center fs-14 mb-0"><i class="isax isax-clock5 text-secondary-soft me-2"></i>15 Minutes</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex align-items-center justify-content-end mt-2 mt-md-0">
-                    <a [routerLink]="routes.instructorQuizResult" class="text-info text-decoration-underline fs-12 fw-medium me-3">View Results</a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" data-bs-toggle="modal" data-bs-target="#edit_quiz"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="border rounded-2 p-3 mb-3">
-        <div class="row align-items-center gy-3">
-            <div class="col-md-8">
-                <div>
-                    <h6 class="mb-2"><a [routerLink]="routes.instructorQuizQuestion">Build Responsive Websites with HTML5 and CSS3</a></h6>
-                    <div class="question-info d-flex align-items-center">
-                        <p class="d-flex align-items-center fs-14 me-2 pe-2 border-end mb-0"><i class="isax isax-message-question5 text-primary-soft me-2"></i>30 Questions</p>
-                        <p class="d-flex align-items-center fs-14 mb-0"><i class="isax isax-clock5 text-secondary-soft me-2"></i>50 Minutes</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex align-items-center justify-content-end mt-2 mt-md-0">
-                    <a [routerLink]="routes.instructorQuizResult" class="text-info text-decoration-underline fs-12 fw-medium me-3">View Results</a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="border rounded-2 p-3 mb-3 mb-0">
-        <div class="row align-items-center gy-3">
-            <div class="col-md-8">
-                <div>
-                    <h6 class="mb-2"><a [routerLink]="routes.instructorQuizQuestion">Information About Photoshop Design Degree</a></h6>
-                    <div class="question-info d-flex align-items-center">
-                        <p class="d-flex align-items-center fs-14 me-2 pe-2 border-end mb-0"><i class="isax isax-message-question5 text-primary-soft me-2"></i>20 Questions</p>
-                        <p class="d-flex align-items-center fs-14 mb-0"><i class="isax isax-clock5 text-secondary-soft me-2"></i>20 Minutes</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex align-items-center justify-content-end mt-2 mt-md-0">
-                    <a [routerLink]="routes.instructorQuizResult" class="text-info text-decoration-underline fs-12 fw-medium me-3">View Results</a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" data-bs-toggle="modal" data-bs-target="#edit_quiz"><i class="isax isax-edit-2"></i></a>
-                    <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-			<!-- Add Question -->
-			<div class="modal fade" id="add_quiz">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Add New Quiz</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body pb-0">
-								<div class="mb-3">
-									<label class="form-label">Course <span class="text-danger"> *</span></label>
-									<mat-select class="custom-mat-select select" placeholder="Select">
-										<mat-option value="1">Select</mat-option>
-										<mat-option value="1">Information About UI/UX Design Degree</mat-option>
-										<mat-option value="1">Learn JavaScript and Express to become a Expert</mat-option>
-										<mat-option value="1">Introduction to Python Programming</mat-option>
-									</mat-select>
-								</div>
-								<div class="mb-3">
-									<label class="form-label">Quiz Title <span class="text-danger"> *</span></label>
-									<input type="text" class="form-control">
-								</div>
-								<div class="row">
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">No of Questions <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control">
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Total Marks <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control">
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Pass Mark <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control">
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Duration <span class="text-danger"> *</span></label>
-											<div class="input-icon-end position-relative">
-                                                <p-datepicker class="timepick form-control"
-													placeholder="-- : -- : --" 
-													inputId="calendar-timeonly" 
-													[(ngModel)]="time2"  
-													[timeOnly]="true" 
-													[hourFormat]="'12'" 
-													[ngModelOptions]="{standalone: true}" />
-												<span class="input-icon-addon">
-													<i class="isax isax-clock"></i>
-												</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn bg-gray-100 rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Add Quiz</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Add Question -->
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+      </div>
 
-			<!-- Edit Question -->
-			<div class="modal fade" id="edit_quiz">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Edit Quiz</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body pb-0">
-								<div class="mb-3">
-									<label class="form-label">Course <span class="text-danger"> *</span></label>
-									<mat-select class="custom-mat-select select" placeholder="Information About UI/UX Design Degree">
-										<mat-option value="1">Select</mat-option>
-										<mat-option value="1">Information About UI/UX Design Degree</mat-option>
-										<mat-option value="1">Learn JavaScript and Express to become a Expert</mat-option>
-										<mat-option value="1">Introduction to Python Programming</mat-option>
-									</mat-select>
-								</div>
-								<div class="mb-3">
-									<label class="form-label">Quiz Title <span class="text-danger"> *</span></label>
-									<input type="text" class="form-control" value="Information About UI/UX Design Degree">
-								</div>
-								<div class="row">
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">No of Questions <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control" value="10">
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Total Marks <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control" value="100">
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Pass Mark <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control" value="50">
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Duration <span class="text-danger"> *</span></label>
-											<div class="input-icon-end position-relative">
-												<p-datepicker class="timepick form-control"
-													placeholder="-- : -- : --" 
-													inputId="calendar-timeonly" 
-													[(ngModel)]="time2"  
-													[timeOnly]="true" 
-													[hourFormat]="'12'" 
-													[ngModelOptions]="{standalone: true}" />
-												<span class="input-icon-addon">
-													<i class="isax isax-clock"></i>
-												</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn bg-gray-100 rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Save Changes</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Edit Question -->
+      <div class="ip-modal-divider"></div>
 
-			<!-- Delete Modal -->
-			<div class="modal fade" id="delete_modal">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-body text-center custom-modal-body">
-							<span class="avatar avatar-lg bg-danger-transparent rounded-circle mb-2">
-								<i class="isax isax-trash fs-24 text-danger"></i>
-							</span>
-							<div>
-								<h4 class="mb-2">Delete Quiz</h4>
-								<p class="mb-3">Are you sure you want to delete Quiz?</p>
-								<div class="d-flex align-items-center justify-content-center">
-									<a href="javascript:void(0);" class="btn bg-gray-100 rounded-pill me-2" data-bs-dismiss="modal">Cancel</a>
-									<a href="javascript:void(0);" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Yes, Delete</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- /Delete Modal -->
+      <!-- Body -->
+      <div class="ip-modal-body">
+
+        <div class="ip-detail-block">
+          <div class="ip-detail-icon-wrap">
+            <i class="isax isax-award"></i>
+          </div>
+          <div>
+            <div class="ip-detail-label">Titre</div>
+            <div class="ip-detail-value">{{ selectedQuiz.titre }}</div>
+          </div>
+        </div>
+
+        <div class="ip-detail-block" *ngIf="selectedQuiz.description">
+          <div class="ip-detail-icon-wrap">
+            <i class="isax isax-document-text"></i>
+          </div>
+          <div>
+            <div class="ip-detail-label">Description</div>
+            <div class="ip-detail-value">{{ selectedQuiz.description }}</div>
+          </div>
+        </div>
+
+        <div class="ip-detail-row">
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-book-1"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Formation associée</div>
+              <div class="ip-detail-value">Formation #{{ selectedQuiz.formation_id }}</div>
+            </div>
+          </div>
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-clock"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Durée</div>
+              <div class="ip-detail-value">{{ selectedQuiz.duree_minutes ? selectedQuiz.duree_minutes + ' min' : 'Non définie' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ip-detail-row">
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-medal-star"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Score minimum</div>
+              <div class="ip-detail-value">{{ selectedQuiz.score_minimum ? selectedQuiz.score_minimum + '%' : 'Non défini' }}</div>
+            </div>
+          </div>
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-repeat"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Tentatives max</div>
+              <div class="ip-detail-value">{{ selectedQuiz.tentatives_max ?? 'Illimitées' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ip-detail-row">
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-status"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Statut</div>
+              <div>
+                <span class="ip-status-badge" [class.ip-status-active]="selectedQuiz.is_active" [class.ip-status-inactive]="!selectedQuiz.is_active">
+                  <i class="fa-solid fa-circle"></i>
+                  {{ selectedQuiz.is_active ? 'Actif' : 'Inactif' }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="ip-detail-block ip-detail-block--half">
+            <div class="ip-detail-icon-wrap">
+              <i class="isax isax-calendar"></i>
+            </div>
+            <div>
+              <div class="ip-detail-label">Créé le</div>
+              <div class="ip-detail-value">{{ selectedQuiz.created_at | date:'dd/MM/yyyy' }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ip-modal-divider"></div>
+
+      <!-- Footer -->
+      <div class="ip-modal-footer">
+        <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Fermer</button>
+        <a [routerLink]="['/instructor/instructor-quiz-questions', selectedQuiz.id]"
+           class="ip-btn ip-btn--primary" data-bs-dismiss="modal">
+          <i class="isax isax-eye"></i> Voir les questions
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL MODIFICATION ────────────────────────────────────────────────── -->
+<div class="modal fade" id="quiz_edit_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered ip-modal-dialog">
+    <div class="modal-content ip-modal-content">
+
+      <!-- Header -->
+      <div class="ip-modal-header">
+        <div class="ip-modal-icon">
+          <i class="isax isax-edit-2"></i>
+        </div>
+        <div>
+          <h5 class="ip-modal-title">Modifier le quiz</h5>
+          <p class="ip-modal-sub">Mettez à jour les informations du quiz</p>
+        </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="ip-modal-divider"></div>
+
+      <!-- Body -->
+      <div class="ip-modal-body" *ngIf="editForm">
+        <form [formGroup]="editForm">
+
+          <div class="ip-field">
+            <label class="ip-label">Titre <span class="ip-required">*</span></label>
+            <input type="text" class="ip-input" formControlName="titre" placeholder="Titre du quiz">
+          </div>
+
+          <div class="ip-field">
+            <label class="ip-label">Description</label>
+            <textarea class="ip-input ip-textarea" formControlName="description" rows="3"
+                      placeholder="Description du quiz (optionnel)"></textarea>
+          </div>
+
+          <div class="ip-field-row">
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Durée (minutes)</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-clock ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="duree_minutes"
+                       placeholder="Ex. : 30" min="1">
+              </div>
+            </div>
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Score minimum (%)</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-medal-star ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="score_minimum"
+                       placeholder="Ex. : 60" min="0" max="100">
+              </div>
+            </div>
+          </div>
+
+          <div class="ip-field-row">
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Tentatives maximum</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-repeat ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="tentatives_max"
+                       placeholder="Illimitées si vide" min="1">
+              </div>
+            </div>
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Statut</label>
+              <div class="ip-toggle-row">
+                <span class="ip-toggle-label">{{ editForm.get('is_active')?.value ? 'Actif' : 'Inactif' }}</span>
+                <label class="ip-toggle">
+                  <input type="checkbox" formControlName="is_active">
+                  <span class="ip-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="editError" class="alert alert-danger mt-2 py-2 small">{{ editError }}</div>
+
+        </form>
+      </div>
+
+      <div class="ip-modal-divider"></div>
+
+      <!-- Footer -->
+      <div class="ip-modal-footer">
+        <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="ip-btn ip-btn--primary"
+                [disabled]="editForm?.invalid || saving"
+                (click)="saveEdit()">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm me-1"></span>
+          <i *ngIf="!saving" class="isax isax-tick-circle me-1"></i>
+          Enregistrer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

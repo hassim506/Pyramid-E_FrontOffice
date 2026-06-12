@@ -3,12 +3,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Permission, PermissionResponse } from '../../models/permission.models';
 import { AuthService } from '../authentification/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PermissionService {
-  private apiUrl = 'http://localhost:8000/api'; // À adapter selon la configuration
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

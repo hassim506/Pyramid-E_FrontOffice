@@ -170,11 +170,11 @@
                               Leçon {{ i + 1 }}.{{ j + 1 }} {{ section.titre }}
                             </p>
                             <div class="d-flex gap-xl-5 gap-3">
-                              <a href="javascript:void(0);" 
-                                 class="preview-link" 
-                                 *ngIf="section.est_gratuit">
-                                Aperçu
-                              </a>
+                             <a href="javascript:void(0);" 
+                            class="preview-link"
+                            (click)="previewSection(section)">
+                            Aperçu
+                          </a>
                               <p class="mb-0">{{ section.duree_estimee || '5' }}min</p>
                             </div>
                           </li>

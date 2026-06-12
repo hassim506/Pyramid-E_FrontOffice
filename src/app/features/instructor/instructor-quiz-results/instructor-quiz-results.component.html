@@ -1,97 +1,161 @@
+<!-- Loading -->
+<div *ngIf="loading" class="ip-loader">
+  <div class="spinner-border" role="status"><span class="visually-hidden">Chargement...</span></div>
+</div>
 
-    <h5 class="page-title">Quiz Results</h5>
-    <div class="card">
-        <div class="card-body">
-            <div class="d-sm-flex align-items-center">
-                <div class="quiz-img me-3 mb-2 mb-sm-0">
-                    <img src="assets/img/students/quiz.jpg" alt="">
-                </div>
-                <div>
-                    <h5 class="mb-2"><a href="javascript:void(0);">Information About UI/UX Design Degree</a></h5>
-                    <div class="question-info d-flex align-items-center">
-                        <p class="d-flex align-items-center fs-14 me-2 pe-2 border-end mb-0"><i class="isax isax-message-question5 text-primary-soft me-2"></i>25 Questions</p>
-                        <p class="d-flex align-items-center fs-14 mb-0"><i class="isax isax-clock5 text-secondary-soft me-2"></i>30 Minutes</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<ng-container *ngIf="!loading">
+
+  <!-- Page header -->
+  <div class="ip-page-head">
+    <div>
+      <h5 class="ip-page-head__title">Résultats des quiz <span class="ip-count">{{ filteredResults.length }}</span></h5>
+      <p class="ip-page-head__sub">Consultez et analysez les résultats des évaluations</p>
     </div>
-    <div class="row">
-        <div class="col-lg-4 col-md-6">
-            <div class="card bg-secondary-transparent border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="mb-1 fw-normal text-gray-5">Total Particpants</h6>
-                            <span class="fs-20 fw-bold mb-1 d-block text-gray-9">30</span>
-                        </div>
-                        <div class="icon-box bg-soft-secondary">
-                            <img src="assets/img/icon/user-tick.svg" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="card bg-info-transparent border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="mb-1 fw-normal text-gray-5">Scores</h6>
-                            <span class="fs-20 fw-bold mb-1 d-block text-gray-9">03</span>
-                        </div>
-                        <div class="icon-box  bg-soft-info">
-                            <img src="assets/img/icon/document.svg" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="card bg-purple-transparent border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="mb-1 fw-normal text-gray-5">Average Time</h6>
-                            <span class="fs-20 fw-bold mb-1 d-block text-gray-9">00:00:55</span>
-                        </div>
-                        <div class="icon-box  bg-soft-purple">
-                            <img src="assets/img/icon/clock.svg" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="ip-kpi-row">
+    <div class="ip-kpi-card">
+      <div class="ip-kpi-icon"><i class="isax isax-chart-1"></i></div>
+      <div>
+        <div class="ip-kpi-label">Total résultats</div>
+        <div class="ip-kpi-value">{{ filteredResults.length }}</div>
+      </div>
     </div>
-    <div class="table-responsive custom-table">
-        <table matSort (matSortChange)="sortData($event)" class="table">
-            <thead class="thead-light">
-                <tr>
-                    <th>Student Name</th>
-                    <th>Score</th>
-                    <th>Attemplts</th>
-                    <th>Finish Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (data of tableData;track data){
-                <tr>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <a [routerLink]="routes.studentsDetails" class="avatar avatar-md avatar-rounded flex-shrink-0 me-2">
-                                <img src="assets/img/user/{{data.img}}" alt="">
-                            </a>
-                            <a [routerLink]="routes.studentsDetails" class="fs-14">{{data.studentName}}</a>
-                        </div>
-                    </td>
-                    <td>{{data.score}}</td>
-                    <td>{{data.attempts}}</td>
-                    <td>{{data.finishTime}}</td>
-                </tr>
-                }
-            </tbody>
-        </table>
+    <div class="ip-kpi-card">
+      <div class="ip-kpi-icon ip-kpi-icon--success"><i class="isax isax-tick-circle"></i></div>
+      <div>
+        <div class="ip-kpi-label">Taux de réussite</div>
+        <div class="ip-kpi-value">{{ getSuccessRate() }}%</div>
+      </div>
     </div>
-    <!-- /pagination -->
-    <app-custom-pagination/>
-    <!-- /pagination -->
+    <div class="ip-kpi-card">
+      <div class="ip-kpi-icon ip-kpi-icon--gold"><i class="isax isax-medal-star"></i></div>
+      <div>
+        <div class="ip-kpi-label">Note moyenne</div>
+        <div class="ip-kpi-value">{{ getAverageScore() }}<span class="ip-kpi-unit">/100</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="ip-card ip-filter-card">
+    <div class="ip-filter-row">
+      <div class="ip-filter-group">
+        <label class="ip-label">Quiz ID</label>
+        <div class="ip-input-icon-wrap">
+          <i class="isax isax-award ip-input-icon"></i>
+          <input type="number" class="ip-input ip-input--icon"
+                 [(ngModel)]="filterQuizId" (ngModelChange)="applyFilters()"
+                 placeholder="ID du quiz">
+        </div>
+      </div>
+      <div class="ip-filter-group">
+        <label class="ip-label">Utilisateur ID</label>
+        <div class="ip-input-icon-wrap">
+          <i class="isax isax-user ip-input-icon"></i>
+          <input type="number" class="ip-input ip-input--icon"
+                 [(ngModel)]="filterUserId" (ngModelChange)="applyFilters()"
+                 placeholder="ID utilisateur">
+        </div>
+      </div>
+      <div class="ip-filter-group">
+        <label class="ip-label">Statut</label>
+        <select class="ip-input" [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+          <option value="all">Tous</option>
+          <option value="success">Réussi</option>
+          <option value="failed">Échoué</option>
+        </select>
+      </div>
+      <div class="ip-filter-group ip-filter-group--action">
+        <button type="button" class="ip-btn ip-btn--ghost" (click)="clearFilters()">
+          <i class="isax isax-refresh"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="ip-card">
+    <div class="table-responsive">
+      <table class="table ip-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Quiz</th>
+            <th>Utilisateur</th>
+            <th>Score</th>
+            <th>Points</th>
+            <th>Tentatives</th>
+            <th>Statut</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let result of getPaginatedResults()">
+            <td><span class="ip-id-badge">#{{ result.id }}</span></td>
+            <td>
+              <span class="ip-pill">
+                <i class="isax isax-award"></i> Quiz #{{ result.quiz_id }}
+              </span>
+            </td>
+            <td>
+              <div class="ip-user-cell">
+                <div class="ip-user-avatar"><i class="isax isax-user"></i></div>
+                <span>User #{{ result.user_id }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="ip-score-cell">
+                <span class="ip-score-badge"
+                      [class.ip-score--high]="parseFloat(result.note) >= 80"
+                      [class.ip-score--mid]="parseFloat(result.note) >= 60 && parseFloat(result.note) < 80"
+                      [class.ip-score--low]="parseFloat(result.note) < 60">
+                  {{ result.note }}/100
+                </span>
+                <div class="ip-progress-wrap">
+                  <div class="ip-progress-bar"
+                       [style.width.%]="parseFloat(result.note)"
+                       [class.ip-progress--high]="parseFloat(result.note) >= 80"
+                       [class.ip-progress--mid]="parseFloat(result.note) >= 60 && parseFloat(result.note) < 80"
+                       [class.ip-progress--low]="parseFloat(result.note) < 60">
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td><span class="text-muted">{{ result.points_obtenus }}/{{ result.points_total }}</span></td>
+            <td>
+              <span class="ip-pill">
+                <i class="isax isax-repeat"></i> {{ result.nombre_tentatives }}
+              </span>
+            </td>
+            <td>
+              <span class="ip-status-badge"
+                    [class.ip-status-active]="result.est_reussi"
+                    [class.ip-status-inactive]="!result.est_reussi">
+                <i class="fa-solid fa-circle"></i>
+                {{ result.est_reussi ? 'Réussi' : 'Échoué' }}
+              </span>
+            </td>
+            <td><span class="text-muted">{{ formatDate(result.created_at) }}</span></td>
+          </tr>
+          <tr *ngIf="filteredResults.length === 0">
+            <td colspan="8" class="ip-empty">
+              <i class="isax isax-search-normal"></i>
+              <span>Aucun résultat trouvé</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <app-custom-pagination
+    *ngIf="filteredResults.length > 0"
+    [currentPage]="currentPage"
+    [totalData]="totalData"
+    (pageChange)="goToPage($event)">
+  </app-custom-pagination>
+
+</ng-container>

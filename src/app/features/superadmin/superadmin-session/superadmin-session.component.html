@@ -1,0 +1,206 @@
+<div class="ac-shell">
+
+  <!-- ── Topbar ── -->
+  <div class="ac-topbar">
+    <button type="button" class="ac-tab active">
+      <i class="isax isax-calendar-1"></i>Sessions
+    </button>
+    <span class="ac-spacer"></span>
+    <div style="display:flex;align-items:center;padding:0 10px;">
+      <span class="ac-topbar-info">{{ totalData }} session{{ totalData !== 1 ? 's' : '' }}</span>
+    </div>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="ac-kpi-row" style="grid-template-columns:repeat(5,1fr);">
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-calendar"></i>Total</div>
+      <div class="ac-kpi__val">{{ stats.total }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-clock"></i>Planifiées</div>
+      <div class="ac-kpi__val">{{ stats.planifiees }}</div>
+      <div class="ac-kpi__delta neutral">à venir</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-play-circle"></i>En cours</div>
+      <div class="ac-kpi__val">{{ stats.enCours }}</div>
+      <div class="ac-kpi__delta up">actives</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-tick-circle"></i>Terminées</div>
+      <div class="ac-kpi__val">{{ stats.terminees }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-close-circle"></i>Annulées</div>
+      <div class="ac-kpi__val">{{ stats.annulees }}</div>
+      <div class="ac-kpi__delta down">annulées</div>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="ac-toolbar">
+    <div class="ac-search">
+      <i class="isax isax-search-normal ac-search__icon"></i>
+      <input class="ac-search__input" type="text"
+             [(ngModel)]="searchTerm"
+             (ngModelChange)="onSearch()"
+             placeholder="Titre, code, lieu, formateur…">
+    </div>
+
+    <!-- Entreprise -->
+    <select class="ac-select" title="Entreprise" [(ngModel)]="selectedEntreprise" (change)="onFilterChange()">
+      <option value="">Toutes entreprises</option>
+      <option *ngFor="let c of companies" [value]="c.id">{{ c.nom }}</option>
+    </select>
+
+    <!-- Statut -->
+    <select class="ac-select" title="Statut" [(ngModel)]="selectedStatut" (change)="onFilterChange()">
+      <option value="">Tous statuts</option>
+      <option value="planifiee">Planifiée</option>
+      <option value="en_cours">En cours</option>
+      <option value="terminee">Terminée</option>
+      <option value="annulee">Annulée</option>
+    </select>
+
+    <!-- Type -->
+    <select class="ac-select" title="Type" [(ngModel)]="selectedType" (change)="onFilterChange()">
+      <option value="">Tous types</option>
+      <option value="presentiel">Présentiel</option>
+      <option value="distanciel">Distanciel</option>
+      <option value="hybride">Hybride</option>
+    </select>
+
+    <!-- Date range -->
+    <input class="ac-select" type="date" title="Date début"
+           [(ngModel)]="dateDebut" (change)="onFilterChange()"
+           style="width:130px;">
+    <input class="ac-select" type="date" title="Date fin"
+           [(ngModel)]="dateFin" (change)="onFilterChange()"
+           style="width:130px;">
+
+    <span class="ac-spacer"></span>
+
+    <!-- Reset -->
+    <button type="button" class="ac-chip" *ngIf="hasActiveFilters" (click)="resetFilters()">
+      <i class="isax isax-refresh"></i>Réinitialiser
+    </button>
+
+    <!-- Page size -->
+    <select class="ac-select" title="Taille de page" [(ngModel)]="pageSize" (change)="PageSize()">
+      <option value="10">10 / page</option>
+      <option value="25">25 / page</option>
+      <option value="50">50 / page</option>
+    </select>
+  </div>
+
+  <!-- ── Alert ── -->
+  <div class="ac-alert" *ngIf="error">
+    <i class="isax isax-warning-2"></i>{{ error }}
+    <button type="button" class="ac-alert-close" (click)="error=''">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+
+  <!-- ── Loading ── -->
+  <div class="ac-empty" *ngIf="loading">
+    <i class="isax isax-calendar-1"></i>Chargement des sessions…
+  </div>
+
+  <!-- ── Table ── -->
+  <ng-container *ngIf="!loading">
+    <table class="ac-table" *ngIf="sessions.length > 0">
+      <thead>
+        <tr>
+          <th style="width:90px;">Code</th>
+          <th>Titre</th>
+          <th style="width:120px;">Formation</th>
+          <th style="width:130px;">Formateur</th>
+          <th style="width:80px;text-align:center;">Type</th>
+          <th style="width:100px;">Lieu</th>
+          <th style="width:100px;">Date début</th>
+          <th style="width:100px;">Date fin</th>
+          <th style="width:80px;text-align:center;">Places</th>
+          <th style="width:88px;text-align:center;">Statut</th>
+          <th style="width:70px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of sessions; trackBy: trackBySession">
+          <!-- Code -->
+          <td style="font-size:11px;color:#9ca3af;font-family:monospace;">{{ s.code_session || '—' }}</td>
+          <!-- Titre -->
+          <td>
+            <div class="ac-table-name">{{ s.titre }}</div>
+            <div class="ac-table-sub" *ngIf="s.description">{{ s.description | slice:0:60 }}{{ (s.description?.length ?? 0) > 60 ? '…' : '' }}</div>
+          </td>
+          <!-- Formation -->
+          <td>
+            <div class="ac-table-name" style="font-size:12px;">{{ s.formation?.titre || '—' }}</div>
+          </td>
+          <!-- Formateur -->
+          <td>
+            <div class="ac-instructor">
+              <div class="ac-instructor-av">{{ (s.formateur?.prenom?.[0] ?? 'F') + (s.formateur?.nom?.[0] ?? '') }}</div>
+              <div>
+                <div class="ac-table-name" style="font-size:12px;">
+                  <ng-container *ngIf="s.formateur?.prenom || s.formateur?.nom">
+                    {{ s.formateur?.prenom || '' }} {{ s.formateur?.nom || '' }}
+                  </ng-container>
+                  <ng-container *ngIf="!s.formateur?.prenom && !s.formateur?.nom">Non assigné</ng-container>
+                </div>
+              </div>
+            </div>
+          </td>
+          <!-- Type -->
+          <td style="text-align:center;">
+            <span class="ac-status" [attr.data-s]="getTypeData(s.type)">{{ getTypeLabel(s.type) }}</span>
+          </td>
+          <!-- Lieu -->
+          <td style="font-size:12px;">{{ s.lieu || '—' }}</td>
+          <!-- Date début -->
+          <td style="font-size:12px;">{{ formatDate(s.date_debut) }}</td>
+          <!-- Date fin -->
+          <td style="font-size:12px;">{{ formatDate(s.date_fin) }}</td>
+          <!-- Places -->
+          <td style="text-align:center;font-size:12px;">
+            <span [style.color]="s.nombre_places_restantes === 0 ? '#991b1b' : '#27500a'">
+              {{ s.nombre_inscrits }}/{{ s.capacite_max }}
+            </span>
+          </td>
+          <!-- Statut -->
+          <td style="text-align:center;">
+            <span class="ac-status" [attr.data-s]="getStatutData(s.statut)">{{ getStatutLabel(s.statut) }}</span>
+          </td>
+          <!-- Actions -->
+          <td>
+            <div class="ac-actions">
+              <button type="button" class="ac-act ac-act--del" (click)="deleteSession(s)" title="Supprimer">
+                <i class="isax isax-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty -->
+    <div class="ac-empty" *ngIf="sessions.length === 0">
+      <i class="isax isax-calendar-1"></i>
+      {{ hasActiveFilters ? 'Aucun résultat pour ces filtres' : 'Aucune session trouvée' }}
+      <button type="button" class="ac-chip" style="margin-top:10px;" *ngIf="hasActiveFilters" (click)="resetFilters()">
+        <i class="isax isax-refresh"></i>Réinitialiser
+      </button>
+    </div>
+
+    <!-- Pagination -->
+    <app-custom-pagination
+      *ngIf="sessions.length > 0 && totalData > pageSize"
+      [totalItems]="totalData"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      (pageChange)="onPageChange($event)">
+    </app-custom-pagination>
+  </ng-container>
+
+</div>

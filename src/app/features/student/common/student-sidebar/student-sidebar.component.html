@@ -23,10 +23,10 @@
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
       <ul class="submenu">
-        <li><a [routerLink]="routes.studentMyCourses"          [class.active]="isExactActive(routes.studentMyCourses)">Formations</a></li>
-        <li><a [routerLink]="routes.student_CataloguesAssignes" [class.active]="isExactActive(routes.student_CataloguesAssignes)">Catalogues</a></li>
-        <li><a [routerLink]="routes.student_ParcoursAssignes"   [class.active]="isExactActive(routes.student_ParcoursAssignes)">Parcours</a></li>
-        <li><a [routerLink]="routes.student_SessionsAcceptees"  [class.active]="isExactActive(routes.student_SessionsAcceptees)">Sessions</a></li>
+        <li><a [routerLink]="routes.studentMyCourses" routerLinkActive="active">Formations</a></li>
+        <li><a [routerLink]="routes.student_CataloguesAssignes" routerLinkActive="active">Catalogues</a></li>
+        <li><a [routerLink]="routes.student_ParcoursAssignes" routerLinkActive="active">Parcours</a></li>
+        <li><a [routerLink]="routes.student_SessionsAcceptees" routerLinkActive="active">Sessions</a></li>
         <li><a>Feedback formateur</a></li>
       </ul>
     </li>
@@ -39,26 +39,10 @@
         <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
       <ul class="submenu">
-        <li>
-          <a [routerLink]="routes.student_DemandeFormation" [class.active]="isExactActive(routes.student_DemandeFormation)">
-            <span>Formations</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLink]="routes.student_DemandeSession" [class.active]="isExactActive(routes.student_DemandeSession)">
-            <span>Sessions</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLink]="routes.student_DemandeParcours" [class.active]="isExactActive(routes.student_DemandeParcours)">
-            <span>Parcours</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLink]="routes.student_DemandeCatalogue" [class.active]="isExactActive(routes.student_DemandeCatalogue)">
-            <span>Catalogues</span>
-          </a>
-        </li>
+        <li><a [routerLink]="routes.studentDemande" routerLinkActive="active"><span>Formations</span></a></li>
+        <li><a [routerLink]="routes.student_DemandeSession" routerLinkActive="active"><span>Sessions</span></a></li>
+        <li><a [routerLink]="routes.student_DemandeParcours" routerLinkActive="active"><span>Parcours</span></a></li>
+        <li><a [routerLink]="routes.student_DemandeCatalogue" routerLinkActive="active"><span>Catalogues</span></a></li>
       </ul>
     </li>
 
@@ -95,15 +79,32 @@
       </a>
     </li>
 
-    
-  
-    <!-- ================= MES PALMARÈS ================= -->
-    <li class="menu-item">
-      <a [routerLink]="routes.student_MesPalmares" routerLinkActive="active">
-        <i class="isax isax-medal"></i>
-        <span>Mes palmarès</span>
+    <!-- ================= MES COMPÉTENCES ================= -->
+    <li class="menu-item has-submenu">
+      <a>
+        <i class="isax isax-chart"></i>
+        <span>Mes compétences</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"></i>
       </a>
+      <ul class="submenu">
+        <li><a [routerLink]="routes.student_MesCompetences" routerLinkActive="active">Compétences acquises</a></li>
+        <li><a [routerLink]="routes.student_CompetencesRecommandees" routerLinkActive="active">Compétences recommandées</a></li>
+      </ul>
     </li>
+
+    <!-- ================= MES PALMARÈS ================= -->
+<li class="menu-item has-submenu" [class.active]="isPalmaresActive()">
+  <a>
+    <i class="isax isax-medal"></i>
+    <span>Mes palmarès</span>
+    <i class="submenu-arrow isax isax-arrow-right-3"></i>
+  </a>
+  <ul class="submenu">
+    <li><a [routerLink]="routes.studentCertificat" routerLinkActive="active">Mes certificats</a></li>
+    <li><a>Mes habilitations</a></li>
+    <li><a>Gamification / Mes badges</a></li>
+  </ul>
+</li>
 
     <!-- ================= CENTRE D'AIDE ================= -->
     <li class="menu-item has-submenu">

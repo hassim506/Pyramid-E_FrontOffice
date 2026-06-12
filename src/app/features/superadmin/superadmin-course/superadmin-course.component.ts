@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
@@ -31,16 +31,24 @@ export class SuperadminCourseComponent implements OnInit {
   totalData = 0;
 
   stats = { active: 0, pending: 0, draft: 0, free: 0, paid: 0 };
+  entrepriseId: number | null = null;
 
   pageNumberArray: { skip: number; limit: number }[] = [];
   totalPages = 0;
   skip = 0;
   limit = 10;
 
-  constructor(private formationService: FormationService) {}
+  constructor(
+    private formationService: FormationService,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit(): void {
-    this.getFormationsList();
+    this.route.queryParamMap.subscribe(params => {
+      const id = params.get('entreprise_id');
+      this.entrepriseId = id ? +id : null;
+      this.getFormationsList();
+    });
   }
 
   // ✅ prix est string | number | undefined
@@ -68,7 +76,7 @@ export class SuperadminCourseComponent implements OnInit {
     this.error = '';
     this.formations = [];
 
-    this.formationService.getFormations({ page: 1, limit: 10 }).subscribe({
+    this.formationService.getFormations({ page: 1, limit: 10, ...(this.entrepriseId ? { entreprise_id: this.entrepriseId } : {}) }).subscribe({
       next: (response) => {
         if (response.status && response.formations) {
           this.allFormations = response.formations;
@@ -231,10 +239,7 @@ export class SuperadminCourseComponent implements OnInit {
   }
 
   getDefaultImage(formation: Formation): string {
-    if (formation.image_couverture) {
-      return 'assets/img/formations/' + formation.image_couverture;
-    }
-    return 'assets/img/course/course-01.jpg';
+    return this.formationService.getImageUrl(formation.image_couverture);
   }
 
   deleteFormation(formation: Formation): void {

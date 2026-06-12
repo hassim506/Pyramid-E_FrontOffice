@@ -6,18 +6,18 @@ import { CommonService } from '../../../../shared/service/common/common.service'
 import { filter } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-student-sidebar',
-    templateUrl: './student-sidebar.component.html',
-    styleUrl: './student-sidebar.component.scss',
-    imports: [CommonModule, RouterModule],
+  selector: 'app-student-sidebar',
+  templateUrl: './student-sidebar.component.html',
+  styleUrl: './student-sidebar.component.scss',
+  imports: [CommonModule, RouterModule],
 })
 export class StudentSidebarComponent implements OnInit {
   public routes = routes;
-  public base = '';
-  public page = '';
-  public last = '';
   isCollapsed = false;
   public currentUrl = '';
+  base: any;
+  page: any;
+  last: any;
 
   constructor(
     private common: CommonService,
@@ -55,12 +55,17 @@ export class StudentSidebarComponent implements OnInit {
 
   isDemandesActive(): boolean {
     return [
-      routes.student_DemandeFormation,
+      routes.studentDemande,
       routes.student_DemandeSession,
       routes.student_DemandeParcours,
       routes.student_DemandeCatalogue,
     ].some(r => r && this.currentUrl.startsWith(r));
   }
+  isPalmaresActive(): boolean {
+  return [
+    routes.studentCertificat,
+  ].some(r => r && this.currentUrl.startsWith(r));
+}
 
   isCompetencesActive(): boolean {
     return [

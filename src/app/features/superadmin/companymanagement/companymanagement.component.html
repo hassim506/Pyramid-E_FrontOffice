@@ -1,155 +1,330 @@
-<div class="page-title d-flex align-items-center justify-content-between">
-    <h5 class="fw-bold">Gestion des Entreprises</h5>
-    <div class="d-flex align-items-center list-icons">
-        <button class="btn btn-outline-primary me-2" (click)="refreshData()" [disabled]="loading">
-            <i class="isax isax-refresh" [class.fa-spin]="loading"></i>
+<!-- ── SHELL ── -->
+<div class="cm-shell">
+
+  <!-- ── HEADER ── -->
+  <div class="cm-header">
+    <div class="cm-header__left">
+      <h1 class="cm-header__title">Entreprises</h1>
+      <span class="cm-header__count">{{ actualData.length }} entreprise{{ actualData.length > 1 ? 's' : '' }}</span>
+    </div>
+    <div class="cm-header__right">
+      <button type="button" class="cm-btn cm-btn--ghost" (click)="refreshData()" [disabled]="loading">
+        <i class="isax isax-refresh" [class.cm-spin]="loading"></i>
+        Actualiser
+      </button>
+      <button type="button" class="cm-btn cm-btn--primary" (click)="openNew()">
+        <i class="isax isax-add"></i>
+        Nouvelle entreprise
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ALERTS ── -->
+  <div *ngIf="error" class="cm-alert cm-alert--danger">
+    <i class="isax isax-warning-2 me-2"></i>{{ error }}
+    <button type="button" class="cm-alert__close" (click)="error = ''"><i class="isax isax-close-circle"></i></button>
+  </div>
+  <div *ngIf="successMessage" class="cm-alert cm-alert--success">
+    <i class="isax isax-tick-circle me-2"></i>{{ successMessage }}
+    <button type="button" class="cm-alert__close" (click)="successMessage = ''"><i class="isax isax-close-circle"></i></button>
+  </div>
+
+  <!-- ── BODY ── -->
+  <div class="cm-body">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="cm-sidebar">
+
+      <!-- Search -->
+      <div class="cm-sidebar__search">
+        <i class="isax isax-search-normal-1 cm-sidebar__search-icon"></i>
+        <input type="search"
+               class="cm-sidebar__search-input"
+               placeholder="Rechercher..."
+               [(ngModel)]="searchDataValue"
+               [ngModelOptions]="{ standalone: true }"
+               (ngModelChange)="searchData(searchDataValue)">
+      </div>
+
+      <!-- Loading skeleton -->
+      <div *ngIf="loading" class="cm-sidebar__loading">
+        <div class="cm-skeleton" *ngFor="let i of [1,2,3,4,5]"></div>
+      </div>
+
+      <!-- List -->
+      <ul class="cm-list" *ngIf="!loading">
+        <li *ngFor="let company of tableData; trackBy: trackByCompanyId"
+            class="cm-list__item"
+            [class.cm-list__item--active]="selectedCompany?.id === company.id"
+            (click)="selectCompany(company)">
+          <div class="cm-list__avatar" [attr.data-status]="company.statut">
+            {{ getCompanyInitials(company.nom) }}
+          </div>
+          <div class="cm-list__info">
+            <span class="cm-list__name">{{ company.nom }}</span>
+            <span class="cm-list__sub">{{ company.secteur_activite }}</span>
+          </div>
+          <span class="cm-list__dot" [attr.data-status]="company.statut"></span>
+        </li>
+
+        <li *ngIf="!tableData.length" class="cm-list__empty">
+          <i class="isax isax-building d-block mb-2"></i>
+          <small>Aucune entreprise trouvée</small>
+        </li>
+      </ul>
+
+      <!-- Pagination -->
+      <div class="cm-sidebar__pager">
+        <app-custom-pagination/>
+      </div>
+    </aside>
+
+    <!-- ══ DETAIL PANEL ══ -->
+    <main class="cm-detail">
+
+      <!-- Empty state -->
+      <div *ngIf="!selectedCompany && !loading" class="cm-empty-state">
+        <div class="cm-empty-state__icon"><i class="isax isax-building"></i></div>
+        <h3>Sélectionnez une entreprise</h3>
+        <p>Choisissez une entreprise dans la liste pour voir ses détails.</p>
+        <button type="button" class="cm-btn cm-btn--primary mt-3" (click)="openNew()">
+          <i class="isax isax-add me-1"></i>Créer une entreprise
         </button>
-        <a href="javascript:void(0);" class="active me-2" (click)="openNew()"><i class="isax isax-add"></i></a>
-    </div>
-</div>
+      </div>
 
-<!-- Ajouter une alerte d'erreur si nécessaire -->
-<div class="alert alert-danger" *ngIf="error">
-    {{error}}
-</div>
+      <ng-container *ngIf="selectedCompany">
 
-<!-- Ajouter un spinner de loading -->
-<div *ngIf="loading" class="d-flex justify-content-center p-4">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Chargement...</span>
-    </div>
-</div>
-
-<div class="row justify-content-end">
-    <div class="col-md-4">
-        <div class="input-icon mb-3">
-            <span class="input-icon-addon">
-                <i class="isax isax-search-normal-14"></i>
-            </span>
-            <input [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }" type="search" (ngModelChange)="searchData(searchDataValue)" class="form-control form-control-md" placeholder="Rechercher...">
+        <!-- ── DETAIL HEADER ── -->
+        <div class="cm-detail-header">
+          <div class="cm-detail-header__avatar">
+            {{ getCompanyInitials(selectedCompany.nom) }}
+          </div>
+          <div class="cm-detail-header__info">
+            <h2 class="cm-detail-header__name">{{ selectedCompany.nom }}</h2>
+            <div class="cm-detail-header__meta">
+              <span class="cm-badge" [attr.data-status]="selectedCompany.statut">
+                {{ getStatusLabel(selectedCompany.statut) }}
+              </span>
+              <span class="cm-meta-chip" *ngIf="selectedCompany.secteur_activite">
+                <i class="isax isax-category me-1"></i>{{ selectedCompany.secteur_activite }}
+              </span>
+              <span class="cm-meta-chip" *ngIf="selectedCompany.pays">
+                <i class="isax isax-global me-1"></i>
+                {{ getCountryFlag(selectedCompany.pays) }} {{ getCountryName(selectedCompany.pays) }}
+              </span>
+            </div>
+          </div>
+          <div class="cm-detail-header__actions">
+            <button type="button" class="cm-btn cm-btn--outline" (click)="editCompany(selectedCompany)">
+              <i class="isax isax-edit me-1"></i>Modifier
+            </button>
+            <a [routerLink]="['/superadmin/superadmin-company-details', selectedCompany.id]"
+               class="cm-btn cm-btn--ghost">
+              <i class="isax isax-eye me-1"></i>Détails
+            </a>
+            <button type="button" *ngIf="selectedCompany.statut === 'active'"
+                    class="cm-btn cm-btn--ghost cm-btn--warn"
+                    (click)="archiveCompany(selectedCompany)">
+              <i class="isax isax-archive me-1"></i>Archiver
+            </button>
+            <button type="button" *ngIf="selectedCompany.statut === 'active'"
+                    class="cm-btn cm-btn--ghost cm-btn--danger"
+                    (click)="suspendCompany(selectedCompany)">
+              <i class="isax isax-pause me-1"></i>Suspendre
+            </button>
+            <button type="button"
+                    *ngIf="selectedCompany.statut === 'inactive' || selectedCompany.statut === 'suspendue'"
+                    class="cm-btn cm-btn--ghost cm-btn--success"
+                    (click)="reactivateCompany(selectedCompany)">
+              <i class="isax isax-refresh me-1"></i>Réactiver
+            </button>
+            <button type="button" class="cm-btn cm-btn--ghost cm-btn--danger"
+                    (click)="deleteCompany(selectedCompany)">
+              <i class="isax isax-trash"></i>
+            </button>
+          </div>
         </div>
-    </div>
-</div>
-<div class="table-responsive custom-table">
-    <table matSort (matSortChange)="sortData($event)" class="table">
-        <thead class="thead-light">
-            <tr>
-                <th>NINEA</th>
-                <th>Nom de l'entreprise</th>
-                <th>Client</th>
-                <th>Email</th>
-                <th>Téléphone</th>
-                <th>Secteur</th>
-                <th>Effectif</th>
-                <th>Pays</th> 
-                <th>Statut</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (data of tableData;track data){
-            <tr>
-                <td><a [routerLink]="['/superadmin/superadmin-company-details', data.id]" class="text-primary">{{data?.ninea}}</a></td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar avatar-md avatar-rounded flex-shrink-0 me-2 bg-primary text-white d-flex align-items-center justify-content-center">
-                            <i class="isax isax-building"></i>
-                        </div>
-                        <a [routerLink]="['/superadmin/superadmin-company-details', data.id]"><p class="fs-14 mb-0">{{data.nom}}</p></a>
-                    </div>
-                </td>
-                <td>
-                    <div>
-                        <p class="mb-0 fs-14 fw-medium">{{data.client?.nom}}</p>
-                        <small class="text-muted">{{data.client?.type | titlecase}}</small>
-                    </div>
-                </td>
-                <td>{{data.email}}</td>
-                <td>{{data.telephone}}</td>
-                <td>{{data.secteur_activite}}</td>
-                <td>{{data.taille_effectif}}</td>
-<td>
-    {{ getCountryFlag(data?.pays || '') }} {{ getCountryName(data?.pays || '') }}
-</td>                <td>
-                    <span [class]="getStatusClass(data.statut)">{{data.statut | titlecase}}</span>
-                </td>
-                <!-- <td>
-                    <div class="d-flex align-items-center">
-                        <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" (click)="editCompany(data)"><i class="isax isax-edit"></i></a>
-                        <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" (click)="deleteCompany(data)"><i class="isax isax-trash"></i></a>
-                    </div>
-                </td> -->
-                
 
-            <!-- Actions -->
-            <td class="text-end">
-              <div class="btn-group btn-group-sm" role="group">
-                <button class="btn btn-outline-primary" 
-                        (click)="editCompany(data)"
-                        [disabled]="!canEditCompany(data)"
-                        title="Modifier">
-                  <i class="isax isax-edit"></i>
-                </button>
-                <button class="btn btn-outline-danger" 
-                        (click)="deleteCompany(data)"
-                        [disabled]="!canDeleteCompany(data)"
-                        title="Supprimer">
-                  <i class="isax isax-trash"></i>
-                </button>
-                <a [routerLink]="['/adminrh/adminrh-company-details', data.id]" 
-                   class="btn btn-outline-info"
-                   title="Voir détails">
-                  <i class="isax isax-eye"></i>
-                </a>
-                 <!-- Bouton Archiver pour les entreprises actives -->
-                <button 
-                    *ngIf="data.statut === 'active'" 
-                    class="btn btn-outline-warning" 
-                    (click)="archiveCompany(data)"
-                    title="Archiver l'entreprise">
-                  <i class="isax isax-archive"></i>
-                </button>
-                
-                <!-- Bouton Réactiver pour les entreprises inactives -->
-                <button 
-                    *ngIf="data.statut === 'inactive'" 
-                    class="btn btn-outline-success" 
-                    (click)="reactivateCompany(data)"
-                    title="Réactiver l'entreprise">
-                  <i class="isax isax-refresh"></i>
-                </button>
-                
-                <!-- Bouton Suspendre pour les entreprises actives -->
-                <button 
-                    *ngIf="data.statut === 'active'" 
-                    class="btn btn-outline-danger" 
-                    (click)="suspendCompany(data)"
-                    title="Suspendre l'entreprise">
-                  <i class="isax isax-pause"></i>
-                </button>
-                
-                <!-- Bouton Réactiver pour les entreprises suspendues -->
-                <button 
-                    *ngIf="data.statut === 'suspendue'" 
-                    class="btn btn-outline-success" 
-                    (click)="reactivateCompany(data)"
-                    title="Réactiver l'entreprise">
-                  <i class="isax isax-refresh"></i>
-                </button>
+        <!-- ── KPI ROW ── -->
+        <div class="cm-kpi-row">
+          <!-- Employés -->
+          <a class="cm-kpi-card cm-kpi-card--link"
+             [routerLink]="[routes.superadminUserList]"
+             [queryParams]="{entreprise_id: selectedCompany.id}">
+            <div class="cm-kpi-card__icon cm-kpi-card__icon--blue"><i class="isax isax-people"></i></div>
+            <div class="cm-kpi-card__body">
+              <span class="cm-kpi-card__value">
+                <span *ngIf="!statsLoading">{{ selectedCompany.employes_count ?? selectedCompany.taille_effectif ?? '—' }}</span>
+                <span *ngIf="statsLoading" class="cm-kpi-skeleton"></span>
+              </span>
+              <span class="cm-kpi-card__label">Employés <i class="isax isax-arrow-right-3 ms-1"></i></span>
+            </div>
+          </a>
+          <!-- Formations actives -->
+          <a class="cm-kpi-card cm-kpi-card--link"
+             [routerLink]="[routes.superadminCourse]"
+             [queryParams]="{entreprise_id: selectedCompany.id}">
+            <div class="cm-kpi-card__icon cm-kpi-card__icon--green"><i class="isax isax-book"></i></div>
+            <div class="cm-kpi-card__body">
+              <span class="cm-kpi-card__value">
+                <span *ngIf="!statsLoading">{{ selectedCompany.formations_actives_count ?? selectedCompany.formations_count ?? '—' }}</span>
+                <span *ngIf="statsLoading" class="cm-kpi-skeleton"></span>
+              </span>
+              <span class="cm-kpi-card__label">Formations actives <i class="isax isax-arrow-right-3 ms-1"></i></span>
+            </div>
+          </a>
+          <!-- Taux complétion -->
+          <div class="cm-kpi-card">
+            <div class="cm-kpi-card__icon cm-kpi-card__icon--teal"><i class="isax isax-chart-2"></i></div>
+            <div class="cm-kpi-card__body">
+              <span class="cm-kpi-card__value">
+                <span *ngIf="!statsLoading">
+                  {{ selectedCompany.taux_completion != null ? (selectedCompany.taux_completion + '%') : '—' }}
+                </span>
+                <span *ngIf="statsLoading" class="cm-kpi-skeleton"></span>
+              </span>
+              <span class="cm-kpi-card__label">Taux de complétion</span>
+            </div>
+          </div>
+          <!-- Certificats -->
+          <div class="cm-kpi-card">
+            <div class="cm-kpi-card__icon cm-kpi-card__icon--orange"><i class="isax isax-award"></i></div>
+            <div class="cm-kpi-card__body">
+              <span class="cm-kpi-card__value">
+                <span *ngIf="!statsLoading">{{ selectedCompany.certificats_count ?? '—' }}</span>
+                <span *ngIf="statsLoading" class="cm-kpi-skeleton"></span>
+              </span>
+              <span class="cm-kpi-card__label">Certificats délivrés</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── QUICK LINKS ── -->
+        <div class="cm-quick-links">
+          <a [routerLink]="[routes.superadminUserList]"
+             [queryParams]="{entreprise_id: selectedCompany.id}"
+             class="cm-quick-link">
+            <i class="isax isax-people"></i>
+            <span>Liste des employés</span>
+            <i class="isax isax-arrow-right-3 cm-quick-link__arrow"></i>
+          </a>
+          <a [routerLink]="[routes.superadminCourse]"
+             [queryParams]="{entreprise_id: selectedCompany.id}"
+             class="cm-quick-link">
+            <i class="isax isax-book"></i>
+            <span>Formations de l'entreprise</span>
+            <i class="isax isax-arrow-right-3 cm-quick-link__arrow"></i>
+          </a>
+          <a [routerLink]="['/superadmin/superadmin-company-details', selectedCompany.id]"
+             class="cm-quick-link">
+            <i class="isax isax-document-text"></i>
+            <span>Fiche complète</span>
+            <i class="isax isax-arrow-right-3 cm-quick-link__arrow"></i>
+          </a>
+        </div>
+
+        <!-- ── DETAIL GRID ── -->
+        <div class="cm-detail-grid">
+
+          <!-- Informations générales -->
+          <div class="cm-card">
+            <div class="cm-card__header">
+              <i class="isax isax-building cm-card__icon"></i>
+              <h3 class="cm-card__title">Informations générales</h3>
+            </div>
+            <div class="cm-card__body">
+              <div class="cm-info-list">
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">NINEA</span>
+                  <span class="cm-info-row__value cm-mono">{{ selectedCompany.ninea || '—' }}</span>
+                </div>
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">Email</span>
+                  <span class="cm-info-row__value">
+                    <a [href]="'mailto:' + selectedCompany.email" class="cm-link">{{ selectedCompany.email }}</a>
+                  </span>
+                </div>
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">Téléphone</span>
+                  <span class="cm-info-row__value">{{ selectedCompany.telephone || '—' }}</span>
+                </div>
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">Adresse</span>
+                  <span class="cm-info-row__value">{{ selectedCompany.adresse || '—' }}</span>
+                </div>
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">Pays</span>
+                  <span class="cm-info-row__value">
+                    {{ getCountryFlag(selectedCompany.pays || '') }}
+                    {{ getCountryName(selectedCompany.pays || '') }}
+                  </span>
+                </div>
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">Secteur d'activité</span>
+                  <span class="cm-info-row__value">{{ selectedCompany.secteur_activite || '—' }}</span>
+                </div>
+                <div class="cm-info-row">
+                  <span class="cm-info-row__label">Effectif</span>
+                  <span class="cm-info-row__value">{{ selectedCompany.taille_effectif || '—' }} personnes</span>
+                </div>
               </div>
-            </td>
-            </tr>
-            }
-        </tbody>
-    </table>
+            </div>
+          </div>
+
+          <!-- Client associé -->
+          <div class="cm-card">
+            <div class="cm-card__header">
+              <i class="isax isax-people cm-card__icon"></i>
+              <h3 class="cm-card__title">Client associé</h3>
+            </div>
+            <div class="cm-card__body">
+              <ng-container *ngIf="selectedCompany.client; else noClient">
+                <div class="cm-client-block">
+                  <div class="cm-client-block__avatar">
+                    {{ getCompanyInitials(selectedCompany.client.nom) }}
+                  </div>
+                  <div class="cm-client-block__info">
+                    <p class="cm-client-block__name">{{ selectedCompany.client.nom }}</p>
+                    <span class="cm-badge cm-badge--type">{{ selectedCompany.client.type | titlecase }}</span>
+                    <p class="cm-client-block__meta" *ngIf="selectedCompany.client.email">
+                      <i class="isax isax-sms me-1"></i>{{ selectedCompany.client.email }}
+                    </p>
+                    <p class="cm-client-block__meta" *ngIf="selectedCompany.client.telephone">
+                      <i class="isax isax-call me-1"></i>{{ selectedCompany.client.telephone }}
+                    </p>
+                    <p class="cm-client-block__meta" *ngIf="selectedCompany.client.contact_principal">
+                      <i class="isax isax-user me-1"></i>{{ selectedCompany.client.contact_principal }}
+                    </p>
+                  </div>
+                </div>
+                <div class="cm-card__footer">
+                  <a [routerLink]="['/superadmin/superadmin-client-details', selectedCompany.client_id]"
+                     class="cm-btn cm-btn--ghost cm-btn--sm">
+                    <i class="isax isax-eye me-1"></i>Voir le client
+                  </a>
+                </div>
+              </ng-container>
+              <ng-template #noClient>
+                <div class="cm-info-empty">
+                  <i class="isax isax-people d-block mb-1"></i>
+                  <small>Aucun client associé</small>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+
+        </div>
+
+      </ng-container>
+    </main>
+  </div>
+
 </div>
-<!-- /pagination -->
-<app-custom-pagination/>
-<!-- /pagination -->
- <!-- À la fin du fichier -->
-<app-company-add 
-  [visible]="companyDialog" 
-  [isEditMode]="isEditMode" 
+
+<!-- ── DIALOGS ── -->
+<app-company-add
+  [visible]="companyDialog"
+  [isEditMode]="isEditMode"
   [companyData]="selectedCompany"
   (onClose)="hideDialog()"
   (onSave)="refreshData()">

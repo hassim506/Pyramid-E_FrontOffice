@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { DemandeFormationService }  from '../../../shared/service/demande/demande-formation.service';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
+import { environment } from '../../../../environments/environment';
 
 declare var bootstrap: any;
 
@@ -122,7 +123,9 @@ export class StudentsParcoursComponent implements OnInit {
       ...d,
       titre_affiche:      d.parcours?.titre            ?? `Parcours #${d.parcours_id}`,
       sous_titre_affiche: d.parcours?.description      ?? '',
-      image_affiche:      d.parcours?.image_couverture || 'assets/img/course/course-01.jpg',
+      image_affiche:      d.parcours?.image_couverture
+        ? (d.parcours.image_couverture.startsWith('http') ? d.parcours.image_couverture : `${environment.apiUrl.replace('/api','')}/storage/${d.parcours.image_couverture}`)
+        : 'assets/img/course/course-01.jpg',
     };
   }
 

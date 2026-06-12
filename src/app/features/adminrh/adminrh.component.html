@@ -1,11 +1,11 @@
 <!-- Breadcrumb -->
 @if (last !== 'view') {
   <div class="breadcrumb-bar text-center">
-    <div class="container">
-      <div class="row">
+    <!-- <div class="container"> -->
+      <!-- <div class="row"> -->
         <div class="col-md-12 col-12">
           <div class="breadcrumb-list">
-            <h2 class="breadcrumb-title">{{ last | titlecase }}</h2>
+            <!-- <h2 class="breadcrumb-title">{{ last | titlecase }} e</h2> -->
             <nav aria-label="breadcrumb" class="page-breadcrumb">
               <ol class="breadcrumb justify-content-center mb-0">
                 <li class="breadcrumb-item"><a [routerLink]="routes.home2">Home</a></li>
@@ -14,46 +14,85 @@
             </nav>
           </div>
         </div>
-      </div>
-    </div>
+      <!-- </div> -->
+    <!-- </div> -->
   </div>
 }
 <!-- /Breadcrumb -->
 
 <div class="content">
   <div class="container">
-      <!-- Bannière profil super admin - Toujours visible -->
-      <div class="adminrh-profile">
-          <div class="adminrh-profile-bg">
-              <!-- <img src="assets/img/bg/card-bg-01.png" class="adminrh-profile-bg-1" alt=""> -->
+      <!-- Header Admin RH -->
+      <div class="arh-header">
+        <div class="arh-header-top-label">ADMIN RH — GESTION DE SON ENTREPRISE</div>
+
+        <div class="arh-header-card">
+          <!-- Identité -->
+          <div class="arh-identity">
+            <div class="arh-av">{{ getInitials() }}</div>
+            <div class="arh-id-info">
+              <h5 class="arh-name">{{ getFullName() }}</h5>
+              <p class="arh-company">
+                <i class="isax isax-building-3"></i>{{ getEntrepriseName() }}
+              </p>
+              <span class="arh-role-badge">{{ getRoleLabel() }}</span>
+            </div>
           </div>
-          <div class="row align-items-center row-gap-3 adminrh-profile">
-              <div class="col-md-6">
-                  <div class="d-flex align-items-center">
-                      <span class="avatar flex-shrink-0 avatar-xxl avatar-rounded me-3 border border-white border-3 position-relative">
-                          <div class="avatar-placeholder">
-                            {{ getInitials() }}
-                          </div>
-                          <span class="verify-tick"><i class="isax isax-verify5"></i></span>
-                      </span>
-                      <div>
-                          <h5 class="mb-1 text-white d-inline-flex align-items-center">
-                            {{ getFullName() }}
-                            <a [routerLink]="routes.adminrhProfile" class="link-light fs-16 ms-2">
-                              <i class="isax isax-edit-2"></i>
-                            </a>
-                          </h5>
-                          <!-- <p class="text-light">{{ getRoleName() }}</p> -->
-                      </div>
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <div class="d-flex align-items-center flex-wrap gap-3 justify-content-md-end">
-                      <a [routerLink]="routes.adminrhCompanyAdd" class="btn btn-white rounded-pill">Ajouter Entreprise  </a>
-                      <a [routerLink]="routes.adminrh_dashboard" class="btn btn-secondary rounded-pill">Tableau de bords RH</a>
-                  </div>
-              </div>
+          <!-- Actions -->
+          <div class="arh-actions">
+            <a [routerLink]="routes.adminrhRapport" class="arh-btn arh-btn-outline" title="Rapport RH">
+              <i class="isax isax-document-text"></i>Rapport RH
+            </a>
+            <a [routerLink]="routes.adminrhUserList" class="arh-btn arh-btn-primary" title="Inscrire un employé">
+              <i class="isax isax-add"></i>Inscrire un employé
+            </a>
           </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="arh-stats-row">
+          <div class="arh-stat">
+            <div class="arh-stat-val">{{ headerStats.employes | number }}</div>
+            <div class="arh-stat-lbl">
+              <i class="isax isax-people"></i>Employés
+            </div>
+            <div class="arh-stat-sub">+{{ headerStats.employesGrowth }} ce mois</div>
+          </div>
+          <div class="arh-stat">
+            <div class="arh-stat-val">{{ headerStats.tauxCompletion }}%</div>
+            <div class="arh-stat-lbl">
+              <i class="isax isax-chart-2"></i>Taux complétion
+            </div>
+            <div class="arh-stat-sub arh-sub-down">
+              <i class="isax isax-arrow-down-2"></i>{{ headerStats.tauxVariation }}% ce mois
+            </div>
+          </div>
+          <div class="arh-stat">
+            <div class="arh-stat-val">{{ headerStats.sessionsAVenir | number }}</div>
+            <div class="arh-stat-lbl">
+              <i class="isax isax-calendar-1"></i>Sessions à venir
+            </div>
+            <div class="arh-stat-sub">ce mois</div>
+          </div>
+          <div class="arh-stat" [class.arh-stat--warn]="headerStats.demandesEnAttente > 0">
+            <div class="arh-stat-val">{{ headerStats.demandesEnAttente | number }}</div>
+            <div class="arh-stat-lbl">
+              <i class="isax isax-clock"></i>Demandes en attente
+            </div>
+            <div class="arh-stat-sub" [class.arh-sub-warn]="headerStats.demandesEnAttente > 0">
+              À traiter
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerte si demandes en attente -->
+        <div class="arh-alert-row" *ngIf="headerStats.demandesEnAttente > 0">
+          <div class="arh-alert">
+            <i class="isax isax-clock"></i>
+            <span>{{ headerStats.demandesEnAttente }} demandes de formation en attente depuis plus de 48h — action requise</span>
+            <a [routerLink]="routes.adminrhDemande" class="arh-alert-link">Voir les demandes →</a>
+          </div>
+        </div>
       </div>
 
       <!-- Contenu selon la route -->

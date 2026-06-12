@@ -1,0 +1,198 @@
+// ── TOKENS ──────────────────────────────────────────────────────────────────
+$primary:    #D4AF37;
+$primary-lt: #FDF8E7;
+$radius:     10px;
+$border:     #E9ECEF;
+$text-muted: #6C757D;
+
+.ip-loader {
+  display: flex; justify-content: center; align-items: center; min-height: 200px;
+}
+
+.ip-page-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+
+  &__title { font-size: 18px; font-weight: 600; color: #1A1A2E; margin: 0 0 4px; }
+  &__sub   { font-size: 13px; color: $text-muted; margin: 0; }
+}
+
+.ip-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: $primary-lt; color: $primary;
+  font-size: 12px; font-weight: 500;
+  padding: 1px 8px; border-radius: 20px; margin-left: 6px;
+}
+
+.ip-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: $radius;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: none; transition: all .15s; text-decoration: none;
+  i { font-size: 16px; }
+  &--primary { background: $primary; color: #fff;
+    &:hover { background: darken($primary, 8%); color: #fff; }
+  }
+}
+
+.ip-card {
+  background: #fff; border: 1px solid $border; border-radius: $radius; overflow: hidden;
+}
+
+.ip-table {
+  margin: 0;
+  thead th {
+    background: #F8F9FA; border-bottom: 1px solid $border;
+    font-size: 11px; font-weight: 600; color: $text-muted;
+    text-transform: uppercase; letter-spacing: .05em;
+    padding: 10px 14px; white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 14px; border-bottom: 1px solid lighten($border, 2%);
+    vertical-align: middle; font-size: 13px;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #FAFBFF; }
+}
+
+.ip-quiz-cell { display: flex; align-items: flex-start; gap: 10px; }
+
+.ip-quiz-icon {
+  width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+  background: $primary-lt; color: $primary;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+
+.ip-quiz-title { font-size: 13px; font-weight: 500; color: #1A1A2E; }
+.ip-quiz-desc  {
+  font-size: 11px; color: $text-muted; margin-top: 2px;
+  max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.ip-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #F1F3F5; color: #495057;
+  font-size: 11px; padding: 3px 8px; border-radius: 20px;
+  i { font-size: 12px; }
+}
+
+.ip-score {
+  display: inline-block;
+  background: #ECFDF5; color: #059669;
+  font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 6px;
+}
+
+.ip-status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 6px;
+  i { font-size: 8px; }
+  &.ip-status-active   { background: #ECFDF5; color: #059669; }
+  &.ip-status-inactive { background: #F8F9FA; color: $text-muted; }
+}
+
+.ip-actions { display: flex; gap: 4px; }
+
+.ip-action-btn {
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; border: 1px solid $border;
+  background: #fff; color: $text-muted; cursor: pointer;
+  font-size: 14px; transition: all .12s; text-decoration: none;
+  &:hover { border-color: $primary; color: $primary; background: $primary-lt; }
+  &.text-danger:hover { border-color: #DC3545; color: #DC3545; background: #FFF5F5; }
+}
+
+.ip-empty {
+  text-align: center; padding: 48px 0;
+  color: $text-muted; font-size: 13px;
+  i { font-size: 32px; display: block; margin-bottom: 8px; opacity: .4; }
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+.ip-modal-dialog { max-width: 520px; }
+
+.ip-modal-content {
+  border: none; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.12);
+}
+
+.ip-modal-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px 24px;
+}
+
+.ip-modal-icon {
+  width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+  background: $primary-lt; color: $primary;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+
+.ip-modal-title { font-size: 15px; font-weight: 600; color: #1A1A2E; margin: 0 0 2px; }
+.ip-modal-sub   { font-size: 12px; color: $text-muted; margin: 0; }
+.ip-modal-divider { height: 1px; background: $border; }
+
+.ip-modal-body  { padding: 20px 24px; }
+.ip-modal-footer {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding: 16px 24px;
+}
+
+// Detail blocks
+.ip-detail-block {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid lighten($border, 2%);
+  &:last-child { border-bottom: none; }
+  &--half { flex: 1; min-width: 0; }
+}
+.ip-detail-row { display: flex; gap: 0; }
+.ip-detail-icon-wrap {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  background: #F8F9FA; color: $primary;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.ip-detail-label { font-size: 11px; color: $text-muted; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+.ip-detail-value { font-size: 13px; font-weight: 500; color: #1A1A2E; }
+
+// Form fields inside modal
+.ip-field       { margin-bottom: 14px; }
+.ip-field-row   { display: flex; gap: 12px; }
+.ip-field--half { flex: 1; min-width: 0; }
+.ip-label       { font-size: 12px; font-weight: 500; color: #3D3D56; display: block; margin-bottom: 5px; }
+.ip-required    { color: #DC3545; }
+
+.ip-input {
+  width: 100%; border: 1px solid $border; border-radius: 8px;
+  padding: 8px 12px; font-size: 13px; color: #1A1A2E;
+  transition: border-color .15s; background: #fff;
+  &:focus { outline: none; border-color: $primary; box-shadow: 0 0 0 3px rgba(212,175,55,.15); }
+  &--icon { padding-left: 34px; }
+}
+.ip-textarea    { resize: vertical; min-height: 72px; }
+
+.ip-input-icon-wrap { position: relative; }
+.ip-input-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  color: $text-muted; font-size: 14px; pointer-events: none;
+}
+
+// Toggle
+.ip-toggle-row  { display: flex; align-items: center; gap: 10px; padding-top: 6px; }
+.ip-toggle-label { font-size: 12px; color: $text-muted; }
+.ip-toggle {
+  position: relative; display: inline-block; width: 38px; height: 22px;
+  input { opacity: 0; width: 0; height: 0; }
+}
+.ip-toggle-slider {
+  position: absolute; inset: 0; background: #DEE2E6; border-radius: 22px; cursor: pointer; transition: .2s;
+  &::before {
+    content: ''; position: absolute; height: 16px; width: 16px;
+    left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s;
+  }
+}
+.ip-toggle input:checked + .ip-toggle-slider { background: $primary; }
+.ip-toggle input:checked + .ip-toggle-slider::before { transform: translateX(16px); }
+
+// Ghost button variant
+.ip-btn--ghost {
+  background: transparent; color: $text-muted; border: 1px solid $border;
+  &:hover { background: #F8F9FA; color: #1A1A2E; border-color: #C0C5CC; }
+}

@@ -1,0 +1,305 @@
+// ── TOKENS ────────────────────────────────────────────────────────────────────
+$bg:        #F8FAFC;
+$card-bg:   #FFFFFF;
+$border:    #E2E8F0;
+$text:      #1E293B;
+$text-muted:#64748B;
+$radius:    10px;
+$accent:    #0F766E;  // teal for instructor
+
+// ── PAGE ─────────────────────────────────────────────────────────────────────
+.tk-page { background: $bg; min-height: 100vh; padding: 24px; }
+
+// ── HEADER ────────────────────────────────────────────────────────────────────
+.tk-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+  &__title { font-size: 20px; font-weight: 600; color: $text; }
+  &__sub   { font-size: 13px; color: $text-muted; margin-top: 2px; }
+}
+
+.tk-new-btn {
+  display: flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 16px; border: none; border-radius: 8px;
+  background: $accent; color: #fff; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background .1s;
+  i { font-size: 16px; }
+  &:hover { background: darken($accent, 8%); }
+}
+
+// ── KPI ───────────────────────────────────────────────────────────────────────
+.kpi-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  margin-bottom: 20px;
+}
+.kpi {
+  background: $card-bg; border: 1px solid $border; border-radius: $radius;
+  padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+
+  &__icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+
+    &.ki-total { background: #F0FDFA; color: #0F766E; }
+    &.ki-open  { background: #FEF3C7; color: #B45309; }
+    &.ki-done  { background: #D1FAE5; color: #065F46; }
+  }
+
+  &__val { font-size: 22px; font-weight: 700; color: $text; line-height: 1; }
+  &__lbl { font-size: 12px; color: $text-muted; margin-top: 2px; }
+}
+
+// ── CREATE FORM ───────────────────────────────────────────────────────────────
+.tk-form-card {
+  background: $card-bg; border: 1px solid $border; border-radius: $radius;
+  padding: 20px; margin-bottom: 20px;
+
+  &__title { font-size: 15px; font-weight: 600; color: $text; margin-bottom: 16px; }
+}
+
+.tk-form-err {
+  background: #FEE2E2; color: #991B1B; border-radius: 6px;
+  padding: 8px 12px; font-size: 13px; margin-bottom: 12px;
+}
+
+.form-row {
+  display: flex; gap: 12px; margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1; min-width: 0;
+  &.full { flex: 0 0 100%; }
+}
+
+.form-label {
+  display: block; font-size: 12px; font-weight: 500; color: $text;
+  margin-bottom: 5px;
+}
+.req { color: #DC2626; }
+
+.form-input, .form-select, .form-textarea {
+  width: 100%; border: 1px solid $border; border-radius: 8px;
+  padding: 8px 10px; font-size: 13px; color: $text;
+  background: #fff; outline: none; font-family: inherit;
+  &:focus { border-color: $accent; }
+}
+.form-textarea { resize: vertical; }
+
+.form-actions {
+  display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;
+}
+
+// ── CONTENT LAYOUT ─────────────────────────────────────────────────────────────
+.tk-content {
+  display: flex; gap: 16px;
+  &.with-detail .tk-list-wrap { flex: 0 0 380px; }
+}
+
+.tk-list-wrap {
+  flex: 1; background: $card-bg; border: 1px solid $border;
+  border-radius: $radius; overflow: hidden;
+  display: flex; flex-direction: column;
+  max-height: calc(100vh - 300px);
+}
+
+.tk-detail-wrap {
+  flex: 1; min-width: 0;
+  background: $card-bg; border: 1px solid $border;
+  border-radius: $radius; overflow: hidden;
+  display: flex; flex-direction: column;
+  max-height: calc(100vh - 300px);
+}
+
+// ── TOOLBAR ───────────────────────────────────────────────────────────────────
+.tk-toolbar {
+  padding: 12px 14px; border-bottom: 1px solid $border;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+.tk-search {
+  flex: 1; min-width: 100px;
+  height: 34px; border: 1px solid $border; border-radius: 8px;
+  padding: 0 10px 0 32px; font-size: 13px; color: $text;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+  outline: none;
+  &:focus { border-color: $accent; }
+}
+
+.tk-select {
+  height: 34px; border: 1px solid $border; border-radius: 8px;
+  padding: 0 8px; font-size: 12px; color: $text;
+  background: #fff; outline: none; cursor: pointer;
+}
+
+// ── TICKET LIST ───────────────────────────────────────────────────────────────
+.tk-list {
+  flex: 1; overflow-y: auto;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: rgba(0,0,0,.12); border-radius: 4px; }
+}
+
+.tk-item {
+  padding: 12px 14px; border-bottom: 1px solid $border;
+  cursor: pointer; transition: background .1s;
+  display: flex; gap: 10px; align-items: flex-start;
+
+  &:hover { background: #F8FAFC; }
+  &.selected { background: #F0FDFA; border-left: 3px solid $accent; }
+  &:last-child { border-bottom: none; }
+}
+
+.tk-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #0F766E; color: #CCFBF1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500; flex-shrink: 0;
+}
+
+.tk-info { flex: 1; min-width: 0; }
+.tk-ref  { font-size: 11px; color: $text-muted; margin-bottom: 2px; }
+.tk-subj { font-size: 13px; font-weight: 500; color: $text; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tk-meta { font-size: 11px; color: $text-muted; margin-top: 3px; display: flex; gap: 6px; flex-wrap: wrap; }
+.tk-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+
+.tk-loader { padding: 40px; text-align: center; color: $text-muted; font-size: 13px; }
+.tk-empty  {
+  padding: 40px; text-align: center; color: $text-muted; font-size: 13px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  i { font-size: 32px; opacity: .3; }
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────────────────
+.tk-detail {
+  display: flex; flex-direction: column; height: 100%;
+
+  &__head {
+    padding: 14px 16px; border-bottom: 1px solid $border;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+
+  &__body {
+    flex: 1; overflow-y: auto; padding: 16px;
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-thumb { background: rgba(0,0,0,.12); border-radius: 4px; }
+  }
+
+  &__desc {
+    background: #F8FAFC; border: 1px solid $border;
+    border-radius: 8px; padding: 12px 14px;
+    font-size: 13px; color: $text; line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  &__thread-title {
+    font-size: 12px; font-weight: 600; color: $text-muted;
+    text-transform: uppercase; letter-spacing: .05em;
+    margin-bottom: 10px;
+  }
+
+  &__thread { display: flex; flex-direction: column; gap: 10px; }
+
+  &__reply {
+    padding: 12px 16px; border-top: 1px solid $border;
+    display: flex; gap: 8px;
+  }
+
+  &__reply-input {
+    flex: 1; border: 1px solid $border; border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; resize: none;
+    outline: none; font-family: inherit;
+    &:focus { border-color: $accent; }
+  }
+}
+
+.detail-info  { flex: 1; min-width: 0; }
+.detail-title { font-size: 15px; font-weight: 600; color: $text; }
+.detail-ref   { font-size: 11px; color: $text-muted; margin-top: 2px; }
+.detail-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+.detail-meta {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 12px; font-size: 12px; color: $text-muted;
+}
+
+// ── MESSAGE BUBBLE ────────────────────────────────────────────────────────────
+.msg {
+  display: flex; gap: 8px;
+
+  &__av {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: $accent; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 500; flex-shrink: 0;
+  }
+
+  &__bubble {
+    background: #F0FDFA; border-radius: 0 8px 8px 8px;
+    padding: 8px 12px; max-width: 90%;
+  }
+
+  &__author { font-size: 11px; font-weight: 600; color: $text; }
+  &__text   { font-size: 13px; color: $text; margin-top: 2px; line-height: 1.5; }
+  &__time   { font-size: 10px; color: $text-muted; margin-top: 4px; }
+}
+
+.msg-empty { font-size: 12px; color: #94A3B8; }
+
+// ── BUTTONS ───────────────────────────────────────────────────────────────────
+.act-btn {
+  height: 30px; padding: 0 12px; border: 1px solid $border;
+  border-radius: 6px; font-size: 12px; cursor: pointer;
+  background: #fff; color: $text; transition: background .1s;
+  &:hover   { background: #F1F5F9; }
+  &.primary { background: $accent; color: #fff; border-color: $accent; }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+.send-btn {
+  height: 36px; width: 36px; border: none; border-radius: 8px;
+  background: $accent; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+// ── BADGES ────────────────────────────────────────────────────────────────────
+.s-ouvert   { background: #FEF3C7; color: #92400E; }
+.s-encours  { background: #DBEAFE; color: #1E40AF; }
+.s-attente  { background: #F3F4F6; color: #374151; }
+.s-resolu   { background: #D1FAE5; color: #065F46; }
+.s-ferme    { background: #F1F5F9; color: #475569; }
+.s-annule   { background: #FEE2E2; color: #991B1B; }
+
+.p-basse    { background: #F0FDF4; color: #166534; }
+.p-moyenne  { background: #FEF9C3; color: #854D0E; }
+.p-haute    { background: #FFF7ED; color: #9A3412; }
+.p-critique { background: #FEE2E2; color: #991B1B; }
+
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 20px;
+}
+
+// ── PAGINATION ────────────────────────────────────────────────────────────────
+.tk-pagination {
+  padding: 10px 14px; border-top: 1px solid $border;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.pg-info { font-size: 12px; color: $text-muted; }
+
+.pg-controls { display: flex; gap: 4px; }
+
+.pg-btn {
+  min-width: 30px; height: 30px; padding: 0 6px;
+  border: 1px solid $border; border-radius: 6px;
+  background: #fff; color: $text; font-size: 12px;
+  cursor: pointer; transition: background .1s;
+
+  &:hover:not(:disabled) { background: #F0FDFA; }
+  &.active { background: $accent; color: #fff; border-color: $accent; }
+  &:disabled { opacity: .4; cursor: not-allowed; }
+}

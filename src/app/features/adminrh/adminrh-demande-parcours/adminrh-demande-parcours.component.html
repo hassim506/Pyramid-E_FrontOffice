@@ -1,0 +1,195 @@
+<div class="page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <h1>Demandes de parcours</h1>
+      <p>Gérez et traitez les demandes de parcours de formation</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn-outline">
+        <i class="isax isax-export"></i> Exporter
+      </button>
+      <button type="button" class="btn-primary" (click)="refreshData()" [disabled]="loading">
+        <i class="isax isax-refresh"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi__icon ki-amber"><i class="isax isax-clock"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">En attente</div>
+        <div class="kpi__val">{{ demandesEnAttente }}</div>
+        <div class="kpi__delta">à traiter</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-green"><i class="isax isax-tick-circle"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Approuvées</div>
+        <div class="kpi__val">{{ demandesValidees }}</div>
+        <div class="kpi__delta">cette période</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-red"><i class="isax isax-close-circle"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Refusées</div>
+        <div class="kpi__val">{{ demandesRefusees }}</div>
+        <div class="kpi__delta">cette période</div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-purple"><i class="isax isax-route-square"></i></div>
+      <div class="kpi__body">
+        <div class="kpi__label">Total</div>
+        <div class="kpi__val">{{ totalDemandes }}</div>
+        <div class="kpi__delta">parcours</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main card -->
+  <div class="main-card">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="isax isax-search-normal-1"></i>
+        <input type="search" placeholder="Rechercher parcours, employé..."
+               [(ngModel)]="searchDataValue" [ngModelOptions]="{standalone:true}"
+               (ngModelChange)="searchData($event)">
+      </div>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'en_attente'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'en_attente' ? 'tous' : 'en_attente')">
+        <i class="isax isax-clock"></i> En attente
+      </button>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'validee'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'validee' ? 'tous' : 'validee')">
+        <i class="isax isax-tick-circle"></i> Approuvées
+      </button>
+      <button type="button" class="filter-chip"
+              [class.active]="selectedStatutFilter === 'refusee'"
+              (click)="onStatutFilterChange(selectedStatutFilter === 'refusee' ? 'tous' : 'refusee')">
+        <i class="isax isax-close-circle"></i> Refusées
+      </button>
+      <div class="toolbar-spacer"></div>
+      <button type="button" class="sort-btn">
+        <i class="isax isax-arrow-3"></i> Plus récent
+      </button>
+    </div>
+
+    <!-- Alerts -->
+    <div *ngIf="successMessage" class="alert alert--ok">
+      <i class="isax isax-tick-circle"></i> {{ successMessage }}
+      <button type="button" class="alert__close" (click)="clearMessages()"><i class="isax isax-close-circle"></i></button>
+    </div>
+    <div *ngIf="error" class="alert alert--err">
+      <i class="isax isax-warning-2"></i> {{ error }}
+      <button type="button" class="alert__close" (click)="clearMessages()"><i class="isax isax-close-circle"></i></button>
+    </div>
+
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="skeletons">
+      <div *ngFor="let i of [1,2,3,4,5]" class="sk-item"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && !hasData" class="empty-state">
+      <i class="isax isax-route-square"></i>
+      <p>Aucune demande de parcours</p>
+    </div>
+
+    <!-- Demande list -->
+    <div *ngIf="!loading && hasData" class="demande-list">
+      <div *ngFor="let d of tableData; trackBy: trackByDemandeId" class="demande-item">
+
+        <!-- Left: avatar + type line -->
+        <div class="d-left">
+          <div class="d-av">{{ (d.employe?.prenom?.charAt(0) || '') + (d.employe?.nom?.charAt(0) || '') }}</div>
+          <div class="d-type-line tl-parc"></div>
+        </div>
+
+        <!-- Body -->
+        <div class="d-body">
+          <div class="d-name">{{ d.employe?.name || 'Employé inconnu' }}</div>
+          <div class="d-company">{{ d.employe?.email || '—' }}</div>
+          <div class="d-time">{{ formatDate(d.created_at) }}</div>
+
+          <div class="d-title">{{ d.parcours?.titre || d.parcours?.nom || 'Parcours non défini' }}</div>
+
+          <div class="d-meta">
+            <span *ngIf="d.date_souhaitee_debut"><i class="isax isax-calendar-1"></i> {{ formatDate(d.date_souhaitee_debut) }}</span>
+            <span *ngIf="d.parcours?.description">{{ d.parcours?.description }}</span>
+            <span class="pb pb-{{ d.priorite }}">{{ d.priorite_display }}</span>
+          </div>
+
+          <div *ngIf="d.motif_demande" class="d-msg" [title]="d.motif_demande">
+            "{{ d.motif_demande }}"
+          </div>
+        </div>
+
+        <!-- Right: badges + actions -->
+        <div class="d-right">
+          <div class="d-badges">
+            <span class="sb"
+              [class.sb-pending]="d.statut === 'en_attente'"
+              [class.sb-approved]="d.statut === 'validee'"
+              [class.sb-rejected]="d.statut === 'refusee'"
+              [class.sb-cancelled]="d.statut === 'annulee'">
+              {{ d.statut_display }}
+            </span>
+            <span class="tb tb-parc">Parcours</span>
+          </div>
+          <div class="action-row">
+            <button *ngIf="canValidate(d)" type="button" class="act-btn act-approve" title="Approuver"
+                    [disabled]="validatingIds.has(d.id)" (click)="validerDemande(d)">
+              <span *ngIf="validatingIds.has(d.id)" class="act-spin"></span>
+              <i *ngIf="!validatingIds.has(d.id)" class="isax isax-tick-circle"></i>
+              Approuver
+            </button>
+            <button *ngIf="canRefuse(d)" type="button" class="act-btn act-reject" title="Refuser"
+                    [disabled]="refusingIds.has(d.id)" (click)="refuserDemande(d)">
+              <span *ngIf="refusingIds.has(d.id)" class="act-spin"></span>
+              <i *ngIf="!refusingIds.has(d.id)" class="isax isax-close-circle"></i>
+              Refuser
+            </button>
+            <button *ngIf="canCancel(d)" type="button" class="act-btn act-cancel" title="Annuler" (click)="annulerDemande(d)">
+              <i class="isax isax-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Empty filtered -->
+      <div *ngIf="!tableData.length" class="empty-state">
+        <i class="isax isax-search-normal-1"></i>
+        <p>Aucun résultat</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <span>Affichage {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > totalData ? totalData : currentPage * pageSize }} sur {{ totalData }} demandes</span>
+      <div class="pagination__pages">
+        <button type="button" class="pag-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button type="button" *ngFor="let p of pagesArray; let i = index"
+                class="pag-btn" [class.active]="currentPage === i + 1"
+                (click)="onPageChange(i + 1)">{{ i + 1 }}</button>
+        <button type="button" class="pag-btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

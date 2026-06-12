@@ -189,6 +189,10 @@ confirmTogglePublish(): void {
     return this.formations.filter(f => f.statut === 'draft' || f.statut === 'brouillon').length;
   }
 
+  getTotalParticipants(): number {
+    return this.formations.reduce((sum, f) => sum + (f.nb_participants || 0), 0);
+  }
+
   getFreeFormationsCount(): number {
     return this.formations.filter(f => !f.prix || f.prix === 0).length;
   }
@@ -201,16 +205,17 @@ confirmTogglePublish(): void {
   isFormationGratuite(formation: any): boolean {
     return !formation.prix || formation.prix === 0;
   }
-
-  formatPrix(prix: number): string {
-    if (!prix || prix === 0) {
-      return 'Gratuit';
+    formatPrix(prix: number): string {
+      if (!prix || prix === 0) {
+        return 'Gratuit';
+      }
+      return `${Math.round(prix)} XOF`;
     }
-    return `${prix} €`;
-  }
 
   getFormationImage(formation: any): string {
-    return formation.image || formation.photo || 'assets/img/course/course-01.jpg';
+    return this.formationService.getImageUrl(
+      formation.image_couverture || formation.image_url || formation.image || formation.photo
+    );
   }
 
   // getStatusClass(formation: any): string {
@@ -271,7 +276,8 @@ logFormationStatus(formation: any): void {
 
   openDeleteModal(formation: any): void {
     this.selectedFormation = formation;
-    // Ouvrir le modal (utiliser Bootstrap modal ou autre)
+    const modal = new bootstrap.Modal(document.getElementById('delete_modal')!);
+    modal.show();
   }
 
   confirmDelete(): void {

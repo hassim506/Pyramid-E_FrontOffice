@@ -90,18 +90,9 @@ export interface ParcoursRequest {
 }
 
 export interface ParcoursResponse {
-  current_page: number;
-  data: Parcours[];
-  first_page_url: string;
-  from: number;
-  last_page: number;
-  last_page_url: string;
-  next_page_url?: string;
-  path: string;
-  per_page: number;
-  prev_page_url?: string;
-  to: number;
-  total: number;
+  status: boolean;
+  parcours: Parcours[];
+  message?: string;
 }
 
 export interface ParcoursSimpleResponse {
@@ -121,7 +112,7 @@ export interface ProgressionRequest {
 
 export interface FormationsUpdateRequest {
   formations: {
-    formation_id: number;
+    id: number;
     ordre: number;
     obligatoire: boolean;
   }[];
@@ -150,30 +141,20 @@ export class ParcoursService {
     });
   }
 
-getRhParcours(page: number = 1, limit: number = 15): Observable<ParcoursResponse> {
+getRhParcours(): Observable<ParcoursResponse> {
   const entrepriseId = this.getCurrentUserEntrepriseId();
-  
-  console.log('Entreprise ID utilisé pour le filtre:', entrepriseId);
-  
-  return this.http.get<ParcoursResponse>(`${this.apiUrl}?page=${page}&per_page=${limit}`, {
+
+  return this.http.get<ParcoursResponse>(this.apiUrl, {
     headers: this.getHeaders()
   }).pipe(
     map(response => {
-      // Filtrer les parcours par entreprise_id côté frontend
-      const filteredData = response.data.filter(parcours => 
-        parcours.entreprise_id === entrepriseId
-      );
-      
-      console.log('Parcours avant filtre:', response.data.length);
-      console.log('Parcours après filtre:', filteredData.length);
-      
-      return {
-        ...response,
-        data: filteredData,
-        total: filteredData.length,
-        to: filteredData.length,
-        from: filteredData.length > 0 ? 1 : 0
-      };
+      const all = response.parcours || [];
+      // Comparaison loose (== au lieu de ===) : PHP peut retourner entreprise_id en string
+      // On normalise aussi actif en booléen (PHP retourne 0/1)
+      const filtered = all
+        .filter((p: Parcours) => Number(p.entreprise_id) === Number(entrepriseId))
+        .map((p: Parcours) => ({ ...p, actif: Boolean(p.actif) }));
+      return { ...response, parcours: filtered };
     })
   );
 }

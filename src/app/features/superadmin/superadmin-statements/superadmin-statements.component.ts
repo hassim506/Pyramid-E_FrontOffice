@@ -1,111 +1,192 @@
-import { Component } from '@angular/core';
-import { Sort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Router, RouterLink } from '@angular/router';
-import { apiResultFormat, instructorStatement, pageSelection } from '../../../shared/models/model';
-import { PaginationService, tablePageSize } from '../../../shared/service/custom-pagination/pagination.service';
-import { DataService } from '../../../shared/service/data/data.service';
-import { routes } from '../../../shared/service/routes/routes';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSelectModule } from '@angular/material/select';
-import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
+import { RapportExportService } from '../../../shared/service/rapport/rapport-export.service';
+
+export interface RapportRecent {
+  nom: string; meta: string; format: 'pdf' | 'excel' | 'csv'; date: string; url?: string;
+}
 
 @Component({
   selector: 'app-superadmin-statements',
-  imports:[CommonModule,MatTableModule,MatSortModule,MatPaginatorModule,FormsModule,RouterLink,MatSelectModule,CustomPaginationComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './superadmin-statements.component.html',
   styleUrl: './superadmin-statements.component.scss'
 })
-export class SuperadminStatementsComponent {
-routes=routes
-// pagination variables
-public pageSize = 10;
-public tableData: instructorStatement[] = [];
-public tableDataCopy: instructorStatement[] = [];
-public actualData: instructorStatement[] = [];
-public currentPage = 1;
-public skip = 0;
-public limit: number = this.pageSize;
-public serialNumberArray: number[] = [];
-public totalData = 0;       
-public pageSelection: pageSelection[] = [];
-dataSource!: MatTableDataSource<instructorStatement>;
-public searchDataValue = '';
-constructor(
-  private data: DataService,
-  private router: Router,
-  private pagination: PaginationService
-) {
-  this.data.getInstructionStatement().subscribe((apiRes: apiResultFormat) => {
-    this.actualData = apiRes.data;
-    this.pagination.tablePageSize.subscribe((res: tablePageSize) => {
-      if (this.router.url == this.routes.instructorStatements) {
-        this.getTableData({ skip: res.skip, limit: res.limit });
-        this.pageSize = res.pageSize;
-      }
-    });
-  });
-}
-private getTableData(pageOption: pageSelection): void {
-  this.data.getInstructionStatement().subscribe((apiRes: apiResultFormat) => {
-    this.tableData = [];
-    this.tableDataCopy = [];
-    this.serialNumberArray = [];
-    this.totalData = apiRes.totalData;
-    apiRes.data.map((res: instructorStatement, index: number) => {
-      const serialNumber = index + 1;
-      if (index >= pageOption.skip && serialNumber <= pageOption.limit) {
-        res.sNo = serialNumber;
-        this.tableData.push(res);
-        this.tableDataCopy.push(res);
-        this.serialNumberArray.push(serialNumber);
-      }
-    });
-    this.dataSource = new MatTableDataSource<instructorStatement>(this.actualData);
-    this.pagination.calculatePageSize.next({
-      totalData: this.totalData,
-      pageSize: this.pageSize,
-      tableData: this.tableData,
-      tableDataCopy: this.tableDataCopy,
-      serialNumberArray: this.serialNumberArray,
-    });
-  });
-}
+export class SuperadminStatementsComponent implements OnInit {
 
-public searchData(value: string): void {
-  if (value == '') {
-    this.tableData = this.tableDataCopy;
-  } else {
-    this.dataSource.filter = value.trim().toLowerCase();
-    this.tableData = this.dataSource.filteredData;
+  selectedType = 'multi';
+  readonly types = [
+    { key: 'multi',         icon: 'isax-buildings-2',   color: 'purple', label: 'Multi-entreprises',   sub: 'Vue consolidée de toutes les entreprises' },
+    { key: 'entreprise',    icon: 'isax-profile-2user', color: 'gray',   label: 'Par entreprise',      sub: 'Rapport ciblé sur une seule entreprise' },
+    { key: 'certifications',icon: 'isax-medal',         color: 'orange', label: 'Certifications',      sub: 'Délivrés, expirations, renouvellements' },
+    { key: 'support',       icon: 'isax-ticket',        color: 'gray',   label: 'Support & tickets',   sub: 'Délais de résolution, satisfaction' },
+    { key: 'performance',   icon: 'isax-chart-2',       color: 'purple', label: 'Performance globale', sub: 'KPIs consolidés plateforme' },
+    { key: 'financier',     icon: 'isax-wallet-add',    color: 'gray',   label: 'Financier',           sub: 'Paiements, gains, abonnements' },
+  ];
+
+  periode    = 'trimestre';
+  entreprise = 'toutes';
+  format     = 'pdf';
+  formationsF = 'toutes';
+  groupe     = 'entreprise';
+  langue     = 'fr';
+
+  schedules = [
+    { label: 'Rapport hebdomadaire',          sub: 'Chaque lundi 08h00 · envoyé aux Admin RH',       on: true  },
+    { label: 'Rapport mensuel consolidé',     sub: '1er de chaque mois · toutes entreprises + direction', on: true },
+    { label: 'Alerte expirations certificats',sub: '30j avant · email automatique aux concernés',    on: false },
+  ];
+
+  totalUsers   = 0;
+  activeUsers  = 0;
+  completion   = 0;
+  totalCerts   = 0;
+  certExpiring = 0;
+  scoresMoy    = 0;
+  entreprises: { label: string; pct: number }[] = [];
+
+  loading    = false;
+  generating = false;
+  successMsg = '';
+
+  recents: RapportRecent[] = [
+    { nom: 'Performance globale T1 2025', meta: 'Multi-entreprises · PDF · 24 pages',       format: 'pdf',   date: '15 jan.' },
+    { nom: 'Certifications déc. 2024',    meta: 'Toutes entreprises · Excel · 1 284 lignes',format: 'excel', date: '1 jan.' },
+    { nom: 'Tickets support nov. 2024',   meta: 'Délais & résolution · CSV',                format: 'csv',   date: '1 déc.' },
+  ];
+
+  private rawUsers:    any[] = [];
+  private rawCerts:    any[] = [];
+  private rawClients:  any[] = [];
+
+  constructor(
+    private http: HttpClient,
+    private exportSvc: RapportExportService,
+  ) {}
+
+  private get headers(): HttpHeaders {
+    const token = localStorage.getItem('pyramide_token');
+    return new HttpHeaders({ 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' });
   }
-}
 
-public sortData(sort: Sort) {
-  const data = this.tableData.slice();
+  ngOnInit(): void { this.loadPreview(); }
 
-  if (!sort.active || sort.direction === '') {
-    this.tableData = data;
-  } else {
-    this.tableData = data.sort((a, b) => {
-      const aValue = (a as never)[sort.active];
+  loadPreview(): void {
+    this.loading = true;
+    forkJoin({
+      users:   this.http.get<any>(`${environment.apiUrl}/users`,       { headers: this.headers }).pipe(catchError(() => of({ users: [] }))),
+      certs:   this.http.get<any>(`${environment.apiUrl}/certificats`, { headers: this.headers }).pipe(catchError(() => of([]))),
+      clients: this.http.get<any>(`${environment.apiUrl}/entreprises`, { headers: this.headers }).pipe(catchError(() => of({ data: [] }))),
+    }).subscribe({
+      next: ({ users, certs, clients }) => {
+        const ul = users.users || users.data || (Array.isArray(users) ? users : []);
+        const cl = Array.isArray(certs) ? certs : (certs.certificats || []);
+        const el = clients.data || clients.entreprises || (Array.isArray(clients) ? clients : []);
 
-      const bValue = (b as never)[sort.active];
-      return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
+        this.rawUsers   = ul;
+        this.rawCerts   = cl;
+        this.rawClients = el;
+
+        this.totalUsers  = ul.length;
+        this.activeUsers = ul.filter((u: any) => u.statut !== 'archive').length;
+        this.completion  = 73;
+        this.totalCerts  = cl.length;
+        this.certExpiring = cl.filter((c: any) => {
+          if (!c.date_expiration) return false;
+          const diff = new Date(c.date_expiration).getTime() - Date.now();
+          return diff > 0 && diff < 30 * 86400000;
+        }).length;
+        this.scoresMoy = 76;
+        this.entreprises = el.slice(0, 4).map((e: any, i: number) => ({
+          label: e.nom || e.name || `Entreprise ${i + 1}`,
+          pct:   Math.floor(55 + i * 8),
+        }));
+        this.loading = false;
+      },
+      error: () => { this.loading = false; }
     });
   }
-}
-public changePageSize(pageSize: number): void {
-  this.pageSelection = [];
-  this.limit = pageSize;
-  this.skip = 0;
-  this.currentPage = 1;
-  this.pagination.tablePageSize.next({
-    skip: this.skip,
-    limit: this.limit,
-    pageSize: this.pageSize,
-  });
-}
+
+  selectType(key: string): void { this.selectedType = key; }
+
+  generate(): void {
+    this.generating = true;
+    this.successMsg = '';
+    setTimeout(() => {
+      this.generating = false;
+      this.doExport(this.format);
+      this.successMsg = `Rapport ${this.selectedType} généré (${this.format.toUpperCase()}) — téléchargement lancé.`;
+      setTimeout(() => { this.successMsg = ''; }, 4000);
+    }, 600);
+  }
+
+  exportQuick(fmt: string): void {
+    this.doExport(fmt);
+    this.successMsg = `Export ${fmt.toUpperCase()} lancé.`;
+    setTimeout(() => { this.successMsg = ''; }, 3000);
+  }
+
+  private doExport(fmt: string): void {
+    const filename = `rapport-superadmin-${this.selectedType}-${this.periode}`;
+
+    const userRows = this.rawUsers.map((u: any) => ({
+      Nom:        u.name || `${u.prenom ?? ''} ${u.nom ?? ''}`.trim(),
+      Email:      u.email || '',
+      Rôle:       u.role?.name || u.role || '',
+      Entreprise: u.entreprise?.nom || u.entreprise_nom || '',
+      Statut:     u.statut || 'actif',
+    }));
+
+    const certRows = this.rawCerts.map((c: any) => ({
+      Employé:    c.employe_nom || c.user?.name || '',
+      Formation:  c.formation_titre || c.formation?.titre || '',
+      Entreprise: c.entreprise?.nom || '',
+      Délivré:    c.date_emission || '',
+      Expiration: c.date_expiration || '',
+    }));
+
+    const clientRows = this.rawClients.map((e: any) => ({
+      Entreprise: e.nom || e.name || '',
+      Email:      e.email || '',
+      Statut:     e.statut || '',
+    }));
+
+    if (fmt === 'csv') {
+      const rows = this.selectedType === 'certifications' ? certRows
+                 : this.selectedType === 'entreprise'     ? clientRows
+                 : userRows;
+      this.exportSvc.exportCsv(rows, filename);
+    } else if (fmt === 'excel') {
+      const rows = this.selectedType === 'certifications' ? certRows
+                 : this.selectedType === 'entreprise'     ? clientRows
+                 : userRows;
+      this.exportSvc.exportExcel(rows, filename);
+    } else {
+      this.exportSvc.exportPdf('Rapport global — toutes entreprises', [
+        { heading: 'Utilisateurs',  rows: userRows   },
+        { heading: 'Entreprises',   rows: clientRows  },
+        { heading: 'Certifications', rows: certRows   },
+      ], filename);
+    }
+  }
+
+  downloadRecent(r: RapportRecent): void {
+    if (r.url) { window.open(r.url, '_blank'); return; }
+    this.doExport(r.format);
+    this.successMsg = `Téléchargement de « ${r.nom} » lancé.`;
+    setTimeout(() => { this.successMsg = ''; }, 3000);
+  }
+
+  getFormatIcon(fmt: string): string {
+    return ({ pdf: 'isax-document', excel: 'isax-document-text', csv: 'isax-clipboard-text' } as any)[fmt] ?? 'isax-document';
+  }
+
+  get periodeLabel(): string {
+    return ({ mois: 'Ce mois', trimestre: 'T1 2025', annee: 'Cette année' } as any)[this.periode] ?? this.periode;
+  }
 }

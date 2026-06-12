@@ -1,4 +1,5 @@
 import { AdminrhDemandeComponent } from "../../../features/adminrh/adminrh-demande/adminrh-demande.component";
+import { AdminrhStatementsComponent } from "../../../features/adminrh/adminrh-statements/adminrh-statements.component";
 
 export const routes = {
   // Instructor Routes
@@ -11,7 +12,7 @@ export const routes = {
   instructorWishlist: '/instructor/instructor-wishlist',
   instructorWithdraw: '/instructor/instructor-withdraw',
   instructorProfile: '/instructor/instructor-profile',
-  instructorQuizQuestion: '/instructor/instructor-quiz-questions',
+  instructorQuizQuestions: '/instructor/instructor-quiz-questions',
   instructorQuiz: '/instructor/instructor-quiz',
   instructorCertificate: '/instructor/instructor-certificate',
   instructorEarning: '/instructor/instructor-earnings',
@@ -23,6 +24,7 @@ export const routes = {
   instructorQuizResult: '/instructor/instructor-quiz-results',
   instructorCourse: '/instructor/instructor-course',
   instructorCourseGrid: '/instructor/instructor-course-grid',
+  instructorSession: '/instructor/instructor-session',
   instructorTickets: '/instructor/instructor-tickets',
   instructorMessage: '/instructor/instructor-message',
   instructorQuizDetails: '/instructor/instructor-quiz-details',
@@ -40,9 +42,11 @@ export const routes = {
   students: '/student/',
   students_profile: '/student/student-profile',
   students_Dashboard: '/student/student-dashboard',
+  student_DemandeFormation: '/student/student-demande',
   course_student: '/student/course-student',
   studentMyCourses: '/student/mes-formations',           // ✅ mes-cours → mes-formations
   student_Certificate: '/student/student-certificate',
+  studentDemande: '/student/student-demande',
   student_Wishlist: '/student/student-wishlist',
   view_invoice_student: '/student/view-invoice',
   transactions_student: '/student/transactions-student',
@@ -88,7 +92,8 @@ export const routes = {
   student_DemandeSession:   '/student/students-session',
   student_DemandeCatalogue: '/student/students-catalogue',
   student_DemandeParcours:  '/student/students-parcours',
-  student_DemandeFormation: '/student/student-certificate',
+  studentCertificat: '/student/student-certificate',
+
 
   // Mes parcours et catalogues assignés
   student_CataloguesAssignes: '/student/mes-catalogues',
@@ -107,6 +112,7 @@ export const routes = {
   superadminProfile: '/superadmin/superadmin-profile',
   superadminQuizQuestion: '/superadmin/superadmin-quiz-questions',
   superadminQuiz: '/superadmin/superadmin-quiz',
+
   superadminCertificate: '/superadmin/superadmin-certificate',
   superadminEarning: '/superadmin/superadmin-earnings',
   superadminStatements: '/superadmin/superadmin-statements',
@@ -123,8 +129,16 @@ export const routes = {
   superadmin_profile: '/superadmin/superadmin-profile',
   superadminPermission: '/superadmin/superadmin-permission',
   superadminRole: '/superadmin/superadmin-role',
+
+  // quiz:  'quiz',
+  // studentsList: '/superadmin/students-list',
+  // studentsGrid: '/superadmin/students-grid',
+  // studentsDetails: '/superadmin/students-details',
+  superadminQuizResult: '/superadmin/superadmin-quiz-results',
   superadminCourse: '/superadmin/superadmin-course',
   superadminCourseGrid: '/superadmin/superadmin-course-grid',
+  superadminSession: '/superadmin/superadmin-session',
+  superadminParcours: '/superadmin/superadmin-parcours',
   superadminTickets: '/superadmin/superadmin-tickets',
   superadminMessage: '/superadmin/superadmin-message',
   superadminQuizDetails: '/superadmin/superadmin-quiz-details',
@@ -150,9 +164,13 @@ export const routes = {
   adminrhProfile: '/adminrh/adminrh-profile',
   adminrhQuizQuestion: '/adminrh/adminrh-quiz-questions',
   adminrhQuiz: '/adminrh/adminrh-quiz',
+  adminrhQuizResult: '/adminrh/adminrh-quiz-results',
   adminrhCertificate: '/adminrh/adminrh-certificate',
+  adminrhCertificateModele: '/adminrh/adminrh-certificate-modele',
   adminrhEarning: '/adminrh/adminrh-earnings',
+  adminrhRapport: '/adminrh/adminrh-rapport',
   adminrhStatements: '/adminrh/adminrh-statements',
+
   adminrhCompanyManagement: '/adminrh/adminrh-companymanagement',
   adminrhCompanydetails: '/adminrh/adminrh-company-details',
   adminrhClientList: '/adminrh/adminrh-client-list',
@@ -167,8 +185,11 @@ export const routes = {
   adminrh_profile: '/adminrh/adminrh-profile',
   adminrhPermission: '/adminrh/adminrh-permission',
   adminrhRole: '/adminrh/adminrh-role',
-  AdminrhDemande: '/adminrh/adminrh-demande',
-  adminrhSession: '/adminrh/adminrh-session',
+  adminrhDemande: '/adminrh/adminrh-demande',
+  adminrhDemandeSession: '/adminrh/adminrh-demande-session',
+  adminrhDemandeParcours: '/adminrh/adminrh-demande-parcours',
+  adminrhDemandeCatalogue: '/adminrh/adminrh-demande-catalogue',
+  adminrhSession: '/adminrh/adminrh-session',  // ✅ lead
   adminrhCourse: '/adminrh/adminrh-course',
   adminrhCategorie: '/adminrh/adminrh-categorie',
   adminrhCatalogue: '/adminrh/adminrh-catalogue',
@@ -222,6 +243,8 @@ export const routes = {
   register: '/auth/register',
   setPassword: '/auth/set-password',
   otp: '/auth/otp',
+  magic_verify: '/auth/magic-verify',
+  activate: '/auth/activate',
   lockScreen: '/auth/lock-screen',
 
   under_construction: '/under-construction',

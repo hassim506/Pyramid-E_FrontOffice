@@ -1,0 +1,176 @@
+<div class="ac-shell">
+
+  <!-- ── Topbar ── -->
+  <div class="ac-topbar">
+    <button type="button" class="ac-tab active">
+      <i class="isax isax-routing-2"></i>Parcours
+    </button>
+    <span class="ac-spacer"></span>
+    <div style="display:flex;align-items:center;padding:0 10px;">
+      <span class="ac-topbar-info">{{ totalData }} parcours</span>
+    </div>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="ac-kpi-row" style="grid-template-columns:repeat(5,1fr);">
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-routing-2"></i>Total</div>
+      <div class="ac-kpi__val">{{ stats.total }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-tick-circle"></i>Actifs</div>
+      <div class="ac-kpi__val">{{ stats.actifs }}</div>
+      <div class="ac-kpi__delta up">actifs</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-pause-circle"></i>Inactifs</div>
+      <div class="ac-kpi__val">{{ stats.inactifs }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-gift"></i>Gratuits</div>
+      <div class="ac-kpi__val">{{ stats.gratuits }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-dollar-circle"></i>Payants</div>
+      <div class="ac-kpi__val">{{ stats.payants }}</div>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="ac-toolbar">
+    <div class="ac-search">
+      <i class="isax isax-search-normal ac-search__icon"></i>
+      <input class="ac-search__input" type="text"
+             [(ngModel)]="searchTerm"
+             (ngModelChange)="onSearch()"
+             placeholder="Nom, description…">
+    </div>
+
+    <!-- Entreprise -->
+    <select class="ac-select" title="Entreprise" [(ngModel)]="selectedEntreprise" (change)="onFilterChange()">
+      <option value="">Toutes entreprises</option>
+      <option *ngFor="let c of companies" [value]="c.id">{{ c.nom }}</option>
+    </select>
+
+    <!-- Niveau -->
+    <select class="ac-select" title="Niveau" [(ngModel)]="selectedNiveau" (change)="onFilterChange()">
+      <option value="">Tous niveaux</option>
+      <option *ngFor="let n of niveaux" [value]="n">{{ n }}</option>
+    </select>
+
+    <!-- Statut -->
+    <select class="ac-select" title="Statut" [(ngModel)]="selectedStatut" (change)="onFilterChange()">
+      <option value="">Tous statuts</option>
+      <option value="actif">Actif</option>
+      <option value="inactif">Inactif</option>
+    </select>
+
+    <span class="ac-spacer"></span>
+
+    <!-- Reset -->
+    <button type="button" class="ac-chip" *ngIf="hasActiveFilters" (click)="resetFilters()">
+      <i class="isax isax-refresh"></i>Réinitialiser
+    </button>
+
+    <!-- Page size -->
+    <select class="ac-select" title="Taille de page" [(ngModel)]="pageSize" (change)="PageSize()">
+      <option value="10">10 / page</option>
+      <option value="25">25 / page</option>
+      <option value="50">50 / page</option>
+    </select>
+  </div>
+
+  <!-- ── Alert ── -->
+  <div class="ac-alert" *ngIf="error">
+    <i class="isax isax-warning-2"></i>{{ error }}
+    <button type="button" class="ac-alert-close" (click)="error=''">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+
+  <!-- ── Loading ── -->
+  <div class="ac-empty" *ngIf="loading">
+    <i class="isax isax-routing-2"></i>Chargement des parcours…
+  </div>
+
+  <!-- ── Table ── -->
+  <ng-container *ngIf="!loading">
+    <table class="ac-table" *ngIf="parcours.length > 0">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th style="width:130px;">Entreprise</th>
+          <th style="width:100px;text-align:center;">Niveau</th>
+          <th style="width:80px;text-align:center;">Formations</th>
+          <th style="width:80px;text-align:center;">Apprenants</th>
+          <th style="width:70px;text-align:center;">Durée</th>
+          <th style="width:90px;text-align:center;">Prix</th>
+          <th style="width:80px;text-align:center;">Statut</th>
+          <th style="width:70px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of parcours; trackBy: trackByParcours">
+          <!-- Nom -->
+          <td>
+            <div class="ac-table-name">{{ p.nom }}</div>
+            <div class="ac-table-sub" *ngIf="p.description">
+              {{ p.description | slice:0:70 }}{{ (p.description?.length ?? 0) > 70 ? '…' : '' }}
+            </div>
+          </td>
+          <!-- Entreprise -->
+          <td style="font-size:12px;">{{ getCompanyName(p.entreprise_id) }}</td>
+          <!-- Niveau -->
+          <td style="text-align:center;">
+            <span class="ac-status" [attr.data-s]="getNiveauData(p.niveau)">{{ p.niveau || '—' }}</span>
+          </td>
+          <!-- Formations -->
+          <td style="text-align:center;font-size:13px;">{{ p.formations?.length || 0 }}</td>
+          <!-- Apprenants -->
+          <td style="text-align:center;font-size:13px;">{{ p.users?.length || 0 }}</td>
+          <!-- Durée -->
+          <td style="text-align:center;font-size:13px;">{{ p.duree_estimee || 0 }}h</td>
+          <!-- Prix -->
+          <td style="text-align:center;">
+            <span class="ac-status" [attr.data-s]="isGratuit(p.prix) ? 'pub' : 'pending'">
+              {{ formatPrix(p.prix) }}
+            </span>
+          </td>
+          <!-- Statut -->
+          <td style="text-align:center;">
+            <span class="ac-status" [attr.data-s]="p.actif ? 'pub' : 'draft'">
+              {{ p.actif ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          <!-- Actions -->
+          <td>
+            <div class="ac-actions">
+              <button type="button" class="ac-act ac-act--del" (click)="deleteParcours(p)" title="Supprimer">
+                <i class="isax isax-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty -->
+    <div class="ac-empty" *ngIf="parcours.length === 0">
+      <i class="isax isax-routing-2"></i>
+      {{ hasActiveFilters ? 'Aucun résultat pour ces filtres' : 'Aucun parcours trouvé' }}
+      <button type="button" class="ac-chip" style="margin-top:10px;" *ngIf="hasActiveFilters" (click)="resetFilters()">
+        <i class="isax isax-refresh"></i>Réinitialiser
+      </button>
+    </div>
+
+    <!-- Pagination -->
+    <app-custom-pagination
+      *ngIf="parcours.length > 0 && totalData > pageSize"
+      [totalItems]="totalData"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      (pageChange)="onPageChange($event)">
+    </app-custom-pagination>
+  </ng-container>
+
+</div>

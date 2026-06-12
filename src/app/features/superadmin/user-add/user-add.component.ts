@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { User } from '../../../shared/models/user.models';
 import { Client, Company } from '../../../shared/models/client-company.models';
 import { UserService } from '../../../shared/service/user/user.service';
-import { RoleService } from '../../../shared/service/role/role.service';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
 
 @Component({
@@ -25,12 +24,12 @@ export class UserAddComponent implements OnInit, OnChanges {
   loading: boolean = false;
   clients: Client[] = [];
   companies: Company[] = [];
- roles: any[] = [];
+  roles: any[] = [];
+  showPasswordFields = false;
 
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private roleService: UserService,
     private clientCompanyService: ClientCompanyService
   ) {}
 
@@ -79,7 +78,7 @@ loadRoles() {
 }
 ngOnChanges() {
   if (this.userData && this.isEditMode) {
-    // Réinitialiser le formulaire avec les bonnes validations pour le mode édition
+    this.showPasswordFields = false;
     this.initForm();
     
     // Extraire le role_id depuis l'objet role ou utiliser directement role_id
@@ -93,22 +92,26 @@ ngOnChanges() {
       email: this.userData.email || '',
       numero: this.userData.numero || '',
       fonction: this.userData.fonction || '',
-      role_id: roleId,
+      role_id: roleId ? String(roleId) : '',
       statut: this.userData.statut,
       entreprise_id: this.userData.entreprise_id || ''
     });
 
-    console.log('Mode édition - Formulaire valide:', this.userForm.valid);
-    console.log('Erreurs du formulaire:', this.userForm.errors);
-    console.log('Statut des champs:', Object.keys(this.userForm.controls).map(key => ({
-      field: key,
-      value: this.userForm.get(key)?.value,
-      valid: this.userForm.get(key)?.valid,
-      errors: this.userForm.get(key)?.errors
-    })));
   } else if (!this.isEditMode) {
-    // Mode création
+    this.showPasswordFields = true;
     this.initForm();
+  }
+}
+
+togglePasswordFields(): void {
+  this.showPasswordFields = !this.showPasswordFields;
+  const pwValidators = this.showPasswordFields ? [Validators.required, Validators.minLength(8)] : [];
+  this.userForm.get('password')?.setValidators(pwValidators);
+  this.userForm.get('password_confirmation')?.setValidators(pwValidators);
+  this.userForm.get('password')?.updateValueAndValidity();
+  this.userForm.get('password_confirmation')?.updateValueAndValidity();
+  if (!this.showPasswordFields) {
+    this.userForm.patchValue({ password: '', password_confirmation: '' });
   }
 }
 
@@ -216,70 +219,30 @@ getRoleName(user: any): string {
   // Ajouter created_by (supposons que c'est l'utilisateur connecté avec ID 1)
   formData.created_by = 1;
 
-  console.log('===== DONNÉES ENVOYÉES =====');
-  console.log(JSON.stringify(formData, null, 2));
-  console.log('============================');
-
   if (this.isEditMode && this.userData) {
-    // En mode édition, supprimer password si vide
     if (!formData.password) {
       delete formData.password;
       delete formData.password_confirmation;
     }
 
     this.userService.updateUser(this.userData.id, formData).subscribe({
-      next: (response) => {
-        console.log('Utilisateur mis à jour:', response);
-        this.loading = false;
-        this.onSave.emit();
-        this.hideDialog();
-      },
+      next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
       error: (error) => {
-        console.error('===== ERREUR COMPLÈTE =====');
-        console.error('Status:', error.status);
-        console.error('Error object:', error);
-        console.error('Error.error:', error.error);
-        console.error('Error.error.errors:', error.error?.errors);
-        console.error('Error.error.message:', error.error?.message);
-        console.error('============================');
-        
-        let errorMessage = 'Erreur lors de la mise à jour';
-        if (error.error?.errors) {
-          errorMessage = Object.values(error.error.errors).flat().join('\n');
-        } else if (error.error?.message) {
-          errorMessage = error.error.message;
-        }
-        
-        alert(errorMessage);
+        const msg = error.error?.errors
+          ? Object.values(error.error.errors).flat().join('\n')
+          : error.error?.message || 'Erreur lors de la mise à jour';
+        alert(msg);
         this.loading = false;
       }
     });
   } else {
     this.userService.createUser(formData).subscribe({
-      next: (response) => {
-        console.log('Utilisateur créé:', response);
-        this.loading = false;
-        this.onSave.emit();
-        this.hideDialog();
-      },
+      next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
       error: (error) => {
-        console.error('===== ERREUR COMPLÈTE =====');
-        console.error('Status:', error.status);
-        console.error('Error object:', error);
-        console.error('Error.error:', error.error);
-        console.error('Error.error.errors:', error.error?.errors);
-        console.error('Error.error.message:', error.error?.message);
-        console.error('============================');
-        
-        let errorMessage = 'Erreur lors de la création';
-        if (error.error?.errors) {
-          // Erreurs de validation Laravel
-          errorMessage = Object.values(error.error.errors).flat().join('\n');
-        } else if (error.error?.message) {
-          errorMessage = error.error.message;
-        }
-        
-        alert(errorMessage);
+        const msg = error.error?.errors
+          ? Object.values(error.error.errors).flat().join('\n')
+          : error.error?.message || 'Erreur lors de la création';
+        alert(msg);
         this.loading = false;
       }
     });

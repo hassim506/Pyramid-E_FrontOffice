@@ -1,291 +1,483 @@
-<!-- Statistics Cards -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  EN-TÊTE DE PAGE                                         -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold text-dark mb-1">
+      <i class="fas fa-tachometer-alt text-primary me-2"></i>Dashboard Super Administrateur
+    </h4>
+    <p class="text-muted mb-0 small">Vue d'ensemble de la plateforme — supervision globale &amp; métriques RH</p>
+  </div>
+  <div class="d-flex gap-2 align-items-center flex-wrap">
+    <mat-date-range-input [rangePicker]="picker" [disabled]="isLoading" #range="matDateRangeInput">
+      <input matStartDate placeholder="Date de début"
+             (dateChange)="onDateRangeChange({ startDate: $event.value, endDate: range.value?.end || null })">
+      <input matEndDate placeholder="Date de fin"
+             (dateChange)="onDateRangeChange({ startDate: range.value?.start || null, endDate: $event.value })">
+    </mat-date-range-input>
+    <mat-date-range-picker #picker></mat-date-range-picker>
+    <button class="btn btn-sm btn-outline-secondary"
+            (click)="refreshData()"
+            [disabled]="isLoading"
+            type="button"
+            aria-label="Actualiser les données">
+      <i class="fas fa-sync-alt me-1" [class.fa-spin]="isLoading"></i>Actualiser
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SECTION : VUE GLOBALE                                   -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center mb-3">
+  <span class="badge bg-primary px-3 py-2 me-3 fs-12 fw-semibold">
+    <i class="fas fa-globe me-1"></i>Vue Globale
+  </span>
+  <hr class="flex-grow-1">
+</div>
+
+<!-- KPI Entreprises / Clients / Formations / Utilisateurs -->
 <div class="row g-3 mb-4">
-    <div class="col-md-6 col-xl-3" *ngFor="let stat of statisticsCards">
-        <div class="card h-100 shadow-sm border-0 stat-card" 
-             [class]="'stat-card-' + stat.type">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon flex-shrink-0 me-3">
-                        <!-- ICÔNES IDENTIQUES AU DASHBOARD ADMINRH -->
-                        <span class="icon-box" [ngClass]="'bg-' + stat.color + '-transparent'">
-                            <img *ngIf="stat.type === 'companies'" src="assets/img/icon/icon-23.svg" alt="Entreprises" class="icon-img">
-                            <img *ngIf="stat.type === 'clients'" src="assets/img/icon/user-octagon.svg" alt="Clients" class="icon-img">
-                            <img *ngIf="stat.type === 'formations'" src="assets/img/icon/graduation.svg" alt="Formations" class="icon-img">
-                            <img *ngIf="stat.type === 'users'" src="assets/img/icon/users.svg" alt="Utilisateurs" class="icon-img">
-                        </span>
-                    </div>
-                    <div class="flex-grow-1">
-                        <p class="text-muted mb-1 small fw-medium">{{ stat.label }}</p>
-                        <div class="stat-value">
-                            <div *ngIf="isLoading" class="skeleton-loader">
-                                <div class="skeleton skeleton-text"></div>
-                            </div>
-                            <h4 *ngIf="!isLoading" 
-                                class="fs-24 mb-0 fw-bold text-dark"
-                                [attr.aria-label]="stat.label + ': ' + stat.value">
-                                {{ stat.value | number }}
-                            </h4>
-                        </div>
-                        <small class="text-success d-flex align-items-center mt-1">
-                            <i class="fas fa-arrow-up me-1"></i>
-                            <span>+{{ stat.growth }}% ce mois</span>
-                        </small>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer bg-transparent border-0 p-2">
-                <div class="progress" style="height: 4px;">
-                    <div class="progress-bar" 
-                         [class]="'bg-' + stat.color"
-                         [style.width.%]="stat.progress" 
-                         role="progressbar"
-                         [attr.aria-valuenow]="stat.progress"
-                         [attr.aria-valuemin]="0"
-                         [attr.aria-valuemax]="100">
-                    </div>
-                </div>
-            </div>
+  <div class="col-md-6 col-xl-3" *ngFor="let stat of statisticsCards">
+    <div class="card h-100 shadow-sm border-0 stat-card" [class]="'stat-card-' + stat.type">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 me-3">
+            <span class="icon-box" [ngClass]="'bg-' + stat.color + '-transparent'">
+              <img *ngIf="stat.type === 'companies'"   src="assets/img/icon/icon-23.svg"      alt="Entreprises" class="icon-img">
+              <img *ngIf="stat.type === 'clients'"     src="assets/img/icon/user-octagon.svg" alt="Clients"     class="icon-img">
+              <img *ngIf="stat.type === 'formations'"  src="assets/img/icon/graduation.svg"   alt="Formations"  class="icon-img">
+              <img *ngIf="stat.type === 'users'"       src="assets/img/icon/users.svg"        alt="Utilisateurs" class="icon-img">
+            </span>
+          </div>
+          <div class="flex-grow-1">
+            <p class="text-muted mb-1 small fw-medium">{{ stat.label }}</p>
+            <div *ngIf="isLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!isLoading" class="fs-24 mb-0 fw-bold text-dark"
+                [attr.aria-label]="stat.label + ': ' + stat.value">
+              {{ stat.value | number }}
+            </h4>
+            <small class="text-success d-flex align-items-center mt-1">
+              <i class="fas fa-arrow-up me-1"></i>+{{ stat.growth }}% ce mois
+            </small>
+          </div>
         </div>
+      </div>
+      <div class="card-footer bg-transparent border-0 p-2">
+        <div class="progress" style="height: 4px;">
+          <div class="progress-bar" [class]="'bg-' + stat.color"
+               [style.width.%]="stat.progress" role="progressbar"
+               [attr.aria-valuenow]="stat.progress" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Statistics Chart -->
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white border-bottom">
-        <div class="d-flex align-items-center flex-wrap gap-3 justify-content-between">
-            <div>
-                <h5 class="fw-bold mb-1 text-dark">
-                    <i class="fas fa-chart-line text-primary me-2"></i>
-                    Évolution Mensuelle
-                </h5>
-                <p class="text-muted mb-0 small">Suivi des performances sur 7 mois</p>
-            </div>
-            <div class="d-flex gap-2 flex-wrap">
-                <button class="btn btn-sm btn-outline-secondary" 
-                        (click)="refreshData()" 
-                        [disabled]="isLoading"
-                        type="button"
-                        aria-label="Actualiser les données">
-                    <i class="fas fa-sync-alt me-1" 
-                       [class.fa-spin]="isLoading"></i>
-                    Actualiser
-                </button>
-                    <mat-date-range-input [rangePicker]="picker" [disabled]="isLoading" #range="matDateRangeInput">
-                  <input matStartDate placeholder="Date de début"
-                         (dateChange)="onDateRangeChange({ startDate: $event.value, endDate: range.value?.end || null })">
-                  <input matEndDate placeholder="Date de fin"
-                         (dateChange)="onDateRangeChange({ startDate: range.value?.start || null, endDate: $event.value })">
-                </mat-date-range-input>
-                <mat-date-range-picker #picker></mat-date-range-picker>
-            </div>
-        </div>
-    </div>
-    <div class="card-body p-0">
-        <!-- Chart Legend -->
+<!-- Évolution Mensuelle (gauche) + Entreprises Récentes (droite) -->
+<div class="row g-4 mb-4">
+
+  <!-- ── Graphique Évolution Mensuelle ── -->
+  <div class="col-lg-7">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="fw-bold mb-1 text-dark">
+          <i class="fas fa-chart-line text-primary me-2"></i>Évolution Mensuelle
+        </h5>
+        <p class="text-muted mb-0 small">Suivi des performances sur 7 mois</p>
+      </div>
+      <div class="card-body p-0">
+        <!-- Légende -->
         <div class="chart-legend p-3 border-bottom bg-light">
-            <div class="row text-center">
-                <div class="col-3" *ngFor="let serie of chartLegend">
-                    <div class="legend-item">
-                        <span class="legend-color d-inline-block rounded-circle me-2" 
-                              [style.background-color]="serie.color"></span>
-                        <small class="text-muted">{{ serie.name }}</small>
-                    </div>
-                </div>
+          <div class="row text-center">
+            <div class="col-3" *ngFor="let serie of chartLegend">
+              <span class="legend-color d-inline-block rounded-circle me-2"
+                    [style.background-color]="serie.color"></span>
+              <small class="text-muted">{{ serie.name }}</small>
             </div>
+          </div>
         </div>
-        
-        <!-- Chart Container -->
-        <div class="chart-container" style="min-height: 350px;">
-            <div *ngIf="!isLoading; else chartLoading" 
-                 id="statistics_chart" 
-                 class="p-3"
-                 role="img" 
-                 aria-label="Graphique des statistiques mensuelles">
-                <apx-chart
-                    [series]="Statisticschart.series"
-                    [chart]="Statisticschart.chart"
-                    [xaxis]="Statisticschart.xaxis"
-                    [yaxis]="Statisticschart.yaxis"
-                    [stroke]="Statisticschart.stroke"
-                    [tooltip]="Statisticschart.tooltip"
-                    [dataLabels]="Statisticschart.dataLabels"
-                    [fill]="Statisticschart.fill"
-                    [plotOptions]="Statisticschart.plotOptions"
-                    [grid]="Statisticschart.grid"
-                    [colors]="Statisticschart.colors">
-                </apx-chart>
+        <!-- Graphique -->
+        <div style="min-height: 300px;">
+          <div *ngIf="!isLoading; else chartLoading" class="p-3"
+               role="img" aria-label="Graphique des statistiques mensuelles">
+            <apx-chart
+              [series]="Statisticschart.series"
+              [chart]="Statisticschart.chart"
+              [xaxis]="Statisticschart.xaxis"
+              [yaxis]="Statisticschart.yaxis"
+              [stroke]="Statisticschart.stroke"
+              [tooltip]="Statisticschart.tooltip"
+              [dataLabels]="Statisticschart.dataLabels"
+              [fill]="Statisticschart.fill"
+              [plotOptions]="Statisticschart.plotOptions"
+              [grid]="Statisticschart.grid"
+              [colors]="Statisticschart.colors">
+            </apx-chart>
+          </div>
+          <ng-template #chartLoading>
+            <div class="d-flex flex-column align-items-center justify-content-center p-5">
+              <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Chargement du graphique...</span>
+              </div>
+              <p class="text-muted mb-0">Chargement des statistiques...</p>
             </div>
-            
-            <ng-template #chartLoading>
-                <div class="d-flex flex-column align-items-center justify-content-center p-5">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">Chargement du graphique...</span>
-                    </div>
-                    <p class="text-muted mb-0">Chargement des statistiques...</p>
-                </div>
-            </ng-template>
+          </ng-template>
         </div>
+      </div>
     </div>
+  </div>
+
+  <!-- ── Entreprises Récentes ── -->
+  <div class="col-lg-5">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+        <div>
+          <h5 class="fw-bold mb-1 text-dark">
+            <i class="fas fa-building text-primary me-2"></i>Entreprises Récentes
+          </h5>
+          <p class="text-muted mb-0 small">Dernières entreprises créées</p>
+        </div>
+        <a class="btn btn-sm btn-outline-primary"
+           [routerLink]="[routes.superadminCompanyManagement]"
+           type="button">
+          <i class="fas fa-eye me-1"></i>Voir toutes
+        </a>
+      </div>
+      <div class="card-body p-0">
+        <div *ngIf="!isLoading; else tableLoading" class="table-responsive">
+          <table class="table table-hover mb-0"
+                 role="table" aria-label="Entreprises récemment créées">
+            <thead class="table-light">
+              <tr>
+                <th scope="col" class="border-0 ps-3">Entreprise</th>
+                <th scope="col" class="border-0 text-center">Clients</th>
+                <th scope="col" class="border-0 text-center">Statut</th>
+                <th scope="col" class="border-0 text-center">Créée le</th>
+                <th scope="col" class="border-0"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let entreprise of recentEntreprises; trackBy: trackByCompanyId">
+                <td class="ps-3 py-2">
+                  <div class="d-flex align-items-center">
+                    <img [src]="entreprise.logo || 'assets/img/default-company.svg'"
+                         [alt]="'Logo ' + entreprise.nom"
+                         class="rounded-3 me-2 shadow-sm"
+                         style="width: 36px; height: 36px; object-fit: cover;"
+                         loading="lazy">
+                    <div>
+                      <h6 class="fw-semibold mb-0 small text-dark">{{ entreprise.nom }}</h6>
+                      <span class="text-muted" style="font-size: 11px;">{{ entreprise.secteur }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center py-2">
+                  <span class="badge bg-primary-light text-primary fw-semibold">
+                    {{ entreprise.nombreClients }}
+                  </span>
+                </td>
+                <td class="text-center py-2">
+                  <span class="badge"
+                        [ngClass]="{
+                          'bg-success text-white': entreprise.statut === 'active',
+                          'bg-warning text-dark':  entreprise.statut === 'pending',
+                          'bg-danger text-white':  entreprise.statut === 'inactive'
+                        }">
+                    {{ getStatusLabel(entreprise.statut) }}
+                  </span>
+                </td>
+                <td class="text-center py-2 small text-muted">
+                  {{ entreprise.dateCreation | date:'dd/MM/yy' }}
+                </td>
+                <td class="text-end pe-3 py-2">
+                  <a class="btn btn-sm btn-outline-secondary"
+                     [routerLink]="[routes.superadminCompanydetails, entreprise.id]"
+                     title="Voir les détails">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                </td>
+              </tr>
+              <tr *ngIf="recentEntreprises.length === 0">
+                <td colspan="5" class="text-center py-5 text-muted">
+                  <i class="fas fa-building fa-2x d-block mb-2"></i>
+                  Aucune entreprise récente
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #tableLoading>
+          <div class="d-flex flex-column align-items-center justify-content-center p-5">
+            <div class="spinner-border text-primary mb-3" role="status">
+              <span class="visually-hidden">Chargement des entreprises...</span>
+            </div>
+            <p class="text-muted mb-0">Chargement...</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /row Vue Globale -->
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SÉPARATEUR — RH & Formation                             -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center my-4">
+  <hr class="flex-grow-1">
+  <span class="px-3 fw-bold text-muted small text-uppercase">
+    <i class="fas fa-user-cog me-2 text-primary"></i>Métriques RH &amp; Formation
+  </span>
+  <hr class="flex-grow-1">
 </div>
 
-<!-- Recent Companies Table -->
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white border-bottom">
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SECTION : RH — KPI Cards                                -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6 col-xl-3" *ngFor="let stat of rhStatisticsCards">
+    <div class="card h-100 shadow-sm border-0" [class]="'stat-card-' + stat.type">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 me-3">
+            <span class="icon-box" [ngClass]="'bg-' + stat.color + '-transparent'">
+              <img *ngIf="stat.type === 'utilisateurs'"  src="assets/img/icon/users.svg"         alt="Utilisateurs" class="icon-img">
+              <img *ngIf="stat.type === 'formateurs'"    src="assets/img/icon/user-octagon.svg"  alt="Formateurs"   class="icon-img">
+              <img *ngIf="stat.type === 'formations'"    src="assets/img/icon/graduation.svg"    alt="Formations"   class="icon-img">
+              <img *ngIf="stat.type === 'demandes'"      src="assets/img/icon/icon-23.svg"       alt="Demandes"     class="icon-img">
+            </span>
+          </div>
+          <div class="flex-grow-1">
+            <p class="text-muted mb-1 small fw-medium">{{ stat.label }}</p>
+            <div *ngIf="isLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!isLoading" class="fs-24 mb-0 fw-bold text-dark">{{ stat.value | number }}</h4>
+            <small class="text-success d-flex align-items-center mt-1">
+              <i class="fas fa-arrow-up me-1"></i>+{{ stat.growth }}% ce mois
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer bg-transparent border-0 p-2">
+        <div class="progress" style="height: 4px;">
+          <div class="progress-bar" [class]="'bg-' + stat.color"
+               [style.width.%]="stat.progress" role="progressbar"
+               [attr.aria-valuenow]="stat.progress" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  RH — Formations & Sessions                              -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center mb-3">
+  <h6 class="fw-bold mb-0 text-dark">
+    <i class="isax isax-book me-2 text-success"></i>Formations &amp; Sessions
+  </h6>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-6 col-xl-3" *ngFor="let card of rhMetricsRow1">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
         <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <h5 class="fw-bold mb-1 text-dark">
-                    <i class="fas fa-building text-primary me-2"></i>
-                    Entreprises Récentes
-                </h5>
-                <p class="text-muted mb-0 small">Dernières entreprises créées</p>
-            </div>
-            <button class="btn btn-sm btn-outline-primary" 
-                    [routerLink]="[routes.superadminCompanyManagement]"
-                    type="button">
-                <i class="fas fa-eye me-1"></i>
-                Voir toutes
-            </button>
+          <div>
+            <p class="text-muted mb-1 small fw-medium">{{ card.label }}</p>
+            <div *ngIf="isLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!isLoading" class="fw-bold mb-0">
+              {{ card.value }}<span class="fs-14 text-muted ms-1">{{ card.suffix }}</span>
+            </h4>
+          </div>
+          <span class="icon-box" [ngClass]="'bg-' + card.color + '-transparent'">
+            <i [class]="card.icon + ' fs-24 text-' + card.color"></i>
+          </span>
         </div>
+      </div>
     </div>
-    <div class="card-body p-0">
-        <div *ngIf="!isLoading; else tableLoading" 
-             class="table-responsive">
-            <table class="table table-hover mb-0" 
-                   role="table" 
-                   aria-label="Liste des entreprises récemment créées">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col" class="border-0 ps-3">
-                            <i class="fas fa-building me-1 text-muted"></i>
-                            Entreprise
-                        </th>
-                        <th scope="col" class="border-0 text-center">
-                            <i class="fas fa-users me-1 text-muted"></i>
-                            Clients
-                        </th>
-                        <th scope="col" class="border-0 text-center">
-                            <i class="fas fa-graduation-cap me-1 text-muted"></i>
-                            Formations
-                        </th>
-                        <th scope="col" class="border-0 text-center">
-                            <i class="fas fa-info-circle me-1 text-muted"></i>
-                            Statut
-                        </th>
-                        <th scope="col" class="border-0 text-center">
-                            <i class="fas fa-calendar me-1 text-muted"></i>
-                            Date création
-                        </th>
-                        <th scope="col" class="border-0"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let entreprise of recentEntreprises; trackBy: trackByCompanyId" 
-                        class="company-row">
-                        <td class="ps-3 py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="company-avatar me-3">
-                                    <img [src]="entreprise.logo || 'assets/img/default-company.svg'" 
-                                         [alt]="'Logo de ' + entreprise.nom"
-                                         class="rounded-3 shadow-sm"
-                                         style="width: 48px; height: 48px; object-fit: cover;"
-                                         loading="lazy">
-                                </div>
-                                <div>
-                                    <h6 class="fw-semibold mb-1 text-dark">{{ entreprise.nom }}</h6>
-                                    <span class="badge bg-light text-muted small">
-                                        <i class="fas fa-industry me-1"></i>
-                                        {{ entreprise.secteur }}
-                                    </span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="text-center py-3">
-                            <span class="badge bg-primary-light text-primary fw-semibold fs-6">
-                                {{ entreprise.nombreClients }}
-                            </span>
-                        </td>
-                        <td class="text-center py-3">
-                            <span class="badge bg-success-light text-success fw-semibold fs-6">
-                                {{ entreprise.nombreFormations }}
-                            </span>
-                        </td>
-                        <td class="text-center py-3">
-                            <span class="badge fs-6 fw-medium" 
-                                  [ngClass]="{
-                                      'bg-success text-white': entreprise.statut === 'active',
-                                      'bg-warning text-dark': entreprise.statut === 'pending',
-                                      'bg-danger text-white': entreprise.statut === 'inactive'
-                                  }"
-                                  [attr.aria-label]="'Statut: ' + getStatusLabel(entreprise.statut)">
-                                <i class="fas me-1" 
-                                   [ngClass]="{
-                                       'fa-check-circle': entreprise.statut === 'active',
-                                       'fa-clock': entreprise.statut === 'pending', 
-                                       'fa-times-circle': entreprise.statut === 'inactive'
-                                   }"></i>
-                                {{ getStatusLabel(entreprise.statut) }}
-                            </span>
-                        </td>
-                        <td class="text-center py-3">
-                            <div class="text-dark fw-medium">
-                                {{ entreprise.dateCreation | date:'dd/MM/yyyy' }}
-                            </div>
-                            <small class="text-muted">
-                                {{ getRelativeDate(entreprise.dateCreation) }}
-                            </small>
-                        </td>
-                        <td class="text-end pe-3 py-3">
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary" 
-                                        type="button" 
-                                        [id]="'dropdown-' + entreprise.id"
-                                        data-bs-toggle="dropdown" 
-                                        aria-expanded="false"
-                                        [attr.aria-label]="'Actions pour ' + entreprise.nom">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end" 
-                                    [attr.aria-labelledby]="'dropdown-' + entreprise.id">
-                                    <li>
-                                        <a class="dropdown-item" 
-                                           [routerLink]="[routes.superadminCompanydetails, entreprise.id]">
-                                            <i class="fas fa-eye me-2"></i>Voir détails
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" 
-                                           [routerLink]="[routes.superadminCompanydetails, entreprise.id]">
-                                            <i class="fas fa-edit me-2"></i>Modifier
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                    
-                    <!-- Empty State -->
-                    <tr *ngIf="recentEntreprises.length === 0" class="empty-state">
-                        <td colspan="6" class="text-center py-5">
-                            <div class="d-flex flex-column align-items-center">
-                                <i class="fas fa-building fa-3x text-muted mb-3"></i>
-                                <h6 class="text-muted mb-2">Aucune entreprise récente</h6>
-                                <p class="text-muted mb-0 small">
-                                    Les nouvelles entreprises apparaîtront ici
-                                </p>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  RH — Qualité & Performance                              -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center mb-3">
+  <h6 class="fw-bold mb-0 text-dark">
+    <i class="isax isax-monitor me-2 text-info"></i>Qualité &amp; Performance
+  </h6>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-6 col-xl-3" *ngFor="let card of rhMetricsRow2">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted mb-1 small fw-medium">{{ card.label }}</p>
+            <div *ngIf="isLoading" class="skeleton-loader"><div class="skeleton skeleton-text"></div></div>
+            <h4 *ngIf="!isLoading" class="fw-bold mb-0">
+              {{ card.value }}<span class="fs-14 text-muted ms-1">{{ card.suffix }}</span>
+            </h4>
+          </div>
+          <span class="icon-box" [ngClass]="'bg-' + card.color + '-transparent'">
+            <i [class]="card.icon + ' fs-24 text-' + card.color"></i>
+          </span>
         </div>
-        
-        <ng-template #tableLoading>
-            <div class="d-flex flex-column align-items-center justify-content-center p-5">
-                <div class="spinner-border text-primary mb-3" role="status">
-                    <span class="visually-hidden">Chargement des entreprises...</span>
-                </div>
-                <p class="text-muted mb-0">Chargement des entreprises récentes...</p>
-            </div>
-        </ng-template>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  RH — Tableau des formations actives                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+    <div>
+      <h5 class="fw-bold mb-1 text-dark">
+        <i class="isax isax-book-1 text-success me-2"></i>Formations actives
+      </h5>
+      <p class="text-muted mb-0 small">Aperçu des formations : inscrits &amp; progression</p>
+    </div>
+    <button class="btn btn-sm btn-outline-primary" type="button" (click)="refreshData()">
+      <i class="isax isax-eye me-1"></i>Voir toutes
+    </button>
+  </div>
+  <div class="card-body p-0">
+    <div *ngIf="!isLoading; else rhTableLoadingTpl" class="table-responsive">
+      <table class="table table-hover mb-0" aria-label="Formations actives">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-3 border-0"><i class="isax isax-book-1 me-1 text-muted"></i>Formation</th>
+            <th class="text-center border-0"><i class="isax isax-people me-1 text-muted"></i>Inscrits</th>
+            <th class="text-center border-0"><i class="isax isax-chart-2 me-1 text-muted"></i>Progression</th>
+            <th class="text-center border-0"><i class="isax isax-user-tick me-1 text-muted"></i>Complétés</th>
+            <th class="text-center border-0"><i class="isax isax-info-circle me-1 text-muted"></i>Statut</th>
+            <th class="text-center border-0"><i class="isax isax-calendar me-1 text-muted"></i>Depuis</th>
+            <th class="border-0"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let formation of rhFormationsRecentes; trackBy: trackByRhFormationId" class="align-middle">
+            <td class="ps-3 py-3">
+              <div class="d-flex align-items-center">
+                <img [src]="formation.image || 'assets/img/default-course.svg'"
+                     [alt]="formation.titre"
+                     class="rh-formation-avatar rounded-3 shadow-sm me-3"
+                     loading="lazy">
+                <h6 class="fw-semibold mb-0 text-dark">{{ formation.titre }}</h6>
+              </div>
+            </td>
+            <td class="text-center">
+              <span class="fw-semibold">{{ formation.inscrits }}</span>
+            </td>
+            <td class="text-center">
+              <div class="rh-progress-bar progress">
+                <div class="progress-bar bg-info" [style.width.%]="formation.progression"
+                     role="progressbar"
+                     [attr.aria-valuenow]="formation.progression"
+                     aria-valuemin="0" aria-valuemax="100"
+                     [attr.aria-label]="'Progression : ' + formation.progression + '%'"></div>
+              </div>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-success-transparent text-success fw-semibold">
+                {{ formation.completes || 0 }}
+              </span>
+            </td>
+            <td class="text-center">
+              <span class="badge fw-medium"
+                    [ngClass]="{
+                      'bg-success text-white':   formation.statut === 'publie',
+                      'bg-warning text-dark':    formation.statut === 'brouillon',
+                      'bg-info text-white':      formation.statut === 'en_cours',
+                      'bg-secondary text-white': formation.statut === 'archive'
+                    }">
+                <i class="fas me-1"
+                   [ngClass]="{
+                     'fa-check-circle': formation.statut === 'publie',
+                     'fa-edit':         formation.statut === 'brouillon',
+                     'fa-play-circle':  formation.statut === 'en_cours',
+                     'fa-archive':      formation.statut === 'archive'
+                   }"></i>
+                {{ getRhStatutLabel(formation.statut) }}
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="text-dark fw-medium small">{{ formation.dateCreation | date:'dd/MM/yyyy' }}</div>
+              <small class="text-muted">{{ getRelativeDate(formation.dateCreation) }}</small>
+            </td>
+            <td class="text-end pe-3">
+              <button class="btn btn-sm btn-outline-secondary" title="Voir les détails" type="button">
+                <i class="isax isax-eye"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="rhFormationsRecentes.length === 0">
+            <td colspan="7" class="text-center py-5">
+              <i class="isax isax-book-1 display-4 text-muted d-block mb-3"></i>
+              <h6 class="text-muted mb-1">Aucune formation disponible</h6>
+              <p class="text-muted small mb-0">Les formations apparaîtront ici dès leur création.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #rhTableLoadingTpl>
+      <div class="d-flex flex-column align-items-center justify-content-center p-5">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="text-muted mb-0">Chargement des formations...</p>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  RH — Graphique Évolution Mensuelle RH                   -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white border-bottom">
+    <h5 class="fw-bold mb-1 text-dark">
+      <i class="fas fa-chart-area text-info me-2"></i>Évolution Mensuelle RH
+    </h5>
+    <p class="text-muted mb-0 small">Suivi des formations sur 7 mois</p>
+  </div>
+  <div class="card-body p-0">
+    <!-- Légende -->
+    <div class="chart-legend p-3 border-bottom bg-light">
+      <div class="row text-center">
+        <div class="col-3" *ngFor="let serie of rhChartLegend">
+          <span class="rh-legend-dot rounded-circle me-2 d-inline-block"
+                [style.background-color]="serie.color"></span>
+          <small class="text-muted">{{ serie.name }}</small>
+        </div>
+      </div>
+    </div>
+    <!-- Graphique -->
+    <div class="chart-container rh-chart-min-height">
+      <div *ngIf="!isLoading; else rhChartLoadingTpl" class="p-3">
+        <apx-chart
+          [series]="rhChartData.series"
+          [chart]="rhChartData.chart"
+          [xaxis]="rhChartData.xaxis"
+          [yaxis]="rhChartData.yaxis"
+          [stroke]="rhChartData.stroke"
+          [tooltip]="rhChartData.tooltip"
+          [dataLabels]="rhChartData.dataLabels"
+          [fill]="rhChartData.fill"
+          [grid]="rhChartData.grid"
+          [colors]="rhChartData.colors">
+        </apx-chart>
+      </div>
+      <ng-template #rhChartLoadingTpl>
+        <div class="d-flex flex-column align-items-center justify-content-center p-5">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="text-muted mb-0">Chargement des statistiques...</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
 </div>

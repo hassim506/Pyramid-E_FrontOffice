@@ -58,6 +58,10 @@ export class AdminrhDemandeComponent implements OnInit {
   
   // Statistiques
   public stats: any = {};
+
+  // Source non filtrée
+  private allDemandes: DemandeFormation[] = [];
+  activeTab: string = 'tous';
   
   // Filtres de statut
   public statutFilters: StatutFilter[] = [
@@ -123,10 +127,18 @@ export class AdminrhDemandeComponent implements OnInit {
         console.log('📦 Réponse API demandes formation:', response);
         
         try {
-          this.stats = response.debug?.stats_par_statut || {};
+          this.allDemandes = response.demandes || [];
+
+          this.stats = {
+            total:      this.allDemandes.length,
+            en_attente: this.allDemandes.filter(d => d.statut === 'en_attente').length,
+            validee:    this.allDemandes.filter(d => d.statut === 'validee').length,
+            refusee:    this.allDemandes.filter(d => d.statut === 'refusee').length,
+            annulee:    this.allDemandes.filter(d => d.statut === 'annulee').length,
+          };
           this.updateStatutFilters();
-          
-          this.actualData = response.demandes || [];
+
+          this.actualData = [...this.allDemandes];
           this.totalData = this.actualData.length;
           this.applyFilters();
           this.loading = false;
@@ -197,8 +209,24 @@ export class AdminrhDemandeComponent implements OnInit {
 
   // === MÉTHODES DE FILTRAGE ===
 
+  setTab(tab: string): void {
+    this.activeTab = tab;
+    this.applyFilters();
+  }
+
+  get tabCounts(): { tous: number; formation: number; parcours: number; catalogue: number } {
+    return {
+      tous:      this.allDemandes.length,
+      formation: this.allDemandes.filter(d => d.type_demande === 'formation').length,
+      parcours:  this.allDemandes.filter(d => d.type_demande === 'parcours').length,
+      catalogue: this.allDemandes.filter(d => d.type_demande === 'catalogue').length,
+    };
+  }
+
   applyFilters(): void {
-    let filteredData = [...this.actualData];
+    let filteredData = this.activeTab === 'tous'
+      ? [...this.allDemandes]
+      : this.allDemandes.filter(d => d.type_demande === this.activeTab);
 
     // Filtre par statut
     if (this.selectedStatutFilter !== 'tous') {
@@ -365,7 +393,7 @@ export class AdminrhDemandeComponent implements OnInit {
     this.refusingIds.add(demande.id);
     this.clearMessages();
 
-   this.demandeFormationService.refuserDemande(demande.id, { motif_refus: motif }).subscribe({
+    this.demandeFormationService.refuserDemande(demande.id, { motif_refus: motif }).subscribe({
       next: () => {
         this.successMessage = `Demande de formation refusée.`;
         this.refusingIds.delete(demande.id);
@@ -526,5 +554,14 @@ export class AdminrhDemandeComponent implements OnInit {
 
   get showEmptyState(): boolean {
     return !this.loading && !this.hasData && !this.error;
+  }
+
+  get totalPages(): number { return Math.ceil(this.totalData / this.pageSize); }
+  get pagesArray(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i); }
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.skip = (page - 1) * this.pageSize;
+    this.limit = page * this.pageSize;
+    this.pagination.tablePageSize.next({ skip: this.skip, limit: this.limit, pageSize: this.pageSize });
   }
 }

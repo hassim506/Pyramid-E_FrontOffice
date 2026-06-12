@@ -2,9 +2,6 @@
    SIDEBAR LMS ENTREPRISE – WHITE PRO
 ===================================== */
 
-// ------------------------------------------------
-// VARIABLES
-// ------------------------------------------------
 $primary:     #11a9b7;
 $primary-dark:#0e8f9b;
 $accent:      #eea51c;
@@ -18,9 +15,7 @@ $radius:      10px;
 $radius-lg:   12px;
 $transition:  all 0.25s ease;
 
-// ------------------------------------------------
-// CONTENEUR
-// ------------------------------------------------
+// ── Conteneur ──────────────────────────────────────────
 .settings-sidebar {
   width: 280px;
   height: 100vh;
@@ -32,20 +27,16 @@ $transition:  all 0.25s ease;
   transition: width 0.3s ease;
 }
 
-// ------------------------------------------------
-// TOGGLE
-// ------------------------------------------------
+// ── Toggle ─────────────────────────────────────────────
 .sidebar-toggle {
   text-align: right;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   cursor: pointer;
   font-size: 1.2rem;
   color: $text-muted;
 }
 
-// ------------------------------------------------
-// MENU PRINCIPAL
-// ------------------------------------------------
+// ── Menu principal ──────────────────────────────────────
 .main-menu {
   list-style: none;
   padding: 0;
@@ -71,10 +62,7 @@ $transition:  all 0.25s ease;
     text-decoration: none;
     transition: $transition;
 
-    i:first-child {
-      font-size: 1rem;
-      color: $text-muted;
-    }
+    i:first-child { font-size: 1rem; color: $text-muted; }
 
     &:hover {
       background: $bg-hover;
@@ -86,7 +74,6 @@ $transition:  all 0.25s ease;
 .menu-item    { @extend %item-base; }
 .submenu-item { @extend %item-base; }
 
-// Flèche
 .submenu-arrow {
   font-size: 0.8rem;
   opacity: 0.6;
@@ -106,7 +93,7 @@ $transition:  all 0.25s ease;
   border-radius: $radius-lg;
   padding: 0.5rem 0;
   list-style: none;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 15px 40px rgba(0,0,0,.08);
   opacity: 0;
   visibility: hidden;
   transform: translateX(10px);
@@ -183,9 +170,7 @@ $transition:  all 0.25s ease;
   span, .submenu-arrow, .demande-desc { display: none; }
 }
 
-// ------------------------------------------------
-// DÉCONNEXION
-// ------------------------------------------------
+// ── Déconnexion ────────────────────────────────────────
 .logout a {
   color: #ef4444;
   &:hover { background: rgba(239, 68, 68, 0.1); }

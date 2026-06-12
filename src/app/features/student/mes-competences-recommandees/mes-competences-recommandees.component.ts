@@ -2,15 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule }      from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormationService } from '../../../shared/service/formation/formation.service';
-
-// ── Interfaces ────────────────────────────────────────────────────────────────
-export interface DomaineDB {
-  id:      number;
-  nom:     string;
-  slug:    string;
-  couleur: string | null;
-  icone:   string | null;
-}
+import { environment } from '../../../../environments/environment';
+import { DomaineDB } from '../mes-competences/mes-competences.component';
 
 interface FormationRecommandee {
   formation_id:    number;
@@ -51,7 +44,7 @@ export class MesCompetencesRecommandeesComponent implements OnInit {
   recherche  = '';
   tri: SortOption = 'competences';
 
-  private readonly imageBase = 'http://localhost:8000/storage/';
+  private readonly imageBase = environment.apiUrl.replace(/\/api$/, '') + '/storage/';
 
   constructor(
     private formationsService: FormationService,

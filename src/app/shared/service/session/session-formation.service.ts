@@ -184,14 +184,13 @@ export class SessionFormationService {
   createSession(sessionData: CreateSessionRequest): Observable<SingleSessionResponse> {
     return this.http.post<SingleSessionResponse>(this.apiUrl, sessionData, this.httpOptions)
       .pipe(
-        tap(response => {
-          if (response.status) {
-            // Rafraîchir la liste des sessions
-            this.refreshSessions();
-          }
-        }),
+        tap(response => { if (response.status) this.refreshSessions(); }),
         catchError(this.handleError<SingleSessionResponse>('createSession'))
       );
+  }
+
+  createSessionRH(sessionData: CreateSessionRequest): Observable<SingleSessionResponse> {
+    return this.http.post<SingleSessionResponse>(this.apiUrl, sessionData, this.httpOptions);
   }
 
   /**
@@ -200,14 +199,13 @@ export class SessionFormationService {
   updateSession(id: number, sessionData: Partial<CreateSessionRequest>): Observable<SingleSessionResponse> {
     return this.http.put<SingleSessionResponse>(`${this.apiUrl}/${id}`, sessionData, this.httpOptions)
       .pipe(
-        tap(response => {
-          if (response.status) {
-            // Rafraîchir la liste des sessions
-            this.refreshSessions();
-          }
-        }),
+        tap(response => { if (response.status) this.refreshSessions(); }),
         catchError(this.handleError<SingleSessionResponse>('updateSession'))
       );
+  }
+
+  updateSessionRH(id: number, sessionData: Partial<CreateSessionRequest>): Observable<SingleSessionResponse> {
+    return this.http.put<SingleSessionResponse>(`${this.apiUrl}/${id}`, sessionData, this.httpOptions);
   }
 
   /**
@@ -216,23 +214,21 @@ export class SessionFormationService {
   deleteSession(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`, this.httpOptions)
       .pipe(
-        tap(() => {
-          // Rafraîchir la liste des sessions
-          this.refreshSessions();
-        }),
+        tap(() => this.refreshSessions()),
         catchError(this.handleError<any>('deleteSession'))
       );
+  }
+
+  deleteSessionRH(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, this.httpOptions);
   }
 
   /**
    * Annuler une session
    */
 cancelSession(id: number, motif: string): Observable<SingleSessionResponse> {
-  const data: Partial<CreateSessionRequest> = {
-    statut: 'annulee',
-    motif_annulation: motif
-  };
-  return this.updateSession(id, data);
+  const data: Partial<CreateSessionRequest> = { statut: 'annulee', motif_annulation: motif };
+  return this.updateSessionRH(id, data);
 }
   /**
    * Changer le statut d'une session
@@ -412,6 +408,21 @@ changeSessionStatus(
   /**
    * Gestion globale des erreurs
    */
+  getSessionParticipants(sessionId: number): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/sessions-formation/${sessionId}/participants`,
+      this.httpOptions
+    );
+  }
+
+  inscrireEmploye(sessionId: number, userId: number): Observable<any> {
+    return this.http.post<any>(
+      `${environment.apiUrl}/sessions-formation/${sessionId}/inscrire`,
+      { user_id: userId },
+      this.httpOptions
+    );
+  }
+
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed:`, error);

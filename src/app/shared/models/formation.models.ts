@@ -170,6 +170,98 @@ export interface DemandeFormation {
   priorite_display?: string;
   formation?: Formation;
   employe?: Employe;
+  catalogue_id?: number | null;
+  catalogue?: {
+    id: number;
+    titre: string;
+    description: string;
+    short_description: string;
+    slug: string;
+    image_couverture?: string;
+    couleur: string;
+    icone: string;
+    ordre: number;
+    tags: string[];
+    metadata: {
+      niveau: string;
+      prerequis: string[];
+      duree_moyenne: number;
+      certificat_disponible: boolean;
+    };
+    est_publie: boolean;
+    est_public: boolean;
+    inscription_requise: boolean;
+    type: string;
+    conditions_acces?: string;
+    date_debut?: string;
+    date_fin?: string;
+    entreprise_id?: number;
+    created_by?: number;
+    updated_by?: number;
+    created_at: string;
+    updated_at: string;
+    formations: Formation[];
+    entreprise?: any;
+    nombre_formations: number;
+    duree_totale: string;
+    prix_moyen?: number;
+    type_display: string;
+    statut: string;
+    est_actif: boolean;
+  } | null;
+  session_formation?: {
+  id: number;
+  titre: string;
+  code_session: string;
+  formation_id: number;
+  formateur_id: number;
+  description: string;
+  date_debut: string;
+  date_fin: string;
+  horaires: any;
+  timezone: string;
+  type: 'presentiel' | 'distanciel' | 'hybride';
+  lieu: string;
+  instructions_acces: string;
+  capacite_max: number;
+  capacite_min: number;
+  inscription_ouverte: boolean;
+  date_limite_inscription: string;
+  statut: 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
+  motif_annulation?: string;
+  evaluation_requise: boolean;
+  certificat_delivre: boolean;
+  documents_requis?: string[];
+  materiel_requis?: string[];
+  cout_par_participant: string;
+  cout_total_session: string;
+  budget_alloue: string;
+  metadata?: any;
+  notes_organisateur?: string;
+  organisateur_id: number;
+  created_by: number;
+  updated_by: number;
+  created_at: string;
+  updated_at: string;
+  formation?: any;
+  formateur?: any;
+  organisateur?: any;
+  nombre_inscrits: number;
+  nombre_places_restantes: number;
+  type_display: string;
+  statut_display: string;
+  duree_en_heures: number;
+  peut_etre_inscrit: boolean;
+}
+
+  parcours?: {
+    id: number;
+    titre: string;
+    nom?: string;
+    description?: string;
+  } | null;
+
+  type_demande?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -202,3 +294,4 @@ export interface ActionDemandeRequest {
   date_debut_accordee?: string;
   conditions_validation?: any[];
 }
+

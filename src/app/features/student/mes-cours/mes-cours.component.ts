@@ -190,11 +190,7 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   }
 
   openPlayer(f: Formation): void {
-    this.router.navigate(['/student/lecture-formation', f.id], {
-      state: { fromPage: 'demandes' }
-      // ✅ Pas de parcoursId ici — c'est une formation simple
-      // lecture-formation lira state.parcoursId = undefined → null
-    });
+    this.router.navigate(['/courses/course-watch', f.id]);
   }
 
   // ════════════════════════════════════════════

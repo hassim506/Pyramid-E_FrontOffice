@@ -1,12 +1,15 @@
-// import { Component } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
 import { CategorieService, CategorieFormation, CategorieFormationRequest } from '../../../shared/service/categorie/categorie-service.service';
+import { QuizService } from '../../../shared/service/quiz/quiz.service';
+import { QuestionQuizService } from '../../../shared/service/quiz/question-quiz.service';
 
 
 
@@ -32,6 +35,28 @@ interface Section {
   obligatoire: boolean;
   visible: boolean;
   ordre: number;
+}
+
+interface QuizQuestion {
+  id: number;
+  question_text: string;
+  type: string;
+  points: number;
+  ordre: number;
+  explication: string;
+  reponses: any[];
+  _new?: boolean;
+}
+
+interface LocalQuiz {
+  moduleIndex: number;
+  sectionIndex: number;
+  titre: string;
+  description: string;
+  score_minimum: number;
+  tentatives_max: number;
+  duree_minutes: number;
+  questions: QuizQuestion[];
 }
 
 // @Component({
@@ -67,10 +92,14 @@ export class InstructorCourseAddComponent implements OnInit {
   // Données
   categories: CategorieFormation[] = [];
   modules: Module[] = [];
-  objectifs: string[] = [''];
-  prerequis: string[] = [''];
-  competencesAcquises: string[] = [''];
-  outilsRequis: string[] = [''];
+  objectifs: string[] = [];
+  prerequis: string[] = [];
+  competencesAcquises: string[] = [];
+  outilsRequis: string[] = [];
+  newObjectif = '';
+  newPrerequis = '';
+  newCompetence = '';
+  newOutil = '';
 
   // Média
   imagePreview: string | null = null;
@@ -89,14 +118,20 @@ export class InstructorCourseAddComponent implements OnInit {
   editingSectionIndex: number | null = null;
   currentModuleIndex: number | null = null;
 
+  // ── quiz editor (step 3) ───────────────────────────────────────────────
+  localQuizzes: LocalQuiz[] = [];
+  activeQuizKey: string | null = null;
+  expandedQuestion: number | null = null;
+
   constructor(
     private fb: FormBuilder,
     private formationService: FormationService,
-  private categorieService: CategorieService,
-
+    private categorieService: CategorieService,
     private router: Router,
     private sanitizer: DomSanitizer,
-    private authService: AuthService
+    private authService: AuthService,
+    private quizService: QuizService,
+    private questionService: QuestionQuizService,
   ) {
     this.initForms();
   }
@@ -240,13 +275,10 @@ export class InstructorCourseAddComponent implements OnInit {
           return false;
         }
         break;
-      case 1:
-        // Média est optionnel
-        break;
-      case 2:
-        // Modules sont optionnels
-        break;
-      case 3:
+      case 1: break; // Média optionnel
+      case 2: break; // Modules optionnels
+      case 3: break; // Quiz optionnel
+      case 4:
         if (this.additionalInfoForm.invalid) {
           this.markFormGroupTouched(this.additionalInfoForm);
           return false;
@@ -265,7 +297,8 @@ export class InstructorCourseAddComponent implements OnInit {
   // ==================== OBJECTIFS ====================
 
   addObjectif(): void {
-    this.objectifs.push('');
+    const v = this.newObjectif.trim();
+    if (v) { this.objectifs.push(v); this.newObjectif = ''; }
   }
 
   removeObjectif(index: number): void {
@@ -277,7 +310,8 @@ export class InstructorCourseAddComponent implements OnInit {
   // ==================== PREREQUIS ====================
 
   addPrerequis(): void {
-    this.prerequis.push('');
+    const v = this.newPrerequis.trim();
+    if (v) { this.prerequis.push(v); this.newPrerequis = ''; }
   }
 
   removePrerequis(index: number): void {
@@ -289,7 +323,8 @@ export class InstructorCourseAddComponent implements OnInit {
   // ==================== COMPETENCES ====================
 
   addCompetence(): void {
-    this.competencesAcquises.push('');
+    const v = this.newCompetence.trim();
+    if (v) { this.competencesAcquises.push(v); this.newCompetence = ''; }
   }
 
   removeCompetence(index: number): void {
@@ -301,7 +336,8 @@ export class InstructorCourseAddComponent implements OnInit {
   // ==================== OUTILS ====================
 
   addOutil(): void {
-    this.outilsRequis.push('');
+    const v = this.newOutil.trim();
+    if (v) { this.outilsRequis.push(v); this.newOutil = ''; }
   }
 
   removeOutil(index: number): void {
@@ -614,6 +650,124 @@ export class InstructorCourseAddComponent implements OnInit {
     return Math.round(total / duree);
   }
 
+  // ==================== QUIZ EDITOR (step 3) ====================
+
+  getQuizKey(moduleIndex: number, sectionIndex: number): string {
+    return `${moduleIndex}-${sectionIndex}`;
+  }
+
+  getQuizSections(): { moduleIndex: number; sectionIndex: number; moduleTitle: string; sectionTitle: string }[] {
+    const result: { moduleIndex: number; sectionIndex: number; moduleTitle: string; sectionTitle: string }[] = [];
+    this.modules.forEach((mod, mi) => {
+      (mod.sections || []).forEach((sec, si) => {
+        if (sec.type === 'quiz') {
+          result.push({ moduleIndex: mi, sectionIndex: si, moduleTitle: mod.titre, sectionTitle: sec.titre });
+        }
+      });
+    });
+    return result;
+  }
+
+  getOrCreateLocalQuiz(moduleIndex: number, sectionIndex: number): LocalQuiz {
+    const key = this.getQuizKey(moduleIndex, sectionIndex);
+    let lq = this.localQuizzes.find(q => this.getQuizKey(q.moduleIndex, q.sectionIndex) === key);
+    if (!lq) {
+      const sec = this.modules[moduleIndex]?.sections[sectionIndex];
+      lq = {
+        moduleIndex, sectionIndex,
+        titre: sec?.titre || 'Nouveau quiz',
+        description: '',
+        score_minimum: 70,
+        tentatives_max: 2,
+        duree_minutes: 0,
+        questions: [],
+      };
+      this.localQuizzes.push(lq);
+    }
+    return lq;
+  }
+
+  selectQuiz(moduleIndex: number, sectionIndex: number): void {
+    this.activeQuizKey = this.getQuizKey(moduleIndex, sectionIndex);
+    this.expandedQuestion = null;
+    this.getOrCreateLocalQuiz(moduleIndex, sectionIndex);
+  }
+
+  get activeLocalQuiz(): LocalQuiz | null {
+    if (!this.activeQuizKey) return null;
+    return this.localQuizzes.find(q => this.getQuizKey(q.moduleIndex, q.sectionIndex) === this.activeQuizKey) || null;
+  }
+
+  quizDefaultOptions(type: string): any[] {
+    if (type === 'true_false') {
+      return [
+        { reponse_text: 'Vrai', is_correct: true,  ordre: 1 },
+        { reponse_text: 'Faux', is_correct: false, ordre: 2 },
+      ];
+    }
+    if (type === 'multiple_choice' || type === 'multiple_choice_multi') {
+      return [
+        { reponse_text: '', is_correct: true,  ordre: 1 },
+        { reponse_text: '', is_correct: false, ordre: 2 },
+      ];
+    }
+    return [];
+  }
+
+  addQuizQuestion(type: string): void {
+    const lq = this.activeLocalQuiz;
+    if (!lq) return;
+    const newQ: QuizQuestion = {
+      id: Date.now(),
+      question_text: '',
+      type,
+      points: 1,
+      ordre: (lq.questions.length || 0) + 1,
+      reponses: this.quizDefaultOptions(type),
+      explication: '',
+      _new: true,
+    };
+    lq.questions = [...lq.questions, newQ];
+    this.expandedQuestion = newQ.id;
+  }
+
+  removeQuizQuestion(q: QuizQuestion): void {
+    const lq = this.activeLocalQuiz;
+    if (!lq) return;
+    lq.questions = lq.questions.filter(x => x.id !== q.id);
+  }
+
+  toggleQuizQuestion(id: number): void {
+    this.expandedQuestion = this.expandedQuestion === id ? null : id;
+  }
+
+  toggleQuizCorrect(q: QuizQuestion, opt: any): void {
+    if (q.type === 'multiple_choice') {
+      q.reponses.forEach((r: any) => r.is_correct = false);
+      opt.is_correct = true;
+    } else {
+      opt.is_correct = !opt.is_correct;
+    }
+  }
+
+  addQuizOption(q: QuizQuestion): void {
+    q.reponses = [...(q.reponses || []), {
+      reponse_text: '', is_correct: false, ordre: (q.reponses?.length || 0) + 1,
+    }];
+  }
+
+  removeQuizOption(q: QuizQuestion, index: number): void {
+    q.reponses = q.reponses.filter((_: any, i: number) => i !== index);
+  }
+
+  getTypeLabel(type: string): string {
+    const map: Record<string, string> = {
+      multiple_choice: 'Choix unique', multiple_choice_multi: 'Choix multiple',
+      true_false: 'Vrai / Faux', text: 'Texte libre',
+    };
+    return map[type] || type;
+  }
+
   // ==================== SOUMISSION ====================
 submitCourse(): void {
   this.saving = true;
@@ -626,21 +780,32 @@ submitCourse(): void {
     return;
   }
 
-  const formData = this.buildFormData();
-  
-  // Debug: Afficher les données envoyées
-  console.log('Données envoyées:', formData);
+  const doCreate = (imagePath: string | null) => {
+    const formData = this.buildFormData();
+    if (imagePath) formData.image_couverture = imagePath;
 
-  this.formationService.createFormation(formData).subscribe({
+    this.formationService.createFormation(formData).subscribe({
     next: (response) => {
-      this.saving = false;
-      this.success = 'Formation créée avec succès !';
-      
-      // Afficher le modal de succès
-      setTimeout(() => {
-        const modal = new bootstrap.Modal(document.getElementById('successModal'));
-        modal.show();
-      }, 100);
+      const formation = response.formation || response.data || response;
+      const formationId = formation?.id;
+
+      if (formationId && this.localQuizzes.length > 0) {
+        this.saveLocalQuizzes(formationId, formation).then(() => {
+          this.saving = false;
+          this.success = 'Formation créée avec succès !';
+          setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+          }, 100);
+        });
+      } else {
+        this.saving = false;
+        this.success = 'Formation créée avec succès !';
+        setTimeout(() => {
+          const modal = new bootstrap.Modal(document.getElementById('successModal'));
+          modal.show();
+        }, 100);
+      }
     },
     error: (err) => {
       this.saving = false;
@@ -670,6 +835,16 @@ submitCourse(): void {
       }
     }
   });
+  };
+
+  if (this.selectedImageFile) {
+    this.formationService.uploadImageCouverture(this.selectedImageFile).subscribe({
+      next: (res) => doCreate(res.path || null),
+      error: () => doCreate(null),
+    });
+  } else {
+    doCreate(null);
+  }
 }
 
 buildFormData(): any {
@@ -715,30 +890,30 @@ buildFormData(): any {
     video_autoplay: Boolean(mediaInfo.video_autoplay),
     video_show_controls: Boolean(mediaInfo.video_show_controls),
 
-    // Objectifs, prérequis, etc. (filtrer les valeurs vides)
-    objectifs: this.objectifs.filter(obj => obj.trim()).map(obj => obj.trim()),
+    objectifs_pedagogiques: this.objectifs.filter(obj => obj.trim()).join(', '),
     prerequis: this.prerequis.filter(pre => pre.trim()).join(', '),
-    competences_acquises: this.competencesAcquises.filter(comp => comp.trim()).map(comp => comp.trim()),
-    outils_requis: this.outilsRequis.filter(outil => outil.trim()).map(outil => outil.trim()),
+    competences_acquises: this.competencesAcquises.filter(comp => comp.trim()),
+    outils_requis: this.outilsRequis.filter(outil => outil.trim()),
 
     // Modules
-    modules: this.modules.map(module => ({
-      titre: module.titre?.trim(),
-      description: module.description?.trim(),
-      duree_estimee: parseInt(module.duree_estimee.toString()) || 0,
-      ordre: module.ordre,
-      sections: module.sections.map(section => ({
-        titre: section.titre?.trim(),
-        type: section.type,
-        duree_estimee: parseInt(section.duree_estimee.toString()) || 0,
-        contenu: section.contenu?.trim() || null,
-        ressources: section.ressources?.trim() || null,
-        obligatoire: Boolean(section.obligatoire),
-        visible: Boolean(section.visible),
-        ordre: section.ordre
-      }))
-    })),
-
+ modules: this.modules.map(module => ({
+  titre: module.titre?.trim(),
+  description: module.description?.trim(),
+  duree_estimee: module.duree_estimee.toString() || '0',
+  ordre: module.ordre,
+  sections: module.sections.map(section => ({
+    titre: section.titre?.trim(),
+    type: section.type,
+    duree_estimee: section.duree_estimee.toString() || '0',
+    contenu: section.contenu?.trim() || null,
+    ressources: section.ressources?.trim()
+      ? [section.ressources.trim()]
+      : [],
+    obligatoire: Boolean(section.obligatoire),
+    visible: Boolean(section.visible),
+    ordre: section.ordre
+  }))
+})),
     // Coûts
     estimation_couts: {
       cout_conception: parseFloat(pricingInfo.cout_conception) || 0,
@@ -779,12 +954,6 @@ validateAllSteps(): boolean {
     isValid = false;
     const formErrors = this.getFormErrorsInFrench(this.additionalInfoForm);
     errorMessages.push(...formErrors);
-  }
-
-  // Valider que les objectifs ne sont pas vides
-  if (this.objectifs.filter(obj => obj.trim()).length === 0) {
-    isValid = false;
-    errorMessages.push('Au moins un objectif est requis');
   }
 
   // Afficher les erreurs spécifiques
@@ -852,11 +1021,53 @@ private getFormErrors(formGroup: FormGroup): any {
 }
 
  
+  private saveLocalQuizzes(formationId: number, _createdFormation?: any): Promise<void> {
+    const saves = this.localQuizzes.map(lq => {
+      const quizPayload: any = {
+        titre: lq.titre,
+        description: lq.description,
+        formation_id: formationId,
+        score_minimum: lq.score_minimum,
+        max_tentatives: lq.tentatives_max,
+        duree_minutes: lq.duree_minutes,
+        type: 'formation',
+        is_active: true,
+      };
+      return this.quizService.createQuiz(quizPayload).toPromise().then((quiz: any) => {
+        const quizData = quiz?.quiz || quiz;
+        if (!quizData?.id || !lq.questions.length) return;
+        const questionSaves = lq.questions.map(q =>
+          this.questionService.createQuestion(quizData.id, {
+            question_text: q.question_text,
+            type: q.type as any,
+            points: q.points,
+            ordre: q.ordre,
+            reponses: q.reponses,
+            explication: q.explication,
+            quizzes_id: quizData.id,
+          }).toPromise().catch(e => {
+            console.error('Erreur création question:', e?.error ?? e);
+          })
+        );
+        return Promise.all(questionSaves);
+      }).catch(e => {
+        console.error('Erreur création quiz:', e?.error ?? e);
+        const msg = e?.error?.message
+          || (e?.error?.errors ? Object.values(e.error.errors).flat().join(', ') : null)
+          || `HTTP ${e?.status}`;
+        this.error = (this.error ? this.error + '\n' : '') + `Quiz "${lq.titre}" : ${msg}`;
+      });
+    });
+    return Promise.all(saves).then(() => undefined);
+  }
+
   // ==================== NAVIGATION POST-CREATION ====================
 
   goToCoursesList(): void {
     this.closeModal('successModal');
-    this.router.navigate(['/courses']);
+    window.close();
+    // fallback if window.close() is blocked
+    this.router.navigate(['/instructor/instructor-course']);
   }
 
   createNewCourse(): void {
@@ -891,10 +1102,14 @@ private getFormErrors(formGroup: FormGroup): any {
       nb_jours: 1
     });
     this.modules = [];
-    this.objectifs = [''];
-    this.prerequis = [''];
-    this.competencesAcquises = [''];
-    this.outilsRequis = [''];
+    this.objectifs = [];
+    this.prerequis = [];
+    this.competencesAcquises = [];
+    this.outilsRequis = [];
+    this.newObjectif = '';
+    this.newPrerequis = '';
+    this.newCompetence = '';
+    this.newOutil = '';
     this.imagePreview = null;
     this.selectedImageFile = null;
     this.error = '';

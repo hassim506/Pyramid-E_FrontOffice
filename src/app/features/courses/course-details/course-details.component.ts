@@ -13,6 +13,9 @@ import { FormationService } from '../../../shared/service/formation/formation.se
 import { AuthService } from '../../../shared/service/authentification/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 import { Location } from '@angular/common';
+import { environment } from '../../../../environments/environment';
+
+const STORAGE_BASE = environment.apiUrl.replace(/\/api$/, '') + '/storage';
 
 @Component({
   selector: 'app-course-details',
@@ -125,13 +128,16 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
     this.formationService.getFormationById(this.formationId).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (response) => {
-        this.formation = response.formation || response.data || response;
-        this.processFormationData();
-        this.loadRelatedCourses();
-        this.loading = false;
-        
-        console.log('✅ Formation chargée:', this.formation);
+     next: (response) => {
+          this.formation = response.formation || response.data || response;
+          this.processFormationData();
+          this.loadRelatedCourses();
+          this.loading = false;
+          
+          console.log('✅ Formation chargée:', this.formation);
+          
+          // AOS ne détecte pas les éléments ajoutés dynamiquement → refresh
+          setTimeout(() => Aos.refresh(), 100);
       },
       error: (error) => {
         console.error('❌ Erreur lors du chargement de la formation:', error);
@@ -182,12 +188,12 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
     
     // Process image URL
     if (this.formation.image_couverture && !this.formation.image_couverture.startsWith('http')) {
-      this.formation.image_couverture = `http://localhost:8000/storage/${this.formation.image_couverture}`;
+      this.formation.image_couverture = `${STORAGE_BASE}/${this.formation.image_couverture}`;
     }
 
     // Process formateur avatar
     if (this.formation.formateur?.avatar && !this.formation.formateur.avatar.startsWith('http')) {
-      this.formation.formateur.avatar = `http://localhost:8000/storage/${this.formation.formateur.avatar}`;
+      this.formation.formateur.avatar = `${STORAGE_BASE}/${this.formation.formateur.avatar}`;
     }
   }
 
@@ -380,7 +386,7 @@ parseToNumber(value: any): number {
     // Construire l'URL complète de la ressource
     let resourceUrl = section.ressources;
     if (!resourceUrl.startsWith('http')) {
-      resourceUrl = `http://localhost:8000/storage/${resourceUrl}`;
+      resourceUrl = `${STORAGE_BASE}/${resourceUrl}`;
     }
     
     if (section.type === 'video') {
@@ -615,9 +621,9 @@ getImageUrl(imageName: string | null | undefined): string {
   }
 
   // Si l'URL contient déjà le domaine mais pas le bon chemin, corriger
-  if (imageName.startsWith('http://localhost:8000/storage/') && !imageName.includes('/formations/')) {
-    const fileName = imageName.replace('http://localhost:8000/storage/', '');
-    const correctedUrl = `http://localhost:8000/storage/formations/${fileName}`;
+  if (imageName.startsWith(STORAGE_BASE + '/') && !imageName.includes('/formations/')) {
+    const fileName = imageName.replace(STORAGE_BASE + '/', '');
+    const correctedUrl = `${STORAGE_BASE}/formations/${fileName}`;
     console.log('URL corrected:', correctedUrl);
     return correctedUrl;
   }
@@ -629,7 +635,7 @@ getImageUrl(imageName: string | null | undefined): string {
   }
 
   // Sinon construire l'URL
-  const finalUrl = `http://localhost:8000/storage/formations/${imageName}`;
+  const finalUrl = `${STORAGE_BASE}/formations/${imageName}`;
   console.log('Constructed URL:', finalUrl);
   return finalUrl;
 }
@@ -791,6 +797,6 @@ getMediaUrl(mediaName: string | null): string | null {
   }
   
   // Sinon, construire l'URL vers le storage local
-  return `http://localhost:8000/storage/formations/videos/${mediaName}`;
+  return `${STORAGE_BASE}/formations/videos/${mediaName}`;
 }
 }

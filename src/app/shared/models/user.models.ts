@@ -19,6 +19,8 @@ export interface User {
     created_at: string;
     updated_at: string;
   };
+  matricule?: string;
+  direction?: string;
   created_at?: string | Date;
   updated_at?: string | Date;
   client?: {

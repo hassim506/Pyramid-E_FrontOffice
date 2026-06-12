@@ -1,0 +1,142 @@
+// ── TOKENS ──────────────────────────────────────────────────────────────────
+$primary:    #534AB7;
+$radius:     10px;
+$border:     #E9ECEF;
+$text-muted: #6C757D;
+
+.ip-loader {
+  display: flex; justify-content: center; align-items: center; min-height: 200px;
+}
+
+.ip-page-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+
+  &__title { font-size: 18px; font-weight: 600; color: #1A1A2E; margin: 0 0 4px; }
+  &__sub   { font-size: 13px; color: $text-muted; margin: 0; }
+}
+
+.ip-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #EEF2FF; color: $primary;
+  font-size: 12px; font-weight: 500;
+  padding: 1px 8px; border-radius: 20px; margin-left: 6px;
+}
+
+.ip-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: $radius;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: none; transition: all .15s;
+  i { font-size: 16px; }
+  &--outline {
+    background: #fff; color: $primary; border: 1px solid $primary;
+    &:hover { background: #EEF2FF; }
+  }
+}
+
+.ip-toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ip-search {
+  height: 36px; border: 1px solid $border; border-radius: 8px;
+  padding: 0 12px; font-size: 13px; outline: none; min-width: 240px;
+  transition: border-color .15s;
+  &:focus { border-color: $primary; }
+}
+
+.ip-select {
+  height: 36px; border: 1px solid $border; border-radius: 8px;
+  padding: 0 10px; font-size: 13px; outline: none; background: #fff;
+  cursor: pointer; max-width: 240px;
+  &:focus { border-color: $primary; }
+}
+
+.ip-card {
+  background: #fff; border: 1px solid $border; border-radius: $radius; overflow: hidden;
+}
+
+.ip-table {
+  margin: 0;
+  thead th {
+    background: #F8F9FA; border-bottom: 1px solid $border;
+    font-size: 11px; font-weight: 600; color: $text-muted;
+    text-transform: uppercase; letter-spacing: .05em;
+    padding: 10px 14px; white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 14px; border-bottom: 1px solid lighten($border, 2%);
+    vertical-align: middle; font-size: 13px;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #FAFBFF; }
+}
+
+// ── STUDENT CELL ──────────────────────────────────────────────────────────────
+.ip-student-cell { display: flex; align-items: center; gap: 10px; }
+
+.ip-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: $primary; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500;
+}
+
+.ip-avatar-img {
+  width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+}
+
+.ip-student-name  { font-size: 13px; font-weight: 500; color: #1A1A2E; }
+.ip-student-email { font-size: 11px; color: $text-muted; margin-top: 1px; }
+
+// ── FORMATION TAG ─────────────────────────────────────────────────────────────
+.ip-formation-tag {
+  display: inline-block; background: #EEF2FF; color: $primary;
+  font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 6px;
+  max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+// ── PROGRESS ──────────────────────────────────────────────────────────────────
+.ip-progress-wrap { display: flex; align-items: center; gap: 8px; }
+.ip-progress-bar  { width: 80px; height: 5px; background: #E9ECEF; border-radius: 4px; overflow: hidden; }
+.ip-progress-fill { height: 100%; background: $primary; border-radius: 4px; }
+.ip-progress-pct  { font-size: 11px; color: $text-muted; min-width: 28px; }
+
+// ── STATUT ────────────────────────────────────────────────────────────────────
+.ip-statut {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  padding: 3px 8px; border-radius: 6px;
+}
+.ip-statut-encours   { background: #EFF6FF; color: #2563EB; }
+.ip-statut-termine   { background: #ECFDF5; color: #059669; }
+.ip-statut-abandonne { background: #FFF5F5; color: #DC3545; }
+.ip-statut-default   { background: #F8F9FA; color: $text-muted; }
+
+// ── EMPTY ─────────────────────────────────────────────────────────────────────
+.ip-empty {
+  text-align: center; padding: 48px 0;
+  color: $text-muted; font-size: 13px;
+  i { font-size: 32px; display: block; margin-bottom: 8px; opacity: .4; }
+}
+
+// ── PAGINATION ────────────────────────────────────────────────────────────────
+.ip-pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-top: 1px solid $border; flex-wrap: wrap; gap: 8px;
+}
+
+.pg-info { font-size: 12px; color: $text-muted; }
+.pg-controls { display: flex; align-items: center; gap: 4px; }
+
+.pg-btn {
+  min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; border: 1px solid $border;
+  background: #fff; color: $text-muted; cursor: pointer;
+  font-size: 12px; transition: all .12s; padding: 0 8px;
+
+  &:hover:not(:disabled) { border-color: $primary; color: $primary; background: #EEF2FF; }
+  &.active { background: $primary; border-color: $primary; color: #fff; }
+  &:disabled { opacity: .4; cursor: not-allowed; }
+}

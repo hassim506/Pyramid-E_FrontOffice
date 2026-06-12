@@ -1,0 +1,118 @@
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.vc-page {
+  min-height: 100vh;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.vc-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.10);
+  padding: 48px 40px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+}
+
+.vc-logo {
+  margin-bottom: 32px;
+}
+
+// ── Spinner / error icon ──
+.vc-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin-bottom: 20px;
+
+  &--spin  { background: #f3f4f6; color: #6b7280; animation: spin .8s linear infinite; }
+  &--error { background: #fef2f2; color: #dc2626; }
+}
+
+// ── Valid / invalid badge ──
+.vc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  i { font-size: 18px; }
+
+  &--valid   { background: #ecfdf5; color: #059669; border: 1.5px solid #6ee7b7; }
+  &--invalid { background: #fef2f2; color: #dc2626; border: 1.5px solid #fca5a5; }
+}
+
+.vc-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.vc-sub {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+// ── Details table ──
+.vc-details {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 4px 0;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.vc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-child { border-bottom: none; }
+}
+
+.vc-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  flex-shrink: 0;
+  width: 140px;
+}
+
+.vc-value {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+}
+
+.vc-code {
+  font-family: monospace;
+  letter-spacing: 1px;
+  color: #069b8f;
+}
+
+.vc-footer {
+  font-size: 12px;
+  color: #d1d5db;
+  margin: 0;
+}

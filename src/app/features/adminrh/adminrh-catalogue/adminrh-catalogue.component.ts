@@ -464,4 +464,16 @@ export class AdminrhCatalogueComponent implements OnInit {
   trackByCatalogueId(index: number, catalogue: Catalogue): number {
     return catalogue.id;
   }
+
+  getTotalFormationsCount(): number {
+    return this.catalogues.reduce((sum, c) => sum + (c.nombre_formations || 0), 0);
+  }
+
+  getCertifiantCount(): number {
+    return this.catalogues.filter(c => c.metadata?.certificat_disponible).length;
+  }
+
+  getPubliedCount(): number {
+    return this.catalogues.filter(c => c.est_publie).length;
+  }
 }

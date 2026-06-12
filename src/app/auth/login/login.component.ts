@@ -22,6 +22,13 @@ export class LoginComponent {
   isLoading = false;
   errorMessage = '';
 
+  // Magic link
+  loginMode: 'password' | 'magic' = 'password';
+  magicEmail = '';
+  magicLoading = false;
+  magicSent = false;
+  magicError = '';
+
   public authSlider = {
     dots: true,
     infinite: false,
@@ -104,6 +111,25 @@ onSubmit(): void {
     }
   });
 }
+
+  sendMagicLink(): void {
+    this.magicError = '';
+    if (!this.magicEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.magicEmail)) {
+      this.magicError = 'Veuillez entrer une adresse e-mail valide.';
+      return;
+    }
+    this.magicLoading = true;
+    this.authService.sendMagicLink(this.magicEmail).subscribe({
+      next: () => {
+        this.magicLoading = false;
+        this.magicSent = true;
+      },
+      error: (err: any) => {
+        this.magicLoading = false;
+        this.magicError = err?.message || 'Une erreur est survenue.';
+      }
+    });
+  }
 
   directIndex() {
     this.onSubmit();

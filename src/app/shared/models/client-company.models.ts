@@ -36,6 +36,14 @@ export interface Company {
   updated_at?: string | Date;
   // Relations
   client?: Client;
+  // Stats (chargées séparément depuis /api/entreprises/{id})
+  formations_count?: number;
+  formations_actives_count?: number;
+  employes_count?: number;
+  taux_completion?: number;
+  certificats_count?: number;
+  users?: any[];
+  formations?: any[];
 }
 
 // Interface pour les réponses API Laravel

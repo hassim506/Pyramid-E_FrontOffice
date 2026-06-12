@@ -2,46 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-
-interface Certificate {
-  id: number;
-  code_unique: string;
-  employe_id: number;
-  formation_id: number;
-  entreprise_id: number;
-  formateur_id: number;
-  modele_certificat_id: number;
-  date_delivrance: string;
-  date_expiration: string | null;
-  score_final: string | null;
-  statut: 'valide' | 'expiré' | 'révoqué';
-  url_pdf: string;
-  created_at: string;
-  updated_at: string;
-  employe: {
-    id: number;
-    name: string;
-    prenom: string;
-    nom: string;
-    email: string;
-    fonction: string;
-  };
-  formation: {
-    id: number;
-    titre: string;
-    description: string;
-  };
-  entreprise: {
-    id: number;
-    nom: string;
-  };
-  formateur: {
-    id: number;
-    name: string;
-    prenom: string;
-    nom: string;
-  };
-}
+import { CertificatService, Certificat } from '../../../shared/service/certificat/certificat.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-superadmin-certificate',
@@ -50,163 +12,149 @@ interface Certificate {
   styleUrl: './superadmin-certificate.component.scss'
 })
 export class SuperadminCertificateComponent implements OnInit {
-  certificates: Certificate[] = [];
-  filteredCertificates: Certificate[] = [];
+  certificates: Certificat[] = [];
+  filteredCertificates: Certificat[] = [];
   loading = false;
   error = '';
-  selectedCertificate: Certificate | null = null;
-  
-  // Filtres
+  selectedCertificate: Certificat | null = null;
+
   searchTerm = '';
   selectedStatus = '';
   selectedEntreprise = '';
-  
-  // Pagination
+
   currentPage = 1;
-  itemsPerPage = 8;
-  totalPages = 0;
-  
-  // URLs de l'API
-  private apiUrl = 'http://127.0.0.1:8000/api';
+  itemsPerPage = 10;
 
-  constructor(private http: HttpClient) {}
+  private apiUrl = environment.apiUrl;
 
-  ngOnInit(): void {
-    this.loadCertificates();
-  }
+  constructor(private http: HttpClient, private certService: CertificatService) {}
+
+  ngOnInit(): void { this.loadCertificates(); }
 
   loadCertificates(): void {
     this.loading = true;
     this.error = '';
-    
-    this.http.get<Certificate[]>(`${this.apiUrl}/certificats`).subscribe({
-      next: (data) => {
-        this.certificates = data;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Erreur lors du chargement des certificats';
-        this.loading = false;
-        console.error('Erreur:', err);
-      }
+    this.http.get<Certificat[]>(`${this.apiUrl}/certificats`).subscribe({
+      next: (data) => { this.certificates = data; this.applyFilters(); this.loading = false; },
+      error: () => { this.error = 'Erreur lors du chargement des certificats.'; this.loading = false; }
     });
   }
 
   applyFilters(): void {
-    this.filteredCertificates = this.certificates.filter(cert => {
-      const matchesSearch = !this.searchTerm || 
-        cert.code_unique.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        cert.employe.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        cert.formation.titre.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
-      const matchesStatus = !this.selectedStatus || cert.statut === this.selectedStatus;
-      const matchesEntreprise = !this.selectedEntreprise || cert.entreprise_id.toString() === this.selectedEntreprise;
-      
-      return matchesSearch && matchesStatus && matchesEntreprise;
+    this.filteredCertificates = this.certificates.filter(c => {
+      const q = this.searchTerm.toLowerCase();
+      const matchSearch = !q
+        || c.code_unique.toLowerCase().includes(q)
+        || c.employe?.name?.toLowerCase().includes(q)
+        || c.formation?.titre?.toLowerCase().includes(q);
+      const matchStatus = !this.selectedStatus || c.statut === this.selectedStatus;
+      const matchEnt = !this.selectedEntreprise || c.entreprise_id.toString() === this.selectedEntreprise;
+      return matchSearch && matchStatus && matchEnt;
     });
-    
-    this.totalPages = Math.ceil(this.filteredCertificates.length / this.itemsPerPage);
     this.currentPage = 1;
   }
 
-  getPaginatedCertificates(): Certificate[] {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    return this.filteredCertificates.slice(startIndex, endIndex);
+  get totalPages(): number { return Math.ceil(this.filteredCertificates.length / this.itemsPerPage); }
+
+  getPaginatedCertificates(): Certificat[] {
+    const s = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredCertificates.slice(s, s + this.itemsPerPage);
   }
 
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-    }
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
   }
 
-  prevPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
+  get pages(): number[] {
+    const total = this.totalPages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const p = this.currentPage;
+    const pages: number[] = [1];
+    if (p > 3) pages.push(-1);
+    for (let i = Math.max(2, p - 1); i <= Math.min(total - 1, p + 1); i++) pages.push(i);
+    if (p < total - 2) pages.push(-1);
+    pages.push(total);
+    return pages;
   }
 
-  viewCertificate(certificate: Certificate): void {
-    this.selectedCertificate = certificate;
+  openDetails(cert: Certificat): void {
+    this.selectedCertificate = cert;
+    setTimeout(() => {
+      const el = document.getElementById('sa_cert_details_modal');
+      if (el) new (window as any).bootstrap.Modal(el).show();
+    }, 50);
   }
 
-  downloadCertificate(certificate: Certificate): void {
-    const link = document.createElement('a');
-    link.href = `${this.apiUrl}${certificate.url_pdf}`;
-    link.download = `certificat-${certificate.code_unique}.pdf`;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  downloading = false;
+
+  downloadPdf(cert: Certificat): void {
+    if (this.downloading) return;
+    this.downloading = true;
+    this.certService.downloadPdf(cert).finally(() => { this.downloading = false; });
   }
 
-  updateCertificateStatus(certificateId: number, newStatus: string): void {
-    this.http.put(`${this.apiUrl}/certificats/${certificateId}`, { statut: newStatus }).subscribe({
+  getUniqueEntreprises(): Array<{ id: number; nom: string }> {
+    const map = new Map<number, string>();
+    this.certificates.forEach(c => {
+      if (c.entreprise_id && c.entreprise?.nom) map.set(c.entreprise_id, c.entreprise.nom);
+    });
+    return Array.from(map.entries()).map(([id, nom]) => ({ id, nom }));
+  }
+
+  updateStatus(id: number, statut: Certificat['statut']): void {
+    this.http.put(`${this.apiUrl}/certificats/${id}`, { statut }).subscribe({
       next: () => {
-        const index = this.certificates.findIndex(c => c.id === certificateId);
-        if (index !== -1) {
-          this.certificates[index].statut = newStatus as any;
-          this.applyFilters();
-        }
+        const i = this.certificates.findIndex(c => c.id === id);
+        if (i !== -1) { this.certificates[i].statut = statut; this.applyFilters(); }
+        if (this.selectedCertificate?.id === id) this.selectedCertificate.statut = statut;
       },
-      error: (err) => {
-        this.error = 'Erreur lors de la mise à jour du statut';
-        console.error('Erreur:', err);
-      }
+      error: () => { this.error = 'Erreur lors de la mise à jour du statut.'; }
     });
   }
 
-  revokeCertificate(certificate: Certificate): void {
-    if (confirm(`Êtes-vous sûr de vouloir révoquer le certificat ${certificate.code_unique} ?`)) {
-      this.updateCertificateStatus(certificate.id, 'révoqué');
-    }
+  revoke(cert: Certificat): void {
+    if (confirm(`Révoquer le certificat ${cert.code_unique} ?`)) this.updateStatus(cert.id, 'révoqué' as Certificat['statut']);
   }
 
-  reactivateCertificate(certificate: Certificate): void {
-    if (confirm(`Êtes-vous sûr de vouloir réactiver le certificat ${certificate.code_unique} ?`)) {
-      this.updateCertificateStatus(certificate.id, 'valide');
-    }
+  reactivate(cert: Certificat): void {
+    if (confirm(`Réactiver le certificat ${cert.code_unique} ?`)) this.updateStatus(cert.id, 'valide' as Certificat['statut']);
   }
 
-  deleteCertificate(certificate: Certificate): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement le certificat ${certificate.code_unique} ?`)) {
-      this.http.delete(`${this.apiUrl}/certificats/${certificate.id}`).subscribe({
-        next: () => {
-          this.certificates = this.certificates.filter(c => c.id !== certificate.id);
-          this.applyFilters();
-        },
-        error: (err) => {
-          this.error = 'Erreur lors de la suppression du certificat';
-          console.error('Erreur:', err);
-        }
-      });
-    }
+  delete(cert: Certificat): void {
+    if (!confirm(`Supprimer définitivement ${cert.code_unique} ?`)) return;
+    this.http.delete(`${this.apiUrl}/certificats/${cert.id}`).subscribe({
+      next: () => { this.certificates = this.certificates.filter(c => c.id !== cert.id); this.applyFilters(); },
+      error: () => { this.error = 'Erreur lors de la suppression.'; }
+    });
   }
 
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'valide': return 'badge bg-success';
-      case 'expiré': return 'badge bg-warning';
-      case 'révoqué': return 'badge bg-danger';
-      default: return 'badge bg-secondary';
-    }
+  getInitials(name: string): string {
+    return name?.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?';
   }
 
-  getUniqueEntreprises(): Array<{id: number, nom: string}> {
-    const entreprises = this.certificates.map(c => ({id: c.entreprise_id, nom: c.entreprise.nom}));
-    return entreprises.filter((e, index, self) => 
-      index === self.findIndex(x => x.id === e.id)
-    );
+  avatarColors = ['#E6F1FB,#0C447C', '#E1F5EE,#085041', '#EEEDFE,#3C3489', '#FAEEDA,#633806', '#F1EFE8,#444441'];
+  getAvatarStyle(id: number): { bg: string; color: string } {
+    const pair = this.avatarColors[id % this.avatarColors.length].split(',');
+    return { bg: pair[0], color: pair[1] };
   }
 
-  isExpired(certificate: Certificate): boolean {
-    if (!certificate.date_expiration) return false;
-    return new Date(certificate.date_expiration) < new Date();
+  getScoreColor(score: string | null): string {
+    if (!score) return '#6C757D';
+    const n = parseFloat(score);
+    if (n >= 80) return '#059669';
+    if (n >= 60) return '#D97706';
+    return '#DC3545';
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('fr-FR');
+  isExpiringSoon(cert: Certificat): boolean {
+    if (!cert.date_expiration) return false;
+    const days = (new Date(cert.date_expiration).getTime() - Date.now()) / 86400000;
+    return days > 0 && days <= 60;
   }
+
+  parseFloat(v: string): number { return parseFloat(v); }
+
+  get totalValides(): number { return this.certificates.filter(c => c.statut === 'valide').length; }
+  get totalExpires(): number { return this.certificates.filter(c => c.statut === 'expiré').length; }
+  get totalRevoques(): number { return this.certificates.filter(c => c.statut === 'révoqué').length; }
 }

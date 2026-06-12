@@ -351,6 +351,10 @@ private getCompanyList() {
     return new Date(date).toLocaleDateString('fr-FR');
   }
 
+  selectClient(client: Client): void {
+    this.selectedClient = client;
+  }
+
   getClientInitials(name: string): string {
     return name.split(' ')
       .map(word => word.charAt(0))

@@ -1,378 +1,183 @@
+<div class="tk-page">
 
-    <div class="tickets">
-        <div class="d-flex align-items-center justify-content-between flex-wrap page-title">
-        <h5>Support Tickets</h5>
-        <a href="javascript:void(0);" class="btn btn-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#add_ticket"><i class="isax isax-add-circle me-2 fs-10"></i>Add Ticket</a>
-        </div> 
-        <div class="row">
-            <div class="col-md-6 col-xl-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <span class="icon-box bg-primary-transparent me-3 flex-shrink-0">
-                                <img src="assets/img/icon/graduation.svg" alt="">
-                            </span>
-                            <div>
-                                <p class="mb-1">Total Tickets</p>
-                                <h4 class="fw-bold">50</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <!-- HEADER -->
+  <div class="tk-header">
+    <div>
+      <div class="tk-header__title">Gestion des tickets</div>
+      <div class="tk-header__sub">Tous les tickets — toutes entreprises</div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi__icon ki-total"><i class="isax isax-ticket"></i></div>
+      <div><div class="kpi__val">{{ stats.total }}</div><div class="kpi__lbl">Total</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-open"><i class="isax isax-record-circle"></i></div>
+      <div><div class="kpi__val">{{ stats.ouvert }}</div><div class="kpi__lbl">Ouverts</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-ongoing"><i class="isax isax-activity"></i></div>
+      <div><div class="kpi__val">{{ stats.en_cours }}</div><div class="kpi__lbl">En cours</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__icon ki-done"><i class="isax isax-tick-circle"></i></div>
+      <div><div class="kpi__val">{{ stats.resolu }}</div><div class="kpi__lbl">Résolus</div></div>
+    </div>
+  </div>
+
+  <!-- SPLIT PANEL -->
+  <div class="tk-split">
+
+    <!-- LIST PANEL -->
+    <div class="tk-split__list">
+      <!-- toolbar -->
+      <div class="tk-toolbar">
+        <input class="tk-search" placeholder="Rechercher…"
+               [(ngModel)]="searchQuery" (ngModelChange)="onSearch()">
+        <select class="tk-select" [(ngModel)]="filterStatut" (change)="applyFilter()">
+          <option value="">Tous statuts</option>
+          <option value="ouvert">Ouvert</option>
+          <option value="en_cours">En cours</option>
+          <option value="en_attente">En attente</option>
+          <option value="resolu">Résolu</option>
+          <option value="ferme">Fermé</option>
+        </select>
+        <select class="tk-select" [(ngModel)]="filterPriorite" (change)="applyFilter()">
+          <option value="">Toutes priorités</option>
+          <option value="basse">Basse</option>
+          <option value="moyenne">Moyenne</option>
+          <option value="haute">Haute</option>
+          <option value="critique">Critique</option>
+        </select>
+      </div>
+
+      <!-- list -->
+      <div class="tk-list">
+        <div *ngIf="loading" class="tk-loader">Chargement…</div>
+        <div *ngIf="!loading && tickets.length === 0" class="tk-empty">Aucun ticket trouvé.</div>
+        <div *ngFor="let t of tickets"
+             class="tk-item"
+             [class.selected]="selectedTicket?.id === t.id"
+             (click)="selectTicket(t)">
+          <div class="tk-av">{{ getInitials(t.createur?.name) }}</div>
+          <div class="tk-info">
+            <div class="tk-ref">{{ t.reference }} · {{ t.entreprise?.nom }}</div>
+            <div class="tk-subj">{{ t.sujet }}</div>
+            <div class="tk-badges">
+              <span class="badge" [ngClass]="getSClass(t.statut)">{{ getSLabel(t.statut) }}</span>
+              <span class="badge" [ngClass]="getPClass(t.priorite)">{{ getPLabel(t.priorite) }}</span>
+              <span *ngIf="t.est_escalade" class="escalade-badge">Escaladé</span>
             </div>
-            <div class="col-md-6 col-xl-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <span class="icon-box bg-secondary-transparent me-3 flex-shrink-0">
-                                <img src="assets/img/icon/book.svg" alt="">
-                            </span>
-                            <div>
-                                <p class="mb-1">Opened Tickets</p>
-                                <h4 class="fw-bold">30</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="tk-meta">
+              <span>{{ t.categorie }}</span>
+              <span *ngIf="t.agent_assigne">· {{ t.agent_assigne.name }}</span>
+              <span>· {{ t.nombre_reponses }} rép.</span>
             </div>
-            <div class="col-md-6 col-xl-4">
-                <div class="student-info">
-                    <div class="d-flex align-items-center">
-                        <span class="icon-box bg-success-transparent me-3 flex-shrink-0">
-                            <img src="assets/img/icon/bookmark.svg" alt="">
-                        </span>
-                        <div>
-                            <span class="d-block">Closed Tickets</span>
-                            <h4 class="fs-24 mt-1">25</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> 
-        <div class="row align-items-center mb-2">
-            <div class="col-md-8">
-                <div class="d-flex align-items-center flex-wrap">
-                    <div class="mb-3">
-                        <div class="dropdown me-3">
-                            <a href="javascript:void(0);" class="dropdown-toggle text-gray-6 btn  rounded border d-inline-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
-                                Category
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">Mailing Issues</a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">Language Issues</a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">Installation Error</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="dropdown me-3">
-                            <a href="javascript:void(0);" class="dropdown-toggle text-gray-6 btn  rounded border d-inline-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
-                                Priority
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">High</a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">Low</a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">Medium</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="dropdown">
-                            <a href="javascript:void(0);" class="dropdown-toggle text-gray-6 btn  rounded border d-inline-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
-                                Status
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">Opened</a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">Inprogress</a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item rounded-1">Closed</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-icon mb-3">
-                    <span class="input-icon-addon">
-                        <i class="isax isax-search-normal-14"></i>
-                    </span>
-                    <input  [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }" type="search" (ngModelChange)="searchData(searchDataValue)" class="form-control form-control-md" placeholder="Search">
-                </div>
-            </div>
-        </div>  
-        <div class="table-responsive custom-table">
-            <table matSort (matSortChange)="sortData($event)" class="table">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Ticket ID</th>
-                        <th>Date</th>
-                        <th>Subject</th>
-                        <th>Priority</th>
-                        <th>Category</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (data of tableData;track data){
-                    <tr>
-                        <td><a href="javascript:void(0);" class="text-primary" data-bs-toggle="modal" data-bs-target="#ticket_details">{{data.ticketId}}</a></td>
-                        <td>{{data.date}}</td>
-                        <td>{{data.subject}}</td>
-                        <td><span class="badge badge-sm d-inline-flex align-items-center" [ngClass]="data.priority==='High'?'bg-soft-danger':data.priority==='Medium'?'bg-soft-skyblue':'bg-soft-success'"><i class="fa-solid fa-circle fs-5 me-1"></i>{{data.priority}}</span></td>
-                        <td>{{data.category}}</td>
-                        <td><span class="badge badge-sm d-inline-flex align-items-center" [ngClass]="data.status==='Opened'?'bg-purple':data.status==='Inprogress'?'bg-warning':'bg-success'"><i class="fa-solid fa-circle fs-5 me-1"></i>{{data.status}}</span></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a href="javascript:void(0);" class="d-inline-flex fs-14 me-1 action-icon" data-bs-toggle="modal" data-bs-target="#ticket_details"><i class="isax isax-eye"></i></a>
-                                <a href="javascript:void(0);" class="d-inline-flex fs-14 me-2 action-icon" data-bs-toggle="modal" data-bs-target="#edit_ticket"><i class="isax isax-edit-2"></i></a>
-                                <a href="javascript:void(0);" class="d-inline-flex fs-14 action-icon" data-bs-toggle="modal" data-bs-target="#delete_modal"><i class="isax isax-trash"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                }
-                    
-                </tbody>
-            </table>
+          </div>
         </div>
-        <app-custom-pagination/>                 
+      </div>
+
+      <!-- Pagination -->
+      <div class="tk-pagination" *ngIf="totalPages > 1">
+        <span class="pg-info">{{ totalItems }} ticket{{ totalItems > 1 ? 's' : '' }}</span>
+        <div class="pg-controls">
+          <button type="button" class="pg-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+            <i class="isax isax-arrow-left-2"></i>
+          </button>
+          <button type="button" class="pg-btn" *ngFor="let p of pageNumbers"
+                  [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+          <button type="button" class="pg-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+            <i class="isax isax-arrow-right-2"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
+    <!-- DETAIL PANEL -->
+    <div class="tk-split__detail">
+      <ng-container *ngIf="!selectedTicket">
+        <div class="tk-no-select">
+          <i class="isax isax-message-question"></i>
+          <span>Sélectionnez un ticket pour voir le détail</span>
+        </div>
+      </ng-container>
 
-                <!-- Add Ticket -->
-			<div class="modal fade" id="add_ticket">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Add Ticket</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Ticket Title <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control">
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Category <span class="text-danger"> *</span></label>
-											<mat-select class="custom-mat-select select" placeholder="Select">
-												<mat-option value="1">Select</mat-option>
-												<mat-option value="1">Mailing Issues</mat-option>
-												<mat-option value="1">Language Issues</mat-option>
-												<mat-option value="1">Installation Error</mat-option>
-											</mat-select>
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Priority <span class="text-danger"> *</span></label>
-											<mat-select class="custom-mat-select select" placeholder="Select">
-												<mat-option value="1">Select</mat-option>
-												<mat-option value="1">High</mat-option>
-												<mat-option value="1">Low</mat-option>
-												<mat-option value="1">Medium</mat-option>
-											</mat-select>
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Description</label>
-											<div class="summernote"><p>Enter Ticket Detail</p></div>
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Attachments</label>
-											<div class="file-upload drag-file w-100 d-flex align-items-center justify-content-center flex-column">
-												<span class="upload-img mb-2"><i class="isax isax-folder5 fs-24"></i></span>
-												<p class="mb-1 text-gray-9 fw-medium">Drag and drop your files</p>
-												<p class="mb-2 fs-12">Accept File Type: doc,docx,jpg,jpeg,png,txt,pdf</p>
-												<input type="file" accept="video/image">
-												<span class="btn mt-2 btn-secondary rounded-pill"><i class="isax isax-document-upload me-1"></i>Upload</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn bg-gray-100 rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Submit</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Add Ticket -->
+      <ng-container *ngIf="selectedTicket">
+        <div class="tk-detail">
+          <!-- head -->
+          <div class="tk-detail__head">
+            <div class="detail-info">
+              <div class="detail-title">{{ selectedTicket.sujet }}</div>
+              <div class="detail-ref">{{ selectedTicket.reference }} · {{ selectedTicket.entreprise?.nom }}</div>
+              <div class="detail-badges">
+                <span class="badge" [ngClass]="getSClass(selectedTicket.statut)">{{ getSLabel(selectedTicket.statut) }}</span>
+                <span class="badge" [ngClass]="getPClass(selectedTicket.priorite)">{{ getPLabel(selectedTicket.priorite) }}</span>
+                <span *ngIf="selectedTicket.est_escalade" class="escalade-badge">Escaladé</span>
+              </div>
+            </div>
+            <button type="button" class="act-btn" (click)="closeDetail()">
+              <i class="isax isax-close-circle"></i>
+            </button>
+          </div>
 
-			<!-- Edit Ticket -->
-			<div class="modal fade" id="edit_ticket">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="fw-bold">Edit Ticket</h5>
-							<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-								<i class="isax isax-close-circle5"></i>
-							</button>
-						</div>
-						<form>
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Ticket Title <span class="text-danger"> *</span></label>
-											<input type="text" class="form-control" value="Issue with Course Notification Emails">
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Category <span class="text-danger"> *</span></label>
-											<mat-select class="custom-mat-select select" placeholder="Mailing Issues">
-												<mat-option value="1">Select</mat-option>
-												<mat-option value="1">Mailing Issues</mat-option>
-												<mat-option value="1">Language Issues</mat-option>
-												<mat-option value="1">Installation Error</mat-option>
-											</mat-select>
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="mb-3">
-											<label class="form-label">Priority <span class="text-danger"> *</span></label>
-											<mat-select class="custom-mat-select select" placeholder="High">
-												<mat-option value="1">Select</mat-option>
-												<mat-option value="1">High</mat-option>
-												<mat-option value="1">Low</mat-option>
-												<mat-option value="1">Medium</mat-option>
-											</mat-select>
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Description</label>
-											<div class="summernote"><p>Enter Ticket Detail</p></div>
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="mb-3">
-											<label class="form-label">Attachments</label>
-											<div class="file-upload drag-file w-100 d-flex align-items-center justify-content-center flex-column">
-												<span class="upload-img mb-2"><i class="isax isax-folder5 fs-24"></i></span>
-												<p class="mb-1 text-gray-9 fw-medium">Drag and drop your files</p>
-												<p class="mb-2 fs-12">Accept File Type: doc,docx,jpg,jpeg,png,txt,pdf</p>
-												<input type="file" accept="video/image">
-												<span class="btn mt-2 btn-secondary rounded-pill"><i class="isax isax-document-upload me-1"></i>Upload</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button class="btn bg-gray-100 rounded-pill me-2" type="button" data-bs-dismiss="modal">Cancel</button>
-								<button class="btn btn-secondary rounded-pill" type="submit" data-bs-dismiss="modal">Save Changes</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!-- /Edit Ticket -->
+          <!-- actions -->
+          <div class="tk-detail__actions">
+            <button type="button" class="act-btn primary" (click)="changerStatut('en_cours')">
+              <i class="isax isax-activity"></i> Prendre en charge
+            </button>
+            <button type="button" class="act-btn success" (click)="changerStatut('resolu')">
+              <i class="isax isax-tick-circle"></i> Résoudre
+            </button>
+            <button type="button" class="act-btn danger" (click)="changerStatut('ferme')">
+              <i class="isax isax-close-circle"></i> Fermer
+            </button>
+          </div>
 
-			<!-- Ticket Details -->
-			<div class="modal fade" id="ticket_details">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="d-inline-flex align-items-center">Ticket Details <span class="text-primary fs-14 ms-2">#TIC010</span></h5>
-							<div class="d-flex align-items-center justify-content-end">
-								<span class="badge badge-sm bg-purple d-inline-flex align-items-center me-2"><i class="fa-solid fa-circle fs-5 me-1"></i>Opened</span>
-								<button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-									<i class="isax isax-close-circle5"></i>
-								</button>
-							</div>
-						</div>
-						<div class="modal-body">
-							<div class="row">
-								<div class="col-lg-4">
-									<div class="mb-3">
-										<h6 class="mb-1">Category</h6>
-										<p>Mailing Issues</p>
-									</div>
-								</div>
-								<div class="col-lg-4">
-									<div class="mb-3">
-										<h6 class="mb-1">Date</h6>
-										<p>26 Jul 2025</p>
-									</div>
-								</div>
-								<div class="col-lg-4">
-									<div class="mb-3">
-										<h6 class="mb-1">Priority</h6>
-										<span class="badge bg-soft-danger badge-sm d-inline-flex align-items-center"><i class="fa-solid fa-circle fs-5 me-1"></i>High</span>
-									</div>
-								</div>
-								<div class="col-lg-12">
-									<div class="mb-3">
-										<h6 class="mb-1">Subject</h6>
-										<p>Issue with Course Notification Emails</p>
-									</div>
-								</div>
-								<div class="col-lg-12">
-									<div>
-										<h6 class="mb-1">Description</h6>
-										<p>I am not receiving important emails from the LMS platform, such as course notifications, 
-											enrollment confirmations, or assignment updates. Additionally, some 
-											students have reported that they are not receiving emails about live classes or announcements.
-											This issue is affecting communication and timely updates for both instructors and students. 
-											Please investigate and resolve this issue as soon as possible.
-											</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- /Ticket Details -->
+          <!-- body -->
+          <div class="tk-detail__body" *ngIf="!loadingDetail">
+            <!-- meta -->
+            <div class="detail-meta">
+              <span><b>Créé par:</b> {{ selectedTicket.createur?.name || '—' }}</span>
+              <span><b>Agent:</b> {{ selectedTicket.agent_assigne?.name || 'Non assigné' }}</span>
+              <span><b>Catégorie:</b> {{ selectedTicket.categorie }}</span>
+              <span><b>Créé le:</b> {{ selectedTicket.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
 
-			<!-- Delete Modal -->
-			<div class="modal fade" id="delete_modal">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-body text-center custom-modal-body">
-							<span class="avatar avatar-lg bg-danger-transparent rounded-circle mb-2">
-								<i class="isax isax-trash fs-24 text-danger"></i>
-							</span>
-							<div>
-								<h4 class="mb-2">Delete Ticket</h4>
-								<p class="mb-3">Are you sure you want to delete ticket?</p>
-								<div class="d-flex align-items-center justify-content-center">
-									<a href="javascript:void(0);" class="btn bg-gray-100 rounded-pill me-2" data-bs-dismiss="modal">Cancel</a>
-									<a href="javascript:void(0);" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Yes, Remove All</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- /Delete Modal -->
+            <!-- description -->
+            <div class="tk-detail__desc">{{ selectedTicket.description }}</div>
+
+            <!-- thread -->
+            <div class="tk-detail__thread-title">Conversation ({{ selectedTicket.nombre_reponses || 0 }} réponses)</div>
+            <div class="tk-detail__thread">
+              <div *ngFor="let m of (selectedTicket.messages || [])" class="msg">
+                <div class="msg__av">{{ getInitials(m.auteur?.name) }}</div>
+                <div class="msg__bubble">
+                  <div class="msg__author">{{ m.auteur?.name }}</div>
+                  <div class="msg__text">{{ m.contenu }}</div>
+                  <div class="msg__time">{{ m.created_at | date:'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+              </div>
+              <div *ngIf="!(selectedTicket.messages?.length)" class="msg-empty">Aucun message pour l'instant.</div>
+            </div>
+          </div>
+          <div class="tk-loader" *ngIf="loadingDetail">Chargement…</div>
+
+          <!-- reply -->
+          <div class="tk-detail__reply">
+            <textarea class="tk-detail__reply-input" rows="2"
+                      placeholder="Répondre au ticket…"
+                      [(ngModel)]="newMessage"></textarea>
+            <button type="button" class="send-btn" [disabled]="sendingMessage || !newMessage.trim()"
+                    (click)="envoyerMessage()">
+              <i class="isax isax-send-2"></i>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+  </div><!-- /tk-split -->
+</div>

@@ -1,7 +1,7 @@
 // filepath: src/app/shared/service/progression/progression.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, of, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export interface FormationProgression {
@@ -126,18 +126,16 @@ export class ProgressionService {
   // MARQUER une section complétée
   // ════════════════════════════════════════════
   markCompleted(
-    formationId:  number,
-    sectionId:    number,
-    parcoursId:   number | null = null,
-    catalogueId:  number | null = null  // ✅ NOUVEAU
+    formationId: number,
+    sectionId: number,
+    parcoursId: number | null = null,
+    catalogueId: number | null = null
   ): Observable<any> {
-    const k    = this.key(formationId, parcoursId, catalogueId);
+    const k = this.key(formationId, parcoursId, catalogueId);
+
+    // 1. Mise à jour locale optimiste (si la Map est initialisée)
     const prog = this.progressions.get(k);
-
-    console.log(`✔️ [ProgressionService] markCompleted → formationId=${formationId} | sectionId=${sectionId} | parcoursId=${parcoursId} | catalogueId=${catalogueId} | clé="${k}"`);
-
-    // Mise à jour locale IMMÉDIATE (optimiste)
-    if (prog) {
+    if (prog && !prog.completed.has(sectionId)) {
       prog.completed.add(sectionId);
       prog.percent = this.calcPercent(prog.completed.size, prog.totalSections);
       this._change$.next(new Map(this.progressions));
@@ -147,31 +145,41 @@ export class ProgressionService {
       console.warn(`⚠️ [ProgressionService] markCompleted — aucune entrée en cache pour clé="${k}", mise à jour locale ignorée`);
     }
 
-    const body: any = {};
-    if (parcoursId)  body['parcours_id']  = parcoursId;
-    if (catalogueId) body['catalogue_id'] = catalogueId; // ✅
-
-    console.log(`📤 [ProgressionService] POST /formations/${formationId}/sections/${sectionId}/complete | body:`, body);
-
+    // 2. POST vers le backend — fonctionne même si la Map locale est vide
+    const url = `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/complete`;
+    console.log('📡 POST progression:', url, '| sectionId:', sectionId, '| formationId:', formationId);
     return this.http.post<any>(
-      `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/complete`,
-      body
+      url,
+      {},
+      { headers: this.getAuthHeaders() }
     ).pipe(
       tap(res => {
-        console.log(`✅ [ProgressionService] markCompleted réponse API:`, res);
-
-        if (res?.status && prog) {
-          prog.percent = res.progression ?? prog.percent;
+        // Synchroniser le % renvoyé par le backend (source de vérité)
+        if (prog) {
+          prog.percent = res?.progression ?? prog.percent;
+          if (res?.completed_section_ids) {
+            prog.completed = new Set<number>(res.completed_section_ids);
+          }
           this._change$.next(new Map(this.progressions));
 
           console.log(`🔄 [ProgressionService] % synchronisé depuis API → %=${prog.percent} | est_termine=${res.est_termine} | quiz_final=${JSON.stringify(res.quiz_final)}`);
         }
       }),
       catchError((err) => {
-        console.error(`❌ [ProgressionService] markCompleted ERREUR API:`, err);
-        return of(null);
+        // Rollback local uniquement si on avait fait une mise à jour optimiste
+        if (prog) {
+          prog.completed.delete(sectionId);
+          prog.percent = this.calcPercent(prog.completed.size, prog.totalSections);
+          this._change$.next(new Map(this.progressions));
+        }
+        return throwError(() => err);
       })
     );
+  }
+
+  private getAuthHeaders(): { [key: string]: string } {
+    const token = localStorage.getItem('pyramide_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
   // ════════════════════════════════════════════

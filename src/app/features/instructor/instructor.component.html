@@ -1,60 +1,70 @@
-<!-- Breadcrumb -->
-@if (last !== 'view') {
-  <div class="breadcrumb-bar text-center">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12 col-12">
-          <div class="breadcrumb-list">
-            <h2 class="breadcrumb-title">{{ last | titlecase }}</h2>
-            <nav aria-label="breadcrumb" class="page-breadcrumb">
-              <ol class="breadcrumb justify-content-center mb-0">
-                <li class="breadcrumb-item"><a [routerLink] = "routes.home">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ last | titlecase }}</li>
-              </ol>
-            </nav>
+<div class="content">
+  <div class="container">
+
+    <!-- ── Header Formateur ── -->
+    <div class="ins-header">
+      <div class="ins-header-label">FORMATEUR — ESPACE PÉDAGOGIQUE</div>
+
+      <div class="ins-card">
+        <!-- Identité + Actions -->
+        <div class="ins-card-top">
+          <div class="ins-identity">
+            <div class="ins-av">{{ getInitials() }}</div>
+            <div class="ins-info">
+              <h5 class="ins-name">{{ getFullName() }}</h5>
+              <p class="ins-sub">
+                {{ getFonction() }}<ng-container *ngIf="getEntrepriseName()"> · {{ getEntrepriseName() }}</ng-container>
+              </p>
+              <div class="ins-tags">
+                <span class="ins-tag" *ngFor="let tag of getSpecialites()">
+                  <i class="isax" [ngClass]="tag.icon"></i>{{ tag.label }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="ins-actions">
+            <a [routerLink]="routes.instructorStatements" class="ins-btn-icon" title="Statistiques">
+              <i class="isax isax-chart-2"></i>
+            </a>
+            <a href="/courses/instructor-course-add" target="_blank" class="ins-btn-primary">
+              <i class="isax isax-add"></i>Nouvelle formation
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats strip -->
+        <div class="ins-stats">
+          <div class="ins-stat">
+            <i class="isax isax-book-1"></i>
+            <div>
+              <div class="ins-stat-val">{{ headerStats.formations }}</div>
+              <div class="ins-stat-lbl">Formations actives</div>
+            </div>
+          </div>
+          <div class="ins-stat">
+            <i class="isax isax-profile-2user"></i>
+            <div>
+              <div class="ins-stat-val">{{ headerStats.apprenants }}</div>
+              <div class="ins-stat-lbl">Apprenants</div>
+            </div>
+          </div>
+          <div class="ins-stat" [class.ins-stat--warn]="headerStats.enDifficulte > 0">
+            <i class="isax isax-clock"></i>
+            <div>
+              <div class="ins-stat-val">{{ headerStats.enDifficulte }}</div>
+              <div class="ins-stat-lbl">En difficulté</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-}
-<!-- /Breadcrumb -->
 
-<div class="content">
-  <div class="container">
-      <!-- Bannière profil instructor - Toujours visible -->
-      <div class="instructor-profile">
-          <div class="instructor-profile-bg">
-              <!-- <img src="assets/img/bg/card-bg-01.png" class="instructor-profile-bg-1" alt=""> -->
-          </div>
-          <div class="row align-items-center row-gap-3 instructor-profile">
-              <div class="col-md-6">
-                  <div class="d-flex align-items-center">
-                      <span class="avatar flex-shrink-0 avatar-xxl avatar-rounded me-3 border border-white border-3 position-relative">
-                          <div class="avatar-placeholder">
-                            {{ getInitials() }}
-                          </div>
-                          <span class="verify-tick"><i class="isax isax-verify5"></i></span>
-                      </span>
-                      <div>
-                          <h5 class="mb-1 text-white d-inline-flex align-items-center">
-                            {{ getFullName() }}
-                            <a [routerLink]="routes.instructorProfile" class="link-light fs-16 ms-2">
-                              <i class="isax isax-edit-2"></i>
-                            </a>
-                          </h5>
-                          <!-- <p class="text-light">{{ getRoleName() }}</p> -->
-                      </div>
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <div class="d-flex align-items-center flex-wrap gap-3 justify-content-md-end">
-                      <a [routerLink]="routes.instructorCourseAdd" class="btn btn-white rounded-pill">Ajouter Formation</a>
-                      <a [routerLink]="routes.instructor_dashboard" class="btn btn-secondary rounded-pill">Tableau de bords</a>
-                  </div>
-              </div>
-          </div>
+      <!-- Prochaine session -->
+      <div class="ins-next" *ngIf="nextSession">
+        <i class="isax isax-video"></i>
+        <span>Prochaine session — <strong>{{ nextSession.titre }}</strong> · {{ nextSession.date }}</span>
+        <span class="ins-next-badge">{{ nextSession.delai }}</span>
       </div>
+    </div>
 
       <!-- Contenu selon la route -->
       @if(last !== 'students-details') {

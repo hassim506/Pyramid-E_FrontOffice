@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonService } from '../../../../shared/service/common/common.service';
 import { routes } from '../../../../shared/service/routes/routes';
 import { CommonModule } from '@angular/common';
@@ -11,49 +11,64 @@ import { RoleRedirectService } from '../../../../shared/service/role/role-redire
     selector: 'app-superadmin-sidebar',
     templateUrl: './superadmin-sidebar.component.html',
     styleUrl: './superadmin-sidebar.component.scss',
-    imports:[CommonModule,RouterLink,RouterLinkActive,HasPermissionDirective]
+    imports: [CommonModule, RouterLink, RouterLinkActive, HasPermissionDirective]
 })
-export class SuperadminSidebarComponent {
+export class SuperadminSidebarComponent implements OnInit {
   public routes = routes;
   public base = '';
   public page = '';
   public last = '';
+  currentUser: any;
 
-  constructor(private common: CommonService,    private auth: AuthService, private roleRedirectService: RoleRedirectService) {
-      
-    
-    this.common.base.subscribe((base: string) => {
-      this.base = base;
-    });
-    this.common.page.subscribe((page: string) => {
-      this.page = page;
-    });
-    this.common.last.subscribe((last: string) => {
-      this.last = last;
-    });
-      console.log('Permissions:', this.auth.getUserPermissions());
-    console.log('A la permission lister utilisateurs:', this.auth.hasPermission('lister utilisateurs'));
-  
+  openGroups: Record<string, boolean> = {
+    utilisateurs: true,
+    pedagogie:    false,
+    finance:      false,
+  };
+
+  toggleGroup(key: string): void {
+    this.openGroups[key] = !this.openGroups[key];
+  }
+
+  getInitials(): string {
+    const u = this.currentUser;
+    if (!u) return 'SA';
+    const n = u.name || `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email || '';
+    return n.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase() || 'SA';
+  }
+
+  getDisplayName(): string {
+    const u = this.currentUser;
+    if (!u) return 'Super Admin';
+    return u.name || `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email || 'Super Admin';
+  }
+
+  getRoleLabel(): string {
+    return this.currentUser?.role?.name || 'Superadministrateur';
+  }
+
+  constructor(
+    private common: CommonService,
+    private auth: AuthService,
+    private roleRedirectService: RoleRedirectService,
+  ) {
+    this.common.base.subscribe((base: string) => { this.base = base; });
+    this.common.page.subscribe((page: string) => { this.page = page; });
+    this.common.last.subscribe((last: string) => { this.last = last; });
+  }
+
+  ngOnInit(): void {
+    this.currentUser = this.auth.getUser();
   }
 
   logout(): void {
     const userData = localStorage.getItem('pyramide_user');
     let roleId = 0;
-    
     if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        roleId = user.role_id;
-      } catch (error) {
-        console.error('Erreur lors du parsing des données utilisateur');
-      }
+      try { roleId = JSON.parse(userData).role_id; } catch {}
     }
-    
-    // Nettoyer le localStorage
     localStorage.removeItem('pyramide_token');
     localStorage.removeItem('pyramide_user');
-    
-    // Rediriger selon le rôle
     this.roleRedirectService.redirectByRole(roleId);
   }
 }

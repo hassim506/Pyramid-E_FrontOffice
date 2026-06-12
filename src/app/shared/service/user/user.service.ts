@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams  } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../../models/user.models';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private baseUrl = 'http://localhost:8000/api';
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -23,8 +24,16 @@ export class UserService {
     return this.http.get<any>(`${this.baseUrl}/users`, { headers: this.getHeaders() });
   }
 
+  getEmployesByEntreprise(entrepriseId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/entreprises/${entrepriseId}/employes`, { headers: this.getHeaders() });
+  }
+
   getMyUsers(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/mes-utilisateurs-rh`, { headers: this.getHeaders() });
+  }
+
+  getFormateurs(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/adminrh/formateurs`, { headers: this.getHeaders() });
   }
 
   getMyUsersgroup(): Observable<any> {

@@ -1,462 +1,284 @@
-<div class="parcours">
-  <!-- En-tête avec titre et bouton d'ajout -->
-  <div class="page-title d-flex align-items-center justify-content-between mb-4">
-    <h5>Gestion des Parcours de Formation</h5>
-    <button class="btn btn-primary d-flex align-items-center" (click)="openParcoursModal()">
-      <i class="isax isax-add-circle me-2"></i>Nouveau Parcours
+<div class="ac-shell">
+
+  <!-- ── Topbar ── -->
+  <div class="ac-topbar">
+    <span class="ac-tab active">
+      <i class="isax isax-route-square"></i>Parcours ({{ totalItems }})
+    </span>
+    <span class="ac-spacer"></span>
+    <div style="display:flex;align-items:center;padding:0 10px;">
+      <button type="button" class="ac-add-btn" (click)="openParcoursModal()">
+        <i class="isax isax-add"></i>Nouveau parcours
+      </button>
+    </div>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="ac-kpi-row">
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-route-square"></i>Total</div>
+      <div class="ac-kpi__val">{{ totalItems }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-tick-circle"></i>Actifs</div>
+      <div class="ac-kpi__val">{{ getParcoursActifs() }}</div>
+      <div class="ac-kpi__delta up">+{{ getParcoursActifs() }} actifs</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-close-circle"></i>Inactifs</div>
+      <div class="ac-kpi__val">{{ getParcoursInactifs() }}</div>
+    </div>
+    <div class="ac-kpi">
+      <div class="ac-kpi__label"><i class="isax isax-book-1"></i>Formations dispo</div>
+      <div class="ac-kpi__val">{{ formations.length }}</div>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="ac-toolbar">
+    <div class="ac-search">
+      <i class="isax isax-search-normal ac-search__icon"></i>
+      <input class="ac-search__input" type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un parcours…">
+    </div>
+    <select class="ac-select" title="Filtrer par niveau" [(ngModel)]="selectedNiveau">
+      <option value="">Tous les niveaux</option>
+      <option *ngFor="let n of niveaux" [value]="n.value">{{ n.label }}</option>
+    </select>
+    <select class="ac-select" title="Filtrer par statut" [(ngModel)]="selectedStatut">
+      <option value="">Tous les statuts</option>
+      <option value="actif">Actif</option>
+      <option value="inactif">Inactif</option>
+    </select>
+    <button type="button" class="ac-chip" (click)="clearFilters()" *ngIf="searchTerm || selectedNiveau || selectedStatut">
+      <i class="isax isax-close-circle"></i>Effacer
     </button>
+    <span class="ac-spacer"></span>
   </div>
 
-  <!-- Messages d'alerte -->
-  <div class="alert alert-success alert-dismissible fade show" *ngIf="success">
-    <i class="isax isax-tick-circle me-2"></i>{{ success }}
-    <button type="button" class="btn-close" (click)="success = ''"></button>
+  <!-- ── Alerts ── -->
+  <div class="ac-alert" style="color:#27500a;background:#eaf3de;border-color:#97c459;" *ngIf="success">
+    <i class="isax isax-tick-circle"></i>{{ success }}
+    <button type="button" class="ac-alert-close" (click)="success=''"><i class="isax isax-close-circle"></i></button>
+  </div>
+  <div class="ac-alert" *ngIf="error && !saving">
+    <i class="isax isax-warning-2"></i>{{ error }}
+    <button type="button" class="ac-alert-close" (click)="error=''"><i class="isax isax-close-circle"></i></button>
   </div>
 
-  <div class="alert alert-danger alert-dismissible fade show" *ngIf="error">
-    <i class="isax isax-close-circle me-2"></i>{{ error }}
-    <button type="button" class="btn-close" (click)="error = ''"></button>
+  <!-- ── Loading ── -->
+  <div class="ac-empty" *ngIf="loading">
+    <i class="isax isax-route-square"></i>Chargement des parcours…
   </div>
 
-  <!-- Filtres et recherche -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <div class="row g-3">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label class="form-label">Rechercher</label>
-            <input type="text" class="form-control" [(ngModel)]="searchTerm" 
-                   placeholder="Nom, description...">
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="form-group">
-            <label class="form-label">Niveau</label>
-            <select class="form-select" [(ngModel)]="selectedNiveau">
-              <option value="">Tous les niveaux</option>
-              <option *ngFor="let niveau of niveaux" [value]="niveau.value">{{ niveau.label }}</option>
-            </select>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="form-group">
-            <label class="form-label">Statut</label>
-            <select class="form-select" [(ngModel)]="selectedStatut">
-              <option value="">Tous les statuts</option>
-              <option value="actif">Actif</option>
-              <option value="inactif">Inactif</option>
-            </select>
-          </div>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
-            <i class="isax isax-refresh me-1"></i>Effacer
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Statistiques rapides -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card bg-primary text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="card-title">Total Parcours</h6>
-              <h4 class="mb-0">{{ totalItems }}</h4>
-            </div>
-            <i class="isax isax-routing-2" style="font-size: 2rem; opacity: 0.7;"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-success text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="card-title">Parcours Actifs</h6>
-              <h4 class="mb-0">{{ getParcoursActifs() }}</h4>
-            </div>
-            <i class="isax isax-tick-circle" style="font-size: 2rem; opacity: 0.7;"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-info text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="card-title">Formations Total</h6>
-              <h4 class="mb-0">{{ formations.length }}</h4>
-            </div>
-            <i class="isax isax-book" style="font-size: 2rem; opacity: 0.7;"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-warning text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="card-title">Page Actuelle</h6>
-              <h4 class="mb-0">{{ currentPage }}/{{ totalPages }}</h4>
-            </div>
-            <i class="isax isax-document" style="font-size: 2rem; opacity: 0.7;"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Liste des parcours -->
-  <div class="parcours-list">
-  <div class="table-responsive">
-    <table class="table table-hover">
+  <!-- ── Table ── -->
+  <ng-container *ngIf="!loading">
+    <table class="ac-table" *ngIf="filteredParcours.length > 0">
       <thead>
         <tr>
-          <th style="width: 80px;">Image</th>
-          <th>Nom du Parcours</th>
-          <th style="width: 120px;">Niveau</th>
-          <th style="width: 100px;">Durée</th>
-          <th style="width: 100px;">Prix</th>
-          <th style="width: 120px;">Formations</th>
-          <th style="width: 100px;">Inscrits</th>
-          <th style="width: 100px;">Statut</th>
-          <th style="width: 120px;">Actions</th>
+          <th style="width:52px;">Image</th>
+          <th>Parcours</th>
+          <th style="width:110px;">Niveau</th>
+          <th style="width:76px;">Durée</th>
+          <th style="width:96px;">Coût</th>
+          <th style="width:90px;text-align:center;">Formations</th>
+          <th style="width:76px;text-align:center;">Inscrits</th>
+          <th style="width:80px;">Statut</th>
+          <th style="width:84px;"></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let parcour of filteredParcours; trackBy: trackByParcoursId">
-          <!-- Image -->
+        <tr *ngFor="let p of filteredParcours; trackBy: trackByParcoursId">
           <td>
-            <img [src]="parcour.image_url || 'assets/images/default-parcours.png'" 
-                 [alt]="parcour.nom" 
-                 class="rounded"
-                 style="width: 50px; height: 50px; object-fit: cover;">
+            <img [src]="p.image_url || 'assets/images/default-parcours.png'" [alt]="p.nom"
+                 style="width:40px;height:40px;border-radius:6px;object-fit:cover;display:block;">
           </td>
-
-          <!-- Nom du parcours -->
           <td>
-            <div>
-              <h6 class="mb-1">{{ parcour.nom }}</h6>
-              <small class="text-muted">Créé le {{ formatDate(parcour.created_at) }}</small>
-            </div>
+            <div class="ac-table-name">{{ p.nom }}</div>
+            <div class="ac-table-sub">{{ formatDate(p.created_at) }}</div>
           </td>
-
-          <!-- Niveau -->
           <td>
-            <span class="badge bg-primary">{{ getNiveauLabel(parcour.niveau) }}</span>
-          </td>
-
-          <!-- Durée -->
-          <td>
-            <div class="text-center">
-              <strong>{{ parcour.duree_estimee }}h</strong>
-              <small class="d-block text-muted">estimée</small>
-            </div>
-          </td>
-
-          <!-- Prix -->
-          <td>
-            <div class="text-center">
-              <strong class="text-success">{{ parcour.prix }}€</strong>
-            </div>
-          </td>
-
-          <!-- Formations -->
-          <td>
-            <div class="text-center">
-              <strong>{{ parcour.formations.length }}</strong>
-              <small class="d-block text-muted">
-                {{ getFormationsObligatoires(parcour.formations).length }} oblig.
-              </small>
-            </div>
-          </td>
-
-          <!-- Inscrits -->
-          <td>
-            <div class="text-center">
-              <strong>{{ parcour.users.length }}</strong>
-              <small class="d-block text-muted">inscrits</small>
-            </div>
-          </td>
-
-          <!-- Statut -->
-          <td>
-            <span class="badge" 
-                  [class]="parcour.actif ? 'bg-success' : 'bg-secondary'">
-              {{ parcour.actif ? 'Actif' : 'Inactif' }}
+            <span class="ac-status"
+                  [attr.data-s]="p.niveau === 'expert' ? 'cancel' : p.niveau === 'avance' ? 'done' : p.niveau === 'intermediaire' ? 'pending' : 'plan'">
+              {{ getNiveauLabel(p.niveau) }}
             </span>
           </td>
-
-          <!-- Actions -->
+          <td style="font-size:13px;font-weight:500;">{{ p.duree_estimee }}h</td>
+          <td style="font-size:12px;color:#4b5563;">{{ p.prix }} XOF</td>
+          <td style="text-align:center;">
+            <strong style="font-size:13px;color:#111827;">{{ p.formations.length }}</strong>
+            <div style="font-size:11px;color:#9ca3af;">{{ getFormationsObligatoires(p.formations).length }} oblig.</div>
+          </td>
+          <td style="text-align:center;font-size:13px;font-weight:500;color:#111827;">{{ p.users.length }}</td>
           <td>
-            <div class="d-flex gap-1">
-              <button class="btn btn-sm btn-outline-info" 
-                      (click)="viewParcours(parcour)"
-                      title="Voir détails">
-                <i class="isax isax-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-warning" 
-                      (click)="editParcours(parcour)"
-                      title="Modifier">
-                <i class="isax isax-edit-2"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger" 
-                      (click)="confirmDelete(parcour)"
-                      title="Supprimer">
-                <i class="isax isax-trash"></i>
-              </button>
+            <span class="ac-status" [attr.data-s]="p.actif ? 'pub' : 'draft'">
+              {{ p.actif ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          <td>
+            <div class="ac-actions">
+              <button type="button" class="ac-act" (click)="viewParcours(p)" title="Voir"><i class="isax isax-eye"></i></button>
+              <button type="button" class="ac-act" (click)="editParcours(p)" title="Modifier"><i class="isax isax-edit-2"></i></button>
+              <button type="button" class="ac-act ac-act--del" (click)="confirmDelete(p)" title="Supprimer"><i class="isax isax-trash"></i></button>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
-  </div>
 
-  <!-- Message si aucun résultat -->
-  <div class="text-center py-4" *ngIf="filteredParcours.length === 0 && !loading">
-    <i class="isax isax-routing-2 text-muted" style="font-size: 3rem;"></i>
-    <h6 class="text-muted mt-3">{{ parcours.length === 0 ? 'Aucun parcours trouvé' : 'Aucun résultat pour ces filtres' }}</h6>
-    <p class="text-muted">
-      {{ parcours.length === 0 ? 'Commencez par créer votre premier parcours' : 'Essayez de modifier vos critères de recherche' }}
-    </p>
-    <button class="btn btn-primary" (click)="openParcoursModal()" *ngIf="parcours.length === 0">
-      <i class="isax isax-add-circle me-2"></i>Créer un parcours
-    </button>
-    <button class="btn btn-outline-secondary" (click)="clearFilters()" *ngIf="parcours.length > 0">
-      <i class="isax isax-refresh me-2"></i>Effacer les filtres
-    </button>
-  </div>
-</div>
-
-
-  <!-- État de chargement -->
-  <div class="text-center py-4" *ngIf="loading">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Chargement...</span>
+    <!-- Empty -->
+    <div class="ac-empty" *ngIf="filteredParcours.length === 0">
+      <i class="isax isax-route-square"></i>
+      {{ parcours.length === 0 ? 'Aucun parcours créé' : 'Aucun résultat pour ces filtres' }}
+      <button type="button" class="ac-add-btn" style="margin-top:10px;" (click)="openParcoursModal()" *ngIf="parcours.length === 0">
+        <i class="isax isax-add"></i>Créer un parcours
+      </button>
+      <button type="button" class="ac-chip" style="margin-top:10px;" (click)="clearFilters()" *ngIf="parcours.length > 0">
+        <i class="isax isax-refresh"></i>Effacer les filtres
+      </button>
     </div>
-    <p class="mt-2 text-muted">Chargement des parcours...</p>
-  </div>
 
-  <!-- État vide -->
-  <div class="text-center py-5" *ngIf="!loading && filteredParcours.length === 0">
-    <i class="isax isax-routing-2 text-muted" style="font-size: 4rem;"></i>
-    <h6 class="text-muted mt-3">{{ parcours.length === 0 ? 'Aucun parcours trouvé' : 'Aucun résultat pour ces filtres' }}</h6>
-    <p class="text-muted">
-      {{ parcours.length === 0 ? 'Commencez par créer votre premier parcours' : 'Essayez de modifier vos critères de recherche' }}
-    </p>
-    <button class="btn btn-primary" (click)="openParcoursModal()" *ngIf="parcours.length === 0">
-      <i class="isax isax-add-circle me-2"></i>Créer un parcours
-    </button>
-    <button class="btn btn-outline-secondary" (click)="clearFilters()" *ngIf="parcours.length > 0">
-      <i class="isax isax-refresh me-2"></i>Effacer les filtres
-    </button>
-  </div>
-
-  <!-- Pagination -->
-  <div class="d-flex justify-content-between align-items-center mt-4" *ngIf="totalPages > 1">
-    <div class="text-muted">
-      Affichage de {{ getPaginationStart() }} à {{ getPaginationEnd() }} 
-      sur {{ totalItems }} parcours
-    </div>
-    
-    <nav>
-      <ul class="pagination mb-0">
-        <li class="page-item" [class.disabled]="currentPage === 1">
-          <a class="page-link" href="javascript:void(0);" (click)="onPageChange(currentPage - 1)">
-            <i class="isax isax-arrow-left-3"></i>
-          </a>
-        </li>
-        
-        <li class="page-item" *ngIf="currentPage > 3">
-          <a class="page-link" href="javascript:void(0);" (click)="onPageChange(1)">1</a>
-        </li>
-        <li class="page-item disabled" *ngIf="currentPage > 4">
-          <span class="page-link">...</span>
-        </li>
-        
-        <li class="page-item" *ngFor="let page of pages" [class.active]="page === currentPage">
-          <a class="page-link" href="javascript:void(0);" (click)="onPageChange(page)">{{ page }}</a>
-        </li>
-        
-        <li class="page-item disabled" *ngIf="currentPage < totalPages - 3">
-          <span class="page-link">...</span>
-        </li>
-        <li class="page-item" *ngIf="currentPage < totalPages - 2">
-          <a class="page-link" href="javascript:void(0);" (click)="onPageChange(totalPages)">{{ totalPages }}</a>
-        </li>
-        
-        <li class="page-item" [class.disabled]="currentPage === totalPages">
-          <a class="page-link" href="javascript:void(0);" (click)="onPageChange(currentPage + 1)">
-            <i class="isax isax-arrow-right-3"></i>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
-</div>
-
-<!-- Modal Ajout/Modification Parcours -->
-
-<!-- Modal Ajout/Modification Parcours - CORRIGÉ -->
-<div class="modal fade" id="parcoursModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          {{ editMode ? 'Modifier le Parcours' : 'Nouveau Parcours' }}
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Pagination -->
+    <div class="ac-pager" *ngIf="totalPages > 1">
+      <span class="ac-pager__info">{{ getPaginationStart() }}–{{ getPaginationEnd() }} sur {{ totalItems }} parcours</span>
+      <div class="ac-pager__btns">
+        <button type="button" class="ac-pager__btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-3"></i>
+        </button>
+        <button type="button" class="ac-pager__btn" *ngFor="let pg of pages"
+                [class.active]="pg === currentPage" (click)="onPageChange(pg)">{{ pg }}</button>
+        <button type="button" class="ac-pager__btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
       </div>
-      
+    </div>
+  </ng-container>
+
+</div><!-- /ac-shell -->
+
+
+<!-- ══════════════════════════════════════════════
+     MODAL CRÉATION / MODIFICATION
+════════════════════════════════════════════════ -->
+<div class="modal fade" id="parcoursModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable" style="max-width:640px;">
+    <div class="wz-modal modal-content">
+
+      <div class="wz-head">
+        <div class="wz-head__icon"><i class="isax isax-route-square"></i></div>
+        <div class="wz-head__text">
+          <div class="wz-head__title">{{ editMode ? 'Modifier le parcours' : 'Nouveau parcours' }}</div>
+          <div class="wz-head__sub">{{ editMode ? 'Mettez à jour les informations' : 'Renseignez les informations du parcours' }}</div>
+        </div>
+        <button type="button" class="wz-close" data-bs-dismiss="modal"><i class="isax isax-close-circle"></i></button>
+      </div>
+
       <form [formGroup]="parcoursForm" (ngSubmit)="onSubmit()">
-        <div class="modal-body">
-          <!-- Informations de base -->
-          <div class="row">
-            <div class="col-12">
-              <div class="mb-3">
-                <label class="form-label">Nom du parcours *</label>
-                <input type="text" class="form-control" formControlName="nom" 
-                       placeholder="Ex: Développement Web Full Stack">
-                <div class="invalid-feedback" 
-                     *ngIf="parcoursForm.get('nom')?.invalid && parcoursForm.get('nom')?.touched">
-                  Le nom est requis (min. 3 caractères)
-                </div>
-              </div>
+        <div class="wz-body">
 
-              <div class="mb-3">
-                <label class="form-label">Description *</label>
-                <textarea class="form-control" rows="3" formControlName="description" 
-                          placeholder="Description détaillée du parcours"></textarea>
-                <div class="invalid-feedback" 
-                     *ngIf="parcoursForm.get('description')?.invalid && parcoursForm.get('description')?.touched">
-                  La description est requise (min. 10 caractères)
-                </div>
-              </div>
+          <div class="wz-field">
+            <label class="wz-label">Nom du parcours <span class="wz-req">*</span></label>
+            <input type="text" class="wz-input" formControlName="nom" placeholder="Ex: Développement Web Full Stack">
+            <span class="wz-hint" *ngIf="parcoursForm.get('nom')?.invalid && parcoursForm.get('nom')?.touched">
+              Nom requis (min. 3 caractères)
+            </span>
+          </div>
+
+          <div class="wz-field">
+            <label class="wz-label">Description <span class="wz-req">*</span></label>
+            <textarea class="wz-input wz-textarea" formControlName="description" placeholder="Description détaillée du parcours"></textarea>
+            <span class="wz-hint" *ngIf="parcoursForm.get('description')?.invalid && parcoursForm.get('description')?.touched">
+              Description requise (min. 10 caractères)
+            </span>
+          </div>
+
+          <div class="wz-row">
+            <div class="wz-field" style="margin-bottom:0;">
+              <label class="wz-label">Niveau <span class="wz-req">*</span></label>
+              <select class="wz-input" title="Niveau du parcours" formControlName="niveau">
+                <option *ngFor="let n of niveaux" [value]="n.value">{{ n.label }}</option>
+              </select>
+            </div>
+            <div class="wz-field" style="margin-bottom:0;">
+              <label class="wz-label">Durée estimée (heures) <span class="wz-req">*</span></label>
+              <input type="number" class="wz-input" formControlName="duree_estimee" min="1">
             </div>
           </div>
 
-          <!-- Configuration en 2 colonnes -->
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label">Niveau *</label>
-                <select class="form-select" formControlName="niveau">
-                  <option *ngFor="let niveau of niveaux" [value]="niveau.value">{{ niveau.label }}</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Durée estimée (heures) *</label>
-                <input type="number" class="form-control" formControlName="duree_estimee" min="1">
-                <div class="invalid-feedback" 
-                     *ngIf="parcoursForm.get('duree_estimee')?.invalid && parcoursForm.get('duree_estimee')?.touched">
-                  La durée doit être supérieure à 0
-                </div>
-              </div>
+          <div class="wz-row" style="margin-top:12px;">
+            <div class="wz-field" style="margin-bottom:0;">
+              <label class="wz-label">Prix (XOF) <span class="wz-req">*</span></label>
+              <input type="number" class="wz-input" formControlName="prix" min="0" step="0.01">
             </div>
-
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label">Prix (€) *</label>
-                <input type="number" class="form-control" formControlName="prix" 
-                       min="0" step="0.01">
-                <div class="invalid-feedback" 
-                     *ngIf="parcoursForm.get('prix')?.invalid && parcoursForm.get('prix')?.touched">
-                  Le prix doit être positif
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Image URL</label>
-                <input type="url" class="form-control" formControlName="image_url" 
-                       placeholder="https://example.com/image.jpg">
-              </div>
+            <div class="wz-field" style="margin-bottom:0;">
+              <label class="wz-label">Image URL</label>
+              <input type="url" class="wz-input" formControlName="image_url" placeholder="https://…">
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-12">
-              <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" formControlName="actif" id="actif">
-                <label class="form-check-label" for="actif">
-                  Parcours actif
-                </label>
-              </div>
+          <div class="wz-toggle-row" style="margin-top:12px;">
+            <div>
+              <div class="wz-toggle-title">Parcours actif</div>
+              <div class="wz-toggle-sub">Rendre ce parcours disponible aux employés</div>
             </div>
+            <div class="wz-toggle" [class.on]="parcoursForm.get('actif')?.value"
+                 (click)="parcoursForm.get('actif')?.setValue(!parcoursForm.get('actif')?.value)"></div>
           </div>
 
           <!-- Objectifs -->
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0">Objectifs du parcours</h6>
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="addObjectif()">
-                <i class="isax isax-add-circle me-1"></i>Ajouter
+          <div style="margin-top:18px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span class="wz-label">Objectifs du parcours</span>
+              <button type="button" class="ac-add-btn" style="padding:4px 10px;font-size:11px;" (click)="addObjectif()">
+                <i class="isax isax-add"></i>Ajouter
               </button>
             </div>
-            
             <div formArrayName="objectifs">
-              <div *ngFor="let objectif of objectifs.controls; let i = index" 
-                   [formGroupName]="i" class="mb-2">
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">{{ i + 1 }}.</span>
-                  <input type="text" class="form-control" formControlName="value" 
-                         placeholder="Décrivez un objectif du parcours">
-                  <button type="button" class="btn btn-outline-danger" 
-                          (click)="removeObjectif(i)" 
-                          [disabled]="objectifsLength === 1">
-                    <i class="isax isax-trash"></i>
-                  </button>
-                </div>
-                <div class="invalid-feedback" 
-                     *ngIf="objectif.get('value')?.invalid && objectif.get('value')?.touched">
-                  L'objectif est requis
-                </div>
+              <div *ngFor="let obj of objectifs.controls; let i = index" [formGroupName]="i"
+                   style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                <span style="font-size:12px;color:#9ca3af;min-width:20px;text-align:right;">{{ i+1 }}.</span>
+                <input type="text" class="wz-input" formControlName="value" style="flex:1;"
+                       placeholder="Décrivez un objectif…">
+                <button type="button" class="ac-act ac-act--del" (click)="removeObjectif(i)"
+                        [disabled]="objectifsLength === 1">
+                  <i class="isax isax-trash"></i>
+                </button>
               </div>
             </div>
           </div>
 
           <!-- Prérequis -->
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="mb-0">Prérequis</h6>
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="addPrerequis()">
-                <i class="isax isax-add-circle me-1"></i>Ajouter
+          <div style="margin-top:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span class="wz-label">Prérequis</span>
+              <button type="button" class="ac-add-btn" style="padding:4px 10px;font-size:11px;" (click)="addPrerequis()">
+                <i class="isax isax-add"></i>Ajouter
               </button>
             </div>
-            
             <div formArrayName="prerequis">
-              <div *ngFor="let prerequisControl of prerequis.controls; let i = index" 
-                   [formGroupName]="i" class="mb-2">
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">{{ i + 1 }}.</span>
-                  <input type="text" class="form-control" formControlName="value" 
-                         placeholder="Décrivez un prérequis">
-                  <button type="button" class="btn btn-outline-danger" 
-                          (click)="removePrerequis(i)" 
-                          [disabled]="prerequisLength === 1">
-                    <i class="isax isax-trash"></i>
-                  </button>
-                </div>
-                <div class="invalid-feedback" 
-                     *ngIf="prerequisControl.get('value')?.invalid && prerequisControl.get('value')?.touched">
-                  Le prérequis est requis
-                </div>
+              <div *ngFor="let pre of prerequis.controls; let i = index" [formGroupName]="i"
+                   style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                <span style="font-size:12px;color:#9ca3af;min-width:20px;text-align:right;">{{ i+1 }}.</span>
+                <input type="text" class="wz-input" formControlName="value" style="flex:1;"
+                       placeholder="Décrivez un prérequis…">
+                <button type="button" class="ac-act ac-act--del" (click)="removePrerequis(i)"
+                        [disabled]="prerequisLength === 1">
+                  <i class="isax isax-trash"></i>
+                </button>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="submit" class="btn btn-primary" [disabled]="parcoursForm.invalid || saving">
-            <span class="spinner-border spinner-border-sm me-2" *ngIf="saving"></span>
+          <div class="wz-error" *ngIf="error && saving">
+            <i class="isax isax-warning-2"></i>{{ error }}
+          </div>
+
+        </div><!-- /wz-body -->
+
+        <div class="wz-foot">
+          <span class="wz-foot__info">{{ editMode ? 'Modification' : 'Création' }} en cours</span>
+          <button type="button" class="wz-btn-ghost" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="wz-btn-primary" [disabled]="parcoursForm.invalid || saving">
+            <span *ngIf="saving" class="wz-spinner"></span>
             {{ editMode ? 'Modifier' : 'Créer' }}
           </button>
         </div>
@@ -465,206 +287,128 @@
   </div>
 </div>
 
-<!-- Modal Visualisation - CORRIGÉ -->
+
+<!-- ══════════════════════════════════════════════
+     MODAL DÉTAILS
+════════════════════════════════════════════════ -->
 <div class="modal fade" id="viewModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Détails du Parcours</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" *ngIf="selectedParcours">
-        <!-- En-tête du parcours -->
-        <div class="mb-4">
-          <div class="d-flex align-items-start p-3 bg-light rounded">
-            <img [src]="selectedParcours.image_url || 'assets/images/default-parcours.png'" 
-                 [alt]="selectedParcours.nom" 
-                 class="me-3 rounded"
-                 style="width: 80px; height: 80px; object-fit: cover;">
-            <div class="flex-grow-1">
-              <h4 class="mb-2">{{ selectedParcours.nom }}</h4>
-              <p class="mb-2 text-muted">{{ selectedParcours.description }}</p>
-              <div class="d-flex align-items-center gap-2 flex-wrap">
-                <span class="badge bg-primary">{{ getNiveauLabel(selectedParcours.niveau) }}</span>
-                <span class="badge bg-success" *ngIf="selectedParcours.actif">Actif</span>
-                <span class="badge bg-secondary" *ngIf="!selectedParcours.actif">Inactif</span>
-                <span class="badge bg-info">{{ selectedParcours.duree_estimee }}h</span>
-                <span class="badge bg-warning">{{ selectedParcours.prix }}€</span>
-              </div>
-            </div>
+  <div class="modal-dialog modal-lg modal-dialog-scrollable" style="max-width:680px;">
+    <div class="wz-modal modal-content">
+      <ng-container *ngIf="selectedParcours">
+        <div class="wz-head">
+          <div class="wz-head__icon" style="background:#e1f5ee;color:#0f6e56;"><i class="isax isax-eye"></i></div>
+          <div class="wz-head__text">
+            <div class="wz-head__title">{{ selectedParcours.nom }}</div>
+            <div class="wz-head__sub">Détails du parcours</div>
           </div>
+          <button type="button" class="wz-close" data-bs-dismiss="modal"><i class="isax isax-close-circle"></i></button>
         </div>
 
-        <!-- Informations en colonnes -->
-        <div class="row">
-          <!-- Statistiques -->
-          <div class="col-md-6 mb-3">
-            <h6>Statistiques</h6>
-            <div class="list-group list-group-flush small">
-              <div class="list-group-item d-flex justify-content-between py-2">
-                <span>Formations incluses</span>
-                <strong>{{ selectedParcours.formations.length }}</strong>
-              </div>
-              <div class="list-group-item d-flex justify-content-between py-2">
-                <span>Durée totale</span>
-                <strong>{{ getTotalDuration(selectedParcours.formations) }}h</strong>
-              </div>
-              <div class="list-group-item d-flex justify-content-between py-2">
-                <span>Formations obligatoires</span>
-                <strong>{{ getFormationsObligatoires(selectedParcours.formations).length }}</strong>
-              </div>
-              <div class="list-group-item d-flex justify-content-between py-2">
-                <span>Inscrits actuels</span>
-                <strong>{{ selectedParcours.users.length }}</strong>
+        <div class="wz-body">
+          <div class="wz-recap-card">
+            <div class="wz-recap-title">Informations</div>
+            <div class="wz-recap-row"><span class="wz-rl">Niveau</span><span class="wz-rv">{{ getNiveauLabel(selectedParcours.niveau) }}</span></div>
+            <div class="wz-recap-row"><span class="wz-rl">Durée estimée</span><span class="wz-rv">{{ selectedParcours.duree_estimee }}h</span></div>
+            <div class="wz-recap-row"><span class="wz-rl">Durée totale formations</span><span class="wz-rv">{{ getTotalDuration(selectedParcours.formations) }}h</span></div>
+            <div class="wz-recap-row"><span class="wz-rl">Coût</span><span class="wz-rv">{{ selectedParcours.prix }} XOF</span></div>
+            <div class="wz-recap-row"><span class="wz-rl">Formations incluses</span><span class="wz-rv">{{ selectedParcours.formations.length }} ({{ getFormationsObligatoires(selectedParcours.formations).length }} oblig.)</span></div>
+            <div class="wz-recap-row"><span class="wz-rl">Inscrits</span><span class="wz-rv">{{ selectedParcours.users.length }}</span></div>
+            <div class="wz-recap-row"><span class="wz-rl">Créé le</span><span class="wz-rv">{{ formatDate(selectedParcours.created_at) }}</span></div>
+          </div>
+
+          <div class="wz-field">
+            <label class="wz-label">Description</label>
+            <div class="wz-desc-box">{{ selectedParcours.description }}</div>
+          </div>
+
+          <div class="wz-field" *ngIf="selectedParcours.objectifs.length > 0">
+            <label class="wz-label">Objectifs ({{ selectedParcours.objectifs.length }})</label>
+            <div class="wz-list">
+              <div class="wz-list-item" *ngFor="let obj of selectedParcours.objectifs">
+                <i class="isax isax-tick-circle" style="color:#0f6e56;"></i>{{ obj }}
               </div>
             </div>
           </div>
 
-          <!-- Informations générales -->
-          <div class="col-md-6 mb-3">
-            <h6>Informations</h6>
-            <div class="list-group list-group-flush small">
-              <div class="list-group-item py-2">
-                <strong>Niveau:</strong> {{ getNiveauLabel(selectedParcours.niveau) }}
-              </div>
-              <div class="list-group-item py-2">
-                <strong>Durée estimée:</strong> {{ selectedParcours.duree_estimee }}h
-              </div>
-              <div class="list-group-item py-2">
-                <strong>Prix:</strong> {{ selectedParcours.prix }}€
-              </div>
-              <div class="list-group-item py-2">
-                <strong>Créé le:</strong> {{ formatDate(selectedParcours.created_at) }}
+          <div class="wz-field" *ngIf="selectedParcours.prerequis.length > 0">
+            <label class="wz-label">Prérequis ({{ selectedParcours.prerequis.length }})</label>
+            <div class="wz-list">
+              <div class="wz-list-item" *ngFor="let pre of selectedParcours.prerequis">
+                <i class="isax isax-info-circle" style="color:#185fa5;"></i>{{ pre }}
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Objectifs et Prérequis -->
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <h6>Objectifs ({{ selectedParcours.objectifs.length }})</h6>
-            <ul class="list-unstyled small">
-              <li class="mb-1" *ngFor="let objectif of selectedParcours.objectifs">
-                <i class="isax isax-tick-circle text-success me-2"></i>{{ objectif }}
-              </li>
-            </ul>
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <h6>Prérequis ({{ selectedParcours.prerequis.length }})</h6>
-            <ul class="list-unstyled small">
-              <li class="mb-1" *ngFor="let prerequis of selectedParcours.prerequis">
-                <i class="isax isax-info-circle text-info me-2"></i>{{ prerequis }}
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Formations du parcours -->
-        <div class="mb-3">
-          <h6>Formations du parcours ({{ selectedParcours.formations.length }})</h6>
-          
           <div *ngIf="selectedParcours.formations.length > 0">
-            <!-- Version compacte pour mobile -->
-            <div class="d-md-none">
-              <div class="card mb-2" *ngFor="let formation of selectedParcours.formations; trackBy: trackByFormationId">
-                <div class="card-body p-3">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="mb-1">{{ formation.titre }}</h6>
-                    <span class="badge bg-secondary">{{ formation.pivot?.ordre || '-' }}</span>
-                  </div>
-                  <p class="small text-muted mb-2">{{ formation.short_description }}</p>
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <span class="badge bg-info me-1">{{ formation.niveau }}</span>
-                      <span class="badge bg-danger me-1" *ngIf="formation.pivot?.obligatoire">Obligatoire</span>
-                    </div>
-                    <small class="text-muted">{{ formation.duree_totale }}h - {{ formation.prix }}€</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Version tableau pour desktop -->
-            <div class="table-responsive d-none d-md-block">
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th>Ordre</th>
-                    <th>Formation</th>
-                    <th>Niveau</th>
-                    <th>Durée</th>
-                    <th>Prix</th>
-                    <th>Statut</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let formation of selectedParcours.formations; trackBy: trackByFormationId">
-                    <td>
-                      <span class="badge bg-secondary">{{ formation.pivot?.ordre || '-' }}</span>
-                    </td>
-                    <td>
-                      <div>
-                        <strong class="d-block">{{ formation.titre }}</strong>
-                        <span class="badge bg-danger" *ngIf="formation.pivot?.obligatoire">Obligatoire</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="badge bg-info">{{ formation.niveau }}</span>
-                    </td>
-                    <td>{{ formation.duree_totale }}h</td>
-                    <td>{{ formation.prix }}€</td>
-                    <td>
-                      <span class="badge bg-success" *ngIf="formation.est_publie">Publié</span>
-                      <span class="badge bg-secondary" *ngIf="!formation.est_publie">Brouillon</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          
-          <div class="text-center text-muted py-3" *ngIf="selectedParcours.formations.length === 0">
-            <i class="isax isax-book" style="font-size: 2rem; opacity: 0.5;"></i>
-            <p class="mt-2 mb-0">Aucune formation dans ce parcours</p>
+            <div class="wz-section-label">Formations du parcours ({{ selectedParcours.formations.length }})</div>
+            <table class="ac-table">
+              <thead>
+                <tr>
+                  <th style="width:50px;">Ordre</th>
+                  <th>Formation</th>
+                  <th style="width:100px;">Niveau</th>
+                  <th style="width:70px;">Durée</th>
+                  <th style="width:80px;">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let f of selectedParcours.formations; trackBy: trackByFormationId">
+                  <td><span class="ac-status" data-s="plan">{{ f.pivot?.ordre || '–' }}</span></td>
+                  <td>
+                    <div class="ac-table-name">{{ f.titre }}</div>
+                    <span class="ac-status" data-s="pending" style="margin-top:3px;display:inline-block;" *ngIf="f.pivot?.obligatoire">Obligatoire</span>
+                  </td>
+                  <td><span class="ac-status" data-s="plan">{{ f.niveau }}</span></td>
+                  <td style="font-size:13px;">{{ f.duree_totale }}h</td>
+                  <td>
+                    <span class="ac-status" [attr.data-s]="f.est_publie ? 'pub' : 'draft'">
+                      {{ f.est_publie ? 'Publié' : 'Brouillon' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
-      
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-        <button type="button" class="btn btn-primary" (click)="editParcours(selectedParcours!)" data-bs-dismiss="modal">
-          <i class="isax isax-edit-2 me-2"></i>Modifier
-        </button>
-      </div>
+
+        <div class="wz-foot">
+          <button type="button" class="wz-btn-ghost" data-bs-dismiss="modal">Fermer</button>
+          <button type="button" class="wz-btn-primary" (click)="editParcours(selectedParcours!)" data-bs-dismiss="modal">
+            <i class="isax isax-edit-2"></i>Modifier
+          </button>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>
 
-<!-- Modal Suppression reste inchangé -->
+
+<!-- ══════════════════════════════════════════════
+     MODAL SUPPRESSION
+════════════════════════════════════════════════ -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-body text-center py-4">
-        <div class="mb-3">
-          <i class="isax isax-trash text-danger" style="font-size: 3rem;"></i>
+  <div class="modal-dialog" style="max-width:420px;">
+    <div class="wz-modal modal-content">
+      <div class="wz-head">
+        <div class="wz-head__icon" style="background:#fef2f2;color:#991b1b;"><i class="isax isax-trash"></i></div>
+        <div class="wz-head__text">
+          <div class="wz-head__title">Supprimer le parcours</div>
+          <div class="wz-head__sub" *ngIf="selectedParcours">{{ selectedParcours.nom }}</div>
         </div>
-        <h5>Supprimer le parcours</h5>
-        <p class="text-muted" *ngIf="selectedParcours">
-          Êtes-vous sûr de vouloir supprimer le parcours 
-          "<strong>{{ selectedParcours.nom }}</strong>" ?
+        <button type="button" class="wz-close" data-bs-dismiss="modal"><i class="isax isax-close-circle"></i></button>
+      </div>
+      <div class="wz-body">
+        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;">
+          Êtes-vous sûr de vouloir supprimer ce parcours ?
+          Cette action est <strong>irréversible</strong> et supprimera aussi toutes les inscriptions associées.
         </p>
-        <p class="text-warning small">
-          <i class="isax isax-warning-2 me-1"></i>
-          Cette action est irréversible et supprimera aussi les inscriptions associées.
-        </p>
-        <div class="d-flex justify-content-center gap-2 mt-4">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-danger" (click)="deleteParcours()">
-            Supprimer définitivement
-          </button>
-        </div>
+      </div>
+      <div class="wz-foot">
+        <span class="wz-foot__info"></span>
+        <button type="button" class="wz-btn-ghost" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="wz-btn-danger" (click)="deleteParcours()">
+          Supprimer définitivement
+        </button>
       </div>
     </div>
   </div>
