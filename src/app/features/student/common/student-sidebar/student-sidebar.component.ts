@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { routes } from '../../../../shared/service/routes/routes';
 import { CommonService } from '../../../../shared/service/common/common.service';
 import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-student-sidebar',
@@ -11,71 +12,81 @@ import { filter } from 'rxjs/operators';
   styleUrl: './student-sidebar.component.scss',
   imports: [CommonModule, RouterModule],
 })
-export class StudentSidebarComponent implements OnInit {
+export class StudentSidebarComponent implements OnInit, OnDestroy {
   public routes = routes;
-  isCollapsed = false;
   public currentUrl = '';
-  base: any;
-  page: any;
-  last: any;
+  public base: any; public page: any; public last: any;
 
-  constructor(
-    private common: CommonService,
-    private router: Router
-  ) {
-    this.common.base.subscribe((base: string) => (this.base = base));
-    this.common.page.subscribe((page: string) => (this.page = page));
-    this.common.last.subscribe((last: string) => (this.last = last));
+  isCollapsed = false;
 
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.currentUrl = event.urlAfterRedirects || event.url;
+  openGroups: Record<string, boolean> = {
+    formations:  false,
+    demandes:    false,
+    competences: false,
+    palmares:    false,
+    aide:        false,
+  };
+
+  toggleGroup(key: string): void {
+    this.openGroups[key] = !this.openGroups[key];
+  }
+
+  private navSub?: Subscription;
+
+  constructor(private common: CommonService, private router: Router) {
+    this.common.base.subscribe((b: string) => (this.base = b));
+    this.common.page.subscribe((p: string) => (this.page = p));
+    this.common.last.subscribe((l: string) => (this.last = l));
+
+    this.navSub = this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe((e: any) => {
+        this.currentUrl = e.urlAfterRedirects || e.url;
+        this.autoOpenGroups();
       });
   }
 
   ngOnInit(): void {
     this.currentUrl = this.router.url;
+    this.autoOpenGroups();
   }
 
-  // ── Tableau de bord : toujours actif (inchangé) ─────────────────────────────
+  ngOnDestroy(): void { this.navSub?.unsubscribe(); }
+
+  private autoOpenGroups(): void {
+    if (this.isFormationsActive())  this.openGroups['formations']  = true;
+    if (this.isDemandesActive())    this.openGroups['demandes']    = true;
+    if (this.isCompetencesActive()) this.openGroups['competences'] = true;
+    if (this.isPalmaresActive())    this.openGroups['palmares']    = true;
+  }
+
   isDashboardActive(): boolean {
-    return true;
+    return this.currentUrl === '/student/student-dashboard';
   }
 
-  // ── Parent actif si une de ses routes enfants est active ────────────────────
   isFormationsActive(): boolean {
-    return [
-      routes.studentMyCourses,
-      routes.student_CataloguesAssignes,
-      routes.student_ParcoursAssignes,
-      routes.student_SessionsAcceptees,
-    ].some(r => r && this.currentUrl.startsWith(r));
+    return [routes.studentMyCourses, routes.student_CataloguesAssignes,
+            routes.student_ParcoursAssignes, routes.student_SessionsAcceptees]
+      .some(r => r && this.currentUrl.startsWith(r));
   }
 
   isDemandesActive(): boolean {
-    return [
-      routes.studentDemande,
-      routes.student_DemandeSession,
-      routes.student_DemandeParcours,
-      routes.student_DemandeCatalogue,
-    ].some(r => r && this.currentUrl.startsWith(r));
+    return [routes.studentDemande, routes.student_DemandeSession,
+            routes.student_DemandeParcours, routes.student_DemandeCatalogue]
+      .some(r => r && this.currentUrl.startsWith(r));
   }
-  isPalmaresActive(): boolean {
-  return [
-    routes.studentCertificat,
-  ].some(r => r && this.currentUrl.startsWith(r));
-}
 
   isCompetencesActive(): boolean {
-    return [
-      routes.student_MesCompetences,
-      routes.student_CompetencesRecommandees,
-      routes.student_EcartCompetences,
-    ].some(r => r && this.currentUrl.startsWith(r));
+    return [routes.student_MesCompetences, routes.student_CompetencesRecommandees,
+            routes.student_EcartCompetences]
+      .some(r => r && this.currentUrl.startsWith(r));
   }
 
-  // ── Un seul sous-lien actif à la fois ───────────────────────────────────────
+  isPalmaresActive(): boolean {
+    return [routes.studentCertificat]
+      .some(r => r && this.currentUrl.startsWith(r));
+  }
+
   isExactActive(path: string): boolean {
     return !!path && this.currentUrl.startsWith(path);
   }
