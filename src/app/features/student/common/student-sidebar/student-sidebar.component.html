@@ -43,41 +43,30 @@
         <i class="submenu-arrow isax isax-arrow-right-3"
            [style.transform]="openGroups['demandes'] ? 'rotate(90deg)' : 'none'"></i>
       </a>
+      <!-- Style identique à Mes formations : texte simple, gras, sans pastilles -->
       <ul class="submenu" [class.open]="openGroups['demandes']">
         <li>
           <a [routerLink]="routes.studentDemande"
              [class.active]="isExactActive(routes.studentDemande)">
-            <span class="demande-dot demande-dot--blue"></span>
-            <span class="demande-info">
-              <span class="demande-label">Formations</span>
-            </span>
+            Formations
           </a>
         </li>
         <li>
           <a [routerLink]="routes.student_DemandeSession"
              [class.active]="isExactActive(routes.student_DemandeSession)">
-            <span class="demande-dot demande-dot--purple"></span>
-            <span class="demande-info">
-              <span class="demande-label">Sessions</span>
-            </span>
+            Sessions
           </a>
         </li>
         <li>
           <a [routerLink]="routes.student_DemandeParcours"
              [class.active]="isExactActive(routes.student_DemandeParcours)">
-            <span class="demande-dot demande-dot--green"></span>
-            <span class="demande-info">
-              <span class="demande-label">Parcours</span>
-            </span>
+            Parcours
           </a>
         </li>
         <li>
           <a [routerLink]="routes.student_DemandeCatalogue"
              [class.active]="isExactActive(routes.student_DemandeCatalogue)">
-            <span class="demande-dot demande-dot--orange"></span>
-            <span class="demande-info">
-              <span class="demande-label">Catalogues</span>
-            </span>
+            Catalogues
           </a>
         </li>
       </ul>
