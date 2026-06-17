@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 import { routes } from '../../../shared/service/routes/routes';
 
 interface Quiz {
@@ -52,7 +52,7 @@ export class StudentQuizComponent implements OnInit {
   totalPages  = 0;
 
   constructor(
-    private formationsService: FormationsService,
+    private formationsService: FormationService,
     private router:            Router
   ) {}
 

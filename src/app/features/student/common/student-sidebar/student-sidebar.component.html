@@ -19,41 +19,85 @@
   <ul class="main-menu">
 
     <!-- ================= TABLEAU DE BORD ================= -->
-    <li class="menu-item">
-      <a [routerLink]="routes.students_Dashboard" routerLinkActive="active">
+    <li class="menu-item" [class.active]="isDashboardActive()">
+      <a [routerLink]="routes.students_Dashboard">
         <i class="isax isax-grid-35"></i>
         <span>Tableau de bord</span>
       </a>
     </li>
 
     <!-- ================= MES FORMATIONS ================= -->
-    <li class="menu-item has-submenu">
-      <a>
+    <li class="menu-item" [class.active]="isFormationsActive()">
+      <a (click)="toggleGroup('formations')">
         <i class="isax isax-play-circle"></i>
         <span>Mes formations</span>
-        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+        <i class="submenu-arrow isax isax-arrow-right-3"
+           [style.transform]="openGroups['formations'] ? 'rotate(90deg)' : 'none'"></i>
       </a>
-      <ul class="submenu">
-        <li><a [routerLink]="routes.studentMyCourses" routerLinkActive="active">Formations</a></li>
-        <li><a [routerLink]="routes.student_CataloguesAssignes" routerLinkActive="active">Catalogues</a></li>
-        <li><a [routerLink]="routes.student_ParcoursAssignes" routerLinkActive="active">Parcours</a></li>
-        <li><a [routerLink]="routes.student_SessionsAcceptees" routerLinkActive="active">Sessions</a></li>
-        <li><a>Feedback formateur</a></li>
+      <ul class="submenu" [class.open]="openGroups['formations']">
+        <li><a [routerLink]="routes.studentMyCourses"
+               [class.active]="isExactActive(routes.studentMyCourses)">Formations</a></li>
+        <li><a [routerLink]="routes.student_CataloguesAssignes"
+               [class.active]="isExactActive(routes.student_CataloguesAssignes)">Catalogues</a></li>
+        <li><a [routerLink]="routes.student_ParcoursAssignes"
+               [class.active]="isExactActive(routes.student_ParcoursAssignes)">Parcours</a></li>
+        <li><a [routerLink]="routes.student_SessionsAcceptees"
+               [class.active]="isExactActive(routes.student_SessionsAcceptees)">Sessions</a></li>
       </ul>
     </li>
 
     <!-- ================= MES DEMANDES ================= -->
-    <li class="menu-item has-submenu">
-      <a>
+    <li class="menu-item" [class.active]="isDemandesActive()">
+      <a (click)="toggleGroup('demandes')">
         <i class="isax isax-send-2"></i>
         <span>Mes demandes</span>
-        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+        <i class="submenu-arrow isax isax-arrow-right-3"
+           [style.transform]="openGroups['demandes'] ? 'rotate(90deg)' : 'none'"></i>
       </a>
-      <ul class="submenu">
-        <li><a [routerLink]="routes.studentDemande" routerLinkActive="active"><span>Formations</span></a></li>
-        <li><a [routerLink]="routes.student_DemandeSession" routerLinkActive="active"><span>Sessions</span></a></li>
-        <li><a [routerLink]="routes.student_DemandeParcours" routerLinkActive="active"><span>Parcours</span></a></li>
-        <li><a [routerLink]="routes.student_DemandeCatalogue" routerLinkActive="active"><span>Catalogues</span></a></li>
+      <!-- Style identique à Mes formations : texte simple, gras, sans pastilles -->
+      <ul class="submenu" [class.open]="openGroups['demandes']">
+        <li>
+          <a [routerLink]="routes.studentDemande"
+             [class.active]="isExactActive(routes.studentDemande)">
+            Formations
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeSession"
+             [class.active]="isExactActive(routes.student_DemandeSession)">
+            Sessions
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeParcours"
+             [class.active]="isExactActive(routes.student_DemandeParcours)">
+            Parcours
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="routes.student_DemandeCatalogue"
+             [class.active]="isExactActive(routes.student_DemandeCatalogue)">
+            Catalogues
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- ================= MES COMPÉTENCES ================= -->
+    <li class="menu-item" [class.active]="isCompetencesActive()">
+      <a (click)="toggleGroup('competences')">
+        <i class="isax isax-chart"></i>
+        <span>Mes compétences</span>
+        <i class="submenu-arrow isax isax-arrow-right-3"
+           [style.transform]="openGroups['competences'] ? 'rotate(90deg)' : 'none'"></i>
+      </a>
+      <ul class="submenu" [class.open]="openGroups['competences']">
+        <li><a [routerLink]="routes.student_MesCompetences"
+               [class.active]="isExactActive(routes.student_MesCompetences)">Compétences acquises</a></li>
+        <li><a [routerLink]="routes.student_CompetencesRecommandees"
+               [class.active]="isExactActive(routes.student_CompetencesRecommandees)">Recommandées</a></li>
+        <li><a [routerLink]="routes.student_EcartCompetences"
+               [class.active]="isExactActive(routes.student_EcartCompetences)">Écart de compétences</a></li>
       </ul>
     </li>
 
@@ -81,41 +125,31 @@
       </a>
     </li>
 
-    <!-- ================= MES COMPÉTENCES ================= -->
-    <li class="menu-item has-submenu">
-      <a>
-        <i class="isax isax-chart"></i>
-        <span>Mes compétences</span>
-        <i class="submenu-arrow isax isax-arrow-right-3"></i>
-      </a>
-      <ul class="submenu">
-        <li><a [routerLink]="routes.student_MesCompetences" routerLinkActive="active">Compétences acquises</a></li>
-        <li><a [routerLink]="routes.student_CompetencesRecommandees" routerLinkActive="active">Compétences recommandées</a></li>
-      </ul>
-    </li>
-
     <!-- ================= MES PALMARÈS ================= -->
-    <li class="menu-item has-submenu">
-      <a>
+    <li class="menu-item" [class.active]="isPalmaresActive()">
+      <a (click)="toggleGroup('palmares')">
         <i class="isax isax-medal"></i>
         <span>Mes palmarès</span>
-        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+        <i class="submenu-arrow isax isax-arrow-right-3"
+           [style.transform]="openGroups['palmares'] ? 'rotate(90deg)' : 'none'"></i>
       </a>
-      <ul class="submenu">
-        <li><a [routerLink]="routes.studentCertificat" routerLinkActive="active">Mes certificats</a></li>
+      <ul class="submenu" [class.open]="openGroups['palmares']">
+        <li><a [routerLink]="routes.studentCertificat"
+               [class.active]="isExactActive(routes.studentCertificat)">Mes certificats</a></li>
         <li><a>Mes habilitations</a></li>
         <li><a>Gamification / Mes badges</a></li>
       </ul>
     </li>
 
     <!-- ================= CENTRE D'AIDE ================= -->
-    <li class="menu-item has-submenu">
-      <a>
+    <li class="menu-item">
+      <a (click)="toggleGroup('aide')">
         <i class="isax isax-ticket"></i>
         <span>Centre d'aide</span>
-        <i class="submenu-arrow isax isax-arrow-right-3"></i>
+        <i class="submenu-arrow isax isax-arrow-right-3"
+           [style.transform]="openGroups['aide'] ? 'rotate(90deg)' : 'none'"></i>
       </a>
-      <ul class="submenu">
+      <ul class="submenu" [class.open]="openGroups['aide']">
         <li><a>Guide d'utilisation</a></li>
         <li><a>Tutoriels vidéo</a></li>
         <li><a>Soumettre un ticket</a></li>
@@ -124,7 +158,7 @@
     </li>
 
     <!-- ================= DÉCONNEXION ================= -->
-    <li class="menu-item">
+    <li class="menu-item logout">
       <a [routerLink]="routes.login">
         <i class="isax isax-logout"></i>
         <span>Déconnexion</span>
@@ -132,5 +166,4 @@
     </li>
 
   </ul>
-
 </div>

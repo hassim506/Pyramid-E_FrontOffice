@@ -36,6 +36,66 @@ $shadow-lg:   0 10px 30px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.06);
 $shadow-hover:0 16px 40px rgba(6,155,143,.15), 0 6px 16px rgba(0,0,0,.08);
 $transition:  all .22s ease;
 
+
+
+$primary:      #069b8f;
+$primary-lt:   #e6f7f5;
+$primary-dk:   #047a6f;
+$success:      #10b981;
+$success-lt:   #f0fdf4;
+$warning:      #f59e0b;
+$warning-lt:   #fffbeb;
+$danger:       #ef4444;
+$danger-lt:    #fef2f2;
+$indigo:       #4f46e5;
+$indigo-lt:    #eef2ff;
+$dark:         #0f172a;
+$gray-50:      #f8fafc;
+$gray-100:     #f1f5f9;
+$gray-200:     #e2e8f0;
+$gray-300:     #cbd5e1;
+$gray-400:     #94a3b8;
+$gray-500:     #64748b;
+$gray-600:     #475569;
+$gray-700:     #334155;
+$gray-900:     #0f172a;
+$radius-sm:    8px;
+$radius-md:    14px;
+$radius-lg:    20px;
+$radius-xl:    28px;
+$shadow-sm:    0 1px 4px rgba(0,0,0,.06);
+$shadow-md:    0 4px 20px rgba(0,0,0,.08);
+$shadow-lg:    0 12px 40px rgba(0,0,0,.12);
+$t:            all .2s ease;
+
+// ═══════════════════════════════════════════════════════
+// LOADING
+// ═══════════════════════════════════════════════════════
+.qq-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 60vh; gap: 20px;
+
+  p { font-size: 14px; color: $gray-400; margin: 0; }
+}
+
+.qq-loading__ring {
+  position: relative; width: 50px; height: 50px;
+
+  div {
+    position: absolute; width: 100%; height: 100%;
+    border: 3px solid transparent;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: qq-spin .8s linear infinite;
+
+    &:nth-child(2) { width: 38px; height: 38px; top: 6px; left: 6px; border-top-color: $indigo; animation-delay: -.3s; }
+    &:nth-child(3) { width: 26px; height: 26px; top: 12px; left: 12px; border-top-color: $warning; animation-delay: -.6s; }
+    &:nth-child(4) { width: 14px; height: 14px; top: 18px; left: 18px; border-top-color: $success; animation-delay: -.9s; }
+  }
+}
+
+@keyframes qq-spin { to { transform: rotate(360deg); } }
+
 // ══════════════════════════════════════════════════════════════
 // KPI CARDS — même style que la page parcours
 // ══════════════════════════════════════════════════════════════

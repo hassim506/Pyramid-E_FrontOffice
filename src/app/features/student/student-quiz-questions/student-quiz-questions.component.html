@@ -1,12 +1,16 @@
-<!-- LOADING -->
+<!-- ══════════════════════════════════════════════
+     LOADING
+══════════════════════════════════════════════ -->
 <div class="qq-loading" *ngIf="loading">
   <div class="qq-loading__ring">
     <div></div><div></div><div></div><div></div>
   </div>
-  <p>Chargement du quiz...</p>
+  <p>Préparation du quiz...</p>
 </div>
 
-<!-- ERREUR -->
+<!-- ══════════════════════════════════════════════
+     ERREUR
+══════════════════════════════════════════════ -->
 <div class="qq-error" *ngIf="error && !loading">
   <div class="qq-error__icon"><i class="isax isax-warning-2"></i></div>
   <h3>Une erreur est survenue</h3>
@@ -16,61 +20,119 @@
   </button>
 </div>
 
+<!-- ══════════════════════════════════════════════
+     QUIZ PLEIN ÉCRAN
+══════════════════════════════════════════════ -->
 <ng-container *ngIf="!loading && !error && quiz">
 
-  <!-- ══════════════════════════════════════════════
-       QUESTIONS
-  ══════════════════════════════════════════════ -->
+  <!-- ─── QUESTIONS ──────────────────────────── -->
   <ng-container *ngFor="let question of questions; let i = index">
-    <div class="qq-shell" *ngIf="selected === i + 1">
+    <div class="qq-page" *ngIf="selected === i + 1">
 
-      <!-- TOP BAR -->
+      <!-- ── TOPBAR ─────────────────────────── -->
       <header class="qq-topbar">
-        <button class="qq-topbar__back" (click)="retournerAuxQuiz()">
-          <i class="isax isax-arrow-left-2"></i>
-        </button>
-        <div class="qq-topbar__info">
-          <span class="qq-topbar__label">Quiz final</span>
-          <h1 class="qq-topbar__title">{{ quiz.titre }}</h1>
+        <div class="qq-topbar__left">
+          <button class="qq-topbar__back" (click)="retournerAuxQuiz()" title="Retour">
+            <i class="isax isax-arrow-left-2"></i>
+          </button>
+          <div class="qq-topbar__meta">
+            <span class="qq-topbar__label">Quiz final</span>
+            <h1 class="qq-topbar__title">{{ quiz.titre }}</h1>
+          </div>
         </div>
-        <div class="qq-topbar__timer" *ngIf="quiz.duree_minutes" [class.qq-topbar__timer--danger]="timeLeft < 60">
-          <i class="isax isax-clock"></i>
-          <span>{{ timerLabel }}</span>
-          <span class="qq-topbar__timer-total">/ {{ totalTimeLabel }}</span>
+
+        <div class="qq-topbar__center">
+          <div class="qq-topbar__progress">
+            <div class="qq-topbar__progress-track">
+              <div class="qq-topbar__progress-fill" [style.width.%]="progressPercent"></div>
+            </div>
+            <span class="qq-topbar__progress-label">
+              <strong>{{ selected }}</strong>/{{ totalQuestions }}
+            </span>
+          </div>
+        </div>
+
+        <div class="qq-topbar__right">
+          <div class="qq-topbar__answered">
+            <i class="isax isax-tick-circle"></i>
+            <span>{{ totalAnswered }} / {{ totalQuestions }}</span>
+          </div>
+          <div class="qq-topbar__timer"
+               *ngIf="quiz.duree_minutes"
+               [class.qq-topbar__timer--warning]="timeLeft < 120"
+               [class.qq-topbar__timer--danger]="timeLeft < 60">
+            <i class="isax isax-clock"></i>
+            <span class="qq-topbar__timer-value">{{ timerLabel }}</span>
+            <span class="qq-topbar__timer-sep">/</span>
+            <span class="qq-topbar__timer-total">{{ totalTimeLabel }}</span>
+          </div>
         </div>
       </header>
 
-      <!-- PROGRESS BAR -->
-      <div class="qq-progress-wrap">
-        <div class="qq-progress-bar">
-          <div class="qq-progress-fill" [style.width.%]="progressPercent"></div>
-        </div>
-        <div class="qq-progress-info">
-          <span class="qq-progress-steps">
-            <strong>{{ selected }}</strong> / {{ totalQuestions }}
-          </span>
-          <span class="qq-progress-answered">
-            <i class="isax isax-tick-circle me-1"></i>
-            {{ totalAnswered }} répondu(s)
-          </span>
-        </div>
-      </div>
+      <!-- ── CORPS ──────────────────────────── -->
+      <main class="qq-main">
 
-      <!-- QUESTION CARD -->
-      <div class="qq-body">
+        <!-- Panneau gauche : navigation dots -->
+        <aside class="qq-aside">
+          <div class="qq-aside__inner">
+            <p class="qq-aside__title">Questions</p>
 
-        <!-- Numéro + question -->
-        <div class="qq-question-card">
-          <div class="qq-question-card__header">
-            <div class="qq-question-num">Q{{ selected }}</div>
-            <div class="qq-question-type-badge" [ngClass]="getTypeBadgeClass(question.type)">
+            <!-- Compteur avancement -->
+            <div class="qq-aside__counter">
+              <span>Répondues</span>
+              <strong>{{ totalAnswered }}/{{ totalQuestions }}</strong>
+            </div>
+
+            <!-- Légende horizontale -->
+            <div class="qq-aside__legend">
+              <span class="qq-aside__legend-item qq-aside__legend-item--answered">
+                <span class="qq-aside__legend-dot"></span>Répondu
+              </span>
+              <span class="qq-aside__legend-item qq-aside__legend-item--current">
+                <span class="qq-aside__legend-dot"></span>En cours
+              </span>
+              <span class="qq-aside__legend-item">
+                <span class="qq-aside__legend-dot qq-aside__legend-dot--empty"></span>Non répondu
+              </span>
+            </div>
+
+            <div class="qq-aside__dots">
+
+              <!-- Liste directe des questions -->
+              <div class="qq-questions-list">
+                <button class="qq-acc-dot"
+                        *ngFor="let question of questions; let i = index"
+                        [class.qq-acc-dot--active]="selected === i + 1"
+                        [class.qq-acc-dot--answered]="isAnswered(question) && selected !== i + 1"
+                        (click)="selected = i + 1; scrollToActive()"
+                        [title]="question.question_text">
+                  <span class="qq-acc-dot__num">Q{{ i + 1 }}</span>
+                  <span class="qq-acc-dot__text">{{ question.question_text }}</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </aside>
+
+        <!-- Zone principale question -->
+        <section class="qq-content">
+
+          <!-- En-tête question -->
+          <div class="qq-question-header">
+            <div class="qq-question-num">
+              <span class="qq-q-prefix">Q</span>{{ selected }}<span class="qq-q-total">/{{ totalQuestions }}</span>
+            </div>
+            <div class="qq-question-type" [ngClass]="getTypeBadgeClass(question.type)">
               <i class="isax me-1" [ngClass]="getTypeIcon(question.type)"></i>
               {{ getTypeLabel(question.type) }}
             </div>
           </div>
+
+          <!-- Texte de la question -->
           <p class="qq-question-text">{{ question.question_text }}</p>
 
-          <!-- QCM / Vrai-Faux -->
+          <!-- ── Options QCM / Vrai-Faux ── -->
           <div class="qq-options" *ngIf="question.type === 'multiple_choice' || question.type === 'true_false'">
             <button class="qq-option"
                     *ngFor="let rep of question.reponses; let ri = index"
@@ -84,143 +146,138 @@
             </button>
           </div>
 
-          <!-- Texte libre -->
-          <div class="qq-text-wrap" *ngIf="question.type === 'text'">
+          <!-- ── Texte libre ── -->
+          <div *ngIf="question.type === 'text'">
             <textarea class="qq-textarea"
-                      rows="4"
+                      rows="5"
                       placeholder="Saisissez votre réponse ici..."
-                      [(ngModel)]="textReponses[question.id]">
+                      [(ngModel)]="textReponses[question.id]"
+                      maxlength="1000">
             </textarea>
             <div class="qq-textarea-hint">
               <i class="isax isax-edit-2 me-1"></i>
-              Réponse libre — orthographe exacte requise
+              Réponse libre — orthographe exacte requise &nbsp;·&nbsp;
+              <span [class.qq-char-warn]="(textReponses[question.id]?.length ?? 0) >= 900">
+                {{ textReponses[question.id]?.length ?? 0 }} / 1000
+              </span>
             </div>
           </div>
 
-        </div>
+          <!-- ── Navigation ── -->
+          <div class="qq-nav">
+            <button class="qq-btn qq-btn--ghost"
+                    *ngIf="selected > 1"
+                    (click)="movePrev()">
+              <i class="isax isax-arrow-left-2 me-2"></i>Précédent
+            </button>
+            <span *ngIf="selected === 1"></span>
 
-        <!-- DOTS NAVIGATION -->
-        <div class="qq-dots">
-          <button class="qq-dot"
-                  *ngFor="let q of questions; let di = index"
-                  [class.qq-dot--active]="selected === di + 1"
-                  [class.qq-dot--answered]="isAnswered(q) && selected !== di + 1"
-                  (click)="selected = di + 1"
-                  [title]="'Question ' + (di + 1)">
-          </button>
-        </div>
+            <button class="qq-btn"
+                   [class.qq-btn--primary]="selected < totalQuestions"
+                   [class.qq-btn--success]="selected === totalQuestions"
+                   (click)="moveNext()"
+                   [disabled]="submitting">
+              <ng-container *ngIf="selected < totalQuestions">
+                Suivant<i class="isax isax-arrow-right-2 ms-2"></i>
+              </ng-container>
+              <ng-container *ngIf="selected === totalQuestions">
+                <span *ngIf="!submitting">
+                  <i class="isax isax-send-2 me-2"></i>Terminer le quiz
+                </span>
+                <span *ngIf="submitting" class="qq-btn__loading">
+                  <span class="qq-spinner"></span>Envoi en cours...
+                </span>
+              </ng-container>
+            </button>
+          </div>
 
-        <!-- NAVIGATION BUTTONS -->
-        <div class="qq-nav">
-          <button class="qq-btn qq-btn--ghost"
-                  *ngIf="selected > 1"
-                  (click)="movePrev()">
-            <i class="isax isax-arrow-left-2 me-2"></i>Précédent
-          </button>
-          <span *ngIf="selected === 1"></span>
-
-          <button class="qq-btn"
-                  [class.qq-btn--primary]="selected < totalQuestions"
-                  [class.qq-btn--success]="selected === totalQuestions"
-                  (click)="moveNext()"
-                  [disabled]="submitting">
-            <ng-container *ngIf="selected < totalQuestions">
-              Suivant<i class="isax isax-arrow-right-2 ms-2"></i>
-            </ng-container>
-            <ng-container *ngIf="selected === totalQuestions">
-              <span *ngIf="!submitting">
-                <i class="isax isax-send-2 me-2"></i>Terminer le quiz
-              </span>
-              <span *ngIf="submitting">
-                <span class="qq-spinner"></span>Envoi...
-              </span>
-            </ng-container>
-          </button>
-        </div>
-
-      </div>
+        </section>
+      </main>
     </div>
   </ng-container>
 
-  <!-- ══════════════════════════════════════════════
-       RÉSULTAT
-  ══════════════════════════════════════════════ -->
-  <div class="qq-shell qq-shell--result" *ngIf="submitted && selected === totalQuestions + 1">
+  <!-- ─── RÉSULTAT ──────────────────────────── -->
+  <div class="qq-page qq-page--result" *ngIf="submitted && selected === totalQuestions + 1">
 
-    <!-- TOP BAR résultat -->
-    <header class="qq-topbar">
-      <button class="qq-topbar__back" (click)="retournerAuxQuiz()">
-        <i class="isax isax-arrow-left-2"></i>
-      </button>
-      <div class="qq-topbar__info">
-        <span class="qq-topbar__label">Résultat</span>
-        <h1 class="qq-topbar__title">{{ quiz.titre }}</h1>
+    <header class="qq-topbar qq-topbar--result">
+      <div class="qq-topbar__left">
+        <button class="qq-topbar__back" (click)="retournerAuxQuiz()">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <div class="qq-topbar__meta">
+          <span class="qq-topbar__label">Résultat final</span>
+          <h1 class="qq-topbar__title">{{ quiz.titre }}</h1>
+        </div>
       </div>
     </header>
 
-    <div class="qq-result-body">
+    <main class="qq-result-main">
+      <div class="qq-result-card"
+           [class.qq-result-card--success]="estReussi"
+           [class.qq-result-card--fail]="!estReussi">
 
-      <!-- Carte résultat -->
-      <div class="qq-result-card" [class.qq-result-card--success]="estReussi" [class.qq-result-card--fail]="!estReussi">
-
-        <!-- Décoration -->
-        <div class="qq-result-card__deco">
-          <span *ngIf="estReussi">🎉</span>
-          <span *ngIf="estReussi">⭐</span>
-          <span *ngIf="estReussi">🏆</span>
-          <span *ngIf="!estReussi">💪</span>
-          <span *ngIf="!estReussi">📚</span>
+        <div class="qq-result-decos" *ngIf="estReussi">
+          <span class="qq-deco qq-deco--1">🎉</span>
+          <span class="qq-deco qq-deco--2">⭐</span>
+          <span class="qq-deco qq-deco--3">🏆</span>
+          <span class="qq-deco qq-deco--4">✨</span>
+        </div>
+        <div class="qq-result-decos" *ngIf="!estReussi">
+          <span class="qq-deco qq-deco--1">💪</span>
+          <span class="qq-deco qq-deco--2">📚</span>
         </div>
 
-        <!-- Icône -->
-        <div class="qq-result-icon" [class.qq-result-icon--success]="estReussi" [class.qq-result-icon--fail]="!estReussi">
+        <div class="qq-score-ring">
+          <svg viewBox="0 0 140 140" class="qq-score-ring__svg">
+            <circle cx="70" cy="70" r="58" class="qq-score-ring__track"/>
+            <circle cx="70" cy="70" r="58" class="qq-score-ring__fill"
+                    [class.qq-score-ring__fill--success]="estReussi"
+                    [class.qq-score-ring__fill--fail]="!estReussi"
+                    [style.stroke-dashoffset]="getScoreDashOffset()"/>
+          </svg>
+          <div class="qq-score-ring__value" [style.color]="getNoteColor()">
+            {{ noteFinale | number:'1.0-0' }}<span class="qq-score-ring__pct">%</span>
+          </div>
+        </div>
+
+        <div class="qq-result-icon" [class.qq-result-icon--success]="estReussi">
           <i class="isax" [class.isax-award]="estReussi" [class.isax-close-circle]="!estReussi"></i>
         </div>
 
-        <!-- Score -->
-        <div class="qq-result-score">
-          <div class="qq-result-score__ring">
-            <svg viewBox="0 0 120 120" class="qq-result-score__svg">
-              <circle cx="60" cy="60" r="50" class="qq-result-score__track"/>
-              <circle cx="60" cy="60" r="50" class="qq-result-score__fill"
-                      [class.qq-result-score__fill--success]="estReussi"
-                      [class.qq-result-score__fill--fail]="!estReussi"
-                      [style.stroke-dashoffset]="getScoreDashOffset()"/>
-            </svg>
-            <div class="qq-result-score__value" [style.color]="getNoteColor()">
-              {{ noteFinale | number:'1.0-0' }}<span>%</span>
-            </div>
-          </div>
-          <p class="qq-result-score__min">Score minimum : {{ quiz.score_minimum }}%</p>
-        </div>
-
-        <!-- Message -->
         <div class="qq-result-message">
-          <h2 *ngIf="estReussi">Félicitations ! Vous avez réussi 🎉</h2>
+          <h2 *ngIf="estReussi">Félicitations ! 🎉</h2>
           <h2 *ngIf="!estReussi">Pas cette fois...</h2>
           <p *ngIf="estReussi">Excellent travail ! Votre maîtrise du sujet est confirmée.</p>
-          <p *ngIf="!estReussi">Ne vous découragez pas, révisez et retentez. Vous pouvez y arriver !</p>
+          <p *ngIf="!estReussi">Ne vous découragez pas — révisez et retentez. Vous pouvez y arriver !</p>
+          <div class="qq-result-min">
+            Score minimum requis : <strong>{{ quiz.score_minimum }}%</strong>
+          </div>
         </div>
 
-        <!-- Stats -->
         <div class="qq-result-stats" *ngIf="resultat?.bonnes_reponses !== undefined">
           <div class="qq-result-stat">
+            <div class="qq-result-stat__icon qq-result-stat__icon--green">
+              <i class="isax isax-tick-circle"></i>
+            </div>
             <div class="qq-result-stat__value">{{ resultat.bonnes_reponses }}</div>
             <div class="qq-result-stat__label">Bonnes réponses</div>
           </div>
-          <div class="qq-result-stat qq-result-stat--sep"></div>
           <div class="qq-result-stat">
+            <div class="qq-result-stat__icon qq-result-stat__icon--blue">
+              <i class="isax isax-note-21"></i>
+            </div>
             <div class="qq-result-stat__value">{{ resultat.total_questions ?? totalQuestions }}</div>
             <div class="qq-result-stat__label">Total questions</div>
           </div>
-          <div class="qq-result-stat qq-result-stat--sep"></div>
           <div class="qq-result-stat">
+            <div class="qq-result-stat__icon qq-result-stat__icon--orange">
+              <i class="isax isax-repeat"></i>
+            </div>
             <div class="qq-result-stat__value">{{ resultat.nombre_tentatives ?? 1 }}</div>
             <div class="qq-result-stat__label">Tentative(s)</div>
           </div>
         </div>
 
-        <!-- Actions -->
         <div class="qq-result-actions">
           <button class="qq-btn qq-btn--ghost" (click)="retournerAuxQuiz()">
             <i class="isax isax-arrow-left-2 me-2"></i>Mes Quiz
@@ -231,7 +288,7 @@
         </div>
 
       </div>
-    </div>
+    </main>
   </div>
 
 </ng-container>

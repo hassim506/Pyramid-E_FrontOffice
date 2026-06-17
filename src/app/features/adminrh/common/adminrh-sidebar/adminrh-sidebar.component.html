@@ -78,14 +78,14 @@
           <i class="isax isax-arrow-right-3 arr"></i>
         </div>
         <div class="sb-sub" *ngIf="openGroups['demandes']">
-          <a [routerLink]="routes.AdminrhDemande" routerLinkActive="active" class="sb-sub-item">
+          <a [routerLink]="routes.adminrhDemande" routerLinkActive="active" class="sb-sub-item">
             <span class="sb-sub-label">Formations</span>
             <span *ngIf="demandesEnAttenteCount > 0" class="sb-badge sb-badge--red sb-badge--sm">{{ demandesEnAttenteCount }}</span>
           </a>
-          <a [routerLink]="routes.AdminrhDemandeParcours" routerLinkActive="active" class="sb-sub-item">
+          <a [routerLink]="routes.adminrhDemandeParcours" routerLinkActive="active" class="sb-sub-item">
             <span class="sb-sub-label">Parcours</span>
           </a>
-          <a [routerLink]="routes.AdminrhDemandeCatalogue" routerLinkActive="active" class="sb-sub-item">
+          <a [routerLink]="routes.adminrhDemandeCatalogue" routerLinkActive="active" class="sb-sub-item">
             <span class="sb-sub-label">Catalogue</span>
           </a>
         </div>
@@ -204,7 +204,7 @@
       {{ demandesEnAttenteCount }} demandes non traitées
     </div>
     <div class="sb-widget-alert-sub">En attente depuis plus de 48h</div>
-    <a [routerLink]="routes.AdminrhDemande" class="sb-widget-alert-link">Traiter maintenant →</a>
+    <a [routerLink]="routes.adminrhDemande" class="sb-widget-alert-link">Traiter maintenant →</a>
   </div>
 
   <!-- ── WIDGET QUOTA ── -->

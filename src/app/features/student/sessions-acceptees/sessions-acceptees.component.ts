@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 declare const bootstrap: any;
 
 interface SessionAcceptee {
@@ -79,7 +79,7 @@ export class SessionsAccepteesComponent implements OnInit {
   private modalInstance: any = null;
 
   constructor(
-    private formationsService: FormationsService,
+    private formationsService: FormationService,
     private router: Router,
   ) {}
 

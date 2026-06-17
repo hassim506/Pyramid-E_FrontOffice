@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { UserListComponent } from './features/superadmin/user/user-list.component';
+import { UserListComponent } from './features/superadmin/user/user-list.component'
 import { PermissionGuard } from './guards/permission-guard.guard';
 import { authGuard } from './guards/auth.guard';
 import { layoutGuard } from './guards/layout.guard';
@@ -21,11 +21,17 @@ export const routes: Routes = [
         ]
 },
     // ══════════════════════════════════════════════════════════════════════
-    // PAGE LECTEUR PLEIN ÉCRAN — en dehors de tout layout back-office
+    // PAGES PLEIN ÉCRAN — en dehors de tout layout back-office
     // ══════════════════════════════════════════════════════════════════════
     {
         path: 'student/lecture-formation/:id',
         loadComponent: () => import('./features/student/lecture-formation/lecture-formation.component').then(m => m.LectureFormationComponent),
+        canActivate: [authGuard],
+    },
+    // ✅ Route quiz plein écran — hors layout, même niveau que lecture-formation
+    {
+        path: 'student/quiz/:id',
+        loadComponent: () => import('./features/student/student-quiz-questions/student-quiz-questions.component').then(m => m.StudentQuizQuestionsComponent),
         canActivate: [authGuard],
     },
 

@@ -38,7 +38,7 @@ export class DemandeFormationService {
   // ✅ Pour RH/Admin → /demandes-formation (permission requise)
   getDemandesFormation(): Observable<DemandeFormationResponse> {
     return this.http.get<DemandeFormationResponse>(
-      `${this.apiUrl}/demandes-formation`,
+      `${this.apiUrl }/demandes-formation`,
       { headers: this.getHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
   }

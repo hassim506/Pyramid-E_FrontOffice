@@ -315,6 +315,21 @@
               </div>
             </div>
 
+            <!-- Barre de recherche dans les permissions -->
+            <div class="perm-search mb-3">
+              <i class="isax isax-search-normal-1 perm-search__icon"></i>
+              <input
+                type="search"
+                class="perm-search__input"
+                placeholder="Rechercher une permission..."
+                [(ngModel)]="permissionSearch"
+                [ngModelOptions]="{standalone: true}">
+              <button *ngIf="permissionSearch" type="button" class="perm-search__clear"
+                      (click)="permissionSearch = ''">
+                <i class="isax isax-close-circle"></i>
+              </button>
+            </div>
+
             <!-- Tabs catégories -->
             <div class="d-flex gap-1 flex-wrap mb-3">
               <button
@@ -332,6 +347,12 @@
             <div *ngIf="adminrhPermissions.length === 0" class="text-center py-4 text-muted">
               <i class="isax isax-info-circle fs-48 d-block mb-2"></i>
               Aucune permission disponible
+            </div>
+
+            <div *ngIf="adminrhPermissions.length > 0 && filteredPermissionsForModal.length === 0"
+                 class="text-center py-4 text-muted">
+              <i class="isax isax-search-normal-1 perm-empty-icon d-block mb-2"></i>
+              Aucune permission ne correspond à votre recherche
             </div>
 
             <div class="permissions-grid">

@@ -89,7 +89,7 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
 
-    this.formationService.getFormationById(String(this.formationId))
+    this.formationService.getFormationById((this.formationId))
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {

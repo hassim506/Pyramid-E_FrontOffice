@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 
 @Component({
   selector: 'app-student-courses',
@@ -11,7 +12,7 @@ import { FormationsService } from '../../../shared/service/Formationsss/formatio
   templateUrl: './student-courses.component.html',
   styleUrls: ['./student-courses.component.scss'],
 })
-export class StudentCoursesComponent implements OnInit {
+export class StudentCoursesComponent implements OnInit, OnDestroy {
 
   allCatalogues:       any[] = [];
   filteredCatalogues:  any[] = [];
@@ -31,13 +32,13 @@ export class StudentCoursesComponent implements OnInit {
   pages:       number[] = [];
 
   types = [
-    { value: '',           label: 'Tous les types' },
-    { value: 'general',    label: 'Général'        },
-    { value: 'specialise', label: 'Spécialisé'     },
-    { value: 'certifiant', label: 'Certifiant'     },
-    { value: 'technique',  label: 'Technique'      },
-    { value: 'management', label: 'Management'     },
-    { value: 'soft_skills',label: 'Soft Skills'    },
+    { value: '',            label: 'Tous les types' },
+    { value: 'general',     label: 'Général'        },
+    { value: 'specialise',  label: 'Spécialisé'     },
+    { value: 'certifiant',  label: 'Certifiant'     },
+    { value: 'technique',   label: 'Technique'      },
+    { value: 'management',  label: 'Management'     },
+    { value: 'soft_skills', label: 'Soft Skills'    },
   ];
 
   filtres = [
@@ -51,25 +52,42 @@ export class StudentCoursesComponent implements OnInit {
     { value: 'expire',         label: 'Expiré',             icon: 'isax-calendar-remove' },
   ];
 
+  // ✅ Flag pour détecter qu'on revient d'une page de détail
+  private _dejaCharge = false;
+  private routerSub?: Subscription;
+
   constructor(
-    private formationsService: FormationsService,
+    private formationsService: FormationService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadCatalogues();
+
+    // ✅ Rafraîchir les progressions quand on revient sur cette page
+    //    depuis le détail d'un catalogue ou depuis lecture-formation
+    this.routerSub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e: NavigationEnd) => {
+        const url = e.urlAfterRedirects || e.url;
+        if (this._dejaCharge && url.includes('mes-catalogues')) {
+          this._refreshProgressionsSilencieux();
+        }
+        this._dejaCharge = true;
+      });
   }
 
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
+  }
+
+  // ── Chargement initial complet ─────────────────────────────
   loadCatalogues(): void {
     this.loading = true;
     this.error   = '';
     this.formationsService.getMesCataloguesAssignes().subscribe({
       next: (res) => {
-        this.allCatalogues = (res.catalogues ?? []).map((c: any) => ({
-          ...c,
-          est_termine: c.est_termine
-            || (c.total_formations > 0 && c.formations_terminees >= c.total_formations),
-        }));
+        this.allCatalogues = this._normaliserCatalogues(res.catalogues ?? []);
         this.applyFilters();
         this.loading = false;
       },
@@ -80,9 +98,41 @@ export class StudentCoursesComponent implements OnInit {
     });
   }
 
-  // ── Helpers état ───────────────────────────────────────────
+  // ✅ Refresh silencieux — même logique que parcours-assignes
+  private _refreshProgressionsSilencieux(): void {
+    this.formationsService.getMesCataloguesAssignes().subscribe({
+      next: (res) => {
+        const nouveaux = this._normaliserCatalogues(res.catalogues ?? []);
 
-  /** Vrai si la date d'expiration est dépassée ET le catalogue n'est pas terminé */
+        // Mettre à jour uniquement les champs de progression sans perdre les filtres
+        this.allCatalogues = this.allCatalogues.map(ancien => {
+          const frais = nouveaux.find(n => n.id === ancien.id);
+          if (!frais) return ancien;
+          return {
+            ...ancien,
+            progression:          frais.progression,
+            formations_terminees: frais.formations_terminees,
+            total_formations:     frais.total_formations,
+            est_termine:          frais.est_termine,
+          };
+        });
+
+        this.applyFilters();
+      },
+      error: () => {}
+    });
+  }
+
+  // ✅ Normalisation commune
+  private _normaliserCatalogues(liste: any[]): any[] {
+    return liste.map((c: any) => ({
+      ...c,
+      est_termine: c.est_termine
+        || (c.total_formations > 0 && c.formations_terminees >= c.total_formations),
+    }));
+  }
+
+  // ── Helpers état ───────────────────────────────────────────
   isExpire(catalogue: any): boolean {
     if (catalogue.est_termine) return false;
     if (!catalogue.date_expiration) return false;
@@ -101,7 +151,6 @@ export class StudentCoursesComponent implements OnInit {
   }
 
   // ── Filtres ────────────────────────────────────────────────
-
   onSearchChange(): void { this.currentPage = 1; this.applyFilters(); }
 
   onTypeChange(type: string): void {
@@ -109,9 +158,7 @@ export class StudentCoursesComponent implements OnInit {
   }
 
   onFiltreChange(valeur: string): void {
-    this.selectedFiltre = valeur as any;
-    this.currentPage    = 1;
-    this.applyFilters();
+    this.selectedFiltre = valeur as any; this.currentPage = 1; this.applyFilters();
   }
 
   clearFilters(): void {
@@ -169,7 +216,6 @@ export class StudentCoursesComponent implements OnInit {
   get totalExpires():     number { return this.allCatalogues.filter(c => this.isExpire(c)).length; }
 
   // ── Pagination ─────────────────────────────────────────────
-
   changePage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
@@ -190,13 +236,11 @@ export class StudentCoursesComponent implements OnInit {
   }
 
   // ── Navigation ─────────────────────────────────────────────
-
   goToCatalogue(id: number): void {
     this.router.navigate(['/student/catalogue-detail', id]);
   }
 
   // ── Helpers couleur / type ─────────────────────────────────
-
   getTypeColor(type: string): string {
     const colors: Record<string, string> = {
       certifiant:  '#7c3aed',

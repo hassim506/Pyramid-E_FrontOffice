@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://127.0.0.1:8000/api',
+    apiUrl: 'http://127.0.0.1:8000/api',
    certifierApiUrl: 'https://api.certifier.io/v1',
   certifierToken: 'cfp_o3eyPlaQVpOvL6Y63W2EqBnDXWsQ2No0g7x6'
 

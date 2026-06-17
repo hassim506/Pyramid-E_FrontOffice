@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 import { Formation } from '../../../shared/models/formation.models';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { FormationService } from '../../../shared/service/formation/formation.service';
 import { ProgressionService } from '../../../shared/service/progression/progression.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 
@@ -24,35 +24,35 @@ interface Toast {
 })
 export class MesCoursComponent implements OnInit, OnDestroy {
 
-  // ── Vue ─────────────────────────────────────────
+  // ── Vue ──────────────────────────────────────
   viewMode: 'grid' | 'table' = 'grid';
 
-  // ── Données ──────────────────────────────────────
+  // ── Données ──────────────────────────────────
   allFormations: Formation[] = [];
   formations:    Formation[] = [];
   loading = false;
   error   = '';
 
-  // ── Pagination ───────────────────────────────────
+  // ── Pagination ───────────────────────────────
   currentPage = 1;
   pageSize    = 10;
   totalData   = 0;
   skip        = 0;
   limit       = 10;
 
-  // ── Filtres ──────────────────────────────────────
+  // ── Filtres ──────────────────────────────────
   selectedTab     = '';
   searchDataValue = '';
 
-  // ── Toast ────────────────────────────────────────
+  // ── Toast ────────────────────────────────────
   toast: Toast = { type: 'success', message: '', visible: false };
   private toastTimer: any;
 
-  // ── Abonnement progression ───────────────────────
+  // ── Abonnement progression ───────────────────
   private progressionSub?: Subscription;
 
   constructor(
-    private formationsService: FormationsService,
+    private formationsService: FormationService,
     public  progressionService: ProgressionService,
     private router: Router
   ) {}
@@ -91,37 +91,65 @@ export class MesCoursComponent implements OnInit, OnDestroy {
 
   // ════════════════════════════════════════════
   // PROGRESSION
+  // ✅ CORRECTION CLÉ : on passe toujours parcoursId=null ici
+  //    car mes-cours n'affiche QUE les formations simples (sans parcours).
+  //    Le service utilise désormais une clé composite "formationId_parcoursId",
+  //    donc getPercent(id, null) lit uniquement le cache de la formation simple
+  //    et ne sera jamais pollué par une session dans un parcours.
   // ════════════════════════════════════════════
   getProgression(f: Formation): number {
-    const fromService = this.progressionService.getPercent(f.id);
-    return fromService > 0 ? fromService : Number(f.progression ?? 0);
+    // Priorité au cache service (contexte formation simple, parcoursId=null)
+    const fromService = this.progressionService.getPercent(f.id, null);
+    // Fallback sur la valeur de l'API si le cache n'a pas encore été chargé
+    return fromService > 0 ? fromService : Number((f as any).progression ?? 0);
+  }
+
+  // ════════════════════════════════════════════
+  // SOURCE HELPERS
+  // ════════════════════════════════════════════
+  getSource(f: Formation): string {
+    return (f as any).source ?? 'assigne';
+  }
+
+  isFromDemande(f: Formation): boolean {
+    return this.getSource(f) === 'demande';
+  }
+
+  getBadgeLabel(f: Formation): string {
+    return (f as any).badge_label ?? (this.isFromDemande(f) ? 'Demande acceptée' : 'Assignée');
   }
 
   // ════════════════════════════════════════════
   // KPI GETTERS
   // ════════════════════════════════════════════
-  get totalFormations():  number { return this.allFormations.length; }
-  get totalEnCours():     number { return this.allFormations.filter(f => { const p = this.getProgression(f); return p > 0 && p < 100; }).length; }
-  get totalACommencer():  number { return this.allFormations.filter(f => this.getProgression(f) === 0).length; }
-  get totalTerminees():   number { return this.allFormations.filter(f => this.getProgression(f) === 100).length; }
-  get totalCertifiantes():number { return this.allFormations.filter(f => (f as any).est_certifiante).length; }
+  get totalFormations():   number { return this.allFormations.length; }
+  get totalEnCours():      number { return this.allFormations.filter(f => { const p = this.getProgression(f); return p > 0 && p < 100; }).length; }
+  get totalACommencer():   number { return this.allFormations.filter(f => this.getProgression(f) === 0).length; }
+  get totalTerminees():    number { return this.allFormations.filter(f => this.getProgression(f) >= 100).length; }
+  get totalCertifiantes(): number { return this.allFormations.filter(f => (f as any).est_certifiante).length; }
+  get totalAssignees():    number { return this.allFormations.filter(f => this.getSource(f) === 'assigne').length; }
+  get totalDemandes():     number { return this.allFormations.filter(f => this.getSource(f) === 'demande').length; }
 
   // ════════════════════════════════════════════
   // FILTRES
   // ════════════════════════════════════════════
   get filteredFormations(): Formation[] {
     return this.allFormations.filter(f => {
-      const p = this.getProgression(f);
+      const p      = this.getProgression(f);
+      const source = this.getSource(f);
 
       const matchSearch = !this.searchDataValue ||
         f.titre.toLowerCase().includes(this.searchDataValue.toLowerCase()) ||
-        (f.description ?? '').toLowerCase().includes(this.searchDataValue.toLowerCase());
+        ((f as any).description ?? '').toLowerCase().includes(this.searchDataValue.toLowerCase());
 
       const matchTab =
         this.selectedTab === ''            ? true :
         this.selectedTab === 'en_cours'    ? (p > 0 && p < 100) :
         this.selectedTab === 'a_commencer' ? p === 0 :
-        this.selectedTab === 'termines'    ? p === 100 : true;
+        this.selectedTab === 'termines'    ? p >= 100 :
+        this.selectedTab === 'assigne'     ? source === 'assigne' :
+        this.selectedTab === 'demande'     ? source === 'demande' :
+        true;
 
       return matchSearch && matchTab;
     });
@@ -151,7 +179,16 @@ export class MesCoursComponent implements OnInit, OnDestroy {
 
   // ════════════════════════════════════════════
   // NAVIGATION
+  // ✅ openPlayer passe explicitement fromPage:'demandes' sans parcoursId
+  //    → lecture-formation lira parcoursId=null depuis history.state
+  //    → progression stockée sous clé "formationId_null" → aucun conflit
   // ════════════════════════════════════════════
+  openDetails(f: Formation): void {
+    this.router.navigate(['/courses/course-details-2', f.id], {
+      state: { fromPage: 'demandes', demande: f }
+    });
+  }
+
   openPlayer(f: Formation): void {
     this.router.navigate(['/courses/course-watch', f.id]);
   }
@@ -168,36 +205,36 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   closeToast(): void { this.toast.visible = false; clearTimeout(this.toastTimer); }
 
   // ════════════════════════════════════════════
-  // HELPERS
+  // HELPERS UI
   // ════════════════════════════════════════════
-  isCourseFinished(f: Formation): boolean  { return this.getProgression(f) === 100; }
+  isCourseFinished(f: Formation): boolean  { return this.getProgression(f) >= 100; }
   isInProgress(f: Formation): boolean      { const p = this.getProgression(f); return p > 0 && p < 100; }
 
   getCourseActionLabel(f: Formation): string {
     const p = this.getProgression(f);
-    if (p === 100) return 'Revoir';
-    if (p > 0)     return 'Continuer';
+    if (p >= 100) return 'Revoir';
+    if (p > 0)    return 'Continuer';
     return 'Commencer';
   }
 
   getCourseActionIcon(f: Formation): string {
     const p = this.getProgression(f);
-    if (p === 100) return 'isax-refresh-2';
-    if (p > 0)     return 'isax-play-circle';
+    if (p >= 100) return 'isax-refresh-2';
+    if (p > 0)    return 'isax-play-circle';
     return 'isax-play';
   }
 
   getStatusLabel(f: Formation): string {
     const p = this.getProgression(f);
-    if (p === 100) return 'Terminé';
-    if (p > 0)     return 'En cours';
+    if (p >= 100) return 'Terminé';
+    if (p > 0)    return 'En cours';
     return 'À commencer';
   }
 
   getStatusClass(f: Formation): string {
     const p = this.getProgression(f);
-    if (p === 100) return 'statut-validee';
-    if (p > 0)     return 'statut-progress';
+    if (p >= 100) return 'statut-validee';
+    if (p > 0)    return 'statut-progress';
     return 'statut-attente';
   }
 
