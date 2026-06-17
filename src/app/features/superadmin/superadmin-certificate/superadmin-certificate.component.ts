@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CertificatService, Certificat } from '../../../shared/service/certificat/certificat.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -36,7 +37,7 @@ export class SuperadminCertificateComponent implements OnInit {
     this.error = '';
     this.http.get<Certificat[]>(`${this.apiUrl}/certificats`).subscribe({
       next: (data) => { this.certificates = data; this.applyFilters(); this.loading = false; },
-      error: () => { this.error = 'Erreur lors du chargement des certificats.'; this.loading = false; }
+      error: (err: any) => { this.error = httpErrorMessage(err, 'Impossible de charger les certificats.'); this.loading = false; }
     });
   }
 

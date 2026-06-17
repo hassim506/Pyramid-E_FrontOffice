@@ -151,6 +151,14 @@ checkLoginStatus(): void {
     }
   }
 
+  isRhUser(): boolean {
+    if (!this.currentUser) return false;
+    const staticRhIds = [4, 5, 9, 14];
+    if (staticRhIds.includes(this.currentUser.role_id)) return true;
+    const roleType = this.currentUser.role_type ?? this.currentUser['role_type'] ?? '';
+    return roleType === 'rh';
+  }
+
   getRoleLabel(): string {
     if (!this.currentUser?.role_id) return 'User';
 

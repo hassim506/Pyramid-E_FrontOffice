@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { SessionFormationService, SessionFormation } from '../../../shared/service/session/session-formation.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { UserService } from '../../../shared/service/user/user.service';
 import { ZoomMeetingService, ZoomMeeting } from '../../../shared/zoom/zoom-meeting.service';
@@ -10,7 +12,7 @@ import { ZoomMeetingService, ZoomMeeting } from '../../../shared/zoom/zoom-meeti
 @Component({
   selector: 'app-adminrh-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, HasPermissionDirective],
   templateUrl: './adminrh-session.component.html',
   styleUrls: ['./adminrh-session.component.scss']
 })
@@ -287,7 +289,7 @@ export class AdminrhSessionComponent implements OnInit {
         this.applyFilters();
         this.loading = false;
       },
-      error: () => { this.error = 'Erreur chargement sessions'; this.loading = false; }
+      error: (err: any) => { this.error = httpErrorMessage(err, 'Impossible de charger les sessions.'); this.loading = false; }
     });
   }
 

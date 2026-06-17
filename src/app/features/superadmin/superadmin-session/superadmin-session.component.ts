@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { SessionFormationService, SessionFormation } from '../../../shared/service/session/session-formation.service';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
 import { Company } from '../../../shared/models/client-company.models';
@@ -69,7 +70,7 @@ export class SuperadminSessionComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         console.error('Erreur chargement sessions:', err);
-        this.error = 'Erreur lors du chargement des sessions';
+        this.error = httpErrorMessage(err, 'Impossible de charger les sessions.');
       }
     });
   }

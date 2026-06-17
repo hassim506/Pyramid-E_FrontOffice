@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { FormsModule } from '@angular/forms';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
@@ -91,7 +92,7 @@ export class SuperadminCourseComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur chargement formations:', error);
-        this.error = 'Erreur lors du chargement des formations';
+        this.error = httpErrorMessage(error, 'Impossible de charger les formations.');
         this.loading = false;
       }
     });

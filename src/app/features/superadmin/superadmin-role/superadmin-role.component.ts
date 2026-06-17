@@ -17,13 +17,42 @@ import { routes } from '../../../shared/service/routes/routes';
 })
 export class SuperadminRoleComponent implements OnInit {
   public routes = routes;
-  
+
+  // ── Constantes modal ────────────────────────────────────────────────────────
+  readonly SYSTEM_ROLES = [
+    { name: 'Responsable RH', icon: 'isax-people' },
+    { name: 'Formateur',      icon: 'isax-teacher' },
+    { name: 'Employé',        icon: 'isax-user' },
+    { name: 'Consultant',     icon: 'isax-briefcase' },
+    { name: 'Manager',        icon: 'isax-chart' },
+  ];
+
+  readonly ROLE_TYPES = [
+    { value: 'admin',     label: 'Admin',     color: 'danger',  icon: 'isax-crown',   description: 'Accès total à la plateforme' },
+    { value: 'rh',        label: 'Admin RH',  color: 'primary', icon: 'isax-people',  description: 'Gestion RH de l\'entreprise' },
+    { value: 'formateur', label: 'Formateur', color: 'info',    icon: 'isax-teacher', description: 'Création et animation de formations' },
+    { value: 'employe',   label: 'Employé',   color: 'success', icon: 'isax-user',    description: 'Accès aux formations assignées' },
+    { value: 'manager',   label: 'Manager',   color: 'warning', icon: 'isax-chart',   description: 'Suivi d\'équipe et rapports' },
+  ];
+
+  readonly PERMISSION_CATEGORIES: { key: string; label: string; keywords?: string[] }[] = [
+    { key: 'all',          label: 'Toutes' },
+    { key: 'utilisateurs', label: 'Utilisateurs', keywords: ['utilisateur', 'user', 'compte', 'profil', 'client'] },
+    { key: 'formations',   label: 'Formations',   keywords: ['formation', 'module', 'cours', 'session', 'contenu'] },
+    { key: 'quiz',         label: 'Quiz',         keywords: ['quiz', 'question', 'reponse', 'évaluation', 'evaluation'] },
+    { key: 'rapports',     label: 'Rapports',     keywords: ['rapport', 'statistique', 'export', 'log'] },
+  ];
+
+  minRoleLevel = 2;
+  activePermissionCategory = 'all';
+  permissionSearchText = '';
+
   // ============= ÉTAT DES DONNÉES =============
   roles: Role[] = [];
   allPermissions: Permission[] = [];
   filteredRoles: Role[] = [];
   paginatedRoles: Role[] = [];
-  
+
   // ============= FORMULAIRE ET MODALS =============
   roleForm!: FormGroup;
   isEditing = false;
@@ -31,7 +60,7 @@ export class SuperadminRoleComponent implements OnInit {
   selectedRolePermissions: Permission[] = [];
   showModal = false;
   showPermissionsModal = false;
-  
+
   // ============= ÉTATS DE L'INTERFACE =============
   loading = false;
   searchText = '';
@@ -69,17 +98,10 @@ export class SuperadminRoleComponent implements OnInit {
   
   private initializeForm(): void {
     this.roleForm = this.fb.group({
-      name: [
-        '', 
-        [
-          Validators.required, 
-          Validators.minLength(3),
-          Validators.maxLength(100),
-          Validators.pattern(/^[a-zA-Z0-9\s\-_.]+$/)
-        ]
-      ],
-      guard_name: ['web', [Validators.required]],
-      description: ['', [Validators.maxLength(500)]],
+      name:        ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      guard_name:  ['web', [Validators.required]],
+      type:        ['', [Validators.required]],
+      role_level:  [this.minRoleLevel, [Validators.required, Validators.min(1), Validators.max(10)]],
       permissions: this.fb.array([])
     });
   }
@@ -418,15 +440,19 @@ export class SuperadminRoleComponent implements OnInit {
       this.createPermissionsFormArray();
     }
 
+    this.activePermissionCategory = 'all';
+    this.permissionSearchText = '';
+
     if (role) {
       this.isEditing = true;
       this.selectedRole = role;
-      
+
       // Remplir le formulaire avec les données du rôle
       this.roleForm.patchValue({
-        name: role.name,
+        name:       role.name,
         guard_name: role.guard_name,
-        description: role.description || ''
+        type:       (role as any).type      || '',
+        role_level: (role as any).role_level ?? this.minRoleLevel,
       });
 
       // Marquer les permissions assignées à ce rôle
@@ -443,8 +469,9 @@ export class SuperadminRoleComponent implements OnInit {
       this.isEditing = false;
       this.selectedRole = null;
       this.roleForm.reset({
-        guard_name: 'web',
-        description: '',
+        guard_name:  'web',
+        type:        '',
+        role_level:  this.minRoleLevel,
         permissions: this.allPermissions.map(() => false)
       });
     }
@@ -499,16 +526,16 @@ export class SuperadminRoleComponent implements OnInit {
     }
   }
 
-private prepareRoleData(): any {
-  const formValue = this.roleForm.value;
-  const selectedPermissions = this.getSelectedPermissionIds();
-  return {
-    name: formValue.name?.trim(),
-    guard_name: formValue.guard_name,
-    description: formValue.description?.trim() || '',
-    permissions: selectedPermissions // <-- change ici
-  };
-}
+  private prepareRoleData(): any {
+    const formValue = this.roleForm.value;
+    return {
+      name:        formValue.name?.trim(),
+      guard_name:  formValue.guard_name,
+      type:        formValue.type,
+      role_level:  formValue.role_level,
+      permissions: this.getSelectedPermissionIds()
+    };
+  }
 
   private createRole(roleData: any): void {
     console.log('➕ Création d\'un rôle:', roleData);
@@ -615,6 +642,73 @@ private prepareRoleData(): any {
     console.log('- Premières permissions:', this.allPermissions.slice(0, 3));
   }
 
+  // ============= CATÉGORIES & RECHERCHE PERMISSIONS MODAL =============
+
+  setPermissionCategory(key: string): void {
+    this.activePermissionCategory = key;
+  }
+
+  get filteredPermissionsForModal(): Permission[] {
+    let list = this.allPermissions;
+
+    // Filtre par catégorie
+    if (this.activePermissionCategory !== 'all') {
+      const cat = this.PERMISSION_CATEGORIES.find(c => c.key === this.activePermissionCategory);
+      if (cat?.keywords?.length) {
+        list = list.filter(p =>
+          cat.keywords!.some(kw => p.name.toLowerCase().includes(kw))
+        );
+      }
+    }
+
+    // Filtre par texte de recherche
+    const term = this.permissionSearchText.trim().toLowerCase();
+    if (term) {
+      list = list.filter(p => p.name.toLowerCase().includes(term));
+    }
+
+    return list;
+  }
+
+  getPermissionIndex(permission: Permission): number {
+    return this.allPermissions.findIndex(p => p.id === permission.id);
+  }
+
+  getSystemRoleFromLoaded(name: string): Role | undefined {
+    return this.roles.find(r => r.name === name);
+  }
+
+  // ============= HELPERS AFFICHAGE LISTE =============
+
+  getRoleTypeKey(role: Role): string {
+    const t = role.type?.toLowerCase();
+    if (t === 'admin') return 'superadmin';
+    if (t === 'rh' || t === 'manager') return 'adminrh';
+    if (t === 'formateur') return 'formateur';
+    if (t === 'employe') return 'employe';
+    return 'default';
+  }
+
+  getRoleTypeIcon(role: Role): string {
+    const t = role.type?.toLowerCase();
+    if (t === 'admin')     return 'isax-crown';
+    if (t === 'rh')        return 'isax-people';
+    if (t === 'manager')   return 'isax-chart';
+    if (t === 'formateur') return 'isax-teacher';
+    if (t === 'employe')   return 'isax-user';
+    return 'isax-user-tag';
+  }
+
+  getRoleTypeLabel(role: Role): string {
+    const t = role.type?.toLowerCase();
+    if (t === 'admin')     return 'Admin';
+    if (t === 'rh')        return 'Admin RH';
+    if (t === 'manager')   return 'Manager';
+    if (t === 'formateur') return 'Formateur';
+    if (t === 'employe')   return 'Employé';
+    return role.type || '—';
+  }
+
   // ============= TRACKBY FUNCTIONS =============
 
   trackByRoleId(index: number, role: Role): number {
@@ -629,21 +723,22 @@ private prepareRoleData(): any {
 
   private handleError(error: any, action: string): void {
     console.error(`❌ Erreur lors de la ${action}:`, error);
-    
+
+    const backendMessage = error.error?.message;
+
     if (error.status === 422 && error.error?.errors) {
-      // Erreurs de validation Laravel
-      const messages = Object.values(error.error.errors).flat().join('\n');
+      const messages = Object.values(error.error.errors).flat().join(' — ');
       this.showError(messages);
+    } else if (backendMessage) {
+      this.showError(backendMessage);
     } else if (error.status === 404) {
-      this.showError('Rôle introuvable');
+      this.showError('Rôle introuvable.');
     } else if (error.status === 403) {
-      this.showError('Vous n\'avez pas les droits pour effectuer cette action');
+      this.showError('Action non autorisée.');
     } else if (error.status === 409) {
-      this.showError('Ce rôle existe déjà');
-    } else if (error.error?.message) {
-      this.showError(error.error.message);
+      this.showError('Un rôle avec ce nom existe déjà.');
     } else {
-      this.showError(`Erreur lors de la ${action} du rôle`);
+      this.showError(`Erreur lors de la ${action} du rôle.`);
     }
   }
 

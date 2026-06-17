@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
@@ -31,6 +31,7 @@ export interface LoginResponse {
   token_type?: string;
   permissions?: string[];
   roles?: string[];
+  role_type?: string | null;
   user?: {
     id: number;
     email: string;
@@ -86,6 +87,8 @@ export class AuthService {
   private tokenKey = 'pyramide_token';
   private userKey = 'pyramide_user';
 
+  readonly permissions$ = new BehaviorSubject<string[]>(this.getUserPermissions());
+
   constructor(
     private http: HttpClient,
     private router: Router
@@ -107,10 +110,10 @@ export class AuthService {
             const userWithPermissions = {
               ...response?.user,
               permissions: response?.permissions || response?.user?.permissions || [],
-              roles: response?.roles || response?.user?.roles || [],
+              roles:       response?.roles       || response?.user?.roles       || [],
+              role_type:   response?.role_type ?? response?.user?.['role_type'] ?? null,
             };
             this.setUser(userWithPermissions);
-            console.log('Token et utilisateur stockés');
           }
         }),
         catchError(error => {
@@ -201,6 +204,7 @@ register(data: any): Observable<any> {
 
   private setUser(user: any): void {
     localStorage.setItem(this.userKey, JSON.stringify(user));
+    this.permissions$.next(this.getUserPermissions());
   }
 
   getUser(): any {
@@ -252,6 +256,25 @@ register(data: any): Observable<any> {
   hasPermission(permission: string): boolean {
     const permissions = this.getUserPermissions();
     return permissions.includes(permission);
+  }
+
+  refreshMe(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/auth/me`).pipe(
+      tap(response => {
+        if (response?.status) {
+          const current = this.getUser() || {};
+          const updated = {
+            ...current,
+            ...response.user,
+            permissions: response.permissions || [],
+            roles:       response.roles       || [],
+            role_type:   response.role_type   ?? current['role_type'] ?? null,
+          };
+          this.setUser(updated);
+        }
+      }),
+      catchError(() => throwError(() => null))
+    );
   }
 
   // Méthode pour vérifier si l'utilisateur a au moins une des permissions

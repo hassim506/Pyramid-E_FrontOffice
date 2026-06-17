@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { SondageService, Sondage, QuestionSondage } from '../../../shared/service/sondage/sondage.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 
 type Tab = 'liste' | 'creer' | 'editer' | 'questions' | 'stats';
 
@@ -79,7 +80,7 @@ export class SuperadminSondageComponent implements OnInit {
 
     this.sondageService.getSondages(filters).subscribe({
       next: (res) => { this.sondages = res.sondages ?? []; this.totalPages = res.pagination?.last_page ?? 1; this.total = res.pagination?.total ?? 0; this.loading = false; },
-      error: () => { this.error = 'Erreur chargement.'; this.loading = false; },
+      error: (err: any) => { this.error = httpErrorMessage(err, 'Impossible de charger les sondages.'); this.loading = false; },
     });
   }
 

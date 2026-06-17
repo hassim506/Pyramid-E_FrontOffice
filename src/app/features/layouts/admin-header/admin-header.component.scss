@@ -265,14 +265,14 @@
     padding: 1rem 1.5rem;
     background: var(--bs-light);
     border-radius: 0 0 12px 12px;
-    
+
     .btn {
       font-size: 0.9rem;
       padding: 0.6rem 1rem;
       border-radius: 8px;
       transition: all 0.3s ease;
       border-color: #006F78;
-      
+
       &:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(0, 111, 120, 0.2);
@@ -281,6 +281,93 @@
       }
     }
   }
+}
+
+// ── Boutons Mode switch (dropdown header RH) ────────
+@mixin mode-btn-base {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all .18s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+  }
+
+  &__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  &__sub {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  &__arrow {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+}
+
+.learner-mode-btn {
+  @include mode-btn-base;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1px solid #6ee7b7;
+
+  &:hover {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border-color: #34d399;
+    box-shadow: 0 4px 12px rgba(16,185,129,.2);
+  }
+
+  &__icon  { background: #10b981; }
+  &__label { color: #065f46; }
+  &__sub   { color: #059669; }
+  &__arrow { color: #10b981; }
+}
+
+.trainer-mode-btn {
+  @include mode-btn-base;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border: 1px solid #c4b5fd;
+
+  &:hover {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    border-color: #a78bfa;
+    box-shadow: 0 4px 12px rgba(139,92,246,.2);
+  }
+
+  &__icon  { background: #8b5cf6; }
+  &__label { color: #3b0764; }
+  &__sub   { color: #7c3aed; }
+  &__arrow { color: #8b5cf6; }
 }
 
 // Auth Buttons

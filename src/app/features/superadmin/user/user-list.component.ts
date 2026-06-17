@@ -1,5 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../shared/models/user.models';
@@ -109,8 +110,8 @@ export class UserListComponent implements OnInit {
         this.applyFilters();
         this.loading = false;
       },
-      error: () => {
-        this.error   = 'Erreur lors du chargement des données';
+      error: (err: any) => {
+        this.error   = httpErrorMessage(err, 'Impossible de charger les utilisateurs.');
         this.loading = false;
       }
     });

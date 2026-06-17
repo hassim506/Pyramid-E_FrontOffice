@@ -4,9 +4,22 @@ import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Va
 import { RouterModule } from '@angular/router';
 import { Role } from '../../../shared/models/role.models';
 import { Permission } from '../../../shared/models/permission.models';
+import { AuthService } from '../../../shared/service/authentification/auth.service';
 import { RoleService } from '../../../shared/service/role/role.service';
 import { PermissionService } from '../../../shared/service/permission/permission.service';
 import { routes } from '../../../shared/service/routes/routes';
+
+// Permissions réservées au Superadmin — invisibles dans le modal de création de rôle pour l'AdminRH
+const SUPERADMIN_ONLY_PERMISSIONS = [
+  'gerer systeme',
+  'gerer roles', 'lister roles', 'creer roles', 'modifier roles', 'supprimer roles',
+  'lister permissions', 'creer permissions', 'modifier permissions', 'supprimer permissions',
+  'voir logs',
+  'sauvegarder systeme',
+  'mode maintenance',
+  'lister clients', 'creer clients', 'modifier clients', 'supprimer clients', 'gerer contrats clients',
+];
+const SUPERADMIN_DELETE_KEYWORDS = ['supprimer'];
 
 @Component({
   selector: 'app-adminrh-role',
@@ -17,10 +30,43 @@ import { routes } from '../../../shared/service/routes/routes';
 })
 export class AdminrhRoleComponent implements OnInit {
   public routes = routes;
-  
+  private currentUser: any;
+  private isSuperAdmin = false;
+  creatorRoleLevel: number | null = null;
+
+  // Rôles système présents dans toutes les entreprises (entreprise_id = null, non modifiables)
+  readonly SYSTEM_ROLES = [
+    { name: 'Responsable RH',  type: 'rh',        icon: 'isax-people' },
+    { name: 'Formateur',       type: 'formateur',  icon: 'isax-teacher' },
+    { name: 'Employé',         type: 'employe',    icon: 'isax-user' },
+    { name: 'Consultant',      type: 'formateur',  icon: 'isax-briefcase' },
+    { name: 'Manager',         type: 'rh',         icon: 'isax-chart' },
+  ];
+
+  // Types de rôles créables par l'AdminRH
+  readonly ROLE_TYPES = [
+    { value: 'rh',        label: 'Administrateur RH',       description: 'Gestion RH, formations, validations',  color: 'primary' },
+    { value: 'formateur', label: 'Formateur / Consultant',  description: 'Création de contenus, suivi',           color: 'purple' },
+    { value: 'employe',   label: 'Employé / Apprenant',     description: 'Accès formations et quiz',              color: 'success' },
+    { value: 'manager',   label: 'Manager',                 description: 'Suivi équipe, rapports',                color: 'warning' },
+  ];
+
+  // Catégories pour le filtre des permissions
+  readonly PERMISSION_CATEGORIES = [
+    { key: 'all',          label: 'Toutes' },
+    { key: 'utilisateurs', label: 'Utilisateurs',  keywords: ['utilisateur', 'user'] },
+    { key: 'formations',   label: 'Formations',    keywords: ['formation', 'module', 'catalogue', 'section', 'categorie', 'contenu', 'parcours'] },
+    { key: 'quiz',         label: 'Quiz',          keywords: ['quiz'] },
+    { key: 'rapports',     label: 'Rapports',      keywords: ['rapport', 'statistique', 'analys', 'progres', 'certificat'] },
+  ];
+  activePermissionCategory = 'all';
+
   // ============= ÉTAT DES DONNÉES =============
   roles: Role[] = [];
+  systemRoles: Role[] = [];       // rôles système (entreprise_id = null)
   allPermissions: Permission[] = [];
+  adminrhPermissions: Permission[] = [];  // permissions que l'utilisateur peut déléguer
+  creatorPermissionNames: string[] = [];  // permissions Spatie du rôle courant
   filteredRoles: Role[] = [];
   paginatedRoles: Role[] = [];
   
@@ -48,8 +94,15 @@ export class AdminrhRoleComponent implements OnInit {
   constructor(
     private roleService: RoleService,
     private permissionService: PermissionService,
+    private authService: AuthService,
     private fb: FormBuilder
   ) {
+    this.currentUser = this.authService.getUser();
+    // Seul le role_id === 1 (vrai Super Admin système) bypass le filtre entreprise_id.
+    // "Super Admin RH Holding" (role_id 14) appartient au layout adminrh → doit être filtré.
+    this.isSuperAdmin = this.currentUser?.role_id === 1;
+    // Niveau du créateur : détermine le niveau minimum imposé aux rôles créés
+    this.creatorRoleLevel = this.currentUser?.role_level ?? null;
     this.initializeForm();
   }
 
@@ -69,19 +122,18 @@ export class AdminrhRoleComponent implements OnInit {
   
   private initializeForm(): void {
     this.roleForm = this.fb.group({
-      name: [
-        '', 
-        [
-          Validators.required, 
-          Validators.minLength(3),
-          Validators.maxLength(100),
-          Validators.pattern(/^[a-zA-Z0-9\s\-_.]+$/)
-        ]
-      ],
-      guard_name: ['web', [Validators.required]],
-      description: ['', [Validators.maxLength(500)]],
+      name:        ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(/^[a-zA-Z0-9\s\-_.àâäéèêëîïôùûüç]+$/)]],
+      guard_name:  ['web', [Validators.required]],
+      type:        [null, [Validators.required]],
+      role_level:  [this.minRoleLevel, [Validators.required, Validators.min(this.minRoleLevel), Validators.max(10)]],
       permissions: this.fb.array([])
     });
+  }
+
+  get minRoleLevel(): number {
+    // Si le niveau du créateur est connu, le niveau minimum autorisé est créateur+1
+    // Si inconnu (null), on utilise 2 par défaut (niveau 1 = SuperAdmin, non délégable)
+    return this.creatorRoleLevel !== null ? this.creatorRoleLevel + 1 : 2;
   }
 
   // ============= CHARGEMENT DES DONNÉES =============
@@ -95,21 +147,12 @@ export class AdminrhRoleComponent implements OnInit {
         console.log('✅ Réponse complète du backend:', response);
         
         this.roles = this.extractRolesFromResponse(response);
-        
-        console.log('✅ Nombre de rôles chargés:', this.roles.length);
-        if (this.roles.length > 0) {
-          console.log('✅ Premier rôle:', this.roles[0]);
-          
-          // Vérifier les permissions pour chaque rôle
-          this.roles.forEach(role => {
-            console.log(`📊 Rôle "${role.name}":`, {
-              id: role.id,
-              permissions: role.permissions?.length || 0,
-              firstPermission: role.permissions?.[0]?.name || 'Aucune'
-            });
-          });
+
+        // Recalculer les permissions affichables maintenant qu'on a creator_permissions
+        if (this.allPermissions.length > 0) {
+          this.rebuildAdminrhPermissions();
         }
-        
+
         this.initializeDataDisplay();
         this.loading = false;
       },
@@ -148,33 +191,88 @@ export class AdminrhRoleComponent implements OnInit {
   }
 
   private extractRolesFromResponse(response: any): Role[] {
+    if (response.system_roles && Array.isArray(response.system_roles)) {
+      this.systemRoles = response.system_roles;
+    }
+
+    // Stocker les permissions du créateur retournées par l'API
+    if (response.creator_permissions && Array.isArray(response.creator_permissions)) {
+      this.creatorPermissionNames = response.creator_permissions;
+    }
+
+    // Mettre à jour le niveau du rôle créateur depuis l'API (plus fiable que localStorage)
+    if (response.creator_role_level !== undefined) {
+      this.creatorRoleLevel = response.creator_role_level ?? null;
+      // Recalculer le niveau par défaut dans le formulaire
+      const defaultLevel = this.creatorRoleLevel !== null ? this.creatorRoleLevel + 1 : 2;
+      this.roleForm.patchValue({ role_level: defaultLevel });
+      this.roleForm.get('role_level')?.setValidators([
+        Validators.required,
+        Validators.min(this.minRoleLevel),
+        Validators.max(10)
+      ]);
+      this.roleForm.get('role_level')?.updateValueAndValidity();
+    }
+
+    let list: Role[] = [];
     if (response.roles && Array.isArray(response.roles)) {
-      return response.roles;
+      list = response.roles;
     } else if (Array.isArray(response)) {
-      return response;
+      list = response;
     } else if (response.data && Array.isArray(response.data)) {
-      return response.data;
+      list = response.data;
     } else if (response.success && Array.isArray(response.data)) {
-      return response.data;
+      list = response.data;
     } else {
       console.warn('⚠️ Structure de réponse des rôles non reconnue:', response);
       return [];
     }
+    return list;
+  }
+
+  private rebuildAdminrhPermissions(): void {
+    const list = this.allPermissions;
+    if (this.isSuperAdmin) {
+      this.adminrhPermissions = list;
+    } else if (this.creatorPermissionNames.length > 0) {
+      this.adminrhPermissions = list.filter(p =>
+        this.creatorPermissionNames.includes(p.name) &&
+        !this.isRestrictedPermission(p.name)
+      );
+    } else {
+      this.adminrhPermissions = list.filter(p => !this.isRestrictedPermission(p.name));
+    }
+    // Reconstruire le FormArray si la modal est déjà ouverte
+    if (this.showModal) {
+      this.createPermissionsFormArray();
+    }
+  }
+
+  private isRestrictedPermission(name: string): boolean {
+    const lower = name.toLowerCase().trim();
+    if (SUPERADMIN_ONLY_PERMISSIONS.includes(lower)) return true;
+    if (SUPERADMIN_DELETE_KEYWORDS.some(kw => lower.startsWith(kw))) return true;
+    return false;
   }
 
   private extractPermissionsFromResponse(response: any): Permission[] {
+    let list: Permission[] = [];
     if (Array.isArray(response)) {
-      return response;
+      list = response;
     } else if (response.data && Array.isArray(response.data)) {
-      return response.data;
+      list = response.data;
     } else if (response.success && Array.isArray(response.data)) {
-      return response.data;
+      list = response.data;
     } else if (response.permissions && Array.isArray(response.permissions)) {
-      return response.permissions;
+      list = response.permissions;
     } else {
       console.warn('⚠️ Structure de réponse des permissions non reconnue:', response);
       return [];
     }
+
+    this.allPermissions = list;
+    this.rebuildAdminrhPermissions();
+    return list;
   }
 
   private initializeDataDisplay(): void {
@@ -186,17 +284,17 @@ export class AdminrhRoleComponent implements OnInit {
   // ============= GESTION DU FORMARRAY DES PERMISSIONS =============
 
   createPermissionsFormArray(): void {
-    if (this.allPermissions.length === 0) {
+    const perms = this.adminrhPermissions;
+    if (perms.length === 0) {
       console.warn('⚠️ Aucune permission disponible pour créer le FormArray');
       return;
     }
 
     const permissionsFormArray = this.fb.array(
-      this.allPermissions.map(() => this.fb.control(false))
+      perms.map(() => this.fb.control(false))
     );
-    
+
     this.roleForm.setControl('permissions', permissionsFormArray);
-    
     console.log('✅ FormArray des permissions créé avec', permissionsFormArray.length, 'contrôles');
   }
 
@@ -291,6 +389,31 @@ export class AdminrhRoleComponent implements OnInit {
     return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
   }
 
+  // ============= CATÉGORIES DE PERMISSIONS =============
+
+  setPermissionCategory(key: string): void {
+    this.activePermissionCategory = key;
+  }
+
+  get filteredPermissionsForModal(): Permission[] {
+    if (this.activePermissionCategory === 'all') return this.adminrhPermissions;
+    const cat = this.PERMISSION_CATEGORIES.find(c => c.key === this.activePermissionCategory);
+    if (!cat || !cat.keywords) return this.adminrhPermissions;
+    return this.adminrhPermissions.filter(p =>
+      cat.keywords!.some(kw => p.name.toLowerCase().includes(kw))
+    );
+  }
+
+  // Retourne l'index global dans adminrhPermissions pour un permission filtré
+  getPermissionIndex(permission: Permission): number {
+    return this.adminrhPermissions.indexOf(permission);
+  }
+
+  // Rôle système : chercher dans la liste system_roles retournée par l'API
+  getSystemRoleFromLoaded(name: string): Role | undefined {
+    return this.systemRoles.find(r => r.name.toLowerCase() === name.toLowerCase());
+  }
+
   // ============= GESTION DES PERMISSIONS =============
 
   getPermissionsCount(role: Role | null): number {
@@ -352,7 +475,7 @@ export class AdminrhRoleComponent implements OnInit {
       return;
     }
     
-    this.allPermissions.forEach((permission, index) => {
+    this.adminrhPermissions.forEach((permission, index) => {
       if (permission.guard_name === guardName) {
         permissionsArray.at(index).setValue(true);
       }
@@ -381,7 +504,7 @@ export class AdminrhRoleComponent implements OnInit {
     
     for (let i = 0; i < permissionsArray.length; i++) {
       if (permissionsArray.at(i).value === true) {
-        selectedPermissions.push(this.allPermissions[i]);
+        selectedPermissions.push(this.adminrhPermissions[i]);
       }
     }
     
@@ -413,46 +536,47 @@ export class AdminrhRoleComponent implements OnInit {
     this.showModal = true;
     
     // Créer le FormArray des permissions si nécessaire
-    if (!this.roleForm.get('permissions') || 
-        this.permissionsFormArray.length !== this.allPermissions.length) {
+    if (!this.roleForm.get('permissions') ||
+        this.permissionsFormArray.length !== this.adminrhPermissions.length) {
       this.createPermissionsFormArray();
     }
 
     if (role) {
       this.isEditing = true;
       this.selectedRole = role;
-      
-      // Remplir le formulaire avec les données du rôle
+
       this.roleForm.patchValue({
-        name: role.name,
+        name:       role.name,
         guard_name: role.guard_name,
-        description: role.description || ''
+        type:       role.type       ?? null,
+        role_level: role.role_level ?? null,
       });
 
-      // Marquer les permissions assignées à ce rôle
+      // Marquer les permissions assignées à ce rôle (uniquement parmi adminrhPermissions)
       const permissionsArray = this.permissionsFormArray;
       const rolePermissionIds = role.permissions?.map(p => p.id) || [];
-      
-      this.allPermissions.forEach((permission, index) => {
+
+      this.adminrhPermissions.forEach((permission, index) => {
         const isAssigned = rolePermissionIds.includes(permission.id);
         permissionsArray.at(index).setValue(isAssigned);
       });
-      
+
       console.log('✅ Rôle chargé avec', rolePermissionIds.length, 'permissions assignées');
     } else {
       this.isEditing = false;
       this.selectedRole = null;
       this.roleForm.reset({
-        guard_name: 'web',
-        description: '',
-        permissions: this.allPermissions.map(() => false)
+        guard_name:  'web',
+        type:        null,
+        role_level:  this.minRoleLevel,
+        permissions: this.adminrhPermissions.map(() => false),
       });
     }
   }
 
   closeModal(): void {
     this.showModal = false;
-    this.roleForm.reset({ guard_name: 'web' });
+    this.roleForm.reset({ guard_name: 'web', type: null, role_level: this.minRoleLevel });
     this.selectedRole = null;
     this.isEditing = false;
     this.clearMessages();
@@ -499,16 +623,16 @@ export class AdminrhRoleComponent implements OnInit {
     }
   }
 
-private prepareRoleData(): any {
-  const formValue = this.roleForm.value;
-  const selectedPermissions = this.getSelectedPermissionIds();
-  return {
-    name: formValue.name?.trim(),
-    guard_name: formValue.guard_name,
-    description: formValue.description?.trim() || '',
-    permissions: selectedPermissions // <-- change ici
-  };
-}
+  private prepareRoleData(): any {
+    const formValue = this.roleForm.value;
+    return {
+      name:        formValue.name?.trim(),
+      guard_name:  formValue.guard_name,
+      type:        formValue.type,
+      role_level:  formValue.role_level,
+      permissions: this.getSelectedPermissionIds(),
+    };
+  }
 
   private createRole(roleData: any): void {
     console.log('➕ Création d\'un rôle:', roleData);
@@ -615,6 +739,37 @@ private prepareRoleData(): any {
     console.log('- Premières permissions:', this.allPermissions.slice(0, 3));
   }
 
+  // ============= HELPERS AFFICHAGE LISTE =============
+
+  getRoleTypeKey(role: Role): string {
+    const t = role.type?.toLowerCase();
+    if (t === 'admin') return 'superadmin';
+    if (t === 'rh' || t === 'manager') return 'adminrh';
+    if (t === 'formateur') return 'formateur';
+    if (t === 'employe') return 'employe';
+    return 'default';
+  }
+
+  getRoleTypeIcon(role: Role): string {
+    const t = role.type?.toLowerCase();
+    if (t === 'admin')    return 'isax-crown';
+    if (t === 'rh')       return 'isax-people';
+    if (t === 'manager')  return 'isax-chart';
+    if (t === 'formateur') return 'isax-teacher';
+    if (t === 'employe')  return 'isax-user';
+    return 'isax-user-tag';
+  }
+
+  getRoleTypeLabel(role: Role): string {
+    const t = role.type?.toLowerCase();
+    if (t === 'admin')    return 'Admin';
+    if (t === 'rh')       return 'Admin RH';
+    if (t === 'manager')  return 'Manager';
+    if (t === 'formateur') return 'Formateur';
+    if (t === 'employe')  return 'Employé';
+    return role.type || '—';
+  }
+
   // ============= TRACKBY FUNCTIONS =============
 
   trackByRoleId(index: number, role: Role): number {
@@ -629,21 +784,23 @@ private prepareRoleData(): any {
 
   private handleError(error: any, action: string): void {
     console.error(`❌ Erreur lors de la ${action}:`, error);
-    
+
+    // Toujours afficher le message du backend s'il existe
+    const backendMessage = error.error?.message;
+
     if (error.status === 422 && error.error?.errors) {
-      // Erreurs de validation Laravel
-      const messages = Object.values(error.error.errors).flat().join('\n');
+      const messages = Object.values(error.error.errors).flat().join(' — ');
       this.showError(messages);
+    } else if (backendMessage) {
+      this.showError(backendMessage);
     } else if (error.status === 404) {
-      this.showError('Rôle introuvable');
+      this.showError('Rôle introuvable.');
     } else if (error.status === 403) {
-      this.showError('Vous n\'avez pas les droits pour effectuer cette action');
+      this.showError('Action non autorisée.');
     } else if (error.status === 409) {
-      this.showError('Ce rôle existe déjà');
-    } else if (error.error?.message) {
-      this.showError(error.error.message);
+      this.showError('Un rôle avec ce nom existe déjà.');
     } else {
-      this.showError(`Erreur lors de la ${action} du rôle`);
+      this.showError(`Erreur lors de la ${action} du rôle.`);
     }
   }
 

@@ -1732,3 +1732,171 @@ $cw-green-bd: #79C9AB;
   color: #BA7517;
   &:hover { border-color: #BA7517; color: #BA7517; background: #FAEEDA; }
 }
+
+.ac-act--warn {
+  color: #B45309;
+  border-color: #FCD34D;
+  &:hover { background: #FFFBEB; }
+}
+
+.ac-act--ok {
+  color: #166534;
+  border-color: #86EFAC;
+  &:hover { background: #F0FDF4; }
+}
+
+// ─── SELECT filtre statut ────────────────────
+.ac-select {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  background: #fff;
+  color: $gray-600;
+  cursor: pointer;
+}
+
+// ─── TABLE cell avec image ───────────────────
+.ac-table-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ac-course-img {
+  flex-shrink: 0;
+  width: 44px;
+  height: 32px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: block;
+  background: $gray-100;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.ac-course-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: $gray-900;
+  text-decoration: none;
+  &:hover { color: $blue; text-decoration: underline; }
+}
+
+// ─── Pill ───────────────────────────────────
+.ac-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: $gray-600;
+  background: $gray-100;
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+// ─── Badge prix ─────────────────────────────
+.ac-badge {
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 2px 7px;
+
+  &--free { background: #D1FAE5; color: #065F46; }
+  &--paid { color: $blue; font-weight: 600; }
+}
+
+// ─── Modal confirmation inline ───────────────
+.ac-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ac-confirm-modal {
+  background: #fff;
+  border-radius: $radius-lg;
+  padding: 28px 32px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+
+  h4 { font-size: 16px; font-weight: 600; margin: 12px 0 6px; }
+  p  { font-size: 13px; color: $gray-600; margin-bottom: 20px; }
+}
+
+.ac-confirm-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+
+  &--warn { background: #FEF3C7; color: #B45309; }
+  &--ok   { background: #D1FAE5; color: #065F46; }
+}
+
+.ac-confirm-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.ac-btn-ghost {
+  padding: 7px 18px;
+  border: 1px solid $gray-200;
+  border-radius: 20px;
+  background: $gray-100;
+  font-size: 13px;
+  cursor: pointer;
+  &:hover { background: $gray-200; }
+}
+
+.ac-btn-warn {
+  padding: 7px 18px;
+  border: none;
+  border-radius: 20px;
+  background: #F59E0B;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  &:hover { background: #D97706; }
+}
+
+.ac-btn-ok {
+  padding: 7px 18px;
+  border: none;
+  border-radius: 20px;
+  background: #10B981;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  &:hover { background: #059669; }
+}
+
+// ─── Skeleton row (formations table) ────────
+.ac-skeleton-row {
+  height: 48px;
+  background: $gray-100;
+  border-radius: $radius-md;
+  margin: 6px 14px;
+  animation: ac-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ac-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .45; }
+}

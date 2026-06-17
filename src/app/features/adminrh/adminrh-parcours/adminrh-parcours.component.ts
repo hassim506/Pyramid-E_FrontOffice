@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, FormArray } from '@angular/forms';
 import { ParcoursService, Parcours, ParcoursRequest, Formation } from '../../../shared/service/parcours/parcours.service';
 import { FormationService } from '../../../shared/service/formation/formation.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-adminrh-parcours',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, HasPermissionDirective],
   templateUrl: './adminrh-parcours.component.html',
   styleUrls: ['./adminrh-parcours.component.scss']
 })
@@ -144,7 +146,7 @@ export class AdminrhParcoursComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         console.error('Erreur chargement parcours:', err);
-        this.error = 'Impossible de charger les parcours.';
+        this.error = httpErrorMessage(err, 'Impossible de charger les parcours.');
         this.parcours = [];
       }
     });

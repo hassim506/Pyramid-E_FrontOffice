@@ -50,6 +50,7 @@ export class AdminrhComponent implements OnInit {
   ngOnInit(): void {
     this.loadSuperAdminProfile();
     this.loadHeaderStats();
+    this.authService.refreshMe().subscribe({ error: () => {} });
   }
 
   private loadHeaderStats(): void {

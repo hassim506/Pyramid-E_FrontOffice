@@ -8,7 +8,7 @@
       <h5 class="ip-page-head__title">Sondages &amp; enquêtes</h5>
       <p class="ip-page-head__sub">Créez et gérez vos sondages de satisfaction, évaluations et enquêtes</p>
     </div>
-    <button class="ip-btn ip-btn--primary" (click)="openCreate()">
+    <button *appHasPermission="'creer sondages'" class="ip-btn ip-btn--primary" (click)="openCreate()">
       <i class="isax isax-add"></i> Nouveau sondage
     </button>
   </div>

@@ -3,8 +3,21 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Permission } from '../../../shared/models/permission.models';
+import { AuthService } from '../../../shared/service/authentification/auth.service';
 import { PermissionService } from '../../../shared/service/permission/permission.service';
 import { routes } from '../../../shared/service/routes/routes';
+
+const SUPERADMIN_ONLY_PERMISSIONS = [
+  'gerer systeme',
+  'gerer roles', 'lister roles', 'creer roles', 'modifier roles', 'supprimer roles',
+  'lister permissions', 'creer permissions', 'modifier permissions', 'supprimer permissions',
+  'voir logs',
+  'sauvegarder systeme',
+  'mode maintenance',
+  'lister clients', 'creer clients', 'modifier clients', 'supprimer clients', 'gerer contrats clients',
+];
+
+const SUPERADMIN_DELETE_KEYWORDS = ['supprimer'];
 
 @Component({
   selector: 'app-adminrh-permission',
@@ -15,6 +28,7 @@ import { routes } from '../../../shared/service/routes/routes';
 })
 export class AdminrhPermissionComponent implements OnInit {
   public routes = routes;
+  isSuperAdmin = false;
   
   // État des données
   permissions: Permission[] = [];
@@ -42,9 +56,15 @@ export class AdminrhPermissionComponent implements OnInit {
 
   constructor(
     private permissionService: PermissionService,
+    private authService: AuthService,
     private fb: FormBuilder
   ) {
     this.initializeForm();
+    const user = this.authService.getUser();
+    const roles: string[] = user?.roles || [];
+    this.isSuperAdmin = roles.some((r: string) =>
+      r.toLowerCase() === 'super admin' || r.toLowerCase() === 'super admin rh holding'
+    );
   }
 
   ngOnInit(): void {
@@ -98,18 +118,31 @@ export class AdminrhPermissionComponent implements OnInit {
   }
 
   private extractPermissionsFromResponse(response: any): Permission[] {
+    let list: Permission[] = [];
     if (Array.isArray(response)) {
-      return response;
+      list = response;
     } else if (response?.data && Array.isArray(response.data)) {
-      return response.data;
+      list = response.data;
     } else if (response?.success && Array.isArray(response.data)) {
-      return response.data;
+      list = response.data;
     } else if (response?.permissions && Array.isArray(response.permissions)) {
-      return response.permissions;
+      list = response.permissions;
     } else {
       console.warn('⚠️ Structure de réponse non reconnue:', response);
       return [];
     }
+
+    if (!this.isSuperAdmin) {
+      list = list.filter(p => !this.isRestrictedForAdminRh(p.name));
+    }
+    return list;
+  }
+
+  private isRestrictedForAdminRh(name: string): boolean {
+    const lower = name.toLowerCase().trim();
+    if (SUPERADMIN_ONLY_PERMISSIONS.includes(lower)) return true;
+    if (SUPERADMIN_DELETE_KEYWORDS.some(kw => lower.startsWith(kw))) return true;
+    return false;
   }
 
   private initializeDataDisplay(): void {

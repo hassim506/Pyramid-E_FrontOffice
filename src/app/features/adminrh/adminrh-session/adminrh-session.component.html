@@ -35,7 +35,7 @@
     </div>
 
     <div class="ss-spacer"></div>
-    <button type="button" class="ss-add-btn" (click)="openCreate()">
+    <button *appHasPermission="'creer sessions'" type="button" class="ss-add-btn" (click)="openCreate()">
       <i class="isax isax-add"></i> Planifier une session
     </button>
   </div>

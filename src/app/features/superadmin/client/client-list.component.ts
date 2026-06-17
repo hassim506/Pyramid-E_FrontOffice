@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MatSortModule, Sort } from '@angular/material/sort';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
 import { routes } from '../../../shared/service/routes/routes';
@@ -100,7 +101,7 @@ private getCompanyList() {
     },
     error: (error) => {
       console.error('Erreur lors de la récupération des entreprises:', error);
-      this.error = 'Erreur lors du chargement des données';
+      this.error = httpErrorMessage(error, 'Impossible de charger les entreprises.');
       this.loading = false;
       this.loadMockData();
     }
@@ -122,7 +123,7 @@ private getCompanyList() {
     },
     error: (error) => {
       console.error('Erreur lors de la récupération des clients:', error);
-      this.error = 'Erreur lors du chargement des données';
+      this.error = httpErrorMessage(error, 'Impossible de charger les clients.');
       this.loading = false;
       this.loadMockData();
     }

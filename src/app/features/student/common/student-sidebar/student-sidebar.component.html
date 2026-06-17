@@ -1,5 +1,16 @@
 <div class="settings-sidebar" [class.collapsed]="isCollapsed">
 
+  <!-- Bannière retour AdminRH (visible uniquement si l'utilisateur est un RH en mode apprenant) -->
+  <div *ngIf="isRhInLearnerMode()" class="rh-switch-banner">
+    <div class="rh-switch-banner__label">
+      <i class="isax isax-shield-tick"></i>
+      <span>Mode apprenant</span>
+    </div>
+    <a [routerLink]="routes.adminrh_dashboard" class="rh-switch-banner__btn">
+      <i class="isax isax-arrow-left-2"></i> Espace AdminRH
+    </a>
+  </div>
+
   <!-- Toggle Collapse -->
   <div class="sidebar-toggle" (click)="isCollapsed = !isCollapsed">
     <i class="isax" [ngClass]="isCollapsed ? 'isax-arrow-right-2' : 'isax-arrow-left-2'"></i>

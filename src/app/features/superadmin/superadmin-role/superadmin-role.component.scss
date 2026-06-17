@@ -1,21 +1,420 @@
-.page-content {
-  padding: 20px;
+// ── UL-* LIST SYSTEM ─────────────────────────────────────────────────────────
+$primary:       #5b5ea6;
+$primary-light: #efeffa;
+$border:        #e4e6ef;
+$text:          #1e2140;
+$muted:         #8c93b0;
+$radius:        8px;
+
+.ul-shell {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.table {
-  th {
+.ul-topbar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+
+  &__icon { font-size: 1.4rem; color: $primary; }
+  &__title { font-size: 1.1rem; font-weight: 700; color: $text; margin: 0; flex: 1; }
+  &__stats {
+    background: $primary-light;
+    color: $primary;
+    border-radius: 20px;
+    padding: .2rem .75rem;
+    font-size: .78rem;
     font-weight: 600;
-    background-color: #f8f9fa;
+  }
+}
+
+.ul-alert {
+  padding: .65rem 1rem;
+  border-radius: $radius;
+  font-size: .85rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: #fff3f3;
+  color: #c0392b;
+  border: 1px solid #ffd5d5;
+
+  &--success {
+    background: #f0fff4;
+    color: #1a7a42;
+    border-color: #b7f0cb;
+  }
+}
+
+.ul-toolbar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.ul-search {
+  flex: 1;
+  position: relative;
+  max-width: 320px;
+
+  &__icon {
+    position: absolute;
+    left: .75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $muted;
+    font-size: .95rem;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: .5rem .75rem .5rem 2.25rem;
+    border: 1px solid $border;
+    border-radius: $radius;
+    font-size: .85rem;
+    color: $text;
+    outline: none;
+    transition: border-color .2s;
+
+    &:focus { border-color: $primary; }
+  }
+}
+
+.ul-add-btn {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem 1rem;
+  background: $primary-light;
+  color: $primary;
+  border: 1px solid rgba($primary, .25);
+  border-radius: $radius;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+
+  &:hover { background: darken(#efeffa, 5%); }
+}
+
+.ul-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.ul-skeleton-row {
+  height: 52px;
+  border-radius: $radius;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.ul-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid $border;
+  border-radius: $radius;
+  overflow: hidden;
+
+  thead tr {
+    background: #f8f7fc;
+  }
+
+  th {
+    padding: .65rem 1rem;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: $muted;
+    border-bottom: 1px solid $border;
   }
 
   tbody tr {
-    transition: all 0.3s ease;
+    border-bottom: 1px solid $border;
+    transition: background .15s;
 
-    &:hover {
-      background-color: #f8f9fa;
+    &:last-child { border-bottom: none; }
+    &:hover { background: #faf9ff; }
+  }
+
+  td {
+    padding: .75rem 1rem;
+    font-size: .85rem;
+    color: $text;
+    vertical-align: middle;
+  }
+}
+
+.ul-empty {
+  text-align: center;
+  padding: 3rem 1rem !important;
+  color: $muted;
+  font-size: .9rem;
+}
+
+.ul-user {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+
+  &__name {
+    font-weight: 600;
+    font-size: .875rem;
+    color: $text;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+
+  &__email {
+    font-size: .75rem;
+    color: $muted;
+    margin-top: .1rem;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.ul-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .78rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: $primary-light;
+  color: $primary;
+
+  &[data-role="rh"]        { background: #f5e9e9; color: #8b3535; }
+  &[data-role="formateur"] { background: #e6f2fb; color: #1b5e87; }
+  &[data-role="employe"]   { background: #e5f5ec; color: #1a5c38; }
+  &[data-role="manager"]   { background: #fdf3e3; color: #7a5500; }
+}
+
+.ul-system-badge {
+  font-size: .65rem;
+  font-weight: 600;
+  padding: .1rem .45rem;
+  border-radius: 4px;
+  background: #e5f5ec;
+  color: #1a5c38;
+  border: 1px solid #b8e4c9;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.ul-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .2rem .6rem;
+  border-radius: 20px;
+  font-size: .76rem;
+  font-weight: 500;
+  background: $primary-light;
+  color: $primary;
+
+  &[data-role="rh"]        { background: #f5e9e9; color: #8b3535; }
+  &[data-role="formateur"] { background: #e6f2fb; color: #1b5e87; }
+  &[data-role="employe"]   { background: #e5f5ec; color: #1a5c38; }
+  &[data-role="manager"]   { background: #fdf3e3; color: #7a5500; }
+}
+
+.ul-level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 5px;
+  font-size: .72rem;
+  font-weight: 700;
+  background: #efeffa;
+  color: $primary;
+  border: 1px solid rgba($primary, .2);
+}
+
+.ul-perm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .3rem .65rem;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: #fff;
+  font-size: .8rem;
+  font-weight: 600;
+  color: $text;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+
+  &:hover { border-color: $primary; color: $primary; }
+}
+
+.ul-count-badge {
+  display: inline-block;
+  padding: .2rem .55rem;
+  border-radius: 6px;
+  font-size: .8rem;
+  font-weight: 600;
+  background: #f0f0f5;
+  color: $muted;
+}
+
+.ul-date {
+  font-size: .8rem;
+  color: $muted;
+}
+
+.ul-actions {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+
+.ul-act {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid $border;
+  border-radius: 7px;
+  background: #fff;
+  color: $muted;
+  cursor: pointer;
+  font-size: .9rem;
+  transition: border-color .15s, color .15s;
+
+  &:hover { border-color: $primary; color: $primary; }
+
+  &--del:hover { border-color: #e74c3c; color: #e74c3c; }
+}
+
+.ul-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .5rem 0;
+
+  &__info { font-size: .8rem; color: $muted; }
+
+  &__btns { display: flex; gap: .3rem; }
+
+  &__btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid $border;
+    border-radius: 7px;
+    background: #fff;
+    font-size: .82rem;
+    color: $text;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+
+    &:hover:not(:disabled) { border-color: $primary; color: $primary; }
+    &:disabled { opacity: .45; cursor: default; }
+
+    &--active {
+      background: $primary-light;
+      border-color: rgba($primary, .4);
+      color: $primary;
+      font-weight: 700;
     }
   }
 }
+
+// ── END UL-* SYSTEM ──────────────────────────────────────────────────────────
+
+// ── Permission search bar ────────────────────────────────────────────────────
+.perm-search {
+  position: relative;
+  max-width: 320px;
+
+  &__icon {
+    position: absolute;
+    left: .75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $muted;
+    font-size: .9rem;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: .4rem .75rem .4rem 2.2rem;
+    border: 1px solid $border;
+    border-radius: $radius;
+    font-size: .83rem;
+    color: $text;
+    outline: none;
+    background: #fff;
+    transition: border-color .15s;
+
+    &:focus { border-color: $primary; }
+  }
+}
+
+.modal-icon-lg { font-size: 2rem; }
+
+// ── Permissions grid (modal) ──────────────────────────────────────────────────
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .5rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: .25rem;
+
+  @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+
+  &::-webkit-scrollbar        { width: 6px; }
+  &::-webkit-scrollbar-track  { background: #f1f3f4; border-radius: 3px; }
+  &::-webkit-scrollbar-thumb  { background: #c1c8cd; border-radius: 3px; }
+}
+
+.permission-item {
+  border-color: $border !important;
+  border-radius: 8px !important;
+  transition: border-color .15s, background .15s;
+  -webkit-user-select: none;
+  user-select: none;
+
+  &:hover { border-color: $primary !important; background: #faf9ff; }
+
+  &.selected {
+    border-color: $primary !important;
+    background: $primary-light;
+
+    label { color: $primary; font-weight: 600; }
+  }
+}
+
+// ── END permissions grid ─────────────────────────────────────────────────────
 
 .modal.show {
   background-color: rgba(0, 0, 0, 0.5);

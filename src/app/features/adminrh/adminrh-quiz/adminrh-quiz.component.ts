@@ -6,6 +6,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { MatSelectModule } from '@angular/material/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { Quiz, QuizService } from '../../../shared/service/quiz/quiz.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
 declare var bootstrap: any;
 
@@ -14,7 +16,7 @@ declare var bootstrap: any;
   standalone: true,
   templateUrl: './adminrh-quiz.component.html',
   styleUrls: ['./adminrh-quiz.component.scss'],
-  imports: [CommonModule, MatSelectModule, RouterLink, FormsModule, ReactiveFormsModule, DatePickerModule]
+  imports: [CommonModule, MatSelectModule, RouterLink, FormsModule, ReactiveFormsModule, DatePickerModule, HasPermissionDirective]
 })
 export class AdminrhQuizComponent implements OnInit, OnDestroy {
   quizzes: Quiz[] = [];
@@ -49,7 +51,7 @@ export class AdminrhQuizComponent implements OnInit, OnDestroy {
     this.error = '';
     const sub = this.quizService.getQuizzes().subscribe({
       next: (quizzes) => { this.quizzes = quizzes; this.loading = false; },
-      error: (err)    => { this.error = 'Erreur lors du chargement des quiz'; this.loading = false; console.error(err); }
+      error: (err: any) => { this.error = httpErrorMessage(err, 'Impossible de charger les quiz.'); this.loading = false; console.error(err); }
     });
     this.subscription.add(sub);
   }

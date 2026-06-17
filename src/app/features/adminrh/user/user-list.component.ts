@@ -1,4 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +15,7 @@ import { pageSelection } from '../../../shared/models/model';
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule, CustomPaginationComponent, UserAddComponent, AdminrhRoleComponent],
+  imports: [RouterLink, FormsModule, CommonModule, CustomPaginationComponent, UserAddComponent, AdminrhRoleComponent, HasPermissionDirective],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss']
 })
@@ -105,8 +107,8 @@ export class UserListComponent implements OnInit {
         this.applyFilters();
         this.loading = false;
       },
-      error: () => {
-        this.error   = 'Erreur lors du chargement des données';
+      error: (err: any) => {
+        this.error   = httpErrorMessage(err, 'Impossible de charger les utilisateurs.');
         this.loading = false;
       }
     });

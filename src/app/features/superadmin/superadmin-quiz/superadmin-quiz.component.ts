@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Quiz, QuizService } from '../../../shared/service/quiz/quiz.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 
 declare var bootstrap: any;
 
@@ -47,7 +48,7 @@ export class SuperadminQuizComponent implements OnInit, OnDestroy {
     this.error = '';
     const sub = this.quizService.getQuizzes().subscribe({
       next: (quizzes) => { this.quizzes = quizzes; this.loading = false; },
-      error: (err)    => { this.error = 'Erreur lors du chargement des quiz'; this.loading = false; console.error(err); }
+      error: (err: any) => { this.error = httpErrorMessage(err, 'Impossible de charger les quiz.'); this.loading = false; console.error(err); }
     });
     this.subscription.add(sub);
   }

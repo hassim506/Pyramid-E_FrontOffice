@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSortModule, Sort } from '@angular/material/sort';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { User } from '../../../shared/models/user.models';
 import { UserService } from '../../../shared/service/user/user.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
@@ -64,7 +65,7 @@ export class UserGroupListComponent implements OnInit {
     },
     error: (error) => {
       console.error('Erreur lors de la récupération des utilisateurs:', error);
-      this.error = 'Erreur lors du chargement des données';
+      this.error = httpErrorMessage(error, 'Impossible de charger les données.');
       this.loading = false;
     }
   });

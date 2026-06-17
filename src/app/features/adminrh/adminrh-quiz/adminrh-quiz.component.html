@@ -17,7 +17,7 @@
       <h5 class="ip-page-head__title">Quiz & évaluations <span class="ip-count">{{ quizzes.length }}</span></h5>
       <p class="ip-page-head__sub">Gérez les quiz et consultez les résultats</p>
     </div>
-    <a [routerLink]="['/quiz/create']" class="ip-btn ip-btn--primary">
+    <a *appHasPermission="'creer quiz'" [routerLink]="['/quiz/create']" class="ip-btn ip-btn--primary">
       <i class="isax isax-add-circle"></i> Nouveau quiz
     </a>
   </div>

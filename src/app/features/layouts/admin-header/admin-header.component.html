@@ -164,28 +164,23 @@
                     </ng-container>
 
                           <!-- Rh Menu -->
-                  <ng-container *ngIf="currentUser?.role_id === 4 || currentUser?.role_id === 5 || currentUser?.role_id === 9 || currentUser?.role_id === 14">
+                  <ng-container *ngIf="isRhUser()">
                       <a class="dropdown-item" [routerLink]="routes.adminrh_dashboard">
-                        <i class="isax isax-book-1 me-2"></i>
-                        <span>Tableau de bords RH</span>
+                        <i class="isax isax-element-4 me-2"></i>
+                        <span>Tableau de bord RH</span>
                       </a>
-                        <a class="dropdown-item" [routerLink]="routes.adminrhUserList">
+                      <a class="dropdown-item" [routerLink]="routes.adminrhUserList">
                         <i class="isax isax-user-add me-2"></i>
                         <span>Gestion utilisateurs</span>
                       </a>
-                     
-                        <a class="dropdown-item" [routerLink]="routes.adminrhCourse">
-                      <i class="isax isax-teacher5 me-2"></i>                   
+                      <a class="dropdown-item" [routerLink]="routes.adminrhCourse">
+                        <i class="isax isax-teacher5 me-2"></i>
                         <span>Formations</span>
                       </a>
-                      <a class="dropdown-item" [routerLink]="routes.adminrh_dashboard">
-                        <i class="isax isax-element-4 me-2"></i>
-                        <span>Tableau de bords Admin</span>
-                      </a>
                       <a class="dropdown-item" [routerLink]="routes.adminrhSettings">
-                      <i class="isax isax-setting-2 me-2"></i>
-                      <span>Parametres</span>
-                    </a>
+                        <i class="isax isax-setting-2 me-2"></i>
+                        <span>Paramètres</span>
+                      </a>
                     </ng-container>
 
                     <!-- Common Menu Items -->
@@ -204,18 +199,30 @@
 
                   <!-- Profile Footer -->
                   <div class="profile-menu-footer">
-                    <!-- Switch Role -->
-                    <div *ngIf="currentUser?.role_id === 1 || currentUser?.role_id === 2" class="mb-2">
-                      <a class="dropdown-item" [routerLink]="routes.login">
-                        <i class="isax isax-arrow-2 me-2"></i>
-                        <span>{{ currentUser?.role_id === 1 ? 'View as Student' : 'Log in as Student' }}</span>
-                      </a>
-                    </div>
+                    <!-- Mode apprenant (RH uniquement) -->
+                    <a *ngIf="isRhUser()" class="learner-mode-btn" [routerLink]="routes.students_Dashboard">
+                      <span class="learner-mode-btn__icon"><i class="isax isax-user-octagon"></i></span>
+                      <span class="learner-mode-btn__text">
+                        <span class="learner-mode-btn__label">Mode apprenant</span>
+                        <span class="learner-mode-btn__sub">Accéder à votre espace employé</span>
+                      </span>
+                      <i class="isax isax-arrow-right-3 learner-mode-btn__arrow"></i>
+                    </a>
+
+                    <!-- Mode formateur (RH uniquement) -->
+                    <a *ngIf="isRhUser()" class="trainer-mode-btn" [routerLink]="routes.instructor_dashboard">
+                      <span class="trainer-mode-btn__icon"><i class="isax isax-teacher"></i></span>
+                      <span class="trainer-mode-btn__text">
+                        <span class="trainer-mode-btn__label">Mode formateur</span>
+                        <span class="trainer-mode-btn__sub">Créer et gérer des formations</span>
+                      </span>
+                      <i class="isax isax-arrow-right-3 trainer-mode-btn__arrow"></i>
+                    </a>
 
                     <!-- Logout Button -->
-                    <button class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center" (click)="logout()">
+                    <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center mt-2" (click)="logout()">
                       <i class="isax isax-logout me-2"></i>
-                      <span>Logout</span>
+                      <span>Déconnexion</span>
                     </button>
                   </div>
                 </div>

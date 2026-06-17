@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { UserListComponent } from './features/superadmin/user/user-list.component';
 import { PermissionGuard } from './guards/permission-guard.guard';
 import { authGuard } from './guards/auth.guard';
+import { layoutGuard } from './guards/layout.guard';
 export const routes: Routes = [
     { path:'',
       redirectTo:'index',
@@ -61,7 +62,7 @@ export const routes: Routes = [
 
             ]
         },
-        {path : 'instructor',loadComponent:()=>import ('./features/instructor/instructor.component').then((m)=>m.InstructorComponent),
+        {path : 'instructor',loadComponent:()=>import ('./features/instructor/instructor.component').then((m)=>m.InstructorComponent), canActivate: [layoutGuard],
             children:[
                 {path:'instructor-dashboard',loadComponent:()=>import ('./features/instructor/instructor-dashboard/instructor-dashboard.component').then((m)=>m.InstructorDashboardComponent)},
                 {path:'instructor-profile',loadComponent:()=>import ('./features/instructor/instructor-profile/instructor-profile.component').then((m)=>m.InstructorProfileComponent)},
@@ -99,7 +100,7 @@ export const routes: Routes = [
                 },
             ]
         },
-        {path : 'superadmin',loadComponent:()=>import ('./features/superadmin/superadmin.component').then((m)=>m.SuperadminComponent), canActivate: [authGuard],
+        {path : 'superadmin',loadComponent:()=>import ('./features/superadmin/superadmin.component').then((m)=>m.SuperadminComponent), canActivate: [layoutGuard],
             children:[
                 {path:'superadmin-dashboard',loadComponent:()=>import ('./features/superadmin/superadmin-dashboard/superadmin-dashboard.component').then((m)=>m.SuperAdminDashboardComponent)},
                 {path:'superadmin-profile',loadComponent:()=>import ('./features/superadmin/superadmin-profile/superadmin-profile.component').then((m)=>m.SuperadminProfileComponent)},
@@ -153,7 +154,7 @@ export const routes: Routes = [
                 },
             ]
         },
-        {path : 'adminrh',loadComponent:()=>import ('./features/adminrh/adminrh.component').then((m)=>m.AdminrhComponent), canActivate: [authGuard],
+        {path : 'adminrh',loadComponent:()=>import ('./features/adminrh/adminrh.component').then((m)=>m.AdminrhComponent), canActivate: [layoutGuard],
             children:[
                 {path:'adminrh-dashboard',loadComponent:()=>import ('./features/adminrh/adminrh-dashboard/adminrh-dashboard.component').then((m)=>m.AdminrhDashboardComponent)},
                 {path:'adminrh-profile',loadComponent:()=>import ('./features/adminrh/adminrh-profile/adminrh-profile.component').then((m)=>m.AdminrhProfileComponent)},
@@ -252,7 +253,7 @@ export const routes: Routes = [
             { path: 'blog-details', loadComponent: () => import('./features/blog/blog-details/blog-details.component').then(m => m.BlogDetailsComponent) }
         ]
         },
-        {path : 'student',loadComponent:()=>import ('./features/student/student.component').then((m)=>m.StudentComponent),
+        {path : 'student',loadComponent:()=>import ('./features/student/student.component').then((m)=>m.StudentComponent), canActivate: [layoutGuard],
     children:[
         {path:'student-dashboard',loadComponent:()=>import ('./features/student/student-dashboard/student-dashboard.component').then((m)=>m.StudentDashboardComponent)},
         {path:'student-profile',loadComponent:()=>import ('./features/student/student-profile/student-profile.component').then((m)=>m.StudentProfileComponent)},

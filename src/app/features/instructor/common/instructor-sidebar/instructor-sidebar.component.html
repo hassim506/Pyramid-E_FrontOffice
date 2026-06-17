@@ -193,6 +193,10 @@
     <a [routerLink]="routes.instructorSettings" routerLinkActive="active" class="sb-bottom-item">
       <i class="isax isax-setting-2"></i> Préférences
     </a>
+    <!-- Retour espace AdminRH (visible uniquement si RH en mode formateur) -->
+    <a *ngIf="isRhInInstructorMode()" [routerLink]="routes.adminrh_dashboard" class="sb-bottom-item sb-rh-return">
+      <i class="isax isax-arrow-left-2"></i> Retour espace AdminRH
+    </a>
     <a [routerLink]="routes.login" class="sb-bottom-item logout">
       <i class="isax isax-logout"></i> Déconnexion
     </a>

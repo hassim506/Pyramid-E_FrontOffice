@@ -6,7 +6,7 @@
       <i class="isax isax-category"></i>Catalogues ({{ catalogues.length }})
     </span>
     <span class="ac-spacer"></span>
-    <button type="button" class="ac-add-btn" (click)="openCatalogueModal()">
+    <button *appHasPermission="'creer catalogues'" type="button" class="ac-add-btn" (click)="openCatalogueModal()">
       <i class="isax isax-add"></i>Nouveau catalogue
     </button>
   </div>
@@ -140,9 +140,11 @@
     <div class="ac-empty" *ngIf="filteredCatalogues.length === 0">
       <i class="isax isax-category"></i>
       {{ catalogues.length === 0 ? 'Aucun catalogue créé' : 'Aucun résultat pour ces filtres' }}
-      <button type="button" class="ac-add-btn" style="margin-top:10px;" (click)="openCatalogueModal()" *ngIf="catalogues.length === 0">
-        <i class="isax isax-add"></i>Créer un catalogue
-      </button>
+      <ng-container *appHasPermission="'creer catalogues'">
+        <button type="button" class="ac-add-btn" style="margin-top:10px;" (click)="openCatalogueModal()" *ngIf="catalogues.length === 0">
+          <i class="isax isax-add"></i>Créer un catalogue
+        </button>
+      </ng-container>
       <button class="ac-chip" style="margin-top:10px;" (click)="clearFilters()" *ngIf="catalogues.length > 0">
         <i class="isax isax-refresh"></i>Effacer les filtres
       </button>

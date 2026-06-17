@@ -21,59 +21,48 @@
   ════════════════════════════════════════════ -->
   <ng-container *ngIf="activeTab === 'formations'">
 
-    <!-- Toolbar -->
-    <div class="ac-toolbar">
-      <div class="ac-search">
-        <i class="isax isax-search-normal-1 ac-search__icon"></i>
-        <input type="search" class="ac-search__input" placeholder="Rechercher..."
-               [(ngModel)]="searchDataValue" [ngModelOptions]="{standalone:true}"
-               (ngModelChange)="searchData($event)">
-      </div>
-      <button type="button" class="ac-chip" [class.ac-chip--on]="selectedStatus === ''"
-              (click)="filterByStatus('')">Toutes</button>
-      <button type="button" class="ac-chip" [class.ac-chip--on]="selectedStatus === 'published'"
-              (click)="filterByStatus('published')">Publiées</button>
-      <button type="button" class="ac-chip" [class.ac-chip--on]="selectedStatus === 'draft'"
-              (click)="filterByStatus('draft')">Brouillons</button>
-      <div class="ac-spacer"></div>
-      <button type="button" class="ac-view-btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
-        <i class="isax isax-row-vertical"></i>
-      </button>
-      <button type="button" class="ac-view-btn" [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">
-        <i class="isax isax-grid-2"></i>
-      </button>
-      <a [routerLink]="routes.adminrhCourseGrid" class="ac-add-btn">
-        <i class="isax isax-add"></i> Nouvelle formation
-      </a>
-    </div>
-
     <!-- KPI row -->
     <div class="ac-kpi-row">
       <div class="ac-kpi">
-        <div class="ac-kpi__label"><i class="isax isax-book-1"></i> Total formations</div>
-        <div class="ac-kpi__val">{{ allFormations.length }}</div>
-        <div class="ac-kpi__delta neutral">{{ stats.active }} publiées</div>
+        <div class="ac-kpi__label"><i class="isax isax-tick-circle"></i> Publiées</div>
+        <div class="ac-kpi__val">{{ getActiveFormationsCount() }}</div>
+        <div class="ac-kpi__delta neutral">en ligne</div>
       </div>
       <div class="ac-kpi">
-        <div class="ac-kpi__label"><i class="isax isax-play-circle"></i> En cours</div>
-        <div class="ac-kpi__val">{{ stats.active }}</div>
-        <div class="ac-kpi__delta neutral">inscription ouverte</div>
+        <div class="ac-kpi__label"><i class="isax isax-clock"></i> En attente</div>
+        <div class="ac-kpi__val">{{ getPendingFormationsCount() }}</div>
+        <div class="ac-kpi__delta neutral">à valider</div>
       </div>
       <div class="ac-kpi">
         <div class="ac-kpi__label"><i class="isax isax-document"></i> Brouillons</div>
-        <div class="ac-kpi__val">{{ stats.draft }}</div>
+        <div class="ac-kpi__val">{{ getDraftFormationsCount() }}</div>
         <div class="ac-kpi__delta neutral">non publiées</div>
       </div>
       <div class="ac-kpi">
-        <div class="ac-kpi__label"><i class="isax isax-gift"></i> Gratuites</div>
-        <div class="ac-kpi__val">{{ stats.free }}</div>
-        <div class="ac-kpi__delta neutral">/ {{ stats.paid }} payantes</div>
+        <div class="ac-kpi__label"><i class="isax isax-people"></i> Apprenants</div>
+        <div class="ac-kpi__val">{{ getTotalParticipants() }}</div>
+        <div class="ac-kpi__delta neutral">inscrits total</div>
       </div>
     </div>
 
-    <!-- Skeleton -->
-    <div *ngIf="loading" class="ac-skeletons">
-      <div *ngFor="let i of [1,2,3,4,5,6]" class="ac-skeleton-card"></div>
+    <!-- Toolbar -->
+    <div class="ac-toolbar">
+      <input type="search" class="ac-search__input" placeholder="Rechercher une formation…"
+             style="flex:1; max-width:280px"
+             [(ngModel)]="searchDataValue" [ngModelOptions]="{standalone:true}"
+             (ngModelChange)="searchData($event)">
+      <select class="ac-select" (change)="filterByStatus($any($event.target).value)">
+        <option value="all">Tous les statuts</option>
+        <option value="published">Publiées</option>
+        <option value="pending">En attente</option>
+        <option value="draft">Brouillons</option>
+      </select>
+      <div class="ac-spacer"></div>
+      <ng-container *appHasPermission="'creer formations'">
+        <a [routerLink]="routes.instructorCourseAdd" class="ac-add-btn">
+          <i class="isax isax-add"></i> Nouvelle formation
+        </a>
+      </ng-container>
     </div>
 
     <!-- Error -->
@@ -81,86 +70,85 @@
       <i class="isax isax-warning-2"></i> {{ error }}
     </div>
 
-    <!-- Grid view -->
-    <div *ngIf="!loading && viewMode === 'grid'" class="ac-card-grid">
-      <div *ngFor="let f of formations; trackBy: trackByFormation" class="ac-fcard">
-        <div class="ac-fcard__thumb" [attr.data-th]="getThumbKey(f)">
-          <img *ngIf="f.image_couverture" [src]="getDefaultImage(f)" [alt]="f.titre" class="ac-fcard__img">
-          <i *ngIf="!f.image_couverture" class="isax isax-book-1"></i>
-        </div>
-        <div class="ac-fcard__body">
-          <div class="ac-fcard__cat" [attr.data-cat]="getCatKey(f)">{{ f.categorie?.nom || 'Autre' }}</div>
-          <div class="ac-fcard__title">{{ f.titre }}</div>
-          <div class="ac-fcard__meta">
-            <span><i class="isax isax-clock"></i> {{ getDuree(f) }}</span>
-            <span *ngIf="f.nb_max_participants"><i class="isax isax-people"></i> {{ f.nb_max_participants }}</span>
-          </div>
-        </div>
-        <div class="ac-fcard__footer">
-          <span class="ac-status" [attr.data-s]="getStatusKey(f)">{{ getStatusText(f) }}</span>
-          <div class="ac-prog">
-            <div class="ac-prog__bar">
-              <div class="ac-prog__fill" [style.width.%]="getCompletion(f)"></div>
-            </div>
-            <span class="ac-prog__txt">{{ getCompletion(f) > 0 ? getCompletion(f) + '%' : '—' }}</span>
-          </div>
-          <div class="ac-fcard__actions">
-            <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ac-act" title="Voir">
-              <i class="isax isax-eye"></i>
-            </a>
-            <button type="button" class="ac-act ac-act--arch" title="Archiver" (click)="archiveFormation(f)">
-              <i class="isax isax-archive"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="!formations.length && !loading" class="ac-empty ac-empty--span">
-        <i class="isax isax-book-1"></i>
-        <p>Aucune formation trouvée</p>
-      </div>
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="ac-skeletons">
+      <div *ngFor="let i of [1,2,3,4,5]" class="ac-skeleton-row"></div>
     </div>
 
-    <!-- List view -->
-    <table *ngIf="!loading && viewMode === 'list'" class="ac-table">
+    <!-- Table -->
+    <table *ngIf="!loading" class="ac-table">
       <thead>
         <tr>
           <th>Formation</th>
-          <th>Catégorie</th>
+          <th>Apprenants</th>
+          <th>Coût</th>
           <th>Durée</th>
           <th>Statut</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let f of formations; trackBy: trackByFormation">
+        <tr *ngFor="let f of tableData; trackBy: trackByFormation">
           <td>
-            <div class="ac-table-name">{{ f.titre }}</div>
-            <div class="ac-table-sub">{{ f.formateur_nom || '—' }}</div>
+            <div class="ac-table-cell">
+              <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ac-course-img">
+                <img [src]="getDefaultImage(f)" [alt]="f.titre" onerror="this.src='assets/img/course/course-01.jpg'">
+              </a>
+              <div>
+                <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ac-course-title">{{ f.titre }}</a>
+                <div class="ac-table-sub">
+                  <span><i class="isax isax-video-circle"></i> {{ f.nombre_modules || 0 }} modules</span>
+                  <span><i class="isax isax-flag"></i> {{ f.niveau || 'N/A' }}</span>
+                </div>
+              </div>
+            </div>
           </td>
-          <td>{{ f.categorie?.nom || '—' }}</td>
-          <td>{{ getDuree(f) }}</td>
-          <td><span class="ac-status" [attr.data-s]="getStatusKey(f)">{{ getStatusText(f) }}</span></td>
+          <td>
+            <span class="ac-pill"><i class="isax isax-people"></i> {{ $any(f).nb_participants || 0 }}/{{ f.nb_max_participants || '∞' }}</span>
+          </td>
+          <td>
+            <span [class]="isFormationGratuite(f) ? 'ac-badge ac-badge--free' : 'ac-badge ac-badge--paid'">
+              {{ formatPrix(f.prix) }}
+            </span>
+          </td>
+          <td>
+            <span class="ac-pill"><i class="isax isax-clock"></i> {{ getDuree(f) }}</span>
+          </td>
+          <td>
+            <span class="ac-status" [attr.data-s]="getStatusKey(f)">{{ getStatusText(f) }}</span>
+          </td>
           <td>
             <div class="ac-actions">
               <a [href]="routes.courseDetails + '/' + f.id" target="_blank" class="ac-act" title="Voir">
                 <i class="isax isax-eye"></i>
               </a>
+              <a [href]="'/courses/instructor-course-edit/' + f.id" target="_blank" class="ac-act" title="Modifier">
+                <i class="isax isax-edit-2"></i>
+              </a>
+              <button type="button" class="ac-act"
+                      [class.ac-act--warn]="f.est_publie" [class.ac-act--ok]="!f.est_publie"
+                      [title]="f.est_publie ? 'Dépublier' : 'Publier'"
+                      (click)="togglePublishStatus(f)">
+                <i [class]="'isax ' + (f.est_publie ? 'isax-eye-slash' : 'isax-send-2')"></i>
+              </button>
               <button type="button" class="ac-act ac-act--arch" title="Archiver" (click)="archiveFormation(f)">
                 <i class="isax isax-archive"></i>
               </button>
             </div>
           </td>
         </tr>
-        <tr *ngIf="!formations.length">
-          <td colspan="5" class="ac-empty">Aucune formation trouvée</td>
+        <tr *ngIf="!tableData.length">
+          <td colspan="6" class="ac-empty">
+            <i class="isax isax-book-1" style="font-size:2rem;display:block;margin-bottom:8px"></i>
+            Aucune formation trouvée
+          </td>
         </tr>
       </tbody>
     </table>
 
     <!-- Pagination -->
     <div class="ac-pager" *ngIf="!loading && totalData > pageSize">
-      <span class="ac-pager__info">{{ skip + 1 }}–{{ skip + formations.length }} sur {{ totalData }}</span>
+      <span class="ac-pager__info">{{ skip + 1 }}–{{ skip + tableData.length }} sur {{ totalData }}</span>
       <div class="ac-pager__btns">
         <button type="button" class="ac-pager__btn" [disabled]="currentPage === 1"
                 (click)="onPageChange(currentPage - 1)">
@@ -178,6 +166,28 @@
     </div>
 
   </ng-container>
+
+  <!-- Modal confirmation publier/dépublier -->
+  <div class="ac-overlay" *ngIf="publishTarget" (click)="publishTarget = null">
+    <div class="ac-confirm-modal" (click)="$event.stopPropagation()">
+      <div class="ac-confirm-icon" [class.ac-confirm-icon--warn]="publishTarget?.est_publie"
+           [class.ac-confirm-icon--ok]="!publishTarget?.est_publie">
+        <i [class]="'isax ' + (publishTarget?.est_publie ? 'isax-eye-slash' : 'isax-send-2')"></i>
+      </div>
+      <h4>{{ publishTarget?.est_publie ? 'Dépublier' : 'Publier' }} la formation</h4>
+      <p>{{ publishTarget?.est_publie
+            ? 'Cette formation ne sera plus visible par les apprenants.'
+            : 'Cette formation sera visible par tous les apprenants.' }}</p>
+      <div class="ac-confirm-btns">
+        <button type="button" class="ac-btn-ghost" (click)="publishTarget = null">Annuler</button>
+        <button type="button"
+                [class]="publishTarget?.est_publie ? 'ac-btn-warn' : 'ac-btn-ok'"
+                (click)="confirmTogglePublish()">
+          {{ publishTarget?.est_publie ? 'Dépublier' : 'Publier' }}
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ════════════════════════════════════════════
        TAB 2 : PARCOURS
@@ -199,9 +209,11 @@
       <button type="button" class="ac-chip" [class.ac-chip--on]="parcoursStatut === 'archive'"
               (click)="parcoursStatut='archive'; applyParcoursFilters()">Archivés</button>
       <div class="ac-spacer"></div>
-      <button type="button" class="ac-add-btn" (click)="openWizardCreate()">
-        <i class="isax isax-add"></i> Nouveau parcours
-      </button>
+      <ng-container *appHasPermission="'creer parcours'">
+        <button type="button" class="ac-add-btn" (click)="openWizardCreate()">
+          <i class="isax isax-add"></i> Nouveau parcours
+        </button>
+      </ng-container>
     </div>
 
     <!-- KPI row -->
@@ -287,9 +299,11 @@
       <button type="button" class="ac-view-btn" title="Trier">
         <i class="isax isax-sort"></i>
       </button>
-      <button type="button" class="ac-add-btn" (click)="openCatWizardCreate()">
-        <i class="isax isax-add"></i> Nouveau catalogue
-      </button>
+      <ng-container *appHasPermission="'creer catalogues'">
+        <button type="button" class="ac-add-btn" (click)="openCatWizardCreate()">
+          <i class="isax isax-add"></i> Nouveau catalogue
+        </button>
+      </ng-container>
     </div>
     <!-- Toolbar row 2 : type chips -->
     <div class="ac-toolbar ac-toolbar--chips">

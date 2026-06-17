@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CatalogueService, Catalogue, CatalogueRequest, Formation, FormationCatalogueRequest } from '../../../shared/service/catalogue/catalogue.service';
 import { FormationService } from '../../../shared/service/formation/formation.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-adminrh-catalogue',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, HasPermissionDirective],
   templateUrl: './adminrh-catalogue.component.html',
   styleUrls: ['./adminrh-catalogue.component.scss']
 })
@@ -109,7 +111,7 @@ export class AdminrhCatalogueComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         console.error('Erreur chargement catalogues:', err);
-        this.error = 'Impossible de charger les catalogues.';
+        this.error = httpErrorMessage(err, 'Impossible de charger les catalogues.');
       }
     });
   }

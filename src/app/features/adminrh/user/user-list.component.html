@@ -83,7 +83,7 @@
         <i class="isax isax-document-download"></i> Exporter
       </button>
 
-      <button type="button" class="ul-add-btn" (click)="openNew()">
+      <button *appHasPermission="'creer utilisateurs'" type="button" class="ul-add-btn" (click)="openNew()">
         <i class="isax isax-add"></i> Nouvel utilisateur
       </button>
     </div>

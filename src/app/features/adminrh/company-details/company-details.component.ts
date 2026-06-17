@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
@@ -71,8 +72,8 @@ export class CompanyDetailsComponent implements OnInit {
         this.employeeCount = employees?.pagination?.total ?? this.employees.length;
         this.loading       = false;
       },
-      error: () => {
-        this.error   = 'Erreur lors du chargement des données';
+      error: (err: any) => {
+        this.error   = httpErrorMessage(err, 'Impossible de charger les données.');
         this.loading = false;
       }
     });

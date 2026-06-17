@@ -104,6 +104,13 @@ export class InstructorSidebarComponent implements OnInit {
     this.openGroups[key] = !this.openGroups[key];
   }
 
+  isRhInInstructorMode(): boolean {
+    const user = this.authService.getUser();
+    if (!user) return false;
+    const roleType = user.role_type ?? (user as any)['role_type'] ?? '';
+    return [4, 5, 9, 14].includes(user.role_id) || roleType === 'rh';
+  }
+
   getInitials(): string {
     const u = this.currentUser;
     if (!u) return 'F';

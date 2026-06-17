@@ -384,4 +384,18 @@ $radius:      8px;
     color: rgba(220,38,38,.65);
     &:hover { background: rgba(220,38,38,.1); color: #fca5a5; }
   }
+
+  &.sb-learner-switch {
+    color: rgba(16,185,129,.75);
+    border: 1px solid rgba(16,185,129,.2);
+    margin-bottom: 2px;
+    &:hover { background: rgba(16,185,129,.12); color: #34d399; border-color: rgba(16,185,129,.4); }
+  }
+
+  &.sb-trainer-switch {
+    color: rgba(139,92,246,.75);
+    border: 1px solid rgba(139,92,246,.2);
+    margin-bottom: 2px;
+    &:hover { background: rgba(139,92,246,.12); color: #a78bfa; border-color: rgba(139,92,246,.4); }
+  }
 }

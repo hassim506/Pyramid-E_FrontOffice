@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { SondageService, Sondage, QuestionSondage } from '../../../shared/service/sondage/sondage.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
 type Tab = 'liste' | 'creer' | 'editer' | 'questions' | 'stats';
 
@@ -23,7 +25,7 @@ const QUESTION_TYPES = [
 @Component({
   selector: 'app-adminrh-sondage',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './adminrh-sondage.component.html',
   styleUrl: './adminrh-sondage.component.scss',
 })
@@ -91,7 +93,7 @@ export class AdminrhSondageComponent implements OnInit {
         this.total       = res.pagination?.total ?? 0;
         this.loading     = false;
       },
-      error: () => { this.error = 'Erreur chargement sondages.'; this.loading = false; },
+      error: (err: any) => { this.error = httpErrorMessage(err, 'Impossible de charger les sondages.'); this.loading = false; },
     });
   }
 

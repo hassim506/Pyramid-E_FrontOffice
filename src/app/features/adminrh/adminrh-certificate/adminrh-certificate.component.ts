@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CertificatService, Certificat, CertConfig, DEFAULT_CERT_CONFIG } from '../../../shared/service/certificat/certificat.service';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
 import { environment } from '../../../../environments/environment';
 
@@ -66,7 +67,7 @@ export class AdminrhCertificateComponent implements OnInit {
     this.loading = true;
     this.certService.getCertificats().subscribe({
       next: (data) => { this.certificats = data; this.applyFilters(); this.loading = false; },
-      error: () => { this.error = 'Erreur chargement certificats.'; this.loading = false; }
+      error: (err: any) => { this.error = httpErrorMessage(err, 'Impossible de charger les certificats.'); this.loading = false; }
     });
   }
 

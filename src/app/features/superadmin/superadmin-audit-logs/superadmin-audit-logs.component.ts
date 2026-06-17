@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, forkJoin } from 'rxjs';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AuditLogService, AuditLog, AuditStats } from '../../../shared/service/audit-log/audit-log.service';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
@@ -140,8 +141,8 @@ export class SuperadminAuditLogsComponent implements OnInit, OnDestroy {
         this.currentPage  = paginated.current_page  ?? 1;
         this.loading      = false;
       },
-      error: () => {
-        this.error   = 'Impossible de charger les logs. Vérifiez votre connexion.';
+      error: (err: any) => {
+        this.error   = httpErrorMessage(err, 'Impossible de charger les logs.');
         this.loading = false;
       }
     });

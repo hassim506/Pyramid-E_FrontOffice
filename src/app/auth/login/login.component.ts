@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SlickCarouselModule } from 'ngx-slick-carousel';
 import { AuthService, LoginRequest } from '../../shared/service/authentification/auth.service';
+import { RoleRedirectService } from '../../core/services/role-redirect.service';
 
 @Component({
   selector: 'app-login',
@@ -60,6 +61,7 @@ export class LoginComponent {
     private dataService: DataService,
     private fb: FormBuilder,
     private authService: AuthService,
+    private roleRedirect: RoleRedirectService,
     public router: Router
   ) {
     this.welcomeLogin = this.dataService.welcomeLogin;
@@ -88,21 +90,11 @@ onSubmit(): void {
 
   this.authService.login(payload).subscribe({
     next: (res) => {
-      
       this.isLoading = false;
-      // Utilisation de role_id pour la redirection
-      const roleId = res.user?.role_id;
-      if (roleId === 2) {
-        this.router.navigate(['/student/student-dashboard']);
-      } else if (roleId === 3 || roleId === 10 || roleId === 6 || roleId === 13) {
-        this.router.navigate(['/instructor/instructor-dashboard']);
-      }else if (roleId === 4 || roleId === 5 || roleId === 9|| roleId === 14) {
-        this.router.navigate(['/adminrh/adminrh-dashboard']);
-      } else if (roleId === 1) {
-        this.router.navigate(['/superadmin/superadmin-dashboard']);
-      } else {
-        this.router.navigate(['/index']);
-      }
+      const roleId   = res.user?.role_id ?? 0;
+      // role_type est renvoyé à la racine de la réponse par le backend
+      const roleType = (res.role_type ?? res.user?.['role_type']) as string | undefined;
+      this.roleRedirect.redirectAfterLogin(roleId, roleType);
     },
     error: (err: any) => {
       this.isLoading = false;

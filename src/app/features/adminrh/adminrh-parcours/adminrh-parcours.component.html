@@ -6,7 +6,7 @@
       <i class="isax isax-route-square"></i>Parcours ({{ totalItems }})
     </span>
     <span class="ac-spacer"></span>
-    <button type="button" class="ac-add-btn" (click)="openParcoursModal()">
+    <button *appHasPermission="'creer parcours'" type="button" class="ac-add-btn" (click)="openParcoursModal()">
       <i class="isax isax-add"></i>Nouveau parcours
     </button>
   </div>
@@ -132,10 +132,12 @@
     <div class="ac-empty ac-empty--span" *ngIf="filteredParcours.length === 0">
       <i class="isax isax-route-square"></i>
       <p>{{ parcours.length === 0 ? 'Aucun parcours créé' : 'Aucun résultat pour ces filtres' }}</p>
-      <button type="button" class="ac-add-btn" style="margin-top:10px;"
-              (click)="openParcoursModal()" *ngIf="parcours.length === 0">
-        <i class="isax isax-add"></i>Créer un parcours
-      </button>
+      <ng-container *appHasPermission="'creer parcours'">
+        <button type="button" class="ac-add-btn" style="margin-top:10px;"
+                (click)="openParcoursModal()" *ngIf="parcours.length === 0">
+          <i class="isax isax-add"></i>Créer un parcours
+        </button>
+      </ng-container>
       <button type="button" class="ac-chip" style="margin-top:10px;"
               (click)="clearFilters()" *ngIf="parcours.length > 0">
         <i class="isax isax-refresh"></i>Effacer les filtres

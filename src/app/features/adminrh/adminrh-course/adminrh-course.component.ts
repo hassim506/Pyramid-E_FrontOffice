@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -12,6 +13,7 @@ import { Formation } from '../../../shared/models/formation.models';
 import { ParcoursService, Parcours, ParcoursRequest } from '../../../shared/service/parcours/parcours.service';
 import { SessionFormationService, SessionFormation } from '../../../shared/service/session/session-formation.service';
 import { CatalogueService, Catalogue } from '../../../shared/service/catalogue/catalogue.service';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
 @Component({
   selector: 'app-adminrh-course',
@@ -22,7 +24,8 @@ import { CatalogueService, Catalogue } from '../../../shared/service/catalogue/c
     FormsModule,
     ReactiveFormsModule,
     MatSortModule,
-    CustomPaginationComponent
+    CustomPaginationComponent,
+    HasPermissionDirective
   ],
   templateUrl: './adminrh-course.component.html',
   styleUrls: ['./adminrh-course.component.scss']
@@ -32,11 +35,13 @@ export class AdminrhCourseComponent implements OnInit {
 
   allFormations: Formation[] = [];
   formations: Formation[] = [];
+  tableData: Formation[] = [];
   searchDataValue = '';
   selectedStatus = '';
   loading = false;
   error = '';
   currentPage = 1;
+  publishTarget: Formation | null = null;
 
   pageSize = 10;
   serialNumberArray: number[] = [];
@@ -522,9 +527,11 @@ export class AdminrhCourseComponent implements OnInit {
         if (response.status && response.formations) {
           this.allFormations = response.formations;
           this.formations = [...this.allFormations];
+          this.tableData = [...this.allFormations];
           this.totalData = this.formations.length;
           this.calculateStats();
           this.calculateTotalPages(this.totalData, this.pageSize);
+          this.getTableData(0, this.pageSize);
         } else {
           this.error = 'Aucune formation trouvée';
         }
@@ -532,7 +539,7 @@ export class AdminrhCourseComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur chargement formations:', error);
-        this.error = 'Erreur lors du chargement des formations';
+        this.error = httpErrorMessage(error, 'Impossible de charger les formations.');
         this.loading = false;
       }
     });
@@ -708,13 +715,14 @@ export class AdminrhCourseComponent implements OnInit {
   getTableData(skip: number, limit: number): void {
     this.serialNumberArray = [];
     this.formations = [];
+    this.tableData = [];
 
     let filteredData = [...this.allFormations];
 
-    if (this.selectedStatus) {
+    if (this.selectedStatus && this.selectedStatus !== 'all') {
       switch (this.selectedStatus.toLowerCase()) {
         case 'published':
-          filteredData = filteredData.filter(f => f.est_publie && f.inscription_ouverte);
+          filteredData = filteredData.filter(f => f.est_publie);
           break;
         case 'pending':
           filteredData = filteredData.filter(f => !f.est_publie && !f.inscription_ouverte);
@@ -730,7 +738,6 @@ export class AdminrhCourseComponent implements OnInit {
       filteredData = filteredData.filter(f =>
         f.titre?.toLowerCase().includes(search) ||
         f.description?.toLowerCase().includes(search) ||
-        // ✅ Corrigé : formateur_nom et categorie sont optionnels
         f.formateur_nom?.toLowerCase().includes(search) ||
         f.categorie?.nom?.toLowerCase().includes(search)
       );
@@ -741,12 +748,50 @@ export class AdminrhCourseComponent implements OnInit {
 
     const start = skip;
     const end = Math.min(skip + limit, this.totalData);
-
     for (let i = start; i < end; i++) {
       this.serialNumberArray.push(i + 1);
     }
 
     this.formations = filteredData.slice(start, end);
+    this.tableData = this.formations;
+  }
+
+  getActiveFormationsCount(): number {
+    return this.allFormations.filter(f => f.est_publie).length;
+  }
+
+  getPendingFormationsCount(): number {
+    return this.allFormations.filter(f => !f.est_publie && !f.inscription_ouverte).length;
+  }
+
+  getDraftFormationsCount(): number {
+    return this.allFormations.filter(f => !f.est_publie).length;
+  }
+
+  getTotalParticipants(): number {
+    return this.allFormations.reduce((sum, f) => sum + ((f as any).nb_participants || 0), 0);
+  }
+
+  togglePublishStatus(f: Formation): void {
+    this.publishTarget = f;
+  }
+
+  confirmTogglePublish(): void {
+    if (!this.publishTarget) return;
+    const target = this.publishTarget;
+    const isPublished = !!target.est_publie;
+    const op = isPublished
+      ? this.formationService.unpublishFormation(target.id)
+      : this.formationService.publishFormation(target.id);
+
+    op.subscribe({
+      next: () => {
+        (target as any).est_publie = !isPublished;
+        this.calculateStats();
+        this.publishTarget = null;
+      },
+      error: () => { this.publishTarget = null; }
+    });
   }
 
   searchData(searchValue: string): void {

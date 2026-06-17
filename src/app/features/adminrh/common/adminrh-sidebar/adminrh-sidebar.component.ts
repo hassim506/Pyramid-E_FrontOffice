@@ -10,12 +10,13 @@ import { SessionFormationService, SessionFormationResponse } from '../../../../s
 import { UserService } from '../../../../shared/service/user/user.service';
 import { CertificatService } from '../../../../shared/service/certificat/certificat.service';
 import { TicketService } from '../../../../shared/service/ticket/ticket.service';
+import { HasPermissionDirective } from '../../../../directive/has-permission-directive.directive';
 
 @Component({
     selector: 'app-adminrh-sidebar',
     templateUrl: './adminrh-sidebar.component.html',
     styleUrl: './adminrh-sidebar.component.scss',
-    imports: [CommonModule, RouterLink, RouterLinkActive]
+    imports: [CommonModule, RouterLink, RouterLinkActive, HasPermissionDirective]
 })
 export class AdminrhSidebarComponent implements OnInit, OnDestroy {
   private refreshSub?: Subscription;
