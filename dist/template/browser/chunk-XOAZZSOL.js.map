@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/superadmin/user-details/user-details.component.ts", "src/app/features/superadmin/user-details/user-details.component.html"],
+  "sourcesContent": ["import { Component } from '@angular/core';\r\n\r\n@Component({\r\n  selector: 'app-user-details',\r\n  imports: [],\r\n  templateUrl: './user-details.component.html',\r\n  styleUrl: './user-details.component.scss'\r\n})\r\nexport class UserDetailsComponent {\r\n\r\n}\r\n", "<p>user-details works!</p>\r\n"],
+  "mappings": ";;;;;;;;;;;;AAQM,IAAO,uBAAP,MAAO,sBAAoB;;qCAApB,uBAAoB;EAAA;yEAApB,uBAAoB,WAAA,CAAA,CAAA,kBAAA,CAAA,GAAA,OAAA,GAAA,MAAA,GAAA,UAAA,SAAA,8BAAA,IAAA,KAAA;AAAA,QAAA,KAAA,GAAA;ACRjC,MAAA,4BAAA,GAAA,GAAA;AAAG,MAAA,iBAAA,GAAA,qBAAA;AAAmB,MAAA,0BAAA;;;;;sEDQT,sBAAoB,CAAA;UANhC;uBACW,oBAAkB,SACnB,CAAA,GAAE,UAAA,iCAAA,CAAA;;;;6EAIA,sBAAoB,EAAA,WAAA,wBAAA,UAAA,kEAAA,YAAA,EAAA,CAAA;AAAA,GAAA;",
+  "names": []
+}

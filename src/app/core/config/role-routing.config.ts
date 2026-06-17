@@ -9,19 +9,19 @@ export interface RoleRoutingConfig {
 export const ROLE_ROUTING: RoleRoutingConfig[] = [
   {
     roleIds: [1],
-    defaultRoute: '/superadmin/superadmin-dashboard',
+    defaultRoute: '/superadmin/superadmin-user-list',
     layout: 'superadmin',
   },
   {
     // Admin RH, Responsable RH, Admin Holding, Manager, + tout rôle créé par RH (type='rh')
     roleIds: [4, 5, 9, 14],
-    defaultRoute: '/adminrh/adminrh-dashboard',
+    defaultRoute: '/adminrh/adminrh-user-list',
     layout: 'adminrh',
   },
   {
     // Formateur, Consultant, Gestionnaire de compte
     roleIds: [3, 6, 10, 13],
-    defaultRoute: '/instructor/instructor-dashboard',
+    defaultRoute: '/instructor/students-list',
     layout: 'formateur',
   },
   {

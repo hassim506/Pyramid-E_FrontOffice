@@ -227,19 +227,22 @@ export class AdminrhDashboardComponent implements OnInit {
     this.generateMonthlyStats(data.mensuel);
   }
 
-  private generateMonthlyStats(_mensuelData: any): void {
+  private generateMonthlyStats(mensuelData: any): void {
     const now = new Date();
     const stats: StatistiqueMensuelle[] = [];
+    const apiData = Array.isArray(mensuelData) ? mensuelData : [];
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const label = date.toLocaleDateString('fr-FR', { month: 'short' });
+      const monthKey = date.toISOString().slice(0, 7); // "2025-06"
+      const entry = apiData.find((m: any) => (m.mois || '').startsWith(monthKey));
       stats.push({
-        mois: label.charAt(0).toUpperCase() + label.slice(1),
-        formations:   Math.floor(Math.random() * 10) + 5,
-        utilisateurs: Math.floor(Math.random() * 50) + 20,
-        formateurs:   Math.floor(Math.random() * 5)  + 2,
-        sessions:     Math.floor(Math.random() * 8)  + 3
+        mois:         label.charAt(0).toUpperCase() + label.slice(1),
+        formations:   entry?.formations   ?? 0,
+        utilisateurs: entry?.utilisateurs ?? 0,
+        formateurs:   entry?.formateurs   ?? 0,
+        sessions:     entry?.sessions     ?? 0,
       });
     }
 

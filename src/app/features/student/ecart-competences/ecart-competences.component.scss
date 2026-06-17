@@ -1,0 +1,679 @@
+// ═══════════════════════════════════════════════════════
+// VARIABLES
+// ═══════════════════════════════════════════════════════
+$primary:      #069b8f;
+$primary-lt:   #e6f7f5;
+$primary-dk:   #047a6f;
+$success:      #10b981;
+$success-lt:   #f0fdf4;
+$warning:      #f59e0b;
+$warning-lt:   #fffbeb;
+$danger:       #ef4444;
+$danger-lt:    #fef2f2;
+$indigo:       #4f46e5;
+$indigo-lt:    #eef2ff;
+$orange:       #ea580c;
+$orange-lt:    rgba(234, 88, 12, 0.08);
+$orange-bdr:   rgba(234, 88, 12, 0.2);
+$dark:         #0f172a;
+$gray-50:      #f8fafc;
+$gray-100:     #f1f5f9;
+$gray-200:     #e2e8f0;
+$gray-300:     #cbd5e1;
+$gray-400:     #94a3b8;
+$gray-500:     #64748b;
+$gray-600:     #475569;
+$gray-700:     #334155;
+$gray-900:     #0f172a;
+$radius-sm:    8px;
+$radius-md:    14px;
+$radius-lg:    20px;
+$radius-xl:    28px;
+$shadow-sm:    0 1px 4px rgba(0,0,0,.06);
+$shadow-md:    0 4px 20px rgba(0,0,0,.08);
+$shadow-lg:    0 12px 40px rgba(0,0,0,.12);
+$t:            all .2s ease;
+
+$reco:         #069b8f;
+$reco-light:   rgba(6, 155, 143, 0.12);
+
+// ═══════════════════════════════════════════════════════
+// LOADING
+// ═══════════════════════════════════════════════════════
+.qq-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 60vh; gap: 20px;
+
+  p { font-size: 14px; color: $gray-400; margin: 0; }
+}
+
+.qq-loading__ring {
+  position: relative; width: 50px; height: 50px;
+
+  div {
+    position: absolute; width: 100%; height: 100%;
+    border: 3px solid transparent;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: qq-spin .8s linear infinite;
+
+    &:nth-child(2) { width: 38px; height: 38px; top: 6px; left: 6px; border-top-color: $indigo; animation-delay: -.3s; }
+    &:nth-child(3) { width: 26px; height: 26px; top: 12px; left: 12px; border-top-color: $warning; animation-delay: -.6s; }
+    &:nth-child(4) { width: 14px; height: 14px; top: 18px; left: 18px; border-top-color: $success; animation-delay: -.9s; }
+  }
+}
+
+@keyframes qq-spin { to { transform: rotate(360deg); } }
+
+// ═══════════════════════════════════════════════════════
+// ERROR
+// ═══════════════════════════════════════════════════════
+.cp-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  gap: 12px;
+  color: $danger;
+  text-align: center;
+
+  i { font-size: 2rem; }
+}
+
+// ═══════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════
+.cp-header {
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $dark;
+    margin: 0;
+  }
+  &__sub {
+    font-size: 0.875rem;
+    color: $gray-500;
+    margin: 4px 0 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════
+.cp-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cp-stat-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  padding: 20px 24px;
+  flex: 1;
+  min-width: 260px;
+
+  &__circle {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__circle--reco {
+    width: 72px;
+    height: 72px;
+    background: $reco-light;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__value {
+    position: absolute;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: $orange;
+  }
+
+  &__label { font-size: 0.875rem; color: $gray-500; }
+  &__sub   { font-size: 0.8rem; color: $gray-400; margin-top: 4px; }
+}
+
+// Cercle SVG
+.cp-circle-svg {
+  width: 72px;
+  height: 72px;
+  transform: rotate(-90deg);
+}
+
+.cp-circle-track {
+  fill: none;
+  stroke: $gray-100;
+}
+
+.cp-circle-fill {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .6s ease;
+
+  &--orange {
+    stroke: $orange;
+  }
+}
+
+// ─────────────────────────────────────────────────────
+// STAT CARDS
+// ─────────────────────────────────────────────────────
+.cp-stat-cards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cp-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: $radius-md;
+  border: 1px solid $gray-200;
+  background: #fff;
+  min-width: 130px;
+
+  i { font-size: 1.4rem; }
+
+  &__value { font-size: 1.4rem; font-weight: 700; line-height: 1; }
+  &__label { font-size: 0.75rem; color: $gray-500; margin-top: 2px; }
+
+  &--teal {
+    i, .cp-stat-card__value { color: $reco; }
+  }
+
+  &--green {
+    i, .cp-stat-card__value { color: $success; }
+  }
+
+  &--indigo {
+    i, .cp-stat-card__value { color: $indigo; }
+  }
+
+  // ← Nouveau : variante orange pour "à acquérir"
+  &--orange {
+    background: $orange-lt;
+    border-color: $orange-bdr;
+
+    i { color: $orange; }
+    .cp-stat-card__value { color: $orange; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// TOOLBAR
+// ═══════════════════════════════════════════════════════
+.cp-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cp-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $radius-sm;
+  padding: 8px 14px;
+  flex: 1;
+  min-width: 220px;
+
+  i { color: $gray-400; }
+
+  &__input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.875rem;
+    width: 100%;
+    color: $dark;
+    &::placeholder { color: $gray-400; }
+  }
+}
+
+.cp-search-hint {
+  font-size: 0.8rem;
+  color: $gray-400;
+  font-style: italic;
+}
+
+.cp-sort {
+  &__select {
+    border: 1px solid $gray-200;
+    border-radius: $radius-sm;
+    padding: 8px 14px;
+    font-size: 0.875rem;
+    color: $gray-700;
+    background: #fff;
+    outline: none;
+    cursor: pointer;
+    &:focus { border-color: $reco; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// GRILLE DOMAINES
+// ═══════════════════════════════════════════════════════
+.cp-domaine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.cp-domaine-card {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $radius-lg;
+  padding: 20px;
+  transition: $t;
+  border-top: 3px solid var(--d-color, #{$orange});
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: $radius-sm;
+    background: var(--d-color-lt, #{$orange-lt});
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 1.3rem;
+      color: var(--d-color, #{$orange});
+    }
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $dark;
+    line-height: 1.3;
+  }
+
+  &__count {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--d-color-lt, #{$orange-lt});
+    color: var(--d-color, #{$orange});
+    white-space: nowrap;
+  }
+
+  // Formations sources
+  &__formations {
+    margin-top: 12px;
+  }
+
+  &__formations-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $gray-500;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+
+    i { font-size: 0.85rem; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// BADGES COMPÉTENCES
+// ═══════════════════════════════════════════════════════
+.cp-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  &--sm .cp-badge {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+  }
+}
+
+.cp-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+
+  i { font-size: 0.75rem; }
+
+  &--reco {
+    background: $reco-light;
+    color: $reco;
+  }
+
+  // ← Badge écart orange
+  &--ecart {
+    background: $orange-lt;
+    color: $orange;
+    border: 1px solid $orange-bdr;
+
+    i { color: $orange; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CHIPS FORMATIONS
+// ═══════════════════════════════════════════════════════
+.cp-formation-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cp-formation-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-radius: $radius-sm;
+  background: $gray-50;
+  border: 1px solid $gray-200;
+  font-size: 0.8rem;
+  color: $gray-700;
+  transition: $t;
+
+  span { flex: 1; }
+
+  &__count {
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 6px;
+    flex-shrink: 0;
+  }
+
+  // ← Variante écart
+  &--ecart {
+    cursor: default;
+
+    &:hover { background: $orange-lt; }
+
+    .cp-formation-chip__count {
+      color: $orange;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// EMPTY STATE
+// ═══════════════════════════════════════════════════════
+.cp-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: $gray-400;
+
+  &__icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $gray-700;
+    margin-bottom: 6px;
+  }
+
+  p { font-size: 0.875rem; margin: 0; }
+}
+
+// ═══════════════════════════════════════════════════════
+// BOUTON
+// ═══════════════════════════════════════════════════════
+.cp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: $radius-sm;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: $t;
+
+  &--primary {
+    background: $reco;
+    color: #fff;
+    &:hover { background: $primary-dk; }
+  }
+}
+// ═══════════════════════════════════════════════════════
+// DOMAINE PRINCIPAL (mis en avant)
+// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// DOMAINE PRINCIPAL (mis en avant)
+// ═══════════════════════════════════════════════════════
+.cp-domaine-principal {
+  background: #fff;
+  border: 2px solid var(--dp-color, #{$primary});
+  border-radius: $radius-lg;
+  padding: 20px 24px;
+  position: relative;
+
+  &--ok {
+    border-color: $success;
+    --dp-color: #{$success};
+    --dp-color-lt: #{$success-lt};
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--dp-color-lt, #{$primary-lt});
+    color: var(--dp-color, #{$primary});
+    border: 1px solid var(--dp-color, #{$primary});
+    margin-bottom: 16px;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+
+    &--ok {
+      background: $success-lt;
+      color: $success;
+      border-color: $success;
+    }
+
+    i { font-size: 0.72rem; }
+  }
+
+  &__body {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: $radius-sm;
+    background: var(--dp-color-lt, #{$primary-lt});
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 1.4rem;
+      color: var(--dp-color, #{$primary});
+    }
+  }
+
+  &__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: $dark;
+    flex: 1;
+  }
+
+  &__count {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+    background: var(--dp-color-lt, #{$primary-lt});
+    color: var(--dp-color, #{$primary});
+  }
+
+  &__competences {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  &__formations {
+    padding-top: 16px;
+    border-top: 1px solid $gray-100;
+  }
+
+  &__formations-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: $gray-500;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    i { font-size: 0.8rem; }
+  }
+}
+
+// Badge compétence — variante domaine principal (vert avec check)
+.cp-badge--domaine-principal {
+  background: $success-lt;
+  color: $success;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-weight: 600;
+
+  i { color: $success; }
+}
+
+// Chip formation dans domaine principal
+.cp-formation-chip--principal {
+  background: $gray-50;
+  border: 1px solid $gray-200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-radius: $radius-sm;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $dark;
+
+  .cp-formation-chip__date {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: $gray-400;
+  }
+}
+.cp-domaine-principal__formations-count,
+.cp-domaine-card__formations-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $gray-600;
+  background: $gray-100;
+  padding: 6px 12px;
+  border-radius: $radius-sm;
+
+  i { font-size: 0.85rem; color: $gray-400; }
+}
+// Badge OK (aucun écart)
+.cp-badge--ok {
+  background: $success-lt;
+  color: $success;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-weight: 600;
+  i { color: $success; }
+}
+
+// Domaine principal — couleur par défaut orange (écart)
+.cp-domaine-principal {
+  --dp-color: #{$orange};
+  --dp-color-lt: #{$orange-lt};
+  border-color: var(--dp-color);
+
+  &__count {
+    background: $orange-lt;
+    color: $orange;
+    border: 1px solid $orange-bdr;
+  }
+}
+.cp-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+.cp-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 12px; border-radius: 20px;
+  border: 1.5px solid #e2e8f0; background: #fff;
+  color: #64748b; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.18s ease;
+
+  &:hover { border-color: var(--chip-color, #4f46e5); color: var(--chip-color, #4f46e5); }
+  &--active { border-color: var(--chip-color, #4f46e5); color: var(--chip-color, #4f46e5);
+    background: color-mix(in srgb, var(--chip-color, #4f46e5) 10%, #fff);
+    .cp-chip__count { background: var(--chip-color, #4f46e5); color: #fff; } }
+
+  &__count { min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
+    background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; }
+}
+
+.cp-filter-hint { display: flex; align-items: center; gap: 6px; margin-top: 10px;
+  font-size: 13px; color: #64748b;
+  &__clear { background: none; border: none; color: #ea580c; font-size: 13px;
+    font-weight: 500; cursor: pointer; &:hover { text-decoration: underline; } } }
+
+.cp-sort-label { font-size: 12px; color: #94a3b8; font-style: italic;
+  display: flex; align-items: center; gap: 6px; }
+
+.cp-btn-link { background: none; border: none; color: #ea580c;
+  font-size: inherit; font-weight: 500; cursor: pointer; text-decoration: underline; }

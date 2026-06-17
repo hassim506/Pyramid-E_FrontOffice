@@ -699,6 +699,53 @@ $radius-lg: 12px;
   }
 }
 
+// ─── Barre de recherche dans le modal permissions ─────────
+.perm-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &__icon {
+    position: absolute;
+    left: 10px;
+    font-size: 14px;
+    color: $gray-400;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 7px 32px 7px 32px;
+    font-size: 13px;
+    border: 1px solid $gray-200;
+    border-radius: $radius-md;
+    background: $gray-50;
+    outline: none;
+    transition: border-color .15s;
+
+    &:focus {
+      border-color: $primary;
+      background: #fff;
+    }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 15px;
+    color: $gray-400;
+    cursor: pointer;
+    line-height: 1;
+
+    &:hover { color: $gray-600; }
+  }
+}
+
+.perm-empty-icon { font-size: 2rem; }
+
 // ============= GRILLE PERMISSIONS (nouveau modal) =============
 
 .permissions-grid {

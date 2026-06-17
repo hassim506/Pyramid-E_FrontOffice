@@ -1,49 +1,64 @@
 // ═══════════════════════════════════════════════════════
 // VARIABLES
 // ═══════════════════════════════════════════════════════
-$primary:    #069b8f;
-$primary-lt: #e6f7f5;
-$success:    #10b981;
-$blue:       #3b82f6;
-$blue-lt:    #eff6ff;
-$warning:    #f59e0b;
-$warning-lt: #fffbeb;
-$danger:     #ef4444;
-$gray-50:    #f8fafc;
-$gray-100:   #f1f5f9;
-$gray-200:   #e2e8f0;
-$gray-300:   #cbd5e1;
-$gray-400:   #94a3b8;
-$gray-500:   #64748b;
-$gray-600:   #475569;
-$gray-700:   #334155;
-$gray-900:   #0f172a;
-$dark:       #1e293b;
-$radius-sm:  8px;
-$radius-md:  12px;
-$radius-lg:  18px;
-$shadow-sm:  0 1px 4px rgba(0,0,0,.06);
-$shadow-md:  0 4px 20px rgba(0,0,0,.08);
-$shadow-lg:  0 12px 40px rgba(0,0,0,.14);
-$t:          all .2s ease;
+$primary:      #069b8f;
+$primary-lt:   #e6f7f5;
+$primary-dk:   #047a6f;
+$success:      #10b981;
+$success-lt:   #f0fdf4;
+$warning:      #f59e0b;
+$warning-lt:   #fffbeb;
+$danger:       #ef4444;
+$danger-lt:    #fef2f2;
+$indigo:       #4f46e5;
+$indigo-lt:    #eef2ff;
+$dark:         #0f172a;
+$gray-50:      #f8fafc;
+$gray-100:     #f1f5f9;
+$gray-200:     #e2e8f0;
+$gray-300:     #cbd5e1;
+$gray-400:     #94a3b8;
+$gray-500:     #64748b;
+$gray-600:     #475569;
+$gray-700:     #334155;
+$gray-900:     #0f172a;
+$radius-sm:    8px;
+$radius-md:    14px;
+$radius-lg:    20px;
+$radius-xl:    28px;
+$shadow-sm:    0 1px 4px rgba(0,0,0,.06);
+$shadow-md:    0 4px 20px rgba(0,0,0,.08);
+$shadow-lg:    0 12px 40px rgba(0,0,0,.12);
+$shadow-xl:    0 20px 60px rgba(0,0,0,.18);
+$t:            all .2s ease;
 
 // ═══════════════════════════════════════════════════════
-// LOADING / ERREUR
+// LOADING
 // ═══════════════════════════════════════════════════════
-.pl-loading {
+.qq-loading {
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; min-height: 60vh; gap: 16px;
-
-  &__ring {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: 3px solid $gray-200; border-top-color: $primary;
-    animation: pl-spin .7s linear infinite;
-  }
+  justify-content: center; min-height: 60vh; gap: 20px;
   p { font-size: 14px; color: $gray-400; margin: 0; }
 }
 
-@keyframes pl-spin { to { transform: rotate(360deg); } }
+.qq-loading__ring {
+  position: relative; width: 50px; height: 50px;
+  div {
+    position: absolute; width: 100%; height: 100%;
+    border: 3px solid transparent;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: qq-spin .8s linear infinite;
+    &:nth-child(2) { width: 38px; height: 38px; top: 6px; left: 6px; border-top-color: $indigo; animation-delay: -.3s; }
+    &:nth-child(3) { width: 26px; height: 26px; top: 12px; left: 12px; border-top-color: $warning; animation-delay: -.6s; }
+    &:nth-child(4) { width: 14px; height: 14px; top: 18px; left: 18px; border-top-color: $success; animation-delay: -.9s; }
+  }
+}
+@keyframes qq-spin { to { transform: rotate(360deg); } }
 
+// ═══════════════════════════════════════════════════════
+// ERREUR
+// ═══════════════════════════════════════════════════════
 .pl-error {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; min-height: 50vh; gap: 12px;
@@ -65,7 +80,6 @@ $t:          all .2s ease;
 // ═══════════════════════════════════════════════════════
 .pl-stats {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
-
   @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }
   @media (max-width: 480px) { grid-template-columns: 1fr 1fr; }
 }
@@ -75,14 +89,12 @@ $t:          all .2s ease;
   padding: 16px 18px; border-radius: $radius-lg;
   background: #fff; border: 1px solid $gray-200;
   box-shadow: $shadow-sm;
-
   i { font-size: 24px; flex-shrink: 0; }
   &__value { font-size: 24px; font-weight: 800; color: $gray-900; line-height: 1; }
   &__label { font-size: 12px; color: $gray-400; margin-top: 2px; }
-
   &--total     { i { color: $primary; } }
   &--presentiel{ i { color: $success; } }
-  &--enligne   { i { color: $blue; } }
+  &--enligne   { i { color: #3b82f6; } }
   &--session   { i { color: $warning; } }
 }
 
@@ -96,7 +108,6 @@ $t:          all .2s ease;
 
 .pl-nav {
   display: flex; align-items: center; gap: 8px;
-
   &__btn {
     width: 36px; height: 36px; border-radius: $radius-sm;
     background: $gray-100; border: 1px solid $gray-200;
@@ -104,15 +115,12 @@ $t:          all .2s ease;
     display: flex; align-items: center; justify-content: center; transition: $t;
     &:hover { background: $primary-lt; color: $primary; border-color: rgba($primary,.2); }
   }
-
   &__label {
     display: flex; flex-direction: column; align-items: center;
     min-width: 130px; text-align: center;
   }
-
   &__mois  { font-size: 16px; font-weight: 800; color: $gray-900; line-height: 1; }
   &__annee { font-size: 12px; color: $gray-400; }
-
   &__today {
     padding: 7px 16px; border-radius: $radius-sm;
     background: $primary-lt; color: $primary;
@@ -122,9 +130,7 @@ $t:          all .2s ease;
   }
 }
 
-.pl-filtres {
-  display: flex; gap: 8px; flex-wrap: wrap;
-}
+.pl-filtres { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .pl-filtre {
   display: inline-flex; align-items: center; gap: 4px;
@@ -132,38 +138,20 @@ $t:          all .2s ease;
   font-size: 12px; font-weight: 700; cursor: pointer;
   background: $gray-100; color: $gray-500;
   border: 1.5px solid $gray-200; transition: $t;
-
   i { font-size: 13px; }
-
   &:hover { background: $gray-200; color: $gray-700; }
-
-  &--active {
-    background: $dark; color: #fff; border-color: $dark;
-  }
-
+  &--active { background: $dark; color: #fff; border-color: $dark; }
   &--presentiel.pl-filtre--active { background: $success; border-color: $success; }
-  &--enligne.pl-filtre--active    { background: $blue;    border-color: $blue; }
-  &--session.pl-filtre--active    { background: $warning; border-color: $warning; }
+  &--enligne.pl-filtre--active    { background: #3b82f6; border-color: #3b82f6; }
 }
 
 // ═══════════════════════════════════════════════════════
-// CALENDRIER
+// CALENDRIER WRAP — position: relative pour le popover
 // ═══════════════════════════════════════════════════════
 .pl-calendar-wrap {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-  overflow: auto;          // ✅ scroll vertical ET horizontal
-  max-height: 80vh;        // ✅ hauteur max avant scroll vertical
-  -webkit-overflow-scrolling: touch; // ✅ swipe fluide mobile
-
-  &:has(.pl-detail) {
-    grid-template-columns: 1fr 360px;
-  }
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr !important;
-  }
+  position: relative;   // ← indispensable pour le popover absolu
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .pl-calendar {
@@ -172,7 +160,7 @@ $t:          all .2s ease;
   border: 1px solid $gray-200;
   box-shadow: $shadow-sm;
   overflow: hidden;
-  min-width: 700px;  // ✅ force le scroll horizontal sur mobile
+  min-width: 700px;
 }
 
 .pl-calendar__headers {
@@ -214,7 +202,8 @@ $t:          all .2s ease;
     }
   }
 
-  &--has-events { cursor: pointer;
+  &--has-events {
+    cursor: pointer;
     &:hover { background: $primary-lt; }
   }
 
@@ -235,38 +224,49 @@ $t:          all .2s ease;
   padding: 3px 6px; border-radius: 5px;
   font-size: 10px; font-weight: 600;
   white-space: nowrap; overflow: hidden;
-
   i    { font-size: 11px; flex-shrink: 0; }
-
   &__title {
     overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap; flex: 1; color: $gray-700;
   }
-
-  &__more {
-    font-size: 10px; color: $gray-400; font-weight: 600;
-    padding: 2px 6px;
-  }
+  &__more { font-size: 10px; color: $gray-400; font-weight: 600; padding: 2px 6px; }
 }
 
 // ═══════════════════════════════════════════════════════
-// PANEL DÉTAIL
+// POPOVER FLOTTANT (remplace l'ancien panel latéral)
 // ═══════════════════════════════════════════════════════
-.pl-detail {
-  background: #fff; border-radius: $radius-lg;
-  border: 1px solid $gray-200; box-shadow: $shadow-md;
-  display: flex; flex-direction: column;
-  max-height: 600px; overflow: hidden;
-  animation: pl-slide-in .25s ease;
+.pl-popover {
+  position: absolute;
+  z-index: 100;
+  width: 340px;
+  background: #fff;
+  border-radius: $radius-lg;
+  border: 1px solid $gray-200;
+  box-shadow: $shadow-xl;
+  display: flex;
+  flex-direction: column;
+  max-height: 480px;
+  overflow: hidden;
+  animation: pl-pop-in .2s cubic-bezier(.34,1.56,.64,1);
 
-  @media (max-width: 1024px) {
-    max-height: none;
+  // ── Flèche pointant vers le bas (vers la case) ──
+  &__arrow {
+    position: absolute;
+    bottom: -9px;         // dépasse en bas du popover
+    width: 18px;
+    height: 18px;
+    background: $dark;    // même couleur que le header
+    border-right: 1px solid $gray-200;
+    border-bottom: 1px solid $gray-200;
+    transform: rotate(45deg);
+    border-radius: 3px;
   }
 
   &__header {
     display: flex; align-items: flex-start; justify-content: space-between;
-    padding: 16px 18px; border-bottom: 1px solid $gray-100;
+    padding: 14px 16px; border-bottom: 1px solid $gray-100;
     flex-shrink: 0; background: $dark;
+    border-radius: $radius-lg $radius-lg 0 0;
   }
 
   &__date  { font-size: 14px; font-weight: 700; color: #fff; text-transform: capitalize; }
@@ -274,30 +274,51 @@ $t:          all .2s ease;
 
   &__close {
     background: none; border: none; cursor: pointer;
-    font-size: 20px; color: rgba(255,255,255,.5); transition: $t;
+    font-size: 20px; color: rgba(255,255,255,.5); transition: $t; padding: 0;
     &:hover { color: #fff; }
   }
 
   &__list {
     flex: 1; overflow-y: auto; padding: 12px;
     display: flex; flex-direction: column; gap: 10px;
-
     &::-webkit-scrollbar { width: 4px; }
     &::-webkit-scrollbar-thumb { background: $gray-200; border-radius: 4px; }
   }
+
+  // Responsive : plein écran sur mobile
+  @media (max-width: 768px) {
+    position: fixed;
+    top: auto !important;
+    left: 50% !important;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 100vw;
+    border-radius: $radius-lg $radius-lg 0 0;
+    max-height: 70vh;
+    animation: pl-slide-up .25s ease;
+
+    .pl-popover__arrow { display: none; }
+  }
 }
 
-@keyframes pl-slide-in {
-  from { opacity: 0; transform: translateX(20px); }
-  to   { opacity: 1; transform: translateX(0); }
+@keyframes pl-pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-// ── Carte événement dans panel ───────────────────────
+@keyframes pl-slide-up {
+  from { transform: translateX(-50%) translateY(100%); }
+  to   { transform: translateX(-50%) translateY(0); }
+}
+
+// ═══════════════════════════════════════════════════════
+// CARTE ÉVÉNEMENT dans le popover
+// ═══════════════════════════════════════════════════════
 .pl-evt-card {
   border-radius: $radius-md; padding: 14px 16px;
   border: 1.5px solid $gray-200; cursor: pointer;
   transition: $t; background: #fff;
-
   &:hover { box-shadow: $shadow-sm; transform: translateY(-1px); }
   &--selected { box-shadow: $shadow-md; }
 
@@ -309,10 +330,7 @@ $t:          all .2s ease;
     i { font-size: 11px; }
   }
 
-  &__title {
-    font-size: 14px; font-weight: 700; color: $gray-900;
-    margin: 0 0 4px; line-height: 1.4;
-  }
+  &__title { font-size: 14px; font-weight: 700; color: $gray-900; margin: 0 0 4px; line-height: 1.4; }
 
   &__sub {
     font-size: 12px; color: $gray-400; margin: 0 0 10px;
@@ -323,7 +341,6 @@ $t:          all .2s ease;
   &__infos {
     display: flex; flex-direction: column; gap: 4px;
     margin-bottom: 10px;
-
     span {
       display: flex; align-items: center; gap: 4px;
       font-size: 12px; color: $gray-500;
@@ -331,16 +348,13 @@ $t:          all .2s ease;
     }
   }
 
-  &__footer {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  }
+  &__footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 }
 
 // ── Statut badge ─────────────────────────────────────
 .pl-evt-status {
   font-size: 11px; font-weight: 700; padding: 3px 10px;
   border-radius: 99px; text-transform: capitalize;
-
   &--non_commence { background: $gray-100; color: $gray-500; }
   &--en_cours     { background: rgba($primary,.1); color: $primary; }
   &--termine      { background: rgba($success,.1); color: $success; }
@@ -351,14 +365,8 @@ $t:          all .2s ease;
 // ── Progression ──────────────────────────────────────
 .pl-evt-prog {
   display: flex; align-items: center; gap: 6px; flex: 1; max-width: 120px;
-
   span { font-size: 11px; color: $gray-400; font-weight: 600; white-space: nowrap; }
-
-  &__bar {
-    flex: 1; height: 4px; background: $gray-100;
-    border-radius: 99px; overflow: hidden;
-  }
-
+  &__bar { flex: 1; height: 4px; background: $gray-100; border-radius: 99px; overflow: hidden; }
   &__fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
 }
 
@@ -367,15 +375,8 @@ $t:          all .2s ease;
 // ═══════════════════════════════════════════════════════
 .pl-legende {
   display: flex; gap: 20px; flex-wrap: wrap;
-
-  &__item {
-    display: flex; align-items: center; gap: 7px;
-    font-size: 12px; color: $gray-500; font-weight: 500;
-  }
-
-  &__dot {
-    width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
-  }
+  &__item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: $gray-500; font-weight: 500; }
+  &__dot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -384,7 +385,6 @@ $t:          all .2s ease;
 .pl-empty {
   display: flex; flex-direction: column; align-items: center;
   padding: 40px; text-align: center; gap: 10px;
-
   &__icon { font-size: 3rem; color: $primary; opacity: .3; }
   h6 { font-size: 16px; font-weight: 700; color: $gray-900; margin: 0; }
   p  { font-size: 13px; color: $gray-400; margin: 0; }
@@ -398,7 +398,6 @@ $t:          all .2s ease;
   padding: 10px 20px; border-radius: 50px;
   font-size: 13px; font-weight: 700; cursor: pointer;
   border: none; transition: $t;
-
   &--primary {
     background: $primary; color: #fff;
     box-shadow: 0 4px 14px rgba($primary,.3);

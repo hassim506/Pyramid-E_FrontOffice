@@ -64,7 +64,7 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
   
   // Private properties
   private lightGallery!: LightGallery;
-  private formationId: string | null = null;
+  private formationId: number| null = null;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -96,7 +96,7 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
     this.route.paramMap.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {
-      this.formationId = params.get('id');
+      this.formationId = params.get('id') ? parseInt(params.get('id')!, 10) : null;
       if (this.formationId) {
         this.loadFormation();
       } else {

@@ -132,10 +132,14 @@
 </div>
 
 <!-- LOADER -->
-<div class="sc-loading" *ngIf="loading">
-  <div class="sc-loading__spinner"></div>
+
+<div class="qq-loading" *ngIf="loading">
+  <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
   <p>Chargement de vos parcours...</p>
 </div>
+
 
 <!-- ERREUR -->
 <div class="sc-error" *ngIf="error && !loading">
@@ -294,9 +298,7 @@
   <i class="isax isax-search-normal sc-empty__icon"></i>
   <h6 class="sc-empty__title">Aucun résultat</h6>
   <p>Aucun parcours ne correspond à votre recherche.</p>
-  <button class="sc-empty__btn" (click)="clearFilters()">
-    <i class="isax isax-refresh me-1"></i> Réinitialiser les filtres
-  </button>
+  
 </div>
 
 <!-- PAGINATION -->

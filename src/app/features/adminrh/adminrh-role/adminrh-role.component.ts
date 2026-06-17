@@ -54,12 +54,16 @@ export class AdminrhRoleComponent implements OnInit {
   // Catégories pour le filtre des permissions
   readonly PERMISSION_CATEGORIES = [
     { key: 'all',          label: 'Toutes' },
-    { key: 'utilisateurs', label: 'Utilisateurs',  keywords: ['utilisateur', 'user'] },
-    { key: 'formations',   label: 'Formations',    keywords: ['formation', 'module', 'catalogue', 'section', 'categorie', 'contenu', 'parcours'] },
-    { key: 'quiz',         label: 'Quiz',          keywords: ['quiz'] },
-    { key: 'rapports',     label: 'Rapports',      keywords: ['rapport', 'statistique', 'analys', 'progres', 'certificat'] },
+    { key: 'utilisateurs', label: 'Utilisateurs',  keywords: ['utilisateur', 'user', 'employe', 'apprenant'] },
+    { key: 'formations',   label: 'Formations',    keywords: ['formation', 'module', 'section', 'contenu', 'parcours', 'access-formation'] },
+    { key: 'catalogue',    label: 'Catalogues',    keywords: ['catalogue', 'categorie'] },
+    { key: 'sessions',     label: 'Sessions',      keywords: ['session', 'séance', 'seance', 'planif'] },
+    { key: 'quiz',         label: 'Quiz',          keywords: ['quiz', 'evaluation', 'examen', 'sondage'] },
+    { key: 'rapports',     label: 'Rapports',      keywords: ['rapport', 'statistique', 'analys', 'progres', 'certificat', 'palmares'] },
+    { key: 'entreprises',  label: 'Entreprises',   keywords: ['entreprise', 'client', 'contrat'] },
   ];
   activePermissionCategory = 'all';
+  permissionSearch = '';
 
   // ============= ÉTAT DES DONNÉES =============
   roles: Role[] = [];
@@ -396,12 +400,23 @@ export class AdminrhRoleComponent implements OnInit {
   }
 
   get filteredPermissionsForModal(): Permission[] {
-    if (this.activePermissionCategory === 'all') return this.adminrhPermissions;
-    const cat = this.PERMISSION_CATEGORIES.find(c => c.key === this.activePermissionCategory);
-    if (!cat || !cat.keywords) return this.adminrhPermissions;
-    return this.adminrhPermissions.filter(p =>
-      cat.keywords!.some(kw => p.name.toLowerCase().includes(kw))
-    );
+    let list = this.adminrhPermissions;
+
+    // Filtre par catégorie
+    if (this.activePermissionCategory !== 'all') {
+      const cat = this.PERMISSION_CATEGORIES.find(c => c.key === this.activePermissionCategory);
+      if (cat?.keywords) {
+        list = list.filter(p => cat.keywords!.some(kw => p.name.toLowerCase().includes(kw)));
+      }
+    }
+
+    // Filtre par recherche texte
+    const search = this.permissionSearch.trim().toLowerCase();
+    if (search) {
+      list = list.filter(p => p.name.toLowerCase().includes(search));
+    }
+
+    return list;
   }
 
   // Retourne l'index global dans adminrhPermissions pour un permission filtré

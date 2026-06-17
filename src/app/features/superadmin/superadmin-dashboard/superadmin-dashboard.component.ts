@@ -3,11 +3,6 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
-import { DataService } from '../../../shared/service/data/data.service';
-import { User } from '../../../shared/models/user.models';
-import { UserService } from '../../../shared/service/user/user.service';
-import { FormationService } from '../../../shared/service/formation/formation.service';
-import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
 import { AdminRHStatsService } from '../../../shared/service/stat/adminrh-stat.service';
 import { SuperAdminDashboardService, SuperAdminStats } from '../../../shared/service/stat/superadmin-dashboard.service';
 import { routes } from '../../../shared/service/routes/routes';
@@ -314,10 +309,6 @@ Statisticschart: any = {
 
   constructor(
     private router: Router,
-    private dataService: DataService,
-    private userService: UserService,
-    private formationService: FormationService,
-    private clientCompanyService: ClientCompanyService,
     private adminRHStatsService: AdminRHStatsService,
     private superAdminDashboardService: SuperAdminDashboardService
   ) { }
@@ -335,20 +326,16 @@ Statisticschart: any = {
     this.isLoading = true;
     this.superStatsLoading = true;
 
+    // Phase 1 : stats légères seulement (pas de getUsers/getFormations sans pagination)
     forkJoin({
-      users:        this.userService.getUsers().pipe(catchError(() => of(null))),
-      clients:      this.clientCompanyService.getClients().pipe(catchError(() => of(null))),
-      formations:   this.formationService.getFormations({ page: 1, limit: 100 }).pipe(catchError(() => of(null))),
-      companies:    this.clientCompanyService.getCompanies().pipe(catchError(() => of(null))),
       rhStats:      this.adminRHStatsService.getAllStats().pipe(catchError(() => of(null))),
       rhFormations: this.adminRHStatsService.getFormationsRecentes().pipe(catchError(() => of([]))),
-      rhMensuel:    this.adminRHStatsService.getFormationsParAnnee().pipe(catchError(() => of([]))),
       superStats:   this.superAdminDashboardService.getStats().pipe(catchError(() => of(null))),
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
-        this.processRealData(data);
         this.processRhData(data);
         this.processSuperStats(data.superStats);
+        this.buildCountsFromStats(data);
         this.isLoading = false;
       },
       error: () => {
@@ -357,6 +344,20 @@ Statisticschart: any = {
         this.superStatsLoading = false;
       }
     });
+  }
+
+  private buildCountsFromStats(data: any): void {
+    // Totaux depuis les stats agrégées — pas besoin de charger toutes les listes
+    const rh = data.rhStats;
+    const su = data.superStats?.data;
+
+    this.dashboardData.totalUtilisateurs = rh?.totalUtilisateurs  ?? su?.total_utilisateurs ?? 0;
+    this.dashboardData.totalFormations   = rh?.totalFormations     ?? su?.total_formations   ?? 0;
+    this.dashboardData.totalEntreprises  = su?.total_entreprises   ?? 0;
+    this.dashboardData.totalClients      = su?.total_clients       ?? 0;
+
+    this.updateStatisticsCards();
+    this.generateMonthlyStats([], [], [], []);
   }
 
   private processSuperStats(res: { status: boolean; data: SuperAdminStats } | null): void {
@@ -406,19 +407,22 @@ Statisticschart: any = {
     this.updateRhChart(data.rhMensuel);
   }
 
-  private updateRhChart(_mensuelData: any): void {
+  private updateRhChart(mensuelData: any): void {
     const now = new Date();
+    const apiData = Array.isArray(mensuelData) ? mensuelData : [];
     const stats: Array<{ mois: string; formations: number; utilisateurs: number; formateurs: number; sessions: number }> = [];
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const label = date.toLocaleDateString('fr-FR', { month: 'short' });
+      const monthKey = date.toISOString().slice(0, 7);
+      const entry = apiData.find((m: any) => (m.mois || '').startsWith(monthKey));
       stats.push({
-        mois: label.charAt(0).toUpperCase() + label.slice(1),
-        formations:   Math.floor(Math.random() * 10) + 5,
-        utilisateurs: Math.floor(Math.random() * 50) + 20,
-        formateurs:   Math.floor(Math.random() * 5) + 2,
-        sessions:     Math.floor(Math.random() * 8) + 3
+        mois:         label.charAt(0).toUpperCase() + label.slice(1),
+        formations:   entry?.formations   ?? 0,
+        utilisateurs: entry?.utilisateurs ?? 0,
+        formateurs:   entry?.formateurs   ?? 0,
+        sessions:     entry?.sessions     ?? 0,
       });
     }
 

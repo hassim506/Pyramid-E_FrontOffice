@@ -1,14 +1,16 @@
 import {
   routes
-} from "./chunk-OSONV73K.js";
+} from "./chunk-LNRQNICS.js";
 import {
-  HasPermissionDirective,
   RoleRedirectService
-} from "./chunk-EMGX62AL.js";
-import "./chunk-W5FY3JM3.js";
+} from "./chunk-UW4TBWN4.js";
+import {
+  HasPermissionDirective
+} from "./chunk-2HZFQCLP.js";
+import "./chunk-MX7HREXV.js";
 import {
   BsDatepickerModule
-} from "./chunk-R43VT3W3.js";
+} from "./chunk-SRQ23QUF.js";
 import {
   Swiper,
   defaults,
@@ -24,9 +26,12 @@ import {
   style,
   ɵPRE_STYLE
 } from "./chunk-N2SUXMIO.js";
-import "./chunk-SNOA42FF.js";
-import "./chunk-FKX6UC3I.js";
-import "./chunk-45DOGZAU.js";
+import "./chunk-DS2V2BCU.js";
+import {
+  AuthService
+} from "./chunk-IEFOQSOV.js";
+import "./chunk-K7E3GT3E.js";
+import "./chunk-HLA233IM.js";
 import {
   NavigationStart,
   Router,
@@ -7513,19 +7518,87 @@ var appConfig = {
   ]
 };
 
+// src/app/shared/service/inactivity/inactivity.service.ts
+var INACTIVITY_TIMEOUT_MS = 2 * 60 * 60 * 1e3;
+var ACTIVITY_EVENTS = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"];
+var InactivityService = class _InactivityService {
+  router;
+  authService;
+  ngZone;
+  timer = null;
+  boundReset = this.resetTimer.bind(this);
+  listening = false;
+  constructor(router, authService, ngZone) {
+    this.router = router;
+    this.authService = authService;
+    this.ngZone = ngZone;
+  }
+  start() {
+    if (this.listening)
+      return;
+    this.listening = true;
+    this.ngZone.runOutsideAngular(() => {
+      ACTIVITY_EVENTS.forEach((event) => window.addEventListener(event, this.boundReset, { passive: true }));
+    });
+    this.resetTimer();
+  }
+  stop() {
+    ACTIVITY_EVENTS.forEach((event) => window.removeEventListener(event, this.boundReset));
+    if (this.timer)
+      clearTimeout(this.timer);
+    this.timer = null;
+    this.listening = false;
+  }
+  resetTimer() {
+    if (this.timer)
+      clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      this.ngZone.run(() => this.onTimeout());
+    }, INACTIVITY_TIMEOUT_MS);
+  }
+  onTimeout() {
+    this.stop();
+    this.authService.logout();
+  }
+  ngOnDestroy() {
+    this.stop();
+  }
+  static \u0275fac = function InactivityService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _InactivityService)(\u0275\u0275inject(Router), \u0275\u0275inject(AuthService), \u0275\u0275inject(NgZone));
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _InactivityService, factory: _InactivityService.\u0275fac, providedIn: "root" });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(InactivityService, [{
+    type: Injectable,
+    args: [{ providedIn: "root" }]
+  }], () => [{ type: Router }, { type: AuthService }, { type: NgZone }], null);
+})();
+
 // src/app/app.component.ts
+var AUTH_ROUTES = ["/auth"];
 var AppComponent = class _AppComponent {
   router;
+  inactivityService;
+  authService;
   title = "template";
   base = "";
   page = "";
-  constructor(router) {
+  constructor(router, inactivityService, authService) {
     this.router = router;
+    this.inactivityService = inactivityService;
+    this.authService = authService;
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         const URL = event.url.split("/");
         this.base = URL[1] ? URL[1].replace("-", " ") : "";
         this.page = URL[2] ? URL[2].replace("-", " ") : "";
+        const isAuthPage = AUTH_ROUTES.some((r) => event.url.startsWith(r));
+        if (isAuthPage || !this.authService.isLoggedIn()) {
+          this.inactivityService.stop();
+        } else {
+          this.inactivityService.start();
+        }
       }
       if (this.base === "index") {
         this.page = "Deals Dashboard";
@@ -7536,7 +7609,7 @@ var AppComponent = class _AppComponent {
     });
   }
   static \u0275fac = function AppComponent_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _AppComponent)(\u0275\u0275directiveInject(Router));
+    return new (__ngFactoryType__ || _AppComponent)(\u0275\u0275directiveInject(Router), \u0275\u0275directiveInject(InactivityService), \u0275\u0275directiveInject(AuthService));
   };
   static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _AppComponent, selectors: [["app-root"]], decls: 4, vars: 3, template: function AppComponent_Template(rf, ctx) {
     if (rf & 1) {
@@ -7555,11 +7628,11 @@ var AppComponent = class _AppComponent {
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AppComponent, [{
     type: Component,
-    args: [{ selector: "app-root", imports: [RouterOutlet, CommonModule, HasPermissionDirective], template: "<router-outlet></router-outlet>\n<title>{{ page | titlecase }} | CRMS - Advanced Bootstrap 5 Admin Template for Customer Management</title>" }]
-  }], () => [{ type: Router }], null);
+    args: [{ selector: "app-root", imports: [RouterOutlet, CommonModule, HasPermissionDirective], template: "<router-outlet></router-outlet>\r\n<title>{{ page | titlecase }} | CRMS - Advanced Bootstrap 5 Admin Template for Customer Management</title>" }]
+  }], () => [{ type: Router }, { type: InactivityService }, { type: AuthService }], null);
 })();
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(AppComponent, { className: "AppComponent", filePath: "src/app/app.component.ts", lineNumber: 12 });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(AppComponent, { className: "AppComponent", filePath: "app/app.component.ts", lineNumber: 16 });
 })();
 
 // src/main.ts

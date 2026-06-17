@@ -1,0 +1,149 @@
+<!-- HEADER -->
+<div class="sc-header mb-4">
+  <div>
+    <h3 class="sc-header__title">
+      <i class="isax isax-medal me-2" style="color:#069b8f"></i>Mes palmarès
+    </h3>
+    <p class="sc-header__subtitle">Vos récompenses et certifications obtenues</p>
+  </div>
+</div>
+
+<!-- ONGLETS -->
+<div class="pal-tabs mb-4">
+  <button class="pal-tab" [class.pal-tab--active]="onglet === 'certificats'"
+          (click)="setOnglet('certificats')">
+    <i class="isax isax-medal me-2"></i>Certificats
+    <span class="pal-tab__count" *ngIf="certificats.length > 0">{{ certificats.length }}</span>
+  </button>
+  <button class="pal-tab" [class.pal-tab--active]="onglet === 'habilitations'"
+          (click)="setOnglet('habilitations')">
+    <i class="isax isax-shield-tick me-2"></i>Habilitations
+  </button>
+  <button class="pal-tab" [class.pal-tab--active]="onglet === 'badges'"
+          (click)="setOnglet('badges')">
+    <i class="isax isax-medal-star me-2"></i>Badges
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- ONGLET CERTIFICATS                             -->
+<!-- ══════════════════════════════════════════════ -->
+<ng-container *ngIf="onglet === 'certificats'">
+
+  <div class="sc-loading" *ngIf="loading">
+    <div class="sc-loading__spinner"></div>
+    <p>Chargement de vos certificats...</p>
+  </div>
+
+  <div class="pal-error" *ngIf="error && !loading">
+    <i class="isax isax-warning-2"></i>
+    <p>{{ error }}</p>
+    <button class="pal-btn" (click)="load()">
+      <i class="isax isax-refresh me-2"></i>Réessayer
+    </button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- STAT UNIQUE — masquée si 0 -->
+    <div class="pal-stats mb-4" *ngIf="certificats.length > 0">
+      <div class="pal-kpi pal-kpi--teal">
+        <div class="pal-kpi__icon"><i class="isax isax-medal"></i></div>
+        <div>
+          <div class="pal-kpi__value">{{ certificats.length }}</div>
+          <div class="pal-kpi__label">Certificats obtenus</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECHERCHE -->
+    <div class="sc-filters mb-4" *ngIf="certificats.length > 0">
+      <div class="sc-filters__search">
+        <i class="isax isax-search-normal-1 sc-filters__search-icon"></i>
+        <input type="text" class="sc-filters__search-input"
+               placeholder="Rechercher un certificat ou une formation..."
+               [value]="recherche" (input)="onRecherche($event)"/>
+      </div>
+    </div>
+
+    <!-- GRILLE -->
+    <div class="pal-grid" *ngIf="certificatsFiltres.length > 0">
+      <div class="pal-card" *ngFor="let c of certificatsFiltres"
+           [class.pal-card--revoque]="c.statut === 'révoqué'">
+
+        <div class="pal-card__cover">
+          <img *ngIf="c.formation?.image_couverture"
+               [src]="c.formation!.image_couverture!" class="pal-card__img" alt="">
+          <div *ngIf="!c.formation?.image_couverture" class="pal-card__img-placeholder">
+            <i class="isax isax-medal"></i>
+          </div>
+          <span class="pal-badge" [ngClass]="getStatutClass(c)">{{ getStatutLabel(c) }}</span>
+        </div>
+
+        <div class="pal-card__body">
+          <div class="pal-card__titre">{{ c.formation?.titre ?? 'Formation' }}</div>
+          <div class="pal-card__code">
+            <i class="isax isax-hashtag me-1"></i>{{ c.code_unique }}
+          </div>
+          <div class="pal-card__meta">
+            <div class="pal-meta-item">
+              <i class="isax isax-calendar-tick"></i>
+              <span>Délivré le {{ formatDate(c.date_delivrance) }}</span>
+            </div>
+            <div class="pal-meta-item" *ngIf="c.score_final !== null">
+              <i class="isax isax-star"></i>
+              <span>Score : <strong>{{ c.score_final }}%</strong></span>
+            </div>
+            <div class="pal-meta-item" *ngIf="c.formateur">
+              <i class="isax isax-user"></i>
+              <span>{{ c.formateur.prenom }} {{ c.formateur.nom }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pal-card__footer">
+          <button class="pal-btn-dl"
+                  [disabled]="!c.url_pdf || c.statut === 'révoqué'"
+                  [class.pal-btn-dl--disabled]="!c.url_pdf || c.statut === 'révoqué'"
+                  (click)="telecharger(c)">
+            <i class="isax isax-document-download me-1"></i>
+            {{ c.url_pdf ? 'Télécharger le PDF' : 'PDF non disponible' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EMPTY -->
+    <div class="sc-empty" *ngIf="certificatsFiltres.length === 0">
+      <div class="sc-empty__icon"><i class="isax isax-medal"></i></div>
+      <h5 class="sc-empty__title">Aucun certificat</h5>
+      <p *ngIf="recherche">Aucun résultat pour "{{ recherche }}".</p>
+      <p *ngIf="!recherche">Vos certificats apparaîtront ici une fois vos formations terminées.</p>
+    </div>
+
+  </ng-container>
+
+</ng-container>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- ONGLET HABILITATIONS                           -->
+<!-- ══════════════════════════════════════════════ -->
+<ng-container *ngIf="onglet === 'habilitations'">
+  <div class="sc-empty">
+    <div class="sc-empty__icon"><i class="isax isax-shield-tick"></i></div>
+    <h5 class="sc-empty__title">Habilitations — Bientôt disponible</h5>
+    <p>Cette fonctionnalité sera disponible dans une prochaine version.</p>
+  </div>
+</ng-container>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- ONGLET BADGES                                  -->
+<!-- ══════════════════════════════════════════════ -->
+<ng-container *ngIf="onglet === 'badges'">
+  <div class="sc-empty">
+    <div class="sc-empty__icon"><i class="isax isax-medal-star"></i></div>
+    <h5 class="sc-empty__title">Badges — Bientôt disponible</h5>
+    <p>La gamification sera disponible dans une prochaine version.</p>
+  </div>
+</ng-container>

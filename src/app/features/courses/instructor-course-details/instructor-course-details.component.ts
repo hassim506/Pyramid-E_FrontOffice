@@ -33,7 +33,7 @@ export class InstructorCourseDetailsComponent implements OnInit, OnDestroy {
 
   // ── formation data ─────────────────────────────────────────────────────
   formation: any = null;
-  private formationId: string | null = null;
+  private formationId: number | null = null;
   private currentUser: any = null;
 
   // ── module/section navigation ──────────────────────────────────────────
@@ -67,8 +67,10 @@ export class InstructorCourseDetailsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.currentUser = this.authService.getUser();
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      this.formationId = params.get('id');
-      if (this.formationId) { this.loadFormation(); }
+      const idParam = params.get('id');
+      const id = idParam ? Number(idParam) : null;
+      this.formationId = id && !Number.isNaN(id) ? id : null;
+      if (this.formationId !== null) { this.loadFormation(); }
       else { this.error = 'ID de formation manquant'; }
     });
   }

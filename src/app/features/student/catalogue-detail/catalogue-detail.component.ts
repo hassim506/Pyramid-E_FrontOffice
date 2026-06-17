@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+// filepath: src/app/student/catalogue-detail/catalogue-detail.component.ts
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FormationsService } from '../../../shared/service/Formationsss/formations.service';
+import { Subscription, filter } from 'rxjs';
+import { FormationService } from '../../../shared/service/formation/formation.service';
+import { ProgressionService } from '../../../shared/service/progression/progression.service';
 
 @Component({
   standalone: true,
@@ -11,7 +14,7 @@ import { FormationsService } from '../../../shared/service/Formationsss/formatio
   templateUrl: './catalogue-detail.component.html',
   styleUrls: ['./catalogue-detail.component.scss'],
 })
-export class CatalogueDetailComponent implements OnInit {
+export class CatalogueDetailComponent implements OnInit, OnDestroy {
 
   catalogueId:  number = 0;
   catalogue:    any    = null;
@@ -19,68 +22,105 @@ export class CatalogueDetailComponent implements OnInit {
   loading              = true;
   error                = '';
 
-  // Source badge
   source     = 'assigne';
   badgeLabel = 'Assigné';
 
-  // ── Expiration ────────────────────────────────────────────
   dateExpiration: string | null = null;
 
-  // ── Progression ────────────────────────────────────────────
   progressionGlobale    = 0;
   totalFormations       = 0;
   formationsTerminees   = 0;
 
-  // Recherche
   searchQuery          = '';
   filteredFormations:  any[] = [];
 
-  // Pagination
   currentPage          = 1;
   pageSize             = 6;
   totalPages           = 0;
   paginatedFormations: any[] = [];
 
+  private routerSub?:      Subscription;
+  private progressionSub?: Subscription;
+
   constructor(
-    private route:             ActivatedRoute,
-    private router:            Router,
-    private formationsService: FormationsService
+    private route:              ActivatedRoute,
+    private router:             Router,
+    private formationsService:  FormationService,
+    public  progressionService: ProgressionService
   ) {}
 
   ngOnInit(): void {
     this.catalogueId = Number(this.route.snapshot.paramMap.get('id'));
+
+    console.log(`🚀 [CatalogueDetail] ngOnInit → catalogueId=${this.catalogueId}`);
+
     if (!this.catalogueId) {
       this.error   = 'Catalogue introuvable';
       this.loading = false;
       return;
     }
+
     this.loadCatalogueDetail();
+
+    // ✅ Écouter le service — met à jour cartes + barre globale en temps réel
+    //    On passe catalogueId pour que le contexte soit isolé
+    this.progressionSub = this.progressionService.change$.subscribe((map) => {
+      console.log(`🔔 [CatalogueDetail #${this.catalogueId}] ProgressionService.change$ émis | map.size=${map.size}`);
+
+      // Vérifier si les données concernent ce catalogue
+      const relevantKeys = [...map.keys()].filter(k => k.includes(`_null_${this.catalogueId}`));
+      console.log(`🔍 [CatalogueDetail #${this.catalogueId}] Clés pertinentes dans le cache:`, relevantKeys);
+
+      this._syncFormationsDepuisService();
+    });
+
+    // ✅ Rafraîchir depuis l'API quand on revient sur cette page
+    this.routerSub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e: NavigationEnd) => {
+        const url = e.urlAfterRedirects || e.url;
+        console.log(`🧭 [CatalogueDetail #${this.catalogueId}] NavigationEnd → ${url}`);
+        if (url.includes(`/catalogue-detail/${this.catalogueId}`)) {
+          console.log(`🔄 [CatalogueDetail #${this.catalogueId}] Retour sur la page → refreshProgressions()`);
+          this.refreshProgressions();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
+    this.progressionSub?.unsubscribe();
   }
 
   // ── Expiration ─────────────────────────────────────────────
-
-  /** Vrai si le catalogue est expiré (date dépassée) */
   get estExpire(): boolean {
     if (!this.dateExpiration) return false;
     return new Date(this.dateExpiration) < new Date();
   }
 
   // ── Chargement ────────────────────────────────────────────
-
   loadCatalogueDetail(): void {
     this.loading = true;
+
+    console.log(`📡 [CatalogueDetail #${this.catalogueId}] loadCatalogueDetail() → getMesCataloguesAssignes()`);
 
     this.formationsService.getMesCataloguesAssignes().subscribe({
       next: (res: any) => {
         const all  = res.catalogues ?? [];
         const meta = all.find((c: any) => c.id === this.catalogueId);
-        this.source         = meta?.source          ?? 'assigne';
-        this.badgeLabel     = meta?.badge_label      ?? 'Assigné';
-        this.dateExpiration = meta?.date_expiration  ?? null;
+
+        console.log(`✅ [CatalogueDetail #${this.catalogueId}] Meta catalogue trouvé:`, meta);
+
+        this.source         = meta?.source         ?? 'assigne';
+        this.badgeLabel     = meta?.badge_label     ?? 'Assigné';
+        this.dateExpiration = meta?.date_expiration ?? null;
+
+        console.log(`📋 [CatalogueDetail #${this.catalogueId}] source=${this.source} | dateExpiration=${this.dateExpiration}`);
 
         this.loadFormations();
       },
-      error: () => {
+      error: (err) => {
+        console.error(`❌ [CatalogueDetail #${this.catalogueId}] Erreur getMesCataloguesAssignes:`, err);
         this.error   = 'Impossible de charger le catalogue';
         this.loading = false;
       }
@@ -88,43 +128,143 @@ export class CatalogueDetailComponent implements OnInit {
   }
 
   loadFormations(): void {
+    console.log(`📡 [CatalogueDetail #${this.catalogueId}] loadFormations() → getCatalogueProgression()`);
+
     this.formationsService.getCatalogueProgression(this.catalogueId).subscribe({
       next: (res: any) => {
-        this.formations          = res.formations          ?? [];
-        this.progressionGlobale  = res.progression_globale ?? 0;
-        this.totalFormations     = res.total_formations    ?? 0;
+        console.log(`✅ [CatalogueDetail #${this.catalogueId}] getCatalogueProgression réponse:`, res);
+        console.log(`📊 [CatalogueDetail #${this.catalogueId}] progression_globale=${res.progression_globale} | formations_terminees=${res.formations_terminees} | total=${res.total_formations}`);
+
+        if (res.formations?.length) {
+          console.log(`🔍 [CatalogueDetail #${this.catalogueId}] Formations reçues (${res.formations.length}):`,
+            res.formations.map((f: any) => ({
+              id: f.id, titre: f.titre, progression: f.progression, statut: f.statut_formation
+            }))
+          );
+        }
+
+        this.formations          = res.formations           ?? [];
+        this.progressionGlobale  = res.progression_globale  ?? 0;
+        this.totalFormations     = res.total_formations     ?? 0;
         this.formationsTerminees = res.formations_terminees ?? 0;
 
         this.formationsService.getCatalogueDetail(this.catalogueId).subscribe({
           next: (r: any) => {
-            this.catalogue          = r.catalogue;
-            this.filteredFormations = [...this.formations];
-            this.totalPages         = Math.ceil(this.filteredFormations.length / this.pageSize);
-            this.paginate();
+            console.log(`✅ [CatalogueDetail #${this.catalogueId}] getCatalogueDetail réponse:`, r?.catalogue);
+
+            this.catalogue = r.catalogue;
+            this._applySearchAndPaginate();
+
+            // ✅ Synchroniser avec le cache service — contexte catalogue isolé
+            this._syncFormationsDepuisService();
             this.loading = false;
           },
-          error: () => { this.loading = false; }
+          error: (err) => {
+            console.error(`❌ [CatalogueDetail #${this.catalogueId}] Erreur getCatalogueDetail:`, err);
+            this.loading = false;
+          }
         });
       },
-      error: () => {
-        // Fallback sur l'ancienne méthode
+      error: (err) => {
+        console.warn(`⚠️ [CatalogueDetail #${this.catalogueId}] getCatalogueProgression échec, fallback getCatalogueDetail:`, err);
+
         this.formationsService.getCatalogueDetail(this.catalogueId).subscribe({
           next: (r: any) => {
-            this.catalogue          = r.catalogue;
-            this.formations         = r.formations ?? [];
-            this.filteredFormations = [...this.formations];
-            this.totalPages         = Math.ceil(this.filteredFormations.length / this.pageSize);
-            this.paginate();
+            console.log(`✅ [CatalogueDetail #${this.catalogueId}] Fallback getCatalogueDetail réponse:`, r);
+
+            this.catalogue  = r.catalogue;
+            this.formations = r.formations ?? [];
+            this._applySearchAndPaginate();
+            this._syncFormationsDepuisService();
             this.loading = false;
           },
-          error: () => { this.error = 'Catalogue introuvable'; this.loading = false; }
+          error: (err2) => {
+            console.error(`❌ [CatalogueDetail #${this.catalogueId}] Fallback ERREUR:`, err2);
+            this.error = 'Catalogue introuvable';
+            this.loading = false;
+          }
         });
       }
     });
   }
 
-  // ── Recherche ──────────────────────────────────────────────
-  onSearch(): void {
+  // ── Refresh silencieux depuis l'API ───────────────────────
+  refreshProgressions(): void {
+    console.log(`🔄 [CatalogueDetail #${this.catalogueId}] refreshProgressions() → appel API...`);
+
+    this.formationsService.getCatalogueProgression(this.catalogueId).subscribe({
+      next: (res: any) => {
+        console.log(`✅ [CatalogueDetail #${this.catalogueId}] refreshProgressions réponse:`, {
+          progression_globale:  res.progression_globale,
+          formations_terminees: res.formations_terminees,
+          total_formations:     res.total_formations,
+          formations: res.formations?.map((f: any) => ({ id: f.id, progression: f.progression, statut: f.statut_formation }))
+        });
+
+        this.formations          = res.formations           ?? [];
+        this.progressionGlobale  = res.progression_globale  ?? 0;
+        this.totalFormations     = res.total_formations     ?? 0;
+        this.formationsTerminees = res.formations_terminees ?? 0;
+        this._applySearchAndPaginate();
+        this._syncFormationsDepuisService();
+      },
+      error: (err) => {
+        console.error(`❌ [CatalogueDetail #${this.catalogueId}] refreshProgressions ERREUR:`, err);
+      }
+    });
+  }
+
+  // ✅ Synchronisation formations + barre globale depuis le ProgressionService
+  //    CONTEXTE CATALOGUE : parcoursId = null, catalogueId = this.catalogueId
+  //    → clé "formationId_null_catalogueId" — totalement isolé des autres contextes
+  private _syncFormationsDepuisService(): void {
+    if (!this.formations.length) {
+      console.log(`⚠️ [CatalogueDetail #${this.catalogueId}] _syncFormationsDepuisService — formations vide, skip`);
+      return;
+    }
+
+    console.log(`🧮 [CatalogueDetail #${this.catalogueId}] _syncFormationsDepuisService — début sync pour ${this.formations.length} formations`);
+
+    let terminees         = 0;
+    let sommeProgressions = 0;
+
+    this.formations = this.formations.map(f => {
+      // ✅ CONTEXTE CATALOGUE : parcoursId=null, catalogueId=this.catalogueId
+      const percentService = this.progressionService.getPercent(f.id, null, this.catalogueId);
+      const progression    = percentService > 0 ? percentService : (f.progression ?? 0);
+      const statut         = progression >= 100 ? 'termine'
+                           : progression > 0    ? 'en_cours'
+                           : (f.statut_formation ?? 'non_commence');
+
+      console.log(`  📦 [Formation #${f.id} "${f.titre}"] getPercent(${f.id}, null, ${this.catalogueId})=${percentService}% | API=${f.progression}% | final=${progression}% | statut=${statut}`);
+
+      if (statut === 'termine') terminees++;
+      sommeProgressions += progression;
+
+      return { ...f, progression, statut_formation: statut, est_terminee: progression >= 100 };
+    });
+
+    const total = this.formations.length;
+    if (total === 0) return;
+
+    // ✅ Progression globale = MOYENNE (cohérent avec parcours)
+    const progressionMoyenne = Math.round(sommeProgressions / total);
+
+    console.log(`📈 [CatalogueDetail #${this.catalogueId}] Progression globale: somme=${sommeProgressions} / ${total} = ${progressionMoyenne}% | API=${this.progressionGlobale}% | final=${Math.max(this.progressionGlobale, progressionMoyenne)}%`);
+
+    if (progressionMoyenne > this.progressionGlobale) {
+      this.progressionGlobale = progressionMoyenne;
+    }
+    this.formationsTerminees = terminees;
+
+    console.log(`✅ [CatalogueDetail #${this.catalogueId}] Après sync: progressionGlobale=${this.progressionGlobale}% | formationsTerminees=${this.formationsTerminees}/${total}`);
+
+    // Réappliquer la pagination avec les données mises à jour
+    this._applySearchAndPaginate();
+  }
+
+  // ── Recherche + pagination ────────────────────────────────
+  private _applySearchAndPaginate(): void {
     const q = this.searchQuery.trim().toLowerCase();
     this.filteredFormations = q
       ? this.formations.filter(f =>
@@ -133,17 +273,20 @@ export class CatalogueDetailComponent implements OnInit {
           f.short_description?.toLowerCase().includes(q)
         )
       : [...this.formations];
-    this.currentPage = 1;
     this.totalPages  = Math.ceil(this.filteredFormations.length / this.pageSize);
+    this.currentPage = 1;
     this.paginate();
+  }
+
+  onSearch(): void {
+    this._applySearchAndPaginate();
   }
 
   clearSearch(): void {
     this.searchQuery = '';
-    this.onSearch();
+    this._applySearchAndPaginate();
   }
 
-  // ── Pagination ─────────────────────────────────────────────
   paginate(): void {
     const start              = (this.currentPage - 1) * this.pageSize;
     this.paginatedFormations = this.filteredFormations.slice(start, start + this.pageSize);
@@ -159,34 +302,35 @@ export class CatalogueDetailComponent implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  // ── Navigation — bloquée si expiré ────────────────────────
+  // ── Navigation ────────────────────────────────────────────
   goToDetails(formationId: number): void {
     if (this.estExpire) return;
     this.router.navigate(['/courses/course-details-2', formationId], {
-      state: {
-        fromPage:      'catalogue',
-        fromCatalogue: true,
-        catalogueId:   this.catalogueId,
-      }
+      state: { fromPage: 'catalogue', catalogueId: this.catalogueId }
     });
   }
 
   commencerFormation(formationId: number, event: Event): void {
     event.stopPropagation();
     if (this.estExpire) return;
+
+    console.log(`🚀 [CatalogueDetail #${this.catalogueId}] commencerFormation → formationId=${formationId} | state: { fromPage: 'catalogue', catalogueId: ${this.catalogueId} }`);
+
     this.router.navigate(['/student/lecture-formation', formationId], {
       state: {
         fromPage:    'catalogue',
         catalogueId: this.catalogueId,
+        // ✅ PAS de parcoursId — contexte catalogue uniquement
+        // lecture-formation lira catalogueId → clé "formationId_null_catalogueId"
       }
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/student/student-courses']);
+    this.router.navigate(['/student/mes-catalogues']);
   }
 
-  // ── Helpers progression ────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────
   getStatutLabel(statut: string): string {
     return ({
       termine:      '✅ Terminé',

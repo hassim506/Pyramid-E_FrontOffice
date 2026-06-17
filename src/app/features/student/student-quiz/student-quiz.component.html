@@ -1,7 +1,12 @@
 <!-- LOADING -->
-<div class="quiz-loading" *ngIf="loading">
-  <div class="quiz-loading__spinner"></div>
-  <p>Chargement de vos quiz...</p>
+
+<div *ngIf="loading" class="qq-loading">
+   <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
+   <p>Chargement de vos quiz...</p>
+
+  
 </div>
 
 <!-- ERREUR -->
