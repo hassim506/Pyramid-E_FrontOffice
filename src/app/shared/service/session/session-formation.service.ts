@@ -9,7 +9,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
@@ -131,16 +131,19 @@ export class SessionFormationService {
       });
     }
 
-    return this.http.get<SessionFormationResponse>(this.apiUrlrh, { 
+    return this.http.get<SessionFormationResponse>(this.apiUrlrh, {
       headers: this.httpOptions.headers,
-      params: httpParams 
+      params: httpParams
     }).pipe(
       tap(response => {
-        if (response.status && response.sessions) {
+        if (response?.status && response.sessions) {
           this.sessionsSubject.next(response.sessions);
         }
       }),
-      catchError(this.handleError<SessionFormationResponse>('getAllSessions'))
+      catchError((error) => {
+        console.error('getAllSessionsRH failed:', error);
+        return of({ status: false, sessions: [] } as SessionFormationResponse);
+      })
     );
   }
 

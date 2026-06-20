@@ -268,16 +268,14 @@ export class UserListComponent implements OnInit {
   exportUsers(): void {
     const data = this.tableDataCopy;
     if (!data.length) { alert('Aucune donnée à exporter'); return; }
-    const headers = ['Nom', 'Prénom', 'Email', 'Rôle', 'Direction', 'Matricule', 'Statut', 'Dernière activité'];
+    const headers = ['Nom', 'Prénom', 'Email', 'Matricule', 'Direction', 'Statut'];
     const rows = data.map(u => [
       u.nom || '',
       u.prenom || '',
       u.email || '',
-      this.getRoleName(u),
-      u.direction || '',
       u.matricule || '',
+      u.direction || '',
       u.statut === 1 ? 'Actif' : 'Inactif',
-      this.formatDate(u.updated_at),
     ]);
     const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
