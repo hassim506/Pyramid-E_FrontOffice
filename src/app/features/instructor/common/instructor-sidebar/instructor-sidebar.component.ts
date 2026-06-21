@@ -87,7 +87,7 @@ export class InstructorSidebarComponent implements OnInit {
     const formateurId = user?.id;
     const params = formateurId ? { formateur_id: formateurId, statut: 'planifiee' } : { statut: 'planifiee' };
 
-    this.sessionService.getAllSessionsRH(params).subscribe({
+    this.sessionService.getAllSessions(params).subscribe({
       next: (res) => {
         if (res?.status && res.sessions) {
           const now = new Date();
