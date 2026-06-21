@@ -76,7 +76,7 @@ export class LoginComponent {
   }
 onSubmit(): void {
   this.errorMessage = '';
-  
+
   if (this.loginForm.invalid) {
     this.loginForm.markAllAsTouched();
     return;
@@ -91,10 +91,11 @@ onSubmit(): void {
   this.authService.login(payload).subscribe({
     next: (res) => {
       this.isLoading = false;
-      const roleId   = res.user?.role_id ?? 0;
+      const roleId    = res.user?.role_id ?? 0;
       // role_type est renvoyé à la racine de la réponse par le backend
-      const roleType = (res.role_type ?? res.user?.['role_type']) as string | undefined;
-      this.roleRedirect.redirectAfterLogin(roleId, roleType);
+      const roleType  = (res.role_type ?? res.user?.['role_type']) as string | undefined;
+      const roleNames = res.roles ?? res.user?.roles ?? [];
+      this.roleRedirect.redirectAfterLogin(roleId, roleType, roleNames);
     },
     error: (err: any) => {
       this.isLoading = false;

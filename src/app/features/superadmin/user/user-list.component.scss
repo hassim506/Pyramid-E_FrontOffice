@@ -550,3 +550,29 @@ $radius-lg: 12px;
   border: none;
   box-shadow: 0 10px 30px rgba(0,0,0,.2);
 }
+
+// ── Liste d'erreurs d'import ──────────────────
+.ul-import-error-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ul-import-error-item {
+  background: #fff;
+  border: 1px solid #FECACA;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: #7F1D1D;
+
+  ul {
+    margin: 4px 0 0 0;
+    padding-left: 16px;
+    li { margin-bottom: 2px; }
+  }
+}
+

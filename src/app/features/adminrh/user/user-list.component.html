@@ -294,46 +294,98 @@
     </div>
 
     <div class="ul-import-modal__body">
-      <!-- Zone de dépôt -->
-      <label class="ul-dropzone" for="rh-file-input" [class.ul-dropzone--active]="!!selectedFile">
-        <i class="isax isax-document-upload ul-dropzone__icon"></i>
-        <span class="ul-dropzone__label" *ngIf="!selectedFile">
-          Cliquer ou glisser votre fichier ici
-          <small>.xlsx · .xls · .csv</small>
-        </span>
-        <span class="ul-dropzone__label" *ngIf="selectedFile">
-          <strong>{{ selectedFile.name }}</strong>
-          <small>{{ (selectedFile.size / 1024).toFixed(0) }} Ko</small>
-        </span>
-        <input id="rh-file-input" type="file" accept=".xlsx,.xls,.csv"
-               (change)="onFileSelected($event)" [disabled]="isImporting" style="display:none">
-      </label>
 
-      <!-- Barre de progression -->
-      <div class="ul-import-progress" *ngIf="isImporting">
-        <div class="ul-import-progress__bar" [style.width.%]="importProgress"></div>
-      </div>
+      <!-- ── Zone de dépôt (masquée après résultat) ── -->
+      <ng-container *ngIf="!importResult">
+        <label class="ul-dropzone" for="rh-file-input" [class.ul-dropzone--active]="!!selectedFile">
+          <i class="isax isax-document-upload ul-dropzone__icon"></i>
+          <span class="ul-dropzone__label" *ngIf="!selectedFile">
+            Cliquer ou glisser votre fichier ici
+            <small>.xlsx · .xls · .csv</small>
+          </span>
+          <span class="ul-dropzone__label" *ngIf="selectedFile">
+            <strong>{{ selectedFile.name }}</strong>
+            <small>{{ (selectedFile.size / 1024).toFixed(0) }} Ko</small>
+          </span>
+          <input id="rh-file-input" type="file" accept=".xlsx,.xls,.csv"
+                 (change)="onFileSelected($event)" [disabled]="isImporting" class="ul-file-hidden">
+        </label>
 
-      <!-- Instructions -->
-      <div class="ul-import-info">
-        <i class="isax isax-info-circle"></i>
-        <ul>
-          <li>Téléchargez d'abord le <strong>template</strong> pour voir la structure requise</li>
-          <li>Colonnes obligatoires : <strong>nom, prenom, email, role_id</strong></li>
-          <li>Les utilisateurs avec le même email seront mis à jour automatiquement</li>
-        </ul>
-      </div>
+        <!-- Barre de progression -->
+        <div class="ul-import-progress" *ngIf="isImporting">
+          <div class="ul-import-progress__bar" [style.width.%]="importProgress"></div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="ul-import-info">
+          <i class="isax isax-info-circle"></i>
+          <ul>
+            <li>Téléchargez d'abord le <strong>template</strong> pour voir la structure requise</li>
+            <li>Colonnes obligatoires : <strong>nom, prenom, email</strong></li>
+            <li>Colonnes optionnelles : <strong>matricule, direction, role, entreprise</strong></li>
+            <li>Matricule et numéro de téléphone doivent être uniques</li>
+          </ul>
+        </div>
+      </ng-container>
+
+      <!-- ── Rapport d'import ── -->
+      <ng-container *ngIf="importResult">
+
+        <!-- Erreurs de structure (colonnes manquantes) -->
+        <div class="ul-import-report ul-import-report--error" *ngIf="importResult.headerErrors.length">
+          <div class="ul-import-report__title">
+            <i class="isax isax-close-circle"></i> Structure du fichier invalide
+          </div>
+          <ul class="ul-import-report__list">
+            <li *ngFor="let e of importResult.headerErrors">{{ e }}</li>
+          </ul>
+        </div>
+
+        <!-- Résumé succès/erreurs lignes -->
+        <ng-container *ngIf="!importResult.headerErrors.length">
+          <div class="ul-import-report ul-import-report--success" *ngIf="importResult.totalCreated > 0">
+            <i class="isax isax-tick-circle"></i>
+            <strong>{{ importResult.totalCreated }}</strong> utilisateur(s) créé(s) sur {{ importResult.totalProcessed }} traité(s)
+          </div>
+
+          <div class="ul-import-report ul-import-report--warn" *ngIf="importResult.totalCreated === 0 && importResult.totalErrors === 0">
+            <i class="isax isax-info-circle"></i> Aucune ligne à traiter dans le fichier.
+          </div>
+
+          <!-- Détail des erreurs par ligne -->
+          <div class="ul-import-report ul-import-report--error" *ngIf="importResult.rowErrors.length">
+            <div class="ul-import-report__title">
+              <i class="isax isax-warning-2"></i>
+              {{ importResult.rowErrors.length }} ligne(s) en erreur
+            </div>
+            <div class="ul-import-report__rows">
+              <div class="ul-import-report__row" *ngFor="let e of importResult.rowErrors">
+                <span class="ul-import-report__line">Ligne {{ e.line }}</span>
+                <ul class="ul-import-report__list">
+                  <li *ngFor="let msg of e.errors">{{ msg }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+      </ng-container>
     </div>
 
     <div class="ul-import-modal__foot">
-      <button type="button" class="ul-import-modal__cancel" (click)="closeImportDialog()" [disabled]="isImporting">
-        Annuler
+      <button type="button" class="ul-import-modal__cancel" (click)="closeImportDialog()">
+        {{ importResult ? 'Fermer' : 'Annuler' }}
       </button>
-      <button type="button" class="ul-import-modal__submit"
+      <button *ngIf="!importResult" type="button" class="ul-import-modal__submit"
               (click)="importUsers()" [disabled]="!selectedFile || isImporting">
         <span *ngIf="isImporting" class="ul-spinner"></span>
         <i *ngIf="!isImporting" class="isax isax-import"></i>
         {{ isImporting ? 'Import en cours…' : 'Importer' }}
+      </button>
+      <button *ngIf="importResult && !importResult.headerErrors.length" type="button"
+              class="ul-import-modal__submit ul-import-modal__submit--retry"
+              (click)="importResult = null; selectedFile = null">
+        <i class="isax isax-refresh"></i> Nouvel import
       </button>
     </div>
   </div>

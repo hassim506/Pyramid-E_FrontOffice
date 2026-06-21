@@ -60,10 +60,18 @@ export class UserListComponent implements OnInit {
   selectedUser: User | null = null;
 
   // ── Import ───────────────────────────────────
-  selectedFile:     File | null = null;
-  isImporting       = false;
-  importProgress    = 0;
-  showImportDialog  = false;
+  selectedFile:    File | null = null;
+  isImporting      = false;
+  importProgress   = 0;
+  showImportDialog = false;
+  importResult: {
+    done: boolean;
+    totalProcessed: number;
+    totalCreated: number;
+    totalErrors: number;
+    headerErrors: string[];
+    rowErrors: { line: number; errors: string[] }[];
+  } | null = null;
 
   constructor(
     private userService: UserService,
@@ -220,8 +228,17 @@ export class UserListComponent implements OnInit {
   // ════════════════════════════════════════════
   // IMPORT
   // ════════════════════════════════════════════
-  openImportDialog(): void  { this.showImportDialog = true; this.selectedFile = null; }
-  closeImportDialog(): void { this.showImportDialog = false; this.isImporting = false; }
+  openImportDialog(): void  {
+    this.showImportDialog = true;
+    this.selectedFile     = null;
+    this.importProgress   = 0;
+    this.importResult     = null;
+  }
+  closeImportDialog(): void {
+    this.showImportDialog = false;
+    this.isImporting      = false;
+    this.importResult     = null;
+  }
 
   onFileSelected(event: Event): void {
     const f = (event.target as HTMLInputElement).files?.[0];
@@ -236,19 +253,31 @@ export class UserListComponent implements OnInit {
     if (!this.selectedFile) return;
     this.isImporting    = true;
     this.importProgress = 0;
+    this.importResult   = null;
     this.userService.importUsers(this.selectedFile).subscribe({
       next: (res) => {
+        this.isImporting    = false;
         this.importProgress = 100;
-        let msg = 'Import réussi !';
-        if (res.created) msg += `\n${res.created} créé(s)`;
-        if (res.updated) msg += `\n${res.updated} mis à jour`;
-        alert(msg);
-        this.refreshData();
-        this.closeImportDialog();
+        this.importResult = {
+          done:           true,
+          totalProcessed: res.total_processed ?? 0,
+          totalCreated:   res.total_created   ?? 0,
+          totalErrors:    res.total_errors    ?? 0,
+          headerErrors:   res.header_errors   ?? [],
+          rowErrors:      (res.errors ?? []).map((e: any) => ({ line: e.line, errors: e.errors })),
+        };
+        if (res.total_created > 0) this.refreshData();
       },
       error: (err) => {
-        this.isImporting = false;
-        alert('Erreur lors de l\'import : ' + (err.error?.message ?? err.message));
+        this.isImporting  = false;
+        this.importResult = {
+          done:           true,
+          totalProcessed: 0,
+          totalCreated:   0,
+          totalErrors:    1,
+          headerErrors:   [err.error?.message ?? 'Erreur serveur lors de l\'import'],
+          rowErrors:      [],
+        };
       }
     });
   }

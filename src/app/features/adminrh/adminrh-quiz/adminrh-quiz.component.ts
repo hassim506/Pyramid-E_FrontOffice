@@ -28,8 +28,12 @@ export class AdminrhQuizComponent implements OnInit, OnDestroy {
   selectedQuiz: Quiz | null = null;
   editForm: FormGroup | null = null;
 
+  createForm: FormGroup | null = null;
+  createError = '';
+
   private detailsModal: any;
   private editModal: any;
+  private createModal: any;
   private subscription = new Subscription();
 
   constructor(private quizService: QuizService, private fb: FormBuilder) {}
@@ -39,6 +43,7 @@ export class AdminrhQuizComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.detailsModal = new bootstrap.Modal(document.getElementById('arh_quiz_details_modal'));
       this.editModal    = new bootstrap.Modal(document.getElementById('arh_quiz_edit_modal'));
+      this.createModal  = new bootstrap.Modal(document.getElementById('arh_quiz_create_modal'));
     }, 100);
   }
 
@@ -73,6 +78,37 @@ export class AdminrhQuizComponent implements OnInit, OnDestroy {
       is_active:      [quiz.is_active]
     });
     this.editModal?.show();
+  }
+
+  openCreateModal(): void {
+    this.createError = '';
+    this.createForm = this.fb.group({
+      titre:          ['', [Validators.required, Validators.minLength(3)]],
+      description:    [''],
+      duree_minutes:  [null],
+      score_minimum:  [null],
+      tentatives_max: [null],
+      is_active:      [true],
+    });
+    this.createModal?.show();
+  }
+
+  saveCreate(): void {
+    if (!this.createForm || this.createForm.invalid) return;
+    this.saving = true;
+    this.createError = '';
+    const sub = this.quizService.createQuiz(this.createForm.value).subscribe({
+      next: (created) => {
+        this.quizzes = [created, ...this.quizzes];
+        this.saving = false;
+        this.createModal?.hide();
+      },
+      error: (err) => {
+        this.createError = err?.error?.message || 'Erreur lors de la création';
+        this.saving = false;
+      }
+    });
+    this.subscription.add(sub);
   }
 
   saveEdit(): void {

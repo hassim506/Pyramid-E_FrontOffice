@@ -14,8 +14,13 @@ export const layoutGuard: CanActivateFn = (_route, state) => {
   }
 
   if (!redirectService.canAccessUrl(state.url)) {
-    // Redirige vers le dashboard du bon layout au lieu de /auth/login
-    router.navigate([redirectService.getDefaultRoute()]);
+    const defaultRoute = redirectService.getDefaultRoute();
+    // Évite la boucle infinie si getDefaultRoute() renvoie la même URL bloquée
+    if (defaultRoute && defaultRoute !== state.url) {
+      router.navigate([defaultRoute]);
+    } else {
+      router.navigate(['/auth/login']);
+    }
     return false;
   }
 

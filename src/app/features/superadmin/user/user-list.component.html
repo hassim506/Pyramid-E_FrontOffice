@@ -347,39 +347,92 @@
         <button type="button" class="btn-close" (click)="closeImportDialog()"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label for="fileInput" class="form-label">Fichier Excel / CSV</label>
-          <input id="fileInput" type="file" class="form-control"
-                 (change)="onFileSelected($event)" accept=".xlsx,.xls,.csv" [disabled]="isImporting">
-          <div class="form-text">Formats acceptés : .xlsx, .xls, .csv</div>
-        </div>
-        <div *ngIf="selectedFile" class="alert alert-info">
-          <strong>{{ selectedFile.name }}</strong>
-          <small class="text-muted ms-1">({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)</small>
-        </div>
-        <div *ngIf="isImporting" class="mb-3">
-          <div class="progress">
-            <div class="progress-bar progress-bar-striped progress-bar-animated"
-                 role="progressbar" [style.width.%]="importProgress"
-                 [attr.aria-valuenow]="importProgress" aria-valuemin="0" aria-valuemax="100">
-              {{ importProgress }}%
+
+        <!-- ── Zone de dépôt (masquée après résultat) ── -->
+        <ng-container *ngIf="!importResult">
+          <div class="mb-3">
+            <label for="fileInput" class="form-label">Fichier Excel / CSV</label>
+            <input id="fileInput" type="file" class="form-control"
+                   (change)="onFileSelected($event)" accept=".xlsx,.xls,.csv" [disabled]="isImporting">
+            <div class="form-text">Formats acceptés : .xlsx, .xls, .csv</div>
+          </div>
+          <div *ngIf="selectedFile" class="alert alert-info py-2">
+            <strong>{{ selectedFile.name }}</strong>
+            <small class="text-muted ms-1">({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)</small>
+          </div>
+          <div *ngIf="isImporting" class="mb-3">
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped progress-bar-animated"
+                   role="progressbar" aria-label="Progression de l'import"
+                   [style.width.%]="importProgress"
+                   [attr.aria-valuenow]="importProgress" aria-valuemin="0" aria-valuemax="100">
+                {{ importProgress }}%
+              </div>
             </div>
           </div>
-        </div>
-        <div class="alert alert-warning">
-          <h6 class="alert-heading"><i class="isax isax-warning-2 me-1"></i>Instructions</h6>
-          <ul class="mb-0 mt-2 small">
-            <li>Téléchargez d'abord le template pour voir la structure requise</li>
-            <li>Colonnes obligatoires : <strong>nom, prenom, email, role_id</strong></li>
-            <li>Les utilisateurs avec le même email seront mis à jour</li>
-          </ul>
-        </div>
+          <div class="alert alert-warning mb-0">
+            <h6 class="alert-heading small fw-bold"><i class="isax isax-info-circle me-1"></i>Instructions</h6>
+            <ul class="mb-0 mt-1 small">
+              <li>Téléchargez d'abord le template pour voir la structure requise</li>
+              <li>Colonnes obligatoires : <strong>nom, prenom, email</strong></li>
+              <li>Colonnes optionnelles : <strong>matricule, direction, role, entreprise</strong></li>
+              <li>Matricule et numéro de téléphone doivent être uniques</li>
+            </ul>
+          </div>
+        </ng-container>
+
+        <!-- ── Rapport d'import ── -->
+        <ng-container *ngIf="importResult">
+
+          <!-- Erreurs de structure -->
+          <div class="alert alert-danger" *ngIf="importResult.headerErrors.length">
+            <h6 class="alert-heading fw-bold"><i class="isax isax-close-circle me-1"></i>Structure du fichier invalide</h6>
+            <ul class="mb-0 mt-1 small">
+              <li *ngFor="let e of importResult.headerErrors">{{ e }}</li>
+            </ul>
+          </div>
+
+          <ng-container *ngIf="!importResult.headerErrors.length">
+            <!-- Résumé succès -->
+            <div class="alert alert-success py-2" *ngIf="importResult.totalCreated > 0">
+              <i class="isax isax-tick-circle me-1"></i>
+              <strong>{{ importResult.totalCreated }}</strong> utilisateur(s) créé(s) sur {{ importResult.totalProcessed }} traité(s)
+            </div>
+            <div class="alert alert-info py-2" *ngIf="importResult.totalCreated === 0 && importResult.totalErrors === 0">
+              <i class="isax isax-info-circle me-1"></i> Aucune ligne à traiter dans le fichier.
+            </div>
+
+            <!-- Détail erreurs par ligne -->
+            <div *ngIf="importResult.rowErrors.length" class="mt-2">
+              <div class="alert alert-danger mb-2 py-2 fw-bold small">
+                <i class="isax isax-warning-2 me-1"></i>
+                {{ importResult.rowErrors.length }} ligne(s) en erreur
+              </div>
+              <div class="ul-import-error-list">
+                <div class="ul-import-error-item" *ngFor="let e of importResult.rowErrors">
+                  <span class="badge bg-danger me-2">Ligne {{ e.line }}</span>
+                  <ul class="mb-0 small">
+                    <li *ngFor="let msg of e.errors">{{ msg }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+        </ng-container>
       </div>
+
       <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeImportDialog()" [disabled]="isImporting">Annuler</button>
-        <button class="btn btn-primary" (click)="importUsers()" [disabled]="!selectedFile || isImporting">
+        <button type="button" class="btn btn-secondary" (click)="closeImportDialog()">
+          {{ importResult ? 'Fermer' : 'Annuler' }}
+        </button>
+        <button type="button" *ngIf="!importResult" class="btn btn-primary" (click)="importUsers()" [disabled]="!selectedFile || isImporting">
           <span *ngIf="isImporting" class="spinner-border spinner-border-sm me-1"></span>
           {{ isImporting ? 'Import en cours...' : 'Importer' }}
+        </button>
+        <button type="button" *ngIf="importResult && !importResult.headerErrors.length" class="btn btn-outline-secondary"
+                (click)="importResult = null; selectedFile = null">
+          <i class="isax isax-refresh me-1"></i> Nouvel import
         </button>
       </div>
     </div>

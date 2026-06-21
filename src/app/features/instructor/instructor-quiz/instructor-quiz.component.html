@@ -17,9 +17,9 @@
       <h5 class="ip-page-head__title">Quiz & évaluations <span class="ip-count">{{ quizzes.length }}</span></h5>
       <p class="ip-page-head__sub">Gérez vos quiz et consultez les résultats</p>
     </div>
-    <a [routerLink]="['/quiz/create']" class="ip-btn ip-btn--primary">
+    <button type="button" class="ip-btn ip-btn--primary" (click)="openCreateModal()">
       <i class="isax isax-add-circle"></i> Nouveau quiz
-    </a>
+    </button>
   </div>
 
   <!-- Table -->
@@ -317,6 +317,96 @@
           <span *ngIf="saving" class="spinner-border spinner-border-sm me-1"></span>
           <i *ngIf="!saving" class="isax isax-tick-circle me-1"></i>
           Enregistrer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL CRÉATION ───────────────────────────────────────────────────── -->
+<div class="modal fade" id="quiz_create_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered ip-modal-dialog">
+    <div class="modal-content ip-modal-content">
+
+      <div class="ip-modal-header">
+        <div class="ip-modal-icon"><i class="isax isax-add-circle"></i></div>
+        <div>
+          <h5 class="ip-modal-title">Nouveau quiz</h5>
+          <p class="ip-modal-sub">Créer un nouveau quiz ou évaluation</p>
+        </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="ip-modal-divider"></div>
+
+      <div class="ip-modal-body" *ngIf="createForm">
+        <form [formGroup]="createForm">
+
+          <div class="ip-field">
+            <label class="ip-label">Titre <span class="ip-required">*</span></label>
+            <input type="text" class="ip-input" formControlName="titre" placeholder="Titre du quiz">
+            <div *ngIf="createForm.get('titre')?.invalid && createForm.get('titre')?.touched"
+                 class="ip-field-error">Le titre est obligatoire (3 caractères min.)</div>
+          </div>
+
+          <div class="ip-field">
+            <label class="ip-label">Description</label>
+            <textarea class="ip-input ip-textarea" formControlName="description" rows="3"
+                      placeholder="Description du quiz (optionnel)"></textarea>
+          </div>
+
+          <div class="ip-field-row">
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Durée (minutes)</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-clock ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="duree_minutes"
+                       placeholder="Ex. : 30" min="1">
+              </div>
+            </div>
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Score minimum (%)</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-medal-star ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="score_minimum"
+                       placeholder="Ex. : 60" min="0" max="100">
+              </div>
+            </div>
+          </div>
+
+          <div class="ip-field-row">
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Tentatives maximum</label>
+              <div class="ip-input-icon-wrap">
+                <i class="isax isax-repeat ip-input-icon"></i>
+                <input type="number" class="ip-input ip-input--icon" formControlName="tentatives_max"
+                       placeholder="Illimitées si vide" min="1">
+              </div>
+            </div>
+            <div class="ip-field ip-field--half">
+              <label class="ip-label">Statut</label>
+              <div class="ip-toggle-row">
+                <span class="ip-toggle-label">{{ createForm.get('is_active')?.value ? 'Actif' : 'Inactif' }}</span>
+                <label class="ip-toggle">
+                  <input type="checkbox" formControlName="is_active">
+                  <span class="ip-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="createError" class="alert alert-danger mt-2 py-2 small">{{ createError }}</div>
+
+        </form>
+      </div>
+      <div class="ip-modal-divider"></div>
+      <div class="ip-modal-footer">
+        <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="ip-btn ip-btn--primary"
+                [disabled]="createForm?.invalid || saving" (click)="saveCreate()">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm me-1"></span>
+          <i *ngIf="!saving" class="isax isax-add-circle me-1"></i>
+          Créer le quiz
         </button>
       </div>
 
