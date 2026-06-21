@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, timeout } from 'rxjs/operators';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { routes } from '../../../shared/service/routes/routes';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
@@ -106,15 +106,15 @@ export class InstructorDashboardComponent implements OnInit {
 
     forkJoin({
       dash:       this.http.get<any>(`${environment.apiUrl}/formateur/dashboard/stats`, { headers: this.headers })
-                    .pipe(catchError(() => of(null))),
+                    .pipe(timeout(10000), catchError(() => of(null))),
       formations: this.http.get<any>(`${environment.apiUrl}/formateur/formations`, { headers: this.headers })
-                    .pipe(catchError(() => of({ formations: [] }))),
+                    .pipe(timeout(10000), catchError(() => of({ formations: [] }))),
       sessions:   this.http.get<any>(`${environment.apiUrl}/sessions-formation?formateur_id=${uid}`, { headers: this.headers })
-                    .pipe(catchError(() => of({ sessions: [] }))),
+                    .pipe(timeout(10000), catchError(() => of({ sessions: [] }))),
       quiz:       this.http.get<any>(`${environment.apiUrl}/quiz-results`, { headers: this.headers })
-                    .pipe(catchError(() => of([]))),
+                    .pipe(timeout(10000), catchError(() => of([]))),
       certs:      this.http.get<any>(`${environment.apiUrl}/certificats`, { headers: this.headers })
-                    .pipe(catchError(() => of([]))),
+                    .pipe(timeout(10000), catchError(() => of([]))),
     }).subscribe({
       next: ({ dash, formations, sessions, quiz, certs }) => {
         // ── Stats API centralisées ────────────────────────────
