@@ -3,9 +3,9 @@ import { CommonModule }             from '@angular/common';
 import { RouterModule }             from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DemandeFormationService }  from '../../../shared/service/demande/demande-formation.service';
-import { FormationService } from '../../../shared/service/formation/formation.service';
+import { FormationService }         from '../../../shared/service/formation/formation.service';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
-import { environment } from '../../../../environments/environment';
+import { environment }              from '../../../../environments/environment';
 
 declare var bootstrap: any;
 
@@ -121,10 +121,12 @@ export class StudentsParcoursComponent implements OnInit {
   private normaliserDemande(d: any): any {
     return {
       ...d,
-      titre_affiche:      d.parcours?.titre            ?? `Parcours #${d.parcours_id}`,
-      sous_titre_affiche: d.parcours?.description      ?? '',
+      titre_affiche:      d.parcours?.titre       ?? `Parcours #${d.parcours_id}`,
+      sous_titre_affiche: d.parcours?.description ?? '',
       image_affiche:      d.parcours?.image_couverture
-        ? (d.parcours.image_couverture.startsWith('http') ? d.parcours.image_couverture : `${environment.apiUrl.replace('/api','')}/storage/${d.parcours.image_couverture}`)
+        ? (d.parcours.image_couverture.startsWith('http')
+            ? d.parcours.image_couverture
+            : `${environment.apiUrl.replace('/api', '')}/storage/${d.parcours.image_couverture}`)
         : 'assets/img/course/course-01.jpg',
     };
   }
@@ -279,29 +281,42 @@ export class StudentsParcoursComponent implements OnInit {
     });
   }
 
+  // ─────────────────────────────────────────────────
+  // CORRECTION PRINCIPALE
+  // La catégorie est déjà présente dans l'objet parcours
+  // retourné par getParcoursDisponibles (categorie_id + categorie).
+  // On reconstruit l'objet catégorie localement, sans appel API,
+  // ce qui supprime le point de rupture identifié (404 silencieux
+  // sur getCategoriesDuParcours quand entreprise_id ne correspond pas).
+  // ─────────────────────────────────────────────────
   selectParcours(parcours: any): void {
+    console.log('Parcours sélectionné :', parcours);
     this.selectedParcours  = parcours;
     this.selectedCategorie = null;
     this.formations        = [];
     this.showFormations    = false;
-    this.loadCategoriesDuParcours(parcours.id);
+
+    if (parcours.categorie_id) {
+      const categorieLocale = {
+        id:     parcours.categorie_id,
+        nom:    parcours.categorie ?? 'Catégorie',
+        couleur: '#7c3aed',
+        icone:  'isax-category',
+      };
+      this.categories = [categorieLocale];
+      // Un seul choix possible → auto-sélection transparente pour l'utilisateur.
+      this.selectCategorie(categorieLocale);
+    } else {
+      // Cas de repli : parcours sans catégorie en base.
+      this.categories = [];
+      this.showToast('warning', '⚠️ Ce parcours ne possède pas de catégorie associée.');
+    }
   }
 
-  loadCategoriesDuParcours(parcoursId: number): void {
-    this.loadingCategories = true;
-    this.categories        = [];
-    this.formationsService.getCategoriesDuParcours(parcoursId).subscribe({
-      next: (res: any) => {
-        this.categories        = res.categories ?? [];
-        this.loadingCategories = false;
-        if (this.categories.length === 1) this.selectCategorie(this.categories[0]);
-      },
-      error: () => {
-        this.loadingCategories = false;
-        this.showToast('error', '❌ Erreur lors du chargement des catégories.');
-      }
-    });
-  }
+  // loadCategoriesDuParcours() supprimée :
+  // cette méthode faisait un appel réseau superflu pour récupérer
+  // une information déjà disponible dans l'objet parcours.
+  // Elle est remplacée par la logique locale dans selectParcours().
 
   selectCategorie(categorie: any): void {
     this.selectedCategorie = categorie;
