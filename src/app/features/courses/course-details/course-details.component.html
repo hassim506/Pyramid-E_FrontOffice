@@ -446,9 +446,7 @@
                   <h2 *ngIf="formation.prix == 0 || formation.prix == '0.00'" class="text-success fs-30 mb-0">
                     GRATUIT
                   </h2>
-                  <h2 *ngIf="formation.prix > 0" class="text-primary fs-30 mb-0">
-                    {{ formation.prix }}FCFA
-                  </h2>
+                  
                   <p class="text-muted mb-0" *ngIf="formation.prix_original && formation.prix_original > formation.prix">
                     <span class="text-decoration-line-through">{{ formation.prix_original }}FCFA</span>
                     <span class="badge bg-success ms-2">

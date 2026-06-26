@@ -1,4 +1,3 @@
-<!-- LOADING -->
 <div class="qq-loading" *ngIf="loading">
   <div class="qq-loading__ring">
     <div></div><div></div><div></div><div></div>
@@ -6,7 +5,6 @@
   <p>Chargement de vos compétences recommandées...</p>
 </div>
 
-<!-- ERREUR -->
 <div class="cp-error" *ngIf="error && !loading">
   <i class="isax isax-warning-2"></i>
   <p>{{ error }}</p>
@@ -16,30 +14,29 @@
 </div>
 
 <ng-container *ngIf="!loading && !error">
-
-  <!-- ── HEADER ───────────────────────────────────────── -->
   <div class="cp-header mb-4">
-    <div>
-      <h3 class="cp-header__title">
-        <i class="isax isax-lamp-on me-2" style="color:#069b8f"></i>Compétences recommandées
-      </h3>
-      <p class="cp-header__sub">Compétences que vous pourriez acquérir via les formations disponibles</p>
-    </div>
+    <h3 class="cp-header__title">
+      <i class="isax isax-lamp-on me-2" style="color:#069b8f"></i>
+      Compétences recommandées
+    </h3>
+    <p class="cp-header__sub">
+      Compétences que vous pourriez acquérir via les formations disponibles.
+    </p>
   </div>
 
-  <!-- ── STATS ────────────────────────────────────────── -->
   <div class="cp-stats mb-4">
     <div class="cp-stat-main">
       <div class="cp-stat-main__circle cp-stat-main__circle--reco">
         <i class="isax isax-lamp-on" style="font-size:2rem; color:#069b8f"></i>
       </div>
-      <div class="cp-stat-main__info">
+      <div>
         <div class="cp-stat-main__label">Compétences accessibles</div>
         <div class="cp-stat-main__sub">
-          {{ totalCompetences }} compétence(s) réparties sur {{ total }} formation(s) disponible(s)
+          {{ totalCompetences }} compétence(s) répartie(s) sur {{ total }} formation(s) disponible(s)
         </div>
       </div>
     </div>
+
     <div class="cp-stat-cards">
       <div class="cp-stat-card cp-stat-card--teal">
         <i class="isax isax-book-1"></i>
@@ -48,6 +45,7 @@
           <div class="cp-stat-card__label">Formations</div>
         </div>
       </div>
+
       <div class="cp-stat-card cp-stat-card--green">
         <i class="isax isax-medal-star"></i>
         <div>
@@ -55,68 +53,170 @@
           <div class="cp-stat-card__label">Compétences</div>
         </div>
       </div>
+
       <div class="cp-stat-card cp-stat-card--indigo">
-        <i class="isax isax-category"></i>
+        <i class="isax isax-lamp-on"></i>
         <div>
-          <div class="cp-stat-card__value">{{ groupesFinaux.length }}</div>
-          <div class="cp-stat-card__label">Domaines</div>
+          <div class="cp-stat-card__value">{{ competencesRecommandees.length }}</div>
+          <div class="cp-stat-card__label">Affichées</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── TOOLBAR ──────────────────────────────────────── -->
   <div class="cp-toolbar mb-4">
     <div class="cp-search">
       <i class="isax isax-search-normal-1"></i>
-      <input type="text" placeholder="Rechercher une compétence..."
-             [value]="recherche" (input)="onRecherche($event)" class="cp-search__input"/>
+      <input type="text"
+             placeholder="Rechercher une compétence ou une formation..."
+             [value]="recherche"
+             (input)="onRecherche($event)"
+             class="cp-search__input">
     </div>
+
     <div class="cp-sort">
-      <select class="cp-sort__select" (change)="setTri($any($event.target).value)">
-        <option value="competences">Trier : Compétences ↓</option>
+      <select class="cp-sort__select" [value]="tri" (change)="setTri($any($event.target).value)">
+        <option value="competences">Trier : Formations ↓</option>
         <option value="duree">Trier : Durée ↓</option>
       </select>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════════════ -->
-  <!-- GRILLE PAR DOMAINE                                   -->
-  <!-- ════════════════════════════════════════════════════ -->
-  <div class="cp-domaine-grid" *ngIf="hasGroupes; else emptyState">
+  <div class="cp-results-card" *ngIf="hasCompetences; else emptyState">
+    <div class="cp-results-card__top">
+      <h5 class="cp-results-card__title">Liste des compétences recommandées</h5>
 
-    <div class="cp-domaine-card"
-         *ngFor="let grp of groupesFinaux; let i = index; trackBy: trackByDomaine"
-         [style.--d-color]="getDomaineColor(grp.domaine, i)"
-         [style.--d-color-lt]="getDomaineColorLight(grp.domaine, i)">
+      <div class="cp-results-actions">
+        <span class="cp-results-count">{{ displayedCount }} affichée(s)</span>
 
-      <!-- En-tête domaine -->
-      <div class="cp-domaine-card__header">
-        <div class="cp-domaine-card__icon">
-          <i class="isax {{ getDomaineIcon(grp.domaine) }}"></i>
+        <div class="cp-view-toggle">
+          <button type="button"
+                  class="cp-view-toggle__btn"
+                  [class.cp-view-toggle__btn--active]="viewMode === 'grid'"
+                  (click)="setViewMode('grid')">
+            <i class="isax isax-grid-2"></i>
+          </button>
+
+          <button type="button"
+                  class="cp-view-toggle__btn"
+                  [class.cp-view-toggle__btn--active]="viewMode === 'list'"
+                  (click)="setViewMode('list')">
+            <i class="isax isax-row-vertical"></i>
+          </button>
         </div>
-        <div class="cp-domaine-card__title">{{ grp.domaine.nom }}</div>
-        <span class="cp-domaine-card__count">{{ grp.competences.length }}</span>
+
+        <span class="cp-page-size">{{ pageSize }} par page</span>
+      </div>
+    </div>
+
+    <div class="cp-competence-list" *ngIf="viewMode === 'grid'">
+      <div class="cp-competence-card"
+           *ngFor="let competence of competencesPage; trackBy: trackByCompetence">
+        <div class="cp-competence-card__header">
+          <div class="cp-competence-card__icon">
+            <i class="isax isax-lamp-on"></i>
+          </div>
+
+          <div class="cp-competence-card__title">{{ competence.nom }}</div>
+
+          <span class="cp-competence-card__count">
+            {{ competence.formations.length }} formation(s)
+          </span>
+        </div>
+
+        <div class="cp-formation-list">
+          <button type="button"
+                  class="cp-formation-chip"
+                  *ngFor="let formation of competence.formations; trackBy: trackByFormation"
+                  (click)="allerVersFormation(formation.formation_id)">
+            <i class="isax isax-book-1"></i>
+            <span>{{ formation.formation_titre }}</span>
+            <small *ngIf="formation.duree">{{ formatDuree(formation.duree) }}</small>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cp-table-wrap" *ngIf="viewMode === 'list'">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th>Compétence</th>
+            <th>Formations concernées</th>
+            <th>Nombre</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let competence of competencesPage; trackBy: trackByCompetence">
+            <td>
+              <div class="cp-table-skill">
+                <span class="cp-table-skill__icon">
+                  <i class="isax isax-lamp-on"></i>
+                </span>
+                <strong>{{ competence.nom }}</strong>
+              </div>
+            </td>
+
+            <td>
+              <div class="cp-table-formations">
+                <button type="button"
+                        *ngFor="let formation of competence.formations; trackBy: trackByFormation"
+                        (click)="allerVersFormation(formation.formation_id)">
+                  {{ formation.formation_titre }}
+                  <small *ngIf="formation.duree">· {{ formatDuree(formation.duree) }}</small>
+                </button>
+              </div>
+            </td>
+
+            <td>
+              <span class="cp-pill">{{ competence.formations.length }}</span>
+            </td>
+
+            <td>
+              <button type="button"
+                      class="cp-action"
+                      *ngIf="competence.formations.length"
+                      (click)="allerVersFormation(competence.formations[0].formation_id)">
+                Voir
+                <i class="isax isax-arrow-right-3"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cp-pagination">
+      <div class="cp-pagination__label">
+        Page {{ currentPage }} sur {{ totalPages }}
       </div>
 
-      <!-- Badges compétences uniquement -->
-      <div class="cp-badges cp-badges--sm mt-3">
-        <div class="cp-badge cp-badge--reco" *ngFor="let c of grp.competences">
-          <i class="isax isax-lamp-on me-1"></i>{{ c }}
-        </div>
-      </div>
+      <div class="cp-pagination__actions">
+        <button type="button"
+                class="cp-pagination__btn"
+                [disabled]="currentPage === 1"
+                (click)="prevPage()">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
 
+        <button type="button"
+                class="cp-pagination__btn"
+                [disabled]="currentPage === totalPages"
+                (click)="nextPage()">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- État vide -->
   <ng-template #emptyState>
     <div class="cp-empty">
       <i class="isax isax-lamp-on cp-empty__icon"></i>
       <h6>Aucune compétence recommandée</h6>
-      <p *ngIf="recherche">Aucun résultat pour "{{ recherche }}".</p>
+      <p *ngIf="recherche">Aucun résultat pour « {{ recherche }} ».</p>
       <p *ngIf="!recherche">Vous avez déjà accès à toutes les formations disponibles.</p>
     </div>
   </ng-template>
-
 </ng-container>
