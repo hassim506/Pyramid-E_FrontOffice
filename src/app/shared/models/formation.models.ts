@@ -101,6 +101,8 @@ export interface Formation {
   date_fin?: string | Date | null;
 
   // Relations
+  entreprise_id?: number;
+  entreprise?: { id: number; nom: string };
   categorie_formation_id?: number;
   categorie_id?: number;
   categorie?: CategorieFormation;

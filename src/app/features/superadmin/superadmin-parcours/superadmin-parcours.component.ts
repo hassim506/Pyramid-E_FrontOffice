@@ -77,12 +77,8 @@ export class SuperadminParcoursComponent implements OnInit {
 
   loadCompanies(): void {
     this.companyService.getCompanies().subscribe({
-      next: (response) => {
-        if (response?.data) {
-          this.companies = response.data;
-        } else if (Array.isArray(response)) {
-          this.companies = response as any;
-        }
+      next: (response: any) => {
+        this.companies = response?.entreprises || response?.data || (Array.isArray(response) ? response : []);
       },
       error: () => { this.companies = []; }
     });

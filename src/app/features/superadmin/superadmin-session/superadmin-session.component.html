@@ -115,6 +115,7 @@
           <th style="width:90px;">Code</th>
           <th>Titre</th>
           <th style="width:120px;">Formation</th>
+          <th style="width:120px;">Entreprise</th>
           <th style="width:130px;">Formateur</th>
           <th style="width:80px;text-align:center;">Type</th>
           <th style="width:100px;">Lieu</th>
@@ -138,6 +139,8 @@
           <td>
             <div class="ac-table-name" style="font-size:12px;">{{ s.formation?.titre || '—' }}</div>
           </td>
+          <!-- Entreprise -->
+          <td style="font-size:12px;">{{ getCompanyName(s.formation?.entreprise_id || s.organisateur?.entreprise_id) }}</td>
           <!-- Formateur -->
           <td>
             <div class="ac-instructor">

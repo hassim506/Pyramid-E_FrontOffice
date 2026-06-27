@@ -45,12 +45,21 @@ export class CompanyAddComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.initForm();
-    this.loadClients();
+    // Charge les clients une seule fois ; si on est en mode édition, peuple le formulaire après
+    this.loadClients(() => {
+      if (this.visible && this.companyData && this.isEditMode) {
+        this.populateForm();
+      }
+    });
   }
 
   ngOnChanges() {
     if (this.visible && this.companyData && this.isEditMode) {
-      this.populateForm();
+      if (this.clients.length > 0) {
+        // Clients déjà chargés : on peut peupler immédiatement
+        this.populateForm();
+      }
+      // Sinon ngOnInit -> loadClients callback s'en chargera
     } else if (this.visible && !this.isEditMode) {
       this.resetForm();
     }
@@ -71,30 +80,33 @@ export class CompanyAddComponent implements OnInit, OnChanges {
     });
   }
 
-  loadClients() {
+  loadClients(afterLoad?: () => void) {
     this.clientCompanyService.getClients().subscribe({
       next: (response) => {
         this.clients = response.clients || response.data || [];
+        if (afterLoad) afterLoad();
       },
       error: (error) => console.error('Erreur chargement clients:', error)
     });
   }
 
   populateForm() {
-    if (this.companyData) {
-      this.companyForm.patchValue({
-        nom: this.companyData.nom,
-        ninea: this.companyData.ninea,
-        email: this.companyData.email,
-        telephone: this.companyData.telephone,
-        adresse: this.companyData.adresse,
-        secteur_activite: this.companyData.secteur_activite,
-        taille_effectif: this.companyData.taille_effectif,
-        client_id: this.companyData.client_id,
-        statut: this.companyData.statut,
-        pays: this.companyData.pays // 🆕 Nouveau champ
-      });
-    }
+    if (!this.companyData) return;
+    const clientId = this.companyData.client_id
+      ?? this.companyData.client?.id
+      ?? '';
+    this.companyForm.patchValue({
+      nom:              this.companyData.nom,
+      ninea:            this.companyData.ninea,
+      email:            this.companyData.email,
+      telephone:        this.companyData.telephone,
+      adresse:          this.companyData.adresse,
+      secteur_activite: this.companyData.secteur_activite,
+      taille_effectif:  this.companyData.taille_effectif,
+      client_id:        String(clientId),
+      statut:           this.companyData.statut,
+      pays:             this.companyData.pays
+    });
   }
 
   resetForm() {

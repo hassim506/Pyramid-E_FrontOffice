@@ -10,6 +10,15 @@ import { FormationsApiResponse } from '../../models/formation.models';
 })
 
 export class FormationService {
+  // /adminrh/formations — filtered by the RH's entreprise
+  //getCompetencesAcquises() {
+   // throw new //Error('Method not implemented.');
+  //}
+  getCompetencesAcquises(): Observable<any> {
+  return this.http.get<any>(`${this.baseUrl}/student/competences`, {
+    headers: this.getHeaders()
+  });
+}
   // private apiUrl = 'http://localhost:8000/api';
 
 
@@ -142,10 +151,10 @@ updateFormation(id: number, formationData: any): Observable<any> {
     });
   }
   getCatalogues(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/catalogues`, {
-      headers: this.getHeaders()
-    });
-  }
+  return this.http.get<any>(`${this.baseUrl}/demandes-formation/listes/catalogues`, {
+    headers: this.getHeaders()
+  });
+}
 
   getFormationById(id: number): Observable<any> {
   return this.http.get(`${this.baseUrl}/formations/${id}`);
@@ -410,11 +419,15 @@ getMesCompetences(): Observable<any> {
 
 //Competences recommandées
 getCompetencesRecommandees(): Observable<any> {
-  return this.http.get(`${this.baseUrl}/student/competences/recommandees`);
+  return this.http.get(`${this.baseUrl}/student/competences/recommandees`, {
+    headers: this.getHeaders()
+  });
 }
-//Ecart de ccompetences 
+
 getEcartCompetences(): Observable<any> {
-  return this.http.get(`${this.baseUrl}/student/competences/ecart`);
+  return this.http.get(`${this.baseUrl}/student/competences/ecart`, {
+    headers: this.getHeaders()
+  });
 }
 
 

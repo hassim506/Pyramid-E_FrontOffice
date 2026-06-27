@@ -8,6 +8,8 @@ import { CustomPaginationComponent } from '../../../shared/service/custom-pagina
 import { routes } from '../../../shared/service/routes/routes';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { Formation } from '../../../shared/models/formation.models';
+import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
+import { Company } from '../../../shared/models/client-company.models';
 
 @Component({
   selector: 'app-superadmin-course',
@@ -33,6 +35,7 @@ export class SuperadminCourseComponent implements OnInit {
 
   stats = { active: 0, pending: 0, draft: 0, free: 0, paid: 0 };
   entrepriseId: number | null = null;
+  companies: Company[] = [];
 
   pageNumberArray: { skip: number; limit: number }[] = [];
   totalPages = 0;
@@ -42,6 +45,7 @@ export class SuperadminCourseComponent implements OnInit {
   constructor(
     private formationService: FormationService,
     private route: ActivatedRoute,
+    private companyService: ClientCompanyService,
   ) {}
 
   ngOnInit(): void {
@@ -50,6 +54,22 @@ export class SuperadminCourseComponent implements OnInit {
       this.entrepriseId = id ? +id : null;
       this.getFormationsList();
     });
+    this.loadCompanies();
+  }
+
+  loadCompanies(): void {
+    this.companyService.getCompanies().subscribe({
+      next: (response: any) => {
+        this.companies = response?.entreprises || response?.data || (Array.isArray(response) ? response : []);
+      },
+      error: () => { this.companies = []; }
+    });
+  }
+
+  getCompanyName(entrepriseId: number | undefined): string {
+    if (!entrepriseId) return '—';
+    const c = this.companies.find(co => co.id === entrepriseId);
+    return c ? c.nom : `#${entrepriseId}`;
   }
 
   // ✅ prix est string | number | undefined

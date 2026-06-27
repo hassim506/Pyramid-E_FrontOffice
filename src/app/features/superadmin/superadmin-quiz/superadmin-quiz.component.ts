@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Quiz, QuizService } from '../../../shared/service/quiz/quiz.service';
 import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
+import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
+import { Company } from '../../../shared/models/client-company.models';
 
 declare var bootstrap: any;
 
@@ -17,6 +19,7 @@ declare var bootstrap: any;
 })
 export class SuperadminQuizComponent implements OnInit, OnDestroy {
   quizzes: Quiz[] = [];
+  companies: Company[] = [];
   loading = false;
   error = '';
   saving = false;
@@ -29,10 +32,11 @@ export class SuperadminQuizComponent implements OnInit, OnDestroy {
   private editModal: any;
   private subscription = new Subscription();
 
-  constructor(private quizService: QuizService, private fb: FormBuilder) {}
+  constructor(private quizService: QuizService, private fb: FormBuilder, private companyService: ClientCompanyService) {}
 
   ngOnInit(): void {
     this.loadQuizzes();
+    this.loadCompanies();
     setTimeout(() => {
       this.detailsModal = new bootstrap.Modal(document.getElementById('sa_quiz_details_modal'));
       this.editModal    = new bootstrap.Modal(document.getElementById('sa_quiz_edit_modal'));
@@ -100,6 +104,21 @@ export class SuperadminQuizComponent implements OnInit, OnDestroy {
       });
       this.subscription.add(sub);
     }
+  }
+
+  loadCompanies(): void {
+    this.companyService.getCompanies().subscribe({
+      next: (response: any) => {
+        this.companies = response?.entreprises || response?.data || (Array.isArray(response) ? response : []);
+      },
+      error: () => { this.companies = []; }
+    });
+  }
+
+  getCompanyName(entrepriseId: number | undefined): string {
+    if (!entrepriseId) return '—';
+    const c = this.companies.find(co => co.id === entrepriseId);
+    return c ? c.nom : `#${entrepriseId}`;
   }
 
   getStatusClass(quiz: Quiz): string { return quiz.is_active ? 'badge-success' : 'badge-secondary'; }

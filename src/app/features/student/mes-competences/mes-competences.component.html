@@ -1,4 +1,3 @@
-<!-- LOADING -->
 <div class="qq-loading" *ngIf="loading">
   <div class="qq-loading__ring">
     <div></div><div></div><div></div><div></div>
@@ -6,7 +5,6 @@
   <p>Chargement de vos compétences acquises...</p>
 </div>
 
-<!-- ERREUR -->
 <div class="cp-error" *ngIf="error && !loading">
   <i class="isax isax-warning-2"></i>
   <p>{{ error }}</p>
@@ -16,43 +14,36 @@
 </div>
 
 <ng-container *ngIf="!loading && !error && data">
-
-  <!-- ── HEADER ──────────────────────────────────────────────── -->
   <div class="cp-header mb-4">
     <div class="cp-header__left">
       <h3 class="cp-header__title">
         <i class="isax isax-medal-star me-2" style="color:#069b8f"></i>
         Mes Compétences Acquises
       </h3>
-      <p class="cp-header__sub">Compétences validées à travers vos formations terminées</p>
-    </div>
-    <div class="cp-header__domaine" *ngIf="data.domaine_user">
-      <div class="cp-domaine-badge"
-           [style.background]="getDomaineColorLight(data.domaine_user)"
-           [style.color]="getDomaineColor(data.domaine_user)"
-           [style.border-color]="getDomaineColor(data.domaine_user) + '40'">
-        <i class="isax {{ getDomaineIcon(data.domaine_user) }} me-1"></i>
-        {{ data.domaine_user.nom }}
-      </div>
+      <p class="cp-header__sub">
+        Compétences validées à travers vos formations terminées.
+      </p>
     </div>
   </div>
 
-  <!-- ── STATS ───────────────────────────────────────────────── -->
-  <div class="cp-stats mb-4" *ngIf="stats">
+  <div class="cp-stats mb-4">
     <div class="cp-stat-main">
       <div class="cp-stat-main__circle">
         <svg viewBox="0 0 100 100" class="cp-circle-svg">
-          <circle class="cp-circle-track" cx="50" cy="50" r="42" stroke-width="8"/>
-          <circle class="cp-circle-fill"  cx="50" cy="50" r="42" stroke-width="8"
-            stroke-dasharray="263.9"
-            [attr.stroke-dashoffset]="0"/>
+          <circle class="cp-circle-track" cx="50" cy="50" r="42" stroke-width="8"></circle>
+          <circle class="cp-circle-fill"
+                  cx="50" cy="50" r="42" stroke-width="8"
+                  stroke-dasharray="263.9"
+                  [attr.stroke-dashoffset]="0">
+          </circle>
         </svg>
         <div class="cp-stat-main__value">{{ stats.total_acquises }}</div>
       </div>
+
       <div class="cp-stat-main__info">
         <div class="cp-stat-main__label">Compétences acquises</div>
         <div class="cp-stat-main__sub">
-          Issues de {{ stats.formations_terminees }} formation(s) terminée(s) <br>
+          Issues de {{ stats.formations_terminees }} formation(s) terminée(s)<br>
           et dont le quiz final a été validé
         </div>
       </div>
@@ -66,168 +57,175 @@
           <div class="cp-stat-card__label">Compétences acquises</div>
         </div>
       </div>
+
       <div class="cp-stat-card cp-stat-card--teal">
-        <i class="isax isax-category"></i>
+        <i class="isax isax-book-1"></i>
         <div>
-          <div class="cp-stat-card__value">{{ totalDomainesBrut }}</div>
-          <div class="cp-stat-card__label">Domaines couverts</div>
+          <div class="cp-stat-card__value">{{ totalFormations }}</div>
+          <div class="cp-stat-card__label">Formations terminées</div>
         </div>
       </div>
-      <div class="cp-stat-card" *ngIf="data.domaine_user"
-           [style.--d-color]="getDomaineColor(data.domaine_user)"
-           [style.--d-color-lt]="getDomaineColorLight(data.domaine_user)">
-        <i class="isax {{ getDomaineIcon(data.domaine_user) }}"
-           [style.color]="getDomaineColor(data.domaine_user)"></i>
+
+      <div class="cp-stat-card cp-stat-card--indigo">
+        <i class="isax isax-medal-star"></i>
         <div>
-          <div class="cp-stat-card__value"
-               [style.color]="getDomaineColor(data.domaine_user)">
-            {{ data.domaine_user.nom }}
-          </div>
-          <div class="cp-stat-card__label">Mon domaine</div>
+          <div class="cp-stat-card__value">{{ competencesAcquises.length }}</div>
+          <div class="cp-stat-card__label">Compétences</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── TOOLBAR ─────────────────────────────────────────────── -->
   <div class="cp-toolbar mb-4">
+    <div class="cp-search">
+      <i class="isax isax-search-normal-1"></i>
+      <input type="text"
+             placeholder="Rechercher une compétence ou une formation..."
+             [value]="recherche"
+             (input)="onRecherche($event)"
+             class="cp-search__input">
+    </div>
 
-    <!-- Ligne 1 : search + hints actifs -->
-    <div class="cp-toolbar-row">
+    <div class="cp-search-hint" *ngIf="recherche">
+      {{ competencesFiltrees.length }} résultat(s) pour « {{ recherche }} »
+    </div>
+  </div>
 
-      <div class="cp-search">
-        <i class="isax isax-search-normal-1"></i>
-        <input
-          type="text"
-          placeholder="Rechercher une compétence..."
-          [value]="recherche"
-          (input)="onRecherche($event)"
-          class="cp-search__input"
-        />
+  <div class="cp-results-card" *ngIf="hasCompetences; else emptyState">
+    <div class="cp-results-card__top">
+      <h5 class="cp-results-card__title">Liste des compétences acquises</h5>
+
+      <div class="cp-results-actions">
+        <span class="cp-results-count">{{ displayedCount }} affichée(s)</span>
+
+        <div class="cp-view-toggle">
+          <button type="button"
+                  class="cp-view-toggle__btn"
+                  [class.cp-view-toggle__btn--active]="viewMode === 'grid'"
+                  (click)="setViewMode('grid')">
+            <i class="isax isax-grid-2"></i>
+          </button>
+
+          <button type="button"
+                  class="cp-view-toggle__btn"
+                  [class.cp-view-toggle__btn--active]="viewMode === 'list'"
+                  (click)="setViewMode('list')">
+            <i class="isax isax-row-vertical"></i>
+          </button>
+        </div>
+
+        <span class="cp-page-size">{{ pageSize }} par page</span>
+      </div>
+    </div>
+
+    <div class="cp-competence-list" *ngIf="viewMode === 'grid'">
+      <div class="cp-competence-card"
+           *ngFor="let competence of competencesPage; trackBy: trackByCompetence">
+        <div class="cp-competence-card__header">
+          <div class="cp-competence-card__icon">
+            <i class="isax isax-verify"></i>
+          </div>
+
+          <div class="cp-competence-card__title">{{ competence.nom }}</div>
+
+          <span class="cp-competence-card__count">
+            {{ competence.formations.length }} formation(s)
+          </span>
+        </div>
+
+        <div class="cp-formation-list" *ngIf="competence.formations.length">
+          <button type="button"
+                  class="cp-formation-chip"
+                  *ngFor="let formation of competence.formations; trackBy: trackByFormation"
+                  (click)="allerVersFormation(formation.formation_id)">
+            <i class="isax isax-book-1"></i>
+            <span>{{ formation.formation_titre }}</span>
+            <small *ngIf="formation.date_fin">{{ formatDateFr(formation.date_fin) }}</small>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cp-table-wrap" *ngIf="viewMode === 'list'">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th>Compétence</th>
+            <th>Formations terminées</th>
+            <th>Nombre</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let competence of competencesPage; trackBy: trackByCompetence">
+            <td>
+              <div class="cp-table-skill">
+                <span class="cp-table-skill__icon">
+                  <i class="isax isax-verify"></i>
+                </span>
+                <strong>{{ competence.nom }}</strong>
+              </div>
+            </td>
+
+            <td>
+              <div class="cp-table-formations">
+                <button type="button"
+                        *ngFor="let formation of competence.formations; trackBy: trackByFormation"
+                        (click)="allerVersFormation(formation.formation_id)">
+                  {{ formation.formation_titre }}
+                  <small *ngIf="formation.date_fin">· {{ formatDateFr(formation.date_fin) }}</small>
+                </button>
+              </div>
+            </td>
+
+            <td>
+              <span class="cp-pill">{{ competence.formations.length }}</span>
+            </td>
+
+            <td>
+              <span class="cp-status">
+                <i class="isax isax-tick-circle"></i>
+                Acquise
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cp-pagination">
+      <div class="cp-pagination__label">
+        Page {{ currentPage }} sur {{ totalPages }}
       </div>
 
-      <div class="cp-search-hint" *ngIf="recherche">
-        {{ competencesAcquises.length }} résultat(s) pour « {{ recherche }} »
-      </div>
+      <div class="cp-pagination__actions">
+        <button type="button"
+                class="cp-pagination__btn"
+                [disabled]="currentPage === 1"
+                (click)="prevPage()">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
 
-      <div class="cp-filter-hint" *ngIf="domaineFiltre !== null">
-        <i class="isax isax-filter"></i>
-        Domaine filtré ·
-        <button class="cp-filter-hint__clear" (click)="setDomaineFiltre(null)">
-          Tout afficher <i class="isax isax-close-circle"></i>
+        <button type="button"
+                class="cp-pagination__btn"
+                [disabled]="currentPage === totalPages"
+                (click)="nextPage()">
+          <i class="isax isax-arrow-right-3"></i>
         </button>
       </div>
-
-    </div>
-
-    <!-- Ligne 2 : chips de filtre par domaine -->
-    <div class="cp-chips" *ngIf="totalDomainesBrut > 1">
-
-      <!-- Chip "Tous" -->
-      <button
-        class="cp-chip"
-        [class.cp-chip--active]="domaineFiltre === null"
-        (click)="setDomaineFiltre(null)">
-        <i class="isax isax-category"></i>
-        Tous
-        <span class="cp-chip__count">{{ totalDomainesBrut }}</span>
-      </button>
-
-      <!-- Chip domaine principal -->
-      <button
-        class="cp-chip cp-chip--principal"
-        *ngIf="data.domaine_user && groupePrincipalBrut"
-        [class.cp-chip--active]="domaineFiltre === data.domaine_user.id"
-        [style.--chip-color]="getDomaineColor(data.domaine_user)"
-        (click)="setDomaineFiltre(data.domaine_user.id)">
-        <i class="isax isax-star-1"></i>
-        {{ data.domaine_user.nom }}
-        <span class="cp-chip__count">{{ groupePrincipalBrut.competences.length }}</span>
-      </button>
-
-      <!-- Chips autres domaines -->
-      <button
-        class="cp-chip"
-        *ngFor="let d of domainesDisponibles; let i = index; trackBy: trackByDomaine2"
-        [class.cp-chip--active]="domaineFiltre === d.id"
-        [style.--chip-color]="getDomaineColor(d, i)"
-        (click)="setDomaineFiltre(d.id)">
-        <i class="isax {{ getDomaineIcon(d) }}"></i>
-        {{ d.nom }}
-        <span class="cp-chip__count">{{ getNbCompetencesDomaine(d.id) }}</span>
-      </button>
-
-    </div>
-
-  </div>
-
-  <!-- ════════════════════════════════════════════════════════════ -->
-  <!-- GRILLE PAR DOMAINE                                          -->
-  <!-- ════════════════════════════════════════════════════════════ -->
-  <div class="cp-domaine-grid" *ngIf="hasGroupes; else emptyState">
-
-    <div class="cp-domaine-card"
-         *ngFor="let grp of groupesFinaux; let i = index; trackBy: trackByDomaine"
-         [class.cp-domaine-card--primary]="grp.isPrimary"
-         [style.--d-color]="getDomaineColor(grp.domaine, i)"
-         [style.--d-color-lt]="getDomaineColorLight(grp.domaine, i)">
-
-      <!-- Tag domaine principal -->
-      <div class="cp-domaine-primary-tag" *ngIf="grp.isPrimary">
-        <i class="isax isax-star-1 me-1"></i>Mon domaine principal
-      </div>
-
-      <!-- En-tête -->
-      <div class="cp-domaine-card__header">
-        <div class="cp-domaine-card__icon">
-          <i class="isax {{ getDomaineIcon(grp.domaine) }}"></i>
-        </div>
-        <div class="cp-domaine-card__title">{{ grp.domaine.nom }}</div>
-        <span class="cp-domaine-card__count">{{ grp.competences.length }}</span>
-      </div>
-
-      <!-- Badges compétences -->
-      <div class="cp-badges cp-badges--sm mt-3">
-        <div class="cp-badge cp-badge--acquis" *ngFor="let c of grp.competences">
-          <i class="isax isax-verify me-1"></i>{{ c }}
-        </div>
-      </div>
-
-      <!-- Formations liées -->
-      <div class="cp-domaine-card__formations mt-3">
-        <div class="cp-domaine-card__formations-label">
-          <i class="isax isax-book-1 me-1"></i>Formations terminées
-        </div>
-        <div class="cp-formation-chips">
-          <div class="cp-formation-chip"
-               *ngFor="let f of grp.formations"
-               (click)="allerVersFormation(f.formation_id)">
-            <span>{{ f.formation_titre }}</span>
-            <span class="cp-formation-chip__date" *ngIf="f.date_fin">
-              {{ formatDateFr(f.date_fin) }}
-            </span>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
-  <!-- État vide -->
   <ng-template #emptyState>
     <div class="cp-empty">
       <i class="isax isax-medal-star cp-empty__icon"></i>
       <h6>Aucune compétence débloquée</h6>
       <p *ngIf="recherche">Aucun résultat pour « {{ recherche }} »</p>
-      <p *ngIf="domaineFiltre !== null && !recherche">
-        Aucune compétence dans ce domaine.
-        <button class="cp-btn-link" (click)="setDomaineFiltre(null)">Voir tous les domaines</button>
-      </p>
-      <p *ngIf="!recherche && domaineFiltre === null">
+      <p *ngIf="!recherche">
         Terminez une formation <strong>et réussissez le quiz final</strong>
         pour débloquer vos compétences.
       </p>
     </div>
   </ng-template>
-
 </ng-container>

@@ -30,6 +30,7 @@
           <tr>
             <th>Quiz</th>
             <th>Formation</th>
+            <th>Entreprise</th>
             <th>Durée</th>
             <th>Score min.</th>
             <th>Statut</th>
@@ -50,8 +51,12 @@
             </td>
             <td>
               <span class="ip-pill">
-                <i class="isax isax-book-1"></i> Formation #{{ quiz.formation_id }}
+                <i class="isax isax-book-1"></i>
+                {{ quiz.formation?.titre || ('Formation #' + quiz.formation_id) }}
               </span>
+            </td>
+            <td style="font-size:12px;">
+              {{ quiz.formation?.entreprise?.nom || getCompanyName(quiz.formation?.entreprise_id) }}
             </td>
             <td>
               <span *ngIf="quiz.duree_minutes" class="ip-pill">
@@ -140,7 +145,12 @@
             <div class="ip-detail-icon-wrap"><i class="isax isax-book-1"></i></div>
             <div>
               <div class="ip-detail-label">Formation associée</div>
-              <div class="ip-detail-value">Formation #{{ selectedQuiz.formation_id }}</div>
+              <div class="ip-detail-value">
+                {{ selectedQuiz.formation?.titre || ('Formation #' + selectedQuiz.formation_id) }}
+              </div>
+              <div class="ip-detail-label" style="margin-top:4px;">
+                {{ selectedQuiz.formation?.entreprise?.nom || getCompanyName(selectedQuiz.formation?.entreprise_id) }}
+              </div>
             </div>
           </div>
           <div class="ip-detail-block ip-detail-block--half">

@@ -1,4 +1,3 @@
-<!-- LOADING -->
 <div class="qq-loading" *ngIf="loading">
   <div class="qq-loading__ring">
     <div></div><div></div><div></div><div></div>
@@ -6,7 +5,6 @@
   <p>Analyse de votre écart de compétences...</p>
 </div>
 
-<!-- ERREUR -->
 <div class="cp-error" *ngIf="error && !loading">
   <i class="isax isax-warning-2"></i>
   <p>{{ error }}</p>
@@ -16,8 +14,6 @@
 </div>
 
 <ng-container *ngIf="!loading && !error && data">
-
-  <!-- HEADER -->
   <div class="cp-header mb-4">
     <h3 class="cp-header__title">
       <i class="isax isax-chart-2 me-2" style="color:#ea580c"></i>
@@ -25,28 +21,29 @@
     </h3>
     <p class="cp-header__sub">
       Compétences visées dans vos formations assignées / demandées,
-      que vous n'avez pas encore acquises
+      que vous n’avez pas encore acquises.
     </p>
   </div>
 
-  <!-- STATS -->
   <div class="cp-stats mb-4">
     <div class="cp-stat-main">
       <div class="cp-stat-main__circle">
         <svg viewBox="0 0 100 100" class="cp-circle-svg">
-          <circle class="cp-circle-track" cx="50" cy="50" r="42" stroke-width="8"/>
+          <circle class="cp-circle-track" cx="50" cy="50" r="42" stroke-width="8"></circle>
           <circle class="cp-circle-fill cp-circle-fill--orange"
                   cx="50" cy="50" r="42" stroke-width="8"
                   stroke-dasharray="263.9"
-                  [attr.stroke-dashoffset]="263.9 * (1 - tauxProgression / 100)"/>
+                  [attr.stroke-dashoffset]="263.9 * (1 - tauxProgression / 100)">
+          </circle>
         </svg>
         <div class="cp-stat-main__value">{{ tauxProgression }}%</div>
       </div>
+
       <div class="cp-stat-main__info">
         <div class="cp-stat-main__label">Taux de complétion</div>
         <div class="cp-stat-main__sub">
-          {{ data.total_acquises }} compétence(s) acquises<br>
-          sur {{ data.total_acquises + data.total_ecart }} visées au total
+          {{ data.total_acquises }} compétence(s) acquise(s)<br>
+          sur {{ data.total_acquises + data.total_ecart }} visée(s) au total
         </div>
       </div>
     </div>
@@ -59,6 +56,7 @@
           <div class="cp-stat-card__label">Acquises</div>
         </div>
       </div>
+
       <div class="cp-stat-card cp-stat-card--orange">
         <i class="isax isax-danger"></i>
         <div>
@@ -66,184 +64,160 @@
           <div class="cp-stat-card__label">À acquérir</div>
         </div>
       </div>
+
       <div class="cp-stat-card cp-stat-card--indigo">
-        <i class="isax isax-category"></i>
+        <i class="isax isax-teacher"></i>
         <div>
-          <div class="cp-stat-card__value">{{ totalDomaines }}</div>
-          <div class="cp-stat-card__label">Domaines</div>
+          <div class="cp-stat-card__value">{{ competencesEcart.length }}</div>
+          <div class="cp-stat-card__label">Compétences</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- TOOLBAR -->
   <div class="cp-toolbar mb-4">
-
-    <!-- Barre de recherche -->
     <div class="cp-search">
       <i class="isax isax-search-normal-1"></i>
-      <input type="text" placeholder="Rechercher une compétence..."
-             [value]="recherche" (input)="onRecherche($event)"
-             class="cp-search__input"/>
+      <input type="text"
+             placeholder="Rechercher une compétence ou une formation..."
+             [value]="recherche"
+             (input)="onRecherche($event)"
+             class="cp-search__input">
     </div>
 
-    <!-- Chips de filtre par domaine (visibles seulement si > 1 domaine) -->
-    <div class="cp-chips" *ngIf="totalDomaines > 1">
-
-      <!-- Chip "Tous" -->
-      <button class="cp-chip"
-              [class.cp-chip--active]="domaineFiltre === null"
-              (click)="setDomaineFiltre(null)">
-        <i class="isax isax-category me-1"></i>
-        Tous
-        <span class="cp-chip__count">{{ totalDomaines }}</span>
-      </button>
-
-      <!-- Chip domaine principal (uniquement s'il a des écarts) -->
-      <button class="cp-chip cp-chip--principal"
-              *ngIf="domaineUser && groupeDomaineUser"
-              [class.cp-chip--active]="domaineFiltre === domaineUser.id"
-              [style.--chip-color]="getColor(domaineUser)"
-              (click)="setDomaineFiltre(domaineUser.id)">
-        <i class="isax isax-star-1 me-1"></i>
-        {{ domaineUser.nom }}
-        <span class="cp-chip__count">{{ groupeDomaineUser.competences.length }}</span>
-      </button>
-
-      <!-- Chips autres domaines (triés par pertinence décroissante) -->
-      <button class="cp-chip"
-              *ngFor="let d of domainesDisponibles; let i = index; trackBy: trackByDomaine"
-              [class.cp-chip--active]="domaineFiltre === d.id"
-              [style.--chip-color]="getColor(d, i)"
-              (click)="setDomaineFiltre(d.id)">
-        <i class="isax {{ getIcon(d) }} me-1"></i>
-        {{ d.nom }}
-        <span class="cp-chip__count">{{ getNbEcartDomaine(d.id) }}</span>
-      </button>
-
-    </div>
-
-    <!-- Hints actifs -->
     <div class="cp-search-hint" *ngIf="recherche">
-      Résultats filtrés pour « {{ recherche }} »
-    </div>
-    <div class="cp-filter-hint" *ngIf="domaineFiltre !== null">
-      <i class="isax isax-filter me-1"></i>
-      Domaine filtré ·
-      <button class="cp-filter-hint__clear" (click)="setDomaineFiltre(null)">
-        Tout afficher <i class="isax isax-close-circle ms-1"></i>
-      </button>
-    </div>
-
-  </div>
-
-  <!-- DOMAINE PRINCIPAL (masqué si chip d'un autre domaine est actif) -->
-  <ng-container *ngIf="showDomainePrincipal">
-    <div class="cp-domaine-principal mb-4"
-         [class.cp-domaine-principal--ok]="!groupeDomaineUser"
-         [style.--dp-color]="getColor(domaineUser!)"
-         [style.--dp-color-lt]="getColorLight(domaineUser!)">
-
-      <div class="cp-domaine-principal__badge">
-        <i class="isax isax-star-1"></i>Mon domaine principal
-      </div>
-
-      <div class="cp-domaine-principal__body">
-        <div class="cp-domaine-principal__icon">
-          <i class="isax {{ getIcon(domaineUser!) }}"></i>
-        </div>
-        <div class="cp-domaine-principal__title">{{ domaineUser!.nom }}</div>
-        <span class="cp-domaine-principal__count" *ngIf="groupeDomaineUser">
-          {{ groupeDomaineUser.competences.length }}
-        </span>
-      </div>
-
-      <!-- Compétences en écart — badges ORANGE -->
-      <div class="cp-domaine-principal__competences" *ngIf="groupeDomaineUser">
-        <div class="cp-badge cp-badge--ecart"
-             *ngFor="let c of groupeDomaineUser.competences">
-          <i class="isax isax-clock me-1"></i>{{ c }}
-        </div>
-      </div>
-
-      <!-- Aucun écart -->
-      <div class="cp-badges mb-3" *ngIf="!groupeDomaineUser">
-        <div class="cp-badge cp-badge--ok">
-          <i class="isax isax-tick-circle me-1"></i>
-          Aucun écart dans votre domaine — continuez ainsi !
-        </div>
-      </div>
-
-      <!-- Nb formations -->
-      <div class="cp-domaine-principal__formations" *ngIf="groupeDomaineUser">
-        <div class="cp-domaine-principal__formations-label">
-          <i class="isax isax-book-1"></i>Formations concernées
-        </div>
-        <div class="cp-domaine-principal__formations-count">
-          <i class="isax isax-document-text"></i>
-          {{ groupeDomaineUser.formations.length }} formation(s) impliquée(s)
-        </div>
-      </div>
-
-    </div>
-  </ng-container>
-
-  <!-- GRILLE PAR DOMAINE (triée par pertinence, sans domaine principal) -->
-  <div class="cp-domaine-grid" *ngIf="groupesSansDomainePrincipal.length > 0; else emptyState">
-
-    <!-- Label tri pertinence (visible seulement si pas de filtre chip) 
-    <div class="cp-sort-label mb-2" *ngIf="domaineFiltre === null">
-      <i class="isax isax-arrange-square-2 me-1"></i>
-      Triés par pertinence (plus d'écarts en premier)
-    </div>
-    -->
-
-    <div class="cp-domaine-card"
-         *ngFor="let grp of groupesSansDomainePrincipal; let i = index; trackBy: trackBy"
-         [style.--d-color]="getColor(grp.domaine, i)"
-         [style.--d-color-lt]="getColorLight(grp.domaine, i)">
-
-      <div class="cp-domaine-card__header">
-        <div class="cp-domaine-card__icon">
-          <i class="isax {{ getIcon(grp.domaine) }}"></i>
-        </div>
-        <div class="cp-domaine-card__title">{{ grp.domaine.nom }}</div>
-        <span class="cp-domaine-card__count">{{ grp.competences.length }}</span>
-      </div>
-
-      <div class="cp-badges cp-badges--sm mt-3">
-        <div class="cp-badge cp-badge--ecart" *ngFor="let c of grp.competences">
-          <i class="isax isax-clock me-1"></i>{{ c }}
-        </div>
-      </div>
-
-      <div class="cp-domaine-card__formations mt-3" *ngIf="grp.formations.length">
-        <div class="cp-domaine-card__formations-label">
-          <i class="isax isax-book-1 me-1"></i>Formations concernées
-        </div>
-        <div class="cp-domaine-card__formations-count">
-          <i class="isax isax-document-text me-1"></i>
-          {{ grp.formations.length }} formation(s) impliquée(s)
-        </div>
-      </div>
-
+      {{ competencesFiltrees.length }} résultat(s) pour « {{ recherche }} »
     </div>
   </div>
 
-  <!-- EMPTY STATE -->
+  <div class="cp-results-card" *ngIf="hasCompetences; else emptyState">
+    <div class="cp-results-card__top">
+      <h5 class="cp-results-card__title">Liste des compétences à acquérir</h5>
+
+      <div class="cp-results-actions">
+        <span class="cp-results-count">{{ displayedCount }} affichée(s)</span>
+
+        <div class="cp-view-toggle">
+          <button type="button"
+                  class="cp-view-toggle__btn"
+                  [class.cp-view-toggle__btn--active]="viewMode === 'grid'"
+                  (click)="setViewMode('grid')">
+            <i class="isax isax-grid-2"></i>
+          </button>
+
+          <button type="button"
+                  class="cp-view-toggle__btn"
+                  [class.cp-view-toggle__btn--active]="viewMode === 'list'"
+                  (click)="setViewMode('list')">
+            <i class="isax isax-row-vertical"></i>
+          </button>
+        </div>
+
+        <span class="cp-page-size">{{ pageSize }} par page</span>
+      </div>
+    </div>
+
+    <div class="cp-competence-list" *ngIf="viewMode === 'grid'">
+      <div class="cp-competence-card"
+           *ngFor="let competence of competencesPage; trackBy: trackByCompetence">
+        <div class="cp-competence-card__header">
+          <div class="cp-competence-card__icon">
+            <i class="isax isax-clock"></i>
+          </div>
+
+          <div class="cp-competence-card__title">{{ competence.nom }}</div>
+
+          <span class="cp-competence-card__count">
+            {{ competence.formations.length }} formation(s)
+          </span>
+        </div>
+
+        <div class="cp-formation-list" *ngIf="competence.formations.length">
+          <div class="cp-formation-chip"
+               *ngFor="let formation of competence.formations; trackBy: trackByFormation">
+            <i class="isax isax-book-1"></i>
+            <span>{{ formation.formation_titre }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cp-table-wrap" *ngIf="viewMode === 'list'">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th>Compétence</th>
+            <th>Formations concernées</th>
+            <th>Nombre</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let competence of competencesPage; trackBy: trackByCompetence">
+            <td>
+              <div class="cp-table-skill">
+                <span class="cp-table-skill__icon">
+                  <i class="isax isax-clock"></i>
+                </span>
+                <strong>{{ competence.nom }}</strong>
+              </div>
+            </td>
+
+            <td>
+              <div class="cp-table-formations">
+                <span *ngFor="let formation of competence.formations; trackBy: trackByFormation">
+                  {{ formation.formation_titre }}
+                </span>
+              </div>
+            </td>
+
+            <td>
+              <span class="cp-pill">{{ competence.formations.length }}</span>
+            </td>
+
+            <td>
+              <span class="cp-status">
+                <i class="isax isax-danger"></i>
+                À acquérir
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cp-pagination">
+      <div class="cp-pagination__label">
+        Page {{ currentPage }} sur {{ totalPages }}
+      </div>
+
+      <div class="cp-pagination__actions">
+        <button type="button"
+                class="cp-pagination__btn"
+                [disabled]="currentPage === 1"
+                (click)="prevPage()">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+
+        <button type="button"
+                class="cp-pagination__btn"
+                [disabled]="currentPage === totalPages"
+                (click)="nextPage()">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <ng-template #emptyState>
-    <div class="cp-empty" *ngIf="!showDomainePrincipal || !groupeDomaineUser">
+    <div class="cp-empty">
       <i class="isax isax-tick-circle cp-empty__icon" style="color:#16a34a"></i>
       <h6>Aucun écart de compétences !</h6>
       <p *ngIf="recherche">Aucun résultat pour « {{ recherche }} »</p>
-      <p *ngIf="domaineFiltre !== null && !recherche">
-        Aucun écart dans ce domaine.
-        <button class="cp-btn-link" (click)="setDomaineFiltre(null)">Voir tous les domaines</button>
-      </p>
-      <p *ngIf="!recherche && domaineFiltre === null">
-        Vous avez acquis toutes les compétences visées dans vos formations assignées. 🎉
+      <p *ngIf="!recherche">
+        Vous avez acquis toutes les compétences visées dans vos formations assignées.
       </p>
     </div>
   </ng-template>
-
 </ng-container>

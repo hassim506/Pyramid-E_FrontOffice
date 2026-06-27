@@ -77,12 +77,8 @@ export class SuperadminSessionComponent implements OnInit {
 
   loadCompanies(): void {
     this.companyService.getCompanies().subscribe({
-      next: (response) => {
-        if (response?.data) {
-          this.companies = response.data;
-        } else if (Array.isArray(response)) {
-          this.companies = response as any;
-        }
+      next: (response: any) => {
+        this.companies = response?.entreprises || response?.data || (Array.isArray(response) ? response : []);
       },
       error: () => { this.companies = []; }
     });
@@ -232,6 +228,12 @@ export class SuperadminSessionComponent implements OnInit {
       hybride: 'Hybride'
     };
     return map[type] || type;
+  }
+
+  getCompanyName(entrepriseId: number | undefined): string {
+    if (!entrepriseId) return '—';
+    const c = this.companies.find(co => co.id === entrepriseId);
+    return c ? c.nom : `#${entrepriseId}`;
   }
 
   trackBySession(index: number, session: SessionFormation): number {
