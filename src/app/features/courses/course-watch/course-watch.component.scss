@@ -245,6 +245,56 @@ $t:            all .2s ease;
 }
 
 // ═══════════════════════════════════════════════════════
+// IMAGE
+// ═══════════════════════════════════════════════════════
+.cw-image-wrap {
+  background: #fff; border-radius: $radius-lg;
+  border: 1px solid $gray-200; box-shadow: $shadow-sm;
+  padding: 20px; margin-bottom: 20px; text-align: center;
+
+  img { max-width: 100%; display: block; margin: 0 auto; border-radius: $radius-md; }
+}
+
+// ═══════════════════════════════════════════════════════
+// FICHIER À TÉLÉCHARGER
+// ═══════════════════════════════════════════════════════
+.cw-file-wrap { margin-bottom: 20px; }
+
+.cw-file-card {
+  display: flex; align-items: center; gap: 16px;
+  background: #fff; border-radius: $radius-lg $radius-lg 0 0;
+  border: 1px solid $gray-200; box-shadow: $shadow-sm;
+  padding: 20px 24px;
+
+  &__icon {
+    width: 52px; height: 52px; flex-shrink: 0;
+    border-radius: 12px; background: $primary-lt;
+    display: flex; align-items: center; justify-content: center;
+    color: $primary; font-size: 24px;
+  }
+
+  &__info { flex: 1; min-width: 0; }
+
+  &__name {
+    font-weight: 600; font-size: 15px; color: $dark;
+    margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  &__hint { margin: 0; font-size: 13px; color: $gray-400; }
+
+  &__btn { flex-shrink: 0; text-decoration: none; }
+}
+
+.cw-file-viewer {
+  height: 75vh; border: 1px solid $gray-200; border-top: none;
+  border-radius: 0 0 $radius-lg $radius-lg; overflow: hidden;
+}
+
+.cw-file-frame {
+  width: 100%; height: 100%; border: none; display: block;
+}
+
+// ═══════════════════════════════════════════════════════
 // PDF
 // ═══════════════════════════════════════════════════════
 .cw-pdf-wrap {

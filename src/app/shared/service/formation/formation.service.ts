@@ -59,11 +59,38 @@ unpublishFormation(id: number): Observable<any> {
     });
   }
 
+  uploadFile(file: File): Observable<any> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/upload/file`, fd, {
+      headers: this.getAuthHeader()
+    });
+  }
+
   // /adminrh/formations — filtered by the RH's entreprise
   getFormationsrh(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/adminrh/formations`, {
       headers: this.getHeaders()
     });
+  }
+
+  getParticipantsFormation(formationId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/formations/${formationId}/participants`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  inscriptionDirecte(payload: { formation_id: number; user_id: number }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/formations/inscription-directe`, payload, {
+      headers: this.getHeaders()
+    });
+  }
+
+  desinscriptionDirecte(payload: { formation_id: number; user_id: number }): Observable<any> {
+    return this.http.delete<any>(
+      `${this.baseUrl}/formations/${payload.formation_id}/employes/${payload.user_id}`,
+      { headers: this.getHeaders() }
+    );
   }
    getFormationsformateur(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/formateur/formations`, {

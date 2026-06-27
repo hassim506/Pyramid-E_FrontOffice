@@ -65,7 +65,7 @@
                 {{ role.name }}
                 <span *ngIf="role.is_system" class="ul-system-badge">système</span>
               </div>
-              <div class="ul-user__email">{{ role.description || ('ID: ' + role.id) }}</div>
+              <div class="ul-user__email" *ngIf="role.description">{{ role.description }}</div>
             </div>
           </div>
         </td>

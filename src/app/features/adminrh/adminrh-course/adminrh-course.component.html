@@ -131,6 +131,11 @@
                       (click)="togglePublishStatus(f)">
                 <i [class]="'isax ' + (f.est_publie ? 'isax-eye-slash' : 'isax-send-2')"></i>
               </button>
+              <ng-container *appHasPermission="'assigner formations'">
+                <button type="button" class="ac-act ac-act--people" title="Participants" (click)="openParticipants(f)">
+                  <i class="isax isax-people"></i>
+                </button>
+              </ng-container>
               <button type="button" class="ac-act ac-act--arch" title="Archiver" (click)="archiveFormation(f)">
                 <i class="isax isax-archive"></i>
               </button>
@@ -967,6 +972,126 @@
           {{ catWizardSaving ? 'Publication...' : 'Publier' }}
         </button>
       </ng-container>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     MODAL PARTICIPANTS
+════════════════════════════════════════════ -->
+<div class="pm-overlay" *ngIf="participantsModalOpen" (click)="closeParticipants()">
+  <div class="pm-modal" (click)="$event.stopPropagation()">
+
+    <!-- Head -->
+    <div class="pm-head">
+      <div class="pm-head__icon"><i class="isax isax-people"></i></div>
+      <div class="pm-head__text">
+        <div class="pm-head__title">{{ selectedFormation?.titre }}</div>
+        <div class="pm-head__sub">{{ participants.length }} participant(s) inscrit(s)</div>
+      </div>
+      <button type="button" class="pm-close" (click)="closeParticipants()">
+        <i class="isax isax-close-circle"></i>
+      </button>
+    </div>
+
+    <!-- Alerts -->
+    <div *ngIf="inscriptionSuccess" class="pm-alert pm-alert--ok">
+      <i class="isax isax-tick-circle"></i> {{ inscriptionSuccess }}
+    </div>
+    <div *ngIf="inscriptionError" class="pm-alert pm-alert--err">
+      <i class="isax isax-warning-2"></i> {{ inscriptionError }}
+    </div>
+
+    <div class="pm-body">
+
+      <!-- Colonne gauche : inscrits -->
+      <div class="pm-col">
+        <div class="pm-col__header">
+          <span class="pm-col__title"><i class="isax isax-tick-circle"></i> Inscrits</span>
+          <div class="pm-search">
+            <i class="isax isax-search-normal-1"></i>
+            <input type="search" placeholder="Rechercher..."
+                   [(ngModel)]="participantsSearch" [ngModelOptions]="{standalone:true}">
+          </div>
+        </div>
+
+        <div *ngIf="participantsLoading" class="pm-loading">
+          <span class="pm-spin"></span> Chargement...
+        </div>
+
+        <div *ngIf="!participantsLoading && !participantsFiltered.length" class="pm-empty">
+          <i class="isax isax-people"></i>
+          <p>Aucun participant</p>
+        </div>
+
+        <div class="pm-list" *ngIf="!participantsLoading && participantsFiltered.length">
+          <div *ngFor="let p of participantsFiltered; trackBy: trackByUserId" class="pm-user-row">
+            <div class="pm-user-av">{{ ((p.prenom || p.nom || p.name || p.email || '?').charAt(0)).toUpperCase() }}</div>
+            <div class="pm-user-info">
+              <div class="pm-user-name">{{ (p.prenom && p.nom) ? (p.prenom + ' ' + p.nom) : (p.name || p.nom || '—') }}</div>
+              <div class="pm-user-email">{{ p.email }}</div>
+            </div>
+            <ng-container *appHasPermission="'desassigner formations'">
+              <button type="button" class="pm-unenroll-btn"
+                      [disabled]="inscriptionPending" (click)="desinscrireUser(p)">
+                <span *ngIf="inscriptionPending" class="pm-spin pm-spin--sm"></span>
+                <i *ngIf="!inscriptionPending" class="isax isax-user-remove"></i>
+                Retirer
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="pm-divider"></div>
+
+      <!-- Colonne droite : à inscrire -->
+      <div class="pm-col">
+        <div class="pm-col__header">
+          <span class="pm-col__title"><i class="isax isax-user-add"></i> Inscrire un employé</span>
+          <div class="pm-search">
+            <i class="isax isax-search-normal-1"></i>
+            <input type="search" placeholder="Rechercher..."
+                   [(ngModel)]="usersSearch" [ngModelOptions]="{standalone:true}"
+                   (ngModelChange)="applyUsersFilter()">
+          </div>
+        </div>
+
+        <div *ngIf="usersLoading" class="pm-loading">
+          <span class="pm-spin"></span> Chargement...
+        </div>
+
+        <div *ngIf="!usersLoading && !availableUsersFiltered.length" class="pm-empty">
+          <i class="isax isax-user-add"></i>
+          <p>Tous les employés sont déjà inscrits</p>
+        </div>
+
+        <div class="pm-list" *ngIf="!usersLoading && availableUsersFiltered.length">
+          <div *ngFor="let u of availableUsersFiltered; trackBy: trackByUserId" class="pm-user-row">
+            <div class="pm-user-av pm-user-av--blue">{{ ((u.prenom || u.nom || u.name || u.email || '?').charAt(0)).toUpperCase() }}</div>
+            <div class="pm-user-info">
+              <div class="pm-user-name">{{ (u.prenom && u.nom) ? (u.prenom + ' ' + u.nom) : (u.name || u.nom || '—') }}</div>
+              <div class="pm-user-email">{{ u.email }}</div>
+            </div>
+            <ng-container *appHasPermission="'assigner formations'">
+              <button type="button" class="pm-enroll-btn"
+                      [disabled]="inscriptionPending" (click)="inscrireUser(u)">
+                <span *ngIf="inscriptionPending" class="pm-spin pm-spin--sm"></span>
+                <i *ngIf="!inscriptionPending" class="isax isax-user-add"></i>
+                Inscrire
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="pm-foot">
+      <span class="pm-foot__info">{{ participants.length }} inscrit(s) · {{ availableUsers.length }} disponible(s)</span>
+      <button type="button" class="pm-close-btn" (click)="closeParticipants()">Fermer</button>
     </div>
 
   </div>

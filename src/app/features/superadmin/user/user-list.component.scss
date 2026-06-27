@@ -488,13 +488,70 @@ $radius-lg: 12px;
   padding: 14px;
 }
 
+.ul-matrix__header {
+  margin-bottom: 16px;
+}
+.ul-matrix__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+.ul-matrix__subtitle { margin: 0; }
+
+// Chaîne hiérarchique
+.ul-matrix__hierarchy {
+  overflow-x: auto;
+  padding: 8px 0;
+}
+.ul-hier-chain {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  width: max-content;
+}
+.ul-hier-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ul-hier-arrow { color: #aaa; font-size: 12px; }
+
+.ul-hier--sa      { background: #fff0f0; color: #c0392b; border: 1px solid #f5c6c6; }
+.ul-hier--holding { background: #fdf3ff; color: #8e44ad; border: 1px solid #e8c6f5; }
+.ul-hier--rh      { background: #eef4ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.ul-hier--it      { background: #f0fff4; color: #16a34a; border: 1px solid #bbf7d0; }
+.ul-hier--mgr     { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+.ul-hier--form    { background: #f0fdfd; color: #0891b2; border: 1px solid #a5f3fc; }
+.ul-hier--emp     { background: #f9fafb; color: #6b7280; border: 1px solid #e5e7eb; }
+
+// Badges colonnes entête
+.ul-mh-role {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.ul-mh--sa      { background: #fff0f0; color: #c0392b; }
+.ul-mh--holding { background: #fdf3ff; color: #8e44ad; }
+.ul-mh--rh      { background: #eef4ff; color: #2563eb; }
+.ul-mh--it      { background: #f0fff4; color: #16a34a; }
+.ul-mh--mgr     { background: #fffbeb; color: #d97706; }
+.ul-mh--form    { background: #f0fdfd; color: #0891b2; }
+.ul-mh--emp     { background: #f9fafb; color: #6b7280; }
+
 .ul-matrix {
   border-collapse: collapse;
   width: 100%;
   font-size: 12px;
 
   th, td {
-    padding: 8px 12px;
+    padding: 7px 10px;
     border: 1px solid $gray-200;
     text-align: center;
   }
@@ -516,6 +573,20 @@ $radius-lg: 12px;
     &:first-child { text-align: left; }
   }
 
+  &__role-names td {
+    font-size: 10px;
+    font-weight: 600;
+    color: $gray-600;
+    background: #f8f9fc !important;
+    white-space: nowrap;
+    padding: 5px 8px !important;
+  }
+  &__group-label {
+    font-style: italic;
+    color: $gray-400 !important;
+    font-weight: 400 !important;
+  }
+
   &__group {
     font-size: 10px;
     font-weight: 600;
@@ -530,10 +601,11 @@ $radius-lg: 12px;
   &__legend {
     display: flex;
     gap: 16px;
-    margin-top: 10px;
     font-size: 11px;
     color: $gray-400;
+    flex-wrap: wrap;
   }
+  &__note { font-size: 11px; }
 }
 
 .ul-c-yes     { color: #3b6d11; font-size: 15px; font-weight: 700; }

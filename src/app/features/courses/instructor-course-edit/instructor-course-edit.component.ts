@@ -113,6 +113,13 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   editingSectionIndex: number | null = null;
   currentModuleIndex: number | null = null;
 
+  // Section upload (modal)
+  sectionVideoMode: 'url' | 'upload' = 'url';
+  sectionUploadFile: File | null = null;
+  sectionUploading = false;
+  sectionUploadError = '';
+  sectionUploadPreview: string | null = null;
+
   // ── quiz editor (step 3) ───────────────────────────────────────────────
   localQuizzes: LocalQuiz[] = [];
   activeQuizKey: string | null = null;
@@ -763,7 +770,7 @@ export class InstructorCourseEditComponent implements OnInit, OnDestroy {
   }
 
   getModuleDuration(module: Module): number {
-    return module.sections?.reduce((sum, s) => sum + (s.duree_estimee || 0), 0) || 0;
+    return module.sections?.reduce((sum, s) => sum + (parseInt(String(s.duree_estimee), 10) || 0), 0) || 0;
   }
 
   getTotalSections(): number {
@@ -796,6 +803,11 @@ private validateSectionType(type: string): string {
     this.currentModuleIndex = moduleIndex;
     this.currentSection = this.getEmptySection();
     this.editingSectionIndex = null;
+    this.sectionVideoMode = 'url';
+    this.sectionUploadFile = null;
+    this.sectionUploading = false;
+    this.sectionUploadError = '';
+    this.sectionUploadPreview = null;
     const modal = new bootstrap.Modal(document.getElementById('sectionModal'));
     modal.show();
   }
@@ -804,24 +816,61 @@ private validateSectionType(type: string): string {
     this.currentModuleIndex = moduleIndex;
     this.editingSectionIndex = sectionIndex;
     this.currentSection = { ...this.modules[moduleIndex].sections[sectionIndex] };
+    this.sectionVideoMode = 'url';
+    this.sectionUploadFile = null;
+    this.sectionUploading = false;
+    this.sectionUploadError = '';
+    this.sectionUploadPreview = null;
     const modal = new bootstrap.Modal(document.getElementById('sectionModal'));
     modal.show();
+  }
+
+  onSectionFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    this.sectionUploadFile = file;
+    this.sectionUploadError = '';
+    if (this.currentSection.type === 'image') {
+      const reader = new FileReader();
+      reader.onload = () => { this.sectionUploadPreview = reader.result as string; };
+      reader.readAsDataURL(file);
+    } else {
+      this.sectionUploadPreview = null;
+    }
   }
 
   saveSection(): void {
     if (!this.currentSection.titre || this.currentModuleIndex === null) return;
 
-    const module = this.modules[this.currentModuleIndex];
+    const doSave = () => {
+      const module = this.modules[this.currentModuleIndex!];
+      if (this.editingSectionIndex !== null) {
+        module.sections[this.editingSectionIndex] = { ...this.currentSection };
+      } else {
+        this.currentSection.ordre = module.sections.length;
+        module.sections.push({ ...this.currentSection });
+      }
+      this.closeModal('sectionModal');
+      this.markAsChanged();
+    };
 
-    if (this.editingSectionIndex !== null) {
-      module.sections[this.editingSectionIndex] = { ...this.currentSection };
+    if (this.sectionUploadFile) {
+      this.sectionUploading = true;
+      this.formationService.uploadFile(this.sectionUploadFile).subscribe({
+        next: (res: any) => {
+          this.sectionUploading = false;
+          this.currentSection.ressources = res.url || res.path || '';
+          doSave();
+        },
+        error: () => {
+          this.sectionUploading = false;
+          this.sectionUploadError = 'Échec de l\'upload, veuillez réessayer.';
+        }
+      });
     } else {
-      this.currentSection.ordre = module.sections.length;
-      module.sections.push({ ...this.currentSection });
+      doSave();
     }
-
-    this.closeModal('sectionModal');
-    this.markAsChanged();
   }
 
   removeSection(moduleIndex: number, sectionIndex: number): void {

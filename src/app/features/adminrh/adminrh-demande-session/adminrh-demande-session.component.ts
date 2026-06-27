@@ -254,7 +254,7 @@ export class AdminrhDemandeSessionComponent implements OnInit {
         .toLowerCase()
         .trim()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+        .replace(/[̀-ͯ]/g, '');
     };
 
     const fields = [
@@ -427,11 +427,6 @@ export class AdminrhDemandeSessionComponent implements OnInit {
     return statutMap[statut] || 'badge bg-secondary';
   }
 
-  // ============================================================
-// REMPLACE ces 3 méthodes dans adminrh-demande.component.ts
-// ============================================================
-
-  // ✅ Corrigé : priorite peut être undefined
   getPrioriteClass(priorite: string | undefined): string {
     const prioriteMap: Record<string, string> = {
       'basse':   'badge bg-light text-dark',
@@ -442,7 +437,6 @@ export class AdminrhDemandeSessionComponent implements OnInit {
     return prioriteMap[priorite ?? ''] || 'badge bg-secondary';
   }
 
-  // ✅ Corrigé : date peut être string | null | undefined
   formatDate(date: string | null | undefined): string {
     if (!date) return 'Non spécifié';
     try {
@@ -452,7 +446,6 @@ export class AdminrhDemandeSessionComponent implements OnInit {
     }
   }
 
-  // ✅ Corrigé : date peut être string | null | undefined
   formatDateTime(date: string | null | undefined): string {
     if (!date) return 'Non spécifié';
     try {

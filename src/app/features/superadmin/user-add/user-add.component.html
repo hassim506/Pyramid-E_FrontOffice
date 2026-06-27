@@ -98,11 +98,15 @@
                     </div>
                 </form>
             </div>
+            <div *ngIf="errorMessage" class="mx-3 mb-2 alert alert-danger alert-dismissible py-2" role="alert">
+                <i class="isax isax-warning-2 me-2"></i>{{ errorMessage }}
+                <button type="button" class="btn-close btn-close-sm" (click)="errorMessage = ''"></button>
+            </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" (click)="hideDialog()" [disabled]="loading">
                         <i class="isax isax-close-circle me-1"></i>Annuler
                     </button>
-                    <button type="button" class="btn btn-primary" (click)="saveUser()" [disabled]="!userForm.valid || loading">
+                    <button type="button" class="btn btn-primary" (click)="saveUser()" [disabled]="loading">
                         <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
                         <i *ngIf="!loading" class="isax isax-tick-circle me-1"></i>
                         {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}

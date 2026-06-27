@@ -95,9 +95,9 @@ export interface CreateSessionRequest {
   cout_par_participant?: string;
   budget_alloue?: string;
   notes_organisateur?: string;
-  // Ajoutez ces deux propriétés :
   statut?: 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
   motif_annulation?: string;
+  participant_ids?: number[];
 }
 @Injectable({
   providedIn: 'root'

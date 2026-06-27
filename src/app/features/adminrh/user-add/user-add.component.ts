@@ -164,6 +164,16 @@ export class UserAddComponent implements OnInit, OnChanges {
     });
     if (this.userForm.hasError('passwordMismatch')) {
       this.errorMessage = 'Les mots de passe ne correspondent pas.';
+    } else {
+      const missing: string[] = [];
+      if (this.userForm.get('nom')?.invalid)    missing.push('Nom');
+      if (this.userForm.get('prenom')?.invalid) missing.push('Prénom');
+      if (this.userForm.get('email')?.invalid)  missing.push('Email valide');
+      if (this.userForm.get('role_id')?.invalid) missing.push('Rôle');
+      if (this.userForm.get('password')?.invalid) missing.push('Mot de passe (min. 8 caractères)');
+      this.errorMessage = missing.length
+        ? `Champs obligatoires manquants : ${missing.join(', ')}`
+        : 'Veuillez corriger les erreurs dans le formulaire.';
     }
     return;
   }
@@ -197,9 +207,7 @@ export class UserAddComponent implements OnInit, OnChanges {
     this.userService.updateUser(this.userData.id, formData).subscribe({
       next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
       error: (error) => {
-        this.errorMessage = error.error?.errors
-          ? Object.values(error.error.errors).flat().join(' · ')
-          : error.error?.message || 'Erreur lors de la mise à jour.';
+        this.errorMessage = this.parseApiError(error);
         this.loading = false;
       }
     });
@@ -207,14 +215,40 @@ export class UserAddComponent implements OnInit, OnChanges {
     this.userService.createUser(formData).subscribe({
       next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
       error: (error) => {
-        this.errorMessage = error.error?.errors
-          ? Object.values(error.error.errors).flat().join(' · ')
-          : error.error?.message || 'Erreur lors de la création.';
+        this.errorMessage = this.parseApiError(error);
         this.loading = false;
       }
     });
   }
 }
+
+  private parseApiError(error: any): string {
+    const errs = error?.error?.errors;
+    if (errs) {
+      const labels: Record<string, string> = {
+        email:     'Email',
+        numero:    'Numéro de téléphone',
+        matricule: 'Matricule',
+      };
+      const duplicateMap: Record<string, string> = {
+        'has already been taken': 'déjà utilisé',
+        'unique':                  'déjà utilisé',
+      };
+      const messages: string[] = [];
+      for (const [field, fieldErrors] of Object.entries(errs)) {
+        const label = labels[field] || field;
+        const arr = Array.isArray(fieldErrors) ? fieldErrors : [fieldErrors];
+        for (const msg of arr as string[]) {
+          const isDuplicate = Object.keys(duplicateMap).some(k => msg.toLowerCase().includes(k));
+          messages.push(isDuplicate
+            ? `${label} déjà utilisé dans le système`
+            : `${label} : ${msg}`);
+        }
+      }
+      if (messages.length) return messages.join(' · ');
+    }
+    return error?.error?.message || 'Erreur lors de l\'enregistrement.';
+  }
 
   hideDialog() {
     this.resetForm();

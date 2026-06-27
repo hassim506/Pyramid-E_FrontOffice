@@ -433,6 +433,29 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
     return this.sanitizer.bypassSecurityTrustResourceUrl(full);
   }
 
+  getFileFullUrl(raw: any): string {
+    const url = this.resolveResourceUrl(raw);
+    return url.startsWith('http') ? url : `${STORAGE_BASE}/${url}`;
+  }
+
+  isViewableFile(raw: any): boolean {
+    const url = this.resolveResourceUrl(raw);
+    const ext = url.split('?')[0].split('.').pop()?.toLowerCase() || '';
+    return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
+  }
+
+  getFileViewerUrl(raw: any): SafeResourceUrl {
+    const url = this.resolveResourceUrl(raw);
+    const full = url.startsWith('http') ? url : `${STORAGE_BASE}/${url}`;
+    const ext = full.split('?')[0].split('.').pop()?.toLowerCase() || '';
+    if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://docs.google.com/viewer?url=${encodeURIComponent(full)}&embedded=true`
+      );
+    }
+    return this.sanitizer.bypassSecurityTrustResourceUrl(full);
+  }
+
   getImageUrl(url: string | null): string {
     if (!url) return 'assets/img/course/courses-06.jpg';
     if (url.startsWith('http')) return url;
@@ -471,6 +494,8 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
       reading:    'isax isax-document-text',
       text:       'isax isax-document-text',
       pdf:        'isax isax-document',
+      image:      'isax isax-gallery',
+      fichier:    'isax isax-document-download',
       quiz:       'isax isax-message-question',
       assignment: 'isax isax-task-square',
     };
@@ -484,6 +509,8 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
       reading:    'text-info',
       text:       'text-info',
       pdf:        'text-secondary',
+      image:      'text-success',
+      fichier:    'text-warning',
       quiz:       'text-warning',
       assignment: 'text-danger',
     };

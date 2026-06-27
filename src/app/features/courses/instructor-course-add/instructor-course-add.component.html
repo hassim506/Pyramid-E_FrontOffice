@@ -530,28 +530,31 @@
                                     </div>
 
                                     <!-- Statistiques -->
-                                    <div class="row mb-4" *ngIf="modules.length > 0">
+                                    <div class="row mb-4 g-3" *ngIf="modules.length > 0">
                                         <div class="col-md-4">
-                                            <div class="card bg-primary text-white">
-                                                <div class="card-body text-center">
-                                                    <h3 class="mb-0">{{ modules.length }}</h3>
-                                                    <small>Modules</small>
+                                            <div class="stat-card stat-card--indigo">
+                                                <div class="stat-card__icon"><i class="fas fa-layer-group"></i></div>
+                                                <div class="stat-card__body">
+                                                    <span class="stat-card__value">{{ modules.length }}</span>
+                                                    <span class="stat-card__label">Modules</span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="card bg-success text-white">
-                                                <div class="card-body text-center">
-                                                    <h3 class="mb-0">{{ getTotalSections() }}</h3>
-                                                    <small>Sections</small>
+                                            <div class="stat-card stat-card--teal">
+                                                <div class="stat-card__icon"><i class="fas fa-list-ul"></i></div>
+                                                <div class="stat-card__body">
+                                                    <span class="stat-card__value">{{ getTotalSections() }}</span>
+                                                    <span class="stat-card__label">Sections</span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="card bg-info text-white">
-                                                <div class="card-body text-center">
-                                                    <h3 class="mb-0">{{ getTotalDuration() }} min</h3>
-                                                    <small>Durée totale</small>
+                                            <div class="stat-card stat-card--amber">
+                                                <div class="stat-card__icon"><i class="fas fa-clock"></i></div>
+                                                <div class="stat-card__body">
+                                                    <span class="stat-card__value">{{ getTotalDuration() }}<small> min</small></span>
+                                                    <span class="stat-card__label">Durée totale</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -570,10 +573,10 @@
                                                     <div class="d-flex align-items-center w-100">
                                                         <i class="fas fa-grip-vertical me-3 text-muted"></i>
                                                         <div class="flex-grow-1">
-                                                            <strong>Module {{ moduleIndex + 1 }}: {{ module.titre }}</strong>
+                                                            <strong>{{ module.titre }}</strong>
                                                             <br>
                                                             <small class="text-muted">
-                                                                {{ module.sections?.length || 0 }} sections · 
+                                                                {{ module.sections?.length || 0 }} sections ·
                                                                 {{ getModuleDuration(module) }} min
                                                             </small>
                                                         </div>
@@ -1070,57 +1073,144 @@
             <form #sectionForm="ngForm" (ngSubmit)="saveSection()">
                 <div class="modal-body">
                     <div class="row">
+                        <!-- Titre -->
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Titre de la section<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" [(ngModel)]="currentSection.titre" 
-                                   name="titre" required>
+                            <input type="text" class="form-control" [(ngModel)]="currentSection.titre"
+                                   name="titre" required placeholder="Ex: Introduction…">
                         </div>
+
+                        <!-- Type + Durée -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Type<span class="text-danger">*</span></label>
-                            <select class="form-select" [(ngModel)]="currentSection.type" name="type" required>
-                                <option value="video">Vidéo</option>
+                            <select class="form-select" [(ngModel)]="currentSection.type" name="type" required
+                                    (ngModelChange)="sectionUploadFile=null;sectionUploadPreview=null;sectionUploadError='';currentSection.ressources=''">
                                 <option value="text">Texte / Lecture</option>
-                                <option value="pdf">Document PDF</option>
-                                <option value="exercice">Exercice pratique</option>
-                                <option value="ressource">Ressource externe</option>
+                                <option value="video">Vidéo</option>
+                                <option value="image">Image</option>
                                 <option value="quiz">Quiz</option>
+                                <option value="fichier">Fichier à télécharger</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Durée (minutes)</label>
-                            <input type="number" class="form-control" [(ngModel)]="currentSection.duree_estimee" 
+                            <input type="number" class="form-control" [(ngModel)]="currentSection.duree_estimee"
                                    name="duree" min="0">
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" [(ngModel)]="currentSection.contenu" 
-                                      name="contenu" rows="3"></textarea>
+
+                        <!-- Contenu texte -->
+                        <div class="col-md-12 mb-3" *ngIf="currentSection.type === 'text'">
+                            <label class="form-label">Contenu texte</label>
+                            <textarea class="form-control" [(ngModel)]="currentSection.contenu"
+                                      name="contenu" rows="5" placeholder="Rédigez le contenu de lecture…"></textarea>
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">URL de la ressource</label>
-                            <input type="url" class="form-control" [(ngModel)]="currentSection.ressources" 
-                                   name="ressources" placeholder="https://...">
+
+                        <!-- Vidéo : URL ou upload -->
+                        <div class="col-md-12 mb-3" *ngIf="currentSection.type === 'video'">
+                            <label class="form-label">Source vidéo</label>
+                            <div class="btn-group mb-2 w-100">
+                                <button type="button" class="btn btn-sm"
+                                        [class.btn-primary]="sectionVideoMode==='url'"
+                                        [class.btn-outline-secondary]="sectionVideoMode!=='url'"
+                                        (click)="sectionVideoMode='url';sectionUploadFile=null;currentSection.ressources=''">
+                                    <i class="fas fa-link me-1"></i> URL
+                                </button>
+                                <button type="button" class="btn btn-sm"
+                                        [class.btn-primary]="sectionVideoMode==='upload'"
+                                        [class.btn-outline-secondary]="sectionVideoMode!=='upload'"
+                                        (click)="sectionVideoMode='upload';currentSection.ressources=''">
+                                    <i class="fas fa-upload me-1"></i> Upload fichier
+                                </button>
+                            </div>
+                            <ng-container *ngIf="sectionVideoMode==='url'">
+                                <input type="url" class="form-control" [(ngModel)]="currentSection.ressources"
+                                       name="ressources_video_url"
+                                       placeholder="https://www.youtube.com/watch?v=… ou lien .mp4">
+                                <small class="text-muted">YouTube, Vimeo ou lien direct (.mp4 / .webm)</small>
+                            </ng-container>
+                            <ng-container *ngIf="sectionVideoMode==='upload'">
+                                <input type="file" class="form-control" name="ressources_video_file"
+                                       accept="video/mp4,video/webm,video/ogg"
+                                       (change)="onSectionFileSelected($event)">
+                                <small class="text-muted">Formats : MP4, WebM, OGG</small>
+                                <div *ngIf="sectionUploadFile" class="mt-1 text-info small">
+                                    <i class="fas fa-paperclip me-1"></i> {{ sectionUploadFile.name }}
+                                </div>
+                            </ng-container>
                         </div>
+
+                        <!-- Image : upload -->
+                        <div class="col-md-12 mb-3" *ngIf="currentSection.type === 'image'">
+                            <label class="form-label">Image à afficher</label>
+                            <input type="file" class="form-control" name="ressources_image"
+                                   accept="image/jpeg,image/png,image/webp,image/gif"
+                                   (change)="onSectionFileSelected($event)">
+                            <small class="text-muted">Formats : JPEG, PNG, WebP, GIF</small>
+                            <div *ngIf="sectionUploadPreview" class="mt-2">
+                                <img [src]="sectionUploadPreview" class="img-fluid rounded" style="max-height:180px" alt="aperçu">
+                            </div>
+                            <div *ngIf="currentSection.ressources && !sectionUploadPreview" class="mt-1 text-success small">
+                                <i class="fas fa-check-circle me-1"></i> Image existante conservée
+                            </div>
+                        </div>
+
+                        <!-- Quiz : info -->
+                        <div class="col-md-12 mb-3" *ngIf="currentSection.type === 'quiz'">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Une fois la section créée, configurez le quiz à l'étape <strong>Quiz</strong>.
+                            </div>
+                        </div>
+
+                        <!-- Fichier à télécharger -->
+                        <div class="col-md-12 mb-3" *ngIf="currentSection.type === 'fichier'">
+                            <label class="form-label">Fichier à mettre à disposition</label>
+                            <input type="file" class="form-control" name="ressources_fichier"
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt"
+                                   (change)="onSectionFileSelected($event)">
+                            <small class="text-muted">PDF, Word, Excel, PowerPoint, ZIP, TXT</small>
+                            <div *ngIf="sectionUploadFile" class="mt-1 text-info small">
+                                <i class="fas fa-paperclip me-1"></i> {{ sectionUploadFile.name }}
+                            </div>
+                            <div *ngIf="currentSection.ressources && !sectionUploadFile" class="mt-1 text-success small">
+                                <i class="fas fa-check-circle me-1"></i> Fichier existant conservé
+                            </div>
+                        </div>
+
+                        <!-- Description générale (hors text) -->
+                        <div class="col-md-12 mb-3" *ngIf="currentSection.type !== 'text'">
+                            <label class="form-label">Description (optionnelle)</label>
+                            <textarea class="form-control" [(ngModel)]="currentSection.contenu"
+                                      name="contenu" rows="2" placeholder="Brève description…"></textarea>
+                        </div>
+
+                        <!-- Erreur upload -->
+                        <div class="col-md-12" *ngIf="sectionUploadError">
+                            <div class="alert alert-danger py-2 mb-2">{{ sectionUploadError }}</div>
+                        </div>
+
+                        <!-- Options -->
                         <div class="col-md-6">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" [(ngModel)]="currentSection.obligatoire" 
-                                       name="obligatoire" id="obligatoire">
-                                <label class="form-check-label" for="obligatoire">Section obligatoire</label>
+                                <input class="form-check-input" type="checkbox" [(ngModel)]="currentSection.obligatoire"
+                                       name="obligatoire" id="sm_add_obligatoire">
+                                <label class="form-check-label" for="sm_add_obligatoire">Section obligatoire</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" [(ngModel)]="currentSection.visible" 
-                                       name="visible" id="visible">
-                                <label class="form-check-label" for="visible">Section visible</label>
+                                <input class="form-check-input" type="checkbox" [(ngModel)]="currentSection.visible"
+                                       name="visible" id="sm_add_visible">
+                                <label class="form-check-label" for="sm_add_visible">Section visible</label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary" [disabled]="!sectionForm.valid">
-                        {{ editingSectionIndex !== null ? 'Modifier' : 'Ajouter' }}
+                    <button type="submit" class="btn btn-primary" [disabled]="!sectionForm.valid || sectionUploading">
+                        <span *ngIf="sectionUploading" class="spinner-border spinner-border-sm me-1"></span>
+                        {{ sectionUploading ? 'Upload en cours…' : (editingSectionIndex !== null ? 'Modifier' : 'Ajouter') }}
                     </button>
                 </div>
             </form>

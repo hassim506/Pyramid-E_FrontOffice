@@ -32,16 +32,32 @@ export class AdminrhRoleComponent implements OnInit {
   public routes = routes;
   private currentUser: any;
   private isSuperAdmin = false;
+  isHoldingRole = false;
   creatorRoleLevel: number | null = null;
 
-  // Rôles système présents dans toutes les entreprises (entreprise_id = null, non modifiables)
-  readonly SYSTEM_ROLES = [
-    { name: 'Responsable RH',  type: 'rh',        icon: 'isax-people' },
-    { name: 'Formateur',       type: 'formateur',  icon: 'isax-teacher' },
-    { name: 'Employé',         type: 'employe',    icon: 'isax-user' },
-    { name: 'Consultant',      type: 'formateur',  icon: 'isax-briefcase' },
-    { name: 'Manager',         type: 'rh',         icon: 'isax-chart' },
+  private readonly HOLDING_ROLE_NAMES = ['Admin RH Holding', 'Superadmin Holding'];
+
+  // Rôles système de base (toutes entreprises)
+  private readonly BASE_SYSTEM_ROLES = [
+    { name: 'Responsable RH', type: 'rh',        icon: 'isax-people' },
+    { name: 'Admin RH',       type: 'rh',        icon: 'isax-people' },
+    { name: 'Admin IT',       type: 'admin',     icon: 'isax-setting-2' },
+    { name: 'Formateur',      type: 'formateur', icon: 'isax-teacher' },
+    { name: 'Employé',        type: 'employe',   icon: 'isax-user' },
+    { name: 'Consultant',     type: 'formateur', icon: 'isax-briefcase' },
+    { name: 'Manager',        type: 'rh',        icon: 'isax-chart' },
   ];
+
+  private readonly HOLDING_SYSTEM_ROLES = [
+    { name: 'Admin RH Holding',   type: 'rh',    icon: 'isax-building-4' },
+    { name: 'Superadmin Holding', type: 'admin', icon: 'isax-crown' },
+  ];
+
+  get SYSTEM_ROLES() {
+    return this.isHoldingRole
+      ? [...this.BASE_SYSTEM_ROLES, ...this.HOLDING_SYSTEM_ROLES]
+      : this.BASE_SYSTEM_ROLES;
+  }
 
   // Types de rôles créables par l'AdminRH
   readonly ROLE_TYPES = [
@@ -102,10 +118,19 @@ export class AdminrhRoleComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.currentUser = this.authService.getUser();
-    // Seul le role_id === 1 (vrai Super Admin système) bypass le filtre entreprise_id.
-    // "Super Admin RH Holding" (role_id 14) appartient au layout adminrh → doit être filtré.
     this.isSuperAdmin = this.currentUser?.role_id === 1;
-    // Niveau du créateur : détermine le niveau minimum imposé aux rôles créés
+
+    // Détecter les rôles Holding via plusieurs sources :
+    // 1. Noms Spatie (roles[]) — contient "Holding"
+    // 2. role_type retourné par l'API de login
+    // 3. role_id direct (5 = Administrateur RH Holding, 14 = Super Admin RH Holding, 25/26 = nouveaux)
+    const spatieRoleNames: string[] = (this.currentUser?.roles ?? []).map((r: any) => r.name ?? '');
+    const holdingRoleIds = [5, 14, 25, 26]; // IDs stables en DB
+    this.isHoldingRole =
+      spatieRoleNames.some((n: string) => n.includes('Holding')) ||
+      (this.currentUser?.role_type ?? '').toLowerCase().includes('holding') ||
+      holdingRoleIds.includes(Number(this.currentUser?.role_id));
+
     this.creatorRoleLevel = this.currentUser?.role_level ?? null;
     this.initializeForm();
   }
@@ -279,8 +304,46 @@ export class AdminrhRoleComponent implements OnInit {
     return list;
   }
 
+  private readonly ROLE_ORDER: string[] = [
+    'Super Admin',
+    'Superadmin Holding',
+    'Super Admin Holding',
+    'Super Admin RH Holding',
+    'Administrateur RH Holding',
+    'Admin RH Holding',
+    'Responsable RH Groupe',
+    'Responsable RH',
+    'Admin RH',
+    'Administrateur RH',
+    'Admin IT',
+    'Administrateur IT',
+    'Gestionnaire de Contenu',
+    'Gestionnaire de Compte Client',
+    'Administrateur Entreprise',
+    'Admin RH Entreprise',
+    'Manager',
+    'Formateur',
+    'Consultant',
+    'Employé',
+    'Employe',
+  ];
+
+  private sortRoles(roles: Role[]): Role[] {
+    return [...roles].sort((a, b) => {
+      const ia = this.ROLE_ORDER.indexOf(a.name);
+      const ib = this.ROLE_ORDER.indexOf(b.name);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      const la = (a as any).role_level ?? 99;
+      const lb = (b as any).role_level ?? 99;
+      if (la !== lb) return la - lb;
+      return a.name.localeCompare(b.name, 'fr');
+    });
+  }
+
   private initializeDataDisplay(): void {
-    this.filteredRoles = [...this.roles];
+    this.filteredRoles = this.sortRoles(this.roles);
     this.currentPage = 1;
     this.updatePagination();
   }
@@ -310,20 +373,16 @@ export class AdminrhRoleComponent implements OnInit {
 
   searchRoles(): void {
     const searchTerm = this.searchText.trim().toLowerCase();
-    
-    if (!searchTerm) {
-      this.filteredRoles = [...this.roles];
-    } else {
-      this.filteredRoles = this.roles.filter(role =>
-        role.name.toLowerCase().includes(searchTerm) ||
-        role.guard_name.toLowerCase().includes(searchTerm) ||
-        (role.description && role.description.toLowerCase().includes(searchTerm))
-      );
-    }
-    
+    const source = !searchTerm
+      ? this.roles
+      : this.roles.filter(role =>
+          role.name.toLowerCase().includes(searchTerm) ||
+          role.guard_name.toLowerCase().includes(searchTerm) ||
+          (role.description && role.description.toLowerCase().includes(searchTerm))
+        );
+    this.filteredRoles = this.sortRoles(source);
     this.currentPage = 1;
     this.updatePagination();
-    
     console.log(`🔍 Recherche "${searchTerm}": ${this.filteredRoles.length} résultat(s)`);
   }
 

@@ -367,3 +367,12 @@
     </div>
   </div>
 </div>
+
+<!-- ── Dialog modification entreprise (réutilise CompanyAddComponent) ── -->
+<app-company-add
+  [visible]="companyDialog"
+  [isEditMode]="true"
+  [companyData]="company"
+  (onSave)="onEditSaved()"
+  (onClose)="onEditClosed()">
+</app-company-add>

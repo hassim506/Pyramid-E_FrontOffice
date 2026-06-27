@@ -84,7 +84,6 @@
             <tr>
               <th>ID</th>
               <th>Nom de la Permission</th>
-              <th>Guard</th>
               <th>Date de Création</th>
               <th>Date de Modification</th>
               <th class="text-end" *ngIf="isSuperAdmin">Actions</th>
@@ -111,9 +110,6 @@
               <td>{{ permission.id }}</td>
               <td>
                 <strong>{{ permission.name }}</strong>
-              </td>
-              <td>
-                <span class="badge bg-info">{{ permission.guard_name }}</span>
               </td>
               <td>{{ permission.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ permission.updated_at | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -260,22 +256,6 @@
             </small>
           </div>
 
-          <!-- Guard Name -->
-          <div class="mb-3">
-            <label class="form-label">
-              Guard <span class="text-danger">*</span>
-            </label>
-            <select 
-              class="form-select"
-              formControlName="guard_name"
-              [class.is-invalid]="f['guard_name'].invalid && f['guard_name'].touched">
-              <option value="web">Web</option>
-              <option value="api">API</option>
-            </select>
-            <div class="invalid-feedback" *ngIf="f['guard_name'].invalid && f['guard_name'].touched">
-              Le guard est requis
-            </div>
-          </div>
         </div>
         <div class="modal-footer">
           <button 

@@ -622,3 +622,291 @@ $radius-xl: 16px;
   .demande-item { flex-wrap: wrap; }
   .d-msg { max-width: 100%; }
 }
+
+// ── KPI row inside card ────────────────────────────────────────
+.kpi-row--card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid $gray-200;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+// ── Formation list avatar ──────────────────────────────────────
+.d-av--form {
+  background: #EDE9FE;
+  color: #7C3AED;
+  i { font-size: 15px; }
+}
+
+// ── Formations count chip ─────────────────────────────────────
+.formations-count {
+  font-size: 12px;
+  color: $gray-500;
+}
+
+// ── Modal participants ─────────────────────────────────────────
+.pm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 16px;
+}
+
+.pm-modal {
+  background: #fff;
+  border-radius: $radius-xl;
+  width: 100%;
+  max-width: 820px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  overflow: hidden;
+}
+
+.pm-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid $gray-200;
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-md;
+    background: $blue-bg;
+    color: $blue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  &__text { flex: 1; min-width: 0; }
+
+  &__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: $gray-900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__sub {
+    font-size: 12px;
+    color: $gray-500;
+    margin-top: 2px;
+  }
+}
+
+.pm-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: $gray-400;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  &:hover { color: $gray-900; }
+}
+
+.pm-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  font-size: 13px;
+  border-bottom: 1px solid transparent;
+
+  &--ok  { background: #F0FDF4; border-color: #4ADE80; color: $green; }
+  &--err { background: #FEF2F2; border-color: #F87171; color: $red; }
+}
+
+.pm-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+
+  @media (max-width: 600px) { flex-direction: column; }
+}
+
+.pm-divider {
+  width: 1px;
+  background: $gray-200;
+  flex-shrink: 0;
+
+  @media (max-width: 600px) { width: 100%; height: 1px; }
+}
+
+.pm-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid $gray-100;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-size: 12px;
+    font-weight: 600;
+    color: $gray-700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    i { font-size: 14px; }
+  }
+}
+
+.pm-search {
+  position: relative;
+  flex: 1;
+  min-width: 120px;
+  max-width: 180px;
+
+  i {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: $gray-400;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 5px 8px 5px 26px;
+    font-size: 12px;
+    border: 1px solid $gray-200;
+    border-radius: $radius-md;
+    background: $gray-50;
+    outline: none;
+    &:focus { border-color: $blue; background: #fff; }
+  }
+}
+
+.pm-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 6px 0;
+}
+
+.pm-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 16px;
+  font-size: 13px;
+  color: $gray-500;
+}
+
+.pm-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: $gray-400;
+  i { font-size: 2rem; display: block; margin-bottom: 8px; opacity: .5; }
+  p { font-size: 13px; margin: 0; }
+}
+
+.pm-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  transition: background .1s;
+  &:hover { background: $gray-50; }
+}
+
+.pm-user-av {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: $gray-100;
+  color: $gray-600;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+
+  &--blue {
+    background: $blue-bg;
+    color: $blue;
+  }
+}
+
+.pm-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pm-user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: $gray-800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-user-email {
+  font-size: 11px;
+  color: $gray-400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid $gray-200;
+  background: $gray-50;
+}
+
+.pm-foot__info {
+  font-size: 12px;
+  color: $gray-500;
+}
+
+.pm-foot__spacer { margin-left: auto; }
+
+// ── Act-btn inline variants ────────────────────────────────────
+.act-btn--sm {
+  padding: 0 8px;
+  height: 26px;
+  font-size: 11px;
+}
+
+.pm-foot-info {
+  font-size: 12px;
+  color: $gray-500;
+  margin-right: auto;
+}

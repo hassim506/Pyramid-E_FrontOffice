@@ -225,19 +225,6 @@
             </div>
           </div>
 
-          <!-- ── Guard ── -->
-          <div class="mb-3">
-            <label for="saGuard" class="form-label fw-medium">
-              Guard <span class="text-danger">*</span>
-            </label>
-            <select id="saGuard" class="form-select" formControlName="guard_name"
-                    style="max-width:260px;"
-                    [class.is-invalid]="f['guard_name'].invalid && f['guard_name'].touched">
-              <option value="web">Web</option>
-              <option value="api">API</option>
-            </select>
-            <small class="text-muted">Détermine où le rôle sera utilisé</small>
-          </div>
 
           <!-- ── Type (cards) ── -->
           <div class="mb-4">

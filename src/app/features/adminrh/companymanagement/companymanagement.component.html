@@ -23,33 +23,33 @@
           <small class="text-muted">Inactives</small>
         </div>
       </div>
-      
+
       <!-- Actions -->
       <button class="btn btn-outline-primary" (click)="refreshData()" [disabled]="loading">
         <i class="isax isax-refresh" [class.fa-spin]="loading"></i>
         <span class="ms-1">Actualiser</span>
       </button>
-      <button class="btn btn-primary" 
-              (click)="openNew()" 
+      <!-- <button class="btn btn-primary"
+              (click)="openNew()"
               [disabled]="loading"
               *ngIf="canAddCompany()">
         <i class="isax isax-add"></i>
         <span class="ms-1">Ajouter</span>
-      </button>
+      </button> -->
     </div>
   </div>
 
   <!-- Messages de notification -->
-  <div class="alert alert-success alert-dismissible fade show" 
-       *ngIf="successMessage" 
+  <div class="alert alert-success alert-dismissible fade show"
+       *ngIf="successMessage"
        role="alert">
     <i class="isax isax-tick-circle me-2"></i>
     {{ successMessage }}
     <button type="button" class="btn-close" (click)="clearMessages()"></button>
   </div>
 
-  <div class="alert alert-danger alert-dismissible fade show" 
-       *ngIf="error" 
+  <div class="alert alert-danger alert-dismissible fade show"
+       *ngIf="error"
        role="alert">
     <i class="isax isax-warning-2 me-2"></i>
     {{ error }}
@@ -65,12 +65,12 @@
             <span class="input-group-text">
               <i class="isax isax-search-normal-1"></i>
             </span>
-            <input 
-              [(ngModel)]="searchDataValue" 
-              [ngModelOptions]="{ standalone: true }" 
-              type="search" 
-              (ngModelChange)="searchData(searchDataValue)" 
-              class="form-control" 
+            <input
+              [(ngModel)]="searchDataValue"
+              [ngModelOptions]="{ standalone: true }"
+              type="search"
+              (ngModelChange)="searchData(searchDataValue)"
+              class="form-control"
               placeholder="Rechercher par nom, email, téléphone, secteur..."
               [disabled]="loading">
           </div>
@@ -104,12 +104,12 @@
       <p class="text-muted mb-4">
         {{ canAddCompany() ? 'Commencez par ajouter votre première entreprise.' : 'Aucune entreprise n\'est associée à votre profil.' }}
       </p>
-      <button class="btn btn-primary" 
-              (click)="openNew()" 
+      <!-- <button class="btn btn-primary"
+              (click)="openNew()"
               *ngIf="canAddCompany()">
         <i class="isax isax-add me-2"></i>
         Ajouter une entreprise
-      </button>
+      </button> -->
     </div>
   </div>
 
@@ -121,8 +121,8 @@
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-light text-dark">{{ tableData.length }} affichée(s)</span>
           <div class="dropdown" *ngIf="hasData">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
-                    type="button" 
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                    type="button"
                     data-bs-toggle="dropdown">
               {{ pageSize }} par page
             </button>
@@ -171,7 +171,7 @@
                   <span class="fw-bold">{{ getCompanyInitials(company.nom || '') }}</span>
                 </div>
                 <div>
-                  <a [routerLink]="['/adminrh/adminrh-company-details', company.id]" 
+                  <a [routerLink]="['/adminrh/adminrh-company-details', company.id]"
                      class="fw-semibold text-decoration-none text-dark">
                     {{ company.nom || 'Nom non renseigné' }}
                   </a>
@@ -241,54 +241,54 @@
             <!-- Actions -->
             <td class="text-end">
               <div class="btn-group btn-group-sm" role="group">
-                <button class="btn btn-outline-primary" 
+                <button class="btn btn-outline-primary"
                         (click)="editCompany(company)"
                         [disabled]="!canEditCompany(company)"
                         title="Modifier">
                   <i class="isax isax-edit"></i>
                 </button>
-                <!-- <button class="btn btn-outline-danger" 
+                <!-- <button class="btn btn-outline-danger"
                         (click)="deleteCompany(company)"
                         [disabled]="!canDeleteCompany(company)"
                         title="Supprimer">
                   <i class="isax isax-trash"></i>
                 </button> -->
-                <a [routerLink]="['/adminrh/adminrh-company-details', company.id]" 
+                <a [routerLink]="['/adminrh/adminrh-company-details', company.id]"
                    class="btn btn-outline-info"
                    title="Voir détails">
                   <i class="isax isax-eye"></i>
                 </a>
                  <!-- Bouton Archiver pour les entreprises actives -->
-                <button 
-                    *ngIf="company.statut === 'active'" 
-                    class="btn btn-outline-warning" 
+                <button
+                    *ngIf="company.statut === 'active'"
+                    class="btn btn-outline-warning"
                     (click)="archiveCompany(company)"
                     title="Archiver l'entreprise">
                   <i class="isax isax-archive"></i>
                 </button>
-                
+
                 <!-- Bouton Réactiver pour les entreprises inactives -->
-                <button 
-                    *ngIf="company.statut === 'inactive'" 
-                    class="btn btn-outline-success" 
+                <button
+                    *ngIf="company.statut === 'inactive'"
+                    class="btn btn-outline-success"
                     (click)="reactivateCompany(company)"
                     title="Réactiver l'entreprise">
                   <i class="isax isax-refresh"></i>
                 </button>
-                
+
                 <!-- Bouton Suspendre pour les entreprises actives -->
-                <!-- <button 
-                    *ngIf="company.statut === 'active'" 
-                    class="btn btn-outline-danger" 
+                <!-- <button
+                    *ngIf="company.statut === 'active'"
+                    class="btn btn-outline-danger"
                     (click)="suspendCompany(company)"
                     title="Suspendre l'entreprise">
                   <i class="isax isax-pause"></i>
                 </button> -->
-                
+
                 <!-- Bouton Réactiver pour les entreprises suspendues -->
-                <!-- <button 
-                    *ngIf="company.statut === 'suspendue'" 
-                    class="btn btn-outline-success" 
+                <!-- <button
+                    *ngIf="company.statut === 'suspendue'"
+                    class="btn btn-outline-success"
                     (click)="reactivateCompany(company)"
                     title="Réactiver l'entreprise">
                   <i class="isax isax-refresh"></i>
@@ -319,9 +319,9 @@
 </div>
 
 <!-- Modal d'ajout/modification -->
-<app-company-add 
-  [visible]="companyDialog" 
-  [isEditMode]="isEditMode" 
+<app-company-add
+  [visible]="companyDialog"
+  [isEditMode]="isEditMode"
   [companyData]="selectedCompany"
   (onClose)="hideDialog()"
   (onSave)="onCompanySaved()">

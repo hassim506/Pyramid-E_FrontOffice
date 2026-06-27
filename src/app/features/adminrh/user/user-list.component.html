@@ -19,7 +19,7 @@
     <button type="button" class="ul-tab" [class.ul-tab--active]="activeTab === 'roles'"
             (click)="setTab('roles')">Rôles & permissions</button>
     <button type="button" class="ul-tab" [class.ul-tab--active]="activeTab === 'matrix'"
-            (click)="setTab('matrix')">Matrice d'accès</button>
+            (click)="setTab('matrix')">Matrice des Habilitations</button>
   </div>
 
   <!-- ════════════════════════════════════════════
@@ -200,61 +200,185 @@
   </div>
 
   <!-- ════════════════════════════════════════════
-       TAB 3 : MATRICE D'ACCÈS
+       TAB 3 : MATRICE DES HABILITATIONS
   ════════════════════════════════════════════ -->
   <div class="ul-matrix-wrap" *ngIf="activeTab === 'matrix'">
+
+    <div class="ul-matrix__header">
+      <h2 class="ul-matrix__title">
+        <i class="isax isax-shield-security me-2"></i>Matrice des Habilitations
+      </h2>
+      <p class="ul-matrix__subtitle text-muted small">
+        Rôles accessibles dans votre périmètre, du plus habilité au moins habilité.
+      </p>
+    </div>
+
+    <!-- Légende hiérarchique -->
+    <div class="ul-matrix__hierarchy mb-3">
+      <div class="ul-hier-chain">
+        <span class="ul-hier-badge ul-hier--rh">Responsable RH</span>
+        <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
+        <span class="ul-hier-badge ul-hier--rh">Admin RH</span>
+        <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
+        <span class="ul-hier-badge ul-hier--mgr">Manager</span>
+        <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
+        <span class="ul-hier-badge ul-hier--form">Formateur</span>
+        <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
+        <span class="ul-hier-badge ul-hier--form">Consultant</span>
+        <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
+        <span class="ul-hier-badge ul-hier--emp">Employé</span>
+      </div>
+    </div>
+
+    <div class="table-responsive">
     <table class="ul-matrix">
       <thead>
         <tr>
-          <th style="width:40%">Permission</th>
-          <th>Admin RH</th>
-          <th>Formateur</th>
-          <th>Employé</th>
+          <th style="min-width:200px">Permission</th>
+          <th title="Responsable RH"><span class="ul-mh-role ul-mh--rh">RRH</span></th>
+          <th title="Admin RH"><span class="ul-mh-role ul-mh--rh">ARH</span></th>
+          <th title="Manager"><span class="ul-mh-role ul-mh--mgr">MGR</span></th>
+          <th title="Formateur"><span class="ul-mh-role ul-mh--form">FOR</span></th>
+          <th title="Consultant"><span class="ul-mh-role ul-mh--form">CST</span></th>
+          <th title="Employé"><span class="ul-mh-role ul-mh--emp">EMP</span></th>
+        </tr>
+        <tr class="ul-matrix__role-names">
+          <td class="ul-matrix__group-label">Rôles (ordre hiérarchique ↓)</td>
+          <td class="small text-nowrap">Responsable RH</td>
+          <td class="small text-nowrap">Admin RH</td>
+          <td class="small text-nowrap">Manager</td>
+          <td class="small text-nowrap">Formateur</td>
+          <td class="small text-nowrap">Consultant</td>
+          <td class="small text-nowrap">Employé</td>
         </tr>
       </thead>
       <tbody>
-        <tr><td class="ul-matrix__group" colspan="4">Gestion des utilisateurs</td></tr>
+
+        <!-- Gestion des utilisateurs -->
+        <tr><td class="ul-matrix__group" colspan="7">Gestion des utilisateurs</td></tr>
         <tr>
           <td>Créer / modifier un utilisateur</td>
-          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
-          <td>Désactiver un compte</td>
-          <td><span class="ul-c-partial">◐</span></td>
+          <td>Supprimer / désactiver un compte</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
         </tr>
-        <tr><td class="ul-matrix__group" colspan="4">Formations & contenus</td></tr>
         <tr>
-          <td>Créer une formation</td>
+          <td>Importer / exporter des utilisateurs</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Attribuer un rôle</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+
+        <!-- Formations & contenus -->
+        <tr><td class="ul-matrix__group" colspan="7">Formations & contenus</td></tr>
+        <tr>
+          <td>Créer / publier une formation</td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Assigner une formation</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
           <td>Valider une demande de formation</td>
           <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
-          <td>Accéder à ses formations</td>
+          <td>Créer / gérer les quiz</td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-yes">✓</span></td>
-          <td><span class="ul-c-yes">✓</span></td>
-          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
-          <td>Gérer les quiz</td>
+          <td>Accéder à ses formations assignées</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+
+        <!-- Sessions -->
+        <tr><td class="ul-matrix__group" colspan="7">Sessions de formation</td></tr>
+        <tr>
+          <td>Créer / modifier une session</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
         </tr>
-        <tr><td class="ul-matrix__group" colspan="4">Suivi & statistiques</td></tr>
+        <tr>
+          <td>Inscrire des participants</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+
+        <!-- Suivi & statistiques -->
+        <tr><td class="ul-matrix__group" colspan="7">Suivi & statistiques</td></tr>
         <tr>
           <td>Statistiques de son entreprise</td>
           <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Voir la progression de son équipe</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
         </tr>
@@ -263,20 +387,51 @@
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+
+        <!-- Certifications -->
+        <tr><td class="ul-matrix__group" colspan="7">Certifications</td></tr>
+        <tr>
+          <td>Générer / valider un certificat</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
-          <td>Télécharger un certificat</td>
+          <td>Télécharger son certificat</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
         </tr>
+
       </tbody>
     </table>
-    <div class="ul-matrix__legend">
+    </div>
+
+    <div class="ul-matrix__legend mt-3">
       <span><span class="ul-c-yes">✓</span> Accès complet</span>
       <span><span class="ul-c-partial">◐</span> Accès limité (son périmètre)</span>
       <span><span class="ul-c-no">—</span> Aucun accès</span>
     </div>
+
+    <div class="ul-matrix__note mt-2">
+      <i class="isax isax-info-circle me-1"></i>
+      <small class="text-muted">
+        <strong>RRH</strong> = Responsable RH · <strong>ARH</strong> = Admin RH ·
+        <strong>MGR</strong> = Manager · <strong>FOR</strong> = Formateur ·
+        <strong>CST</strong> = Consultant · <strong>EMP</strong> = Employé
+      </small>
+    </div>
+
   </div>
 
 </div>

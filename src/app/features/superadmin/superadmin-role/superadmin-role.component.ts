@@ -20,11 +20,15 @@ export class SuperadminRoleComponent implements OnInit {
 
   // ── Constantes modal ────────────────────────────────────────────────────────
   readonly SYSTEM_ROLES = [
-    { name: 'Responsable RH', icon: 'isax-people' },
-    { name: 'Formateur',      icon: 'isax-teacher' },
-    { name: 'Employé',        icon: 'isax-user' },
-    { name: 'Consultant',     icon: 'isax-briefcase' },
-    { name: 'Manager',        icon: 'isax-chart' },
+    { name: 'Responsable RH',    icon: 'isax-people' },
+    { name: 'Admin RH',          icon: 'isax-people' },
+    { name: 'Admin IT',          icon: 'isax-setting-2' },
+    { name: 'Formateur',         icon: 'isax-teacher' },
+    { name: 'Employé',           icon: 'isax-user' },
+    { name: 'Consultant',        icon: 'isax-briefcase' },
+    { name: 'Manager',           icon: 'isax-chart' },
+    { name: 'Admin RH Holding',  icon: 'isax-building-4' },
+    { name: 'Superadmin Holding', icon: 'isax-crown' },
   ];
 
   readonly ROLE_TYPES = [
@@ -43,7 +47,7 @@ export class SuperadminRoleComponent implements OnInit {
     { key: 'rapports',     label: 'Rapports',     keywords: ['rapport', 'statistique', 'export', 'log'] },
   ];
 
-  minRoleLevel = 2;
+  minRoleLevel = 1;
   activePermissionCategory = 'all';
   permissionSearchText = '';
 
@@ -199,8 +203,49 @@ export class SuperadminRoleComponent implements OnInit {
     }
   }
 
+  private readonly ROLE_ORDER: string[] = [
+    'Super Admin',
+    'Superadmin Holding',
+    'Super Admin Holding',
+    'Super Admin RH Holding',
+    'Administrateur RH Holding',
+    'Admin RH Holding',
+    'Responsable RH Groupe',
+    'Responsable RH',
+    'Admin RH',
+    'Administrateur RH',
+    'Admin IT',
+    'Administrateur IT',
+    'Gestionnaire de Contenu',
+    'Gestionnaire de Compte Client',
+    'Administrateur Entreprise',
+    'Admin RH Entreprise',
+    'Manager',
+    'Formateur',
+    'Consultant',
+    'Employé',
+    'Employe',
+  ];
+
+  private sortRoles(roles: Role[]): Role[] {
+    return [...roles].sort((a, b) => {
+      const ia = this.ROLE_ORDER.indexOf(a.name);
+      const ib = this.ROLE_ORDER.indexOf(b.name);
+      // Rôles connus : tri par ordre défini
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      // Un seul connu : il passe devant
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      // Tous deux inconnus : tri par role_level puis par nom
+      const la = (a as any).role_level ?? 99;
+      const lb = (b as any).role_level ?? 99;
+      if (la !== lb) return la - lb;
+      return a.name.localeCompare(b.name, 'fr');
+    });
+  }
+
   private initializeDataDisplay(): void {
-    this.filteredRoles = [...this.roles];
+    this.filteredRoles = this.sortRoles(this.roles);
     this.currentPage = 1;
     this.updatePagination();
   }
@@ -230,17 +275,14 @@ export class SuperadminRoleComponent implements OnInit {
 
   searchRoles(): void {
     const searchTerm = this.searchText.trim().toLowerCase();
-    
-    if (!searchTerm) {
-      this.filteredRoles = [...this.roles];
-    } else {
-      this.filteredRoles = this.roles.filter(role =>
-        role.name.toLowerCase().includes(searchTerm) ||
-        role.guard_name.toLowerCase().includes(searchTerm) ||
-        (role.description && role.description.toLowerCase().includes(searchTerm))
-      );
-    }
-    
+    const source = !searchTerm
+      ? this.roles
+      : this.roles.filter(role =>
+          role.name.toLowerCase().includes(searchTerm) ||
+          role.guard_name.toLowerCase().includes(searchTerm) ||
+          (role.description && role.description.toLowerCase().includes(searchTerm))
+        );
+    this.filteredRoles = this.sortRoles(source);
     this.currentPage = 1;
     this.updatePagination();
     
@@ -503,8 +545,10 @@ export class SuperadminRoleComponent implements OnInit {
   }
 
   editRoleFromPermissionsView(): void {
-    this.closePermissionsModal();
-    this.openModal(this.selectedRole!);
+    const role = this.selectedRole;
+    this.showPermissionsModal = false;
+    this.selectedRolePermissions = [];
+    this.openModal(role!);
   }
 
   // ============= CRUD OPERATIONS =============

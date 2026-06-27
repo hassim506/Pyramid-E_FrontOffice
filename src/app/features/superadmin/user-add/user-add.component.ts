@@ -21,7 +21,8 @@ export class UserAddComponent implements OnInit, OnChanges {
   @Output() onSave = new EventEmitter<void>();
 
   userForm!: FormGroup;
-  loading: boolean = false;
+  loading = false;
+  errorMessage = '';
   clients: Client[] = [];
   companies: Company[] = [];
   roles: any[] = [];
@@ -39,152 +40,110 @@ export class UserAddComponent implements OnInit, OnChanges {
     this.loadCompanies();
     this.loadRoles();
   }
-loadRoles() {
-  console.log('Chargement des rôles...');
-  this.userService.getRoles().subscribe({
-    next: (response: any) => {
-      console.log('Réponse API roles:', response);
-      
-      // Gérer différents formats de réponse
-      if (Array.isArray(response)) {
-        this.roles = response;
-      } else if (response && Array.isArray(response.data)) {
-        this.roles = response.data;
-      } else if (response && Array.isArray(response.roles)) {
-        this.roles = response.roles;
-      } else if (response && typeof response === 'object') {
-        // Si c'est un objet, essayer de convertir en tableau
-        this.roles = Object.values(response);
-      } else {
-        console.error('Format de réponse inattendu pour les rôles:', response);
-        this.roles = [];
+
+  loadRoles(): void {
+    this.userService.getRoles().subscribe({
+      next: (response: any) => {
+        if (Array.isArray(response)) this.roles = response;
+        else if (response?.data)  this.roles = response.data;
+        else if (response?.roles) this.roles = response.roles;
+        else this.roles = [];
+      },
+      error: () => {
+        this.roles = [
+          { id: 1, name: 'Super Admin' },
+          { id: 2, name: 'Employé' },
+          { id: 3, name: 'Formateur' },
+          { id: 4, name: 'Responsable RH' },
+          { id: 5, name: 'Responsable RH Groupe' },
+        ];
       }
-      
-      console.log('Rôles finaux assignés:', this.roles);
-    },
-    error: (error) => {
-      console.error('Erreur chargement rôles:', error);
-      // Fallback sur une liste statique
-      this.roles = [
-        { id: 1, name: 'Super Admin' },
-        { id: 2, name: 'Employé' },
-        { id: 3, name: 'Formateur' },
-        { id: 4, name: 'Responsable RH' },
-        { id: 5, name: 'Responsable RH Groupe' },
-        
-      ];
-    }
-  });
-}
-ngOnChanges() {
-  if (this.userData && this.isEditMode) {
-    this.showPasswordFields = false;
-    this.initForm();
-    
-    // Extraire le role_id depuis l'objet role ou utiliser directement role_id
-    const roleId = this.userData.role ? 
-      (typeof this.userData.role === 'object' ? this.userData.role.id : this.userData.role_id) : 
-      this.userData.role_id;
-
-    this.userForm.patchValue({
-      nom: this.userData.nom || '',
-      prenom: this.userData.prenom || '',
-      email: this.userData.email || '',
-      numero: this.userData.numero || '',
-      fonction: this.userData.fonction || '',
-      role_id: roleId ? String(roleId) : '',
-      statut: this.userData.statut,
-      entreprise_id: this.userData.entreprise_id || ''
     });
-
-  } else if (!this.isEditMode) {
-    this.showPasswordFields = true;
-    this.initForm();
   }
-}
 
-togglePasswordFields(): void {
-  this.showPasswordFields = !this.showPasswordFields;
-  const pwValidators = this.showPasswordFields ? [Validators.required, Validators.minLength(8)] : [];
-  this.userForm.get('password')?.setValidators(pwValidators);
-  this.userForm.get('password_confirmation')?.setValidators(pwValidators);
-  this.userForm.get('password')?.updateValueAndValidity();
-  this.userForm.get('password_confirmation')?.updateValueAndValidity();
-  if (!this.showPasswordFields) {
-    this.userForm.patchValue({ password: '', password_confirmation: '' });
+  ngOnChanges() {
+    this.errorMessage = '';
+    if (this.visible && this.userData && this.isEditMode) {
+      this.showPasswordFields = false;
+      this.initForm();
+      this.populateForm();
+    } else if (this.visible && !this.isEditMode) {
+      this.showPasswordFields = true;
+      this.initForm();
+      this.resetForm();
+    }
   }
-}
 
-initForm() {
-  const passwordValidators = this.isEditMode ? [] : [Validators.required, Validators.minLength(8)];
-  
-  this.userForm = this.fb.group({
-    nom: ['', [Validators.required, Validators.minLength(2)]],
-    prenom: ['', [Validators.required, Validators.minLength(2)]],
-    email: ['', [Validators.required, Validators.email]],
-    numero: [''],
-    fonction: [''],
-    role_id: ['', Validators.required],
-    entreprise_id: [''],
-    statut: [1, Validators.required],
-    password: ['', passwordValidators],
-    password_confirmation: ['', passwordValidators]
-  });
-}
-
-// Ajoutez cette méthode pour debug
-isFormValid(): boolean {
-  const isValid = this.userForm.valid;
-  console.log('Formulaire valide:', isValid);
-  if (!isValid) {
-    console.log('Champs invalides:', Object.keys(this.userForm.controls)
-      .filter(key => this.userForm.get(key)?.invalid)
-      .map(key => ({
-        field: key,
-        errors: this.userForm.get(key)?.errors,
-        value: this.userForm.get(key)?.value
-      }))
-    );
+  initForm() {
+    const pwValidators = !this.isEditMode ? [Validators.required, Validators.minLength(8)] : [];
+    this.userForm = this.fb.group({
+      nom:                  ['', [Validators.required, Validators.minLength(2)]],
+      prenom:               ['', [Validators.required, Validators.minLength(2)]],
+      email:                ['', [Validators.required, Validators.email]],
+      numero:               [''],
+      matricule:            [''],
+      direction:            [''],
+      fonction:             [''],
+      role_id:              ['', Validators.required],
+      entreprise_id:        [''],
+      statut:               [1, Validators.required],
+      password:             ['', pwValidators],
+      password_confirmation:['', pwValidators],
+    });
+    this.userForm.addValidators(this.passwordMatchValidator);
   }
-  return isValid;
-}
-getRoleName(user: any): string {
-  if (!user || !user.role) return '';
-  if (typeof user.role === 'object' && user.role.name) return user.role.name;
-  if (typeof user.role === 'string') return user.role;
-  return '';
-}
+
+  private passwordMatchValidator(control: { get: (k: string) => any }) {
+    const pw  = control.get('password')?.value;
+    const pwc = control.get('password_confirmation')?.value;
+    if (!pw && !pwc) return null;
+    return pw === pwc ? null : { passwordMismatch: true };
+  }
+
+  togglePasswordFields(): void {
+    this.showPasswordFields = !this.showPasswordFields;
+    const pwValidators = this.showPasswordFields ? [Validators.required, Validators.minLength(8)] : [];
+    this.userForm.get('password')?.setValidators(pwValidators);
+    this.userForm.get('password_confirmation')?.setValidators(pwValidators);
+    this.userForm.get('password')?.updateValueAndValidity();
+    this.userForm.get('password_confirmation')?.updateValueAndValidity();
+    this.userForm.updateValueAndValidity();
+    if (!this.showPasswordFields) {
+      this.userForm.patchValue({ password: '', password_confirmation: '' });
+    }
+  }
+
   loadClients() {
     this.clientCompanyService.getClients().subscribe({
-      next: (response) => {
-        this.clients = response.clients || response.data || [];
-      },
-      error: (error) => console.error('Erreur chargement clients:', error)
+      next: (response) => { this.clients = response.clients || response.data || []; },
+      error: () => {}
     });
   }
 
   loadCompanies() {
     this.clientCompanyService.getCompanies().subscribe({
-      next: (response) => {
-        this.companies = response.entreprises || response.data || [];
-      },
-      error: (error) => console.error('Erreur chargement entreprises:', error)
+      next: (response) => { this.companies = response.entreprises || response.data || []; },
+      error: () => {}
     });
   }
 
   populateForm() {
-    if (this.userData) {
-      this.userForm.patchValue({
-        nom: this.userData.nom,
-        prenom: this.userData.prenom,
-        email: this.userData.email,
-        numero: this.userData.numero,
-        fonction: this.userData.fonction,
-        role_id: this.userData.role,
-        entreprise_id: this.userData.entreprise_id,
-        statut: this.userData.statut
-      });
-    }
+    if (!this.userData) return;
+    const rawRoleId = this.userData.role
+      ? (typeof this.userData.role === 'object' ? (this.userData.role as any).id : this.userData.role_id)
+      : this.userData.role_id;
+    this.userForm.patchValue({
+      nom:          this.userData.nom          || '',
+      prenom:       this.userData.prenom       || '',
+      email:        this.userData.email        || '',
+      numero:       this.userData.numero       || '',
+      matricule:    this.userData.matricule    || '',
+      direction:    this.userData.direction    || '',
+      fonction:     this.userData.fonction     || '',
+      role_id:      rawRoleId ? String(rawRoleId) : '',
+      entreprise_id:this.userData.entreprise_id || '',
+      statut:       this.userData.statut,
+    });
   }
 
   resetForm() {
@@ -192,62 +151,76 @@ getRoleName(user: any): string {
   }
 
   saveUser() {
-  if (this.userForm.invalid) {
-    Object.keys(this.userForm.controls).forEach(key => {
-      this.userForm.get(key)?.markAsTouched();
-    });
-    return;
-  }
-
-  this.loading = true;
-  const formData = { ...this.userForm.value };
-
-  // Convertir les valeurs en nombres
-  if (formData.role_id) {
-    formData.role_id = parseInt(formData.role_id);
-  }
-  if (formData.statut !== undefined && formData.statut !== '') {
-    formData.statut = parseInt(formData.statut);
-  }
-  if (formData.entreprise_id) {
-    formData.entreprise_id = parseInt(formData.entreprise_id);
-  } else {
-    // Supprimer entreprise_id si vide
-    delete formData.entreprise_id;
-  }
-
-  // Ajouter created_by (supposons que c'est l'utilisateur connecté avec ID 1)
-  formData.created_by = 1;
-
-  if (this.isEditMode && this.userData) {
-    if (!formData.password) {
-      delete formData.password;
-      delete formData.password_confirmation;
+    this.errorMessage = '';
+    if (this.userForm.invalid) {
+      Object.keys(this.userForm.controls).forEach(key => {
+        this.userForm.get(key)?.markAsTouched();
+      });
+      if (this.userForm.hasError('passwordMismatch')) {
+        this.errorMessage = 'Les mots de passe ne correspondent pas.';
+      } else {
+        const missing: string[] = [];
+        if (this.userForm.get('nom')?.invalid)     missing.push('Nom');
+        if (this.userForm.get('prenom')?.invalid)  missing.push('Prénom');
+        if (this.userForm.get('email')?.invalid)   missing.push('Email valide');
+        if (this.userForm.get('role_id')?.invalid) missing.push('Rôle');
+        if (this.userForm.get('password')?.invalid) missing.push('Mot de passe (min. 8 caractères)');
+        this.errorMessage = missing.length
+          ? `Champs obligatoires manquants : ${missing.join(', ')}`
+          : 'Veuillez corriger les erreurs dans le formulaire.';
+      }
+      return;
     }
 
-    this.userService.updateUser(this.userData.id, formData).subscribe({
-      next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
-      error: (error) => {
-        const msg = error.error?.errors
-          ? Object.values(error.error.errors).flat().join('\n')
-          : error.error?.message || 'Erreur lors de la mise à jour';
-        alert(msg);
-        this.loading = false;
+    this.loading = true;
+    const formData = { ...this.userForm.value };
+    if (formData.role_id)      formData.role_id       = parseInt(formData.role_id);
+    if (formData.statut !== undefined) formData.statut = parseInt(formData.statut);
+    if (formData.entreprise_id) formData.entreprise_id = parseInt(formData.entreprise_id);
+    else delete formData.entreprise_id;
+    formData.created_by = 1;
+
+    if (this.isEditMode && this.userData) {
+      if (!formData.password) {
+        delete formData.password;
+        delete formData.password_confirmation;
       }
-    });
-  } else {
-    this.userService.createUser(formData).subscribe({
-      next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
-      error: (error) => {
-        const msg = error.error?.errors
-          ? Object.values(error.error.errors).flat().join('\n')
-          : error.error?.message || 'Erreur lors de la création';
-        alert(msg);
-        this.loading = false;
-      }
-    });
+      this.userService.updateUser(this.userData.id, formData).subscribe({
+        next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
+        error: (error) => { this.errorMessage = this.parseApiError(error); this.loading = false; }
+      });
+    } else {
+      this.userService.createUser(formData).subscribe({
+        next: () => { this.loading = false; this.onSave.emit(); this.hideDialog(); },
+        error: (error) => { this.errorMessage = this.parseApiError(error); this.loading = false; }
+      });
+    }
   }
-}
+
+  private parseApiError(error: any): string {
+    const errs = error?.error?.errors;
+    if (errs) {
+      const labels: Record<string, string> = {
+        email:     'Email',
+        numero:    'Numéro de téléphone',
+        matricule: 'Matricule',
+      };
+      const messages: string[] = [];
+      for (const [field, fieldErrors] of Object.entries(errs)) {
+        const label = labels[field] || field;
+        const arr = Array.isArray(fieldErrors) ? fieldErrors : [fieldErrors];
+        for (const msg of arr as string[]) {
+          const isDuplicate = (msg as string).toLowerCase().includes('has already been taken')
+                           || (msg as string).toLowerCase().includes('unique');
+          messages.push(isDuplicate
+            ? `${label} déjà utilisé dans le système`
+            : `${label} : ${msg}`);
+        }
+      }
+      if (messages.length) return messages.join(' · ');
+    }
+    return error?.error?.message || 'Erreur lors de l\'enregistrement.';
+  }
 
   hideDialog() {
     this.resetForm();

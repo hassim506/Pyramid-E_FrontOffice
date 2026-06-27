@@ -569,16 +569,17 @@ export class AdminrhSessionComponent implements OnInit {
     const dateFin   = new Date(dateBase); dateFin.setHours(eh, em, 0, 0);
 
     const payload: any = {
-      formation_id:  Number(fv.formation_id),
-      formateur_id:  Number(fv.formateur_id),
-      type:          this.wizardType,
-      lieu:          this.wizardType !== 'distanciel' ? (fv.lieu || '') : (fv.lien || ''),
+      formation_id:    Number(fv.formation_id),
+      formateur_id:    Number(fv.formateur_id),
+      type:            this.wizardType,
+      lieu:            this.wizardType !== 'distanciel' ? (fv.lieu || '') : (fv.lien || ''),
       instructions_acces: fv.lien || '',
-      date_debut:    dateDebut.toISOString(),
-      date_fin:      dateFin.toISOString(),
-      capacite_max:  Number(fv.capacite_max),
-      titre:         fv.titre || '',
-      statut:        'planifiee',
+      date_debut:      dateDebut.toISOString(),
+      date_fin:        dateFin.toISOString(),
+      capacite_max:    Number(fv.capacite_max),
+      titre:           fv.titre || '',
+      statut:          'planifiee',
+      participant_ids: this.selectedParticipants.map(p => p.id),
     };
 
     const op = this.wizardMode === 'edit' && this.wizardSelected

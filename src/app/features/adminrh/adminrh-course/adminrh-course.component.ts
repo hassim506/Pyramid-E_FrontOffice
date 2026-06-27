@@ -10,6 +10,7 @@ import { CustomPaginationComponent } from '../../../shared/service/custom-pagina
 import { routes } from '../../../shared/service/routes/routes';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { Formation } from '../../../shared/models/formation.models';
+import { UserService } from '../../../shared/service/user/user.service';
 import { ParcoursService, Parcours, ParcoursRequest } from '../../../shared/service/parcours/parcours.service';
 import { SessionFormationService, SessionFormation } from '../../../shared/service/session/session-formation.service';
 import { CatalogueService, Catalogue } from '../../../shared/service/catalogue/catalogue.service';
@@ -485,12 +486,27 @@ export class AdminrhCourseComponent implements OnInit {
   skip = 0;
   limit = 10;
 
+  // ── Modal participants ────────────────────────────────────────
+  participantsModalOpen = false;
+  selectedFormation: Formation | null = null;
+  participants: any[] = [];
+  participantsLoading = false;
+  participantsSearch = '';
+  availableUsers: any[] = [];
+  availableUsersFiltered: any[] = [];
+  usersSearch = '';
+  usersLoading = false;
+  inscriptionPending = false;
+  inscriptionSuccess = '';
+  inscriptionError = '';
+
   constructor(
     private formationService: FormationService,
     private parcoursService: ParcoursService,
     private sessionService: SessionFormationService,
     private catalogueService: CatalogueService,
     private fb: FormBuilder,
+    private userService: UserService,
   ) {}
 
   ngOnInit(): void {
@@ -972,6 +988,121 @@ export class AdminrhCourseComponent implements OnInit {
       });
     }
   }
+
+  // ── PARTICIPANTS ──────────────────────────────────────────────
+
+  openParticipants(f: Formation): void {
+    this.selectedFormation = f;
+    this.participants = [];
+    this.availableUsers = [];
+    this.availableUsersFiltered = [];
+    this.participantsSearch = '';
+    this.usersSearch = '';
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+    this.participantsModalOpen = true;
+    this.loadParticipants(f.id);
+  }
+
+  closeParticipants(): void {
+    this.participantsModalOpen = false;
+    this.selectedFormation = null;
+  }
+
+  private loadParticipants(formationId: number): void {
+    this.participantsLoading = true;
+    this.formationService.getParticipantsFormation(formationId).subscribe({
+      next: (res: any) => {
+        this.participants = res.participants || [];
+        this.participantsLoading = false;
+        // Charger les users disponibles APRÈS avoir les inscrits
+        this.loadAvailableUsers();
+      },
+      error: () => { this.participantsLoading = false; }
+    });
+  }
+
+  private loadAvailableUsers(): void {
+    this.usersLoading = true;
+    this.userService.getMyUsers().subscribe({
+      next: (res: any) => {
+        const enrolled = new Set(this.participants.map((p: any) => p.id));
+        const all: any[] = res.users || res.data || [];
+        this.availableUsers = all.filter((u: any) => !enrolled.has(u.id));
+        this.applyUsersFilter();
+        this.usersLoading = false;
+      },
+      error: () => { this.usersLoading = false; }
+    });
+  }
+
+  applyUsersFilter(): void {
+    const q = this.usersSearch.toLowerCase();
+    this.availableUsersFiltered = this.availableUsers.filter((u: any) =>
+      !q || u.name?.toLowerCase().includes(q) || u.nom?.toLowerCase().includes(q)
+        || u.prenom?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
+    );
+  }
+
+  get participantsFiltered(): any[] {
+    const q = this.participantsSearch.toLowerCase();
+    return this.participants.filter((p: any) =>
+      !q || p.name?.toLowerCase().includes(q) || p.nom?.toLowerCase().includes(q)
+        || p.prenom?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q)
+    );
+  }
+
+  inscrireUser(user: any): void {
+    if (!this.selectedFormation || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.formationService.inscriptionDirecte({
+      formation_id: this.selectedFormation.id,
+      user_id: user.id
+    }).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été inscrit(e) avec succès.`;
+        this.participants.push(user);
+        this.availableUsers = this.availableUsers.filter((u: any) => u.id !== user.id);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de l\'inscription.';
+      }
+    });
+  }
+
+  desinscrireUser(user: any): void {
+    if (!this.selectedFormation || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.formationService.desinscriptionDirecte({
+      formation_id: this.selectedFormation.id,
+      user_id: user.id
+    }).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été désinscrit(e).`;
+        this.participants = this.participants.filter((p: any) => p.id !== user.id);
+        this.availableUsers.push(user);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de la désinscription.';
+      }
+    });
+  }
+
+  trackByUserId(_i: number, u: any): number { return u.id; }
 
   archiveFormation(formation: Formation): void {
     if (!confirm(`Archiver la formation "${formation.titre}" ?`)) return;

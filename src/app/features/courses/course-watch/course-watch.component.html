@@ -118,6 +118,63 @@
           </div>
         </ng-container>
 
+        <!-- ── IMAGE ── -->
+        <ng-container *ngIf="activeSection.type === 'image'">
+          <div class="cw-image-wrap">
+            <div *ngIf="hasResource(activeSection); else noImageSection">
+              <img [src]="getImageUrl(resolveResourceUrl(activeSection.ressources))"
+                   class="img-fluid rounded"
+                   [alt]="activeSection.titre">
+            </div>
+            <ng-template #noImageSection>
+              <div class="cw-empty-media">
+                <i class="isax isax-gallery fs-36 d-block mb-2"></i>
+                <p>Image non disponible.</p>
+              </div>
+            </ng-template>
+            <div class="cw-text-card mt-3" *ngIf="activeSection.contenu || activeSection.description">
+              <div class="cw-text-body" [innerHTML]="activeSection.contenu || activeSection.description"></div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ── FICHIER À TÉLÉCHARGER ── -->
+        <ng-container *ngIf="activeSection.type === 'fichier'">
+          <div class="cw-file-wrap">
+            <ng-container *ngIf="hasResource(activeSection); else noFileSection">
+              <!-- En-tête avec bouton télécharger -->
+              <div class="cw-file-card">
+                <div class="cw-file-card__icon"><i class="isax isax-document-download"></i></div>
+                <div class="cw-file-card__info">
+                  <p class="cw-file-card__name">{{ activeSection.titre }}</p>
+                  <p class="cw-file-card__hint">{{ activeSection.contenu || activeSection.description || 'Consultez et téléchargez le document ci-dessous.' }}</p>
+                </div>
+                <a [href]="getFileFullUrl(activeSection.ressources)"
+                   target="_blank"
+                   download
+                   class="cw-btn cw-btn--primary cw-file-card__btn">
+                  <i class="isax isax-document-download me-2"></i>Télécharger
+                </a>
+              </div>
+              <!-- Lecteur intégré -->
+              <div class="cw-file-viewer" *ngIf="isViewableFile(activeSection.ressources)">
+                <iframe [src]="getFileViewerUrl(activeSection.ressources)"
+                        class="cw-file-frame"
+                        frameborder="0"
+                        allowfullscreen
+                        [title]="activeSection.titre">
+                </iframe>
+              </div>
+            </ng-container>
+            <ng-template #noFileSection>
+              <div class="cw-empty-media">
+                <i class="isax isax-document fs-36 d-block mb-2"></i>
+                <p>Fichier non disponible.</p>
+              </div>
+            </ng-template>
+          </div>
+        </ng-container>
+
         <!-- ── PDF ── -->
         <ng-container *ngIf="activeSection.type === 'pdf'">
           <div class="cw-pdf-wrap">
@@ -375,6 +432,8 @@
                    [class.isax-play-circle]="!isSectionCompleted(section.id) && (section.type === 'video' || section.type === 'lecture')"
                    [class.isax-document-text]="!isSectionCompleted(section.id) && (section.type === 'texte' || section.type === 'text' || section.type === 'reading')"
                    [class.isax-document]="!isSectionCompleted(section.id) && section.type === 'pdf'"
+                   [class.isax-gallery]="!isSectionCompleted(section.id) && section.type === 'image'"
+                   [class.isax-document-download]="!isSectionCompleted(section.id) && section.type === 'fichier'"
                    [class.isax-task-square]="!isSectionCompleted(section.id) && (section.type === 'quiz' || section.type === 'assignment')"
                    [class.isax-play-circle5]="!isSectionCompleted(section.id) && !section.type">
                 </i>

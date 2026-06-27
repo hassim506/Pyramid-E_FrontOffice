@@ -6,10 +6,11 @@ import { forkJoin } from 'rxjs';
 import { Company } from '../../../shared/models/client-company.models';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
 import { UserService } from '../../../shared/service/authentification/user.service';
+import { CompanyAddComponent } from '../company-add/company-add.component';
 
 @Component({
   selector: 'app-company-details',
-  imports: [TitleCasePipe, CommonModule],
+  imports: [TitleCasePipe, CommonModule, CompanyAddComponent],
   templateUrl: './company-details.component.html',
   styleUrls: ['./company-details.component.scss']
 })
@@ -23,6 +24,9 @@ export class CompanyDetailsComponent implements OnInit {
   nbActifsPlateforme: number = 0;      // utilisateurs inscrits ET actifs (statut=1)
   employees: any[] = [];
   loadingEmployees: boolean = false;
+
+  // Dialog modification
+  companyDialog: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -91,9 +95,19 @@ export class CompanyDetailsComponent implements OnInit {
   }
 
   editCompany() {
+    if (!this.company) return;
+    this.companyDialog = true;
+  }
+
+  onEditSaved() {
+    this.companyDialog = false;
     if (this.company) {
-      console.log('Éditer entreprise:', this.company);
+      this.loadCompanyDetails(this.company.id);
     }
+  }
+
+  onEditClosed() {
+    this.companyDialog = false;
   }
 
   deleteCompany() {
