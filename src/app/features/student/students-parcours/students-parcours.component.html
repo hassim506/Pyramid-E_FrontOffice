@@ -721,7 +721,9 @@
             </small>
             <small *ngIf="selectedCategorie">
               <i class="isax isax-arrow-right-3 me-1" style="font-size:10px"></i>{{ selectedParcours.titre }}
-              <i class="isax isax-arrow-right-3 mx-1" style="font-size:10px"></i>{{ selectedCategorie.nom }}
+              <ng-container *ngIf="selectedCategorie.nom">
+                <i class="isax isax-arrow-right-3 mx-1" style="font-size:10px"></i>{{ selectedCategorie.nom }}
+              </ng-container>
             </small>
           </div>
         </div>
@@ -842,17 +844,19 @@
         <!-- ÉTAPE 3 — Formulaire demande -->
         <ng-container *ngIf="selectedParcours && selectedCategorie">
           <button class="lms-back-btn mb-3" (click)="retourCategories()">
-            <i class="isax isax-arrow-left me-1"></i> Retour aux catégories
+            <i class="isax isax-arrow-left me-1"></i> Retour aux parcours
           </button>
 
           <div class="lms-recap-row mb-4">
             <div class="lms-recap-chip lms-recap-chip--blue">
               <i class="isax isax-routing me-1"></i>{{ selectedParcours.titre }}
             </div>
-            <i class="isax isax-arrow-right-3 text-muted" style="font-size:12px"></i>
-            <div class="lms-recap-chip lms-recap-chip--green">
-              <i class="isax isax-category me-1"></i>{{ selectedCategorie.nom }}
-            </div>
+            <ng-container *ngIf="selectedCategorie.nom">
+              <i class="isax isax-arrow-right-3 text-muted" style="font-size:12px"></i>
+              <div class="lms-recap-chip lms-recap-chip--green">
+                <i class="isax isax-category me-1"></i>{{ selectedCategorie.nom }}
+              </div>
+            </ng-container>
           </div>
 
           <div class="lms-collapsible mb-4" *ngIf="formations.length > 0 || loadingFormations">

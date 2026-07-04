@@ -307,6 +307,8 @@ export class StudentsParcoursComponent implements OnInit {
       this.selectCategorie(categorieLocale);
     } else {
       this.categories = [];
+      // Pas de catégorie — sentinelle pour passer directement à l'étape 3
+      this.selectedCategorie = { id: null, nom: null };
       this.loadFormationsDuParcours(parcours.id, null);
     }
   }
@@ -349,6 +351,10 @@ export class StudentsParcoursComponent implements OnInit {
     this.selectedCategorie = null;
     this.formations        = [];
     this.showFormations    = false;
+    // Si le parcours n'avait pas de catégorie, on remonte au choix de parcours
+    if (!this.categories.length) {
+      this.selectedParcours = null;
+    }
   }
 
   canSubmit(): boolean {
