@@ -181,6 +181,11 @@
         <i class="isax isax-note-21"></i>
         <span class="sb-item-label">Sondages &amp; enquêtes</span>
       </a>
+      <a [routerLink]="routes.adminrhMesSondages" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-message-question"></i>
+        <span class="sb-item-label">Mes enquêtes reçues</span>
+        <span *ngIf="sondagesRecusCount > 0" class="sb-badge sb-badge--notif">{{ sondagesRecusCount }}</span>
+      </a>
     </div>
 
     <div class="sb-divider"></div>

@@ -1,0 +1,156 @@
+<div class="sondage-public-page">
+
+  <!-- ── CHARGEMENT ────────────────────────────────────────────────────── -->
+  <div *ngIf="etat === 'chargement'" class="sp-center">
+    <div class="sp-spinner"></div>
+    <p>Chargement du sondage…</p>
+  </div>
+
+  <!-- ── DÉJÀ RÉPONDU ──────────────────────────────────────────────────── -->
+  <div *ngIf="etat === 'deja_repondu'" class="sp-card sp-state">
+    <div class="sp-icon sp-icon--warn">✓</div>
+    <h2>Déjà répondu</h2>
+    <p>Vous avez déjà répondu à ce sondage. Votre avis a bien été enregistré.</p>
+    <p class="sp-muted">Merci pour votre participation !</p>
+  </div>
+
+  <!-- ── INACTIF / EXPIRÉ ──────────────────────────────────────────────── -->
+  <div *ngIf="etat === 'inactif'" class="sp-card sp-state">
+    <div class="sp-icon sp-icon--muted">🔒</div>
+    <h2>Sondage fermé</h2>
+    <p>Ce sondage n'est plus disponible.</p>
+  </div>
+
+  <!-- ── ERREUR ────────────────────────────────────────────────────────── -->
+  <div *ngIf="etat === 'erreur'" class="sp-card sp-state">
+    <div class="sp-icon sp-icon--danger">✕</div>
+    <h2>Lien invalide</h2>
+    <p>{{ erreurMessage || 'Ce lien est invalide ou a expiré.' }}</p>
+  </div>
+
+  <!-- ── SUCCÈS ────────────────────────────────────────────────────────── -->
+  <div *ngIf="etat === 'succes'" class="sp-card sp-state">
+    <div class="sp-icon sp-icon--success">✓</div>
+    <h2>Merci !</h2>
+    <p class="sp-message-fin">{{ messageFin }}</p>
+  </div>
+
+  <!-- ── FORMULAIRE ────────────────────────────────────────────────────── -->
+  <div *ngIf="etat === 'formulaire'" class="sp-wrap">
+
+    <!-- En-tête sondage -->
+    <div class="sp-header">
+      <div class="sp-logo">Pyramide-e</div>
+      <h1 class="sp-titre">{{ sondage.titre }}</h1>
+      <p *ngIf="sondage.introduction" class="sp-intro">{{ sondage.introduction }}</p>
+    </div>
+
+    <!-- Alerte validation -->
+    <div *ngIf="erreurMessage" class="sp-alert">
+      <span>⚠</span> {{ erreurMessage }}
+    </div>
+
+    <!-- Questions -->
+    <div class="sp-questions">
+      <div *ngFor="let q of questions; let i = index" class="sp-question">
+
+        <div class="sp-question-label">
+          <span class="sp-num">{{ i + 1 }}</span>
+          <span class="sp-text">
+            {{ q.question }}
+            <span *ngIf="q.est_obligatoire" class="sp-obligatoire" title="Obligatoire">*</span>
+          </span>
+        </div>
+
+        <p *ngIf="q.description" class="sp-description">{{ q.description }}</p>
+
+        <!-- TEXT -->
+        <input *ngIf="q.type === 'text' || q.type === 'email' || q.type === 'numero'"
+          [type]="q.type === 'numero' ? 'number' : q.type === 'email' ? 'email' : 'text'"
+          class="sp-input"
+          [(ngModel)]="reponses[q.id!]"
+          [placeholder]="q.placeholder || ''"
+          [attr.minlength]="q.min_caracteres || null"
+          [attr.maxlength]="q.max_caracteres || null" />
+
+        <!-- TEXTAREA -->
+        <textarea *ngIf="q.type === 'textarea'"
+          class="sp-textarea"
+          [(ngModel)]="reponses[q.id!]"
+          [placeholder]="q.placeholder || ''"
+          rows="4"
+          [attr.minlength]="q.min_caracteres || null"
+          [attr.maxlength]="q.max_caracteres || null"></textarea>
+
+        <!-- DATE -->
+        <input *ngIf="q.type === 'date'"
+          type="date"
+          class="sp-input"
+          [(ngModel)]="reponses[q.id!]" />
+
+        <!-- RADIO -->
+        <div *ngIf="q.type === 'radio'" class="sp-options">
+          <label *ngFor="let opt of q.options" class="sp-option">
+            <input type="radio" [name]="'q' + q.id" [value]="opt" [(ngModel)]="reponses[q.id!]" />
+            <span>{{ opt }}</span>
+          </label>
+        </div>
+
+        <!-- SELECT -->
+        <select *ngIf="q.type === 'select'" class="sp-select" [(ngModel)]="reponses[q.id!]">
+          <option value="" disabled selected>— Choisir —</option>
+          <option *ngFor="let opt of q.options" [value]="opt">{{ opt }}</option>
+        </select>
+
+        <!-- CHECKBOX -->
+        <div *ngIf="q.type === 'checkbox'" class="sp-options">
+          <label *ngFor="let opt of q.options" class="sp-option">
+            <input type="checkbox"
+              [checked]="isChecked(q.id!, opt)"
+              (change)="toggleCheckbox(q.id!, opt)" />
+            <span>{{ opt }}</span>
+          </label>
+        </div>
+
+        <!-- ECHELLE -->
+        <div *ngIf="q.type === 'echelle'" class="sp-echelle">
+          <span class="sp-echelle-label">{{ q.valeur_min ?? 1 }}</span>
+          <div class="sp-echelle-btns">
+            <button *ngFor="let n of getEtoiles(+(q.valeur_max ?? 10) - +(q.valeur_min ?? 1) + 1)"
+              type="button"
+              class="sp-echelle-btn"
+              [class.active]="reponses[q.id!] === (+(q.valeur_min ?? 1) + n - 1)"
+              (click)="setNotation(q.id!, +(q.valeur_min ?? 1) + n - 1)">
+              {{ +(q.valeur_min ?? 1) + n - 1 }}
+            </button>
+          </div>
+          <span class="sp-echelle-label">{{ q.valeur_max ?? 10 }}</span>
+        </div>
+
+        <!-- NOTATION (étoiles) -->
+        <div *ngIf="q.type === 'notation'" class="sp-notation">
+          <button *ngFor="let star of getEtoiles(+(q.valeur_max ?? 5))"
+            type="button"
+            class="sp-star"
+            [class.active]="reponses[q.id!] !== null && star <= reponses[q.id!]"
+            (click)="setNotation(q.id!, star)"
+            [attr.aria-label]="star + ' étoile(s)'">
+            ★
+          </button>
+          <span *ngIf="reponses[q.id!]" class="sp-star-label">{{ reponses[q.id!] }} / {{ q.valeur_max ?? 5 }}</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bouton soumettre -->
+    <div class="sp-footer">
+      <button class="sp-btn-submit" (click)="soumettre()" [disabled]="soumettre_loading">
+        <span *ngIf="!soumettre_loading">Envoyer mes réponses</span>
+        <span *ngIf="soumettre_loading" class="sp-btn-spinner"></span>
+      </button>
+    </div>
+
+  </div><!-- /sp-wrap -->
+
+</div>

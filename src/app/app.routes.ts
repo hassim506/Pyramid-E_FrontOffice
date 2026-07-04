@@ -85,6 +85,7 @@ export const routes: Routes = [
                 {path:'instructor-course',loadComponent:()=>import ('./features/instructor/instructor-course/instructor-course.component').then((m)=>m.InstructorCourseComponent)},
                 {path:'instructor-course-grid',loadComponent:()=>import ('./features/instructor/instructor-course-grid/instructor-course-grid.component').then((m)=>m.InstructorCourseGridComponent)},
                 {path:'instructor-session',loadComponent:()=>import ('./features/instructor/instructor-session/instructor-session.component').then((m)=>m.InstructorSessionComponent)},
+                {path:'instructor-mes-sondages',loadComponent:()=>import ('./features/instructor/instructor-mes-sondages/instructor-mes-sondages.component').then((m)=>m.InstructorMesSondagesComponent)},
 
                 {path:'instructor-message',loadComponent:()=>import ('./features/instructor/instructor-message/instructor-message.component').then((m)=>m.InstructorMessageComponent)},
                 {path:'instructor-assignment',loadComponent:()=>import ('./features/instructor/instructor-assignment/instructor-assignment.component').then((m)=>m.InstructorAssignmentComponent)},
@@ -191,6 +192,7 @@ export const routes: Routes = [
                 {path:'adminrh-certificate',loadComponent:()=>import ('./features/adminrh/adminrh-certificate/adminrh-certificate.component').then((m)=>m.AdminrhCertificateComponent)},
                 {path:'adminrh-certificate-modele',loadComponent:()=>import ('./features/adminrh/adminrh-certificate-modele/adminrh-certificate-modele.component').then((m)=>m.AdminrhCertificateModeleComponent)},
                 {path:'adminrh-sondage',loadComponent:()=>import ('./features/adminrh/adminrh-sondage/adminrh-sondage.component').then((m)=>m.AdminrhSondageComponent)},
+                {path:'adminrh-mes-sondages',loadComponent:()=>import ('./features/adminrh/adminrh-mes-sondages/adminrh-mes-sondages.component').then((m)=>m.AdminrhMesSondagesComponent)},
                 {path:'adminrh-certifier',loadComponent:()=>import ('./features/adminrh/adminrh-certifier/adminrh-certifier.component').then((m)=>m.AdminrhCertifierComponent)},
                 {path:'adminrh-categorie',loadComponent:()=>import ('./features/adminrh/adminrh-categorie/adminrh-categorie.component').then((m)=>m.AdminrhCategorieComponent)},
 
@@ -326,6 +328,7 @@ export const routes: Routes = [
 
 },
 { path: 'verify-certificate', loadComponent: () => import('./features/verify-certificate/verify-certificate.component').then(m => m.VerifyCertificateComponent) },
+{ path: 'sondage/:token',   loadComponent: () => import('./features/sondage-public/sondage-public.component').then(m => m.SondagePublicComponent) },
 { path: 'under-construction', loadComponent: () => import('./features/pages/under-construction/under-construction.component').then(m => m.UnderConstructionComponent) },
 { path: 'coming-soon', loadComponent: () => import('./features/pages/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent) },
 

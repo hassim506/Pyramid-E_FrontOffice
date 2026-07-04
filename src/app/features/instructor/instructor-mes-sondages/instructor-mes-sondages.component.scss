@@ -1,0 +1,129 @@
+// Formateur — accent vert émeraude
+$primary: #059669;
+$success: #059669;
+$danger:  #DC2626;
+$radius:  14px;
+$shadow:  0 4px 24px rgba(0,0,0,.07);
+
+.ms-hero {
+  display: flex; align-items: center; gap: 16px;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border-radius: $radius; padding: 24px 28px; margin-bottom: 28px; color: #fff;
+  &__icon { width: 52px; height: 52px; background: rgba(255,255,255,.15); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+  &__title { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+  &__sub   { font-size: 13px; opacity: .85; margin: 0; }
+}
+
+.ms-loader { display: flex; align-items: center; gap: 12px; justify-content: center; padding: 60px 0; color: #6b7280; }
+.ms-spinner { width: 28px; height: 28px; border: 3px solid #e5e7eb; border-top-color: $primary; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ms-alert { display: flex; align-items: center; gap: 10px; border-radius: 10px; padding: 12px 16px; font-size: 14px; margin-bottom: 16px;
+  &--danger { background: #fef2f2; color: $danger; border: 1px solid #fecaca; }
+  &--mb { margin-bottom: 16px; }
+}
+.ms-empty { text-align: center; padding: 80px 20px;
+  &__icon  { font-size: 56px; color: #d1d5db; margin-bottom: 16px; }
+  &__title { font-size: 18px; font-weight: 600; color: #374151; margin: 0 0 8px; }
+  &__sub   { font-size: 14px; color: #9ca3af; margin: 0; }
+}
+
+.ms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+.ms-card {
+  background: #fff; border-radius: $radius; box-shadow: $shadow; overflow: hidden;
+  cursor: pointer; transition: transform .2s, box-shadow .2s; display: flex; flex-direction: column;
+  &:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.12); }
+  &__accent { height: 5px; }
+  &__body   { padding: 20px 20px 12px; flex: 1; }
+  &__header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  &__title  { font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; line-height: 1.4; }
+  &__desc   { font-size: 13px; color: #6b7280; margin: 0 0 14px; overflow: hidden;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  &__meta   { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: #6b7280; i { margin-right: 4px; } }
+  &__footer { padding: 14px 20px; border-top: 1px solid #f3f4f6; }
+}
+
+.ms-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  &--new { background: #d1fae5; color: #059669; }
+}
+.ms-meta-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px;
+  &--anon { background: #f3f4f6; color: #6b7280; }
+}
+.ms-text-muted { color: #9ca3af !important; }
+
+.ms-btn-repondre {
+  display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; padding: 10px 16px;
+  border: none; border-radius: 10px; background: linear-gradient(135deg, #059669, #047857);
+  color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s;
+  &:hover { opacity: .9; }
+  .ms-btn-arrow { margin-left: auto; }
+}
+
+.ms-rep-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.ms-back-btn {
+  width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; flex-shrink: 0;
+  &:hover { background: #f9fafb; }
+}
+.ms-rep-title { font-size: 20px; font-weight: 700; margin: 0 0 6px; color: #111827; }
+.ms-rep-sub   { font-size: 14px; color: #6b7280; margin: 0; }
+
+.ms-progress-wrap { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+.ms-progress-bar  { flex: 1; height: 8px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
+.ms-progress-fill { height: 100%; background: linear-gradient(90deg, $primary, #34d399); border-radius: 99px; transition: width .4s ease; }
+.ms-progress-label { font-size: 13px; color: #6b7280; white-space: nowrap; }
+
+.ms-question-card { background: #fff; border-radius: $radius; box-shadow: $shadow; padding: 32px 28px; margin-bottom: 24px; }
+.ms-q-num  { font-size: 12px; font-weight: 600; color: $primary; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+.ms-q-text { font-size: 17px; font-weight: 700; color: #111827; margin: 0 0 8px; line-height: 1.5; }
+.ms-q-aide { font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 6px; margin: 0 0 20px; }
+.ms-required { color: $danger; margin-left: 2px; }
+
+.ms-input {
+  width: 100%; padding: 12px 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 14px; outline: none; transition: border-color .15s;
+  &:focus { border-color: $primary; }
+  &--sm { max-width: 220px; }
+}
+.ms-textarea { resize: vertical; min-height: 100px; font-family: inherit; }
+
+.ms-options { display: flex; flex-direction: column; gap: 10px; }
+.ms-option {
+  display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 10px;
+  border: 1.5px solid #e5e7eb; cursor: pointer; transition: border-color .15s, background .15s;
+  font-size: 14px; color: #374151;
+  &.selected { border-color: $primary; background: #ecfdf5; color: $primary; font-weight: 600; }
+  &:hover:not(.selected) { border-color: #6ee7b7; background: #f0fdf4; }
+  &-input { display: none; }
+  &-dot   { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d1d5db; flex-shrink: 0; transition: border-color .15s, background .15s;
+    .ms-option.selected & { border-color: $primary; background: $primary; } }
+  &-check { width: 18px; height: 18px; border-radius: 5px; border: 2px solid #d1d5db; flex-shrink: 0; transition: border-color .15s, background .15s;
+    .ms-option.selected & { border-color: $primary; background: $primary; } }
+}
+
+.ms-scale { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.ms-scale-btn {
+  width: 48px; height: 48px; border-radius: 10px; border: 1.5px solid #e5e7eb; background: #fff;
+  font-size: 15px; font-weight: 600; cursor: pointer; transition: all .15s; color: #374151;
+  &.selected { background: $primary; border-color: $primary; color: #fff; }
+  &:hover:not(.selected) { border-color: $primary; color: $primary; }
+}
+.ms-scale-labels { display: flex; justify-content: space-between; font-size: 12px; color: #9ca3af; }
+
+.ms-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.ms-nav-btn {
+  display: flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: opacity .2s;
+  &--ghost   { background: #f3f4f6; color: #374151; &:hover:not(:disabled) { background: #e5e7eb; } &:disabled { opacity: .4; cursor: default; } }
+  &--primary { background: $primary; color: #fff; margin-left: auto; &:hover { opacity: .88; } }
+  &--success { background: $success; color: #fff; margin-left: auto; &:hover { opacity: .88; } &:disabled { opacity: .5; cursor: default; } }
+}
+.ms-mini-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+
+.ms-success-screen { text-align: center; padding: 80px 20px; }
+.ms-success-icon  { font-size: 64px; color: $success; margin-bottom: 20px; animation: pop .4s cubic-bezier(.175,.885,.32,1.275); }
+@keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.ms-success-title { font-size: 26px; font-weight: 700; margin: 0 0 10px; color: #111827; }
+.ms-success-msg   { font-size: 15px; color: #6b7280; margin: 0 0 28px; }
+.ms-btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 10px; background: #f3f4f6; border: none; color: #374151; font-size: 14px; font-weight: 600; cursor: pointer; &:hover { background: #e5e7eb; } }

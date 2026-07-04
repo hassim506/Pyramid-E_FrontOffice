@@ -154,6 +154,17 @@
 
     <div class="sb-divider"></div>
 
+    <!-- ENQUÊTES -->
+    <div class="sb-divider"></div>
+    <div class="sb-section-label">Enquêtes</div>
+    <a [routerLink]="routes.instructorMesSondages" routerLinkActive="active" class="sb-item">
+      <i class="isax isax-message-question icon"></i>
+      <span class="sb-item-label">Mes enquêtes reçues</span>
+      <span *ngIf="sondagesRecusCount > 0" class="sb-badge sb-badge--notif">{{ sondagesRecusCount }}</span>
+    </a>
+
+    <div class="sb-divider"></div>
+
     <!-- COMMUNICATION -->
     <div class="sb-section-label">Communication</div>
 

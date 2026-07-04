@@ -218,10 +218,16 @@ $radius:      8px;
   line-height: 1.4;
   white-space: nowrap;
 
-  &--red   { background: #dc2626; color: #fff; }
-  &--amber { background: #d97706; color: #fff; }
-  &--teal  { background: $teal;   color: #fff; }
-  &--sm    { font-size: 9px; padding: 1px 6px; }
+  &--red    { background: #dc2626; color: #fff; }
+  &--amber  { background: #d97706; color: #fff; }
+  &--teal   { background: $teal;   color: #fff; }
+  &--sm     { font-size: 9px; padding: 1px 6px; }
+  &--notif  { background: #dc2626; color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; text-align: center; animation: pulse-notif 2s infinite; }
+
+@keyframes pulse-notif {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(220,38,38,0); }
+}
 }
 
 // ── GROUP ─────────────────────────────────────

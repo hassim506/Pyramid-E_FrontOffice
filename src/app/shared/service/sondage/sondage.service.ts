@@ -28,8 +28,13 @@ export interface Sondage {
   introduction?: string;
   message_fin?: string;
   formation_id?: number | null;
+  formation_ids?: number[];
+  formations?: { id: number; titre: string }[];
+  parametres?: { cible_entreprise_ids?: number[]; [key: string]: any } | null;
   module_id?: number | null;
   section_module_id?: number | null;
+  entreprise_id?: number | null;
+  est_template?: boolean;
   created_by?: any;
   type: 'satisfaction' | 'evaluation' | 'feedback' | 'quiz' | 'enquete';
   declenchement?: 'manuel' | 'a_chaud' | 'a_froid';
@@ -55,8 +60,10 @@ export interface Sondage {
 export interface SondageFilters {
   search?: string;
   type?: string;
+  declenchement?: string;
   formation_id?: number;
   est_actif?: boolean;
+  entreprise_id?: number | string;
   per_page?: number;
   page?: number;
 }
@@ -126,6 +133,29 @@ export class SondageService {
 
   getMesSondages(): Observable<any> {
     return this.http.get(`${this.api}/mes-sondages`, { headers: this.headers() });
+  }
+
+  getMesSondagesRecus(): Observable<any> {
+    return this.http.get(`${this.api}/mes-sondages-recus`, { headers: this.headers() });
+  }
+
+  getResultats(id: number): Observable<any> {
+    return this.http.get(`${this.api}/sondages/${id}/resultats`, { headers: this.headers() });
+  }
+
+  envoyerSondage(id: number, userIds?: number[], entrepriseIds?: number[]): Observable<any> {
+    const body: any = { user_ids: userIds ?? [] };
+    if (entrepriseIds && entrepriseIds.length > 0) body.entreprise_ids = entrepriseIds;
+    return this.http.post(`${this.api}/sondages/${id}/envoyer`, body, { headers: this.headers() });
+  }
+
+  // ── Public (pas de Bearer token) ─────────────────────────────────────────
+  getSondagePublic(token: string): Observable<any> {
+    return this.http.get(`${this.api}/sondage/${token}`);
+  }
+
+  soumettreReponsePublique(token: string, reponses: Record<string, any>): Observable<any> {
+    return this.http.post(`${this.api}/sondage/${token}`, { reponses });
   }
 
   getExportUrl(id: number): string {

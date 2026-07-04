@@ -1,0 +1,259 @@
+// ── Variables ───────────────────────────────────────────────────────────────
+$primary:   #069b8f;
+$primary-dk:#047a70;
+$danger:    #ef4444;
+$warn:      #f59e0b;
+$muted:     #9ca3af;
+$border:    #e5e7eb;
+$bg:        #f4f6f8;
+$white:     #ffffff;
+$text:      #1f2937;
+$subtext:   #6b7280;
+
+// ── Page wrapper ─────────────────────────────────────────────────────────────
+.sondage-public-page {
+  min-height: 100vh;
+  background: $bg;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px 80px;
+}
+
+// ── États (chargement / succès / erreur) ─────────────────────────────────────
+.sp-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 80px 16px;
+  color: $subtext;
+}
+
+.sp-spinner, .sp-btn-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid $border;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+.sp-btn-spinner { width: 18px; height: 18px; border-width: 2px; display: inline-block; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.sp-card.sp-state {
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.07);
+  padding: 56px 40px;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+
+  h2 { font-size: 22px; font-weight: 700; color: $text; margin: 16px 0 8px; }
+  p  { color: $subtext; font-size: 15px; line-height: 1.6; margin: 0; }
+  .sp-muted { font-size: 13px; margin-top: 8px; }
+  .sp-message-fin { font-size: 16px; color: $text; }
+}
+
+.sp-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 700;
+  margin: 0 auto;
+
+  &--success { background: #d1fae5; color: #059669; }
+  &--warn    { background: #fef3c7; color: $warn; }
+  &--danger  { background: #fee2e2; color: $danger; }
+  &--muted   { background: #f3f4f6; color: $muted; }
+}
+
+// ── Formulaire principal ─────────────────────────────────────────────────────
+.sp-wrap {
+  width: 100%;
+  max-width: 680px;
+}
+
+.sp-header {
+  background: $white;
+  border-radius: 16px 16px 0 0;
+  padding: 32px 40px 28px;
+  border-bottom: 3px solid $primary;
+  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+
+  .sp-logo {
+    font-size: 13px; font-weight: 700; color: $primary;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+  }
+  .sp-titre {
+    font-size: 22px; font-weight: 800; color: $text; margin: 0 0 10px;
+  }
+  .sp-intro {
+    font-size: 14px; color: $subtext; line-height: 1.7; margin: 0;
+  }
+}
+
+.sp-alert {
+  background: #fef3c7; border: 1px solid #fcd34d;
+  border-radius: 8px; padding: 12px 16px;
+  font-size: 14px; color: #92400e;
+  margin: 12px 0;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.sp-questions {
+  background: $white;
+  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+}
+
+.sp-question {
+  padding: 28px 40px;
+  border-bottom: 1px solid $border;
+
+  &:last-child { border-bottom: none; }
+}
+
+.sp-question-label {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px;
+
+  .sp-num {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    background: $primary; color: $white;
+    border-radius: 50%;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+
+  .sp-text {
+    font-size: 15px; font-weight: 600; color: $text; line-height: 1.5;
+  }
+
+  .sp-obligatoire { color: $danger; margin-left: 3px; }
+}
+
+.sp-description {
+  font-size: 13px; color: $subtext;
+  margin: -8px 0 12px 38px; line-height: 1.6;
+}
+
+// ── Inputs ───────────────────────────────────────────────────────────────────
+.sp-input, .sp-select, .sp-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  font-size: 14px;
+  color: $text;
+  background: $white;
+  transition: border-color .15s;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(6,155,143,.1);
+  }
+}
+
+.sp-textarea { resize: vertical; min-height: 96px; }
+
+// ── Options radio / checkbox ─────────────────────────────────────────────────
+.sp-options {
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.sp-option {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; font-size: 14px; color: $text;
+  padding: 8px 12px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  transition: background .12s, border-color .12s;
+
+  &:hover { background: #f0fdf4; border-color: $primary; }
+
+  input { width: 16px; height: 16px; cursor: pointer; accent-color: $primary; flex-shrink: 0; }
+}
+
+// ── Échelle ──────────────────────────────────────────────────────────────────
+.sp-echelle {
+  display: flex; align-items: center; gap: 12px;
+
+  .sp-echelle-label { font-size: 12px; color: $subtext; min-width: 20px; text-align: center; }
+}
+
+.sp-echelle-btns {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+
+.sp-echelle-btn {
+  width: 40px; height: 40px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  background: $white;
+  font-size: 13px; font-weight: 600; color: $subtext;
+  cursor: pointer; transition: all .15s;
+
+  &:hover, &.active {
+    background: $primary; border-color: $primary; color: $white;
+  }
+}
+
+// ── Notation étoiles ─────────────────────────────────────────────────────────
+.sp-notation {
+  display: flex; align-items: center; gap: 4px;
+}
+
+.sp-star {
+  font-size: 32px;
+  color: #d1d5db;
+  background: none; border: none;
+  cursor: pointer; padding: 0 2px;
+  transition: color .12s, transform .1s;
+  line-height: 1;
+
+  &:hover, &.active { color: #f59e0b; transform: scale(1.1); }
+}
+
+.sp-star-label {
+  font-size: 13px; color: $subtext; margin-left: 8px;
+}
+
+// ── Footer / bouton ──────────────────────────────────────────────────────────
+.sp-footer {
+  background: $white;
+  padding: 28px 40px;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  display: flex; justify-content: flex-end;
+}
+
+.sp-btn-submit {
+  background: $primary;
+  color: $white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+  display: flex; align-items: center; gap: 8px;
+  min-width: 180px; justify-content: center;
+
+  &:hover:not(:disabled) { background: $primary-dk; }
+  &:disabled { opacity: .6; cursor: not-allowed; }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 600px) {
+  .sondage-public-page { padding: 24px 8px 60px; }
+  .sp-header, .sp-question, .sp-footer { padding-left: 20px; padding-right: 20px; }
+  .sp-question-label .sp-text { font-size: 14px; }
+  .sp-echelle-btn { width: 34px; height: 34px; }
+  .sp-star { font-size: 28px; }
+}

@@ -5,6 +5,12 @@
       "Read(//c/Users/mouhamed.faye/AppData/Local/Temp/claude/c--Project-Pyramide-Dev-Front-end-angular/c1d8dd60-edf3-4792-a707-24030baa8016/tasks/**)",
       "Bash(grep -v \"^$\")",
       "Bash(npx ng *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Project\\Pyramide\\Dev\\pyramide-backend\\app\\Observers",
+      "c:\\Project\\Pyramide\\Dev\\pyramide-backend\\app\\Providers",
+      "c:\\Project\\Pyramide\\Dev\\pyramide-backend\\config",
+      "c:\\Project\\Pyramide\\Dev\\pyramide-backend\\app\\Exports"
     ]
   }
 }

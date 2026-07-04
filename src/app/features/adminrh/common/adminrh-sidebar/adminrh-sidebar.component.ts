@@ -6,6 +6,7 @@ import { routes } from '../../../../shared/service/routes/routes';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DemandeFormationService } from '../../../../shared/service/demande/demande-formation.service';
+import { SondageService } from '../../../../shared/service/sondage/sondage.service';
 import { SessionFormationService, SessionFormationResponse } from '../../../../shared/service/session/session-formation.service';
 import { UserService } from '../../../../shared/service/user/user.service';
 import { CertificatService } from '../../../../shared/service/certificat/certificat.service';
@@ -31,6 +32,7 @@ export class AdminrhSidebarComponent implements OnInit, OnDestroy {
   certificatsCount       = 0;
   messagesCount          = 0;
   ticketsCount           = 0;
+  sondagesRecusCount     = 0;
   employes               = 0;
   tauxCompletion         = 73;
 
@@ -84,6 +86,7 @@ export class AdminrhSidebarComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private certificatService: CertificatService,
     private ticketService: TicketService,
+    private sondageService: SondageService,
     private router: Router,
   ) {
     this.common.base.subscribe((base: string) => { this.base = base; });
@@ -156,6 +159,11 @@ export class AdminrhSidebarComponent implements OnInit, OnDestroy {
         const arr = res?.tickets || res?.data || (Array.isArray(res) ? res : []);
         this.ticketsCount = arr.filter((t: any) => t.statut === 'ouvert').length;
       },
+      error: () => {}
+    });
+
+    this.sondageService.getMesSondagesRecus().subscribe({
+      next: (res: any) => { this.sondagesRecusCount = res?.total ?? (res?.sondages?.length ?? 0); },
       error: () => {}
     });
   }

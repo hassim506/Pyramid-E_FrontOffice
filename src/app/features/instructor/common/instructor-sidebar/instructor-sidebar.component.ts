@@ -5,6 +5,7 @@ import { CommonService } from '../../../../shared/service/common/common.service'
 import { AuthService } from '../../../../shared/service/authentification/auth.service';
 import { FormationService } from '../../../../shared/service/formation/formation.service';
 import { SessionFormationService } from '../../../../shared/service/session/session-formation.service';
+import { SondageService } from '../../../../shared/service/sondage/sondage.service';
 import { routes } from '../../../../shared/service/routes/routes';
 
 interface ProgressBar { name: string; pct: number; }
@@ -25,7 +26,8 @@ export class InstructorSidebarComponent implements OnInit {
   formationsCount   = 0;
   apprenantCount    = 0;
   completionRate    = 0;
-  sessionsAVenir    = 0;
+  sessionsAVenir       = 0;
+  sondagesRecusCount   = 0;
   progressBars: ProgressBar[] = [];
 
   openGroups: Record<string, boolean> = {
@@ -39,6 +41,7 @@ export class InstructorSidebarComponent implements OnInit {
     private authService: AuthService,
     private formationService: FormationService,
     private sessionService: SessionFormationService,
+    private sondageService: SondageService,
   ) {
     this.common.base.subscribe((v: string) => this.base = v);
     this.common.page.subscribe((v: string) => this.page = v);
@@ -49,6 +52,10 @@ export class InstructorSidebarComponent implements OnInit {
     this.currentUser = this.authService.getUser();
     this.loadStats();
     this.loadSessionsAVenir();
+    this.sondageService.getMesSondagesRecus().subscribe({
+      next: (res: any) => { this.sondagesRecusCount = res?.total ?? (res?.sondages?.length ?? 0); },
+      error: () => {}
+    });
   }
 
   private loadStats(): void {

@@ -252,3 +252,183 @@ $danger:     #DC3545;
 
 .mt-2 { margin-top:8px; }
 .ml-1 { margin-left:4px; }
+
+// ── Onglets catégories ────────────────────────────────────────────────────────
+.ip-cat-tabs {
+  display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;
+}
+.ip-cat-tab {
+  display:flex; align-items:center; gap:8px;
+  padding:10px 18px; border-radius:$radius;
+  border:1px solid $border; background:#fff;
+  font-size:13px; font-weight:500; color:$muted;
+  cursor:pointer; transition:all .15s;
+  i { font-size:15px; }
+  &__count {
+    background:#F1F3F5; color:$muted;
+    font-size:11px; font-weight:700;
+    padding:1px 7px; border-radius:20px; min-width:22px; text-align:center;
+  }
+  &:hover { border-color:$primary; color:$primary; background:$primary-lt; }
+  &.active {
+    border-color:$primary; background:$primary; color:#fff;
+    .ip-cat-tab__count { background:rgba(255,255,255,.25); color:#fff; }
+  }
+}
+
+// ── Catégorie header (desc + bouton créer) ────────────────────────────────────
+.ip-cat-header {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; margin-bottom:14px;
+}
+.ip-cat-desc {
+  font-size:13px; color:$muted; line-height:1.5;
+  strong { color:#1A1A2E; }
+}
+
+// ── Badge catégorie (dans le formulaire) ──────────────────────────────────────
+.ip-cat-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px;
+  text-transform:uppercase; letter-spacing:.04em; margin-top:6px;
+  i { font-size:12px; }
+  &--chaud   { background:#FEF3C7; color:#D97706; }
+  &--froid   { background:#EFF6FF; color:#1D6EBF; }
+  &--enquete { background:#F5F3FF; color:#7C3AED; }
+}
+
+// ── Champ lecture seule (déclenchement) ──────────────────────────────────────
+.ip-input-readonly {
+  font-size:13px; color:#1A1A2E; font-weight:500;
+  padding:8px 12px; background:#F8F9FA;
+  border:1px solid $border; border-radius:8px;
+  flex:1;
+}
+
+// ── Aide champ ────────────────────────────────────────────────────────────────
+.ip-field-hint {
+  font-size:11px; color:$muted; margin-top:5px;
+  display:flex; align-items:center; gap:4px;
+  i { font-size:12px; }
+}
+.ip-label-hint {
+  font-weight:400; text-transform:none; letter-spacing:0;
+  font-size:10px; color:$muted; margin-left:4px;
+}
+
+// ── Tag info ──────────────────────────────────────────────────────────────────
+.ip-tag--info { background:#EFF6FF; color:#1D6EBF; }
+
+// ── Boutons action spéciaux ───────────────────────────────────────────────────
+.ip-action-btn--send    { &:hover { border-color:#069b8f; color:#069b8f; background:#f0fdf4; } }
+.ip-action-btn--results { &:hover { border-color:#7c3aed; color:#7c3aed; background:#f5f3ff; } }
+
+// ── Alertes ───────────────────────────────────────────────────────────────────
+.ip-alert {
+  display:flex; align-items:center; gap:8px;
+  padding:10px 14px; border-radius:8px;
+  font-size:13px; margin-bottom:14px;
+  &--success { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+  &--danger  { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+  &--warn    { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+  &--info    { background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; }
+}
+
+// ── Vue Envoyer ───────────────────────────────────────────────────────────────
+.ip-envoyer-info {
+  margin-bottom:16px;
+}
+.ip-envoyer-info-row {
+  display:flex; gap:12px; padding:8px 0;
+  border-bottom:1px solid $border; font-size:13px;
+  &:last-child { border-bottom:none; }
+}
+.ip-envoyer-info-label { color:$muted; min-width:140px; flex-shrink:0; }
+.ip-envoyer-info-val   { color:#1A1A2E; font-weight:500; }
+
+// ── Vue Résultats détaillés ───────────────────────────────────────────────────
+.ip-resultats-card { padding:0; }
+
+.ip-resultats-header {
+  padding:14px 20px;
+  border-bottom:1px solid $border;
+  font-size:13px; color:$muted;
+}
+.ip-resultats-count { font-weight:600; color:#1A1A2E; }
+
+.ip-resultats-table-wrap { overflow-x:auto; }
+
+.ip-resultats-table {
+  width:100%; border-collapse:collapse; font-size:13px;
+
+  th {
+    padding:10px 14px;
+    background:#f9fafb;
+    border-bottom:1px solid $border;
+    font-weight:600; color:#374151;
+    text-align:left; white-space:nowrap;
+    position:sticky; top:0;
+    max-width:200px; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  td {
+    padding:10px 14px;
+    border-bottom:1px solid $border;
+    vertical-align:middle;
+  }
+
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#f9fafb; }
+}
+
+.ip-res-user { display:flex; align-items:center; gap:10px; }
+.ip-res-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:$primary; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700; flex-shrink:0;
+}
+.ip-res-name  { font-weight:600; color:#1A1A2E; font-size:13px; }
+.ip-res-email { font-size:11px; color:$muted; }
+.ip-res-date  { font-size:12px; color:$muted; white-space:nowrap; }
+.ip-res-val   { color:#374151; max-width:180px; }
+
+// ── Multi-select formations ───────────────────────────────────────────────────
+.ip-multiselect-list {
+  border:1px solid $border; border-radius:8px;
+  max-height:200px; overflow-y:auto;
+  background:#fff;
+}
+.ip-multiselect-item {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 14px; cursor:pointer;
+  font-size:13px; color:#1A1A2E;
+  border-bottom:1px solid $border;
+  transition:background .1s;
+  &:last-child { border-bottom:none; }
+  &:hover { background:#f9fafb; }
+  &.selected { background:$primary-lt; color:darken($primary, 10%); font-weight:500; }
+}
+.ip-multiselect-cb {
+  accent-color:$primary; width:15px; height:15px; flex-shrink:0; cursor:pointer;
+}
+.ip-multiselect-summary {
+  font-size:11px; color:darken($primary, 10%); font-weight:600;
+  margin-top:5px; padding:3px 6px;
+  background:$primary-lt; border-radius:4px; display:inline-block;
+}
+
+// ── Tag formation dans les cartes ─────────────────────────────────────────────
+.ip-multiselect-empty { padding:10px 14px; }
+
+.ip-envoyer-desc {
+  font-size:14px; color:#6b7280; margin:0 0 20px; line-height:1.6;
+}
+.ip-alert--mb { margin-bottom:20px; }
+
+.ip-sc-formation-tag {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:11px; color:#374151; background:#f3f4f6;
+  border-radius:4px; padding:2px 6px;
+  i { font-size:12px; }
+}

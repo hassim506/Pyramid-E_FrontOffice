@@ -252,3 +252,255 @@ $danger:     #DC3545;
 
 .mt-2 { margin-top:8px; }
 .ml-1 { margin-left:4px; }
+
+// ── Onglets catégories ────────────────────────────────────────────────────────
+.ip-cat-tabs {
+  display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;
+}
+.ip-cat-tab {
+  display:flex; align-items:center; gap:8px;
+  padding:10px 18px; border-radius:$radius;
+  border:1px solid $border; background:#fff;
+  font-size:13px; font-weight:500; color:$muted;
+  cursor:pointer; transition:all .15s;
+  i { font-size:15px; }
+  &__count {
+    background:#F1F3F5; color:$muted;
+    font-size:11px; font-weight:700;
+    padding:1px 7px; border-radius:20px; min-width:22px; text-align:center;
+  }
+  &:hover { border-color:$primary; color:$primary; background:$primary-lt; }
+  &.active {
+    border-color:$primary; background:$primary; color:#fff;
+    .ip-cat-tab__count { background:rgba(255,255,255,.25); color:#fff; }
+  }
+}
+
+// ── Catégorie header ──────────────────────────────────────────────────────────
+.ip-cat-header {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; margin-bottom:14px;
+}
+.ip-cat-desc {
+  font-size:13px; color:$muted; line-height:1.5;
+  strong { color:#1A1A2E; }
+}
+.ip-cat-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+// ── Badge catégorie (formulaire) ──────────────────────────────────────────────
+.ip-cat-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px;
+  text-transform:uppercase; letter-spacing:.04em; margin-top:6px;
+  i { font-size:12px; }
+  &--chaud   { background:#FEF3C7; color:#D97706; }
+  &--froid   { background:#EFF6FF; color:#1D6EBF; }
+  &--enquete { background:#F5F3FF; color:#7C3AED; }
+}
+
+// ── Section header ────────────────────────────────────────────────────────────
+.ip-section-header {
+  display:flex; align-items:center; gap:10px; margin-bottom:10px; margin-top:4px;
+}
+.ip-section-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;
+  text-transform:uppercase; letter-spacing:.04em;
+  background:#F8F9FA; color:$muted;
+  i { font-size:12px; }
+  &--global { background:#FDF8E7; color:$primary; }
+}
+.ip-section-hint { font-size:12px; color:$muted; }
+
+// ── Template card ─────────────────────────────────────────────────────────────
+.ip-sondage-card--template {
+  border-style:dashed;
+  border-color:darken($border, 5%);
+  background:lighten($primary-lt, 2%);
+}
+.ip-sondage-card--readonly {
+  border-color: darken($border, 3%);
+  background: #fafafa;
+  opacity: .92;
+}
+.ip-template-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px;
+  background:$primary-lt; color:$primary;
+  text-transform:uppercase; letter-spacing:.04em;
+  i { font-size:11px; }
+}
+
+// ── Tag entreprise ────────────────────────────────────────────────────────────
+.ip-tag {
+  font-size:10px; font-weight:500; padding:2px 8px; border-radius:20px;
+  background:#F8F9FA; color:$muted;
+  &--warn     { background:#FFF9EC; color:#D97706; }
+  &--info     { background:#EFF6FF; color:#1D6EBF; }
+  &--enquete  { background:#F5F3FF; color:#7C3AED; }
+  &--entreprise {
+    background:#F0FDF4; color:#166534;
+    display:inline-flex; align-items:center; gap:3px;
+    i { font-size:10px; }
+  }
+}
+
+// ── Champ lecture seule (déclenchement) ──────────────────────────────────────
+.ip-input-readonly {
+  font-size:13px; color:#1A1A2E; font-weight:500;
+  padding:8px 12px; background:#F8F9FA;
+  border:1px solid $border; border-radius:8px;
+  flex:1;
+}
+
+// ── Aide label ────────────────────────────────────────────────────────────────
+.ip-field-hint {
+  font-size:11px; color:$muted; margin-top:5px;
+  display:flex; align-items:center; gap:4px;
+  i { font-size:12px; }
+}
+.ip-label-hint {
+  font-weight:400; text-transform:none; letter-spacing:0;
+  font-size:10px; color:$muted; margin-left:4px;
+}
+
+// ── Résultats card ────────────────────────────────────────────────────────────
+.ip-resultats-card { padding:0; overflow:hidden; }
+.ip-resultats-header { padding:14px 20px; border-bottom:1px solid $border; font-size:13px; color:$muted; }
+.ip-resultats-count { font-weight:600; color:#1A1A2E; }
+
+// ── Envoyer info (nouveau style row-based) ────────────────────────────────────
+.ip-envoyer-info-row {
+  display:flex; align-items:center; gap:12px; padding:8px 0;
+  border-bottom:1px solid $border; font-size:13px;
+  &:last-child { border-bottom:none; }
+}
+.ip-envoyer-info-label { color:$muted; min-width:140px; flex-shrink:0; }
+.ip-envoyer-info-val   { color:#1A1A2E; font-weight:500; }
+
+// ── Action btns supplémentaires ───────────────────────────────────────────────
+.ip-action-btn--send {
+  &:hover { border-color:#059669; color:#059669; background:#ECFDF5; }
+}
+.ip-action-btn--results {
+  &:hover { border-color:#7C3AED; color:#7C3AED; background:#F5F3FF; }
+}
+
+// ── Alertes inline ────────────────────────────────────────────────────────────
+.ip-alert {
+  display:flex; align-items:flex-start; gap:10px;
+  border-radius:8px; padding:12px 16px; font-size:13px; margin-bottom:16px;
+  i { font-size:15px; flex-shrink:0; margin-top:1px; }
+  &--success { background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46; }
+  &--danger  { background:#FFF5F5; border:1px solid #FCA5A5; color:#991B1B; }
+  &--warn    { background:#FFF9EC; border:1px solid #FCD34D; color:#92400E; }
+  &--info    { background:#EFF6FF; border:1px solid #BFDBFE; color:#1E40AF; }
+}
+
+// ── Envoyer info ──────────────────────────────────────────────────────────────
+.ip-envoyer-info {
+  background:#FAFBFF; border:1px solid $border; border-radius:8px;
+  padding:14px 18px; margin-bottom:20px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.ip-envoyer-info__row {
+  display:flex; align-items:center; gap:12px;
+  font-size:13px;
+}
+.ip-envoyer-info__label {
+  min-width:140px; font-weight:600; color:$muted; font-size:11px; text-transform:uppercase; letter-spacing:.04em;
+}
+.ip-envoyer-info__val { color:#1A1A2E; }
+
+// ── Spinner dans btn ──────────────────────────────────────────────────────────
+.ip-btn-spinner {
+  width:16px; height:16px;
+  border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  display:inline-block; flex-shrink:0;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+// ── Multi-select formations ───────────────────────────────────────────────────
+.ip-multiselect-list {
+  border:1px solid $border; border-radius:8px;
+  max-height:200px; overflow-y:auto;
+  background:#fff;
+}
+.ip-multiselect-item {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 14px; cursor:pointer;
+  font-size:13px; color:#1A1A2E;
+  border-bottom:1px solid $border;
+  transition:background .1s;
+  &:last-child { border-bottom:none; }
+  &:hover { background:#f9fafb; }
+  &.selected { background:$primary-lt; color:darken($primary, 10%); font-weight:500; }
+}
+.ip-multiselect-cb {
+  accent-color:$primary; width:15px; height:15px; flex-shrink:0; cursor:pointer;
+}
+.ip-multiselect-summary {
+  font-size:11px; color:darken($primary, 10%); font-weight:600;
+  margin-top:5px; padding:3px 6px;
+  background:$primary-lt; border-radius:4px; display:inline-block;
+}
+
+.ip-multiselect-empty { padding:10px 14px; }
+
+.ip-envoyer-card { max-width:600px; }
+.ip-field--mb { margin-bottom:20px; }
+.ip-envoyer-cibles-info {
+  display:flex; align-items:center; gap:8px;
+  background:#f0fdf4; border:1px solid #a7f3d0;
+  border-radius:8px; padding:10px 14px;
+  font-size:13px; color:#065f46; margin-bottom:16px;
+  i { font-size:15px; }
+}
+.ip-envoyer-desc { font-size:14px; color:#6b7280; margin:0 0 20px; line-height:1.6; }
+.ip-alert--mb    { margin-bottom:20px; }
+
+.ip-th--participant { width:180px; }
+.ip-th--date        { width:130px; }
+
+// ── Tag formation dans les cartes ─────────────────────────────────────────────
+.ip-sc-formation-tag {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:11px; color:#374151; background:#f3f4f6;
+  border-radius:4px; padding:2px 6px;
+  i { font-size:12px; }
+}
+
+// ── Résultats table ───────────────────────────────────────────────────────────
+.ip-resultats-table-wrap { overflow-x:auto; }
+.ip-resultats-table {
+  width:100%; border-collapse:collapse; font-size:13px;
+}
+.ip-res-th {
+  padding:10px 14px; background:#F8F9FA; border-bottom:2px solid $border;
+  font-size:11px; font-weight:600; color:$muted; text-transform:uppercase; letter-spacing:.04em;
+  white-space:nowrap; text-align:left;
+  &--participant { min-width:180px; }
+}
+.ip-res-row {
+  border-bottom:1px solid $border; transition:background .1s;
+  &:last-child { border-bottom:none; }
+  &:hover { background:#FAFBFF; }
+}
+.ip-res-td {
+  padding:10px 14px; vertical-align:middle; color:#1A1A2E;
+  max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.ip-res-participant { display:flex; align-items:center; gap:10px; }
+.ip-res-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:$primary-lt; color:$primary;
+  font-size:13px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ip-res-user { min-width:0; }
+.ip-res-nom   { font-weight:500; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ip-res-email { font-size:11px; color:$muted; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ip-res-date  { white-space:nowrap; color:$muted; font-size:12px; }

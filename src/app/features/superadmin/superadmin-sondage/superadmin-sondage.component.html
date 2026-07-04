@@ -6,11 +6,53 @@
   <div class="ip-page-head">
     <div>
       <h5 class="ip-page-head__title">Sondages &amp; enquêtes</h5>
-      <p class="ip-page-head__sub">Créez et gérez vos sondages de satisfaction, évaluations et enquêtes</p>
+      <p class="ip-page-head__sub">Gérez les modèles globaux et les sondages de toutes les entreprises</p>
     </div>
-    <button class="ip-btn ip-btn--primary" (click)="openCreate()">
-      <i class="isax isax-add"></i> Nouveau sondage
+  </div>
+
+  <!-- Onglets catégories -->
+  <div class="ip-cat-tabs">
+    <button type="button" class="ip-cat-tab" [class.active]="categorieActive === 'a_chaud'" (click)="setCategorie('a_chaud')">
+      <i class="isax isax-flash-1"></i>
+      <span>Évaluation à chaud</span>
+      <span class="ip-cat-tab__count">{{ templatesChaud.length + sondagesChaud.length }}</span>
     </button>
+    <button type="button" class="ip-cat-tab" [class.active]="categorieActive === 'a_froid'" (click)="setCategorie('a_froid')">
+      <i class="isax isax-clock"></i>
+      <span>Évaluation à froid</span>
+      <span class="ip-cat-tab__count">{{ templatesFroid.length + sondagesFroid.length }}</span>
+    </button>
+    <button type="button" class="ip-cat-tab" [class.active]="categorieActive === 'enquete'" (click)="setCategorie('enquete')">
+      <i class="isax isax-message-question"></i>
+      <span>Enquêtes libres</span>
+      <span class="ip-cat-tab__count">{{ sondagesEnquete.length }}</span>
+    </button>
+  </div>
+
+  <!-- Description catégorie + boutons créer -->
+  <div class="ip-cat-header">
+    <div class="ip-cat-desc">
+      <ng-container *ngIf="categorieActive === 'a_chaud'">
+        <strong>Évaluation à chaud</strong> — Envoyée immédiatement après la fin d'une formation.
+      </ng-container>
+      <ng-container *ngIf="categorieActive === 'a_froid'">
+        <strong>Évaluation à froid</strong> — Envoyée automatiquement X jours après la formation.
+      </ng-container>
+      <ng-container *ngIf="categorieActive === 'enquete'">
+        <strong>Enquêtes libres</strong> — Envoyées manuellement à tous les employés ou aux participants d'une formation.
+      </ng-container>
+    </div>
+    <div class="ip-cat-actions">
+      <button *ngIf="categorieActive !== 'enquete'" type="button" class="ip-btn ip-btn--ghost" (click)="openCreate(categorieActive, true)">
+        <i class="isax isax-global"></i> Nouveau modèle global
+      </button>
+      <button type="button" class="ip-btn ip-btn--primary" (click)="openCreate(categorieActive, false)">
+        <i class="isax isax-add"></i>
+        <ng-container *ngIf="categorieActive === 'a_chaud'">Nouvelle évaluation à chaud</ng-container>
+        <ng-container *ngIf="categorieActive === 'a_froid'">Nouvelle évaluation à froid</ng-container>
+        <ng-container *ngIf="categorieActive === 'enquete'">Nouvelle enquête</ng-container>
+      </button>
+    </div>
   </div>
 
   <!-- Filtres -->
@@ -21,21 +63,18 @@
           <i class="isax isax-search-normal ip-input-icon"></i>
           <input type="text" class="ip-input ip-input--icon"
                  [(ngModel)]="search" (ngModelChange)="onSearch()"
-                 placeholder="Rechercher par titre, description…">
+                 placeholder="Rechercher par titre…">
         </div>
       </div>
       <div class="ip-filter-group">
-        <select class="ip-input" [(ngModel)]="filterType" (ngModelChange)="loadSondages()">
-          <option value="">Tous les types</option>
-          <option value="satisfaction">Satisfaction</option>
-          <option value="evaluation">Évaluation</option>
-          <option value="feedback">Feedback</option>
-          <option value="quiz">Quiz</option>
-          <option value="enquete">Enquête</option>
+        <select class="ip-input" [(ngModel)]="filterEntrepriseId" (ngModelChange)="loadAll()">
+          <option value="">Toutes les entreprises</option>
+          <option value="global">Modèles globaux uniquement</option>
+          <option *ngFor="let e of entreprises" [value]="e.id">{{ e.nom }}</option>
         </select>
       </div>
       <div class="ip-filter-group">
-        <select class="ip-input" [(ngModel)]="filterActif" (ngModelChange)="loadSondages()">
+        <select class="ip-input" [(ngModel)]="filterActif" (ngModelChange)="loadAll()">
           <option value="">Tous les statuts</option>
           <option value="1">Actif</option>
           <option value="0">Inactif</option>
@@ -54,91 +93,190 @@
     <div class="spinner-border" role="status"></div>
   </div>
 
-  <!-- Grid de cartes -->
-  <div *ngIf="!loading" class="ip-sondage-grid">
-    <div *ngFor="let s of sondages" class="ip-sondage-card">
+  <ng-container *ngIf="!loading">
 
-      <!-- Bandeau type -->
-      <div class="ip-sc-bar" [style.background]="typeColor(s.type)"></div>
-
-      <div class="ip-sc-body">
-        <!-- Header -->
-        <div class="ip-sc-header">
-          <span class="ip-sc-type-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">
-            {{ typeLabel(s.type) }}
-          </span>
-          <span class="ip-sc-statut" [class]="getStatutClass(s)">
-            <i class="fa-solid fa-circle"></i> {{ getStatutLabel(s) }}
-          </span>
+    <!-- ── Section : Modèles globaux (uniquement À chaud / À froid) ── -->
+    <ng-container *ngIf="categorieActive !== 'enquete' && templatesCourants.length > 0">
+      <div class="ip-section-header">
+        <div class="ip-section-badge ip-section-badge--global">
+          <i class="isax isax-global"></i> Modèles globaux
         </div>
-
-        <h6 class="ip-sc-title">{{ s.titre }}</h6>
-        <p class="ip-sc-desc" *ngIf="s.description">{{ s.description }}</p>
-        <p class="ip-sc-desc ip-text-muted" *ngIf="!s.description">Aucune description</p>
-
-        <!-- Méta -->
-        <div class="ip-sc-meta">
-          <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
-          <span><i class="isax isax-people"></i> {{ s.nombre_reponses }} réponse{{ s.nombre_reponses !== 1 ? 's' : '' }}</span>
-          <span *ngIf="s.duree_estimee"><i class="isax isax-clock"></i> ~{{ s.duree_estimee }} min</span>
-          <span *ngIf="s.formation"><i class="isax isax-book-1"></i> {{ s.formation.titre }}</span>
+        <span class="ip-section-hint">Partagés avec toutes les entreprises</span>
+      </div>
+      <div class="ip-sondage-grid ip-sondage-grid--sm">
+        <div *ngFor="let s of templatesCourants" class="ip-sondage-card ip-sondage-card--template">
+          <div class="ip-sc-bar" [style.background]="typeColor(s.type)"></div>
+          <div class="ip-sc-body">
+            <div class="ip-sc-header">
+              <span class="ip-sc-type-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">
+                {{ typeLabel(s.type) }}
+              </span>
+              <span class="ip-template-badge"><i class="isax isax-global"></i> Modèle global</span>
+            </div>
+            <h6 class="ip-sc-title">{{ s.titre }}</h6>
+            <p class="ip-sc-desc" *ngIf="s.description">{{ s.description }}</p>
+            <div class="ip-sc-meta">
+              <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+          <div class="ip-sc-footer">
+            <button class="ip-action-btn" title="Questions" (click)="openQuestions(s)">
+              <i class="isax isax-edit-2"></i>
+            </button>
+            <button class="ip-action-btn" title="Modifier" (click)="openEdit(s)">
+              <i class="isax isax-setting-2"></i>
+            </button>
+            <button class="ip-action-btn ip-action-btn--danger" title="Supprimer" (click)="confirmDelete(s.id)">
+              <i class="isax isax-trash"></i>
+            </button>
+          </div>
         </div>
+      </div>
+    </ng-container>
 
-        <!-- Badges options -->
-        <div class="ip-sc-tags">
-          <span *ngIf="s.est_anonyme" class="ip-tag">Anonyme</span>
-          <span *ngIf="s.est_obligatoire" class="ip-tag ip-tag--warn">Obligatoire</span>
-          <span *ngIf="s.autorise_retour" class="ip-tag">Retour autorisé</span>
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- MODE : Évaluation à chaud / à froid                           -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="categorieActive !== 'enquete'">
+      <div class="ip-section-header" *ngIf="sondagesCourants.length > 0">
+        <div class="ip-section-badge">
+          <i class="isax isax-building-3"></i> Par entreprise
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="ip-sc-footer">
-        <button class="ip-action-btn" title="Questions" (click)="openQuestions(s)">
-          <i class="isax isax-edit-2"></i>
-        </button>
-        <button class="ip-action-btn" title="Statistiques" (click)="openStats(s)">
-          <i class="isax isax-chart-2"></i>
-        </button>
-        <button class="ip-action-btn" title="Modifier" (click)="openEdit(s)">
-          <i class="isax isax-setting-2"></i>
-        </button>
-        <button class="ip-action-btn" [title]="s.est_actif ? 'Archiver' : 'Publier'" (click)="toggleActif(s)">
-          <i [class]="s.est_actif ? 'isax isax-archive' : 'isax isax-send-2'"></i>
-        </button>
-        <button class="ip-action-btn" title="Export CSV" (click)="exportCsv(s)">
-          <i class="isax isax-document-download"></i>
-        </button>
-        <button class="ip-action-btn ip-action-btn--danger" title="Supprimer" (click)="confirmDelete(s.id)">
-          <i class="isax isax-trash"></i>
-        </button>
+      <div class="ip-sondage-grid">
+        <div *ngFor="let s of sondagesCourants" class="ip-sondage-card">
+          <div class="ip-sc-bar" [style.background]="typeColor(s.type)"></div>
+          <div class="ip-sc-body">
+            <div class="ip-sc-header">
+              <span class="ip-sc-type-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">{{ typeLabel(s.type) }}</span>
+              <span class="ip-sc-statut" [class]="getStatutClass(s)"><i class="fa-solid fa-circle"></i> {{ getStatutLabel(s) }}</span>
+            </div>
+            <h6 class="ip-sc-title">{{ s.titre }}</h6>
+            <p class="ip-sc-desc" *ngIf="s.description">{{ s.description }}</p>
+            <p class="ip-sc-desc ip-text-muted" *ngIf="!s.description">Aucune description</p>
+            <div class="ip-sc-meta">
+              <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
+              <span><i class="isax isax-people"></i> {{ s.nombre_reponses }} réponse{{ s.nombre_reponses !== 1 ? 's' : '' }}</span>
+              <span *ngIf="s.duree_estimee"><i class="isax isax-clock"></i> ~{{ s.duree_estimee }} min</span>
+              <span *ngFor="let t of getFormationsTitres(s)" class="ip-sc-formation-tag"><i class="isax isax-book-1"></i> {{ t }}</span>
+            </div>
+            <div class="ip-sc-tags">
+              <span class="ip-tag ip-tag--entreprise" *ngIf="s.entreprise_id"><i class="isax isax-building-3"></i> {{ getEntrepriseNom(s.entreprise_id) }}</span>
+              <span *ngIf="s.est_anonyme" class="ip-tag">Anonyme</span>
+              <span *ngIf="categorieActive === 'a_froid' && s.delai_jours" class="ip-tag ip-tag--info">J+{{ s.delai_jours }}</span>
+            </div>
+          </div>
+          <div class="ip-sc-footer">
+            <button class="ip-action-btn" title="Questions" (click)="openQuestions(s)"><i class="isax isax-edit-2"></i></button>
+            <button class="ip-action-btn" title="Statistiques" (click)="openStats(s)"><i class="isax isax-chart-2"></i></button>
+            <button class="ip-action-btn ip-action-btn--results" title="Résultats" (click)="openResultats(s)"><i class="isax isax-eye"></i></button>
+            <button class="ip-action-btn ip-action-btn--send" title="Envoyer" (click)="openEnvoyer(s)"><i class="isax isax-send-2"></i></button>
+            <button class="ip-action-btn" title="Modifier" (click)="openEdit(s)"><i class="isax isax-setting-2"></i></button>
+            <button class="ip-action-btn" [title]="s.est_actif ? 'Archiver' : 'Publier'" (click)="toggleActif(s)"><i [class]="s.est_actif ? 'isax isax-archive' : 'isax isax-refresh'"></i></button>
+            <button class="ip-action-btn" title="Export CSV" (click)="exportCsv(s)"><i class="isax isax-document-download"></i></button>
+            <button class="ip-action-btn ip-action-btn--danger" title="Supprimer" (click)="confirmDelete(s.id)"><i class="isax isax-trash"></i></button>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Vide -->
-    <div *ngIf="sondages.length === 0" class="ip-empty-state">
-      <i class="isax isax-note-21"></i>
-      <p>Aucun sondage trouvé</p>
-      <button class="ip-btn ip-btn--primary" (click)="openCreate()">Créer le premier sondage</button>
-    </div>
-  </div>
+      <div *ngIf="sondagesCourants.length === 0 && templatesCourants.length === 0" class="ip-empty-state">
+        <i class="isax isax-note-21"></i>
+        <p *ngIf="categorieActive === 'a_chaud'">Aucune évaluation à chaud</p>
+        <p *ngIf="categorieActive === 'a_froid'">Aucune évaluation à froid</p>
+        <button type="button" class="ip-btn ip-btn--primary" (click)="openCreate(categorieActive, false)">Créer maintenant</button>
+      </div>
+    </ng-container>
 
-  <!-- Pagination -->
-  <div *ngIf="totalPages > 1" class="ip-pagination">
-    <span class="ip-pagination__info">{{ total }} sondage{{ total !== 1 ? 's' : '' }}</span>
-    <div class="ip-pagination__controls">
-      <button class="ip-pg-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
-        <i class="isax isax-arrow-left-2"></i>
-      </button>
-      <ng-container *ngFor="let p of pageNumbers">
-        <span *ngIf="p === -1" class="ip-pg-ellipsis">…</span>
-        <button *ngIf="p !== -1" class="ip-pg-btn" [class.ip-pg-btn--active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- MODE : Enquêtes libres — deux sections                         -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="categorieActive === 'enquete'">
+
+      <!-- Section 1 : Mes enquêtes globales (superadmin, entreprise_id=null) -->
+      <ng-container *ngIf="enquetesSuperadmin.length > 0">
+        <div class="ip-section-header">
+          <div class="ip-section-badge ip-section-badge--global">
+            <i class="isax isax-global"></i> Mes enquêtes globales
+          </div>
+          <span class="ip-section-hint">Créées par vous, envoyées aux entreprises cibles</span>
+        </div>
+        <div class="ip-sondage-grid">
+          <ng-container *ngTemplateOutlet="cardEnquete; context: { $implicit: enquetesSuperadmin, editable: true }"></ng-container>
+        </div>
       </ng-container>
-      <button class="ip-pg-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
-        <i class="isax isax-arrow-right-3"></i>
-      </button>
-    </div>
-  </div>
+
+      <!-- Section 2 : Enquêtes des entreprises (AdminRH) -->
+      <ng-container *ngIf="enquetesEntreprises.length > 0">
+        <div class="ip-section-header" [style.margin-top]="enquetesSuperadmin.length > 0 ? '24px' : '0'">
+          <div class="ip-section-badge">
+            <i class="isax isax-building-3"></i> Enquêtes des entreprises
+          </div>
+          <span class="ip-section-hint">Créées par les AdminRH de leurs entreprises</span>
+        </div>
+        <div class="ip-sondage-grid">
+          <ng-container *ngTemplateOutlet="cardEnquete; context: { $implicit: enquetesEntreprises, editable: false }"></ng-container>
+        </div>
+      </ng-container>
+
+      <!-- Vide total -->
+      <div *ngIf="sondagesEnquete.length === 0" class="ip-empty-state">
+        <i class="isax isax-note-21"></i>
+        <p>Aucune enquête créée</p>
+        <button type="button" class="ip-btn ip-btn--primary" (click)="openCreate('enquete', false)">Créer maintenant</button>
+      </div>
+
+    </ng-container>
+
+    <!-- ── Template carte enquête (réutilisé pour les 2 sections) ── -->
+    <ng-template #cardEnquete let-list let-editable="editable">
+      <div *ngFor="let s of list" class="ip-sondage-card" [class.ip-sondage-card--readonly]="!editable">
+        <div class="ip-sc-bar" [style.background]="typeColor(s.type)"></div>
+        <div class="ip-sc-body">
+          <div class="ip-sc-header">
+            <span class="ip-sc-type-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">{{ typeLabel(s.type) }}</span>
+            <span class="ip-sc-statut" [class]="getStatutClass(s)"><i class="fa-solid fa-circle"></i> {{ getStatutLabel(s) }}</span>
+          </div>
+          <h6 class="ip-sc-title">{{ s.titre }}</h6>
+          <p class="ip-sc-desc" *ngIf="s.description">{{ s.description }}</p>
+          <p class="ip-sc-desc ip-text-muted" *ngIf="!s.description">Aucune description</p>
+          <div class="ip-sc-meta">
+            <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
+            <span><i class="isax isax-people"></i> {{ s.nombre_reponses }} réponse{{ s.nombre_reponses !== 1 ? 's' : '' }}</span>
+            <span *ngIf="s.duree_estimee"><i class="isax isax-clock"></i> ~{{ s.duree_estimee }} min</span>
+          </div>
+          <div class="ip-sc-tags">
+            <!-- Mes enquêtes : badges cibles -->
+            <ng-container *ngIf="!s.entreprise_id">
+              <span *ngFor="let nom of getCibleEntreprisesNoms(s)" class="ip-tag ip-tag--entreprise">
+                <i class="isax isax-building-3"></i> {{ nom }}
+              </span>
+            </ng-container>
+            <!-- Enquêtes entreprise : badge de l'entreprise propriétaire -->
+            <span *ngIf="s.entreprise_id" class="ip-tag ip-tag--entreprise">
+              <i class="isax isax-building-3"></i> {{ getEntrepriseNom(s.entreprise_id) }}
+            </span>
+            <span *ngIf="s.est_anonyme" class="ip-tag">Anonyme</span>
+          </div>
+        </div>
+        <div class="ip-sc-footer">
+          <ng-container *ngIf="editable">
+            <button class="ip-action-btn" title="Questions" (click)="openQuestions(s)"><i class="isax isax-edit-2"></i></button>
+            <button class="ip-action-btn" title="Modifier" (click)="openEdit(s)"><i class="isax isax-setting-2"></i></button>
+            <button class="ip-action-btn" [title]="s.est_actif ? 'Archiver' : 'Publier'" (click)="toggleActif(s)"><i [class]="s.est_actif ? 'isax isax-archive' : 'isax isax-refresh'"></i></button>
+          </ng-container>
+          <button class="ip-action-btn" title="Statistiques" (click)="openStats(s)"><i class="isax isax-chart-2"></i></button>
+          <button class="ip-action-btn ip-action-btn--results" title="Résultats" (click)="openResultats(s)"><i class="isax isax-eye"></i></button>
+          <button class="ip-action-btn ip-action-btn--send" title="Envoyer" (click)="openEnvoyer(s)"><i class="isax isax-send-2"></i></button>
+          <button class="ip-action-btn" title="Export CSV" (click)="exportCsv(s)"><i class="isax isax-document-download"></i></button>
+          <ng-container *ngIf="editable">
+            <button class="ip-action-btn ip-action-btn--danger" title="Supprimer" (click)="confirmDelete(s.id)"><i class="isax isax-trash"></i></button>
+          </ng-container>
+        </div>
+      </div>
+    </ng-template>
+
+  </ng-container>
 
 </ng-container>
 
@@ -149,10 +287,26 @@
 
   <div class="ip-page-head">
     <div>
-      <button class="ip-btn ip-btn--ghost ip-btn--sm" (click)="backToList()">
+      <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm" (click)="backToList()">
         <i class="isax isax-arrow-left-2"></i> Retour
       </button>
-      <h5 class="ip-page-head__title mt-2">{{ tab === 'creer' ? 'Nouveau sondage' : 'Modifier le sondage' }}</h5>
+      <h5 class="ip-page-head__title mt-2">
+        <ng-container *ngIf="tab === 'creer'">
+          <ng-container *ngIf="formCategorie === 'a_chaud'">Nouvelle évaluation à chaud</ng-container>
+          <ng-container *ngIf="formCategorie === 'a_froid'">Nouvelle évaluation à froid</ng-container>
+          <ng-container *ngIf="formCategorie === 'enquete'">Nouvelle enquête libre</ng-container>
+        </ng-container>
+        <ng-container *ngIf="tab === 'editer'">Modifier — {{ selectedSondage?.titre }}</ng-container>
+      </h5>
+      <span class="ip-cat-badge ip-cat-badge--chaud" *ngIf="formCategorie === 'a_chaud'">
+        <i class="isax isax-flash-1"></i> À chaud
+      </span>
+      <span class="ip-cat-badge ip-cat-badge--froid" *ngIf="formCategorie === 'a_froid'">
+        <i class="isax isax-clock"></i> À froid
+      </span>
+      <span class="ip-cat-badge ip-cat-badge--enquete" *ngIf="formCategorie === 'enquete'">
+        <i class="isax isax-message-question"></i> Enquête libre
+      </span>
     </div>
   </div>
 
@@ -180,6 +334,84 @@
         </select>
       </div>
 
+      <!-- Portée : global ou entreprise spécifique -->
+      <div class="ip-field">
+        <label class="ip-label">
+          Portée
+          <span class="ip-label-hint">(modèle global = visible par toutes les entreprises)</span>
+        </label>
+        <select class="ip-input" [(ngModel)]="formEntrepriseId"
+                (ngModelChange)="onEntrepriseChange()">
+          <option value="">Modèle global (toutes entreprises)</option>
+          <option *ngFor="let e of entreprises" [value]="e.id">{{ e.nom }}</option>
+        </select>
+      </div>
+
+      <!-- Entreprises cibles — enquête libre uniquement, visible même si portée = global -->
+      <div class="ip-field" *ngIf="formCategorie === 'enquete'">
+        <label class="ip-label">
+          Entreprise(s) cible(s)
+          <span class="ip-label-hint">(employés qui recevront l'enquête)</span>
+        </label>
+        <div class="ip-multiselect-list">
+          <label class="ip-multiselect-item ip-multiselect-item--all"
+                 [class.selected]="allCibleEntreprisesSelected"
+                 title="Toutes les entreprises">
+            <input type="checkbox" class="ip-multiselect-cb"
+                   [checked]="allCibleEntreprisesSelected"
+                   (change)="toggleAllCibleEntreprises()"
+                   title="Toutes les entreprises">
+            <strong>Toutes les entreprises</strong>
+          </label>
+          <label *ngFor="let e of entreprises" class="ip-multiselect-item"
+                 [class.selected]="isCibleEntrepriseSelected(e.id)"
+                 [title]="e.nom">
+            <input type="checkbox" class="ip-multiselect-cb"
+                   [checked]="isCibleEntrepriseSelected(e.id)"
+                   (change)="toggleCibleEntreprise(e.id)"
+                   [title]="e.nom">
+            <span>{{ e.nom }}</span>
+          </label>
+          <div *ngIf="entreprises.length === 0" class="ip-multiselect-empty ip-text-muted ip-text-sm">Aucune entreprise disponible</div>
+        </div>
+        <div *ngIf="formCibleEntrepriseIds.length > 0" class="ip-multiselect-summary">
+          {{ allCibleEntreprisesSelected ? 'Toutes les entreprises sélectionnées' : formCibleEntrepriseIds.length + ' entreprise' + (formCibleEntrepriseIds.length > 1 ? 's' : '') + ' sélectionnée' + (formCibleEntrepriseIds.length > 1 ? 's' : '') }}
+        </div>
+      </div>
+
+      <!-- Formations liées — multi-select checkboxes -->
+      <div class="ip-field" *ngIf="formEntrepriseId && formCategorie !== 'enquete'">
+        <label class="ip-label">
+          Formation(s) liée(s)
+          <span class="ip-required">*</span>
+        </label>
+        <div *ngIf="formationsLoading" class="ip-text-muted ip-text-sm">Chargement des formations…</div>
+        <div *ngIf="!formationsLoading" class="ip-multiselect-list">
+          <label class="ip-multiselect-item ip-multiselect-item--all"
+                 [class.selected]="allFormationsSelected"
+                 title="Toutes les formations">
+            <input type="checkbox" class="ip-multiselect-cb"
+                   [checked]="allFormationsSelected"
+                   (change)="toggleAllFormations()"
+                   title="Toutes les formations">
+            <strong>Toutes les formations</strong>
+          </label>
+          <label *ngFor="let f of formations" class="ip-multiselect-item"
+                 [class.selected]="isFormationSelected(f.id)"
+                 [title]="f.titre">
+            <input type="checkbox" class="ip-multiselect-cb"
+                   [checked]="isFormationSelected(f.id)"
+                   (change)="toggleFormation(f.id)"
+                   [title]="f.titre">
+            <span>{{ f.titre }}</span>
+          </label>
+          <div *ngIf="formations.length === 0" class="ip-text-muted ip-text-sm ip-multiselect-empty">Aucune formation disponible</div>
+        </div>
+        <div *ngIf="formFormationIds.length > 0" class="ip-multiselect-summary">
+          {{ allFormationsSelected ? 'Toutes les formations sélectionnées' : formFormationIds.length + ' formation' + (formFormationIds.length > 1 ? 's' : '') + ' sélectionnée' + (formFormationIds.length > 1 ? 's' : '') }}
+        </div>
+      </div>
+
       <div class="ip-field">
         <label class="ip-label">Description</label>
         <textarea class="ip-input ip-textarea" [(ngModel)]="form.description" rows="3"
@@ -203,17 +435,19 @@
     <div class="ip-card ip-form-card">
       <div class="ip-form-section-head"><i class="isax isax-setting-2"></i> Paramètres</div>
 
+      <!-- Déclenchement en lecture seule -->
       <div class="ip-field ip-field--row">
         <label class="ip-label">Déclenchement</label>
-        <select class="ip-input ip-input--sm" [(ngModel)]="form.declenchement">
-          <option value="manuel">Manuel</option>
-          <option value="a_chaud">À chaud (immédiatement après la formation)</option>
-          <option value="a_froid">À froid (après un délai)</option>
-        </select>
+        <div class="ip-input-readonly">
+          <ng-container *ngIf="formCategorie === 'a_chaud'">À chaud — immédiatement après la formation</ng-container>
+          <ng-container *ngIf="formCategorie === 'a_froid'">À froid — après un délai</ng-container>
+          <ng-container *ngIf="formCategorie === 'enquete'">Manuel (enquête libre)</ng-container>
+        </div>
       </div>
 
-      <div class="ip-field ip-field--row" *ngIf="form.declenchement === 'a_froid'">
-        <label class="ip-label">Délai (jours)</label>
+      <!-- Délai uniquement pour à froid -->
+      <div class="ip-field ip-field--row" *ngIf="formCategorie === 'a_froid'">
+        <label class="ip-label">Délai après la formation (jours)</label>
         <input type="number" class="ip-input ip-input--sm" [(ngModel)]="form.delai_jours" min="1" placeholder="Ex. 30">
       </div>
 
@@ -261,7 +495,7 @@
       </div>
 
       <div class="ip-save-row">
-        <button class="ip-btn ip-btn--primary ip-btn--wide" [disabled]="saving" (click)="saveSondage()">
+        <button type="button" class="ip-btn ip-btn--primary ip-btn--wide" [disabled]="saving" (click)="saveSondage()">
           <i class="isax isax-save-2"></i>
           {{ saving ? 'Enregistrement…' : (tab === 'creer' ? 'Créer et ajouter des questions' : 'Enregistrer') }}
         </button>
@@ -278,13 +512,13 @@
 
   <div class="ip-page-head">
     <div>
-      <button class="ip-btn ip-btn--ghost ip-btn--sm" (click)="backToList()">
+      <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm" (click)="backToList()">
         <i class="isax isax-arrow-left-2"></i> Retour
       </button>
       <h5 class="ip-page-head__title mt-2">{{ selectedSondage?.titre }}</h5>
       <p class="ip-page-head__sub">Gérer les questions du sondage</p>
     </div>
-    <button class="ip-btn ip-btn--primary" (click)="newQuestion()">
+    <button type="button" class="ip-btn ip-btn--primary" (click)="newQuestion()">
       <i class="isax isax-add"></i> Ajouter une question
     </button>
   </div>
@@ -333,7 +567,7 @@
         <div class="ip-add-option-row">
           <input type="text" class="ip-input" [(ngModel)]="newOptionText" placeholder="Nouvelle option…"
                  (keyup.enter)="addOption()">
-          <button class="ip-btn ip-btn--ghost ip-btn--sm" (click)="addOption()">
+          <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm" (click)="addOption()">
             <i class="isax isax-add"></i> Ajouter
           </button>
         </div>
@@ -356,8 +590,8 @@
         <label class="ip-switch"><input type="checkbox" [(ngModel)]="editingQuestion.est_obligatoire"><span class="ip-switch-track"></span></label>
       </div>
       <div class="ip-question-form-actions">
-        <button class="ip-btn ip-btn--ghost" (click)="cancelQuestion()">Annuler</button>
-        <button class="ip-btn ip-btn--primary" (click)="saveQuestion()">
+        <button type="button" class="ip-btn ip-btn--ghost" (click)="cancelQuestion()">Annuler</button>
+        <button type="button" class="ip-btn ip-btn--primary" (click)="saveQuestion()">
           <i class="isax isax-tick-circle"></i>
           {{ editingQuestion.id ? 'Mettre à jour' : 'Ajouter la question' }}
         </button>
@@ -408,8 +642,8 @@
       <i class="isax isax-warning-2 ip-confirm-icon"></i>
       <p class="ip-confirm-text">Supprimer cette question ? Les réponses associées seront aussi supprimées.</p>
       <div class="ip-confirm-actions">
-        <button class="ip-btn ip-btn--ghost" (click)="confirmDeleteQId = null">Annuler</button>
-        <button class="ip-btn ip-btn--danger" (click)="deleteQuestion()">Supprimer</button>
+        <button type="button" class="ip-btn ip-btn--ghost" (click)="confirmDeleteQId = null">Annuler</button>
+        <button type="button" class="ip-btn ip-btn--danger" (click)="deleteQuestion()">Supprimer</button>
       </div>
     </div>
   </div>
@@ -423,12 +657,12 @@
 
   <div class="ip-page-head">
     <div>
-      <button class="ip-btn ip-btn--ghost ip-btn--sm" (click)="backToList()">
+      <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm" (click)="backToList()">
         <i class="isax isax-arrow-left-2"></i> Retour
       </button>
       <h5 class="ip-page-head__title mt-2">Statistiques — {{ selectedSondage?.titre }}</h5>
     </div>
-    <button class="ip-btn ip-btn--ghost" (click)="exportCsv(selectedSondage!)">
+    <button type="button" class="ip-btn ip-btn--ghost" (click)="exportCsv(selectedSondage!)">
       <i class="isax isax-document-download"></i> Export CSV
     </button>
   </div>
@@ -436,7 +670,6 @@
   <div *ngIf="statsLoading" class="ip-loader"><div class="spinner-border"></div></div>
 
   <ng-container *ngIf="!statsLoading && stats">
-    <!-- KPIs -->
     <div class="ip-kpi-row">
       <div class="ip-kpi-card">
         <div class="ip-kpi-icon"><i class="isax isax-note-21"></i></div>
@@ -452,7 +685,6 @@
       </div>
     </div>
 
-    <!-- Par question -->
     <div *ngFor="let q of stats.questions; let i = index" class="ip-stat-question-card ip-card">
       <div class="ip-stat-q-header">
         <span class="ip-stat-q-num">Q{{ i + 1 }}</span>
@@ -460,7 +692,6 @@
         <span class="ip-stat-q-count">{{ q.nombre_reponses }} réponse{{ q.nombre_reponses !== 1 ? 's' : '' }}</span>
       </div>
 
-      <!-- Répartition bar chart (radio/select/checkbox) -->
       <div *ngIf="q.repartition" class="ip-stat-bars">
         <div *ngFor="let item of q.repartition | keyvalue" class="ip-stat-bar-row">
           <div class="ip-stat-bar-label">{{ item.key || '(vide)' }}</div>
@@ -471,13 +702,11 @@
         </div>
       </div>
 
-      <!-- Moyenne (echelle/notation) -->
       <div *ngIf="q.moyenne !== undefined" class="ip-stat-moyenne">
         <span class="ip-stat-moy-label">Moyenne</span>
         <span class="ip-stat-moy-val">{{ q.moyenne }}<span class="ip-stat-moy-max"> / {{ q.type === 'notation' ? 5 : 10 }}</span></span>
       </div>
 
-      <!-- Textes libres -->
       <div *ngIf="q.reponses_texte" class="ip-stat-textes">
         <div *ngFor="let t of q.reponses_texte" class="ip-stat-texte-item">
           <i class="isax isax-quote-up"></i> {{ t }}
@@ -487,8 +716,182 @@
     </div>
 
     <div *ngIf="stats.questions.length === 0" class="ip-empty">
-      <i class="isax isax-chart-2"></i>
-      <span>Aucune donnée disponible</span>
+      <i class="isax isax-chart-2"></i><span>Aucune donnée disponible</span>
+    </div>
+  </ng-container>
+
+</ng-container>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- VUE : ENVOYER PAR EMAIL                                                   -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<ng-container *ngIf="tab === 'envoyer'">
+
+  <div class="ip-page-head">
+    <div>
+      <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm" (click)="backToList()">
+        <i class="isax isax-arrow-left-2"></i> Retour
+      </button>
+      <h5 class="ip-page-head__title mt-2">Envoyer — {{ selectedSondage?.titre }}</h5>
+    </div>
+  </div>
+
+  <div class="ip-card ip-envoyer-card">
+
+    <div class="ip-envoyer-info">
+      <div class="ip-envoyer-info-row">
+        <span class="ip-envoyer-info-label">Formation(s) liée(s)</span>
+        <span class="ip-envoyer-info-val">
+          <ng-container *ngIf="selectedSondage && getFormationsTitres(selectedSondage).length > 0">
+            <span *ngFor="let t of getFormationsTitres(selectedSondage!); let last = last">{{ t }}<span *ngIf="!last">, </span></span>
+          </ng-container>
+          <ng-container *ngIf="!selectedSondage || getFormationsTitres(selectedSondage).length === 0">— (aucune)</ng-container>
+        </span>
+      </div>
+      <div class="ip-envoyer-info-row">
+        <span class="ip-envoyer-info-label">Déclenchement</span>
+        <span class="ip-envoyer-info-val">
+          {{ selectedSondage?.declenchement === 'a_chaud' ? 'À chaud' : selectedSondage?.declenchement === 'a_froid' ? 'À froid (' + (selectedSondage?.delai_jours || '?') + ' j)' : 'Manuel' }}
+        </span>
+      </div>
+      <div class="ip-envoyer-info-row" *ngIf="!isEnqueteLibreSansFormation">
+        <span class="ip-envoyer-info-label">Entreprise</span>
+        <span class="ip-envoyer-info-val">{{ getEntrepriseNom(selectedSondage?.entreprise_id) }}</span>
+      </div>
+    </div>
+
+    <div class="ip-divider"></div>
+
+    <!-- Enquête libre : résumé des entreprises cibles sauvegardées -->
+    <div *ngIf="isEnqueteLibreSansFormation && (selectedSondage?.parametres?.cible_entreprise_ids?.length ?? 0) > 0" class="ip-envoyer-cibles-info">
+      <i class="isax isax-buildings-2"></i>
+      <span>
+        Cibles enregistrées : <strong>{{ (selectedSondage?.parametres?.cible_entreprise_ids ?? []).length }}</strong> entreprise{{ (selectedSondage?.parametres?.cible_entreprise_ids?.length ?? 0) > 1 ? 's' : '' }}
+      </span>
+    </div>
+
+    <!-- Enquête libre sans formation : sélecteur multi-entreprises (modifiable avant envoi) -->
+    <ng-container *ngIf="isEnqueteLibreSansFormation">
+      <div class="ip-field ip-field--mb">
+        <label class="ip-label">
+          Entreprise(s) destinataire(s) <span class="ip-required">*</span>
+        </label>
+        <div class="ip-multiselect-list">
+          <label class="ip-multiselect-item ip-multiselect-item--all"
+                 [class.selected]="allEnvoyerEntreprisesSelected"
+                 title="Toutes les entreprises">
+            <input type="checkbox" class="ip-multiselect-cb"
+                   [checked]="allEnvoyerEntreprisesSelected"
+                   (change)="toggleAllEnvoyerEntreprises()"
+                   title="Toutes les entreprises">
+            <strong>Toutes les entreprises</strong>
+          </label>
+          <label *ngFor="let e of entreprises" class="ip-multiselect-item"
+                 [class.selected]="isEnvoyerEntrepriseSelected(e.id)"
+                 [title]="e.nom">
+            <input type="checkbox" class="ip-multiselect-cb"
+                   [checked]="isEnvoyerEntrepriseSelected(e.id)"
+                   (change)="toggleEnvoyerEntreprise(e.id)"
+                   [title]="e.nom">
+            <span>{{ e.nom }}</span>
+          </label>
+        </div>
+        <div *ngIf="envoyerEntrepriseIds.length > 0" class="ip-multiselect-summary">
+          {{ allEnvoyerEntreprisesSelected ? 'Toutes les entreprises sélectionnées' : envoyerEntrepriseIds.length + ' entreprise' + (envoyerEntrepriseIds.length > 1 ? 's' : '') + ' sélectionnée' + (envoyerEntrepriseIds.length > 1 ? 's' : '') }}
+        </div>
+        <div class="ip-field-hint">
+          <i class="isax isax-info-circle"></i>
+          L'email sera envoyé à tous les employés des entreprises sélectionnées.
+        </div>
+      </div>
+    </ng-container>
+
+    <p *ngIf="selectedSondage && getFormationsTitres(selectedSondage).length > 0" class="ip-envoyer-desc">
+      Un email contenant un lien personnel à usage unique sera envoyé à tous les participants des formations sélectionnées.
+    </p>
+    <div *ngIf="selectedSondage && !isEnqueteLibreSansFormation && getFormationsTitres(selectedSondage).length === 0" class="ip-alert ip-alert--info ip-alert--mb">
+      <i class="isax isax-info-circle"></i>
+      Ce sondage n'est lié à aucune formation. L'invitation sera envoyée à tous les employés de l'entreprise concernée.
+    </div>
+
+    <div *ngIf="envoyerSuccess" class="ip-alert ip-alert--success">
+      <i class="isax isax-tick-circle"></i> {{ envoyerSuccess }}
+    </div>
+    <div *ngIf="envoyerError" class="ip-alert ip-alert--danger">
+      <i class="isax isax-warning-2"></i> {{ envoyerError }}
+    </div>
+
+    <button type="button" class="ip-btn ip-btn--primary ip-btn--wide"
+            [disabled]="envoyerLoading || !!envoyerSuccess"
+            (click)="envoyerSondage()">
+      <span *ngIf="!envoyerLoading"><i class="isax isax-send-2"></i> Envoyer à tous les participants</span>
+      <span *ngIf="envoyerLoading"><span class="spinner-border spinner-border-sm me-2"></span> Envoi en cours…</span>
+    </button>
+  </div>
+
+</ng-container>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- VUE : RÉSULTATS DÉTAILLÉS                                                 -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<ng-container *ngIf="tab === 'resultats'">
+
+  <div class="ip-page-head">
+    <div>
+      <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm" (click)="backToList()">
+        <i class="isax isax-arrow-left-2"></i> Retour
+      </button>
+      <h5 class="ip-page-head__title mt-2">Résultats — {{ selectedSondage?.titre }}</h5>
+      <p class="ip-page-head__sub">Réponses individuelles par participant</p>
+    </div>
+    <button type="button" class="ip-btn ip-btn--ghost" (click)="exportCsv(selectedSondage!)">
+      <i class="isax isax-document-download"></i> Export CSV
+    </button>
+  </div>
+
+  <div *ngIf="resultatsLoading" class="ip-loader"><div class="spinner-border"></div></div>
+
+  <ng-container *ngIf="!resultatsLoading">
+    <div *ngIf="!resultats || resultats.length === 0" class="ip-empty-state">
+      <i class="isax isax-note-21"></i>
+      <p>Aucune réponse reçue pour ce sondage.</p>
+      <button type="button" class="ip-btn ip-btn--primary" (click)="openEnvoyer(selectedSondage!)">
+        <i class="isax isax-send-2"></i> Envoyer le sondage
+      </button>
+    </div>
+
+    <div *ngIf="resultats && resultats.length > 0" class="ip-card ip-resultats-card">
+      <div class="ip-resultats-header">
+        <span class="ip-resultats-count">{{ resultats.length }} réponse{{ resultats.length > 1 ? 's' : '' }} reçue{{ resultats.length > 1 ? 's' : '' }}</span>
+      </div>
+      <div class="ip-resultats-table-wrap">
+        <table class="ip-resultats-table">
+          <thead>
+            <tr>
+              <th class="ip-th--participant">Participant</th>
+              <th class="ip-th--date">Répondu le</th>
+              <th *ngFor="let q of resultatsQuestions; let i = index">Q{{ i + 1 }} — {{ q.question }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of resultats">
+              <td>
+                <div class="ip-res-user">
+                  <span class="ip-res-avatar">{{ (r.user?.prenom || r.user?.name || '?')[0] | uppercase }}</span>
+                  <div>
+                    <div class="ip-res-name">{{ r.user?.prenom }} {{ r.user?.nom }}</div>
+                    <div class="ip-res-email">{{ r.user?.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="ip-res-date">{{ r.repondu_at | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td *ngFor="let q of resultatsQuestions" class="ip-res-val">
+                {{ getReponseLabel(r.reponses, q.id) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </ng-container>
 
@@ -502,8 +905,8 @@
     <i class="isax isax-warning-2 ip-confirm-icon ip-confirm-icon--danger"></i>
     <p class="ip-confirm-text">Supprimer ce sondage définitivement ? Toutes les questions et réponses seront perdues.</p>
     <div class="ip-confirm-actions">
-      <button class="ip-btn ip-btn--ghost" (click)="confirmDeleteId = null">Annuler</button>
-      <button class="ip-btn ip-btn--danger" (click)="deleteSondage()">Supprimer définitivement</button>
+      <button type="button" class="ip-btn ip-btn--ghost" (click)="confirmDeleteId = null">Annuler</button>
+      <button type="button" class="ip-btn ip-btn--danger" (click)="deleteSondage()">Supprimer définitivement</button>
     </div>
   </div>
 </div>
