@@ -5,7 +5,7 @@ import { SidebarService } from '../../../shared/service/sidebar/sidebar.service'
 import { routes } from '../../../shared/service/routes/routes';
 import { SidebarItem } from '../../../shared/models/model';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
 
 @Component({
@@ -48,7 +48,6 @@ export class AdminHeaderComponent implements OnInit {
      public sidebarService: SidebarService,
      private renderer: Renderer2,
      private authService: AuthService,
-    private router: Router
    ) {
      this.common.base.subscribe((res: string) => {
        this.base = res;
@@ -157,28 +156,36 @@ checkLoginStatus(): void {
     const staticRhIds = [4, 5, 9, 14];
     if (staticRhIds.includes(this.currentUser.role_id)) return true;
     const roleType = this.currentUser.role_type ?? this.currentUser['role_type'] ?? '';
-    return roleType === 'rh';
+    if (roleType === 'rh') return true;
+    // Rôle dynamique : vérifier le nom du rôle pour les Holding non listés
+    const roleName: string = (this.currentUser.role?.name ?? '').toLowerCase();
+    return roleName.includes('rh') || roleName.includes('holding') || roleName.includes('admin');
+  }
+
+  private formatRoleName(name: string): string {
+    return name.replace(/\bAdmin\b/g, 'Administrateur');
   }
 
   getRoleLabel(): string {
-    if (!this.currentUser?.role_id) return 'User';
-
+    if (!this.currentUser) return 'Utilisateur';
+    // Priorité : nom du rôle retourné par le backend (dynamique, fiable)
+    if (this.currentUser.role?.name) return this.formatRoleName(this.currentUser.role.name);
+    // Fallback : IDs statiques des rôles système
     switch (this.currentUser.role_id) {
-      case 1: return 'Super Admin';
-      case 2: return 'Employe';
-      case 3: return 'Formateur';
-      case 4: return 'Responsable RH';
-      case 5: return 'Administrateur RH Holding';
-      case 6: return 'Gestionnaire de Contenu';
-      case 7: return 'Support Technique';
-      case 8: return 'Auditeur';
-      case 9: return 'Administrateur RH';
-      case 10: return 'Manageur';
-      case 11: return 'Administrateur';
-      case 13: return 'Consultant';      
-      case 14: return 'Super Admin RH Holding Groupe';      
-  
-      default: return 'User';
+      case 1:  return 'Super Admin';
+      case 2:  return 'Employé';
+      case 3:  return 'Formateur';
+      case 4:  return 'Responsable RH';
+      case 5:  return 'Administrateur RH Holding';
+      case 9:  return 'Administrateur RH';
+      case 14: return 'Super Admin RH Holding';
+      default: {
+        // Fallback final : déduire depuis role_type
+        const rt = this.currentUser.role_type ?? '';
+        if (rt === 'rh') return 'Admin RH';
+        if (rt === 'admin') return 'Administrateur';
+        return 'Utilisateur';
+      }
     }
   }
 
