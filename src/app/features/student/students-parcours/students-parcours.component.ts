@@ -304,12 +304,10 @@ export class StudentsParcoursComponent implements OnInit {
         icone:  'isax-category',
       };
       this.categories = [categorieLocale];
-      // Un seul choix possible → auto-sélection transparente pour l'utilisateur.
       this.selectCategorie(categorieLocale);
     } else {
-      // Cas de repli : parcours sans catégorie en base.
       this.categories = [];
-      this.showToast('warning', '⚠️ Ce parcours ne possède pas de catégorie associée.');
+      this.loadFormationsDuParcours(parcours.id, null);
     }
   }
 

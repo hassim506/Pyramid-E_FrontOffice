@@ -103,8 +103,11 @@ export class FormationsService {
     return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/parcours/${parcoursId}/categories`, { headers: this.getHeaders() });
   }
 
-  getFormationsDuParcoursParCategorie(parcoursId: number, categorieId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/demandes-formation/listes/parcours/${parcoursId}/categories/${categorieId}/formations`, { headers: this.getHeaders() });
+  getFormationsDuParcoursParCategorie(parcoursId: number, categorieId: number | null): Observable<any> {
+    const url = categorieId != null
+      ? `${this.apiUrl}/demandes-formation/listes/parcours/${parcoursId}/categories/${categorieId}/formations`
+      : `${this.apiUrl}/demandes-formation/listes/parcours/${parcoursId}/formations`;
+    return this.http.get<any>(url, { headers: this.getHeaders() });
   }
 
   getParcoursParCategorie(categorieId: number): Observable<any> {
