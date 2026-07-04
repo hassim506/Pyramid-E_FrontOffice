@@ -323,7 +323,7 @@ export class StudentsParcoursComponent implements OnInit {
     this.loadFormationsDuParcours(this.selectedParcours.id, categorie.id);
   }
 
-  loadFormationsDuParcours(parcoursId: number, categorieId: number): void {
+  loadFormationsDuParcours(parcoursId: number, categorieId: number | null): void {
     this.loadingFormations = true;
     this.formationsService.getFormationsDuParcoursParCategorie(parcoursId, categorieId).subscribe({
       next: (res: any) => {
