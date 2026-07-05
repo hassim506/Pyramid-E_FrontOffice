@@ -1,4 +1,4 @@
-// filepath: src/app/student/lecture-formation/lecture-formation.component.ts
+// filepath: src/app/courses/course-watch/lecture-formation.component.ts
 import { Component, OnInit, OnChanges, OnDestroy, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -89,13 +89,13 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
       if (idFromRoute) {
         this.formationId = Number(idFromRoute);
 
-        const state = history.state ?? {};
-        this.parcoursId  = state?.parcoursId  ? Number(state.parcoursId)  : null;
-        this.catalogueId = state?.catalogueId ? Number(state.catalogueId) : null;
-
-        console.log(`🚀 [LectureFormation] Mode ROUTE → formationId=${this.formationId}`);
-        console.log(`📋 [LectureFormation] history.state complet:`, state);
-        console.log(`🔑 [LectureFormation] Contexte → parcoursId=${this.parcoursId} | catalogueId=${this.catalogueId} | fromPage=${state?.fromPage}`);
+        // Lire le contexte depuis history.state (navigation interne) OU queryParams (nouvel onglet)
+        const state       = history.state ?? {};
+        const qp          = this.route.snapshot.queryParamMap;
+        this.parcoursId   = state?.parcoursId  ? Number(state.parcoursId)
+                          : qp.get('parcoursId')  ? Number(qp.get('parcoursId'))  : null;
+        this.catalogueId  = state?.catalogueId ? Number(state.catalogueId)
+                          : qp.get('catalogueId') ? Number(qp.get('catalogueId')) : null;
 
         this.loadStructure();
       } else {
@@ -380,22 +380,22 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
   // ── Retour — navigation exacte selon le tunnel emprunté ──
   goBack(): void {
     if (this.isEmbedded) {
-      console.log(`↩️ [LectureFormation] goBack → mode embarqué → closePlayer.emit()`);
       this.closePlayer.emit();
       return;
     }
 
-    const state = history.state;
-    console.log(`↩️ [LectureFormation] goBack → state:`, state);
+    // Lire le contexte depuis history.state (navigation interne) ou queryParams (nouvel onglet)
+    const state    = history.state ?? {};
+    const qp       = this.route.snapshot.queryParamMap;
+    const fromPage = state?.fromPage ?? qp.get('fromPage') ?? '';
+    const pId      = this.parcoursId  ?? (qp.get('parcoursId')  ? Number(qp.get('parcoursId'))  : null);
+    const cId      = this.catalogueId ?? (qp.get('catalogueId') ? Number(qp.get('catalogueId')) : null);
 
-    if (state?.fromPage === 'parcours' && state?.parcoursId) {
-      console.log(`↩️ [LectureFormation] goBack → parcours → /student/mes-parcours/${state.parcoursId}`);
-      this.router.navigate(['/student/mes-parcours', state.parcoursId]);
-    } else if (state?.fromPage === 'catalogue' && state?.catalogueId) {
-      console.log(`↩️ [LectureFormation] goBack → catalogue → /student/catalogue-detail/${state.catalogueId}`);
-      this.router.navigate(['/student/catalogue-detail', state.catalogueId]);
+    if (fromPage === 'parcours' && pId) {
+      this.router.navigate(['/student/mes-parcours', pId]);
+    } else if (fromPage === 'catalogue' && cId) {
+      this.router.navigate(['/student/catalogue-detail', cId]);
     } else {
-      console.log(`↩️ [LectureFormation] goBack → formation simple → /student/mes-formations`);
       this.router.navigate(['/student/mes-formations']);
     }
   }

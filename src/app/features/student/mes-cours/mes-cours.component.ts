@@ -190,7 +190,12 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   }
 
   openPlayer(f: Formation): void {
-    this.router.navigate(['/courses/course-watch', f.id]);
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/courses/course-watch', f.id], {
+        queryParams: { fromPage: 'demandes' }
+      })
+    );
+    window.open(url, '_blank');
   }
 
   // ════════════════════════════════════════════

@@ -175,16 +175,21 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
   commencerFormation(formationId: number, event: Event): void {
     event.stopPropagation();
     if (this.estExpire) return;
-    this.router.navigate(['/student/lecture-formation', formationId], {
-      state: { fromPage: 'parcours', parcoursId: this.parcoursId }
-    });
+    this.openFormationInNewTab(formationId);
   }
 
   goToFormation(formationId: number): void {
     if (this.estExpire) return;
-    this.router.navigate(['/student/lecture-formation', formationId], {
-      state: { fromPage: 'parcours', parcoursId: this.parcoursId }
-    });
+    this.openFormationInNewTab(formationId);
+  }
+
+  private openFormationInNewTab(formationId: number): void {
+    const params: Record<string, string> = { fromPage: 'parcours' };
+    if (this.parcoursId) params['parcoursId'] = String(this.parcoursId);
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/courses/course-watch', formationId], { queryParams: params })
+    );
+    window.open(url, '_blank');
   }
 
   goBack(): void { this.router.navigate(['/student/mes-parcours-assignes']); }

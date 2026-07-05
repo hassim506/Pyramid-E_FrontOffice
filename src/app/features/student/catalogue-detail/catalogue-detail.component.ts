@@ -314,16 +314,13 @@ export class CatalogueDetailComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     if (this.estExpire) return;
 
-    console.log(`🚀 [CatalogueDetail #${this.catalogueId}] commencerFormation → formationId=${formationId} | state: { fromPage: 'catalogue', catalogueId: ${this.catalogueId} }`);
+    const params: Record<string, string> = { fromPage: 'catalogue' };
+    if (this.catalogueId) params['catalogueId'] = String(this.catalogueId);
 
-    this.router.navigate(['/student/lecture-formation', formationId], {
-      state: {
-        fromPage:    'catalogue',
-        catalogueId: this.catalogueId,
-        // ✅ PAS de parcoursId — contexte catalogue uniquement
-        // lecture-formation lira catalogueId → clé "formationId_null_catalogueId"
-      }
-    });
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/courses/course-watch', formationId], { queryParams: params })
+    );
+    window.open(url, '_blank');
   }
 
   goBack(): void {

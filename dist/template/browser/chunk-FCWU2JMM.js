@@ -758,14 +758,14 @@ var ParcoursAssigneDetailComponent = class _ParcoursAssigneDetailComponent {
     event.stopPropagation();
     if (this.estExpire)
       return;
-    this.router.navigate(["/student/lecture-formation", formationId], {
+    this.router.navigate(["/courses/course-watch", formationId], {
       state: { fromPage: "parcours", parcoursId: this.parcoursId }
     });
   }
   goToFormation(formationId) {
     if (this.estExpire)
       return;
-    this.router.navigate(["/student/lecture-formation", formationId], {
+    this.router.navigate(["/courses/course-watch", formationId], {
       state: { fromPage: "parcours", parcoursId: this.parcoursId }
     });
   }

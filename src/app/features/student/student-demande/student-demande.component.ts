@@ -344,12 +344,12 @@ export class StudentDemandeComponent implements OnInit {
     const formationId = demande.formation_id ?? demande.formation?.id;
     if (formationId) {
       this.fermerDetailDemande();
-      this.router.navigate(['/student/lecture-formation', formationId], {
-        state: {
-          fromPage: 'demandes',
-          demande: demande
-        }
-      });
+      const url = this.router.serializeUrl(
+        this.router.createUrlTree(['/courses/course-watch', formationId], {
+          queryParams: { fromPage: 'demandes' }
+        })
+      );
+      window.open(url, '_blank');
     }
   }
 

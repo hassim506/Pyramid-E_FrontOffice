@@ -115,7 +115,7 @@ var routes = [
   // PAGES PLEIN ÉCRAN — en dehors de tout layout back-office
   // ══════════════════════════════════════════════════════════════════════
   {
-    path: "student/lecture-formation/:id",
+    path: "courses/course-watch/:id",
     loadComponent: () => import("./chunk-V2FNIVMT.js").then((m) => m.LectureFormationComponent),
     canActivate: [authGuard]
   },

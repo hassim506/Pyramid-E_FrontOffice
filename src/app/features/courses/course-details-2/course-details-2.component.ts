@@ -223,7 +223,7 @@ export class CourseDetails2Component implements OnInit {
     if (!this.canCommencer()) return;
     const id = this.formation?.id ?? Number(this.route.snapshot.paramMap.get('id'));
     if (id) {
-      this.router.navigate(['/student/lecture-formation', id]);
+      this.router.navigate(['/courses/course-watch', id]);
     }
   }
 
