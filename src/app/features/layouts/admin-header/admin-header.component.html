@@ -199,11 +199,11 @@
 
                   <!-- Profile Footer -->
                   <div class="profile-menu-footer">
-                    <!-- Mode apprenant (RH uniquement) -->
-                    <a *ngIf="isRhUser()" class="learner-mode-btn" [routerLink]="routes.students_Dashboard">
+                    <!-- Mode apprenant (tous les profils non-employé) -->
+                    <a *ngIf="!isEmployee()" class="learner-mode-btn" [routerLink]="routes.students_Dashboard">
                       <span class="learner-mode-btn__icon"><i class="isax isax-user-octagon"></i></span>
                       <span class="learner-mode-btn__text">
-                        <span class="learner-mode-btn__label">Mode apprenant</span>
+                        <span class="learner-mode-btn__label">Mode employé</span>
                         <span class="learner-mode-btn__sub">Accéder à votre espace employé</span>
                       </span>
                       <i class="isax isax-arrow-right-3 learner-mode-btn__arrow"></i>

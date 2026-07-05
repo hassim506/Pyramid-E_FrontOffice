@@ -32,10 +32,10 @@ export const ROLE_ROUTING: RoleRoutingConfig[] = [
 ];
 
 // Layouts autorisés par préfixe de route
-// adminrh inclut /student et /instructor pour les modes apprenant et formateur sans re-login
+// Tous les profils non-employé peuvent accéder à /student (mode apprenant) et /courses
 export const LAYOUT_ROUTE_PREFIXES: Record<LayoutType, string[]> = {
-  superadmin: ['/superadmin'],
-  adminrh:    ['/adminrh', '/student', '/instructor'],
-  formateur:  ['/instructor'],
-  employe:    ['/student'],
+  superadmin: ['/superadmin', '/student', '/instructor', '/courses'],
+  adminrh:    ['/adminrh',    '/student', '/instructor', '/courses'],
+  formateur:  ['/instructor', '/student',               '/courses'],
+  employe:    ['/student',                              '/courses'],
 };

@@ -92,11 +92,26 @@ export class StudentSidebarComponent implements OnInit, OnDestroy {
     return !!path && this.currentUrl.startsWith(path);
   }
 
-  isRhInLearnerMode(): boolean {
+  isInLearnerMode(): boolean {
     const user = this.authService.getUser();
     if (!user) return false;
     const roleType = user.role_type ?? (user as any)['role_type'] ?? '';
     const roleId   = user.role_id ?? 0;
-    return [4, 5, 9, 14].includes(roleId) || roleType === 'rh';
+    // Tout profil non-employé peut être en mode apprenant
+    if (roleId === 2 || roleType === 'employe') return false;
+    return true;
   }
+
+  getAdminReturnRoute(): string {
+    const user = this.authService.getUser();
+    if (!user) return this.routes.adminrh_dashboard;
+    const roleType = user.role_type ?? (user as any)['role_type'] ?? '';
+    const roleId   = user.role_id ?? 0;
+    if (roleId === 3 || roleType === 'formateur') return this.routes.instructor_dashboard;
+    if (roleId === 1 || roleType === 'admin')     return this.routes.superadmin_dashboard ?? this.routes.adminrh_dashboard;
+    return this.routes.adminrh_dashboard;
+  }
+
+  /** @deprecated use isInLearnerMode() */
+  isRhInLearnerMode(): boolean { return this.isInLearnerMode(); }
 }

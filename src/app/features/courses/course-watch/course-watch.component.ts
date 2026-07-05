@@ -49,6 +49,9 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
   quizScore = 0;
 
   private formationId!: number;
+  private parcoursId:  number | null = null;
+  private catalogueId: number | null = null;
+  private fromPage:    string = '';
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -61,6 +64,15 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Contexte de navigation (state interne ou queryParams depuis nouvel onglet)
+    const state       = history.state ?? {};
+    const qp          = this.route.snapshot.queryParamMap;
+    this.fromPage     = state?.fromPage   ?? qp.get('fromPage')   ?? '';
+    this.parcoursId   = state?.parcoursId  ? Number(state.parcoursId)
+                      : qp.get('parcoursId')  ? Number(qp.get('parcoursId'))  : null;
+    this.catalogueId  = state?.catalogueId ? Number(state.catalogueId)
+                      : qp.get('catalogueId') ? Number(qp.get('catalogueId')) : null;
+
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const raw = params.get('id');
       if (!raw) {
@@ -158,9 +170,26 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
       if (quizId) {
         this.loadQuiz(quizId);
       } else {
-        // No quiz linked yet — reset quiz state so the "not available" banner shows
+        // quiz_id absent : chercher parmi les quiz de la formation en matchant par titre
         this.quiz = null;
-        this.quizLoading = false;
+        this.quizLoading = true;
+        this.quizService.getQuizzesByFormation(this.formationId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (quizzes: any[]) => {
+              const sectionTitle = section.titre?.toLowerCase().trim() ?? '';
+              // Priorité : titre exact → premier quiz si la formation n'en a qu'un
+              const match = quizzes.find((q: any) => q.titre?.toLowerCase().trim() === sectionTitle)
+                         ?? (quizzes.length === 1 ? quizzes[0] : null);
+              if (match) {
+                section.quiz_id = match.id;
+                this.loadQuiz(match.id);
+              } else {
+                this.quizLoading = false;
+              }
+            },
+            error: () => { this.quizLoading = false; }
+          });
       }
     }
   }
@@ -535,6 +564,12 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate([this.routes.courseDetails + '/' + this.formationId]);
+    if (this.fromPage === 'parcours' && this.parcoursId) {
+      this.router.navigate(['/student/mes-parcours', this.parcoursId]);
+    } else if (this.fromPage === 'catalogue' && this.catalogueId) {
+      this.router.navigate(['/student/catalogue-detail', this.catalogueId]);
+    } else {
+      this.router.navigate(['/student/mes-formations']);
+    }
   }
 }

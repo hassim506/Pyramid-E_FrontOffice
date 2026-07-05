@@ -24,8 +24,14 @@ export const routes: Routes = [
     // PAGES PLEIN ÉCRAN — en dehors de tout layout back-office
     // ══════════════════════════════════════════════════════════════════════
     {
+        path: 'courses/course-watch/:id',
+        loadComponent: () => import('./features/courses/course-watch/course-watch.component').then(m => m.CourseWatchComponent),
+        canActivate: [authGuard],
+    },
+    // Rétrocompatibilité ancienne URL
+    {
         path: 'student/lecture-formation/:id',
-        loadComponent: () => import('./features/student/lecture-formation/lecture-formation.component').then(m => m.LectureFormationComponent),
+        loadComponent: () => import('./features/courses/course-watch/course-watch.component').then(m => m.CourseWatchComponent),
         canActivate: [authGuard],
     },
     // ✅ Route quiz plein écran — hors layout, même niveau que lecture-formation
@@ -54,8 +60,6 @@ export const routes: Routes = [
                 {path:'course-category-2',loadComponent:()=>import ('./features/courses/course-category-2/course-category-2.component').then((m)=>m.CourseCategory2Component)},
                 {path:'course-category-3',loadComponent:()=>import ('./features/courses/course-category-3/course-category-3.component').then((m)=>m.CourseCategory3Component)},
                 {path:'course-resume',loadComponent:()=>import ('./features/courses/course-resume/course-resume.component').then((m)=>m.CourseResumeComponent)},
-                {path:'course-watch',loadComponent:()=>import ('./features/courses/course-watch/course-watch.component').then((m)=>m.CourseWatchComponent)},
-                {path:'course-watch/:id',loadComponent:()=>import ('./features/courses/course-watch/course-watch.component').then((m)=>m.CourseWatchComponent)},
 
                 {path:'cart',loadComponent:()=>import ('./features/courses/course-cart/course-cart.component').then((m)=>m.CourseCartComponent)},
                 {path:'checkout',loadComponent:()=>import ('./features/courses/course-checkout/course-checkout.component').then((m)=>m.CourseCheckoutComponent)},

@@ -162,6 +162,13 @@ checkLoginStatus(): void {
     return roleName.includes('rh') || roleName.includes('holding') || roleName.includes('admin');
   }
 
+  isEmployee(): boolean {
+    if (!this.currentUser) return false;
+    if (this.currentUser.role_id === 2) return true;
+    const roleType = this.currentUser.role_type ?? this.currentUser['role_type'] ?? '';
+    return roleType === 'employe';
+  }
+
   private formatRoleName(name: string): string {
     return name.replace(/\bAdmin\b/g, 'Administrateur');
   }
