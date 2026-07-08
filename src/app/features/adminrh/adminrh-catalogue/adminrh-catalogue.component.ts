@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CatalogueService, Catalogue, CatalogueRequest, Formation, FormationCatalogueRequest } from '../../../shared/service/catalogue/catalogue.service';
 import { FormationService } from '../../../shared/service/formation/formation.service';
+import { UserService } from '../../../shared/service/user/user.service';
 import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
@@ -52,16 +53,31 @@ export class AdminrhCatalogueComponent implements OnInit {
     { value: 'soft_skills', label: 'Soft Skills' }
   ];
 
+  // ── Modal participants ─────────────────────────────────────────
+  participantsModalOpen = false;
+  selectedCatalogueForParticipants: Catalogue | null = null;
+  participants: any[] = [];
+  participantsLoading = false;
+  participantsSearch = '';
+  availableUsers: any[] = [];
+  availableUsersFiltered: any[] = [];
+  usersSearch = '';
+  usersLoading = false;
+  inscriptionPending = false;
+  inscriptionSuccess = '';
+  inscriptionError = '';
+
   constructor(
     private catalogueService: CatalogueService,
     private formationService: FormationService,
+    private userService: UserService,
     private formBuilder: FormBuilder
   ) {
     // Formulaire catalogue
     this.catalogueForm = this.formBuilder.group({
       titre: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(10)]],
-      short_description: ['', Validators.required],
+      description: [''],
+      short_description: [''],
       couleur: ['#3B82F6', Validators.required],
       icone: ['folder', Validators.required],
       ordre: [1, [Validators.required, Validators.min(1)]],
@@ -213,8 +229,8 @@ export class AdminrhCatalogueComponent implements OnInit {
     
     return {
       titre: formValue.titre.trim(),
-      description: formValue.description.trim(),
-      short_description: formValue.short_description.trim(),
+      description: formValue.description?.trim() || '',
+      short_description: formValue.short_description?.trim() || '',
       couleur: formValue.couleur,
       icone: formValue.icone.trim(),
       ordre: parseInt(formValue.ordre),
@@ -553,6 +569,114 @@ export class AdminrhCatalogueComponent implements OnInit {
 
   trackByCatalogueId(_index: number, catalogue: Catalogue): number {
     return catalogue.id;
+  }
+
+  trackByUserId(_i: number, u: any): number { return u.id; }
+
+  // ==================== PARTICIPANTS MODAL ====================
+
+  openParticipants(cat: Catalogue): void {
+    this.selectedCatalogueForParticipants = cat;
+    this.participants = [];
+    this.availableUsers = [];
+    this.availableUsersFiltered = [];
+    this.participantsSearch = '';
+    this.usersSearch = '';
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+    this.participantsModalOpen = true;
+    this.loadParticipants(cat.id);
+  }
+
+  closeParticipants(): void {
+    this.participantsModalOpen = false;
+    this.selectedCatalogueForParticipants = null;
+  }
+
+  private loadParticipants(catalogueId: number): void {
+    this.participantsLoading = true;
+    this.catalogueService.getParticipantsCatalogue(catalogueId).subscribe({
+      next: (res: any) => {
+        this.participants = res.participants || [];
+        this.participantsLoading = false;
+        this.loadAvailableUsers();
+      },
+      error: () => { this.participantsLoading = false; }
+    });
+  }
+
+  private loadAvailableUsers(): void {
+    this.usersLoading = true;
+    this.userService.getMyUsers().subscribe({
+      next: (res: any) => {
+        const enrolled = new Set(this.participants.map((p: any) => p.id));
+        const all: any[] = res.users || res.data || [];
+        this.availableUsers = all.filter((u: any) => !enrolled.has(u.id));
+        this.applyUsersFilter();
+        this.usersLoading = false;
+      },
+      error: () => { this.usersLoading = false; }
+    });
+  }
+
+  applyUsersFilter(): void {
+    const q = this.usersSearch.toLowerCase();
+    this.availableUsersFiltered = this.availableUsers.filter((u: any) =>
+      !q || u.name?.toLowerCase().includes(q) || u.nom?.toLowerCase().includes(q)
+        || u.prenom?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
+    );
+  }
+
+  get participantsFiltered(): any[] {
+    const q = this.participantsSearch.toLowerCase();
+    return this.participants.filter((p: any) =>
+      !q || p.name?.toLowerCase().includes(q) || p.nom?.toLowerCase().includes(q)
+        || p.prenom?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q)
+    );
+  }
+
+  inscrireUser(user: any): void {
+    if (!this.selectedCatalogueForParticipants || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.catalogueService.inscrireUtilisateur(this.selectedCatalogueForParticipants.id, user.id).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été inscrit(e) avec succès.`;
+        this.participants.push(user);
+        this.availableUsers = this.availableUsers.filter((u: any) => u.id !== user.id);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de l\'inscription.';
+      }
+    });
+  }
+
+  desinscrireUser(user: any): void {
+    if (!this.selectedCatalogueForParticipants || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.catalogueService.desinscrireUtilisateur(this.selectedCatalogueForParticipants.id, user.id).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été désinscrit(e).`;
+        this.participants = this.participants.filter((p: any) => p.id !== user.id);
+        this.availableUsers.push(user);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de la désinscription.';
+      }
+    });
   }
 
   getTotalFormationsCount(): number {

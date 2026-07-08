@@ -31,6 +31,7 @@ interface Section {
   type: string;
   duree_estimee: number;
   contenu: string;
+  description: string;
   ressources: string;
   obligatoire: boolean;
   visible: boolean;
@@ -551,6 +552,7 @@ export class InstructorCourseAddComponent implements OnInit {
       type: 'video',
       duree_estimee: 0,
       contenu: '',
+      description: '',
       ressources: '',
       obligatoire: true,
       visible: true,

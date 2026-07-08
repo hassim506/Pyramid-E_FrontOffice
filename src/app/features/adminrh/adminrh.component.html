@@ -43,7 +43,7 @@
             <a [routerLink]="routes.adminrhRapport" class="arh-btn arh-btn-outline" title="Rapport RH">
               <i class="isax isax-document-text"></i>Rapport RH
             </a>
-            <a [routerLink]="routes.adminrhUserList" class="arh-btn arh-btn-primary" title="Inscrire un employé">
+            <a [routerLink]="routes.adminrhUserList" [queryParams]="{action: 'create'}" class="arh-btn arh-btn-primary" title="Inscrire un employé">
               <i class="isax isax-add"></i>Inscrire un employé
             </a>
           </div>

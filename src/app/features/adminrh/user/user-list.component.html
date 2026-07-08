@@ -102,8 +102,8 @@
     <table class="ul-table" *ngIf="!loading">
       <thead>
         <tr>
-          <th style="width:26%">Utilisateur</th>
           <th style="width:12%">Matricule</th>
+          <th style="width:26%">Utilisateur</th>
           <th style="width:13%">Direction</th>
           <th style="width:13%">Rôle</th>
           <th style="width:10%">Statut</th>
@@ -114,6 +114,9 @@
       <tbody>
         <tr *ngFor="let u of tableData; trackBy: trackById">
           <td>
+            <span class="ul-meta ul-meta--mono">{{ u.matricule || '—' }}</span>
+          </td>
+          <td>
             <div class="ul-user">
               <div class="ul-avatar" [attr.data-role]="getRoleKey(getRoleName(u))">
                 {{ getInitials(u) }}
@@ -123,9 +126,6 @@
                 <div class="ul-user__email">{{ u.email }}</div>
               </div>
             </div>
-          </td>
-          <td>
-            <span class="ul-meta ul-meta--mono">{{ u.matricule || '—' }}</span>
           </td>
           <td>
             <span class="ul-meta">{{ u.direction || '—' }}</span>

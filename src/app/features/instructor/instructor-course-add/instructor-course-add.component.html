@@ -701,14 +701,6 @@
                         <div class="invalid-feedback">Le niveau de difficulté est requis</div>
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Coût (XOF)<span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" formControlName="prix" 
-                               placeholder="0" min="0" step="0.01"
-                               [class.is-invalid]="additionalInfoForm.get('prix')?.invalid && additionalInfoForm.get('prix')?.touched">
-                        <small class="text-muted">0 pour une formation gratuite</small>
-                        <div class="invalid-feedback">Le coût est requis (0 minimum)</div>
-                    </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-semibold">Durée totale (heures)</label>
@@ -1204,14 +1196,6 @@
                         <div class="invalid-feedback">Le niveau de difficulté est requis</div>
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Coût (XOF)<span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" formControlName="prix" 
-                               placeholder="0" min="0" step="0.01"
-                               [class.is-invalid]="additionalInfoForm.get('prix')?.invalid && additionalInfoForm.get('prix')?.touched">
-                        <small class="text-muted">0 pour une formation gratuite</small>
-                        <div class="invalid-feedback">Le coût est requis (0 minimum)</div>
-                    </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-semibold">Durée totale (heures)</label>

@@ -95,8 +95,8 @@
               </iframe>
             </div>
           </div>
-          <div class="cw-video-description" *ngIf="activeSection.description">
-            <p>{{ activeSection.description }}</p>
+          <div class="cw-video-description" *ngIf="activeSection.description || activeSection.contenu">
+            <p>{{ activeSection.description || activeSection.contenu }}</p>
           </div>
         </ng-container>
 
@@ -108,6 +108,9 @@
               Votre navigateur ne supporte pas la lecture vidéo.
             </video>
           </div>
+          <div class="cw-video-description" *ngIf="activeSection.description || activeSection.contenu">
+            <p>{{ activeSection.description || activeSection.contenu }}</p>
+          </div>
         </ng-container>
 
         <!-- ── VIDÉO sans ressource → image couverture ── -->
@@ -115,6 +118,9 @@
           <div class="cw-media-wrap cw-media-wrap--video">
             <img [src]="getImageUrl(formation.image_couverture)"
                  class="cw-cover-fallback" [alt]="activeSection.titre">
+          </div>
+          <div class="cw-video-description" *ngIf="activeSection.description || activeSection.contenu">
+            <p>{{ activeSection.description || activeSection.contenu }}</p>
           </div>
         </ng-container>
 

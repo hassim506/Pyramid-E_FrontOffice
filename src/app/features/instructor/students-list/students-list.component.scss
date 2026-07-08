@@ -140,3 +140,5 @@ $text-muted: #6C757D;
   &.active { background: $primary; border-color: $primary; color: #fff; }
   &:disabled { opacity: .4; cursor: not-allowed; }
 }
+
+.ip-matricule { font-family: monospace; font-size: 13px; color: #374151; }

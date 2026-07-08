@@ -269,14 +269,14 @@
           <div class="cd-price-body">
             <!-- Prix : uniquement pour les apprenants/employés (role 2) -->
             <div class="cd-price-tag" *ngIf="currentUser?.role_id === 2">
-              <span *ngIf="formation.prix == 0 || formation.prix == '0.00'" class="cd-price-free">GRATUIT</span>
-              <span *ngIf="formation.prix > 0" class="cd-price-main">{{ formation.prix }} FCFA</span>
+              <!-- <span *ngIf="formation.prix == 0 || formation.prix == '0.00'" class="cd-price-free">GRATUIT</span> -->
+              <!-- <span *ngIf="formation.prix > 0" class="cd-price-main">{{ formation.prix }} FCFA</span>
               <span *ngIf="formation.prix_original && formation.prix_original > formation.prix" class="cd-price-old">
                 {{ formation.prix_original }} FCFA
-              </span>
-              <span *ngIf="calculateDiscount(formation.prix, formation.prix_original) > 0" class="cd-price-discount">
+              </span> -->
+              <!-- <span *ngIf="calculateDiscount(formation.prix, formation.prix_original) > 0" class="cd-price-discount">
                 -{{ calculateDiscount(formation.prix, formation.prix_original) }}%
-              </span>
+              </span> -->
             </div>
 
             <!-- CTA button — adapté selon le rôle -->

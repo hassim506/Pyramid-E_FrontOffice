@@ -31,6 +31,12 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
   private routerSub?:      Subscription;
   private progressionSub?: Subscription;
 
+  private _visibilityHandler = () => {
+    if (document.visibilityState === 'visible') {
+      this.refreshProgressions();
+    }
+  };
+
   constructor(
     private route:              ActivatedRoute,
     private router:             Router,
@@ -61,11 +67,14 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
           this.refreshProgressions();
         }
       });
+
+    document.addEventListener('visibilitychange', this._visibilityHandler);
   }
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
     this.progressionSub?.unsubscribe();
+    document.removeEventListener('visibilitychange', this._visibilityHandler);
   }
 
   loadDetail(): void {
@@ -167,7 +176,7 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
   voirDetail(formationId: number, event: Event): void {
     event.stopPropagation();
     if (this.estExpire) return;
-    this.router.navigate(['/courses/course-details-2', formationId], {
+    this.router.navigate(['/courses/course-details', formationId], {
       state: { fromPage: 'parcours', parcoursId: this.parcoursId }
     });
   }

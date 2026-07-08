@@ -1,121 +1,202 @@
+<div class="ip-page">
 
-            <div class="page-title d-flex align-items-center justify-content-between">
-              <h5 class="fw-bold">My Profile</h5>
-              <a href="javascript:void(0);" class="edit-profile-icon"><i class="isax isax-edit-2"></i></a>
-            </div>
-            <div class="card">
-              <div class="card-body">
-                <h5 class="fs-18 pb-3 border-bottom mb-3">Basic Information</h5>
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>First Name</h6>
-                      <span>Eugene</span>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>Last Name</h6>
-                      <span>Andre</span>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>Registration Date</h6>
-                      <span>16 Jan 2024, 11:15 AM</span>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>User Name</h6>
-                      <span>instructordemo</span>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>Phone Number</h6>
-                      <span>89104-71829</span>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>Email</h6>
-                      <span>instructordemo&#64;example.com</span>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>Gender</h6>
-                      <span>Male</span>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>DOB</h6>
-                      <span>16 Jan 2020</span>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="mb-3">
-                      <h6>Age</h6>
-                      <span>24</span>
-                    </div>
-                  </div>
-                  <div class="col-md-12">
-                    <div>
-                      <h6>Bio</h6>
-                      <span>I am a web developer with a vast array of knowledge in
-                        many different front end and back end languages, 
-                        responsive frameworks, databases, and best code practices.
-                      </span>
-                    </div>
-                  </div>
-                </div>								
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-body">
-                  <h5 class="fs-18 pb-3 border-bottom mb-3">Education</h5>
-                  <div class="education-flow">
-                    <div class="ps-4 pb-3 timeline-flow">
-                      <div>
-                        <h6 class="mb-1">BCA - Bachelor of Computer Applications</h6>
-                        <p>International University - (2004 - 2010)</p>
-                      </div>
-                    </div>
-                    <div class="ps-4 pb-3 timeline-flow">
-                      <div>
-                        <h6 class="mb-1">MCA - Master of Computer Application</h6>
-                        <p>International University - (2010 - 2012)</p>
-                      </div>
-                    </div>
-                    <div class="ps-4 pb-0 timeline-flow">
-                      <div>
-                        <h6 class="mb-1">Design Communication Visual</h6>
-                        <p>International University - (2012-2015)</p>
-                      </div>
-                    </div>
-                  </div>
-              </div>
-            </div>
+  <!-- HERO -->
+  <div class="ip-hero">
+    <div class="ip-hero__bg"></div>
+    <div class="ip-hero__body">
+      <div class="ip-hero__identity">
+        <div class="ip-av">{{ getInitials() }}</div>
+        <div class="ip-hero__info">
+          <h2 class="ip-hero__name">{{ profile?.prenom }} {{ profile?.nom }}</h2>
+          <p class="ip-hero__fonction">{{ profile?.fonction || '—' }}</p>
+          <div class="ip-hero__meta">
+            <span *ngIf="profile?.email"><i class="isax isax-sms"></i>{{ profile?.email }}</span>
+            <span *ngIf="profile?.telephone"><i class="isax isax-call"></i>{{ profile?.telephone }}</span>
+            <span *ngIf="profile?.entreprise"><i class="isax isax-building-3"></i>{{ profile?.entreprise?.nom }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="ip-hero__actions">
+        <span class="ip-status" [class.ip-status--active]="profile?.statut === 1"
+                                [class.ip-status--inactive]="profile?.statut !== 1">
+          {{ getStatusText() }}
+        </span>
+      </div>
+    </div>
+  </div>
 
-            <div class="card mb-0">
-              <div class="card-body">
-                  <h5 class="fs-18 pb-3 border-bottom mb-3">Experience</h5>
-                  <div class="d-flex align-items-center mb-4">
-                    <span class="bg-light border avatar avatar-lg text-gray-9 flex-shrink-0 me-3"><i class="isax isax-briefcase fw-bold"></i></span>
-                    <div>
-                      <h6 class="mb-1">Web Design & Development Team Leader</h6>
-                      <p>Creative Agency - (2013 - 2016)</p>
-                    </div>
-                  </div>
-                  <div class="d-flex align-items-center">
-                    <span class="bg-light border avatar avatar-lg text-gray-9 flex-shrink-0 me-3"><i class="isax isax-briefcase fw-bold"></i></span>
-                    <div>
-                      <h6 class="mb-1">Project Manager</h6>
-                      <p>CJobcy Technology Pvt.Ltd - (Present)</p>
-                    </div>
-                  </div>
-              </div>
-            </div>					
-        
+  <!-- CONTENU -->
+  <div class="ip-layout">
+
+    <!-- Aside -->
+    <aside class="ip-aside">
+      <div class="ip-card ip-aside__card">
+        <div class="ip-av ip-av--lg">{{ getInitials() }}</div>
+        <div class="ip-aside__name">{{ profile?.prenom }} {{ profile?.nom }}</div>
+        <div class="ip-aside__role">{{ profile?.role?.name || 'Formateur' }}</div>
+        <span class="ip-status ip-status--sm"
+              [class.ip-status--active]="profile?.statut === 1"
+              [class.ip-status--inactive]="profile?.statut !== 1">
+          {{ getStatusText() }}
+        </span>
+        <div class="ip-aside__chips">
+          <div class="ip-chip">
+            <span class="ip-chip__lbl">ID</span>
+            <span class="ip-chip__val">#{{ profile?.id }}</span>
+          </div>
+          <div class="ip-chip" *ngIf="profile?.matricule">
+            <span class="ip-chip__lbl">Matricule</span>
+            <span class="ip-chip__val">{{ profile?.matricule }}</span>
+          </div>
+          <div class="ip-chip" *ngIf="profile?.entreprise">
+            <span class="ip-chip__lbl">Entreprise</span>
+            <span class="ip-chip__val">{{ profile?.entreprise?.nom }}</span>
+          </div>
+          <div class="ip-chip" *ngIf="profile?.client">
+            <span class="ip-chip__lbl">Client</span>
+            <span class="ip-chip__val">{{ profile?.client?.nom }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="ip-main">
+      <ng-container *ngIf="!isEditing && profile">
+
+        <!-- Informations personnelles -->
+        <div class="ip-card">
+          <div class="ip-card__header">
+            <i class="isax isax-user-square"></i>
+            <h4>Informations personnelles</h4>
+          </div>
+          <div class="ip-grid">
+            <div class="ip-field">
+              <span class="ip-field__lbl">Nom</span>
+              <span class="ip-field__val">{{ profile.nom }}</span>
+            </div>
+            <div class="ip-field">
+              <span class="ip-field__lbl">Prénom</span>
+              <span class="ip-field__val">{{ profile.prenom }}</span>
+            </div>
+            <div class="ip-field">
+              <span class="ip-field__lbl">Email</span>
+              <span class="ip-field__val">{{ profile.email }}</span>
+            </div>
+            <div class="ip-field">
+              <span class="ip-field__lbl">Téléphone</span>
+              <span class="ip-field__val">{{ profile.telephone || '—' }}</span>
+            </div>
+            <div class="ip-field">
+              <span class="ip-field__lbl">Fonction</span>
+              <span class="ip-field__val">{{ profile.fonction || '—' }}</span>
+            </div>
+            <div class="ip-field">
+              <span class="ip-field__lbl">Numéro matricule</span>
+              <span class="ip-field__val">{{ profile.matricule || profile.numero || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Organisation -->
+        <div class="ip-card">
+          <div class="ip-card__header">
+            <i class="isax isax-buildings-2"></i>
+            <h4>Organisation</h4>
+          </div>
+          <div class="ip-grid">
+            <div class="ip-field">
+              <span class="ip-field__lbl">Rôle</span>
+              <span class="ip-field__val">
+                <span class="ip-badge ip-badge--role">{{ profile.role?.name || 'Formateur' }}</span>
+              </span>
+            </div>
+            <div class="ip-field" *ngIf="profile.direction">
+              <span class="ip-field__lbl">Direction</span>
+              <span class="ip-field__val">{{ profile.direction }}</span>
+            </div>
+            <div class="ip-field" *ngIf="profile.entreprise">
+              <span class="ip-field__lbl">Entreprise</span>
+              <span class="ip-field__val">{{ profile.entreprise.nom }}</span>
+            </div>
+            <div class="ip-field" *ngIf="profile.client">
+              <span class="ip-field__lbl">Client / Groupe</span>
+              <span class="ip-field__val">{{ profile.client.nom }}</span>
+            </div>
+            <div class="ip-field">
+              <span class="ip-field__lbl">Statut</span>
+              <span class="ip-field__val">
+                <span class="ip-badge" [class.ip-badge--active]="profile.statut === 1"
+                                       [class.ip-badge--inactive]="profile.statut !== 1">
+                  {{ getStatusText() }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historique -->
+        <div class="ip-card">
+          <div class="ip-card__header">
+            <i class="isax isax-calendar-1"></i>
+            <h4>Historique</h4>
+          </div>
+          <div class="ip-grid">
+            <div class="ip-field">
+              <span class="ip-field__lbl">Créé le</span>
+              <span class="ip-field__val">{{ profile.created_at | date:'dd/MM/yyyy à HH:mm' }}</span>
+            </div>
+            <div class="ip-field">
+              <span class="ip-field__lbl">Dernière modification</span>
+              <span class="ip-field__val">{{ profile.updated_at | date:'dd/MM/yyyy à HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+
+      <!-- EDIT MODE -->
+      <div class="ip-card" *ngIf="isEditing">
+        <div class="ip-card__header">
+          <i class="isax isax-edit-2"></i>
+          <h4>Modifier le profil</h4>
+        </div>
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <div class="ip-grid">
+            <div class="ip-form-group">
+              <label>Nom</label>
+              <input class="form-control" formControlName="nom" placeholder="Nom">
+            </div>
+            <div class="ip-form-group">
+              <label>Prénom</label>
+              <input class="form-control" formControlName="prenom" placeholder="Prénom">
+            </div>
+            <div class="ip-form-group">
+              <label>Email</label>
+              <input class="form-control" formControlName="email" type="email" placeholder="Email">
+            </div>
+            <div class="ip-form-group">
+              <label>Téléphone</label>
+              <input class="form-control" formControlName="telephone" placeholder="Téléphone">
+            </div>
+            <div class="ip-form-group">
+              <label>Fonction</label>
+              <input class="form-control" formControlName="fonction" placeholder="Fonction">
+            </div>
+            <div class="ip-form-group">
+              <label>Numéro matricule</label>
+              <input class="form-control" formControlName="numero" placeholder="Matricule">
+            </div>
+          </div>
+          <div class="ip-form-actions">
+            <button class="ip-btn ip-btn--primary" type="submit" [disabled]="profileForm.invalid || loading">
+              <i class="isax isax-tick-circle"></i> Sauvegarder
+            </button>
+            <button type="button" class="ip-btn ip-btn--light" (click)="toggleEdit()">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+  </div>
+</div>

@@ -49,7 +49,6 @@
         <th style="width:10%">Niveau</th>
         <th style="width:12%">Permissions</th>
         <th style="width:10%">Utilisateurs</th>
-        <th style="width:13%">Créé le</th>
         <th style="width:9%">Actions</th>
       </tr>
     </thead>
@@ -90,7 +89,6 @@
         <td>
           <span class="ul-count-badge">{{ role.users_count || 0 }}</span>
         </td>
-        <td class="ul-date">{{ role.created_at | date:'dd/MM/yyyy' }}</td>
         <td>
           <div class="ul-actions">
             <button type="button" class="ul-act" title="Voir permissions"

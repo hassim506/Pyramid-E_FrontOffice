@@ -142,6 +142,12 @@ $t:            all .2s ease;
   &::-webkit-scrollbar { width: 5px; }
   &::-webkit-scrollbar-track { background: $gray-100; }
   &::-webkit-scrollbar-thumb { background: $gray-300; border-radius: 4px; }
+
+}
+
+.cw-content-wrap {
+  max-width: 860px;
+  margin: 0 auto;
 }
 
 // ── Alerte ───────────────────────────────────────────
@@ -241,6 +247,7 @@ $t:            all .2s ease;
   padding: 14px 18px; background: #fff;
   border: 1px solid $gray-200; border-top: none;
   border-radius: 0 0 $radius-lg $radius-lg;
+  text-align: center;
   p { margin: 0; font-size: 13px; color: $gray-500; line-height: 1.6; }
 }
 

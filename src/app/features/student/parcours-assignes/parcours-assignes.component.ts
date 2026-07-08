@@ -48,6 +48,12 @@ export class ParcoursAssignesComponent implements OnInit, OnDestroy {
   private routerSub?:      Subscription;
   private progressionSub?: Subscription;
 
+  private _visibilityHandler = () => {
+    if (document.visibilityState === 'visible') {
+      this._refreshProgressionsSilencieux();
+    }
+  };
+
   constructor(
     private formationsService:  FormationService,
     public  progressionService: ProgressionService,
@@ -83,11 +89,14 @@ export class ParcoursAssignesComponent implements OnInit, OnDestroy {
         }
         this._dejaCharge = true;
       });
+
+    document.addEventListener('visibilitychange', this._visibilityHandler);
   }
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
     this.progressionSub?.unsubscribe();
+    document.removeEventListener('visibilitychange', this._visibilityHandler);
   }
 
   // ── Chargement initial complet ─────────────────────────────

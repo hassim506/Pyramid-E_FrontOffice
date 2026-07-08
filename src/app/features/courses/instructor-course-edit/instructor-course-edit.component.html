@@ -31,7 +31,7 @@
         <div class="row">
             <div class="col-lg-10 mx-auto">
                 <div class="add-course-item">
-                    
+
                     <!-- Progress Wizard -->
                     <div class="wizard mb-4">
                         <ul class="form-wizard-steps" id="progressbar2">
@@ -105,7 +105,7 @@
                     </div>
                     <!-- Form Container -->
                     <div class="form-container">
-         
+
                         <!-- Étape 1: Informations de base -->
                         <div *ngIf="currentStep === 0" class="form-step">
                             <div class="card border-0 shadow-sm">
@@ -114,12 +114,12 @@
                                         <i class="fas fa-info-circle text-primary me-2"></i>
                                         Informations de base
                                     </h4>
-                                    
+
                                     <form [formGroup]="basicInfoForm">
                                         <div class="row">
                                             <div class="col-md-12 mb-3">
                                                 <label class="form-label fw-semibold">Titre de la formation<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" formControlName="titre" 
+                                                <input type="text" class="form-control" formControlName="titre"
                                                        placeholder="Ex: Développement Web avec Angular"
                                                        [class.is-invalid]="basicInfoForm.get('titre')?.invalid && basicInfoForm.get('titre')?.touched">
                                                 <div class="invalid-feedback">Le titre est requis (min. 5 caractères)</div>
@@ -165,13 +165,13 @@
 
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label fw-semibold">Nombre max de participants</label>
-                                                <input type="number" class="form-control" formControlName="nb_max_participants" 
+                                                <input type="number" class="form-control" formControlName="nb_max_participants"
                                                        placeholder="25" min="1">
                                             </div>
 
                                             <div class="col-md-12 mb-3">
                                                 <label class="form-label fw-semibold">Description courte<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" formControlName="short_description" 
+                                                <input type="text" class="form-control" formControlName="short_description"
                                                        placeholder="Résumé en une phrase"
                                                        [class.is-invalid]="basicInfoForm.get('short_description')?.invalid && basicInfoForm.get('short_description')?.touched">
                                                 <div class="invalid-feedback">La description courte est requise</div>
@@ -225,7 +225,7 @@
 
                                             <div class="col-md-12">
                                                 <div class="form-check form-switch">
-                                                    <input class="form-check-input" type="checkbox" formControlName="est_certifiante" 
+                                                    <input class="form-check-input" type="checkbox" formControlName="est_certifiante"
                                                            id="certifiante">
                                                     <label class="form-check-label" for="certifiante">
                                                         <i class="fas fa-certificate text-warning me-2"></i>
@@ -247,12 +247,12 @@
                                         <i class="fas fa-photo-video text-primary me-2"></i>
                                         Média de la formation
                                     </h4>
-                                    
+
                                     <div class="alert alert-info mb-4">
                                         <i class="fas fa-info-circle me-2"></i>
                                         <strong>Information :</strong> Ajoutez une image de couverture attractive et optionnellement une vidéo de présentation pour donner envie aux apprenants.
                                     </div>
-                                    
+
                                     <form [formGroup]="mediaForm">
                                         <div class="row">
                                             <!-- Section Image de couverture -->
@@ -267,34 +267,34 @@
                                                      (dragover)="onDragOver($event)"
                                                      (dragleave)="onDragLeave($event)"
                                                      (drop)="onDrop($event)">
-                                                    
-                                                    <input type="file" 
-                                                           #imageInput 
-                                                           (change)="onImageSelected($event)" 
-                                                           accept="image/*" 
+
+                                                    <input type="file"
+                                                           #imageInput
+                                                           (change)="onImageSelected($event)"
+                                                           accept="image/*"
                                                            class="d-none"
                                                            id="imageUpload">
-                                                    
+
                                                     <!-- Zone d'affichage de l'image -->
                                                     <div *ngIf="imagePreview; else noImageTemplate" class="position-relative">
-                                                        <img [src]="imagePreview" 
-                                                             class="img-fluid rounded shadow-sm" 
+                                                        <img [src]="imagePreview"
+                                                             class="img-fluid rounded shadow-sm"
                                                              style="max-height: 300px; max-width: 100%;"
                                                              alt="Aperçu de l'image">
-                                                        
+
                                                         <!-- Boutons d'action sur l'image -->
                                                         <div class="position-absolute top-0 end-0 m-2">
-                                                            <button type="button" 
+                                                            <button type="button"
                                                                     class="btn btn-sm btn-danger rounded-circle"
                                                                     (click)="removeImage()"
                                                                     title="Supprimer l'image">
                                                                 <i class="fas fa-times"></i>
                                                             </button>
                                                         </div>
-                                                        
+
                                                         <!-- Bouton pour changer l'image -->
                                                         <div class="mt-3">
-                                                            <button type="button" 
+                                                            <button type="button"
                                                                     class="btn btn-outline-primary btn-sm"
                                                                     (click)="imageInput.click()">
                                                                 <i class="fas fa-sync-alt me-2"></i>
@@ -302,11 +302,11 @@
                                                             </button>
                                                         </div>
                                                     </div>
-                                                    
+
                                                     <!-- Template quand aucune image -->
                                                     <ng-template #noImageTemplate>
-                                                        <div class="upload-placeholder" 
-                                                             (click)="imageInput.click()" 
+                                                        <div class="upload-placeholder"
+                                                             (click)="imageInput.click()"
                                                              style="cursor: pointer;">
                                                             <div class="upload-icon mb-3">
                                                                 <i class="fas fa-cloud-upload-alt fa-3x text-primary"></i>
@@ -315,7 +315,7 @@
                                                             <p class="text-muted mb-3">
                                                                 Glissez-déposez votre image ici ou cliquez pour parcourir
                                                             </p>
-                                                            <button type="button" 
+                                                            <button type="button"
                                                                     class="btn btn-primary"
                                                                     (click)="$event.stopPropagation(); imageInput.click()">
                                                                 <i class="fas fa-folder-open me-2"></i>
@@ -330,7 +330,7 @@
                                                         </div>
                                                     </ng-template>
                                                 </div>
-                                                
+
                                                 <!-- Messages d'erreur pour l'image -->
                                                 <div *ngIf="imageError" class="alert alert-danger mt-2 mb-0 py-2">
                                                     <i class="fas fa-exclamation-triangle me-2"></i>
@@ -344,19 +344,19 @@
                                                     <i class="fas fa-play-circle me-2"></i>
                                                     Vidéo de présentation <span class="text-muted">(optionnel)</span>
                                                 </label>
-                                                
+
                                                 <div class="mb-3">
                                                     <div class="input-group">
                                                         <span class="input-group-text">
                                                             <i class="fab fa-youtube text-danger"></i>
                                                         </span>
-                                                        <input type="url" 
-                                                               class="form-control" 
+                                                        <input type="url"
+                                                               class="form-control"
                                                                formControlName="media_url"
                                                                placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
                                                                (blur)="validateVideoUrl()"
                                                                (input)="onVideoUrlChange($event)">
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 class="btn btn-outline-secondary"
                                                                 *ngIf="mediaForm.get('media_url')?.value"
                                                                 (click)="clearVideoUrl()"
@@ -364,18 +364,18 @@
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </div>
-                                                    
+
                                                     <!-- Messages d'aide et d'erreur -->
                                                     <div class="mt-2">
                                                         <small class="text-muted d-block">
                                                             <i class="fas fa-lightbulb me-1"></i>
                                                             Plateformes supportées : YouTube, Vimeo, ou lien direct vers une vidéo
                                                         </small>
-                                                        
+
                                                         <div *ngIf="videoUrlError" class="text-danger mt-1">
                                                             <small><i class="fas fa-exclamation-circle me-1"></i>{{ videoUrlError }}</small>
                                                         </div>
-                                                        
+
                                                         <div *ngIf="videoUrlValid && mediaForm.get('media_url')?.value" class="text-success mt-1">
                                                             <small><i class="fas fa-check-circle me-1"></i>URL vidéo valide</small>
                                                         </div>
@@ -403,7 +403,7 @@
                                                                         loading="lazy">
                                                                 </iframe>
                                                             </div>
-                                                            
+
                                                             <!-- Vimeo -->
                                                             <div *ngIf="isVimeoUrl(mediaForm.get('media_url')?.value)" class="ratio ratio-16x9">
                                                                 <iframe [src]="getVimeoEmbedUrl(mediaForm.get('media_url')?.value)"
@@ -414,10 +414,10 @@
                                                                         loading="lazy">
                                                                 </iframe>
                                                             </div>
-                                                            
+
                                                             <!-- Vidéo directe -->
                                                             <div *ngIf="isDirectVideoUrl(mediaForm.get('media_url')?.value)" class="p-3">
-                                                                <video controls 
+                                                                <video controls
                                                                        class="w-100 rounded"
                                                                        style="max-height: 400px;"
                                                                        [src]="mediaForm.get('media_url')?.value"
@@ -454,8 +454,8 @@
                                                         <div class="row">
                                                             <div class="col-md-6">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" 
-                                                                           type="checkbox" 
+                                                                    <input class="form-check-input"
+                                                                           type="checkbox"
                                                                            formControlName="video_autoplay"
                                                                            id="videoAutoplay">
                                                                     <label class="form-check-label" for="videoAutoplay">
@@ -468,8 +468,8 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" 
-                                                                           type="checkbox" 
+                                                                    <input class="form-check-input"
+                                                                           type="checkbox"
                                                                            formControlName="video_show_controls"
                                                                            id="videoControls">
                                                                     <label class="form-check-label" for="videoControls">
@@ -497,7 +497,7 @@
                                             <div class="col-md-6">
                                                 <p class="mb-1">
                                                     <i class="fas fa-image me-2 text-primary"></i>
-                                                    Image de couverture : 
+                                                    Image de couverture :
                                                     <span class="fw-semibold" [class]="imagePreview ? 'text-success' : 'text-muted'">
                                                         {{ imagePreview ? 'Ajoutée' : 'Non définie' }}
                                                     </span>
@@ -506,7 +506,7 @@
                                             <div class="col-md-6">
                                                 <p class="mb-1">
                                                     <i class="fas fa-play-circle me-2 text-primary"></i>
-                                                    Vidéo de présentation : 
+                                                    Vidéo de présentation :
                                                     <span class="fw-semibold" [class]="(mediaForm.get('media_url')?.value && videoUrlValid) ? 'text-success' : 'text-muted'">
                                                         {{ (mediaForm.get('media_url')?.value && videoUrlValid) ? 'Configurée' : 'Non définie' }}
                                                     </span>
@@ -565,11 +565,11 @@
 
                                     <!-- Liste des modules -->
                                     <div *ngIf="modules.length > 0" class="accordion" id="modulesAccordion">
-                                        <div *ngFor="let module of modules; let moduleIndex = index" 
+                                        <div *ngFor="let module of modules; let moduleIndex = index"
                                              class="accordion-item mb-3 border rounded">
-                                            
+
                                             <h2 class="accordion-header">
-                                                <button class="accordion-button" type="button" 
+                                                <button class="accordion-button" type="button"
                                                         [class.collapsed]="moduleIndex !== 0"
                                                         [attr.data-bs-toggle]="'collapse'"
                                                         [attr.data-bs-target]="'#module-' + moduleIndex">
@@ -584,11 +584,11 @@
                                                             </small>
                                                         </div>
                                                         <div class="btn-group me-2" (click)="$event.stopPropagation()">
-                                                            <button class="btn btn-sm btn-outline-primary" 
+                                                            <button class="btn btn-sm btn-outline-primary"
                                                                     (click)="editModule(moduleIndex)">
                                                                 <i class="fas fa-edit"></i>
                                                             </button>
-                                                            <button class="btn btn-sm btn-outline-danger" 
+                                                            <button class="btn btn-sm btn-outline-danger"
                                                                     (click)="removeModule(moduleIndex)">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
@@ -597,19 +597,19 @@
                                                 </button>
                                             </h2>
 
-                                            <div [id]="'module-' + moduleIndex" 
+                                            <div [id]="'module-' + moduleIndex"
                                                  class="accordion-collapse collapse"
                                                  [class.show]="moduleIndex === 0"
                                                  [attr.data-bs-parent]="'#modulesAccordion'">
                                                 <div class="accordion-body">
-                                                    
+
                                                     <p class="text-muted mb-3" *ngIf="module.description">
                                                         {{ module.description }}
                                                     </p>
 
                                                     <!-- Liste des sections -->
                                                     <div class="sections-list mb-3">
-                                                        <div *ngFor="let section of module.sections; let sectionIndex = index" 
+                                                        <div *ngFor="let section of module.sections; let sectionIndex = index"
                                                              class="d-flex align-items-center justify-content-between p-3 mb-2 border rounded bg-light">
                                                             <div class="d-flex align-items-center">
                                                                 <i class="fas fa-play-circle text-success me-3"></i>
@@ -623,11 +623,11 @@
                                                                 </div>
                                                             </div>
                                                             <div class="btn-group">
-                                                                <button class="btn btn-sm btn-outline-primary" 
+                                                                <button class="btn btn-sm btn-outline-primary"
                                                                         (click)="editSection(moduleIndex, sectionIndex)">
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
-                                                                <button class="btn btn-sm btn-outline-danger" 
+                                                                <button class="btn btn-sm btn-outline-danger"
                                                                         (click)="removeSection(moduleIndex, sectionIndex)">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
@@ -636,7 +636,7 @@
                                                     </div>
 
                                                     <!-- Ajouter section -->
-                                                    <button class="btn btn-sm btn-outline-success" 
+                                                    <button class="btn btn-sm btn-outline-success"
                                                             (click)="openSectionModal(moduleIndex)">
                                                         <i class="fas fa-plus me-1"></i> Ajouter une section
                                                     </button>
@@ -775,10 +775,10 @@
                 <i class="fas fa-info-circle text-primary me-2"></i>
                 Informations supplémentaires
             </h4>
-            
+
             <form [formGroup]="additionalInfoForm">
                 <div class="row">
-                    
+
                     <!-- Section 1: Détails de formation -->
                     <div class="col-12 mb-4">
                         <h5 class="text-secondary border-bottom pb-2">
@@ -789,7 +789,7 @@
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-semibold">Difficulté<span class="text-danger">*</span></label>
-                        <select class="form-select" formControlName="difficulte" 
+                        <select class="form-select" formControlName="difficulte"
                                 [class.is-invalid]="additionalInfoForm.get('difficulte')?.invalid && additionalInfoForm.get('difficulte')?.touched">
                             <option value="facile">Facile</option>
                             <option value="moyen">Moyen</option>
@@ -799,18 +799,18 @@
                         <div class="invalid-feedback">Le niveau de difficulté est requis</div>
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <!-- <div class="col-md-4 mb-3">
                         <label class="form-label fw-semibold">Cooût (XOF)<span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" formControlName="prix" 
+                        <input type="number" class="form-control" formControlName="prix"
                                placeholder="0" min="0" step="0.01"
                                [class.is-invalid]="additionalInfoForm.get('prix')?.invalid && additionalInfoForm.get('prix')?.touched">
                         <small class="text-muted">0 pour une formation gratuite</small>
                         <div class="invalid-feedback">Le Coût est requis (0 minimum)</div>
-                    </div>
+                    </div> -->
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-semibold">Durée totale (heures)</label>
-                        <input type="number" class="form-control" formControlName="duree_totale" 
+                        <input type="number" class="form-control" formControlName="duree_totale"
                                placeholder="40" min="1" step="0.5"
                                [class.is-invalid]="additionalInfoForm.get('duree_totale')?.invalid && additionalInfoForm.get('duree_totale')?.touched">
                         <small class="text-muted">Estimation du temps total nécessaire</small>
@@ -878,7 +878,7 @@
 
                     <div class="col-md-12 mb-3">
                         <label class="form-label fw-semibold">Tags</label>
-                        <input type="text" class="form-control" formControlName="tags" 
+                        <input type="text" class="form-control" formControlName="tags"
                                placeholder="javascript, angular, web, développement (séparés par des virgules)">
                         <small class="text-muted">Maximum 10 tags, séparés par des virgules. Utiles pour la recherche.</small>
                     </div>
@@ -919,7 +919,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" 
+                            <input class="form-check-input" type="checkbox"
                                    formControlName="inscription_ouverte" id="inscriptionOuverte">
                             <label class="form-check-label" for="inscriptionOuverte">
                                 <i class="fas fa-door-open text-success me-2"></i>
@@ -932,7 +932,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" 
+                            <input class="form-check-input" type="checkbox"
                                    formControlName="est_publie" id="estPublie">
                             <label class="form-check-label" for="estPublie">
                                 <i class="fas fa-eye text-info me-2"></i>
@@ -959,7 +959,7 @@
                                                 <strong>Difficulté:</strong> {{ getDifficulteLabel(additionalInfoForm.get('difficulte')?.value) }}
                                             </li>
                                             <li class="mb-1">
-                                                <strong>Coût:</strong> 
+                                                <strong>Coût:</strong>
                                                 <span [class]="additionalInfoForm.get('prix')?.value == 0 ? 'text-success' : 'text-primary'">
                                                     {{ additionalInfoForm.get('prix')?.value == 0 ? 'GRATUIT' : additionalInfoForm.get('prix')?.value + 'XOF' }}
                                                 </span>
@@ -978,7 +978,7 @@
                                                 <strong>Outils requis:</strong> {{ getOutilsCount() }} défini(s)
                                             </li>
                                             <li class="mb-1">
-                                                <strong>Inscriptions:</strong> 
+                                                <strong>Inscriptions:</strong>
                                                 <span [class]="additionalInfoForm.get('inscription_ouverte')?.value ? 'text-success' : 'text-warning'">
                                                     {{ additionalInfoForm.get('inscription_ouverte')?.value ? 'Ouvertes' : 'Fermées' }}
                                                 </span>
@@ -993,7 +993,7 @@
             </form>
         </div>
     </div>
-</div>                        
+</div>
 
                         <!-- Étape 6: Coût estimatif -->
                         <div *ngIf="currentStep === 5" class="form-step">
@@ -1003,12 +1003,12 @@
                                         <i class="fas fa-calculator text-primary me-2"></i>
                                         Estimation des coûts de formation
                                     </h4>
-                                    
+
                                     <div class="alert alert-info mb-4">
                                         <i class="fas fa-info-circle me-2"></i>
                                         <strong>Information :</strong> Cette estimation permet aux entreprises d'évaluer le budget nécessaire pour cette formation.
                                     </div>
-                                    
+
                                     <form [formGroup]="pricingForm">
                                         <div class="row">
                                             <!-- Coûts de développement -->
@@ -1021,14 +1021,14 @@
 
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label fw-semibold">Coût de conception (XOF)</label>
-                                                <input type="number" class="form-control" formControlName="cout_conception" 
+                                                <input type="number" class="form-control" formControlName="cout_conception"
                                                        placeholder="2000" step="100" min="0">
                                                 <small class="text-muted">Analyse des besoins, conception pédagogique</small>
                                             </div>
 
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label fw-semibold">Coût de production (XOF)</label>
-                                                <input type="number" class="form-control" formControlName="cout_production" 
+                                                <input type="number" class="form-control" formControlName="cout_production"
                                                        placeholder="5000" step="100" min="0">
                                                 <small class="text-muted">Création du contenu, vidéos, exercices</small>
                                             </div>
@@ -1043,14 +1043,14 @@
 
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label fw-semibold">Coût formateur par jour (XOF)</label>
-                                                <input type="number" class="form-control" formControlName="cout_formateur_jour" 
+                                                <input type="number" class="form-control" formControlName="cout_formateur_jour"
                                                        placeholder="600" step="50" min="0">
                                                 <small class="text-muted">Tarif journalier du formateur</small>
                                             </div>
 
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label fw-semibold">Frais logistiques par participant (XOF)</label>
-                                                <input type="number" class="form-control" formControlName="frais_logistique" 
+                                                <input type="number" class="form-control" formControlName="frais_logistique"
                                                        placeholder="50" step="10" min="0">
                                                 <small class="text-muted">Matériel, documentation, pauses</small>
                                             </div>

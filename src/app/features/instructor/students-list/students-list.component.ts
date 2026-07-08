@@ -82,6 +82,7 @@ export class StudentsListComponent implements OnInit {
               participants.forEach((p: any) => {
                 const entry = {
                   id: p.id,
+                  matricule: p.matricule || '—',
                   nom: p.nom || p.name || '—',
                   prenom: p.prenom || '',
                   email: p.email || '—',

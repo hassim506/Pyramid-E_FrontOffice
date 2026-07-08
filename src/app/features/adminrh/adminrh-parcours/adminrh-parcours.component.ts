@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, FormArray } from '@angular/forms';
 import { ParcoursService, Parcours, ParcoursRequest, Formation } from '../../../shared/service/parcours/parcours.service';
 import { FormationService } from '../../../shared/service/formation/formation.service';
+import { UserService } from '../../../shared/service/user/user.service';
 import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
@@ -55,9 +56,24 @@ export class AdminrhParcoursComponent implements OnInit {
     { value: 'expert', label: 'Expert' }
   ];
 
+  // ── Modal participants ─────────────────────────────────────────
+  participantsModalOpen = false;
+  selectedParcoursForParticipants: Parcours | null = null;
+  participants: any[] = [];
+  participantsLoading = false;
+  participantsSearch = '';
+  availableUsers: any[] = [];
+  availableUsersFiltered: any[] = [];
+  usersSearch = '';
+  usersLoading = false;
+  inscriptionPending = false;
+  inscriptionSuccess = '';
+  inscriptionError = '';
+
   constructor(
     private parcoursService: ParcoursService,
     private formationService: FormationService,
+    private userService: UserService,
     private formBuilder: FormBuilder
   ) {
     this.parcoursForm = this.formBuilder.group({
@@ -523,5 +539,113 @@ buildParcoursData(): ParcoursRequest {
 
   trackByFormationId(_index: number, formation: Formation): number {
     return formation.id;
+  }
+
+  trackByUserId(_i: number, u: any): number { return u.id; }
+
+  // ==================== PARTICIPANTS MODAL ====================
+
+  openParticipants(p: Parcours): void {
+    this.selectedParcoursForParticipants = p;
+    this.participants = [];
+    this.availableUsers = [];
+    this.availableUsersFiltered = [];
+    this.participantsSearch = '';
+    this.usersSearch = '';
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+    this.participantsModalOpen = true;
+    this.loadParticipants(p.id);
+  }
+
+  closeParticipants(): void {
+    this.participantsModalOpen = false;
+    this.selectedParcoursForParticipants = null;
+  }
+
+  private loadParticipants(parcoursId: number): void {
+    this.participantsLoading = true;
+    this.parcoursService.getParticipantsParcours(parcoursId).subscribe({
+      next: (res: any) => {
+        this.participants = res.participants || [];
+        this.participantsLoading = false;
+        this.loadAvailableUsers();
+      },
+      error: () => { this.participantsLoading = false; }
+    });
+  }
+
+  private loadAvailableUsers(): void {
+    this.usersLoading = true;
+    this.userService.getMyUsers().subscribe({
+      next: (res: any) => {
+        const enrolled = new Set(this.participants.map((p: any) => p.id));
+        const all: any[] = res.users || res.data || [];
+        this.availableUsers = all.filter((u: any) => !enrolled.has(u.id));
+        this.applyUsersFilter();
+        this.usersLoading = false;
+      },
+      error: () => { this.usersLoading = false; }
+    });
+  }
+
+  applyUsersFilter(): void {
+    const q = this.usersSearch.toLowerCase();
+    this.availableUsersFiltered = this.availableUsers.filter((u: any) =>
+      !q || u.name?.toLowerCase().includes(q) || u.nom?.toLowerCase().includes(q)
+        || u.prenom?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
+    );
+  }
+
+  get participantsFiltered(): any[] {
+    const q = this.participantsSearch.toLowerCase();
+    return this.participants.filter((p: any) =>
+      !q || p.name?.toLowerCase().includes(q) || p.nom?.toLowerCase().includes(q)
+        || p.prenom?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q)
+    );
+  }
+
+  inscrireUser(user: any): void {
+    if (!this.selectedParcoursForParticipants || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.parcoursService.inscrireUtilisateur(this.selectedParcoursForParticipants.id, { user_id: user.id }).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été inscrit(e) avec succès.`;
+        this.participants.push(user);
+        this.availableUsers = this.availableUsers.filter((u: any) => u.id !== user.id);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de l\'inscription.';
+      }
+    });
+  }
+
+  desinscrireUser(user: any): void {
+    if (!this.selectedParcoursForParticipants || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.parcoursService.desinscrireUtilisateur(this.selectedParcoursForParticipants.id, user.id).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été désinscrit(e).`;
+        this.participants = this.participants.filter((p: any) => p.id !== user.id);
+        this.availableUsers.push(user);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de la désinscription.';
+      }
+    });
   }
 }

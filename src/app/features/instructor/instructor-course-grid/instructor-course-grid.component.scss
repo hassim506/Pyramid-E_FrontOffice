@@ -1,0 +1,71 @@
+$primary:    #534AB7;
+$border:     #E9ECEF;
+$text-muted: #6C757D;
+$radius:     10px;
+
+// ── KPI row ───────────────────────────────────────────────────────────────────
+.icg-kpi-row {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
+  margin-bottom: 20px;
+
+  @media (max-width: 1100px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 600px)  { grid-template-columns: repeat(2, 1fr); }
+}
+
+.icg-kpi {
+  background: #fff; border: 1px solid $border; border-radius: $radius;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+
+  &__icon {
+    width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  &__val { font-size: 20px; font-weight: 600; color: #1A1A2E; line-height: 1; }
+  &__lbl { font-size: 11px; color: $text-muted; margin-top: 3px; }
+}
+
+.ki-green  { background: #ECFDF5; color: #059669; }
+.ki-amber  { background: #FFFBEB; color: #D97706; }
+.ki-blue   { background: #EFF6FF; color: #2563EB; }
+.ki-teal   { background: #F0FDFA; color: #0D9488; }
+.ki-purple { background: #F5F3FF; color: #7C3AED; }
+
+// ── Card image ────────────────────────────────────────────────────────────────
+.icg-card-img {
+  height: 200px;
+  object-fit: cover;
+}
+
+// ── Categorie badge ───────────────────────────────────────────────────────────
+.icg-categorie-badge {
+  color: #fff;
+  font-size: 11px;
+}
+
+// ── Description truncation ────────────────────────────────────────────────────
+.icg-desc {
+  height: 40px;
+  overflow: hidden;
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+.icg-pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 4px; margin-top: 8px; flex-wrap: wrap; gap: 8px;
+}
+
+.pg-info { font-size: 12px; color: $text-muted; }
+.pg-controls { display: flex; align-items: center; gap: 4px; }
+
+.pg-btn {
+  min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; border: 1px solid $border;
+  background: #fff; color: $text-muted; cursor: pointer;
+  font-size: 12px; transition: all .12s; padding: 0 8px;
+
+  &:hover:not(:disabled) { border-color: $primary; color: $primary; background: #EEF2FF; }
+  &.active { background: $primary; border-color: $primary; color: #fff; }
+  &:disabled { opacity: .4; cursor: not-allowed; }
+}

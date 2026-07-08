@@ -169,6 +169,27 @@ checkLoginStatus(): void {
     return roleType === 'employe';
   }
 
+  isSuperAdmin(): boolean {
+    if (!this.currentUser) return false;
+    if (this.currentUser.role_id === 1) return true;
+    const roleType = this.currentUser.role_type ?? this.currentUser['role_type'] ?? '';
+    return roleType === 'admin';
+  }
+
+  isInstructor(): boolean {
+    if (!this.currentUser) return false;
+    if (this.currentUser.role_id === 3) return true;
+    const roleType = this.currentUser.role_type ?? this.currentUser['role_type'] ?? '';
+    return roleType === 'formateur';
+  }
+
+  hasPermission(permission: string): boolean {
+    if (!this.currentUser) return false;
+    const perms: any[] = this.currentUser.permissions ?? [];
+    // Supporte tableau de strings ou tableau d'objets { name: string }
+    return perms.some(p => (typeof p === 'string' ? p : p?.name) === permission);
+  }
+
   private formatRoleName(name: string): string {
     return name.replace(/\bAdmin\b/g, 'Administrateur');
   }

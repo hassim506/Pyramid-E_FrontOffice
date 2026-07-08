@@ -21,7 +21,7 @@ export const ROLE_ROUTING: RoleRoutingConfig[] = [
   {
     // Formateur, Consultant, Gestionnaire de compte
     roleIds: [3, 6, 10, 13],
-    defaultRoute: '/instructor/students-list',
+    defaultRoute: '/instructor/instructor-course-grid',
     layout: 'formateur',
   },
   {

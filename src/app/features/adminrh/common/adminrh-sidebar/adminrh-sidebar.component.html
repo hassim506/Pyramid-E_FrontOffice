@@ -82,12 +82,20 @@
             <span class="sb-sub-label">Formations</span>
             <span *ngIf="demandesEnAttenteCount > 0" class="sb-badge sb-badge--red sb-badge--sm">{{ demandesEnAttenteCount }}</span>
           </a>
-          <a [routerLink]="routes.adminrhDemandeParcours" routerLinkActive="active" class="sb-sub-item">
-            <span class="sb-sub-label">Parcours</span>
-          </a>
+
           <a [routerLink]="routes.adminrhDemandeCatalogue" routerLinkActive="active" class="sb-sub-item">
             <span class="sb-sub-label">Catalogue</span>
           </a>
+
+          <a [routerLink]="routes.adminrhDemandeParcours" routerLinkActive="active" class="sb-sub-item">
+            <span class="sb-sub-label">Parcours</span>
+          </a>
+
+             <a [routerLink]="routes.adminrhDemandeSession" routerLinkActive="active" class="sb-sub-item">
+            <span class="sb-sub-label">Sessions</span>
+          </a>
+
+
         </div>
       </div>
     </div>
@@ -239,7 +247,7 @@
     </a>
     <!-- Mode apprenant : accède à l'espace employé sans re-login -->
     <a [routerLink]="routes.students_Dashboard" class="sb-bottom-item sb-learner-switch">
-      <i class="isax isax-user-octagon"></i> Mode employé
+      <i class="isax isax-user-octagon"></i> Mode apprenant
     </a>
     <!-- Mode formateur : accède à l'espace formateur sans re-login -->
     <a [routerLink]="routes.instructor_dashboard" class="sb-bottom-item sb-trainer-switch">

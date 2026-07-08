@@ -38,6 +38,7 @@
       <table class="table ip-table">
         <thead>
           <tr>
+            <th>Matricule</th>
             <th>Apprenant</th>
             <th>Formation</th>
             <th>Progression</th>
@@ -47,6 +48,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let a of tableData">
+            <td>
+              <span class="ip-matricule">{{ a.matricule }}</span>
+            </td>
             <td>
               <div class="ip-student-cell">
                 <div class="ip-avatar" *ngIf="!a.avatar">{{ getInitials(a) }}</div>

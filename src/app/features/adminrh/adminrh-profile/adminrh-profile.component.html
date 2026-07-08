@@ -1,295 +1,205 @@
-<div class="content container-fluid">
-  <div class="page-header">
-    <div class="row">
-      <div class="col-sm-12">
-        <div class="page-sub-header">
-          <h3 class="page-title">Mon Profil Super Administrateur</h3>
-          <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a [routerLink]="routes.superadmin_dashboard">Dashboard</a></li>
-            <li class="breadcrumb-item active">Mon Profil</li>
-          </ul>
+<div class="ap-page">
+
+  <!-- HERO -->
+  <div class="ap-hero">
+    <div class="ap-hero__bg"></div>
+    <div class="ap-hero__body">
+      <div class="ap-hero__identity">
+        <div class="ap-av">{{ getInitials() }}</div>
+        <div class="ap-hero__info">
+          <h2 class="ap-hero__name">{{ profile?.prenom }} {{ profile?.nom }}</h2>
+          <p class="ap-hero__fonction">{{ profile?.fonction || '—' }}</p>
+          <div class="ap-hero__meta">
+            <span *ngIf="profile?.email"><i class="isax isax-sms"></i>{{ profile?.email }}</span>
+            <span *ngIf="profile?.telephone"><i class="isax isax-call"></i>{{ profile?.telephone }}</span>
+            <span *ngIf="profile?.entreprise"><i class="isax isax-building-3"></i>{{ profile?.entreprise?.nom }}</span>
+          </div>
         </div>
+      </div>
+      <div class="ap-hero__actions">
+        <span class="ap-status" [class.ap-status--active]="profile?.statut === 1"
+                                [class.ap-status--inactive]="profile?.statut !== 1">
+          {{ getStatusText() }}
+        </span>
+        <button *ngIf="!isEditing" class="ap-btn ap-btn--edit" (click)="toggleEdit()">
+          <i class="isax isax-edit-2"></i> Modifier
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Affichage du profil -->
-  <div class="row" *ngIf="superAdminProfile && !loading">
-    <div class="col-md-12">
-      <div class="profile-header">
-        <div class="row align-items-center">
-          <div class="col-auto profile-image">
-            <div class="avatar avatar-xl">
-              {{ getInitials() }}
-            </div>
-          </div>
-          <div class="col">
-            <div class="profile-user-info">
-              <h4>{{ superAdminProfile.prenom }} {{ superAdminProfile.nom }}</h4>
-              <h6>{{ superAdminProfile.fonction }}</h6>
-              <div class="user-location">
-                <i class="fas fa-envelope"></i> {{ superAdminProfile.email }}
-              </div>
-              <div class="user-location" *ngIf="superAdminProfile.telephone">
-                <i class="fas fa-phone"></i> {{ superAdminProfile.telephone }}
-              </div>
-            </div>
-          </div>
-          <div class="col-auto">
-            <button 
-              *ngIf="!isEditing" 
-              class="btn btn-primary" 
-              (click)="toggleEdit()">
-              <i class="fas fa-edit me-2"></i> Modifier le profil
-            </button>
-          </div>
-        </div>
-      </div>
+  <!-- CONTENU -->
+  <div class="ap-layout">
 
-      <!-- Vue en lecture -->
-      <div class="card" *ngIf="!isEditing">
-        <div class="card-header">
-          <h5 class="card-title d-flex justify-content-between align-items-center">
-            <span>Informations du profil</span>
-            <span class="badge" [ngClass]="getStatusClass()">
-              {{ getStatusText() }}
-            </span>
-          </h5>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>ID :</strong>
-                <span>{{ superAdminProfile.id }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Nom :</strong>
-                <span>{{ superAdminProfile.nom || 'Non défini' }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Name :</strong>
-                <span>{{ superAdminProfile.name || 'Non défini' }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Prénom :</strong>
-                <span>{{ superAdminProfile.prenom || 'Non défini' }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Email :</strong>
-                <span>{{ superAdminProfile.email || 'Non défini' }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Téléphone :</strong>
-                <span>{{ superAdminProfile.telephone || 'Non défini' }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Fonction :</strong>
-                <span>{{ superAdminProfile.fonction || 'Non défini' }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Numéro :</strong>
-                <span>{{ superAdminProfile.numero || 'Non défini' }}</span>
-              </div>
-            </div>
-       <!-- Affichage du rôle -->
-      <div class="col-md-6">
-        <div class="profile-info-item">
-          <strong>Rôle :</strong>
-          <span class="badge badge-primary">
-            {{ superAdminProfile.role || (superAdminProfile.role_id === 1 ? 'Super Admin' : 'Utilisateur') }}
-          </span>
+    <!-- Aside -->
+    <aside class="ap-aside">
+      <div class="ap-card ap-aside__card">
+        <div class="ap-av ap-av--lg">{{ getInitials() }}</div>
+        <div class="ap-aside__name">{{ profile?.prenom }} {{ profile?.nom }}</div>
+        <div class="ap-aside__role">{{ profile?.role?.name || 'Admin RH' }}</div>
+        <span class="ap-status ap-status--sm"
+              [class.ap-status--active]="profile?.statut === 1"
+              [class.ap-status--inactive]="profile?.statut !== 1">
+          {{ getStatusText() }}
+        </span>
+        <div class="ap-aside__chips">
+          <div class="ap-chip">
+            <span class="ap-chip__lbl">ID</span>
+            <span class="ap-chip__val">#{{ profile?.id }}</span>
+          </div>
+          <div class="ap-chip" *ngIf="profile?.matricule">
+            <span class="ap-chip__lbl">Matricule</span>
+            <span class="ap-chip__val">{{ profile?.matricule }}</span>
+          </div>
+          <div class="ap-chip" *ngIf="profile?.entreprise">
+            <span class="ap-chip__lbl">Entreprise</span>
+            <span class="ap-chip__val">{{ profile?.entreprise?.nom }}</span>
+          </div>
+          <div class="ap-chip" *ngIf="profile?.client">
+            <span class="ap-chip__lbl">Client</span>
+            <span class="ap-chip__val">{{ profile?.client?.nom }}</span>
+          </div>
         </div>
       </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Statut :</strong>
-                <span class="badge" [ngClass]="getStatusClass()">
+    </aside>
+
+    <!-- Main -->
+    <main class="ap-main">
+      <ng-container *ngIf="!isEditing && profile">
+
+        <!-- Informations personnelles -->
+        <div class="ap-card">
+          <div class="ap-card__header">
+            <i class="isax isax-user-square"></i>
+            <h4>Informations personnelles</h4>
+          </div>
+          <div class="ap-grid">
+            <div class="ap-field">
+              <span class="ap-field__lbl">Nom</span>
+              <span class="ap-field__val">{{ profile.nom }}</span>
+            </div>
+            <div class="ap-field">
+              <span class="ap-field__lbl">Prénom</span>
+              <span class="ap-field__val">{{ profile.prenom }}</span>
+            </div>
+            <div class="ap-field">
+              <span class="ap-field__lbl">Email</span>
+              <span class="ap-field__val">{{ profile.email }}</span>
+            </div>
+            <div class="ap-field">
+              <span class="ap-field__lbl">Téléphone</span>
+              <span class="ap-field__val">{{ profile.telephone || '—' }}</span>
+            </div>
+            <div class="ap-field">
+              <span class="ap-field__lbl">Fonction</span>
+              <span class="ap-field__val">{{ profile.fonction || '—' }}</span>
+            </div>
+            <div class="ap-field">
+              <span class="ap-field__lbl">Numéro matricule</span>
+              <span class="ap-field__val">{{ profile.matricule || profile.numero || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Organisation -->
+        <div class="ap-card">
+          <div class="ap-card__header">
+            <i class="isax isax-buildings-2"></i>
+            <h4>Organisation</h4>
+          </div>
+          <div class="ap-grid">
+            <div class="ap-field">
+              <span class="ap-field__lbl">Rôle</span>
+              <span class="ap-field__val">
+                <span class="ap-badge ap-badge--role">{{ profile.role?.name || 'Admin RH' }}</span>
+              </span>
+            </div>
+            <div class="ap-field" *ngIf="profile.direction">
+              <span class="ap-field__lbl">Direction</span>
+              <span class="ap-field__val">{{ profile.direction }}</span>
+            </div>
+            <div class="ap-field" *ngIf="profile.entreprise">
+              <span class="ap-field__lbl">Entreprise</span>
+              <span class="ap-field__val">{{ profile.entreprise.nom }}</span>
+            </div>
+            <div class="ap-field" *ngIf="profile.client">
+              <span class="ap-field__lbl">Client / Groupe</span>
+              <span class="ap-field__val">{{ profile.client.nom }}</span>
+            </div>
+            <div class="ap-field">
+              <span class="ap-field__lbl">Statut</span>
+              <span class="ap-field__val">
+                <span class="ap-badge" [class.ap-badge--active]="profile.statut === 1"
+                                       [class.ap-badge--inactive]="profile.statut !== 1">
                   {{ getStatusText() }}
                 </span>
-              </div>
-            </div>
-            <div class="col-md-6" *ngIf="superAdminProfile.client_id">
-              <div class="profile-info-item">
-                <strong>Client ID :</strong>
-                <span>{{ superAdminProfile.client_id }}</span>
-              </div>
-            </div>
-            <div class="col-md-6" *ngIf="superAdminProfile.entreprise_id">
-              <div class="profile-info-item">
-                <strong>Entreprise ID :</strong>
-                <span>{{ superAdminProfile.entreprise_id }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Créé le :</strong>
-                <span>{{ superAdminProfile.created_at ? (superAdminProfile.created_at | date:'dd/MM/yyyy à HH:mm') : 'Non défini' }}</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="profile-info-item">
-                <strong>Modifié le :</strong>
-                <span>{{ superAdminProfile.updated_at ? (superAdminProfile.updated_at | date:'dd/MM/yyyy à HH:mm') : 'Non défini' }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Informations client/entreprise si disponibles -->
-          <div class="row mt-4" *ngIf="superAdminProfile.client || superAdminProfile.entreprise">
-            <div class="col-12">
-              <h6 class="mb-3">Informations d'affectation</h6>
-            </div>
-            <div class="col-md-6" *ngIf="superAdminProfile.client">
-              <div class="profile-info-item">
-                <strong>Client :</strong>
-                <span>{{ superAdminProfile.client.nom }} (ID: {{ superAdminProfile.client.id }})</span>
-              </div>
-            </div>
-            <div class="col-md-6" *ngIf="superAdminProfile.entreprise">
-              <div class="profile-info-item">
-                <strong>Entreprise :</strong>
-                <span>{{ superAdminProfile.entreprise.nom }} (ID: {{ superAdminProfile.entreprise.id }})</span>
-              </div>
+              </span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Vue en édition -->
-      <div class="card" *ngIf="isEditing">
-        <div class="card-header">
-          <h5 class="card-title">Modifier le profil</h5>
-        </div>
-        <div class="card-body">
-          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group local-forms">
-                  <label>Nom <span class="login-danger">*</span></label>
-                  <input 
-                    type="text" 
-                    class="form-control"
-                    formControlName="nom"
-                    [class.is-invalid]="profileForm.get('nom')?.invalid && profileForm.get('nom')?.touched">
-                  <div class="invalid-feedback" *ngIf="profileForm.get('nom')?.invalid && profileForm.get('nom')?.touched">
-                    Le nom est requis
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group local-forms">
-                  <label>Prénom <span class="login-danger">*</span></label>
-                  <input 
-                    type="text" 
-                    class="form-control"
-                    formControlName="prenom"
-                    [class.is-invalid]="profileForm.get('prenom')?.invalid && profileForm.get('prenom')?.touched">
-                  <div class="invalid-feedback" *ngIf="profileForm.get('prenom')?.invalid && profileForm.get('prenom')?.touched">
-                    Le prénom est requis
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group local-forms">
-                  <label>Email <span class="login-danger">*</span></label>
-                  <input 
-                    type="email" 
-                    class="form-control"
-                    formControlName="email"
-                    [class.is-invalid]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
-                  <div class="invalid-feedback" *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
-                    Un email valide est requis
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group local-forms">
-                  <label>Téléphone</label>
-                  <input 
-                    type="tel" 
-                    class="form-control"
-                    formControlName="telephone">
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group local-forms">
-                  <label>Fonction <span class="login-danger">*</span></label>
-                  <input 
-                    type="text" 
-                    class="form-control"
-                    formControlName="fonction"
-                    [class.is-invalid]="profileForm.get('fonction')?.invalid && profileForm.get('fonction')?.touched">
-                  <div class="invalid-feedback" *ngIf="profileForm.get('fonction')?.invalid && profileForm.get('fonction')?.touched">
-                    La fonction est requise
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group local-forms">
-                  <label>Numéro</label>
-                  <input 
-                    type="text" 
-                    class="form-control"
-                    formControlName="numero">
-                </div>
-              </div>
+        <!-- Historique -->
+        <div class="ap-card">
+          <div class="ap-card__header">
+            <i class="isax isax-calendar-1"></i>
+            <h4>Historique</h4>
+          </div>
+          <div class="ap-grid">
+            <div class="ap-field">
+              <span class="ap-field__lbl">Créé le</span>
+              <span class="ap-field__val">{{ profile.created_at | date:'dd/MM/yyyy à HH:mm' }}</span>
             </div>
-            <div class="col-12">
-              <div class="student-submit">
-                <button 
-                  type="submit" 
-                  class="btn btn-primary"
-                  [disabled]="profileForm.invalid || loading">
-                  <i class="fas fa-save me-2"></i> Enregistrer
-                </button>
-                <button 
-                  type="button" 
-                  class="btn btn-secondary ms-2" 
-                  (click)="toggleEdit()">
-                  <i class="fas fa-times me-2"></i> Annuler
-                </button>
-              </div>
+            <div class="ap-field">
+              <span class="ap-field__lbl">Dernière modification</span>
+              <span class="ap-field__val">{{ profile.updated_at | date:'dd/MM/yyyy à HH:mm' }}</span>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Loading -->
-  <div class="row" *ngIf="loading">
-    <div class="col-12">
-      <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="sr-only">Chargement...</span>
+      </ng-container>
+
+      <!-- EDIT MODE -->
+      <div class="ap-card" *ngIf="isEditing">
+        <div class="ap-card__header">
+          <i class="isax isax-edit-2"></i>
+          <h4>Modifier le profil</h4>
         </div>
-        <p class="mt-3">Chargement du profil...</p>
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <div class="ap-grid">
+            <div class="ap-form-group">
+              <label>Nom</label>
+              <input class="form-control" formControlName="nom" placeholder="Nom">
+            </div>
+            <div class="ap-form-group">
+              <label>Prénom</label>
+              <input class="form-control" formControlName="prenom" placeholder="Prénom">
+            </div>
+            <div class="ap-form-group">
+              <label>Email</label>
+              <input class="form-control" formControlName="email" type="email" placeholder="Email">
+            </div>
+            <div class="ap-form-group">
+              <label>Téléphone</label>
+              <input class="form-control" formControlName="telephone" placeholder="Téléphone">
+            </div>
+            <div class="ap-form-group">
+              <label>Fonction</label>
+              <input class="form-control" formControlName="fonction" placeholder="Fonction">
+            </div>
+            <div class="ap-form-group">
+              <label>Numéro matricule</label>
+              <input class="form-control" formControlName="numero" placeholder="Matricule">
+            </div>
+          </div>
+          <div class="ap-form-actions">
+            <button class="ap-btn ap-btn--primary" type="submit" [disabled]="profileForm.invalid || loading">
+              <i class="isax isax-tick-circle"></i> Sauvegarder
+            </button>
+            <button type="button" class="ap-btn ap-btn--light" (click)="toggleEdit()">Annuler</button>
+          </div>
+        </form>
       </div>
-    </div>
-  </div>
 
-  <!-- Message si aucun profil trouvé -->
-  <div class="row" *ngIf="!superAdminProfile && !loading">
-    <div class="col-12">
-      <div class="alert alert-warning text-center">
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        Aucune information de profil trouvée. Veuillez vous reconnecter.
-      </div>
-    </div>
+    </main>
   </div>
 </div>

@@ -13,6 +13,8 @@ import { DemandeFormation, DemandeFormationResponse } from '../../../shared/mode
 import { DemandeFormationService } from '../../../shared/service/demande/demande-formation.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
 import { CatalogueService } from '../../../shared/service/catalogue/catalogue.service';
+import { UserService } from '../../../shared/service/user/user.service';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -26,7 +28,7 @@ interface StatutFilter {
 @Component({
   selector: 'app-adminrh-demande-catalogue',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule, MatSortModule, CustomPaginationComponent],
+  imports: [RouterLink, FormsModule, CommonModule, MatSortModule, CustomPaginationComponent, HasPermissionDirective],
 templateUrl: './adminrh-demande-catalogue.component.html',
   styleUrl: './adminrh-demande-catalogue.component.scss'
 })
@@ -76,12 +78,27 @@ export class AdminrhDemandeCatalogueComponent implements OnInit {
   validatingIds: Set<number> = new Set();
   refusingIds: Set<number> = new Set();
 
+  // Modal participants
+  participantsModalOpen = false;
+  selectedCatalogueForParticipants: any = null;
+  participants: any[] = [];
+  participantsLoading = false;
+  participantsSearch = '';
+  availableUsers: any[] = [];
+  availableUsersFiltered: any[] = [];
+  usersSearch = '';
+  usersLoading = false;
+  inscriptionPending = false;
+  inscriptionSuccess = '';
+  inscriptionError = '';
+
   constructor(
     private data: DataService,
     private router: Router,
     private pagination: PaginationService,
     private demandeFormationService: DemandeFormationService,
     private catalogueService: CatalogueService,
+    private userService: UserService,
     private authService: AuthService
     ) {
     this.pagination.tablePageSize.subscribe((res: tablePageSize) => {
@@ -532,6 +549,116 @@ export class AdminrhDemandeCatalogueComponent implements OnInit {
 
   trackByDemandeId(index: number, demande: DemandeFormation): number {
     return demande.id;
+  }
+
+  trackByUserId(_i: number, u: any): number { return u.id; }
+
+  // === PARTICIPANTS MODAL ===
+
+  openParticipants(demande: DemandeFormation): void {
+    const catalogue = demande.catalogue;
+    if (!catalogue) return;
+    this.selectedCatalogueForParticipants = catalogue;
+    this.participants = [];
+    this.availableUsers = [];
+    this.availableUsersFiltered = [];
+    this.participantsSearch = '';
+    this.usersSearch = '';
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+    this.participantsModalOpen = true;
+    this.loadParticipants(catalogue.id);
+  }
+
+  closeParticipants(): void {
+    this.participantsModalOpen = false;
+    this.selectedCatalogueForParticipants = null;
+  }
+
+  private loadParticipants(catalogueId: number): void {
+    this.participantsLoading = true;
+    this.catalogueService.getParticipantsCatalogue(catalogueId).subscribe({
+      next: (res: any) => {
+        this.participants = res.participants || [];
+        this.participantsLoading = false;
+        this.loadAvailableUsers();
+      },
+      error: () => { this.participantsLoading = false; }
+    });
+  }
+
+  private loadAvailableUsers(): void {
+    this.usersLoading = true;
+    this.userService.getMyUsers().subscribe({
+      next: (res: any) => {
+        const enrolled = new Set(this.participants.map((p: any) => p.id));
+        const all: any[] = res.users || res.data || [];
+        this.availableUsers = all.filter((u: any) => !enrolled.has(u.id));
+        this.applyUsersFilter();
+        this.usersLoading = false;
+      },
+      error: () => { this.usersLoading = false; }
+    });
+  }
+
+  applyUsersFilter(): void {
+    const q = this.usersSearch.toLowerCase();
+    this.availableUsersFiltered = this.availableUsers.filter((u: any) =>
+      !q || u.name?.toLowerCase().includes(q) || u.nom?.toLowerCase().includes(q)
+        || u.prenom?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
+    );
+  }
+
+  get participantsFiltered(): any[] {
+    const q = this.participantsSearch.toLowerCase();
+    return this.participants.filter((p: any) =>
+      !q || p.name?.toLowerCase().includes(q) || p.nom?.toLowerCase().includes(q)
+        || p.prenom?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q)
+    );
+  }
+
+  inscrireUser(user: any): void {
+    if (!this.selectedCatalogueForParticipants || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.catalogueService.inscrireUtilisateur(this.selectedCatalogueForParticipants.id, user.id).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été inscrit(e) avec succès.`;
+        this.participants.push(user);
+        this.availableUsers = this.availableUsers.filter((u: any) => u.id !== user.id);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de l\'inscription.';
+      }
+    });
+  }
+
+  desinscrireUser(user: any): void {
+    if (!this.selectedCatalogueForParticipants || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.catalogueService.desinscrireUtilisateur(this.selectedCatalogueForParticipants.id, user.id).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été désinscrit(e).`;
+        this.participants = this.participants.filter((p: any) => p.id !== user.id);
+        this.availableUsers.push(user);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de la désinscription.';
+      }
+    });
   }
 
   public changePageSize(pageSize: number): void {

@@ -52,9 +52,14 @@ export class StudentCoursesComponent implements OnInit, OnDestroy {
     { value: 'expire',         label: 'Expiré',             icon: 'isax-calendar-remove' },
   ];
 
-  // ✅ Flag pour détecter qu'on revient d'une page de détail
   private _dejaCharge = false;
   private routerSub?: Subscription;
+
+  private _visibilityHandler = () => {
+    if (document.visibilityState === 'visible') {
+      this._refreshProgressionsSilencieux();
+    }
+  };
 
   constructor(
     private formationsService: FormationService,
@@ -75,10 +80,13 @@ export class StudentCoursesComponent implements OnInit, OnDestroy {
         }
         this._dejaCharge = true;
       });
+
+    document.addEventListener('visibilitychange', this._visibilityHandler);
   }
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
+    document.removeEventListener('visibilitychange', this._visibilityHandler);
   }
 
   // ── Chargement initial complet ─────────────────────────────

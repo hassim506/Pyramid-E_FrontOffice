@@ -12,48 +12,28 @@
 
 <!-- Main Content -->
 <div *ngIf="!loading && !error">
-    <!-- Statistics Cards -->
-    <div class="row">
-        <div class="col-xxl col-lg-4 col-md-6">
-            <div class="card bg-success">
-                <div class="card-body">
-                    <h6 class="fw-medium mb-1 text-white">Formations Publiées</h6>
-                    <h4 class="fw-bold text-white">{{ getActiveFormationsCount() }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl col-lg-4 col-md-6">
-            <div class="card bg-secondary">
-                <div class="card-body">
-                    <h6 class="fw-medium mb-1 text-white">En Attente</h6>
-                    <h4 class="fw-bold text-white">{{ getPendingFormationsCount() }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl col-lg-4 col-md-6">
-            <div class="card bg-info">
-                <div class="card-body">
-                    <h6 class="fw-medium mb-1 text-white">Brouillons</h6>
-                    <h4 class="fw-bold text-white">{{ getDraftFormationsCount() }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl col-lg-4 col-md-6">
-            <div class="card bg-skyblue">
-                <div class="card-body">
-                    <h6 class="fw-medium mb-1 text-white">Formations Gratuites</h6>
-                    <h4 class="fw-bold text-white">{{ getFreeFormationsCount() }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl col-lg-4 col-md-6">
-            <div class="card bg-purple">
-                <div class="card-body">
-                    <h6 class="fw-medium mb-1 text-white">Formations Payantes</h6>
-                    <h4 class="fw-bold text-white">{{ getPaidFormationsCount() }}</h4>
-                </div>
-            </div>
-        </div>
+    <!-- KPI row -->
+    <div class="icg-kpi-row">
+      <div class="icg-kpi">
+        <div class="icg-kpi__icon ki-green"><i class="isax isax-tick-circle"></i></div>
+        <div><div class="icg-kpi__val">{{ getActiveFormationsCount() }}</div><div class="icg-kpi__lbl">Publiées</div></div>
+      </div>
+      <div class="icg-kpi">
+        <div class="icg-kpi__icon ki-amber"><i class="isax isax-clock"></i></div>
+        <div><div class="icg-kpi__val">{{ getPendingFormationsCount() }}</div><div class="icg-kpi__lbl">En attente</div></div>
+      </div>
+      <div class="icg-kpi">
+        <div class="icg-kpi__icon ki-blue"><i class="isax isax-edit-2"></i></div>
+        <div><div class="icg-kpi__val">{{ getDraftFormationsCount() }}</div><div class="icg-kpi__lbl">Brouillons</div></div>
+      </div>
+      <div class="icg-kpi">
+        <div class="icg-kpi__icon ki-teal"><i class="isax isax-tag"></i></div>
+        <div><div class="icg-kpi__val">{{ getFreeFormationsCount() }}</div><div class="icg-kpi__lbl">Gratuites</div></div>
+      </div>
+      <div class="icg-kpi">
+        <div class="icg-kpi__icon ki-purple"><i class="isax isax-dollar-circle"></i></div>
+        <div><div class="icg-kpi__val">{{ getPaidFormationsCount() }}</div><div class="icg-kpi__lbl">Payantes</div></div>
+      </div>
     </div>
 
     <!-- Page Header -->
@@ -87,8 +67,8 @@
                 <span class="input-icon-addon">
                     <i class="isax isax-search-normal-14"></i>
                 </span>
-                <input [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }" 
-                       type="search" (ngModelChange)="searchData(searchDataValue)" 
+                <input [(ngModel)]="searchDataValue" [ngModelOptions]="{ standalone: true }"
+                       type="search" (ngModelChange)="searchData(searchDataValue)"
                        class="form-control form-control-md" placeholder="Rechercher une formation...">
             </div>
         </div>
@@ -100,21 +80,21 @@
             <div class="card border-0 shadow-sm mb-4">
                 <!-- Image de la formation -->
                 <div class="position-relative">
-                    <a [routerLink]="['/formateur/formation-details', formation.id]">
-                        <img class="card-img-top" 
-                             [src]="getFormationImage(formation)" 
+                    <a [href]="'/courses/course-details/' + formation.id" target="_blank">
+                        <img class="card-img-top"
+                             [src]="getFormationImage(formation)"
                              [alt]="formation.titre"
                              style="height: 200px; object-fit: cover;"
                              onerror="this.src='assets/img/course/course-01.jpg'">
                     </a>
-                    
+
                     <!-- Badge statut -->
                     <div class="position-absolute top-0 end-0 m-2">
                         <span class="badge" [ngClass]="getStatusClass(formation)">
                             {{ getStatusText(formation) }}
                         </span>
                     </div>
-                    
+
                     <!-- Badge prix -->
                     <div class="position-absolute bottom-0 start-0 m-2">
                         <span class="badge" [ngClass]="{'bg-success': isFormationGratuite(formation), 'bg-primary': !isFormationGratuite(formation)}">
@@ -127,7 +107,7 @@
                 <div class="card-body">
                     <!-- Catégorie -->
                     <div class="mb-2">
-                        <span class="badge rounded-pill" 
+                        <span class="badge rounded-pill"
                               [style.background-color]="formation.categorie?.couleur || '#6c757d'"
                               style="color: white; font-size: 11px;">
                             {{ formation.categorie?.nom || 'Non définie' }}
@@ -136,7 +116,7 @@
 
                     <!-- Titre -->
                     <h6 class="fw-bold mb-2">
-                        <a [routerLink]="['/formateur/formation-details', formation.id]" 
+                        <a [href]="'/courses/course-details/' + formation.id" target="_blank"
                            class="text-decoration-none text-dark">
                             {{ formation.titre }}
                         </a>
@@ -169,7 +149,7 @@
                             <i class="isax isax-people me-1"></i>
                             <span>{{ formation.nb_participants || 0 }}/{{ formation.nb_max_participants || 0 }} participants</span>
                         </div>
-                        
+
                         <!-- Certification -->
                         <div *ngIf="formation.est_certifiante">
                             <span class="badge bg-warning">
@@ -182,12 +162,12 @@
                     <!-- Actions -->
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
-                            <a [routerLink]="['/formateur/formation-details', formation.id]" 
+                            <a [href]="'/courses/course-details/' + formation.id" target="_blank"
                                class="btn btn-sm btn-outline-primary me-2"
                                title="Voir les détails">
                                 <i class="isax isax-eye"></i>
                             </a>
-                            <a [routerLink]="['/formateur/formation-edit', formation.id]" 
+                            <a [href]="'/courses/instructor-course-edit/' + formation.id" target="_blank"
                                class="btn btn-sm btn-outline-secondary me-2"
                                title="Modifier">
                                 <i class="isax isax-edit-2"></i>
@@ -198,7 +178,7 @@
                                 <i class="isax isax-archive"></i>
                             </button>
                         </div>
-                        
+
                         <div class="small text-muted">
                             {{ formation.type_display || formation.type }}
                         </div>
@@ -216,6 +196,22 @@
     </div>
 
     <!-- Pagination -->
-    <app-custom-pagination/>
+    <div class="icg-pagination" *ngIf="totalData > pageSize">
+      <span class="pg-info">{{ totalData }} formation{{ totalData > 1 ? 's' : '' }}</span>
+      <div class="pg-controls">
+        <button type="button" class="pg-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button type="button" class="pg-btn"
+                *ngFor="let p of getPageNumbers()"
+                [class.active]="p === currentPage"
+                (click)="onPageChange(p)">{{ p }}</button>
+        <button type="button" class="pg-btn"
+                [disabled]="currentPage * pageSize >= totalData"
+                (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-2"></i>
+        </button>
+      </div>
+    </div>
 </div>
 

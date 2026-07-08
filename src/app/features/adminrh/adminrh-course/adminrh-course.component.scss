@@ -1242,11 +1242,11 @@ $cw-green-bd: #79C9AB;
   border: 0.5px solid $gray-200;
   width: 100%;
   max-width: 600px;
-  max-height: 92vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  // max-height géré par Bootstrap modal-dialog-scrollable (90vh automatique)
 }
 
 // ── Head ──────────────────────────────────────
@@ -1298,6 +1298,7 @@ $cw-green-bd: #79C9AB;
   padding: 18px 20px;
   overflow-y: auto;
   flex: 1;
+  max-height: calc(80vh - 120px);
 
   &::-webkit-scrollbar       { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }

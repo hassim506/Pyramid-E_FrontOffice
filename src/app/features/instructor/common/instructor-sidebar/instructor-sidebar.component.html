@@ -65,7 +65,7 @@
         <i class="isax isax-arrow-right-3 arr"></i>
       </div>
       <div class="sb-sub" *ngIf="openGroups['formations']">
-        <a [routerLink]="routes.instructorCourse" routerLinkActive="active" class="sb-sub-item">
+        <a [routerLink]="routes.instructorCourseGrid" routerLinkActive="active" class="sb-sub-item">
           <i class="isax isax-task-square"></i>
           <span>Toutes mes formations</span>
         </a>
@@ -85,7 +85,7 @@
         <i class="isax isax-arrow-right-3 arr"></i>
       </div>
       <div class="sb-sub" *ngIf="openGroups['modules']">
-        <a [routerLink]="routes.instructorCourse" routerLinkActive="active" class="sb-sub-item">
+        <a [routerLink]="routes.instructorCourseGrid" routerLinkActive="active" class="sb-sub-item">
           <i class="isax isax-video-circle"></i>
           <span>Vidéos & ressources</span>
         </a>
@@ -199,11 +199,11 @@
   <!-- BOTTOM -->
   <div class="sb-bottom">
     <a [routerLink]="routes.instructorProfile" routerLinkActive="active" class="sb-bottom-item">
-      <i class="isax isax-user-square"></i> Mon profil formateur
+      <i class="isax isax-user-square"></i> Mon profil
     </a>
-    <a [routerLink]="routes.instructorSettings" routerLinkActive="active" class="sb-bottom-item">
+    <!-- <a [routerLink]="routes.instructorSettings" routerLinkActive="active" class="sb-bottom-item">
       <i class="isax isax-setting-2"></i> Préférences
-    </a>
+    </a> -->
     <!-- Retour espace AdminRH (visible uniquement si RH en mode formateur) -->
     <a *ngIf="isRhInInstructorMode()" [routerLink]="routes.adminrh_dashboard" class="sb-bottom-item sb-rh-return">
       <i class="isax isax-arrow-left-2"></i> Retour espace AdminRH

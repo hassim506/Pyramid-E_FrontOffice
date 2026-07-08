@@ -85,8 +85,8 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
 
     this.progressionService.change$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       if (!this.formationId) return;
-      this.progressPercent = this.progressionService.getPercent(this.formationId);
-      this.completedIds = new Set(this.progressionService.getCompleted(this.formationId));
+      this.progressPercent = this.progressionService.getPercent(this.formationId, this.parcoursId, this.catalogueId);
+      this.completedIds = new Set(this.progressionService.getCompleted(this.formationId, this.parcoursId, this.catalogueId));
     });
   }
 
@@ -130,17 +130,17 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
     const total = this.allSections().length;
 
     // Init locale immédiate — la Map est prête avant même la réponse API
-    this.progressionService.init(this.formationId, total);
-    this.progressPercent = this.progressionService.getPercent(this.formationId);
-    this.completedIds = new Set(this.progressionService.getCompleted(this.formationId));
+    this.progressionService.init(this.formationId, total, [], this.parcoursId, this.catalogueId);
+    this.progressPercent = this.progressionService.getPercent(this.formationId, this.parcoursId, this.catalogueId);
+    this.completedIds = new Set(this.progressionService.getCompleted(this.formationId, this.parcoursId, this.catalogueId));
 
     // Sync depuis l'API (remplace les données locales par les données serveur)
-    this.progressionService.loadFromApi(this.formationId)
+    this.progressionService.loadFromApi(this.formationId, this.parcoursId, this.catalogueId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.progressPercent = this.progressionService.getPercent(this.formationId);
-          this.completedIds = new Set(this.progressionService.getCompleted(this.formationId));
+          this.progressPercent = this.progressionService.getPercent(this.formationId, this.parcoursId, this.catalogueId);
+          this.completedIds = new Set(this.progressionService.getCompleted(this.formationId, this.parcoursId, this.catalogueId));
         },
         error: (err) => {
           console.warn('Progression API indisponible, utilisation locale.', err?.status);
@@ -325,7 +325,7 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
     this.markDoneLoading = true;
     this.error = '';
 
-    this.progressionService.markCompleted(this.formationId, sid)
+    this.progressionService.markCompleted(this.formationId, sid, this.parcoursId, this.catalogueId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => { this.markDoneLoading = false; },

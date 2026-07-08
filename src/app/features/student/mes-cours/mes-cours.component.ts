@@ -184,7 +184,7 @@ export class MesCoursComponent implements OnInit, OnDestroy {
   //    → progression stockée sous clé "formationId_null" → aucun conflit
   // ════════════════════════════════════════════
   openDetails(f: Formation): void {
-    this.router.navigate(['/courses/course-details-2', f.id], {
+    this.router.navigate(['/courses/course-details', f.id], {
       state: { fromPage: 'demandes', demande: f }
     });
   }

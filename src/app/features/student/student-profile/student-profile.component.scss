@@ -1,127 +1,365 @@
-.profile-page {
-  padding: 20px;
+// ═══════════════════════════════════════════════════
+// STUDENT PROFILE — design élégant
+// ═══════════════════════════════════════════════════
+
+.sp-page {
+  padding: 0 0 40px;
 }
 
-/* HERO */
-.profile-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(135deg,#49e8f7, #dcb183,#7e50e9);
-  border-radius: 16px;
-  padding: 24px;
-  color: #fff;
-  margin-bottom: 30px;
+// ── HERO ────────────────────────────────────────────
+.sp-hero {
+  position: relative;
+  background: linear-gradient(135deg, #0d9488 0%, #0891b2 50%, #6366f1 100%);
+  border-radius: 20px;
+  margin-bottom: 28px;
+  overflow: hidden;
 
-  .hero-left {
+  &__bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,.12) 0%, transparent 50%),
+      radial-gradient(circle at 10% 80%, rgba(255,255,255,.08) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  &__body {
+    position: relative;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 20px;
-    align-items: center;
+    padding: 28px 32px;
+    flex-wrap: wrap;
   }
 
-  .avatar-xl {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
+  &__identity {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 28px;
+    gap: 20px;
+  }
+
+  &__info {
+    color: #fff;
+  }
+
+  &__name {
+    margin: 0 0 4px;
+    font-size: 22px;
     font-weight: 700;
+    color: #fff;
   }
 
-  .hero-info {
-    h2 {
-      margin: 0;
-      font-weight: 700;
-    }
+  &__fonction {
+    margin: 0 0 10px;
+    font-size: 14px;
+    opacity: .85;
+    color: #fff;
+  }
 
-    .role {
-      opacity: 0.9;
-      margin-bottom: 8px;
-    }
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
 
-    .meta span {
-      margin-right: 15px;
-      font-size: 14px;
-      i { margin-right: 6px; }
+    span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: rgba(255,255,255,.9);
+
+      i { font-size: 15px; }
     }
   }
 
-  .hero-actions {
+  &__actions {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
+    flex-shrink: 0;
   }
 }
 
-/* STATUS */
-.status-pill {
-  padding: 6px 14px;
+// ── AVATAR ──────────────────────────────────────────
+.sp-av {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  border: 3px solid rgba(255,255,255,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+
+  &--lg {
+    width: 80px;
+    height: 80px;
+    font-size: 26px;
+    background: linear-gradient(135deg, #0d9488, #6366f1);
+    border: none;
+    margin: 0 auto 12px;
+  }
+}
+
+// ── STATUS ──────────────────────────────────────────
+.sp-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+
+  &::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .7;
+  }
+
+  &--active {
+    background: rgba(34,197,94,.2);
+    color: #16a34a;
+    border: 1px solid rgba(34,197,94,.3);
+  }
+
+  &--inactive {
+    background: rgba(239,68,68,.15);
+    color: #dc2626;
+    border: 1px solid rgba(239,68,68,.25);
+  }
+
+  &--sm {
+    margin-top: 8px;
+  }
 }
 
-.status-active { background: #22c55e; }
-.status-inactive { background: #ef4444; }
-
-/* CARD */
-.profile-card {
-  border-radius: 16px;
-  border: none;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-}
-
-/* SECTION */
-.section-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 16px;
-}
-
-/* GRID */
-.info-grid {
+// ── LAYOUT ──────────────────────────────────────────
+.sp-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 }
 
-.info-item {
-  background: #f9fafb;
-  padding: 14px 16px;
-  border-radius: 12px;
+// ── ASIDE ───────────────────────────────────────────
+.sp-aside {
+  &__card {
+    text-align: center;
+    padding: 28px 20px;
+  }
 
-  span {
-    display: block;
-    font-size: 12px;
+  &__name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+  }
+
+  &__role {
+    font-size: 13px;
     color: #6b7280;
+    margin-bottom: 12px;
   }
 
-  strong {
-    font-size: 14px;
-    color: #0d1818;
+  &__chips {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
   }
 }
 
-/* FORM */
-.form-grid {
+.sp-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 8px 12px;
+
+  &__lbl {
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+
+  &__val {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+// ── CARD ────────────────────────────────────────────
+.sp-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  padding: 24px;
+  margin-bottom: 20px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f3f4f6;
+
+    i {
+      font-size: 20px;
+      color: #0d9488;
+    }
+
+    h4 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+    }
+  }
+}
+
+// ── GRID INFOS ──────────────────────────────────────
+.sp-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
 }
 
-.actions {
-  margin-top: 30px;
+.sp-field {
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: border-color .2s;
+
+  &:hover { border-color: #d1fae5; }
+
+  &__lbl {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+
+  &__val {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+// ── BADGES ──────────────────────────────────────────
+.sp-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &--role {
+    background: #e0e7ff;
+    color: #4338ca;
+  }
+
+  &--active {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  &--inactive {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+}
+
+// ── FORM ────────────────────────────────────────────
+.sp-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+
+  .form-control {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: border-color .2s, box-shadow .2s;
+
+    &:focus {
+      border-color: #0d9488;
+      box-shadow: 0 0 0 3px rgba(13,148,136,.1);
+      outline: none;
+    }
+  }
+}
+
+.sp-form-actions {
+  margin-top: 24px;
   display: flex;
   gap: 12px;
 }
 
-/* BUTTONS */
-.btn-edit {
-  background: #fff;
-  color: #4f46e5;
-  font-weight: 600;
+// ── BOUTONS ─────────────────────────────────────────
+.sp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
   border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity .2s, transform .1s;
+
+  &:active { transform: scale(.98); }
+
+  &--edit {
+    background: rgba(255,255,255,.95);
+    color: #0d9488;
+    i { font-size: 15px; }
+  }
+
+  &--primary {
+    background: #0d9488;
+    color: #fff;
+    &:disabled { opacity: .5; cursor: not-allowed; }
+  }
+
+  &--light {
+    background: #f3f4f6;
+    color: #374151;
+  }
 }

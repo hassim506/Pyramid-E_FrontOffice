@@ -49,8 +49,8 @@ export class ProgressionService {
     catalogueId:  number | null = null  // ✅ NOUVEAU
   ): Observable<any> {
     const params: any = {};
-    if (parcoursId)  params['parcours_id']  = parcoursId;
-    if (catalogueId) params['catalogue_id'] = catalogueId; // ✅
+    if (parcoursId  != null) params['parcours_id']  = parcoursId;
+    if (catalogueId != null) params['catalogue_id'] = catalogueId;
 
     console.log(`📡 [ProgressionService] loadFromApi → formationId=${formationId} | parcoursId=${parcoursId} | catalogueId=${catalogueId} | clé="${this.key(formationId, parcoursId, catalogueId)}" | params:`, params);
 
@@ -147,10 +147,13 @@ export class ProgressionService {
 
     // 2. POST vers le backend — fonctionne même si la Map locale est vide
     const url = `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/complete`;
-    console.log('📡 POST progression:', url, '| sectionId:', sectionId, '| formationId:', formationId);
+    const body: Record<string, any> = {};
+    if (parcoursId  != null) body['parcours_id']  = parcoursId;
+    if (catalogueId != null) body['catalogue_id'] = catalogueId;
+    console.log('📡 POST progression:', url, '| sectionId:', sectionId, '| formationId:', formationId, '| body:', body);
     return this.http.post<any>(
       url,
-      {},
+      body,
       { headers: this.getAuthHeaders() }
     ).pipe(
       tap(res => {
@@ -205,8 +208,8 @@ export class ProgressionService {
     }
 
     const body: any = {};
-    if (parcoursId)  body['parcours_id']  = parcoursId;
-    if (catalogueId) body['catalogue_id'] = catalogueId; // ✅
+    if (parcoursId  != null) body['parcours_id']  = parcoursId;
+    if (catalogueId != null) body['catalogue_id'] = catalogueId;
 
     this.http.post<any>(
       `${this.apiUrl}/formations/${formationId}/sections/${sectionId}/uncomplete`,
@@ -222,6 +225,12 @@ export class ProgressionService {
       }),
       catchError((err) => {
         console.error(`❌ [ProgressionService] markUncompleted ERREUR API:`, err);
+        // Rollback : remettre la section comme complétée
+        if (prog) {
+          prog.completed.add(sectionId);
+          prog.percent = this.calcPercent(prog.completed.size, prog.totalSections);
+          this._change$.next(new Map(this.progressions));
+        }
         return of(null);
       })
     ).subscribe();

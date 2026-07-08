@@ -1,203 +1,157 @@
 import { Component, OnInit } from '@angular/core';
 import { routes } from '../../../shared/service/routes/routes';
-import { Router, RouterLink } from '@angular/router';
-import { pageSelection, PaginationService } from '../../../shared/service/custom-pagination/pagination.service';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { FormationService } from '../../../shared/service/formation/formation.service';
-import { AuthService } from '../../../shared/service/authentification/auth.service';
 
 @Component({
-    selector: 'app-instructor-course-grid',
-    templateUrl: './instructor-course-grid.component.html',
-    styleUrls: ['./instructor-course-grid.component.scss'],
-    imports: [CommonModule, CustomPaginationComponent, FormsModule, RouterLink]
+  selector: 'app-instructor-course-grid',
+  templateUrl: './instructor-course-grid.component.html',
+  styleUrls: ['./instructor-course-grid.component.scss'],
+  imports: [CommonModule, FormsModule, RouterLink]
 })
 export class InstructorCourseGridComponent implements OnInit {
   public routes = routes;
 
-  // pagination variables
-  public pageSize = 12; // Plus d'éléments par page pour le grid
-  public tableData: any[] = [];
-  public actualData: any[] = [];
-  public currentPage = 1;
-  public skip = 0;
-  public limit: number = this.pageSize;
-  public totalData = 0;
-  public searchDataValue = '';
-  
-  // Nouvelles propriétés
-  public formations: any[] = [];
   public loading = false;
   public error = '';
 
-  constructor(
-    private router: Router,
-    private pagination: PaginationService,
-    private formationService: FormationService,
-    private authService: AuthService
-  ) {}
+  public allFormations: any[] = [];
+  public tableData: any[] = [];
+  public totalData = 0;
 
-  ngOnInit() {
+  public currentPage = 1;
+  public pageSize = 12;
+
+  public searchDataValue = '';
+  public statusFilter = 'all';
+
+  private _filtered: any[] = [];
+
+  constructor(private formationService: FormationService) {}
+
+  ngOnInit(): void {
     this.loadFormations();
   }
 
-  loadFormations() {
+  loadFormations(): void {
     this.loading = true;
     this.error = '';
-    
+
     this.formationService.getFormationsformateur().subscribe({
       next: (response) => {
-        this.formations = response.formations || [];
-        this.actualData = this.formations;
-        this.totalData = this.formations.length;
+        this.allFormations = response.formations || [];
         this.loading = false;
-        
-        // Initialiser la pagination
-        this.getTableData({ skip: 0, limit: this.pageSize });
+        this.applyFilters();
       },
-      error: (error) => {
+      error: () => {
         this.error = 'Erreur lors du chargement des formations';
         this.loading = false;
-        console.error('Erreur:', error);
       }
     });
   }
 
-  private getTableData(pageOption: pageSelection): void {
-    this.tableData = [];
-    
-    this.formations.map((formation: any, index: number) => {
-      const serialNumber = index + 1;
-      if (index >= pageOption.skip && serialNumber <= pageOption.limit) {
-        formation.sNo = serialNumber;
-        this.tableData.push(formation);
-      }
-    });
-    
-    this.pagination.calculatePageSize.next({
-      totalData: this.totalData,
-      pageSize: this.pageSize,
-      tableData: this.tableData,
-      tableDataCopy: this.tableData,
-      serialNumberArray: [],
-    });
-  }
+  applyFilters(): void {
+    let filtered = [...this.allFormations];
 
-  public searchData(value: string): void {
-    if (value == '') {
-      this.actualData = this.formations;
-    } else {
-      this.actualData = this.formations.filter(formation => 
-        formation.titre.toLowerCase().includes(value.toLowerCase()) ||
-        formation.description.toLowerCase().includes(value.toLowerCase())
+    if (this.searchDataValue.trim()) {
+      const q = this.searchDataValue.toLowerCase();
+      filtered = filtered.filter(f =>
+        f.titre?.toLowerCase().includes(q) ||
+        f.description?.toLowerCase().includes(q)
       );
     }
-    this.getTableData({ skip: 0, limit: this.pageSize });
+
+    if (this.statusFilter !== 'all') {
+      filtered = filtered.filter(f => {
+        const published = f.est_publie === true || f.est_publie === 1;
+        if (this.statusFilter === 'active')  return published;
+        if (this.statusFilter === 'draft')   return !published;
+        if (this.statusFilter === 'pending') return f.statut === 'pending' || f.statut === 'en_attente';
+        return true;
+      });
+    }
+
+    this.totalData = filtered.length;
+    this.currentPage = 1;
+    this._filtered = filtered;
+    this.tableData = filtered.slice(0, this.pageSize);
   }
 
-  // Méthodes pour les statistiques
+  searchData(value: string): void {
+    this.searchDataValue = value;
+    this.applyFilters();
+  }
+
+  filterByStatus(status: string): void {
+    this.statusFilter = status;
+    this.applyFilters();
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    const start = (page - 1) * this.pageSize;
+    this.tableData = this._filtered.slice(start, start + this.pageSize);
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const totalPages = Math.ceil(this.totalData / this.pageSize);
+    const start = Math.max(1, this.currentPage - 2);
+    const end   = Math.min(totalPages, this.currentPage + 2);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }
+
+  // ── KPI ──────────────────────────────────────
   getActiveFormationsCount(): number {
-    return this.formations.filter(f => f.est_publie === true).length;
+    return this.allFormations.filter(f => f.est_publie === true || f.est_publie === 1).length;
   }
 
   getPendingFormationsCount(): number {
-    return this.formations.filter(f => f.est_publie === false && f.inscription_ouverte === false).length;
+    return this.allFormations.filter(f => f.statut === 'pending' || f.statut === 'en_attente').length;
   }
 
   getDraftFormationsCount(): number {
-    return this.formations.filter(f => f.est_publie === false).length;
+    return this.allFormations.filter(f => !f.est_publie || f.est_publie === 0).length;
   }
 
   getFreeFormationsCount(): number {
-    return this.formations.filter(f => !f.prix || parseFloat(f.prix) === 0).length;
+    return this.allFormations.filter(f => !f.prix || parseFloat(f.prix) === 0).length;
   }
 
   getPaidFormationsCount(): number {
-    return this.formations.filter(f => f.prix && parseFloat(f.prix) > 0).length;
+    return this.allFormations.filter(f => f.prix && parseFloat(f.prix) > 0).length;
   }
 
-  // Méthodes utilitaires
-  isFormationGratuite(formation: any): boolean {
-    return !formation.prix || parseFloat(formation.prix) === 0;
-  }
+  // ── Helpers ───────────────────────────────────
+  isFormationGratuite(f: any): boolean { return !f.prix || parseFloat(f.prix) === 0; }
 
   formatPrix(prix: string): string {
-    if (!prix || parseFloat(prix) === 0) {
-      return 'Gratuit';
-    }
-    return `${parseFloat(prix)} €`;
+    return !prix || parseFloat(prix) === 0 ? 'Gratuit' : `${Math.round(parseFloat(prix))} XOF`;
   }
 
-  getFormationImage(formation: any): string {
-    return this.formationService.getImageUrl(formation.image_couverture);
+  getFormationImage(f: any): string {
+    return this.formationService.getImageUrl(
+      f.image_couverture || f.image_url || f.image || f.photo
+    );
   }
 
-  getStatusClass(formation: any): string {
-    if (formation.est_publie) {
-      return 'bg-success';
-    } else if (formation.inscription_ouverte) {
-      return 'bg-warning';
-    } else {
-      return 'bg-info';
-    }
+  getStatusClass(f: any): string {
+    return (f.est_publie === true || f.est_publie === 1) ? 'bg-success' : 'bg-secondary';
   }
 
-  getStatusText(formation: any): string {
-    if (formation.est_publie) {
-      return 'Publié';
-    } else if (formation.inscription_ouverte) {
-      return 'En attente';
-    } else {
-      return 'Brouillon';
-    }
+  getStatusText(f: any): string {
+    return (f.est_publie === true || f.est_publie === 1) ? 'Publié' : 'Brouillon';
   }
 
-  trackByFormation(index: number, formation: any): number {
-    return formation.id || index;
-  }
-
-  // Méthodes de filtrage
-  filterByStatus(status: string): void {
-    if (status === 'all') {
-      this.actualData = this.formations;
-    } else if (status === 'active') {
-      this.actualData = this.formations.filter(f => f.est_publie === true);
-    } else if (status === 'pending') {
-      this.actualData = this.formations.filter(f => f.est_publie === false && f.inscription_ouverte === false);
-    } else if (status === 'draft') {
-      this.actualData = this.formations.filter(f => f.est_publie === false);
-    }
-    this.getTableData({ skip: 0, limit: this.pageSize });
-  }
-
-  // Modal de suppression
-  selectedFormation: any = null;
-
-  openDeleteModal(formation: any): void {
-    this.selectedFormation = formation;
-  }
-
-  confirmDelete(): void {
-    if (this.selectedFormation) {
-      this.formationService.deleteFormation(this.selectedFormation.id).subscribe({
-        next: () => {
-          this.loadFormations();
-          this.selectedFormation = null;
-        },
-        error: (error) => {
-          console.error('Erreur lors de la suppression:', error);
-        }
-      });
-    }
-  }
+  trackByFormation(_: number, f: any): number { return f.id || _; }
 
   archiveFormation(formation: any): void {
     if (!confirm(`Archiver la formation "${formation.titre}" ?`)) return;
     this.formationService.deleteFormation(formation.id).subscribe({
-      next: () => this.loadFormations(),
-      error: (error) => console.error('Erreur archivage:', error)
+      next: () => this.loadFormations()
     });
   }
 }

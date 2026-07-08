@@ -1,7 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { httpErrorMessage } from '../../../shared/utils/http-error.utils';
 import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../shared/models/user.models';
@@ -76,11 +76,15 @@ export class UserListComponent implements OnInit {
   constructor(
     private userService: UserService,
     private authService: AuthService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getUser();
     this.getUserList();
+    if (this.route.snapshot.queryParamMap.get('action') === 'create') {
+      this.openNew();
+    }
   }
 
   @HostListener('document:click')
@@ -297,12 +301,12 @@ export class UserListComponent implements OnInit {
   exportUsers(): void {
     const data = this.tableDataCopy;
     if (!data.length) { alert('Aucune donnée à exporter'); return; }
-    const headers = ['Nom', 'Prénom', 'Email', 'Matricule', 'Direction', 'Rôle', 'Entreprise', 'Statut'];
+    const headers = ['Matricule', 'Nom', 'Prénom', 'Email', 'Direction', 'Rôle', 'Entreprise', 'Statut'];
     const rows = data.map(u => [
+      u.matricule || '',
       u.nom || '',
       u.prenom || '',
       u.email || '',
-      u.matricule || '',
       u.direction || '',
       this.getRoleName(u),
       (u as any).entreprise?.nom || '',

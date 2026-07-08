@@ -191,4 +191,22 @@ export class CatalogueService {
       { headers: this.getHeaders() }
     );
   }
+
+  getParticipantsCatalogue(catalogueId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${catalogueId}/participants`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  inscrireUtilisateur(catalogueId: number, userId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${catalogueId}/inscrire`, { user_id: userId }, {
+      headers: this.getHeaders()
+    });
+  }
+
+  desinscrireUtilisateur(catalogueId: number, userId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${catalogueId}/desinscrire/${userId}`, {
+      headers: this.getHeaders()
+    });
+  }
 }

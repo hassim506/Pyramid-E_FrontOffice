@@ -42,6 +42,12 @@ export class CatalogueDetailComponent implements OnInit, OnDestroy {
   private routerSub?:      Subscription;
   private progressionSub?: Subscription;
 
+  private _visibilityHandler = () => {
+    if (document.visibilityState === 'visible') {
+      this.refreshProgressions();
+    }
+  };
+
   constructor(
     private route:              ActivatedRoute,
     private router:             Router,
@@ -85,11 +91,14 @@ export class CatalogueDetailComponent implements OnInit, OnDestroy {
           this.refreshProgressions();
         }
       });
+
+    document.addEventListener('visibilitychange', this._visibilityHandler);
   }
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
     this.progressionSub?.unsubscribe();
+    document.removeEventListener('visibilitychange', this._visibilityHandler);
   }
 
   // ── Expiration ─────────────────────────────────────────────
@@ -305,9 +314,12 @@ export class CatalogueDetailComponent implements OnInit, OnDestroy {
   // ── Navigation ────────────────────────────────────────────
   goToDetails(formationId: number): void {
     if (this.estExpire) return;
-    this.router.navigate(['/courses/course-details-2', formationId], {
-      state: { fromPage: 'catalogue', catalogueId: this.catalogueId }
-    });
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/courses/course-details', formationId], {
+        queryParams: { fromPage: 'catalogue', catalogueId: this.catalogueId }
+      })
+    );
+    window.open(url, '_blank');
   }
 
   commencerFormation(formationId: number, event: Event): void {

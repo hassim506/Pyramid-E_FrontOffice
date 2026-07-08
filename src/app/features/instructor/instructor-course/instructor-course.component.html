@@ -131,6 +131,25 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination -->
+    <div class="ip-pagination" *ngIf="totalData > pageSize">
+      <span class="pg-info">{{ totalData }} formation{{ totalData > 1 ? 's' : '' }}</span>
+      <div class="pg-controls">
+        <button type="button" class="pg-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button type="button" class="pg-btn"
+                *ngFor="let p of getPageNumbers()"
+                [class.active]="p === currentPage"
+                (click)="onPageChange(p)">{{ p }}</button>
+        <button type="button" class="pg-btn"
+                [disabled]="currentPage * pageSize >= totalData"
+                (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-2"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
 </ng-container>

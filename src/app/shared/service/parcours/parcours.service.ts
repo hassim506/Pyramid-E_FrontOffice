@@ -221,4 +221,16 @@ createParcours(parcoursData: ParcoursRequest): Observable<ParcoursSimpleResponse
       headers: this.getHeaders()
     });
   }
+
+  getParticipantsParcours(parcoursId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${parcoursId}/participants`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  desinscrireUtilisateur(parcoursId: number, userId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${parcoursId}/desinscrire/${userId}`, {
+      headers: this.getHeaders()
+    });
+  }
 }
