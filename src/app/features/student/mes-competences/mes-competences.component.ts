@@ -3,25 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 
-export interface DomaineDB {
-  id: number;
-  nom: string;
-  slug?: string;
-  couleur: string | null;
-  icone: string | null;
-}
-
 export interface FormationAcquise {
   formation_id: number;
   formation_titre: string;
-  competences: string[];
   date_fin?: string | null;
-}
-
-export interface DomaineGroupAcquis {
-  domaine: DomaineDB | null;
-  competences: string[];
-  formations: FormationAcquise[];
 }
 
 export interface StatsAcquises {
@@ -29,18 +14,14 @@ export interface StatsAcquises {
   formations_terminees: number;
 }
 
-export interface CompetencesAcquisesData {
-  stats?: StatsAcquises;
-  total_acquises?: number;
-  formations_terminees?: number;
-  competences_acquises?: string[];
-  par_domaine: DomaineGroupAcquis[];
-  domaine_user: DomaineDB | null;
-}
-
 export interface CompetenceAcquiseView {
   nom: string;
   formations: FormationAcquise[];
+}
+
+export interface CompetencesAcquisesData {
+  stats: StatsAcquises;
+  competences_acquises: CompetenceAcquiseView[];
 }
 
 type ViewMode = 'grid' | 'list';
@@ -81,9 +62,8 @@ export class MesCompetencesComponent implements OnInit {
     this.formationsService.getCompetencesAcquises().subscribe({
       next: (res: any) => {
         this.data = {
-          ...res,
-          par_domaine: res?.par_domaine ?? [],
-          domaine_user: res?.domaine_user ?? null,
+          stats: res?.stats ?? { total_acquises: 0, formations_terminees: 0 },
+          competences_acquises: res?.competences_acquises ?? [],
         };
 
         this.currentPage = 1;
@@ -98,47 +78,14 @@ export class MesCompetencesComponent implements OnInit {
   }
 
   get stats(): StatsAcquises {
-    return {
-      total_acquises:
-        this.data?.stats?.total_acquises ??
-        this.data?.total_acquises ??
-        this.competencesAcquises.length,
-      formations_terminees:
-        this.data?.stats?.formations_terminees ??
-        this.data?.formations_terminees ??
-        this.totalFormations,
+    return this.data?.stats ?? {
+      total_acquises: 0,
+      formations_terminees: 0,
     };
   }
 
   get competencesAcquises(): CompetenceAcquiseView[] {
-    const groupes = this.data?.par_domaine ?? [];
-    const map = new Map<string, Map<number, FormationAcquise>>();
-
-    groupes.forEach(groupe => {
-      groupe.competences.forEach(competence => {
-        if (!map.has(competence)) {
-          map.set(competence, new Map<number, FormationAcquise>());
-        }
-
-        const formationsMap = map.get(competence)!;
-
-        groupe.formations
-          .filter(formation => formation.competences.includes(competence))
-          .forEach(formation => {
-            formationsMap.set(formation.formation_id, {
-              ...formation,
-              competences: [competence],
-            });
-          });
-      });
-    });
-
-    return Array.from(map.entries())
-      .map(([nom, formations]) => ({
-        nom,
-        formations: Array.from(formations.values()),
-      }))
-      .sort((a, b) => a.nom.localeCompare(b.nom));
+    return this.data?.competences_acquises ?? [];
   }
 
   get competencesFiltrees(): CompetenceAcquiseView[] {

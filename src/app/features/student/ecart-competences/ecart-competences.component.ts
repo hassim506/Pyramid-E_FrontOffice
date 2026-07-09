@@ -3,23 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 
-export interface DomaineDB {
-  id: number;
-  nom: string;
-  slug?: string;
-  couleur: string | null;
-  icone: string | null;
-}
-
 export interface FormationEcart {
   formation_id: number;
   formation_titre: string;
-  competences: string[];
 }
 
-export interface DomaineGroupEcart {
-  domaine: DomaineDB | null;
-  competences: string[];
+export interface CompetenceEcartView {
+  nom: string;
   formations: FormationEcart[];
 }
 
@@ -28,13 +18,7 @@ export interface EcartData {
   total_visees: number;
   total_ecart: number;
   competences_acquises: string[];
-  par_domaine: DomaineGroupEcart[];
-  domaine_user: DomaineDB | null;
-}
-
-export interface CompetenceEcartView {
-  nom: string;
-  formations: FormationEcart[];
+  competences_ecart: CompetenceEcartView[];
 }
 
 type ViewMode = 'grid' | 'list';
@@ -71,6 +55,7 @@ export class EcartCompetencesComponent implements OnInit {
 
     this.formationsService.getEcartCompetences().subscribe({
       next: (res: EcartData) => {
+         console.log('Réponse API écart:', res);
         this.data = res;
         this.loading = false;
         this.currentPage = 1;
@@ -92,34 +77,7 @@ export class EcartCompetencesComponent implements OnInit {
   }
 
   get competencesEcart(): CompetenceEcartView[] {
-    const groupes = this.data?.par_domaine ?? [];
-    const map = new Map<string, Map<number, FormationEcart>>();
-
-    groupes.forEach(groupe => {
-      groupe.competences.forEach(competence => {
-        if (!map.has(competence)) {
-          map.set(competence, new Map<number, FormationEcart>());
-        }
-
-        const formationsMap = map.get(competence)!;
-
-        groupe.formations
-          .filter(formation => formation.competences.includes(competence))
-          .forEach(formation => {
-            formationsMap.set(formation.formation_id, {
-              ...formation,
-              competences: [competence],
-            });
-          });
-      });
-    });
-
-    return Array.from(map.entries())
-      .map(([nom, formations]) => ({
-        nom,
-        formations: Array.from(formations.values()),
-      }))
-      .sort((a, b) => a.nom.localeCompare(b.nom));
+    return this.data?.competences_ecart ?? [];
   }
 
   get competencesFiltrees(): CompetenceEcartView[] {

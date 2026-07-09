@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { environment } from '../../../../environments/environment';
-import { DomaineDB } from '../mes-competences/mes-competences.component';
 
 interface FormationRecommandee {
   formation_id: number;
@@ -12,7 +11,6 @@ interface FormationRecommandee {
   duree: string | null;
   competences: string[];
   nb_competences: number;
-  domaine: DomaineDB | null;
 }
 
 interface CompetenceRecommandeeView {
