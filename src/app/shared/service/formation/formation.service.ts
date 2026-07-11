@@ -145,6 +145,12 @@ updateFormation(id: number, formationData: any): Observable<any> {
     });
   }
 
+  getVideosRessourcesFormateur(): Observable<any> {
+  return this.http.get(`${this.baseUrl}/formateur/videos-ressources`, {
+    headers: this.getHeaders()
+  });
+}
+
   getCategories(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/categories-formation`, {
       headers: this.getHeaders()

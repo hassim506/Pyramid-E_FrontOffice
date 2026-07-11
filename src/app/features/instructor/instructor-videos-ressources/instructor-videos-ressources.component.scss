@@ -1,0 +1,333 @@
+// ── Loading ──────────────────────────────────────────
+.qq-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  gap: 1rem;
+
+  &__ring {
+    display: inline-block;
+    position: relative;
+    width: 48px;
+    height: 48px;
+
+    div {
+      box-sizing: border-box;
+      display: block;
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      margin: 4px;
+      border: 4px solid #ea580c;
+      border-radius: 50%;
+      animation: qq-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      border-color: #ea580c transparent transparent transparent;
+
+      &:nth-child(1) { animation-delay: -0.45s; }
+      &:nth-child(2) { animation-delay: -0.3s; }
+      &:nth-child(3) { animation-delay: -0.15s; }
+    }
+  }
+
+  p {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+@keyframes qq-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// ── Error ────────────────────────────────────────────
+.cp-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  gap: 0.75rem;
+
+  i {
+    font-size: 2rem;
+    color: #ef4444;
+  }
+
+  p {
+    color: #6b7280;
+    margin: 0;
+  }
+}
+
+.cp-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &--primary {
+    background: #ea580c;
+    color: #fff;
+
+    &:hover {
+      background: #c2410c;
+    }
+  }
+}
+
+// ── Header ───────────────────────────────────────────
+.cp-header {
+  &__title {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+
+  &__sub {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+// ── Stat cards ───────────────────────────────────────
+.cp-stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.cp-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+
+  i {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  &__value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.1;
+  }
+
+  &__label {
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  &--indigo i { color: #6366f1; }
+  &--green  i { color: #16a34a; }
+  &--teal   i { color: #069b8f; }
+  &--orange i { color: #ea580c; }
+}
+
+// ── Toolbar ──────────────────────────────────────────
+.cp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.cp-search {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+
+  i {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.6rem 1rem 0.6rem 2.4rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.9rem;
+
+    &:focus {
+      outline: none;
+      border-color: #ea580c;
+    }
+  }
+}
+
+// ── Results card ─────────────────────────────────────
+.cp-results-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__title {
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+}
+
+.cp-results-count {
+  font-size: 0.85rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+}
+
+// ── Table ────────────────────────────────────────────
+.cp-table-wrap {
+  overflow-x: auto;
+}
+
+.cp-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead th {
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6b7280;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  tbody td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.9rem;
+    color: #374151;
+  }
+
+  tbody tr:hover {
+    background: #fafafa;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+
+  &.bg-danger    { background: #ef4444; }
+  &.bg-info      { background: #0ea5e9; }
+  &.bg-primary   { background: #6366f1; }
+  &.bg-secondary { background: #9ca3af; }
+
+  i {
+    font-size: 0.85rem;
+  }
+}
+
+.cp-status {
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+// ── Pagination ───────────────────────────────────────
+.cp-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+
+  &__label {
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__btn {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: #f3f4f6;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ── Empty state ──────────────────────────────────────
+.cp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+
+  &__icon {
+    font-size: 2.5rem;
+    color: #d1d5db;
+    margin-bottom: 0.75rem;
+  }
+
+  h6 {
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}

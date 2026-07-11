@@ -1,0 +1,147 @@
+<div class="qq-loading" *ngIf="loading">
+  <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
+  <p>Chargement des vidéos et ressources...</p>
+</div>
+
+<div class="cp-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2"></i>
+  <p>{{ error }}</p>
+  <button class="cp-btn cp-btn--primary" (click)="load()">
+    <i class="isax isax-refresh me-2"></i>Réessayer
+  </button>
+</div>
+
+<ng-container *ngIf="!loading && !error">
+  <div class="cp-header mb-4">
+    <h3 class="cp-header__title">
+      <i class="isax isax-video-circle me-2" style="color:#ea580c"></i>
+      Vidéos & ressources
+    </h3>
+    <p class="cp-header__sub">
+      Ensemble des vidéos et ressources pédagogiques de vos formations.
+    </p>
+  </div>
+
+  <div class="cp-stat-cards mb-4">
+    <div class="cp-stat-card cp-stat-card--indigo">
+      <i class="isax isax-book-1"></i>
+      <div>
+        <div class="cp-stat-card__value">{{ stats.total_formations }}</div>
+        <div class="cp-stat-card__label">Formations</div>
+      </div>
+    </div>
+
+    <div class="cp-stat-card cp-stat-card--green">
+      <i class="isax isax-video-circle"></i>
+      <div>
+        <div class="cp-stat-card__value">{{ stats.total_videos }}</div>
+        <div class="cp-stat-card__label">Vidéos</div>
+      </div>
+    </div>
+
+    <div class="cp-stat-card cp-stat-card--teal">
+      <i class="isax isax-folder-2"></i>
+      <div>
+        <div class="cp-stat-card__value">{{ stats.total_ressources }}</div>
+        <div class="cp-stat-card__label">Ressources</div>
+      </div>
+    </div>
+
+    <div class="cp-stat-card cp-stat-card--orange">
+      <i class="isax isax-element-3"></i>
+      <div>
+        <div class="cp-stat-card__value">{{ stats.total_items }}</div>
+        <div class="cp-stat-card__label">Total éléments</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cp-toolbar mb-4">
+    <div class="cp-search">
+      <i class="isax isax-search-normal-1"></i>
+      <input type="text"
+             placeholder="Rechercher une vidéo, ressource ou formation..."
+             [value]="searchValue"
+             (input)="onSearch($any($event.target).value)"
+             class="cp-search__input">
+    </div>
+
+    <select class="form-select" style="max-width:200px"
+            [(ngModel)]="typeFilter"
+            (ngModelChange)="onTypeFilter($event)">
+      <option value="all">Tous les types</option>
+      <option value="video">Vidéos</option>
+      <option value="pdf">PDF</option>
+      <option value="ressource">Ressources</option>
+    </select>
+
+    <select class="form-select" style="max-width:260px"
+            [(ngModel)]="formationFilter"
+            (ngModelChange)="onFormationFilter($event)">
+      <option value="all">Toutes les formations</option>
+      <option *ngFor="let f of formationsUniques" [value]="f.id">{{ f.titre }}</option>
+    </select>
+  </div>
+
+  <div class="cp-results-card" *ngIf="tableData.length; else emptyState">
+    <div class="cp-results-card__top">
+      <h5 class="cp-results-card__title">Liste des vidéos & ressources</h5>
+      <span class="cp-results-count">{{ totalData }} résultat(s)</span>
+    </div>
+
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Titre</th>
+            <th>Formation</th>
+            <th>Module</th>
+            <th>Durée</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of tableData; trackBy: trackByItem">
+            <td>
+              <span class="badge" [ngClass]="getTypeBadgeClass(item.type)">
+                <i class="isax" [ngClass]="getTypeIcon(item.type)"></i>
+                {{ getTypeLabel(item.type) }}
+              </span>
+            </td>
+            <td><strong>{{ item.titre }}</strong></td>
+            <td>{{ item.formation_titre }}</td>
+            <td>{{ item.module_titre }}</td>
+            <td>{{ item.duree_estimee || '—' }}</td>
+            <td>
+              <span class="cp-status">{{ item.statut }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cp-pagination" *ngIf="totalPages > 1">
+      <div class="cp-pagination__label">Page {{ currentPage }} sur {{ totalPages }}</div>
+      <div class="cp-pagination__actions">
+        <button type="button" class="cp-pagination__btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <i class="isax isax-arrow-left-2"></i>
+        </button>
+        <button type="button" class="cp-pagination__btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+          <i class="isax isax-arrow-right-3"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="cp-empty">
+      <i class="isax isax-video-circle cp-empty__icon"></i>
+      <h6>Aucune vidéo ou ressource trouvée</h6>
+      <p>Ajoutez des sections de type vidéo, PDF ou ressource dans vos formations.</p>
+    </div>
+  </ng-template>
+</ng-container>

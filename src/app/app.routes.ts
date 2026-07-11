@@ -88,6 +88,7 @@ export const routes: Routes = [
                 {path:'instructor-statements',loadComponent:()=>import ('./features/instructor/instructor-statements/instructor-statements.component').then((m)=>m.InstructorStatementsComponent)},
                 {path:'instructor-course',loadComponent:()=>import ('./features/instructor/instructor-course/instructor-course.component').then((m)=>m.InstructorCourseComponent)},
                 {path:'instructor-course-grid',loadComponent:()=>import ('./features/instructor/instructor-course-grid/instructor-course-grid.component').then((m)=>m.InstructorCourseGridComponent)},
+                {path:'instructor-videos-ressources',loadComponent:()=>import ('./features/instructor/instructor-videos-ressources/instructor-videos-ressources.component').then((m)=>m.InstructorVideosRessourcesComponent)},
                 {path:'instructor-session',loadComponent:()=>import ('./features/instructor/instructor-session/instructor-session.component').then((m)=>m.InstructorSessionComponent)},
                 {path:'instructor-mes-sondages',loadComponent:()=>import ('./features/instructor/instructor-mes-sondages/instructor-mes-sondages.component').then((m)=>m.InstructorMesSondagesComponent)},
 
