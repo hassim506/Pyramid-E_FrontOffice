@@ -173,13 +173,13 @@
             <i class="isax isax-eye"></i> Voir détails
           </a>
           <button
-            *ngIf="!formation.est_inscrit"
+            *ngIf="formation.peut_demander !== false && !formation.est_inscrit"
             class="btn-demand"
             (click)="demanderFormation(formation.id)">
             <i class="isax isax-add-circle"></i> Demander
           </button>
-          <div class="enrolled-tag" *ngIf="formation.est_inscrit">
-            <i class="isax isax-tick-circle"></i> Déjà inscrit
+          <div class="enrolled-tag" *ngIf="formation.est_inscrit || formation.peut_demander === false">
+            <i class="isax isax-tick-circle"></i> Déjà demandé
           </div>
         </div>
 

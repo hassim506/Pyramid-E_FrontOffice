@@ -15,10 +15,25 @@ export class FormationService {
    // throw new //Error('Method not implemented.');
   //}
   getCompetencesAcquises(): Observable<any> {
-  return this.http.get<any>(`${this.baseUrl}/student/competences`, {
-    headers: this.getHeaders()
-  });
-}
+    const user = this.getCurrentUser();
+    const userId = user?.id ?? user?.user_id;
+
+    const url = userId
+      ? `${this.baseUrl}/student/competences/${userId}/formations`
+      : `${this.baseUrl}/student/competences`;
+
+    return this.http.get<any>(url, {
+      headers: this.getHeaders()
+    });
+  }
+
+  private getCurrentUser(): any {
+    try {
+      return JSON.parse(localStorage.getItem('pyramide_user') || 'null');
+    } catch {
+      return null;
+    }
+  }
   // private apiUrl = 'http://localhost:8000/api';
 
 
@@ -52,7 +67,7 @@ unpublishFormation(id: number): Observable<any> {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
-    
+
   }
 
   private getAuthHeader(): any {
@@ -230,6 +245,10 @@ addComment(commentData: any): Observable<any> {
 
   getCataloguesForEmploye(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl   }/demandes-formation/listes/catalogues`, { headers: this.getHeaders() });
+  }
+
+  getFormationsForEmploye(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/demandes-formation/listes/formations`, { headers: this.getHeaders() });
   }
 
   getCategoriesForEmploye(): Observable<any> {

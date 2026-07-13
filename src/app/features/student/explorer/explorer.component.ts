@@ -19,6 +19,7 @@ interface Formation {
   note_moyenne?: number;
   nombre_etudiants?: number;
   est_inscrit?: boolean;
+  peut_demander?: boolean;
 }
 
 interface Catalogue {
@@ -169,21 +170,24 @@ export class ExplorerComponent implements OnInit {
 
   loadFormations(): void {
     const user = this.getCurrentUser();
-    const entrepriseId = user?.entreprise_id;
+    console.log('🔍 Explorer - Chargement formations pour utilisateur:', {
+      entreprise_id: user?.entreprise_id,
+      user_id: user?.id
+    });
 
-    console.log('🔍 Explorer - Chargement formations pour entreprise:', entrepriseId);
-
-    if (!entrepriseId) {
-      console.error('❌ Explorer - Utilisateur sans entreprise_id');
-      this.error = 'Votre profil n\'est pas associé à une entreprise';
-      this.loading = false;
-      return;
-    }
-
-    this.formationService.getFormationsByEntreprise(entrepriseId).subscribe({
+    // Utiliser le nouvel endpoint qui gère peut_demander et est_inscrit
+    this.formationService.getFormationsForEmploye().subscribe({
       next: (response: any) => {
         console.log('📦 Explorer - Réponse API formations:', response);
-        this.formations = response.formations || response.data || [];
+        const rawFormations = response.formations || response.data || [];
+
+        // Normaliser les données
+        this.formations = rawFormations.map((f: any) => ({
+          ...f,
+          peut_demander: f.peut_demander !== false,
+          est_inscrit: f.est_inscrit || false
+        }));
+
         console.log(`✅ Explorer - ${this.formations.length} formations chargées`);
         this.loading = false;
       },
