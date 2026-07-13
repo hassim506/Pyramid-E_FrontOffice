@@ -1,0 +1,323 @@
+<!-- LOADER -->
+
+<div class="qq-loading" *ngIf="loading">
+  <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
+  <p>Chargement des formations de votre parcour...</p>
+</div>
+
+<!-- ERREUR -->
+<div class="sc-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2 sc-error__icon"></i>
+  <p>{{ error }}</p>
+  <button class="sc-error__retry" (click)="goBack()">
+    <i class="isax isax-arrow-left me-1"></i> Retour
+  </button>
+</div>
+
+<!-- CONTENU -->
+<ng-container *ngIf="!loading && !error && parcours">
+
+  <!-- HERO -->
+  <div class="pad-hero" [class.pad-hero--expire]="estExpire">
+    <div class="pad-hero__bg"
+         [style.background-image]="parcours.image_couverture ? 'url(' + parcours.image_couverture + ')' : 'none'">
+    </div>
+    <div class="pad-hero__overlay"></div>
+    <div class="container position-relative" style="z-index:2">
+      <div class="row">
+        <div class="col-lg-8">
+
+          <!-- Breadcrumb -->
+          <nav class="pad-breadcrumb mb-3">
+            <button class="pad-breadcrumb__back" (click)="goBack()">
+              <i class="isax isax-arrow-left-2 me-1"></i>Explorer
+            </button>
+            <span class="pad-breadcrumb__sep">/</span>
+            <span class="pad-breadcrumb__current">{{ parcours.titre }}</span>
+          </nav>
+
+          <!-- Badges -->
+          <div class="pad-hero__badges mb-3">
+            <!-- Badge expiré prioritaire -->
+            <span class="pad-badge pad-badge--expired" *ngIf="estExpire">
+              <i class="isax isax-calendar-remove me-1"></i>Parcours expiré
+            </span>
+            <span class="pad-badge"
+                  *ngIf="!estExpire"
+                  [class.pad-badge--assigned]="parcours.source !== 'demande'"
+                  [class.pad-badge--demande]="parcours.source === 'demande'">
+              <i class="isax me-1"
+                 [class.isax-tick-circle]="parcours.source !== 'demande'"
+                 [class.isax-send-2]="parcours.source === 'demande'"></i>
+              {{ parcours.badge_label || 'Assigné' }}
+            </span>
+            <span class="pad-badge pad-badge--cat" *ngIf="parcours.categorie">
+              <i class="isax isax-category me-1"></i>{{ parcours.categorie }}
+            </span>
+            <span class="pad-badge pad-badge--count">
+              <i class="isax isax-book-1 me-1"></i>{{ parcours.nombre_formations }} formation(s)
+            </span>
+            <span class="pad-badge" *ngIf="!estExpire" [ngClass]="{
+              'pad-badge--prog-done':    progressionGlobale >= 100,
+              'pad-badge--prog-ongoing': progressionGlobale > 0 && progressionGlobale < 100,
+              'pad-badge--prog-todo':    progressionGlobale === 0
+            }">
+              <i class="isax isax-chart-2 me-1"></i>{{ progressionGlobale | number:'1.0-0' }}% complété
+            </span>
+          </div>
+
+          <h1 class="pad-hero__title">{{ parcours.titre }}</h1>
+          <p class="pad-hero__subtitle" *ngIf="parcours.description">{{ parcours.description }}</p>
+
+          <!-- Infos date -->
+          <div class="pad-hero__assignation mt-3">
+            <span *ngIf="parcours.date_assignation">
+              <i class="isax me-1"
+                 [class.isax-calendar-add]="parcours.source !== 'demande'"
+                 [class.isax-tick-circle]="parcours.source === 'demande'"></i>
+              {{ parcours.source === 'demande' ? 'Validée le' : 'Assigné le' }}
+              {{ parcours.date_assignation | date:'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="!parcours.date_expiration" class="pad-permanent">
+              <i class="isax isax-infinity me-1"></i>Accès permanent
+            </span>
+            <span *ngIf="estExpire" class="pad-expired">
+              <i class="isax isax-calendar-remove me-1"></i>
+              Expiré le {{ parcours.date_expiration | date:'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="!estExpire && parcours.date_expiration && !isExpiringSoon(parcours.date_expiration)">
+              <i class="isax isax-calendar-remove me-1"></i>
+              Expire le {{ parcours.date_expiration | date:'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="!estExpire && isExpiringSoon(parcours.date_expiration)" class="pad-warning">
+              <i class="isax isax-warning-2 me-1"></i>
+              Expire dans {{ getJoursRestants(parcours.date_expiration) }} jour(s) !
+            </span>
+          </div>
+
+          <!-- PROGRESSION GLOBALE (masquée si expiré) -->
+          <div class="pad-progression-globale mt-4" *ngIf="!estExpire">
+            <div class="pad-progression-globale__header">
+              <span class="pad-progression-globale__label">
+                <i class="isax isax-chart-2 me-2"></i>Progression globale
+              </span>
+              <span class="pad-progression-globale__pct"
+                    [class.pad-progression-globale__pct--done]="progressionGlobale >= 100">
+                {{ progressionGlobale | number:'1.0-0' }}%
+              </span>
+            </div>
+            <div class="pad-progression-globale__bar">
+              <div class="pad-progression-globale__fill"
+                   [style.width.%]="progressionGlobale"
+                   [class.pad-progression-globale__fill--done]="progressionGlobale >= 100"
+                   [class.pad-progression-globale__fill--ongoing]="progressionGlobale > 0 && progressionGlobale < 100">
+              </div>
+            </div>
+            <p class="pad-progression-globale__detail">
+              <span>{{ formationsTerminees }} / {{ totalFormations }} formations terminées</span>
+              <span *ngIf="progressionGlobale >= 100" class="pad-progression-globale__complete">
+                <i class="isax isax-tick-circle me-1"></i>Parcours complété !
+              </span>
+            </p>
+          </div>
+
+          <div class="pad-hero__divider mt-4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- BANNIÈRE EXPIRATION                        -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="pad-expire-banner" *ngIf="estExpire">
+    <div class="container">
+      <div class="pad-expire-banner__inner">
+        <div class="pad-expire-banner__icon">
+          <i class="isax isax-calendar-remove"></i>
+        </div>
+        <div class="pad-expire-banner__text">
+          <strong>Accès expiré</strong>
+          <span>
+            Votre accès à ce parcours a expiré le
+            <strong>{{ parcours.date_expiration | date:'dd/MM/yyyy' }}</strong>.
+            Le contenu des formations est en lecture seule. Contactez votre responsable RH pour renouveler votre accès.
+          </span>
+        </div>
+        <button class="pad-expire-banner__btn" (click)="goBack()">
+          <i class="isax isax-arrow-left me-1"></i>Retour
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMATIONS -->
+  <section class="pad-section" [class.pad-section--expire]="estExpire">
+    <div class="container">
+
+      <div class="pad-section__header">
+        <div class="pad-section__header-left">
+          <h4 class="pad-section__title">
+            <i class="isax isax-book-1 me-2" style="color:#7c3aed"></i>
+            Formations incluses
+          </h4>
+          <span class="pad-count-chip">{{ formations.length }} formation(s)</span>
+        </div>
+        <!-- Légende statuts (masquée si expiré) -->
+        <div class="pad-legende" *ngIf="!estExpire">
+          <span class="pad-legende__item pad-legende__item--done">
+            <span class="pad-legende__dot"></span>Terminée
+          </span>
+          <span class="pad-legende__item pad-legende__item--ongoing">
+            <span class="pad-legende__dot"></span>En cours
+          </span>
+          <span class="pad-legende__item pad-legende__item--todo">
+            <span class="pad-legende__dot"></span>À commencer
+          </span>
+        </div>
+        <!-- Légende expirée -->
+        <div class="pad-legende" *ngIf="estExpire">
+          <span class="pad-legende__item pad-legende__item--expire">
+            <i class="isax isax-lock me-1" style="font-size:13px"></i>
+            Contenu verrouillé — accès expiré
+          </span>
+        </div>
+      </div>
+
+      <div class="sc-loading py-4" *ngIf="loading">
+        <div class="sc-loading__spinner"></div>
+      </div>
+
+      <div class="row g-4" *ngIf="!loading && formations.length > 0">
+        <div class="col-xl-4 col-md-6" *ngFor="let f of formations; let i = index">
+
+          <!-- Carte — grisée + non cliquable si expiré -->
+          <div class="pad-formation-card"
+               [class.pad-formation-card--done]="f.statut_formation === 'termine' && !estExpire"
+               [class.pad-formation-card--ongoing]="f.statut_formation === 'en_cours' && !estExpire"
+               [class.pad-formation-card--expire]="estExpire"
+               [class.pad-formation-card--no-click]="estExpire"
+               (click)="!estExpire && goToFormation(f.id)">
+
+            <!-- Numéro ordre -->
+            <div class="pad-formation-card__order"
+                 [class.pad-formation-card__order--done]="f.statut_formation === 'termine' && !estExpire"
+                 [class.pad-formation-card__order--expire]="estExpire">
+              <i class="isax isax-lock" *ngIf="estExpire"></i>
+              <i class="isax isax-tick-circle" *ngIf="!estExpire && f.statut_formation === 'termine'"></i>
+              <span *ngIf="!estExpire && f.statut_formation !== 'termine'">{{ i + 1 }}</span>
+            </div>
+
+            <!-- Image -->
+            <div class="pad-formation-card__img-wrap">
+              <img [src]="getImageUrl(f.image_couverture)"
+                   class="pad-formation-card__img" alt="">
+              <!-- Overlay verrouillé si expiré -->
+              <div class="pad-formation-card__img-overlay" [class.pad-formation-card__img-overlay--expire]="estExpire">
+                <i class="isax" [class.isax-play-circle]="!estExpire" [class.isax-lock]="estExpire"></i>
+              </div>
+              <div class="pad-formation-card__statut-badge"
+                   [ngClass]="estExpire ? 'pad-statut--expire' : getStatutClass(f.statut_formation)">
+                {{ estExpire ? 'Expiré' : getStatutLabel(f.statut_formation) }}
+              </div>
+            </div>
+
+            <!-- Body -->
+            <div class="pad-formation-card__body">
+              <h5 class="pad-formation-card__title">{{ f.titre }}</h5>
+              <div class="pad-formation-card__meta">
+                <span class="pad-meta-chip" *ngIf="f.niveau">
+                  <i class="isax isax-chart me-1"></i>{{ f.niveau }}
+                </span>
+                <span class="pad-meta-chip" *ngIf="f.duree_totale">
+                  <i class="isax isax-clock me-1"></i>{{ f.duree_totale }} min
+                </span>
+              </div>
+
+              <!-- Barre progression (grisée si expiré) -->
+              <div class="pad-formation-progress mt-3">
+                <div class="pad-formation-progress__header">
+                  <span class="pad-formation-progress__label">Progression</span>
+                  <span class="pad-formation-progress__pct"
+                        [style.color]="estExpire ? '#9ca3af' : getProgressionColor(f.statut_formation)">
+                    {{ +f.progression | number:'1.0-0' }}%
+                  </span>
+                </div>
+                <div class="pad-formation-progress__bar">
+                  <div class="pad-formation-progress__fill"
+                       [style.width.%]="+f.progression"
+                       [style.background]="estExpire ? '#9ca3af' : getProgressionColor(f.statut_formation)">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pad-formation-card__footer">
+
+              <!-- Bouton "Voir le détail" -->
+              <button class="pad-formation-card__detail-btn"
+                      [class.pad-formation-card__detail-btn--disabled]="estExpire"
+                      [disabled]="estExpire"
+                      [title]="estExpire ? 'Accès expiré' : 'Voir le détail'"
+                      (click)="voirDetail(f.id, $event)">
+                <i class="isax me-1" [class.isax-arrow-right-3]="!estExpire" [class.isax-lock]="estExpire"></i>
+                {{ estExpire ? 'Accès expiré' : 'Voir le détail' }}
+              </button>
+
+              <!-- Bouton "Commencer/Reprendre/Revoir" pour formations inscrites -->
+              <button *ngIf="f.est_inscrit && !estExpire"
+                      class="pad-formation-card__start-btn"
+                      [class.pad-formation-card__start-btn--resume]="f.statut_formation === 'en_cours'"
+                      [class.pad-formation-card__start-btn--done]="f.statut_formation === 'termine'"
+                      (click)="commencerFormation(f.id, $event)">
+                <i class="isax me-1"
+                   [class.isax-play]="f.statut_formation === 'non_commence'"
+                   [class.isax-refresh]="f.statut_formation === 'en_cours'"
+                   [class.isax-eye]="f.statut_formation === 'termine'"></i>
+                {{ getCTALabel(f.statut_formation) }}
+              </button>
+
+              <!-- Bouton "Demander" pour formations non inscrites -->
+              <button *ngIf="!f.est_inscrit && f.peut_demander !== false && !estExpire"
+                      class="pad-formation-card__start-btn"
+                      (click)="demanderFormation(f.id, $event)">
+                <i class="isax isax-send-2 me-1"></i>
+                Demander
+              </button>
+
+              <!-- Badge "Déjà demandé" pour formations demandées mais non validées -->
+              <div *ngIf="!f.est_inscrit && f.peut_demander === false && !estExpire"
+                   class="pad-formation-card__start-btn pad-formation-card__start-btn--disabled"
+                   style="cursor: not-allowed; opacity: 0.6;">
+                <i class="isax isax-clock me-1"></i>
+                Déjà demandé
+              </div>
+
+              <!-- Bouton verrouillé si expiré -->
+              <button *ngIf="estExpire"
+                      class="pad-formation-card__start-btn pad-formation-card__start-btn--expire"
+                      [disabled]="true"
+                      title="Accès expiré — contactez votre RH">
+                <i class="isax isax-lock me-1"></i>
+                Verrouillé
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="sc-empty" *ngIf="!loading && formations.length === 0">
+        <i class="isax isax-book-1 sc-empty__icon"></i>
+        <h6 class="sc-empty__title">Aucune formation disponible</h6>
+        <p>Ce parcours ne contient pas encore de formations publiées.</p>
+      </div>
+
+    </div>
+  </section>
+
+</ng-container>

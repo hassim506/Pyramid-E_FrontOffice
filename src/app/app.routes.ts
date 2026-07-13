@@ -299,6 +299,9 @@ export const routes: Routes = [
         {path:'mes-parcours/:id',loadComponent:()=>import ('./features/student/parcours-assigne-detail/parcours-assigne-detail.component').then((m)=>m.ParcoursAssigneDetailComponent)},
         {path:'parcours-assigne/:id',redirectTo:'mes-parcours/:id',pathMatch:'full'},
 
+        // Détails parcours (pour n'importe quel parcours depuis l'explorer)
+        {path:'parcours-details/:id',loadComponent:()=>import ('./features/student/parcours-details/parcours-details.component').then((m)=>m.ParcoursDetailsComponent)},
+
         {path:'student-sondage/:id',loadComponent:()=>import('./features/student/student-sondage/student-sondage.component').then(m=>m.StudentSondageComponent)},
         {path:'student-mes-sondages',loadComponent:()=>import('./features/student/student-mes-sondages/student-mes-sondages.component').then(m=>m.StudentMesSondagesComponent)},
         {path:'student-quiz',loadComponent:()=>import ('./features/student/student-quiz/student-quiz.component').then((m)=>m.StudentQuizComponent)},
