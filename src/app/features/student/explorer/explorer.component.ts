@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { CategorieService } from '../../../shared/service/categorie/categorie-service.service';
+import { DemandeFormationService } from '../../../shared/service/demande/demande-formation.service';
+
+declare var bootstrap: any;
 
 interface Formation {
   id: number;
@@ -49,7 +52,7 @@ interface Parcours {
 @Component({
   selector: 'app-explorer',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './explorer.component.html',
   styleUrls: ['./explorer.component.scss'],
 })
@@ -77,6 +80,12 @@ export class ExplorerComponent implements OnInit {
     { value: 'avancé', label: 'Avancé' },
     { value: 'expert', label: 'Expert' }
   ];
+
+  // Modal demande
+  demandeForm!: FormGroup;
+  formationSelectionnee: Formation | null = null;
+  submitting = false;
+  demandeModal: any;
 
   // Données filtrées
   get filteredFormations(): Formation[] {
@@ -127,8 +136,18 @@ export class ExplorerComponent implements OnInit {
   constructor(
     private formationService: FormationService,
     private categorieService: CategorieService,
+    private demandeService: DemandeFormationService,
+    private formBuilder: FormBuilder,
     private router: Router
-  ) {}
+  ) {
+    this.demandeForm = this.formBuilder.group({
+      motif_demande: ['', Validators.required],
+      objectifs_personnels: ['', Validators.required],
+      priorite: ['normale', Validators.required],
+      date_souhaitee_debut: [''],
+      commentaire_employe: ['']
+    });
+  }
 
   ngOnInit(): void {
     this.loadCategories();
@@ -348,10 +367,59 @@ export class ExplorerComponent implements OnInit {
   }
 
   demanderFormation(formationId: number): void {
-    // Rediriger vers la page de demande de formation
-    this.router.navigate(['/student/student-demande'], {
-      queryParams: { formationId: formationId }
+    // Trouver la formation
+    this.formationSelectionnee = this.formations.find(f => f.id === formationId) || null;
+
+    if (!this.formationSelectionnee) return;
+
+    // Réinitialiser le formulaire
+    this.demandeForm.reset({
+      motif_demande: '',
+      objectifs_personnels: '',
+      priorite: 'normale',
+      date_souhaitee_debut: '',
+      commentaire_employe: ''
     });
+
+    // Ouvrir le modal
+    this.demandeModal = new bootstrap.Modal(document.getElementById('demandeFormationModal'));
+    this.demandeModal.show();
+  }
+
+  soumettreDemandeFormation(): void {
+    if (this.demandeForm.invalid || !this.formationSelectionnee) {
+      Object.keys(this.demandeForm.controls).forEach(key => {
+        this.demandeForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.submitting = true;
+    const payload = {
+      formation_id: this.formationSelectionnee.id,
+      ...this.demandeForm.value
+    };
+
+    this.demandeService.creerDemande(payload).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.demandeModal.hide();
+        alert('Demande de formation envoyée avec succès !');
+        // Recharger les formations pour mettre à jour le statut peut_demander
+        this.loadFormations();
+      },
+      error: (err) => {
+        this.submitting = false;
+        console.error('Erreur création demande:', err);
+        alert('Erreur lors de la création de la demande. Veuillez réessayer.');
+      }
+    });
+  }
+
+  fermerModalDemande(): void {
+    if (this.demandeModal) {
+      this.demandeModal.hide();
+    }
   }
 
   demanderCatalogue(catalogueId: number): void {

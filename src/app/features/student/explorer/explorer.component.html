@@ -317,3 +317,107 @@
     </div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     MODAL - DEMANDE FORMATION
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="demandeFormationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="isax isax-add-circle"></i>
+          Demander une formation
+        </h5>
+        <button type="button" class="btn-close" (click)="fermerModalDemande()"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <div *ngIf="formationSelectionnee" class="formation-info mb-4">
+          <h6 class="text-primary">{{ formationSelectionnee.titre }}</h6>
+          <p class="text-muted small mb-0">{{ formationSelectionnee.description }}</p>
+        </div>
+
+        <form [formGroup]="demandeForm">
+          <!-- Motif -->
+          <div class="mb-3">
+            <label class="form-label">Motif de la demande *</label>
+            <textarea
+              formControlName="motif_demande"
+              class="form-control"
+              rows="3"
+              placeholder="Expliquez pourquoi vous souhaitez suivre cette formation..."></textarea>
+            <div class="text-danger small" *ngIf="demandeForm.get('motif_demande')?.touched && demandeForm.get('motif_demande')?.errors?.['required']">
+              Le motif est obligatoire
+            </div>
+          </div>
+
+          <!-- Objectifs -->
+          <div class="mb-3">
+            <label class="form-label">Objectifs personnels *</label>
+            <textarea
+              formControlName="objectifs_personnels"
+              class="form-control"
+              rows="3"
+              placeholder="Quels sont vos objectifs en suivant cette formation ?"></textarea>
+            <div class="text-danger small" *ngIf="demandeForm.get('objectifs_personnels')?.touched && demandeForm.get('objectifs_personnels')?.errors?.['required']">
+              Les objectifs sont obligatoires
+            </div>
+          </div>
+
+          <!-- Priorité -->
+          <div class="mb-3">
+            <label class="form-label">Priorité *</label>
+            <select formControlName="priorite" class="form-select">
+              <option value="basse">Basse</option>
+              <option value="normale">Normale</option>
+              <option value="haute">Haute</option>
+              <option value="urgente">Urgente</option>
+            </select>
+          </div>
+
+          <!-- Date souhaitée -->
+          <div class="mb-3">
+            <label class="form-label">Date souhaitée de début (optionnel)</label>
+            <input
+              type="date"
+              formControlName="date_souhaitee_debut"
+              class="form-control">
+          </div>
+
+          <!-- Commentaire -->
+          <div class="mb-3">
+            <label class="form-label">Commentaire additionnel (optionnel)</label>
+            <textarea
+              formControlName="commentaire_employe"
+              class="form-control"
+              rows="2"
+              placeholder="Ajoutez des informations complémentaires..."></textarea>
+          </div>
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fermerModalDemande()" [disabled]="submitting">
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="soumettreDemandeFormation()"
+          [disabled]="submitting || demandeForm.invalid">
+          <span *ngIf="!submitting">
+            <i class="isax isax-send-2"></i> Envoyer la demande
+          </span>
+          <span *ngIf="submitting">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Envoi en cours...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
