@@ -193,8 +193,29 @@ export class ExplorerComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ Explorer - Erreur chargement formations:', err);
-        this.error = 'Impossible de charger les formations';
-        this.loading = false;
+
+        // Fallback: si l'endpoint ne marche pas, utiliser l'ancien
+        console.log('⚠️ Fallback vers getFormationsByEntreprise');
+        const entrepriseId = user?.entreprise_id;
+
+        if (!entrepriseId) {
+          this.error = 'Impossible de charger les formations';
+          this.loading = false;
+          return;
+        }
+
+        this.formationService.getFormationsByEntreprise(entrepriseId).subscribe({
+          next: (response: any) => {
+            this.formations = response.formations || response.data || [];
+            // Sans peut_demander, tous les boutons seront affichés (comportement par défaut)
+            console.log(`✅ Explorer - ${this.formations.length} formations chargées (fallback)`);
+            this.loading = false;
+          },
+          error: () => {
+            this.error = 'Impossible de charger les formations';
+            this.loading = false;
+          }
+        });
       }
     });
   }
