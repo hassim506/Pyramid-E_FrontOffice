@@ -378,6 +378,6 @@ export class StudentsCatalogueComponent implements OnInit {
 
   getImageUrl(path: string | null | undefined): string {
     // Utiliser la méthode du service qui gère correctement les URLs
-    return this.formationService.getImageUrl(path);
+    return this.formationsService.getImageUrl(path);
   }
 }
