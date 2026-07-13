@@ -23,7 +23,20 @@ export interface Quiz {
     note_moyenne: string;
     nb_reussis: number;
   };
-  formation?: any;
+  formation?: {
+    id?: number;
+    titre?: string;
+    nom?: string;
+    formateur_id?: number;
+    formateur?: {
+      id?: number;
+      nom?: string;
+      prenom?: string;
+      name?: string;
+      email?: string;
+    };
+    [key: string]: any;
+  };
   section?: any;
 }
 

@@ -40,31 +40,47 @@
       </div>
 
       <!-- Filtre Rôle -->
-      <div class="ul-filter-group" (clickOutside)="showRoleDropdown = false">
+      <div class="ul-filter-group">
         <button class="ul-filter" [class.ul-filter--on]="!!selectedRoleFilter"
-                (click)="showRoleDropdown = !showRoleDropdown">
+                (click)="toggleRoleDropdown($event)">
           <i class="isax isax-filter"></i> Rôle
           <span *ngIf="selectedRoleFilter" class="ul-filter__chip">{{ selectedRoleFilter }}</span>
         </button>
         <div class="ul-dropdown" *ngIf="showRoleDropdown">
           <div class="ul-dropdown__item" (click)="setRoleFilter('')">Tous les rôles</div>
           <div class="ul-dropdown__item"
-               *ngFor="let r of availableRoles"
-               [class.ul-dropdown__item--on]="selectedRoleFilter === r"
-               (click)="setRoleFilter(r)">{{ r }}</div>
+               *ngFor="let r of allRoles"
+               [class.ul-dropdown__item--on]="selectedRoleFilter === r.name"
+               (click)="setRoleFilter(r.name)">{{ r.name }}</div>
         </div>
       </div>
 
       <!-- Filtre Entreprise -->
-      <button class="ul-filter" [class.ul-filter--on]="!!entrepriseId">
+      <div class="ul-filter-group" *ngIf="!entrepriseId">
+        <button class="ul-filter" [class.ul-filter--on]="!!selectedEntrepriseFilter"
+                (click)="toggleEntrepriseDropdown($event)">
+          <i class="isax isax-building"></i> Entreprise
+          <span *ngIf="selectedEntrepriseFilter" class="ul-filter__chip">
+            {{ getEntrepriseName(selectedEntrepriseFilter) }}
+          </span>
+        </button>
+        <div class="ul-dropdown" *ngIf="showEntrepriseDropdown">
+          <div class="ul-dropdown__item" (click)="setEntrepriseFilter('')">Toutes les entreprises</div>
+          <div class="ul-dropdown__item"
+               *ngFor="let e of allEntreprises"
+               [class.ul-dropdown__item--on]="selectedEntrepriseFilter === e.id.toString()"
+               (click)="setEntrepriseFilter(e.id.toString())">{{ e.nom }}</div>
+        </div>
+      </div>
+      <button *ngIf="entrepriseId" class="ul-filter" [class.ul-filter--on]="true">
         <i class="isax isax-building"></i>
-        {{ entrepriseId ? ('Entreprise #' + entrepriseId) : 'Entreprise' }}
+        {{ getEntrepriseName(entrepriseId.toString()) }}
       </button>
 
       <!-- Filtre Statut -->
-      <div class="ul-filter-group" (clickOutside)="showStatutDropdown = false">
+      <div class="ul-filter-group">
         <button class="ul-filter" [class.ul-filter--on]="selectedStatutFilter !== ''"
-                (click)="showStatutDropdown = !showStatutDropdown">
+                (click)="toggleStatutDropdown($event)">
           <i class="isax isax-tick-circle"></i> Statut
           <span *ngIf="selectedStatutFilter !== ''" class="ul-filter__chip">
             {{ selectedStatutFilter === '1' ? 'Actif' : 'Inactif' }}

@@ -111,14 +111,47 @@ export class CatalogueDetailComponent implements OnInit, OnDestroy {
   loadCatalogueDetail(): void {
     this.loading = true;
 
-    console.log(`📡 [CatalogueDetail #${this.catalogueId}] loadCatalogueDetail() → getMesCataloguesAssignes()`);
+    console.log(`📡 [CatalogueDetail #${this.catalogueId}] loadCatalogueDetail() → getCatalogueFormationsWithStatus()`);
 
+    // ✅ Charger les formations du catalogue avec statut peut_demander et est_inscrit
+    this.formationsService.getCatalogueFormationsWithStatus(this.catalogueId).subscribe({
+      next: (res: any) => {
+        console.log(`✅ [CatalogueDetail #${this.catalogueId}] getCatalogueFormationsWithStatus réponse:`, res);
+
+        this.catalogue  = res.catalogue;
+        this.formations = res.formations || [];
+
+        // Initialiser les stats
+        this.totalFormations = this.formations.length;
+        this.formationsTerminees = this.formations.filter((f: any) => f.est_inscrit && f.progression >= 100).length;
+        this.progressionGlobale = 0;
+
+        this.source = 'demande'; // Par défaut "demande" pour les catalogues explorés
+        this.badgeLabel = 'À explorer';
+        this.dateExpiration = null; // Pas d'expiration pour les catalogues explorés
+
+        console.log(`📋 [CatalogueDetail #${this.catalogueId}] ${this.formations.length} formations chargées`);
+
+        this._applySearchAndPaginate();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(`❌ [CatalogueDetail #${this.catalogueId}] Erreur getCatalogueFormationsWithStatus:`, err);
+
+        // Fallback: Charger depuis l'ancien endpoint pour les catalogues assignés
+        console.log(`⚠️ Fallback vers getMesCataloguesAssignes`);
+        this.loadCatalogueDetailFallback();
+      }
+    });
+  }
+
+  private loadCatalogueDetailFallback(): void {
     this.formationsService.getMesCataloguesAssignes().subscribe({
       next: (res: any) => {
         const all  = res.catalogues ?? [];
         const meta = all.find((c: any) => c.id === this.catalogueId);
 
-        console.log(`✅ [CatalogueDetail #${this.catalogueId}] Meta catalogue trouvé:`, meta);
+        console.log(`✅ [CatalogueDetail #${this.catalogueId}] Meta catalogue trouvé (fallback):`, meta);
 
         this.source         = meta?.source         ?? 'assigne';
         this.badgeLabel     = meta?.badge_label     ?? 'Assigné';
@@ -129,7 +162,7 @@ export class CatalogueDetailComponent implements OnInit, OnDestroy {
         this.loadFormations();
       },
       error: (err) => {
-        console.error(`❌ [CatalogueDetail #${this.catalogueId}] Erreur getMesCataloguesAssignes:`, err);
+        console.error(`❌ [CatalogueDetail #${this.catalogueId}] Erreur fallback:`, err);
         this.error   = 'Impossible de charger le catalogue';
         this.loading = false;
       }
@@ -337,6 +370,14 @@ export class CatalogueDetailComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/student/mes-catalogues']);
+  }
+
+  demanderFormation(formationId: number, event: Event): void {
+    event.stopPropagation();
+    // Rediriger vers l'explorer avec le modal de demande
+    this.router.navigate(['/student/students-explorer'], {
+      queryParams: { formationId: formationId }
+    });
   }
 
   // ── Helpers ───────────────────────────────────────────────

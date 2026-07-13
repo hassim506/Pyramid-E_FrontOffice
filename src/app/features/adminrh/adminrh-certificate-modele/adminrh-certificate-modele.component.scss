@@ -106,6 +106,53 @@ $text-muted: #6C757D;
   &::before { transform:translateX(18px); }
 }
 
+// ── Logo upload ─────────────────────────────────────────────
+.ip-logo-upload {
+  display:flex; flex-direction:column; gap:8px;
+}
+
+.ip-logo-preview {
+  position:relative; width:fit-content;
+  img { width:100px; height:100px; object-fit:contain; border-radius:$radius; border:1px solid $border; background:#F8F9FA; }
+}
+
+.ip-logo-remove {
+  position:absolute; top:-6px; right:-6px; width:24px; height:24px;
+  background:#DC3545; color:#fff; border:2px solid #fff; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all .15s;
+  i { font-size:12px; }
+  &:hover { background:darken(#DC3545,8%); transform:scale(1.1); }
+}
+
+.ip-upload-zone {
+  border:2px dashed $border; border-radius:$radius; padding:24px 16px;
+  text-align:center; cursor:pointer; transition:all .15s;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  i { font-size:32px; color:$text-muted; }
+  span { font-size:13px; font-weight:500; color:#1A1A2E; }
+  small { font-size:11px; color:$text-muted; }
+  &:hover { border-color:$primary; background:$primary-lt; }
+}
+
+.ip-upload-loading {
+  display:flex; align-items:center; gap:8px; font-size:12px; color:$text-muted;
+}
+
+.ip-upload-error {
+  display:flex; align-items:center; gap:6px; font-size:12px; color:#DC3545;
+  background:#FEE2E2; padding:6px 10px; border-radius:6px;
+  i { font-size:14px; }
+}
+
+.ip-spin {
+  display:inline-block; width:12px; height:12px;
+  border:2px solid currentColor; border-right-color:transparent;
+  border-radius:50%; animation:spin .6s linear infinite;
+}
+
+@keyframes spin { to { transform:rotate(360deg); } }
+
 .ip-save-row { padding:16px 20px; display:flex; flex-direction:column; gap:8px; }
 .ip-save-ok {
   font-size:12px; color:#059669; font-weight:500;

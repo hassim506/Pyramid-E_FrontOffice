@@ -1258,26 +1258,38 @@ private validateSectionType(type: string): string {
       competences_acquises: this.competencesAcquises.filter(comp => comp.trim()),
       outils_requis: this.outilsRequis.filter(outil => outil.trim()),
 
-      modules: this.modules.map((module: any) => ({
-        id: module.id,
-        titre: String(module.titre ?? '').trim(),
-        description: String(module.description ?? '').trim() || null,
-        duree_estimee: String(module.duree_estimee ?? '0'),
-        ordre: module.ordre,
-        sections: (module.sections ?? []).map((section: any) => ({
-          id: section.id,
-          titre: String(section.titre ?? '').trim(),
-          type: section.type || 'text',
-          duree_estimee: String(section.duree_estimee ?? '0'),
-          contenu: section.contenu ? String(section.contenu).trim() : null,
-          ressources: Array.isArray(section.ressources)
-            ? section.ressources.filter((r: any) => r && String(r).trim())
-            : (section.ressources ? String(section.ressources).split(',').map((r: string) => r.trim()).filter(Boolean) : []),
-          obligatoire: Boolean(section.obligatoire),
-          visible: Boolean(section.visible),
-          ordre: section.ordre,
-        })),
-      })),
+      modules: this.modules.map((module: any) => {
+        const moduleData: any = {
+          titre: String(module.titre ?? '').trim(),
+          description: String(module.description ?? '').trim() || null,
+          duree_estimee: String(module.duree_estimee ?? '0'),
+          ordre: module.ordre,
+          sections: (module.sections ?? []).map((section: any) => {
+            const sectionData: any = {
+              titre: String(section.titre ?? '').trim(),
+              type: section.type || 'text',
+              duree_estimee: String(section.duree_estimee ?? '0'),
+              contenu: section.contenu ? String(section.contenu).trim() : null,
+              ressources: Array.isArray(section.ressources)
+                ? section.ressources.filter((r: any) => r && String(r).trim())
+                : (section.ressources ? String(section.ressources).split(',').map((r: string) => r.trim()).filter(Boolean) : []),
+              obligatoire: Boolean(section.obligatoire),
+              visible: Boolean(section.visible),
+              ordre: section.ordre,
+            };
+            // N'inclure l'id que s'il existe (section existante)
+            if (section.id !== undefined && section.id !== null) {
+              sectionData.id = section.id;
+            }
+            return sectionData;
+          })
+        };
+        // N'inclure l'id que s'il existe (module existant)
+        if (module.id !== undefined && module.id !== null) {
+          moduleData.id = module.id;
+        }
+        return moduleData;
+      }),
 
       // Coûts
       cout_conception: parseFloat(pricingInfo.cout_conception) || 0,

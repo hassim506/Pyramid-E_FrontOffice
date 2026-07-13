@@ -42,7 +42,7 @@ interface StatutFilter {
 })
 export class AdminrhDemandeParcoursComponent implements OnInit {
   routes = routes;
-  
+
   // Variables de pagination
   public pageSize: number = 10;
   public tableData: DemandeFormation[] = [];
@@ -57,22 +57,22 @@ export class AdminrhDemandeParcoursComponent implements OnInit {
   public pageSelection: pageSelection[] = [];
   dataSource!: MatTableDataSource<DemandeFormation>;
   public searchDataValue: string = '';
-  
+
   // Variables de gestion d'état
   loading: boolean = false;
   error: string = '';
   successMessage: string = '';
-  
+
   // Filtres
   selectedStatutFilter: string = 'tous';
   selectedPrioriteFilter: string = 'tous';
-  
+
   // Données utilisateur connecté
   public currentUser: any;
-  
+
   // Statistiques
   public stats: any = {};
-  
+
   // Filtres de statut
   public statutFilters: StatutFilter[] = [
     { value: 'tous', label: 'Tous les statuts', count: 0, color: 'secondary' },
@@ -134,7 +134,7 @@ private loadDemandes(): void {
     this.demandeFormationService.getDemandesFormation().subscribe({
       next: (response: DemandeFormationResponse) => {
         console.log('📦 Réponse API demandes formation:', response);
-        
+
         try {
           const parcoursDemandes = (response.demandes || []).filter(d => d.type_demande === 'parcours');
 
@@ -193,7 +193,7 @@ private loadDemandes(): void {
     this.tableData = [];
     this.tableDataCopy = [];
     this.serialNumberArray = [];
-    
+
     this.actualData.forEach((demande: DemandeFormation, index: number) => {
       const serialNumber = index + 1;
       if (index >= pageOption.skip && serialNumber <= pageOption.limit) {
@@ -202,7 +202,7 @@ private loadDemandes(): void {
         this.serialNumberArray.push(serialNumber);
       }
     });
-    
+
     this.dataSource = new MatTableDataSource<DemandeFormation>(this.actualData);
     this.pagination.calculatePageSize.next({
       totalData: this.totalData,
@@ -350,7 +350,7 @@ private loadDemandes(): void {
     if (this.validatingIds.has(demande.id)) return;
 
     const confirmMessage = `Êtes-vous sûr de vouloir valider la demande de parcours "${demande.parcours?.titre}" pour ${demande.employe?.name} ?`;
-    
+
     if (confirm(confirmMessage)) {
       this.validatingIds.add(demande.id);
       this.clearMessages();
@@ -378,9 +378,9 @@ private loadDemandes(): void {
     if (this.refusingIds.has(demande.id)) return;
 
     const motif = prompt(`Pourquoi refusez-vous la demande de parcours "${demande.parcours?.titre}" pour ${demande.employe?.name} ?\n\nVeuillez saisir un motif :`);
-    
+
     if (motif === null) return; // Annulation
-    
+
     if (!motif.trim()) {
       this.error = 'Un motif de refus est obligatoire.';
       return;
@@ -407,7 +407,7 @@ private loadDemandes(): void {
   // Annuler une demande
   annulerDemande(demande: DemandeFormation): void {
     const confirmMessage = `Êtes-vous sûr de vouloir annuler la demande de parcours "${demande.parcours?.titre}" pour ${demande.employe?.name} ?`;
-    
+
     if (confirm(confirmMessage)) {
       this.clearMessages();
 

@@ -33,9 +33,42 @@
                placeholder="Learning Management System">
       </div>
       <div class="ip-field">
-        <label class="ip-label">Logo (URL)</label>
-        <input type="text" class="ip-input" [(ngModel)]="config.logo_url"
-               placeholder="https://…/logo.png">
+        <label class="ip-label">Logo de l'entreprise</label>
+        <div class="ip-logo-upload">
+          <!-- Preview du logo actuel -->
+          <div class="ip-logo-preview" *ngIf="config.logo_url">
+            <img [src]="config.logo_url" alt="Logo" (error)="onLogoError()">
+            <button type="button" class="ip-logo-remove" (click)="removeLogo()" title="Supprimer le logo">
+              <i class="isax isax-trash"></i>
+            </button>
+          </div>
+
+          <!-- Zone d'upload -->
+          <div class="ip-upload-zone" *ngIf="!config.logo_url" (click)="fileInput.click()">
+            <i class="isax isax-document-upload"></i>
+            <span>Cliquez pour uploader un logo</span>
+            <small>PNG, JPG, SVG (max 2MB)</small>
+          </div>
+
+          <!-- Bouton de changement si un logo existe -->
+          <button type="button" class="ip-btn ip-btn--ghost ip-btn--sm"
+                  *ngIf="config.logo_url" (click)="fileInput.click()">
+            <i class="isax isax-edit"></i> Changer le logo
+          </button>
+
+          <input #fileInput type="file" hidden accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml,image/webp"
+                 (change)="onLogoFileSelected($event)" [disabled]="uploadingLogo">
+
+          <!-- Indicateur de chargement -->
+          <div class="ip-upload-loading" *ngIf="uploadingLogo">
+            <span class="ip-spin"></span> Upload en cours...
+          </div>
+
+          <!-- Message d'erreur -->
+          <div class="ip-upload-error" *ngIf="logoUploadError">
+            <i class="isax isax-warning-2"></i> {{ logoUploadError }}
+          </div>
+        </div>
       </div>
 
       <div class="ip-field">
@@ -198,9 +231,13 @@
 
       <div class="ip-cert-card__header">
         <div class="ip-cert-card__logo-wrap">
-          <img *ngIf="config.logo_url" [src]="config.logo_url" class="ip-cert-card__logo-img"
-               alt="logo" onerror="this.style.display='none'">
-          <div *ngIf="!config.logo_url" class="ip-cert-card__logo-mark"
+          <img *ngIf="config.logo_url && !previewLogoError"
+               [src]="config.logo_url"
+               class="ip-cert-card__logo-img"
+               alt="logo"
+               (error)="onPreviewLogoError()">
+          <div *ngIf="!config.logo_url || previewLogoError"
+               class="ip-cert-card__logo-mark"
                [style.background]="config.couleur_principale">
             {{ getInitials(config.entreprise_nom || 'E') }}
           </div>

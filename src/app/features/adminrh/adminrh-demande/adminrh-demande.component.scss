@@ -552,16 +552,27 @@ $radius-xl: 16px;
     border-color: #FCA5A5;
   }
 
-  &.act-cancel:not(:disabled):hover {
+  &.act-cancel:not(:disabled) {
     background: $amber-bg;
     color: $amber;
-    border-color: #FCD34D;
+    border-color: darken($amber-bg, 5%);
+
+    &:hover {
+      background: darken($amber-bg, 5%);
+      border-color: $amber;
+    }
   }
 
   &.act-view:not(:disabled):hover {
     background: $blue-bg;
     color: $blue;
     border-color: #93C5FD;
+  }
+
+  &.act-people:not(:disabled):hover {
+    background: $purple-bg;
+    color: $purple;
+    border-color: #C4B5FD;
   }
 }
 

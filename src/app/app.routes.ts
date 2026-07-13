@@ -284,6 +284,8 @@ export const routes: Routes = [
         {path:'students-session',loadComponent:()=>import ('./features/student/students-session/students-session.component').then((m)=>m.StudentsSessionsComponent)},
         {path:'sessions-acceptees',loadComponent:()=>import ('./features/student/sessions-acceptees/sessions-acceptees.component').then((m)=>m.SessionsAccepteesComponent)},
         {path:'students-catalogue',loadComponent:()=>import ('./features/student/students-catalogue/students-catalogue.component').then((m)=>m.StudentsCatalogueComponent)},
+        {path:'students-explorer',loadComponent:()=>import ('./features/student/explorer/explorer.component').then((m)=>m.ExplorerComponent)},
+
 
         // RENOMMÉ : students-parcours → mes-parcours
         {path:'mes-parcours',loadComponent:()=>import ('./features/student/students-parcours/students-parcours.component').then((m)=>m.StudentsParcoursComponent)},

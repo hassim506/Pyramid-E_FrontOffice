@@ -57,6 +57,13 @@ export class AdminrhCertificateComponent implements OnInit {
       next: (res) => {
         if (res.data?.config) {
           this.config = { ...DEFAULT_CONFIG, ...res.data.config };
+
+          // ✅ Convertir l'URL relative en URL complète pour l'affichage
+          if (this.config.logo_url && !this.config.logo_url.startsWith('http')) {
+            const baseUrl = this.apiUrl.replace('/api', '');
+            this.config.logo_url = baseUrl + this.config.logo_url;
+            console.log('✅ Logo URL chargée AdminRH:', this.config.logo_url);
+          }
         }
       },
       error: () => {}
@@ -128,6 +135,38 @@ export class AdminrhCertificateComponent implements OnInit {
 
   openDetails(cert: Certificat): void {
     this.selectedCert = cert;
+
+    // ✅ Si le certificat a un modèle avec config, l'utiliser
+    if (cert.modele?.config) {
+      this.config = { ...DEFAULT_CONFIG, ...cert.modele.config };
+
+      // ✅ Convertir l'URL relative en URL complète pour l'affichage
+      if (this.config.logo_url && !this.config.logo_url.startsWith('http')) {
+        const baseUrl = this.apiUrl.replace('/api', '');
+        this.config.logo_url = baseUrl + this.config.logo_url;
+        console.log('✅ Logo URL convertie dans preview AdminRH:', this.config.logo_url);
+      }
+
+      console.log('✅ Config du modèle appliquée pour la prévisualisation AdminRH:', this.config);
+    } else if (cert.modele?.template_html) {
+      try {
+        const parsed = JSON.parse(cert.modele.template_html);
+        if (parsed && typeof parsed === 'object') {
+          this.config = { ...DEFAULT_CONFIG, ...parsed };
+
+          // ✅ Convertir l'URL relative en URL complète
+          if (this.config.logo_url && !this.config.logo_url.startsWith('http')) {
+            const baseUrl = this.apiUrl.replace('/api', '');
+            this.config.logo_url = baseUrl + this.config.logo_url;
+          }
+
+          console.log('✅ Config du template_html appliquée AdminRH:', this.config);
+        }
+      } catch (e) {
+        console.warn('⚠️ Impossible de parser le template_html du modèle');
+      }
+    }
+
     setTimeout(() => {
       const el = document.getElementById('arh_cert_details_modal');
       if (el) new (window as any).bootstrap.Modal(el).show();

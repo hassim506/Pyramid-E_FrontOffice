@@ -33,12 +33,12 @@
             <th>Durée</th>
             <th>Score min.</th>
             <th>Statut</th>
-            <th>Créé le</th>
+            <th>Créé par</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let quiz of quizzes">
+          <tr *ngFor="let quiz of paginatedQuizzes">
             <td>
               <div class="ip-quiz-cell">
                 <div class="ip-quiz-icon"><i class="isax isax-award"></i></div>
@@ -50,7 +50,7 @@
             </td>
             <td>
               <span class="ip-pill">
-                <i class="isax isax-book-1"></i> Formation #{{ quiz.formation_id }}
+                <i class="isax isax-book-1"></i> {{ getFormationTitre(quiz) }}
               </span>
             </td>
             <td>
@@ -72,7 +72,7 @@
               </span>
             </td>
             <td>
-              <span class="text-muted">{{ quiz.created_at | date:'dd/MM/yyyy' }}</span>
+              <span class="text-muted">{{ getCreateurNom(quiz) }}</span>
             </td>
             <td>
               <div class="ip-actions">
@@ -97,6 +97,27 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="totalPages > 1" class="ip-pagination">
+    <span class="ip-pagination__info">
+      {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ pageEnd }} sur {{ filteredQuizzes.length }} quiz
+    </span>
+    <div class="ip-pagination__controls">
+      <button type="button" class="ip-pg-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        <i class="isax isax-arrow-left-2"></i>
+      </button>
+      <ng-container *ngFor="let p of pageNumbers">
+        <span *ngIf="p === -1" class="ip-pg-ellipsis">…</span>
+        <button type="button" *ngIf="p !== -1" class="ip-pg-btn"
+                [class.ip-pg-btn--active]="p === currentPage"
+                (click)="goToPage(p)">{{ p }}</button>
+      </ng-container>
+      <button type="button" class="ip-pg-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+        <i class="isax isax-arrow-right-3"></i>
+      </button>
     </div>
   </div>
 
@@ -197,7 +218,7 @@
       <div class="ip-modal-divider"></div>
       <div class="ip-modal-footer">
         <button type="button" class="ip-btn ip-btn--ghost" data-bs-dismiss="modal">Fermer</button>
-        <a [routerLink]="['/adminrh/adminrh-quiz-questions', selectedQuiz?.id]"
+        <a [routerLink]="['/adminrh/adminrh-quiz-questions', selectedQuiz!.id]"
            class="ip-btn ip-btn--primary" data-bs-dismiss="modal">
           <i class="isax isax-eye"></i> Voir les questions
         </a>

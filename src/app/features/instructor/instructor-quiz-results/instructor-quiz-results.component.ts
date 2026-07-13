@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-instructor-quiz-results',
-  imports:[CommonModule,MatTableModule,MatSortModule,MatPaginatorModule,MatSelectModule,CustomPaginationComponent,RouterLink,FormsModule],
+  imports:[CommonModule,MatTableModule,MatSortModule,MatPaginatorModule,MatSelectModule,CustomPaginationComponent,FormsModule],
   templateUrl: './instructor-quiz-results.component.html',
   styleUrl: './instructor-quiz-results.component.scss'
 })
@@ -32,12 +32,11 @@ export class InstructorQuizResultsComponent implements OnInit {
   userId = 0;
   isAuthenticated = false;
   loading = false;
-  
+
   // Filtres
-  filterQuizId: number | null = null;
-  filterUserId: number | null = null;
-  filterStatus: string = 'all'; // 'all', 'success', 'failed'
-  
+  filterSearch = '';
+  filterStatus: string = 'all';
+
   // Pagination
   currentPage = 1;
   pageSize = 10;
@@ -69,64 +68,87 @@ export class InstructorQuizResultsComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.filteredResults = this.results.filter(result => {
-      let matches = true;
-
-      if (this.filterQuizId !== null) {
-        matches = matches && result.quiz_id === this.filterQuizId;
-      }
-
-      if (this.filterUserId !== null) {
-        matches = matches && result.user_id === this.filterUserId;
-      }
-
-      if (this.filterStatus !== 'all') {
-        matches = matches && (this.filterStatus === 'success' ? result.est_reussi : !result.est_reussi);
-      }
-
-      return matches;
+    const s = this.filterSearch.toLowerCase();
+    this.filteredResults = this.results.filter(r => {
+      const matchStatus = this.filterStatus === 'all'
+        || (this.filterStatus === 'success' ? r.est_reussi : !r.est_reussi);
+      const matchSearch = !s
+        || r.quiz?.titre?.toLowerCase().includes(s)
+        || r.user?.prenom?.toLowerCase().includes(s)
+        || r.user?.nom?.toLowerCase().includes(s)
+        || r.user?.name?.toLowerCase().includes(s)
+        || r.user?.matricule?.toLowerCase().includes(s);
+      return matchStatus && matchSearch;
     });
+
+    // Tri du plus récent au plus ancien
+    this.filteredResults.sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
 
     this.totalData = Math.ceil(this.filteredResults.length / this.pageSize);
     this.currentPage = 1;
   }
 
   clearFilters(): void {
-    this.filterQuizId = null;
-    this.filterUserId = null;
+    this.filterSearch = '';
     this.filterStatus = 'all';
     this.applyFilters();
   }
 
-  getPaginatedResults(): QuizResult[] {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    return this.filteredResults.slice(startIndex, startIndex + this.pageSize);
+  getUserName(result: QuizResult): string {
+    if (result.user?.prenom || result.user?.nom) {
+      return `${result.user.prenom ?? ''} ${result.user.nom ?? ''}`.trim();
+    }
+    return result.user?.name || `User #${result.user_id}`;
   }
 
-  nextPage(): void {
-    if (this.currentPage < this.totalData) {
-      this.currentPage++;
-    }
-  }
-  parseFloat(value: string): number {
-    return parseFloat(value);
+  getInitials(result: QuizResult): string {
+    const name = this.getUserName(result);
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   }
 
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
+  getAvatarStyle(userId: number): { bg: string; color: string } {
+    const colors = [
+      { bg: '#EDE9FE', color: '#7C3AED' },
+      { bg: '#D1FAE5', color: '#059669' },
+      { bg: '#FEF3C7', color: '#D97706' },
+      { bg: '#DBEAFE', color: '#2563EB' },
+      { bg: '#FCE7F3', color: '#DB2777' },
+    ];
+    return colors[userId % colors.length];
   }
-  sortData(event: any): void {
-    // Implémentation du tri si nécessaire
-    console.log('Sort event:', event);
+
+  readonly itemsPerPage = 10;
+
+  get totalPages(): number { return Math.max(1, Math.ceil(this.filteredResults.length / this.itemsPerPage)); }
+
+  get paginatedResults(): QuizResult[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredResults.slice(start, start + this.itemsPerPage);
+  }
+
+  get pageEnd(): number { return Math.min(this.currentPage * this.itemsPerPage, this.filteredResults.length); }
+
+  get pageNumbers(): number[] {
+    const total = this.totalPages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const p = this.currentPage;
+    const pages: number[] = [1];
+    if (p > 3) pages.push(-1);
+    for (let i = Math.max(2, p - 1); i <= Math.min(total - 1, p + 1); i++) pages.push(i);
+    if (p < total - 2) pages.push(-1);
+    pages.push(total);
+    return pages;
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalData) {
+    if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
     }
   }
+
+  parseFloat(value: string): number { return parseFloat(value); }
 
   getSuccessRate(): number {
     if (this.filteredResults.length === 0) return 0;

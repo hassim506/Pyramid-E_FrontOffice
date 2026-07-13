@@ -90,7 +90,7 @@ export const routes = {
   studentChangePassword: '/student/settings/student-change-password',
   studentSettings: '/student/settings/student-settings',
   studentBillingAddress: '/student/settings/student-billing-address',
-
+  studentExplorer : '/student/students-explorer' ,
   // Demandes — alignées sur app.routes.ts
   student_DemandeSession:   '/student/students-session',
   student_DemandeCatalogue: '/student/students-catalogue',

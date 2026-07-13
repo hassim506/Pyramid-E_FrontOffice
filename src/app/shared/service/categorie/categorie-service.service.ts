@@ -20,6 +20,7 @@ export interface CategorieFormation {
   description: string;
   short_description?: string;
   parent_id?: number;
+  entreprise_id?: number;
   couleur: string;
   icone: string;
   image_couverture?: string;
@@ -30,6 +31,7 @@ export interface CategorieFormation {
   updated_at: string;
   parent?: CategorieFormation;
   enfants: CategorieFormation[];
+  entreprise?: { id: number; nom: string };
   created_by?: any;
   a_des_enfants: boolean;
   nombre_formations: number;
@@ -57,6 +59,7 @@ export interface CategorieFormationRequest {
   description: string;
   short_description?: string;
   parent_id?: number;
+  entreprise_id?: number;
   couleur: string;
   icone: string;
   image_couverture?: string;

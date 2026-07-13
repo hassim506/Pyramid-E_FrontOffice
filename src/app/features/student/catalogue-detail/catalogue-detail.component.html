@@ -273,7 +273,7 @@
             <!-- Footer -->
             <div class="pad-formation-card__footer">
 
-              <!-- Bouton "Voir le détail" — désactivé si expiré -->
+              <!-- Bouton "Voir le détail" -->
               <button class="pad-formation-card__detail-btn"
                       [class.pad-formation-card__detail-btn--disabled]="estExpire"
                       [disabled]="estExpire"
@@ -283,20 +283,42 @@
                 {{ estExpire ? 'Accès expiré' : 'Voir le détail' }}
               </button>
 
-              <!-- Bouton "Commencer/Reprendre/Revoir" — désactivé si expiré -->
-              <button class="pad-formation-card__start-btn"
-                      [class.pad-formation-card__start-btn--resume]="f.statut_formation === 'en_cours' && !estExpire"
-                      [class.pad-formation-card__start-btn--done]="f.statut_formation === 'termine' && !estExpire"
-                      [class.pad-formation-card__start-btn--expire]="estExpire"
-                      [disabled]="estExpire"
-                      [title]="estExpire ? 'Accès expiré — contactez votre RH' : ''"
+              <!-- Bouton "Commencer/Reprendre/Revoir" pour formations inscrites -->
+              <button *ngIf="f.est_inscrit && !estExpire"
+                      class="pad-formation-card__start-btn"
+                      [class.pad-formation-card__start-btn--resume]="f.statut_formation === 'en_cours'"
+                      [class.pad-formation-card__start-btn--done]="f.statut_formation === 'termine'"
                       (click)="commencerFormation(f.id, $event)">
                 <i class="isax me-1"
-                   [class.isax-lock]="estExpire"
-                   [class.isax-play]="!estExpire && f.statut_formation === 'non_commence'"
-                   [class.isax-refresh]="!estExpire && f.statut_formation === 'en_cours'"
-                   [class.isax-eye]="!estExpire && f.statut_formation === 'termine'"></i>
-                {{ estExpire ? 'Verrouillé' : (f.statut_formation === 'termine' ? 'Revoir' : f.statut_formation === 'en_cours' ? 'Reprendre' : 'Commencer') }}
+                   [class.isax-play]="f.statut_formation === 'non_commence'"
+                   [class.isax-refresh]="f.statut_formation === 'en_cours'"
+                   [class.isax-eye]="f.statut_formation === 'termine'"></i>
+                {{ f.statut_formation === 'termine' ? 'Revoir' : f.statut_formation === 'en_cours' ? 'Reprendre' : 'Commencer' }}
+              </button>
+
+              <!-- Bouton "Demander" pour formations non inscrites -->
+              <button *ngIf="!f.est_inscrit && f.peut_demander !== false && !estExpire"
+                      class="pad-formation-card__start-btn"
+                      (click)="demanderFormation(f.id, $event)">
+                <i class="isax isax-send-2 me-1"></i>
+                Demander
+              </button>
+
+              <!-- Badge "Déjà demandé" pour formations demandées mais non validées -->
+              <div *ngIf="!f.est_inscrit && f.peut_demander === false && !estExpire"
+                   class="pad-formation-card__start-btn pad-formation-card__start-btn--disabled"
+                   style="cursor: not-allowed; opacity: 0.6;">
+                <i class="isax isax-clock me-1"></i>
+                Déjà demandé
+              </div>
+
+              <!-- Bouton verrouillé si expiré -->
+              <button *ngIf="estExpire"
+                      class="pad-formation-card__start-btn pad-formation-card__start-btn--expire"
+                      [disabled]="true"
+                      title="Accès expiré — contactez votre RH">
+                <i class="isax isax-lock me-1"></i>
+                Verrouillé
               </button>
 
             </div>

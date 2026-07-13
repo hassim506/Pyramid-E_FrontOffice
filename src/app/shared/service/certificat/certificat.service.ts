@@ -38,6 +38,15 @@ export interface CertificatEntreprise {
   nom: string;
 }
 
+export interface ModeleCertificat {
+  id: number;
+  entreprise_id: number;
+  nom: string;
+  template_html: string;
+  config?: CertConfig;
+  actif: boolean;
+}
+
 export interface Certificat {
   id: number;
   code_unique: string;
@@ -45,6 +54,7 @@ export interface Certificat {
   formation_id: number;
   entreprise_id: number;
   formateur_id: number;
+  modele_id?: number | null;
   date_delivrance: string;
   date_expiration: string | null;
   score_final: string;
@@ -54,6 +64,7 @@ export interface Certificat {
   formation: CertificatFormation;
   formateur: CertificatFormateur;
   entreprise?: CertificatEntreprise;
+  modele?: ModeleCertificat;
   created_at: string;
 }
 
@@ -105,7 +116,68 @@ export class CertificatService {
   }
 
   async downloadPdf(cert: Certificat, config?: Partial<CertConfig>): Promise<void> {
-    const cfg: CertConfig = { ...DEFAULT_CERT_CONFIG, ...config };
+    // ✅ Utiliser le modèle du certificat s'il existe, sinon utiliser la config passée en paramètre
+    let cfg: CertConfig = { ...DEFAULT_CERT_CONFIG };
+
+    if (cert.modele?.config) {
+      cfg = { ...cfg, ...cert.modele.config };
+      console.log('✅ Config du modèle appliquée:', cfg);
+    } else if (cert.modele?.template_html) {
+      // Si template_html contient la config en JSON
+      try {
+        const parsedConfig = JSON.parse(cert.modele.template_html);
+        if (parsedConfig && typeof parsedConfig === 'object') {
+          cfg = { ...cfg, ...parsedConfig };
+          console.log('✅ Config du template_html appliquée:', cfg);
+        }
+      } catch (e) {
+        console.warn('⚠️ Impossible de parser le modèle de certificat', e);
+      }
+    }
+
+    // Appliquer la config manuelle par-dessus si fournie
+    if (config) {
+      cfg = { ...cfg, ...config };
+    }
+
+    // ✅ Convertir le logo en Base64 via le proxy pour éviter les problèmes CORS
+    if (cfg.logo_url) {
+      console.log('📋 Logo URL avant traitement:', cfg.logo_url);
+
+      try {
+        // Extraire le chemin relatif du logo
+        let logoPath = cfg.logo_url;
+
+        // Si l'URL est complète (http/https), extraire le chemin après /storage/
+        if (logoPath.startsWith('http://') || logoPath.startsWith('https://')) {
+          const match = logoPath.match(/\/storage\/(.+)$/);
+          if (match) {
+            logoPath = match[1]; // Ex: "certificats/logos/5/xxx.png"
+          }
+        }
+        // Si l'URL commence par /storage/, enlever le préfixe
+        else if (logoPath.startsWith('/storage/')) {
+          logoPath = logoPath.substring(9); // Enlever "/storage/"
+        }
+
+        console.log('📂 Chemin extrait pour le proxy:', logoPath);
+
+        // Utiliser le proxy API pour obtenir l'image avec les en-têtes CORS
+        const proxyUrl = `${this.apiUrl}/certificats/logo-proxy?path=${encodeURIComponent(logoPath)}`;
+        console.log('🔗 URL du proxy:', proxyUrl);
+
+        cfg.logo_url = await this.imageToBase64(proxyUrl);
+        console.log('✅ Logo converti en Base64 (taille:', cfg.logo_url.length, 'caractères)');
+      } catch (err) {
+        console.error('❌ Impossible de convertir le logo en Base64:', err);
+        console.error('URL du logo originale:', cfg.logo_url);
+        // Continuer sans le logo
+        cfg.logo_url = '';
+      }
+    } else {
+      console.log('⚠️ Pas de logo_url dans la config');
+    }
+
     const html = this.buildCertHtml(cert, cfg);
 
     const wrapper = document.createElement('div');
@@ -145,6 +217,43 @@ export class CertificatService {
     return (name || '').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?';
   }
 
+  /**
+   * Convertit une image URL en Base64 pour éviter les problèmes CORS lors de la génération PDF
+   * Utilise HttpClient pour contourner les problèmes CORS sur les fichiers statiques
+   */
+  private async imageToBase64(url: string): Promise<string> {
+    try {
+      console.log('🖼️ Téléchargement du logo via HttpClient:', url);
+
+      // Télécharger l'image en tant que blob via HttpClient (qui gère CORS)
+      const blob = await this.http.get(url, { responseType: 'blob' }).toPromise();
+
+      if (!blob) {
+        throw new Error('Failed to download image');
+      }
+
+      console.log('✅ Image téléchargée:', blob.size, 'bytes, type:', blob.type);
+
+      // Convertir le blob en Base64
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result as string;
+          console.log('✅ Image convertie en Base64 (', base64.substring(0, 50), '...)');
+          resolve(base64);
+        };
+        reader.onerror = (err) => {
+          console.error('❌ Erreur lors de la conversion en Base64:', err);
+          reject(err);
+        };
+        reader.readAsDataURL(blob);
+      });
+    } catch (err) {
+      console.error('❌ Erreur lors du téléchargement de l\'image:', err);
+      throw new Error(`Failed to load image: ${url}`);
+    }
+  }
+
   private buildCertHtml(cert: Certificat, c: CertConfig): string {
     const pri = c.couleur_principale;
     const priLight = pri + '20';
@@ -153,8 +262,9 @@ export class CertificatService {
     const formateurName = [cert.formateur?.prenom, cert.formateur?.nom].filter(Boolean).join(' ')
       || cert.formateur?.name || '—';
 
+    // Logo déjà converti en Base64, donc pas de problème CORS avec html2canvas
     const logoHtml = c.logo_url
-      ? `<img src="${c.logo_url}" style="width:44px;height:44px;object-fit:contain;border-radius:8px;" crossorigin="anonymous">`
+      ? `<img src="${c.logo_url}" style="width:44px;height:44px;object-fit:contain;border-radius:8px;">`
       : `<div style="width:44px;height:44px;border-radius:8px;background:${pri};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;">${this.initials(c.entreprise_nom || 'E')}</div>`;
 
     const numeroHtml = c.show_numero

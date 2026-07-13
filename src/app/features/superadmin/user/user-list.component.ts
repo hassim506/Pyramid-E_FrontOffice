@@ -37,11 +37,17 @@ export class UserListComponent implements OnInit {
   searchDataValue     = '';
   selectedRoleFilter  = '';
   selectedStatutFilter = '';
+  selectedEntrepriseFilter = '';
   showRoleDropdown    = false;
   showStatutDropdown  = false;
+  showEntrepriseDropdown = false;
 
   // ── Context entreprise (depuis query param) ──
   entrepriseId: number | null = null;
+
+  // ── Listes pour filtres ──────────────────────
+  allRoles: any[] = [];
+  allEntreprises: any[] = [];
 
   // ── KPIs topbar ──────────────────────────────
   get rolesCount():      number { return this.availableRoles.length; }
@@ -79,11 +85,62 @@ export class UserListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadRoles();
+    this.loadEntreprises();
     this.route.queryParamMap.subscribe(params => {
       const id = params.get('entreprise_id');
       this.entrepriseId = id ? +id : null;
+      this.selectedEntrepriseFilter = id || '';
       this.getUserList();
     });
+  }
+
+  private loadRoles(): void {
+    this.userService.getRoles().subscribe({
+      next: (response: any) => {
+        // L'API retourne { status: true, roles: [...], system_roles: [...], total: X }
+        this.allRoles = response.roles || [];
+        console.log('Roles chargés:', this.allRoles);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des rôles:', err);
+      }
+    });
+  }
+
+  private loadEntreprises(): void {
+    this.userService.getEntreprises().subscribe({
+      next: (response: any) => {
+        // L'API retourne { status: true, entreprises: [...], pagination: {...} }
+        this.allEntreprises = response.entreprises || response.data || response || [];
+        console.log('Entreprises chargées:', this.allEntreprises);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des entreprises:', err);
+      }
+    });
+  }
+
+  // ── Toggle dropdowns ──
+  toggleRoleDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showStatutDropdown = false;
+    this.showEntrepriseDropdown = false;
+    this.showRoleDropdown = !this.showRoleDropdown;
+  }
+
+  toggleStatutDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showRoleDropdown = false;
+    this.showEntrepriseDropdown = false;
+    this.showStatutDropdown = !this.showStatutDropdown;
+  }
+
+  toggleEntrepriseDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showRoleDropdown = false;
+    this.showStatutDropdown = false;
+    this.showEntrepriseDropdown = !this.showEntrepriseDropdown;
   }
 
   // ── Ferme les dropdowns sur clic extérieur ──
@@ -91,6 +148,7 @@ export class UserListComponent implements OnInit {
   onDocumentClick(): void {
     this.showRoleDropdown   = false;
     this.showStatutDropdown = false;
+    this.showEntrepriseDropdown = false;
   }
 
   // ════════════════════════════════════════════
@@ -142,6 +200,12 @@ export class UserListComponent implements OnInit {
     this.applyFilters();
   }
 
+  setEntrepriseFilter(id: string): void {
+    this.selectedEntrepriseFilter = id;
+    this.showEntrepriseDropdown = false;
+    this.applyFilters();
+  }
+
   searchData(value: string): void {
     this.searchDataValue = value;
     this.applyFilters();
@@ -168,6 +232,11 @@ export class UserListComponent implements OnInit {
     if (this.selectedStatutFilter !== '') {
       const s = +this.selectedStatutFilter;
       data = data.filter(u => u.statut === s);
+    }
+
+    if (this.selectedEntrepriseFilter) {
+      const eid = +this.selectedEntrepriseFilter;
+      data = data.filter(u => u.entreprise_id === eid);
     }
 
     this.actualData  = data;
@@ -364,5 +433,10 @@ export class UserListComponent implements OnInit {
     if (h < 24) return `Il y a ${h}h`;
     if (j < 2)  return 'Hier';
     return `Il y a ${j}j`;
+  }
+
+  getEntrepriseName(id: string): string {
+    const entreprise = this.allEntreprises.find(e => e.id.toString() === id);
+    return entreprise?.nom || `Entreprise #${id}`;
   }
 }

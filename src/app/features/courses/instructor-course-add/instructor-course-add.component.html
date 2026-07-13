@@ -727,13 +727,21 @@
                                 <label class="form-label">Réponses</label>
                                 <div *ngFor="let opt of q.reponses; let oi = index" class="d-flex align-items-center gap-2 mb-1">
                                     <input type="text" class="form-control form-control-sm" [(ngModel)]="opt.reponse_text" [ngModelOptions]="{standalone:true}" placeholder="Réponse">
-                                    <div class="form-check mb-0 ms-1" *ngIf="q.type !== 'true_false'">
-                                        <input class="form-check-input" type="checkbox" [checked]="opt.is_correct" (change)="toggleQuizCorrect(q, opt)">
-                                        <label class="form-check-label" style="font-size:.75rem">Correcte</label>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="removeQuizOption(q, oi)" *ngIf="q.type !== 'true_false'">
-                                        <i class="fas fa-times"></i>
-                                    </button>
+                                   <div class="form-check mb-0 ms-1" *ngIf="q.type !== 'true_false'">
+                                            <input class="form-check-input" type="checkbox" [checked]="opt.is_correct" (change)="toggleQuizCorrect(q, opt)">
+                                            <label class="form-check-label" style="font-size:.75rem">Correcte</label>
+                                        </div>
+                                        <!-- Vrai/Faux : radio exclusif -->
+                                        <div class="form-check mb-0 ms-1" *ngIf="q.type === 'true_false'">
+                                            <input class="form-check-input" type="radio"
+                                                  [name]="'tf_' + q.id"
+                                                  [checked]="opt.is_correct"
+                                                  (change)="toggleQuizCorrect(q, opt)">
+                                            <label class="form-check-label" style="font-size:.75rem; color:#059669; font-weight:600;">Correcte</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="removeQuizOption(q, oi)" *ngIf="q.type !== 'true_false'">
+                                            <i class="fas fa-times"></i>
+                                        </button>
                                 </div>
                                 <button type="button" class="btn btn-sm btn-outline-primary mt-1" (click)="addQuizOption(q)" *ngIf="q.type !== 'true_false'">
                                     <i class="fas fa-plus me-1"></i> Réponse

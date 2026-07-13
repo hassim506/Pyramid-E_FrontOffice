@@ -41,22 +41,13 @@
   <!-- Filters -->
   <div class="ip-card ip-filter-card">
     <div class="ip-filter-row">
-      <div class="ip-filter-group">
-        <label class="ip-label">Quiz ID</label>
+      <div class="ip-filter-group ip-filter-group--search">
+        <label class="ip-label">Recherche</label>
         <div class="ip-input-icon-wrap">
-          <i class="isax isax-award ip-input-icon"></i>
-          <input type="number" class="ip-input ip-input--icon"
-                 [(ngModel)]="filterQuizId" (ngModelChange)="applyFilters()"
-                 placeholder="ID du quiz">
-        </div>
-      </div>
-      <div class="ip-filter-group">
-        <label class="ip-label">Utilisateur ID</label>
-        <div class="ip-input-icon-wrap">
-          <i class="isax isax-user ip-input-icon"></i>
-          <input type="number" class="ip-input ip-input--icon"
-                 [(ngModel)]="filterUserId" (ngModelChange)="applyFilters()"
-                 placeholder="ID utilisateur">
+          <i class="isax isax-search-normal ip-input-icon"></i>
+          <input type="text" class="ip-input ip-input--icon"
+                 [(ngModel)]="filterSearch" (ngModelChange)="applyFilters()"
+                 placeholder="Nom employé, titre quiz…">
         </div>
       </div>
       <div class="ip-filter-group">
@@ -68,6 +59,7 @@
         </select>
       </div>
       <div class="ip-filter-group ip-filter-group--action">
+        <label class="ip-label">&nbsp;</label>
         <button type="button" class="ip-btn ip-btn--ghost" (click)="clearFilters()">
           <i class="isax isax-refresh"></i> Réinitialiser
         </button>
@@ -92,17 +84,24 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let result of getPaginatedResults()">
+          <tr *ngFor="let result of paginatedResults">
             <td><span class="ip-id-badge">#{{ result.id }}</span></td>
             <td>
-              <span class="ip-pill">
-                <i class="isax isax-award"></i> Quiz #{{ result.quiz_id }}
-              </span>
+              <div class="ip-quiz-cell">
+                <span class="ip-quiz-title">{{ result.quiz?.titre || ('Quiz #' + result.quiz_id) }}</span>
+              </div>
             </td>
             <td>
               <div class="ip-user-cell">
-                <div class="ip-user-avatar"><i class="isax isax-user"></i></div>
-                <span>User #{{ result.user_id }}</span>
+                <div class="ip-avatar"
+                     [style.background]="getAvatarStyle(result.user_id).bg"
+                     [style.color]="getAvatarStyle(result.user_id).color">
+                  {{ getInitials(result) }}
+                </div>
+                <div>
+                  <div class="ip-user-name">{{ getUserName(result) }}</div>
+                  <div class="ip-user-sub" *ngIf="result.user && result.user.matricule">{{ result.user.matricule }}</div>
+                </div>
               </div>
             </td>
             <td>
@@ -151,11 +150,24 @@
   </div>
 
   <!-- Pagination -->
-  <app-custom-pagination
-    *ngIf="filteredResults.length > 0"
-    [currentPage]="currentPage"
-    [totalData]="totalData"
-    (pageChange)="goToPage($event)">
-  </app-custom-pagination>
+  <div *ngIf="totalPages > 1" class="ip-pagination">
+    <span class="ip-pagination__info">
+      {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ pageEnd }} sur {{ filteredResults.length }} résultats
+    </span>
+    <div class="ip-pagination__controls">
+      <button type="button" class="ip-pg-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        <i class="isax isax-arrow-left-2"></i>
+      </button>
+      <ng-container *ngFor="let p of pageNumbers">
+        <span *ngIf="p === -1" class="ip-pg-ellipsis">…</span>
+        <button type="button" *ngIf="p !== -1" class="ip-pg-btn"
+                [class.ip-pg-btn--active]="p === currentPage"
+                (click)="goToPage(p)">{{ p }}</button>
+      </ng-container>
+      <button type="button" class="ip-pg-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+        <i class="isax isax-arrow-right-3"></i>
+      </button>
+    </div>
+  </div>
 
 </ng-container>

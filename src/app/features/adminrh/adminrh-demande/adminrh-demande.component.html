@@ -189,8 +189,9 @@
               <i *ngIf="!refusingIds.has(d.id)" class="isax isax-close-circle"></i>
               Refuser
             </button>
-            <button *ngIf="canCancel(d)" type="button" class="act-btn act-cancel" title="Annuler" (click)="annulerDemande(d)">
+            <button *ngIf="canCancel(d)" type="button" class="act-btn act-cancel" title="Annuler" (click)="annulerDemande(d)" aria-label="Annuler">
               <i class="isax isax-minus-circle"></i>
+              <span>Annuler</span>
             </button>
           </div>
         </div>

@@ -56,7 +56,7 @@
               </span>
             </td>
             <td style="font-size:12px;">
-              {{ quiz.formation?.entreprise?.nom || getCompanyName(quiz.formation?.entreprise_id) }}
+              {{ quiz.formation?.['entreprise']?.nom || getCompanyName(quiz.formation?.['entreprise_id']) }}
             </td>
             <td>
               <span *ngIf="quiz.duree_minutes" class="ip-pill">
@@ -149,7 +149,7 @@
                 {{ selectedQuiz.formation?.titre || ('Formation #' + selectedQuiz.formation_id) }}
               </div>
               <div class="ip-detail-label" style="margin-top:4px;">
-                {{ selectedQuiz.formation?.entreprise?.nom || getCompanyName(selectedQuiz.formation?.entreprise_id) }}
+                {{ selectedQuiz.formation?.['entreprise']?.nom || getCompanyName(selectedQuiz.formation?.['entreprise_id']) }}
               </div>
             </div>
           </div>

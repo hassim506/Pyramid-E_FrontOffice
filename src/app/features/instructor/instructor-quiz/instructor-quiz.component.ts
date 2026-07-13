@@ -4,7 +4,6 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Quiz, QuizService } from '../../../shared/service/quiz/quiz.service';
-import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
 
@@ -13,20 +12,20 @@ declare var bootstrap: any;
 @Component({
   selector: 'app-instructor-quiz',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule, DatePickerModule, CustomPaginationComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule, DatePickerModule],
   templateUrl: './instructor-quiz.component.html',
   styleUrls: ['./instructor-quiz.component.scss']
 })
 export class InstructorQuizComponent implements OnInit, OnDestroy {
   quizzes: Quiz[] = [];
+  filteredQuizzes: Quiz[] = [];
   loading = false;
   error = '';
   saving = false;
   editError = '';
   createError = '';
   currentPage = 1;
-  totalData = 0;
-  itemsPerPage = 10;
+  readonly itemsPerPage = 10;
 
   selectedQuiz: Quiz | null = null;
   editForm: FormGroup | null = null;
@@ -56,8 +55,16 @@ export class InstructorQuizComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     const sub = this.quizService.getQuizzes().subscribe({
-      next: (quizzes) => { this.quizzes = quizzes; this.loading = false; },
-      error: (err)    => { this.error = 'Erreur lors du chargement des quiz'; this.loading = false; console.error(err); }
+      next: (quizzes) => {
+        // tri du plus récent au plus ancien
+        this.quizzes = quizzes.sort((a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        this.filteredQuizzes = [...this.quizzes];
+        this.currentPage = 1;
+        this.loading = false;
+      },
+      error: (err) => { this.error = 'Erreur lors du chargement des quiz'; this.loading = false; console.error(err); }
     });
     this.subscription.add(sub);
   }
@@ -154,4 +161,33 @@ export class InstructorQuizComponent implements OnInit, OnDestroy {
 
   getStatusClass(quiz: Quiz): string { return quiz.is_active ? 'badge-success' : 'badge-secondary'; }
   getStatusText(quiz: Quiz):  string { return quiz.is_active ? 'Actif' : 'Inactif'; }
+
+  getFormationTitre(quiz: Quiz): string {
+    return quiz.formation?.titre || quiz.formation?.nom || `Formation #${quiz.formation_id}`;
+  }
+
+  get totalPages(): number { return Math.max(1, Math.ceil(this.filteredQuizzes.length / this.itemsPerPage)); }
+
+  get paginatedQuizzes(): Quiz[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredQuizzes.slice(start, start + this.itemsPerPage);
+  }
+
+  get pageEnd(): number { return Math.min(this.currentPage * this.itemsPerPage, this.filteredQuizzes.length); }
+
+  get pageNumbers(): number[] {
+    const total = this.totalPages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const p = this.currentPage;
+    const pages: number[] = [1];
+    if (p > 3) pages.push(-1);
+    for (let i = Math.max(2, p - 1); i <= Math.min(total - 1, p + 1); i++) pages.push(i);
+    if (p < total - 2) pages.push(-1);
+    pages.push(total);
+    return pages;
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
 }

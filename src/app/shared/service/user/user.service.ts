@@ -60,7 +60,11 @@ export class UserService {
     return this.http.get<any[]>(`${this.baseUrl}/roles`, { headers: this.getHeaders() });
   }
 
-  
+  getEntreprises(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/entreprises`, { headers: this.getHeaders() });
+  }
+
+
   // Import d'utilisateurs via fichier Excel/CSV
   importUsers(file: File): Observable<any> {
     const formData = new FormData();

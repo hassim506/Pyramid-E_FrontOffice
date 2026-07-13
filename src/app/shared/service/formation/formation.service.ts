@@ -322,6 +322,10 @@ addComment(commentData: any): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/catalogues/${catalogueId}/progression`, { headers: this.getHeaders() });
   }
 
+  getCatalogueFormationsWithStatus(catalogueId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/demandes-formation/listes/catalogues/${catalogueId}/formations`, { headers: this.getHeaders() });
+  }
+
   // ===============================
   // 🔁 DEMANDES
   // ===============================

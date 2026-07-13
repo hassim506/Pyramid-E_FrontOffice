@@ -226,7 +226,11 @@ export class AdminrhCatalogueComponent implements OnInit {
 
   buildCatalogueData(): CatalogueRequest {
     const formValue = this.catalogueForm.value;
-    
+
+    // ✅ Récupérer l'entreprise_id de l'utilisateur connecté
+    const user = JSON.parse(localStorage.getItem('pyramide_user') || '{}');
+    const entrepriseId = user?.entreprise_id;
+
     return {
       titre: formValue.titre.trim(),
       description: formValue.description?.trim() || '',
@@ -237,7 +241,7 @@ export class AdminrhCatalogueComponent implements OnInit {
       tags: [],
       metadata: {
         niveau: formValue.niveau,
-        prerequis: formValue.prerequis ? 
+        prerequis: formValue.prerequis ?
           formValue.prerequis.split(',').map((p: string) => p.trim()).filter((p: string) => p) : [],
         duree_moyenne: parseInt(formValue.duree_moyenne),
         certificat_disponible: Boolean(formValue.certificat_disponible)
@@ -245,7 +249,8 @@ export class AdminrhCatalogueComponent implements OnInit {
       est_publie: Boolean(formValue.est_publie),
       est_public: Boolean(formValue.est_public),
       inscription_requise: Boolean(formValue.inscription_requise),
-      type: formValue.type
+      type: formValue.type,
+      entreprise_id: entrepriseId // ✅ Ajouter l'entreprise_id
     };
   }
 

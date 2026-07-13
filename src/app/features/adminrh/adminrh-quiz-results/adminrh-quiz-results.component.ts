@@ -49,6 +49,12 @@ export class AdminrhQuizResultsComponent implements OnInit {
         || r.user?.matricule?.toLowerCase().includes(s);
       return matchStatus && matchSearch;
     });
+
+    // Trier du plus récent au plus ancien
+    this.filteredResults.sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
     this.currentPage = 1;
   }
 

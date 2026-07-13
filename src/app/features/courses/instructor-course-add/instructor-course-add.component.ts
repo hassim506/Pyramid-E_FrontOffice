@@ -199,7 +199,7 @@ export class InstructorCourseAddComponent implements OnInit {
   this.categorieService.getCategories().subscribe({
     next: (response: any) => {
       this.loading = false;
-      
+
       try {
         // Extraction robuste des catégories selon différents formats de réponse
         if (Array.isArray(response)) {
@@ -216,7 +216,7 @@ export class InstructorCourseAddComponent implements OnInit {
         }
 
         // Validation des données
-        this.categories = this.categories.filter(cat => 
+        this.categories = this.categories.filter(cat =>
           cat && typeof cat === 'object' && cat.id && cat.nom
         );
 
@@ -236,9 +236,9 @@ export class InstructorCourseAddComponent implements OnInit {
     error: (err) => {
       this.loading = false;
       console.error('Erreur chargement catégories:', err);
-      
+
       this.categories = [];
-      
+
       // Gestion spécifique des erreurs
       if (err.status === 0) {
         this.error = 'Impossible de contacter le serveur. Vérifiez votre connexion.';
@@ -251,7 +251,7 @@ export class InstructorCourseAddComponent implements OnInit {
       } else {
         this.error = 'Impossible de charger les catégories. Veuillez réessayer.';
       }
-      
+
       // Auto-clear error après 8 secondes
       setTimeout(() => {
         this.error = '';
@@ -392,7 +392,7 @@ export class InstructorCourseAddComponent implements OnInit {
 
   processImageFile(file: File): void {
     this.imageError = '';
-    
+
     // Validation du type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
@@ -661,7 +661,7 @@ export class InstructorCourseAddComponent implements OnInit {
   }
 
   getFormControlValue(controlName: string): any {
-    return this.basicInfoForm.get(controlName)?.value || 
+    return this.basicInfoForm.get(controlName)?.value ||
            this.pricingForm.get(controlName)?.value;
   }
 
@@ -793,10 +793,12 @@ export class InstructorCourseAddComponent implements OnInit {
   }
 
   toggleQuizCorrect(q: QuizQuestion, opt: any): void {
-    if (q.type === 'multiple_choice') {
+    if (q.type === 'multiple_choice' || q.type === 'true_false') {
+      // Sélection exclusive : une seule bonne réponse
       q.reponses.forEach((r: any) => r.is_correct = false);
       opt.is_correct = true;
     } else {
+      // multiple_choice_multi : bascule libre
       opt.is_correct = !opt.is_correct;
     }
   }
@@ -861,15 +863,15 @@ submitCourse(): void {
     error: (err) => {
       this.saving = false;
       console.error('Erreur création:', err);
-      
+
       // Gestion détaillée des erreurs de validation
       if (err.status === 422 && err.error?.errors) {
         console.error('Erreurs de validation:', err.error.errors);
-        
+
         // Construire un message d'erreur détaillé
         const errors = err.error.errors;
         let errorMessage = 'Erreurs de validation :\n';
-        
+
         Object.keys(errors).forEach(field => {
           if (Array.isArray(errors[field])) {
             errorMessage += `• ${field}: ${errors[field].join(', ')}\n`;
@@ -877,7 +879,7 @@ submitCourse(): void {
             errorMessage += `• ${field}: ${errors[field]}\n`;
           }
         });
-        
+
         this.error = errorMessage;
       } else if (err.error?.message) {
         this.error = err.error.message;
@@ -1035,7 +1037,7 @@ private getFormErrorsInFrench(formGroup: FormGroup): string[] {
   Object.keys(formGroup.controls).forEach(key => {
     const control = formGroup.get(key);
     const fieldName = fieldNames[key] || key;
-    
+
     if (control && control.errors) {
       if (control.errors['required']) {
         errors.push(`• ${fieldName} est requis`);
@@ -1071,7 +1073,7 @@ private getFormErrors(formGroup: FormGroup): any {
   return errors;
 }
 
- 
+
   private saveLocalQuizzes(formationId: number, _createdFormation?: any): Promise<void> {
     const saves = this.localQuizzes.map(lq => {
       const quizPayload: any = {

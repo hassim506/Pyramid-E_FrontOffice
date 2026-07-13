@@ -29,7 +29,7 @@ interface StatutFilter {
 })
 export class AdminrhDemandeComponent implements OnInit {
   routes = routes;
-  
+
   // Variables de pagination
   public pageSize: number = 10;
   public tableData: DemandeFormation[] = [];
@@ -43,26 +43,26 @@ export class AdminrhDemandeComponent implements OnInit {
   public pageSelection: pageSelection[] = [];
   dataSource!: MatTableDataSource<DemandeFormation>;
   public searchDataValue: string = '';
-  
+
   // Variables de gestion d'état
   loading: boolean = false;
   error: string = '';
   successMessage: string = '';
-  
+
   // Filtres
   selectedStatutFilter: string = 'tous';
   selectedPrioriteFilter: string = 'tous';
-  
+
   // Données utilisateur connecté
   public currentUser: any;
-  
+
   // Statistiques
   public stats: any = {};
 
   // Source non filtrée
   private allDemandes: DemandeFormation[] = [];
   activeTab: string = 'tous';
-  
+
   // Filtres de statut
   public statutFilters: StatutFilter[] = [
     { value: 'tous', label: 'Tous les statuts', count: 0, color: 'secondary' },
@@ -125,7 +125,7 @@ export class AdminrhDemandeComponent implements OnInit {
     this.demandeFormationService.getDemandesFormation().subscribe({
       next: (response: DemandeFormationResponse) => {
         console.log('📦 Réponse API demandes formation:', response);
-        
+
         try {
           this.allDemandes = response.demandes || [];
 
@@ -144,7 +144,7 @@ export class AdminrhDemandeComponent implements OnInit {
           this.loading = false;
 
           console.log('✅ Demandes chargées avec succès:', this.actualData.length);
-          
+
           if (this.actualData.length === 0) {
             this.error = 'Aucune demande de formation trouvée.';
           }
@@ -181,7 +181,7 @@ export class AdminrhDemandeComponent implements OnInit {
     this.tableData = [];
     this.tableDataCopy = [];
     this.serialNumberArray = [];
-    
+
     this.actualData.forEach((demande: DemandeFormation, index: number) => {
       const serialNumber = index + 1;
       if (index >= pageOption.skip && serialNumber <= pageOption.limit) {
@@ -190,7 +190,7 @@ export class AdminrhDemandeComponent implements OnInit {
         this.serialNumberArray.push(serialNumber);
       }
     });
-    
+
     this.dataSource = new MatTableDataSource<DemandeFormation>(this.actualData);
     this.pagination.calculatePageSize.next({
       totalData: this.totalData,
@@ -278,7 +278,7 @@ export class AdminrhDemandeComponent implements OnInit {
       demande.priorite_display || ''
     ];
 
-    return fields.some(field => 
+    return fields.some(field =>
       field.toLowerCase().includes(searchValue)
     );
   }
@@ -354,7 +354,7 @@ export class AdminrhDemandeComponent implements OnInit {
     if (this.validatingIds.has(demande.id)) return;
 
     const confirmMessage = `Êtes-vous sûr de vouloir valider la demande de formation "${demande.formation?.titre}" pour ${demande.employe?.name} ?`;
-    
+
     if (confirm(confirmMessage)) {
       this.validatingIds.add(demande.id);
       this.clearMessages();
@@ -382,9 +382,9 @@ export class AdminrhDemandeComponent implements OnInit {
     if (this.refusingIds.has(demande.id)) return;
 
     const motif = prompt(`Pourquoi refusez-vous la demande de formation "${demande.formation?.titre}" pour ${demande.employe?.name} ?\n\nVeuillez saisir un motif :`);
-    
+
     if (motif === null) return; // Annulation
-    
+
     if (!motif.trim()) {
       this.error = 'Un motif de refus est obligatoire.';
       return;
@@ -411,7 +411,7 @@ export class AdminrhDemandeComponent implements OnInit {
   // Annuler une demande
   annulerDemande(demande: DemandeFormation): void {
     const confirmMessage = `Êtes-vous sûr de vouloir annuler la demande de formation "${demande.formation?.titre}" pour ${demande.employe?.name} ?`;
-    
+
     if (confirm(confirmMessage)) {
       this.clearMessages();
 
