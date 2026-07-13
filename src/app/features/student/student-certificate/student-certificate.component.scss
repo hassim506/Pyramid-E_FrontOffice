@@ -452,6 +452,10 @@ $radius-lg: 12px;
   display: flex; align-items: center; gap: 10px; margin-bottom: 14px; text-align: left;
 }
 
+.sc-cert-logo-img {
+  width: 36px; height: 36px; object-fit: contain; border-radius: 8px; flex-shrink: 0;
+}
+
 .sc-cert-logo-mark {
   width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;

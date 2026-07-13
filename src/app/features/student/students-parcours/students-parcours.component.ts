@@ -407,4 +407,8 @@ export class StudentsParcoursComponent implements OnInit {
   getStatutClass(s: string): string {
     return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[s] ?? '';
   }
+
+  getImageUrl(path: string | null | undefined): string {
+    return this.formationsService.getImageUrl(path);
+  }
 }

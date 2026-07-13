@@ -228,4 +228,8 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     const diff = new Date(dateExpiration).getTime() - new Date().getTime();
     return diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : 0;
   }
+
+  getImageUrl(path: string | null | undefined): string {
+    return this.formationsService.getImageUrl(path);
+  }
 }

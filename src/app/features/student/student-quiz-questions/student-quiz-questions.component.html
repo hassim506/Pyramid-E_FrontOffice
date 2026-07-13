@@ -133,11 +133,11 @@
           <p class="qq-question-text">{{ question.question_text }}</p>
 
           <!-- ── Options QCM / Vrai-Faux ── -->
-          <div class="qq-options" *ngIf="question.type === 'multiple_choice' || question.type === 'true_false'">
+          <div class="qq-options"*ngIf="question.type === 'multiple_choice' || question.type === 'multiple_choice_multi' || question.type === 'true_false'">
             <button class="qq-option"
                     *ngFor="let rep of question.reponses; let ri = index"
                     [class.qq-option--selected]="isSelected(question.id, rep.id)"
-                    (click)="selectReponse(question.id, rep.id)">
+                    (click)="selectReponse(question.id, rep.id, question.type)">
               <span class="qq-option__letter">{{ getOptionLetter(ri) }}</span>
               <span class="qq-option__text">{{ rep.reponse_text }}</span>
               <span class="qq-option__check">

@@ -169,7 +169,7 @@
         <ng-container *ngIf="selectedSection.type === 'audio'">
           <div class="lp-audio-wrap">
             <div class="lp-audio-cover">
-              <img [src]="formation?.image_couverture || 'assets/img/course/course-01.jpg'" [alt]="selectedSection.titre" class="lp-audio-cover__img">
+              <img [src]="getImageUrl(formation?.image_couverture)" [alt]="selectedSection.titre" class="lp-audio-cover__img">
               <div class="lp-audio-cover__overlay"><i class="isax isax-voice-cricle"></i></div>
             </div>
             <div class="lp-audio-player">

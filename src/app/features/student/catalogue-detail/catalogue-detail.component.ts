@@ -367,4 +367,8 @@ export class CatalogueDetailComponent implements OnInit, OnDestroy {
   isFree(formation: any): boolean {
     return Number(formation.prix) === 0;
   }
+
+  getImageUrl(path: string | null | undefined): string {
+    return this.formationsService.getImageUrl(path);
+  }
 }

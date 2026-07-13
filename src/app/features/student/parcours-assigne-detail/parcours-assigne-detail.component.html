@@ -212,7 +212,7 @@
 
             <!-- Image -->
             <div class="pad-formation-card__img-wrap">
-              <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+              <img [src]="getImageUrl(f.image_couverture)"
                    class="pad-formation-card__img" alt="">
               <!-- Overlay verrouillé si expiré -->
               <div class="pad-formation-card__img-overlay" [class.pad-formation-card__img-overlay--expire]="estExpire">

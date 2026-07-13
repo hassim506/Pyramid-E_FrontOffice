@@ -40,6 +40,7 @@ export class StudentCertificateComponent implements OnInit {
   downloading = false;
   copiedId: number | null = null;
   selectedCert: Certificat | null = null;
+  logoLoadError = false;
   private previewModal: any;
 
   constructor(
@@ -61,10 +62,36 @@ export class StudentCertificateComponent implements OnInit {
   loadCertificats(): void {
     this.loading = true;
     this.formationsService.getMyCertificates()
-      .pipe(catchError(() => of({ data: [] })))
+      .pipe(catchError((err) => {
+        console.error('❌ Erreur chargement certificats:', err);
+        return of({ data: [] });
+      }))
       .subscribe((res: any) => {
+        console.log('📦 Réponse certificats:', res);
         const raw: any[] = res?.data ?? res?.certificats ?? res ?? [];
+        console.log('✅ Certificats extraits:', raw);
         this.allCertificats = Array.isArray(raw) ? raw : [];
+        console.log('📊 Total certificats:', this.allCertificats.length);
+
+        // ✅ Si un certificat a un modèle, utiliser sa config
+        if (this.allCertificats.length > 0 && this.allCertificats[0].modele) {
+          const modele = this.allCertificats[0].modele;
+          if (modele.config) {
+            this.config = { ...this.config, ...modele.config };
+            console.log('✅ Config du modèle appliquée:', this.config);
+          } else if (modele.template_html) {
+            try {
+              const parsed = JSON.parse(modele.template_html);
+              if (parsed && typeof parsed === 'object') {
+                this.config = { ...this.config, ...parsed };
+                console.log('✅ Config du template_html appliquée:', this.config);
+              }
+            } catch (e) {
+              console.warn('⚠️ Impossible de parser template_html');
+            }
+          }
+        }
+
         this.loading = false;
       });
   }
@@ -85,9 +112,43 @@ export class StudentCertificateComponent implements OnInit {
     const user = this.auth.getUser();
     const eid  = user?.entreprise_id;
     if (!eid) return;
-    // reuse the modele if available
-    import('../../../shared/service/certificat/certificat.service').then(({ DEFAULT_CERT_CONFIG }) => {
-      if (user?.entreprise?.nom) this.config.entreprise_nom = user.entreprise.nom;
+
+    // Charger le modèle de certificat personnalisé de l'entreprise
+    import('../../../shared/service/certificat/certificat.service').then(m => {
+      const apiUrl = m.CertificatService.baseUrl + '/api';
+
+      fetch(`${apiUrl}/modeles-certificat/entreprise/${eid}`, {
+        headers: {
+          'Authorization': `Bearer ${this.auth.getToken()}`,
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then((response: any) => {
+        if (response.data?.config) {
+          this.config = { ...m.DEFAULT_CERT_CONFIG, ...response.data.config };
+
+          // ✅ Convertir l'URL relative en URL complète pour l'affichage
+          if (this.config.logo_url && !this.config.logo_url.startsWith('http')) {
+            const baseUrl = m.CertificatService.baseUrl;
+            this.config.logo_url = baseUrl + this.config.logo_url;
+            console.log('✅ Logo URL convertie:', this.config.logo_url);
+          }
+
+          console.log('✅ Configuration certificat chargée:', this.config);
+        } else {
+          // Fallback : utiliser le nom de l'entreprise
+          if (user?.entreprise?.nom) {
+            this.config.entreprise_nom = user.entreprise.nom;
+          }
+        }
+      })
+      .catch(err => {
+        console.warn('⚠️ Impossible de charger la config certificat:', err);
+        if (user?.entreprise?.nom) {
+          this.config.entreprise_nom = user.entreprise.nom;
+        }
+      });
     });
   }
 
@@ -233,6 +294,43 @@ export class StudentCertificateComponent implements OnInit {
 
   openPreview(cert: Certificat): void {
     this.selectedCert = cert;
+    this.logoLoadError = false; // Reset logo error state
+
+    // ✅ Si le certificat a un modèle avec config, l'utiliser
+    if (cert.modele?.config) {
+      this.config = { ...DEFAULT_CERT_CONFIG, ...cert.modele.config };
+
+      // ✅ Convertir l'URL relative en URL complète pour l'affichage
+      if (this.config.logo_url && !this.config.logo_url.startsWith('http')) {
+        import('../../../shared/service/certificat/certificat.service').then(m => {
+          const baseUrl = m.CertificatService.baseUrl;
+          this.config.logo_url = baseUrl + this.config.logo_url;
+          console.log('✅ Logo URL convertie dans preview:', this.config.logo_url);
+        });
+      }
+
+      console.log('✅ Config du modèle appliquée pour la prévisualisation:', this.config);
+    } else if (cert.modele?.template_html) {
+      try {
+        const parsed = JSON.parse(cert.modele.template_html);
+        if (parsed && typeof parsed === 'object') {
+          this.config = { ...DEFAULT_CERT_CONFIG, ...parsed };
+
+          // ✅ Convertir l'URL relative en URL complète
+          if (this.config.logo_url && !this.config.logo_url.startsWith('http')) {
+            import('../../../shared/service/certificat/certificat.service').then(m => {
+              const baseUrl = m.CertificatService.baseUrl;
+              this.config.logo_url = baseUrl + this.config.logo_url;
+            });
+          }
+
+          console.log('✅ Config du template_html appliquée:', this.config);
+        }
+      } catch (e) {
+        console.warn('⚠️ Impossible de parser le template_html du modèle');
+      }
+    }
+
     setTimeout(() => {
       const el = document.getElementById('sc_cert_preview_modal');
       if (el) {
@@ -245,5 +343,10 @@ export class StudentCertificateComponent implements OnInit {
   closePreview(): void {
     this.previewModal?.hide();
     this.selectedCert = null;
+  }
+
+  onPreviewLogoError(): void {
+    this.logoLoadError = true;
+    console.warn('⚠️ Erreur de chargement du logo dans la prévisualisation');
   }
 }

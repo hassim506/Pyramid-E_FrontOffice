@@ -307,13 +307,13 @@
     <div class="modal-content sc-modal-content" *ngIf="selectedCert">
 
       <!-- accent top bar -->
-      <div class="sc-cert-accent" [style.background]="getAccentColor(selectedCert)"></div>
+      <div class="sc-cert-accent" [style.background]="config.couleur_principale || getAccentColor(selectedCert)"></div>
 
       <!-- modal header -->
       <div class="sc-modal-header">
         <div class="sc-modal-icon"
-             [style.background]="getAccentColor(selectedCert) + '20'"
-             [style.color]="getAccentColor(selectedCert)">
+             [style.background]="(config.couleur_principale || getAccentColor(selectedCert)) + '20'"
+             [style.color]="config.couleur_principale || getAccentColor(selectedCert)">
           <i class="isax isax-award"></i>
         </div>
         <div>
@@ -330,7 +330,14 @@
 
           <!-- logo header -->
           <div class="sc-cert-logo-row">
-            <div class="sc-cert-logo-mark" [style.background]="getAccentColor(selectedCert)">
+            <!-- Logo ou initiale -->
+            <img *ngIf="config.logo_url && !logoLoadError" [src]="config.logo_url"
+                 class="sc-cert-logo-img"
+                 alt="Logo"
+                 (error)="onPreviewLogoError()">
+            <div class="sc-cert-logo-mark"
+                 *ngIf="!config.logo_url || logoLoadError"
+                 [style.background]="config.couleur_principale || getAccentColor(selectedCert)">
               {{ (config.entreprise_nom || userEntreprise || 'E').slice(0,1).toUpperCase() }}
             </div>
             <div>
@@ -343,12 +350,12 @@
           </div>
 
           <!-- badge + name -->
-          <div class="sc-cert-badge-label" [style.background]="getAccentColor(selectedCert) + '20'" [style.color]="getAccentColor(selectedCert)">
+          <div class="sc-cert-badge-label" [style.background]="(config.couleur_principale || getAccentColor(selectedCert)) + '20'" [style.color]="config.couleur_principale || getAccentColor(selectedCert)">
             CERTIFICAT DE RÉUSSITE
           </div>
           <div class="sc-cert-employee">{{ getEmployeeName(selectedCert) }}</div>
           <div class="sc-cert-accroche">{{ config.accroche }}</div>
-          <div class="sc-cert-formation" [style.color]="getAccentColor(selectedCert)">
+          <div class="sc-cert-formation" [style.color]="config.couleur_principale || getAccentColor(selectedCert)">
             {{ selectedCert.formation?.titre }}
           </div>
 
@@ -370,7 +377,7 @@
             <div class="sc-cert-sig" *ngIf="config.show_formateur">
               <div class="sc-cert-sig-line"></div>
               <div class="sc-cert-sig-name">{{ getFormateurName(selectedCert) }}</div>
-              <div class="sc-cert-sig-role" [style.color]="getAccentColor(selectedCert)">Formateur</div>
+              <div class="sc-cert-sig-role" [style.color]="config.couleur_principale || getAccentColor(selectedCert)">Formateur</div>
             </div>
           </div>
 
@@ -409,7 +416,7 @@
         <button type="button" class="sc-btn-cancel" (click)="closePreview()">Fermer</button>
         <button type="button" class="sc-btn-download"
                 [disabled]="downloading"
-                [style.background]="getAccentColor(selectedCert)"
+                [style.background]="config.couleur_principale || getAccentColor(selectedCert)"
                 (click)="downloadPdf(selectedCert)">
           <i class="isax" [ngClass]="downloading ? 'isax-refresh' : 'isax-document-download'"></i>
           {{ downloading ? 'Génération…' : 'Télécharger PDF' }}

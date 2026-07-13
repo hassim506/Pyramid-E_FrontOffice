@@ -586,7 +586,7 @@
               <div class="lms-accordion__body" *ngIf="isFormationOpen(demandeSelectionnee.id, i)">
                 <div class="lms-formation-detail-body">
                   <div class="lms-formation-detail-body__img-wrap" *ngIf="formation.image_couverture">
-                    <img [src]="formation.image_couverture || 'assets/img/course/course-01.jpg'"
+                    <img [src]="getImageUrl(formation.image_couverture)"
                          class="lms-formation-detail-body__img" alt="">
                   </div>
                   <div class="lms-formation-detail-body__content">
@@ -875,7 +875,7 @@
               <div *ngIf="!loadingFormations" class="lms-formations-list">
                 <div class="lms-formation-item" *ngFor="let f of formations; let i = index">
                   <div class="lms-formation-item__num">{{ i + 1 }}</div>
-                  <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'" class="lms-formation-item__img" alt="">
+                  <img [src]="getImageUrl(f.image_couverture)" class="lms-formation-item__img" alt="">
                   <div class="lms-formation-item__body">
                     <div class="lms-formation-item__title">{{ f.titre }}</div>
                     <div class="lms-formation-item__meta">

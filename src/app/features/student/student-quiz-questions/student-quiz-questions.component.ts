@@ -19,7 +19,7 @@ interface Section {
 interface Question {
   id:            number;
   question_text: string;
-  type:          'multiple_choice' | 'true_false' | 'text';
+  type:          'multiple_choice' | 'multiple_choice_multi' | 'true_false' | 'text';
   points:        number;
   ordre:         number;
   reponses:      Reponse[];
@@ -61,8 +61,7 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
   }
 
   // ── Réponses ───────────────────────────────────────────────
-  selectedReponses: Record<number, number | string> = {};
-  textReponses:     Record<number, string>           = {};
+selectedReponses: Record<number, number | number[] | string> = {};  textReponses:     Record<number, string>           = {};
 
   // ── Timer ──────────────────────────────────────────────────
   timeLeft   = 0;
@@ -172,18 +171,30 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
   }
 
   // ── Réponses ───────────────────────────────────────────────
-  selectReponse(questionId: number, reponseId: number): void {
-    this.selectedReponses[questionId] = reponseId;
+selectReponse(questionId: number, reponseId: number, questionType: string): void {
+  if (questionType === 'multiple_choice_multi') {
+    const selected = this.selectedReponses[questionId] as number[] | undefined;
+    if (selected?.includes(reponseId)) {
+      this.selectedReponses[questionId] = selected.filter(id => id !== reponseId);
+    } else {
+      this.selectedReponses[questionId] = [...(selected || []), reponseId];
+    }
+    return;
   }
 
-  isSelected(questionId: number, reponseId: number): boolean {
-    return this.selectedReponses[questionId] === reponseId;
+  this.selectedReponses[questionId] = reponseId;
+}
+isSelected(questionId: number, reponseId: number): boolean {
+  const current = this.selectedReponses[questionId];
+  return Array.isArray(current) ? current.includes(reponseId) : current === reponseId;
+}
+isAnswered(question: Question): boolean {
+  if (question.type === 'text') {
+    return !!this.textReponses[question.id]?.trim();
   }
-
-  isAnswered(question: Question): boolean {
-    if (question.type === 'text') return !!this.textReponses[question.id]?.trim();
-    return !!this.selectedReponses[question.id];
-  }
+  const answer = this.selectedReponses[question.id];
+  return Array.isArray(answer) ? answer.length > 0 : !!answer;
+}
 
   get totalAnswered(): number {
     return this.questions.filter(q => this.isAnswered(q)).length;
@@ -224,12 +235,23 @@ export class StudentQuizQuestionsComponent implements OnInit, OnDestroy {
     clearInterval(this.timerInterval);
     this.submitting = true;
 
-    const answers: any[] = this.questions.map(q => {
-      if (q.type === 'text') {
-        return { question_id: q.id, reponse_text: this.textReponses[q.id] ?? '' };
-      }
-      return { question_id: q.id, reponse_id: (this.selectedReponses[q.id] as number) ?? null };
-    });
+const answers: any[] = this.questions.map(q => {
+  if (q.type === 'text') {
+    return { question_id: q.id, reponse_text: this.textReponses[q.id] ?? '' };
+  }
+
+  if (q.type === 'multiple_choice_multi') {
+    return {
+      question_id: q.id,
+      reponse_ids: (this.selectedReponses[q.id] as number[]) ?? []
+    };
+  }
+
+  return {
+    question_id: q.id,
+    reponse_id: (this.selectedReponses[q.id] as number) ?? null
+  };
+});
 
     this.formationsService.soumettreQuiz(this.quiz.id, answers).subscribe({
       next: (res: any) => {

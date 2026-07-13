@@ -476,4 +476,8 @@ export class LectureFormationComponent implements OnInit, OnChanges, OnDestroy {
       audio:  'Audio'
     } as any)[s?.type] ?? 'Contenu';
   }
+
+  getImageUrl(path: string | null | undefined): string {
+    return this.formationsService.getImageUrl(path);
+  }
 }

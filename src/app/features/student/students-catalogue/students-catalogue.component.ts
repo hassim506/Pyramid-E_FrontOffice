@@ -375,4 +375,9 @@ export class StudentsCatalogueComponent implements OnInit {
   getStatutClass(s: string): string {
     return ({ en_attente: 'statut-attente', validee: 'statut-validee', refusee: 'statut-refusee', annulee: 'statut-annulee' } as any)[s] ?? '';
   }
+
+  getImageUrl(path: string | null | undefined): string {
+    // Utiliser la méthode du service qui gère correctement les URLs
+    return this.formationService.getImageUrl(path);
+  }
 }
