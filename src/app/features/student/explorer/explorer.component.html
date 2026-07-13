@@ -1,0 +1,336 @@
+<!-- ══ PAGE HEADER ══════════════════════════════════════════════════════════ -->
+<div class="ph">
+  <div class="ph-icon"><i class="isax isax-search-normal-1"></i></div>
+  <div class="ph-info">
+    <div class="ph-title">Explorer les Formations</div>
+    <div class="ph-sub">
+      Découvrez formations, catalogues et parcours disponibles dans votre entreprise
+    </div>
+  </div>
+</div>
+
+<!-- ══ TABS NAVIGATION ═════════════════════════════════════════════════════ -->
+<div class="tab-bar">
+  <div
+    class="tab"
+    [class.active]="activeTab === 'formations'"
+    (click)="changeTab('formations')">
+    <i class="isax isax-book-1"></i> Formations ({{ formations.length }})
+  </div>
+  <div
+    class="tab"
+    [class.active]="activeTab === 'catalogues'"
+    (click)="changeTab('catalogues')">
+    <i class="isax isax-folder-2"></i> Catalogues ({{ catalogues.length }})
+  </div>
+  <div
+    class="tab"
+    [class.active]="activeTab === 'parcours'"
+    (click)="changeTab('parcours')">
+    <i class="isax isax-diagram"></i> Parcours ({{ parcours.length }})
+  </div>
+</div>
+
+<!-- ══ FILTERS BAR ═════════════════════════════════════════════════════════ -->
+<div class="filters-bar">
+  <!-- Search -->
+  <div class="search-box">
+    <i class="isax isax-search-normal-1"></i>
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Rechercher...">
+    <button type="button" *ngIf="searchTerm" class="clear-btn" (click)="searchTerm = ''">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+
+  <!-- Category Filter -->
+  <div class="filter-group">
+    <label><i class="isax isax-category"></i></label>
+    <select [(ngModel)]="selectedCategory" class="filter-select">
+      <option [ngValue]="null">Toutes les catégories</option>
+      <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.nom }}</option>
+    </select>
+  </div>
+
+  <!-- Niveau Filter (for formations) -->
+  <div class="filter-group" *ngIf="activeTab === 'formations'">
+    <label><i class="isax isax-medal-star"></i></label>
+    <select [(ngModel)]="selectedNiveau" class="filter-select">
+      <option [ngValue]="null">Tous les niveaux</option>
+      <option *ngFor="let niveau of niveaux" [ngValue]="niveau.value">{{ niveau.label }}</option>
+    </select>
+  </div>
+
+  <!-- Prix Filter (for formations) -->
+  <div class="filter-group" *ngIf="activeTab === 'formations'">
+    <label><i class="isax isax-dollar-circle"></i></label>
+    <select [(ngModel)]="selectedPrix" class="filter-select">
+      <option [ngValue]="null">Tous les prix</option>
+      <option *ngFor="let prix of prixOptions" [ngValue]="prix.value">{{ prix.label }}</option>
+    </select>
+  </div>
+
+  <!-- Reset Filters -->
+  <button type="button" class="btn-reset" (click)="resetFilters()" *ngIf="searchTerm || selectedCategory || selectedNiveau || selectedPrix">
+    <i class="isax isax-refresh"></i> Réinitialiser
+  </button>
+</div>
+
+<!-- ══ LOADING STATE ═══════════════════════════════════════════════════════ -->
+<div class="loading-state" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Chargement en cours...</p>
+</div>
+
+<!-- ══ ERROR STATE ════════════════════════════════════════════════════════ -->
+<div class="error-banner" *ngIf="error && !loading">
+  <i class="isax isax-warning-2"></i>
+  <div class="error-text">
+    <div class="error-title">Erreur</div>
+    <div class="error-message">{{ error }}</div>
+  </div>
+  <button type="button" class="btn-retry" (click)="loadData()">
+    <i class="isax isax-refresh"></i> Réessayer
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TAB - FORMATIONS
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div class="tv" [class.active]="activeTab === 'formations'" *ngIf="!loading && !error">
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredFormations.length === 0">
+    <i class="isax isax-book"></i>
+    <h3>Aucune formation trouvée</h3>
+    <p>Aucune formation ne correspond à vos critères de recherche</p>
+    <button type="button" class="btn-primary" (click)="resetFilters(); loadData()">
+      Voir toutes les formations
+    </button>
+  </div>
+
+  <!-- Course Grid -->
+  <div class="course-grid" *ngIf="filteredFormations.length > 0">
+    <div class="course-card" *ngFor="let formation of filteredFormations">
+      <!-- Image -->
+      <div class="course-image">
+        <img [src]="getImageUrl(formation.image_couverture)" [alt]="formation.titre">
+        <div class="course-badge" *ngIf="formation.est_inscrit">
+          <i class="isax isax-tick-circle"></i> Inscrit
+        </div>
+        <div class="course-badge free" *ngIf="formation.est_gratuite && !formation.est_inscrit">
+          Gratuit
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="course-content">
+        <!-- Category & Niveau -->
+        <div class="course-meta">
+          <span class="category-badge" *ngIf="formation.categorie_formation">
+            {{ formation.categorie_formation.nom }}
+          </span>
+          <span class="niveau-badge" [ngClass]="getNiveauClass(formation.niveau)">
+            {{ formation.niveau }}
+          </span>
+        </div>
+
+        <!-- Title -->
+        <h3 class="course-title">{{ formation.titre }}</h3>
+
+        <!-- Description -->
+        <p class="course-description">{{ formation.description | slice:0:120 }}...</p>
+
+        <!-- Stats -->
+        <div class="course-stats">
+          <div class="stat">
+            <i class="isax isax-clock"></i>
+            <span>{{ formation.duree_totale }}h</span>
+          </div>
+          <div class="stat" *ngIf="formation.note_moyenne">
+            <i class="isax isax-star"></i>
+            <span>{{ formation.note_moyenne }} / 5</span>
+          </div>
+          <div class="stat" *ngIf="formation.nombre_etudiants">
+            <i class="isax isax-people"></i>
+            <span>{{ formation.nombre_etudiants }} étudiants</span>
+          </div>
+        </div>
+
+        <!-- Formateur -->
+        <div class="course-instructor" *ngIf="formation.formateur">
+          <img
+            [src]="formation.formateur.avatar || 'assets/images/default-avatar.png'"
+            [alt]="formation.formateur.name"
+            class="instructor-avatar">
+          <span class="instructor-name">{{ formation.formateur.name }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="course-actions">
+          <a [routerLink]="['/student/formation', formation.id]" class="btn-view">
+            <i class="isax isax-eye"></i> Voir détails
+          </a>
+          <button
+            *ngIf="!formation.est_inscrit"
+            class="btn-demand"
+            (click)="demanderFormation(formation.id)">
+            <i class="isax isax-add-circle"></i> Demander
+          </button>
+          <div class="enrolled-tag" *ngIf="formation.est_inscrit">
+            <i class="isax isax-tick-circle"></i> Déjà inscrit
+          </div>
+        </div>
+
+        <!-- Prix -->
+        <div class="course-price" *ngIf="!formation.est_gratuite && formation.prix">
+          <span class="price">{{ formation.prix }} €</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TAB - CATALOGUES
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div class="tv" [class.active]="activeTab === 'catalogues'" *ngIf="!loading && !error">
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredCatalogues.length === 0">
+    <i class="isax isax-folder-2"></i>
+    <h3>Aucun catalogue trouvé</h3>
+    <p>Aucun catalogue ne correspond à vos critères de recherche</p>
+    <button class="btn-primary" (click)="resetFilters(); loadData()">
+      Voir tous les catalogues
+    </button>
+  </div>
+
+  <!-- Catalogue Grid -->
+  <div class="course-grid" *ngIf="filteredCatalogues.length > 0">
+    <div class="course-card catalogue-card" *ngFor="let catalogue of filteredCatalogues">
+      <!-- Image -->
+      <div class="course-image">
+        <img [src]="getImageUrl(catalogue.image_couverture)" [alt]="catalogue.nom">
+        <div class="course-badge" *ngIf="catalogue.est_assigne">
+          <i class="isax isax-tick-circle"></i> Assigné
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="course-content">
+        <!-- Type Badge -->
+        <div class="course-meta">
+          <span class="type-badge catalogue">
+            <i class="isax isax-folder-2"></i> Catalogue
+          </span>
+        </div>
+
+        <!-- Title -->
+        <h3 class="course-title">{{ catalogue.nom || catalogue.titre }}</h3>
+
+        <!-- Description -->
+        <p class="course-description">{{ catalogue.description | slice:0:120 }}...</p>
+
+        <!-- Stats -->
+        <div class="course-stats">
+          <div class="stat">
+            <i class="isax isax-book-1"></i>
+            <span>{{ catalogue.formations_count || catalogue.nombre_formations || 0 }} formations</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="course-actions">
+          <a [routerLink]="['/student/catalogue', catalogue.id]" class="btn-view">
+            <i class="isax isax-eye"></i> Voir détails
+          </a>
+          <button
+            *ngIf="catalogue.peut_demander !== false && !catalogue.est_assigne"
+            class="btn-demand"
+            (click)="demanderCatalogue(catalogue.id)">
+            <i class="isax isax-add-circle"></i> Demander
+          </button>
+          <div class="enrolled-tag" *ngIf="catalogue.est_assigne || catalogue.peut_demander === false">
+            <i class="isax isax-tick-circle"></i> Déjà demandé
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TAB - PARCOURS
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div class="tv" [class.active]="activeTab === 'parcours'" *ngIf="!loading && !error">
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredParcours.length === 0">
+    <i class="isax isax-diagram"></i>
+    <h3>Aucun parcours trouvé</h3>
+    <p>Aucun parcours ne correspond à vos critères de recherche</p>
+    <button class="btn-primary" (click)="resetFilters(); loadData()">
+      Voir tous les parcours
+    </button>
+  </div>
+
+  <!-- Parcours Grid -->
+  <div class="course-grid" *ngIf="filteredParcours.length > 0">
+    <div class="course-card parcours-card" *ngFor="let parc of filteredParcours">
+      <!-- Image -->
+      <div class="course-image">
+        <img [src]="getImageUrl(parc.image_couverture)" [alt]="parc.nom">
+        <div class="course-badge" *ngIf="parc.est_assigne">
+          <i class="isax isax-tick-circle"></i> Assigné
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="course-content">
+        <!-- Type Badge -->
+        <div class="course-meta">
+          <span class="type-badge parcours">
+            <i class="isax isax-diagram"></i> Parcours
+          </span>
+          <span class="category-badge" *ngIf="parc.categorie">
+            {{ parc.categorie.nom }}
+          </span>
+        </div>
+
+        <!-- Title -->
+        <h3 class="course-title">{{ parc.nom }}</h3>
+
+        <!-- Description -->
+        <p class="course-description">{{ parc.description | slice:0:120 }}...</p>
+
+        <!-- Stats -->
+        <div class="course-stats">
+          <div class="stat">
+            <i class="isax isax-book-1"></i>
+            <span>{{ parc.formations_count }} formations</span>
+          </div>
+          <div class="stat" *ngIf="parc.duree_totale">
+            <i class="isax isax-clock"></i>
+            <span>{{ parc.duree_totale }}h</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="course-actions">
+          <a [routerLink]="['/student/parcours', parc.id]" class="btn-view">
+            <i class="isax isax-eye"></i> Voir détails
+          </a>
+          <button
+            *ngIf="parc.peut_demander !== false && !parc.est_assigne"
+            class="btn-demand"
+            (click)="demanderParcours(parc.id)">
+            <i class="isax isax-add-circle"></i> Demander
+          </button>
+          <div class="enrolled-tag" *ngIf="parc.est_assigne || parc.peut_demander === false">
+            <i class="isax isax-tick-circle"></i> Déjà demandé
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
