@@ -361,11 +361,8 @@ export class ExplorerComponent implements OnInit {
   }
 
   getImageUrl(path: string | null | undefined): string {
-    if (!path) return 'assets/images/default-course.png';
-    if (path.startsWith('http')) return path;
-    // Construire l'URL complète depuis le backend
-    const baseUrl = 'http://127.0.0.1:8000'; // Ou depuis environment
-    return path.startsWith('/') ? `${baseUrl}${path}` : `${baseUrl}/${path}`;
+    // Utiliser la méthode du service qui gère correctement les URLs
+    return this.formationService.getImageUrl(path);
   }
 
   getNiveauClass(niveau: string): string {
