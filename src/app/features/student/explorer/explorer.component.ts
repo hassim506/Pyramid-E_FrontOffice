@@ -69,7 +69,6 @@ export class ExplorerComponent implements OnInit {
   searchTerm = '';
   selectedCategory: number | null = null;
   selectedNiveau: string | null = null;
-  selectedPrix: string | null = null;
 
   // Filtres disponibles
   niveaux = [
@@ -77,12 +76,6 @@ export class ExplorerComponent implements OnInit {
     { value: 'intermédiaire', label: 'Intermédiaire' },
     { value: 'avancé', label: 'Avancé' },
     { value: 'expert', label: 'Expert' }
-  ];
-
-  prixOptions = [
-    { value: 'gratuit', label: 'Gratuit' },
-    { value: 'payant', label: 'Payant' },
-    { value: 'tous', label: 'Tous' }
   ];
 
   // Données filtrées
@@ -330,15 +323,6 @@ export class ExplorerComponent implements OnInit {
       result = result.filter(item => item.niveau?.toLowerCase() === this.selectedNiveau?.toLowerCase());
     }
 
-    // Filtre prix
-    if (this.selectedPrix) {
-      if (this.selectedPrix === 'gratuit') {
-        result = result.filter(item => item.est_gratuite || !item.prix || item.prix === 0);
-      } else if (this.selectedPrix === 'payant') {
-        result = result.filter(item => !item.est_gratuite && item.prix && item.prix > 0);
-      }
-    }
-
     return result;
   }
 
@@ -353,7 +337,6 @@ export class ExplorerComponent implements OnInit {
     this.searchTerm = '';
     this.selectedCategory = null;
     this.selectedNiveau = null;
-    this.selectedPrix = null;
   }
 
   onSearchChange(): void {

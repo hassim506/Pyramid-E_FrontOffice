@@ -63,17 +63,8 @@
     </select>
   </div>
 
-  <!-- Prix Filter (for formations) -->
-  <div class="filter-group" *ngIf="activeTab === 'formations'">
-    <label><i class="isax isax-dollar-circle"></i></label>
-    <select [(ngModel)]="selectedPrix" class="filter-select">
-      <option [ngValue]="null">Tous les prix</option>
-      <option *ngFor="let prix of prixOptions" [ngValue]="prix.value">{{ prix.label }}</option>
-    </select>
-  </div>
-
   <!-- Reset Filters -->
-  <button type="button" class="btn-reset" (click)="resetFilters()" *ngIf="searchTerm || selectedCategory || selectedNiveau || selectedPrix">
+  <button type="button" class="btn-reset" (click)="resetFilters()" *ngIf="searchTerm || selectedCategory || selectedNiveau">
     <i class="isax isax-refresh"></i> Réinitialiser
   </button>
 </div>
@@ -118,9 +109,6 @@
         <img [src]="getImageUrl(formation.image_couverture)" [alt]="formation.titre">
         <div class="course-badge" *ngIf="formation.est_inscrit">
           <i class="isax isax-tick-circle"></i> Inscrit
-        </div>
-        <div class="course-badge free" *ngIf="formation.est_gratuite && !formation.est_inscrit">
-          Gratuit
         </div>
       </div>
 
@@ -181,11 +169,6 @@
           <div class="enrolled-tag" *ngIf="formation.est_inscrit || formation.peut_demander === false">
             <i class="isax isax-tick-circle"></i> Déjà demandé
           </div>
-        </div>
-
-        <!-- Prix -->
-        <div class="course-price" *ngIf="!formation.est_gratuite && formation.prix">
-          <span class="price">{{ formation.prix }} €</span>
         </div>
       </div>
     </div>
