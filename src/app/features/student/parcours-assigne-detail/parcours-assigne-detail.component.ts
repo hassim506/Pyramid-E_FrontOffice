@@ -81,8 +81,41 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error   = '';
 
+    console.log(`📡 [ParcoursDetail #${this.parcoursId}] loadDetail() → getParcoursFormationsWithStatus()`);
+
+    // ✅ Charger les formations du parcours avec statut peut_demander et est_inscrit
+    this.formationsService.getParcoursFormationsWithStatus(this.parcoursId).subscribe({
+      next: (res: any) => {
+        console.log(`✅ [ParcoursDetail #${this.parcoursId}] getParcoursFormationsWithStatus réponse:`, res);
+
+        this.parcours            = res.parcours             ?? null;
+        this.formations          = res.formations           ?? [];
+        this.progressionGlobale  = res.progression          ?? 0;
+        this.totalFormations     = res.total_formations     ?? 0;
+        this.formationsTerminees = res.formations_terminees ?? 0;
+        this.estTermine          = res.est_termine          ?? false;
+        this.source              = res.source               ?? 'demande';
+
+        console.log(`📋 [ParcoursDetail #${this.parcoursId}] ${this.formations.length} formations chargées`);
+
+        this._syncFormationsDepuisService();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(`❌ [ParcoursDetail #${this.parcoursId}] Erreur getParcoursFormationsWithStatus:`, err);
+
+        // Fallback: Charger depuis l'ancien endpoint pour les parcours assignés
+        console.log(`⚠️ Fallback vers getParcoursDetail`);
+        this.loadDetailFallback();
+      }
+    });
+  }
+
+  private loadDetailFallback(): void {
     this.formationsService.getParcoursDetail(this.parcoursId).subscribe({
       next: (res: any) => {
+        console.log(`✅ [ParcoursDetail #${this.parcoursId}] getParcoursDetail réponse (fallback):`, res);
+
         this.parcours            = res.parcours             ?? null;
         this.formations          = res.formations           ?? [];
         this.progressionGlobale  = res.progression          ?? 0;
@@ -101,7 +134,7 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Erreur loadDetail parcours', err);
+        console.error(`❌ [ParcoursDetail #${this.parcoursId}] Erreur fallback:`, err);
         this.error   = 'Impossible de charger le parcours. Vérifiez que vous y avez accès.';
         this.loading = false;
       }
@@ -202,6 +235,14 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void { this.router.navigate(['/student/mes-parcours-assignes']); }
+
+  demanderFormation(formationId: number, event: Event): void {
+    event.stopPropagation();
+    // Rediriger vers l'explorer avec le modal de demande
+    this.router.navigate(['/student/students-explorer'], {
+      queryParams: { formationId: formationId }
+    });
+  }
 
   getStatutLabel(statut: string): string {
     return ({ termine: 'Terminé', en_cours: 'En cours', non_commence: 'À commencer' } as any)[statut] ?? 'À commencer';

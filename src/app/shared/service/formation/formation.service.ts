@@ -326,6 +326,10 @@ addComment(commentData: any): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/demandes-formation/listes/catalogues/${catalogueId}/formations`, { headers: this.getHeaders() });
   }
 
+  getParcoursFormationsWithStatus(parcoursId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/demandes-formation/listes/parcours/${parcoursId}/formations`, { headers: this.getHeaders() });
+  }
+
   // ===============================
   // 🔁 DEMANDES
   // ===============================
