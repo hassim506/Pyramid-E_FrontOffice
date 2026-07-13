@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormationService } from '../../../shared/service/formation/formation.service';
 import { CategorieService } from '../../../shared/service/categorie/categorie-service.service';
 import { DemandeFormationService } from '../../../shared/service/demande/demande-formation.service';
@@ -138,7 +138,8 @@ export class ExplorerComponent implements OnInit {
     private categorieService: CategorieService,
     private demandeService: DemandeFormationService,
     private formBuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.demandeForm = this.formBuilder.group({
       motif_demande: ['', Validators.required],
@@ -152,6 +153,23 @@ export class ExplorerComponent implements OnInit {
   ngOnInit(): void {
     this.loadCategories();
     this.loadData();
+
+    // Vérifier si on doit ouvrir le modal automatiquement
+    this.route.queryParams.subscribe(params => {
+      if (params['formationId']) {
+        const formationId = +params['formationId'];
+        // Attendre que les formations soient chargées
+        setTimeout(() => {
+          this.demanderFormation(formationId);
+          // Nettoyer le queryParam de l'URL
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {},
+            queryParamsHandling: 'merge'
+          });
+        }, 1000);
+      }
+    });
   }
 
   loadCategories(): void {

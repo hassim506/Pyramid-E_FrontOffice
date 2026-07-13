@@ -298,7 +298,11 @@
             </a>
 
             <!-- Apprenant / Employé (2) : demande via l'organisation -->
-            <button class="cd-enroll-btn cd-enroll-btn--green" *ngIf="currentUser?.role_id === 2">
+            <button
+              class="cd-enroll-btn cd-enroll-btn--green"
+              *ngIf="currentUser?.role_id === 2"
+              [routerLink]="['/student/students-explorer']"
+              [queryParams]="{formationId: formation.id}">
               <i class="isax isax-document-text"></i> Demander la formation
             </button>
 
