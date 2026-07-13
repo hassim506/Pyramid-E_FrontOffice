@@ -97,9 +97,12 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
         this.source              = res.source               ?? 'demande';
 
         console.log(`📋 [ParcoursDetail #${this.parcoursId}] ${this.formations.length} formations chargées`);
+        console.log(`🔍 [ParcoursDetail #${this.parcoursId}] parcours:`, this.parcours);
+        console.log(`🔍 [ParcoursDetail #${this.parcoursId}] loading: ${this.loading}, error: ${this.error}`);
 
         this._syncFormationsDepuisService();
         this.loading = false;
+        console.log(`✅ [ParcoursDetail #${this.parcoursId}] Chargement terminé, loading=${this.loading}`);
       },
       error: (err) => {
         console.error(`❌ [ParcoursDetail #${this.parcoursId}] Erreur getParcoursFormationsWithStatus:`, err);
