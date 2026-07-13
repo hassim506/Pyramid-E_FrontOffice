@@ -252,4 +252,9 @@ export class MesCoursComponent implements OnInit, OnDestroy {
     };
     return map[niveau?.toLowerCase() ?? ''] ?? 'niveau-default';
   }
+
+  getImageUrl(path: string | null | undefined): string {
+    // Utiliser la méthode du service qui gère correctement les URLs
+    return this.formationsService.getImageUrl(path);
+  }
 }

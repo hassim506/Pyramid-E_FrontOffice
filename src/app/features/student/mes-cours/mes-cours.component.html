@@ -235,7 +235,7 @@
             <td>
               <div class="mc-formation">
                 <div class="mc-formation__thumb-wrap">
-                  <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+                  <img [src]="getImageUrl(f.image_couverture)"
                        class="mc-formation__thumb" alt="">
                   <!-- Sceau terminé sur thumb -->
                   <div class="mc-formation__thumb-seal" *ngIf="isCourseFinished(f)">
@@ -320,7 +320,7 @@
 
       <!-- Cover -->
       <div class="mc-grid-card__cover">
-        <img [src]="f.image_couverture || 'assets/img/course/course-01.jpg'"
+        <img [src]="getImageUrl(f.image_couverture)"
              alt="{{ f.titre }}" class="mc-grid-card__img">
         <div class="mc-grid-card__cover-overlay"></div>
 
