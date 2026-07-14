@@ -102,6 +102,14 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
           this.parcours.statut           = res.statut           ?? 'actif';
         }
 
+        // ✅ IMPORTANT: Parcours assigné = toutes formations inscrites automatiquement
+        // Ajouter est_inscrit=true pour masquer les boutons "Demander"
+        this.formations = this.formations.map(f => ({
+          ...f,
+          est_inscrit: true,  // Formations accessibles via le parcours assigné
+          peut_demander: false // Pas besoin de demander (déjà dans le parcours)
+        }));
+
         console.log(`📋 [ParcoursDetail #${this.parcoursId}] ${this.formations.length} formations chargées (assigné)`);
 
         this._syncFormationsDepuisService();
