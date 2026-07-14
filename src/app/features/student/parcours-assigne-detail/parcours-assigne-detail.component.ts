@@ -81,43 +81,12 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error   = '';
 
-    console.log(`📡 [ParcoursDetail #${this.parcoursId}] loadDetail() → getParcoursFormationsWithStatus()`);
+    console.log(`📡 [ParcoursDetail #${this.parcoursId}] loadDetail() → getParcoursDetail() [ASSIGNE]`);
 
-    // ✅ Charger les formations du parcours avec statut peut_demander et est_inscrit
-    this.formationsService.getParcoursFormationsWithStatus(this.parcoursId).subscribe({
-      next: (res: any) => {
-        console.log(`✅ [ParcoursDetail #${this.parcoursId}] getParcoursFormationsWithStatus réponse:`, res);
-
-        this.parcours            = res.parcours             ?? null;
-        this.formations          = res.formations           ?? [];
-        this.progressionGlobale  = res.progression          ?? 0;
-        this.totalFormations     = res.total_formations     ?? 0;
-        this.formationsTerminees = res.formations_terminees ?? 0;
-        this.estTermine          = res.est_termine          ?? false;
-        this.source              = res.source               ?? 'demande';
-
-        console.log(`📋 [ParcoursDetail #${this.parcoursId}] ${this.formations.length} formations chargées`);
-        console.log(`🔍 [ParcoursDetail #${this.parcoursId}] parcours:`, this.parcours);
-        console.log(`🔍 [ParcoursDetail #${this.parcoursId}] loading: ${this.loading}, error: ${this.error}`);
-
-        this._syncFormationsDepuisService();
-        this.loading = false;
-        console.log(`✅ [ParcoursDetail #${this.parcoursId}] Chargement terminé, loading=${this.loading}`);
-      },
-      error: (err) => {
-        console.error(`❌ [ParcoursDetail #${this.parcoursId}] Erreur getParcoursFormationsWithStatus:`, err);
-
-        // Fallback: Charger depuis l'ancien endpoint pour les parcours assignés
-        console.log(`⚠️ Fallback vers getParcoursDetail`);
-        this.loadDetailFallback();
-      }
-    });
-  }
-
-  private loadDetailFallback(): void {
+    // ✅ Pour les parcours ASSIGNÉS, utiliser getParcoursDetail qui charge la progression réelle
     this.formationsService.getParcoursDetail(this.parcoursId).subscribe({
       next: (res: any) => {
-        console.log(`✅ [ParcoursDetail #${this.parcoursId}] getParcoursDetail réponse (fallback):`, res);
+        console.log(`✅ [ParcoursDetail #${this.parcoursId}] getParcoursDetail réponse:`, res);
 
         this.parcours            = res.parcours             ?? null;
         this.formations          = res.formations           ?? [];
@@ -133,16 +102,19 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
           this.parcours.statut           = res.statut           ?? 'actif';
         }
 
+        console.log(`📋 [ParcoursDetail #${this.parcoursId}] ${this.formations.length} formations chargées (assigné)`);
+
         this._syncFormationsDepuisService();
         this.loading = false;
       },
       error: (err) => {
-        console.error(`❌ [ParcoursDetail #${this.parcoursId}] Erreur fallback:`, err);
+        console.error(`❌ [ParcoursDetail #${this.parcoursId}] Erreur getParcoursDetail:`, err);
         this.error   = 'Impossible de charger le parcours. Vérifiez que vous y avez accès.';
         this.loading = false;
       }
     });
   }
+
 
   refreshProgressions(): void {
     this.formationsService.getParcoursDetail(this.parcoursId).subscribe({
