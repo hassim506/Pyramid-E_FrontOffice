@@ -121,6 +121,12 @@ unpublishFormation(id: number): Observable<any> {
       headers: this.getHeaders()
     });
   }
+
+  getApprenantsUniques(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/formateur/apprenants-uniques`, {
+      headers: this.getHeaders()
+    });
+  }
   getFormationFormateurById(id: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/formateurs/${id}/formations`, {
       headers: this.getHeaders()
@@ -328,6 +334,14 @@ addComment(commentData: any): Observable<any> {
 
   getParcoursFormationsWithStatus(parcoursId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/demandes-formation/listes/parcours/${parcoursId}/formations`, { headers: this.getHeaders() });
+  }
+
+  // ===============================
+  // 🔒 VÉRIFICATION ACCÈS
+  // ===============================
+
+  verifierAccesFormation(formationId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/demandes-formation/verifier-acces/${formationId}`, { headers: this.getHeaders() });
   }
 
   // ===============================

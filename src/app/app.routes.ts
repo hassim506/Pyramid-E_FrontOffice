@@ -271,10 +271,12 @@ export const routes: Routes = [
         {path:'student-profile',loadComponent:()=>import ('./features/student/student-profile/student-profile.component').then((m)=>m.StudentProfileComponent)},
 
         // RENOMMÉ : student-courses → mes-catalogues
-        {path:'mes-catalogues',loadComponent:()=>import ('./features/student/student-courses/student-courses.component').then((m)=>m.StudentCoursesComponent)},
+        {path:'mes-catalogues',loadComponent:()=>import ('./features/student/mes-catalogues/mes-catalogues.component').then((m)=>m.MesCataloguesComponent)},
+        {path:'mes-catalogues/:id',loadComponent:()=>import ('./features/student/mes-catalogues-details/mes-catalogues-details.component').then((m)=>m.MesCataloguesDetailsComponent)},
+
         {path:'student-courses',redirectTo:'mes-catalogues',pathMatch:'full'},
 
-        {path:'catalogue-detail/:id',loadComponent:()=>import ('./features/student/catalogue-detail/catalogue-detail.component').then((m)=>m.CatalogueDetailComponent)},
+        {path:'catalogue-detail/:id',loadComponent:()=>import ('./features/student/explorer/catalogue-detail/catalogue-detail.component').then((m)=>m.CatalogueDetailComponent)},
 
         // RENOMMÉ : mes-cours → mes-formations
         {path:'mes-formations',loadComponent:()=>import ('./features/student/mes-cours/mes-cours.component').then((m)=>m.MesCoursComponent)},
@@ -283,17 +285,22 @@ export const routes: Routes = [
         {path:'student-tickets',loadComponent:()=>import ('./features/student/student-tickets/student-tickets.component').then((m)=>m.StudentTicketsComponent)},
         {path:'students-session',loadComponent:()=>import ('./features/student/students-session/students-session.component').then((m)=>m.StudentsSessionsComponent)},
         {path:'sessions-acceptees',loadComponent:()=>import ('./features/student/sessions-acceptees/sessions-acceptees.component').then((m)=>m.SessionsAccepteesComponent)},
-        {path:'students-catalogue',loadComponent:()=>import ('./features/student/students-catalogue/students-catalogue.component').then((m)=>m.StudentsCatalogueComponent)},
+        // RENOMMÉ : students-catalogue → student-demande-catalogue
+        {path:'student-demande-catalogue',loadComponent:()=>import ('./features/student/student-demande-catalogue/student-demande-catalogue.component').then((m)=>m.StudentDemandeCatalogueComponent)},
+        {path:'students-catalogue',redirectTo:'student-demande-catalogue',pathMatch:'full'},
         {path:'students-explorer',loadComponent:()=>import ('./features/student/explorer/explorer.component').then((m)=>m.ExplorerComponent)},
 
 
-        // RENOMMÉ : students-parcours → mes-parcours
-        {path:'mes-parcours',loadComponent:()=>import ('./features/student/students-parcours/students-parcours.component').then((m)=>m.StudentsParcoursComponent)},
-        {path:'students-parcours',redirectTo:'mes-parcours',pathMatch:'full'},
+        // RENOMMÉ : students-parcours → mes-demandes-parcours
+        {path:'mes-demandes-parcours',loadComponent:()=>import ('./features/student/student-demande-parcours/student-demande-parcours.component').then((m)=>m.StudentDemandeParcoursComponent)},
+        {path:'students-parcours',redirectTo:'mes-demandes-parcours',pathMatch:'full'},
 
         // RENOMMÉ : parcours-assignes → mes-parcours-assignes
-        {path:'mes-parcours-assignes',loadComponent:()=>import ('./features/student/parcours-assignes/parcours-assignes.component').then((m)=>m.ParcoursAssignesComponent)},
+        // RENOMMÉ : parcours-assignes → mes-parcours-assignes
+        {path:'mes-parcours',loadComponent:()=>import ('./features/student/mes-parcours/mes-parcours.component').then((m)=>m.MesParcoursComponent)},
         {path:'parcours-assignes',redirectTo:'mes-parcours-assignes',pathMatch:'full'},
+        {path:'mes-parcours',redirectTo:'mes-parcours-assignes',pathMatch:'full'},
+        {path:'mes-parcours',redirectTo:'mes-parcours',pathMatch:'full'},
 
         // RENOMMÉ : parcours-assigne/:id → mes-parcours/:id
         {path:'mes-parcours/:id',loadComponent:()=>import ('./features/student/parcours-assigne-detail/parcours-assigne-detail.component').then((m)=>m.ParcoursAssigneDetailComponent)},

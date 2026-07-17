@@ -1,0 +1,350 @@
+<!-- HEADER -->
+<div class="sc-header">
+  <div class="sc-header__left">
+    <h1 class="sc-header__title">Mes Catalogues</h1>
+    <p class="sc-header__subtitle">Catalogues assignés et demandes acceptées par votre entreprise</p>
+  </div>
+  <div class="sc-header__right" *ngIf="!loading && allCatalogues.length > 0">
+    <span class="sc-header__count">
+      <i class="isax isax-book-1"></i>
+      {{ totalItems }} catalogue{{ totalItems > 1 ? 's' : '' }}
+    </span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- KPI INDICATORS — même style que la page parcours  -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="pq-kpi-grid mb-4" *ngIf="!loading && allCatalogues.length > 0">
+
+  <!-- Total -->
+  <div class="pq-kpi-card pq-kpi-card--teal" (click)="onFiltreChange('')"
+       [class.pq-kpi-card--active]="selectedFiltre === ''">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-book-1"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalCatalogues }}</div>
+      <div class="pq-kpi-card__label">Total</div>
+    </div>
+  </div>
+
+  <!-- En cours -->
+  <div class="pq-kpi-card pq-kpi-card--blue" (click)="onFiltreChange('en_cours')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'en_cours'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-play-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalEnCours }}</div>
+      <div class="pq-kpi-card__label">En cours</div>
+    </div>
+  </div>
+
+  <!-- Terminés -->
+  <div class="pq-kpi-card pq-kpi-card--green" (click)="onFiltreChange('termine')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'termine'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-medal-star"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalTermines }}</div>
+      <div class="pq-kpi-card__label">Terminés</div>
+    </div>
+  </div>
+
+  <!-- Non démarrés -->
+  <div class="pq-kpi-card pq-kpi-card--orange" (click)="onFiltreChange('')"
+       [class.pq-kpi-card--active]="false">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-flash-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalNonDemarres }}</div>
+      <div class="pq-kpi-card__label">Non démarrés</div>
+    </div>
+  </div>
+
+  <!-- Assignés directement -->
+  <div class="pq-kpi-card pq-kpi-card--purple" (click)="onFiltreChange('assigne')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'assigne'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-tick-circle"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalAssignes }}</div>
+      <div class="pq-kpi-card__label">Assignés</div>
+    </div>
+  </div>
+
+  <!-- Demandes acceptées -->
+  <div class="pq-kpi-card pq-kpi-card--indigo" (click)="onFiltreChange('demande')"
+       [class.pq-kpi-card--active]="selectedFiltre === 'demande'">
+    <div class="pq-kpi-card__icon">
+      <i class="isax isax-send-2"></i>
+    </div>
+    <div class="pq-kpi-card__body">
+      <div class="pq-kpi-card__value">{{ totalDemandes }}</div>
+      <div class="pq-kpi-card__label">Demandes acceptées</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FILTRES -->
+<div class="sc-filters" *ngIf="!loading && allCatalogues.length > 0">
+  <div class="sc-filters__search">
+    <i class="isax isax-search-normal sc-filters__search-icon"></i>
+    <input type="text" class="sc-filters__search-input"
+           placeholder="Rechercher un catalogue..."
+           [(ngModel)]="searchTerm"
+           (ngModelChange)="onSearchChange()">
+    <button *ngIf="searchTerm" class="sc-filters__search-clear"
+            (click)="searchTerm = ''; onSearchChange()">
+      <i class="isax isax-close-circle"></i>
+    </button>
+  </div>
+
+  <div class="sc-filters__types">
+    <button *ngFor="let f of filtres"
+            class="sc-filters__type-btn"
+            [class.sc-filters__type-btn--active]="selectedFiltre === f.value"
+            (click)="onFiltreChange(f.value)">
+      <i class="isax me-1" [ngClass]="f.icon"></i>{{ f.label }}
+      <span class="sc-filters__type-count" *ngIf="f.value === 'assigne'        && totalAssignes    > 0">({{ totalAssignes }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'demande'        && totalDemandes    > 0">({{ totalDemandes }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'termine'        && totalTermines    > 0">({{ totalTermines }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'en_cours'       && totalEnCours     > 0">({{ totalEnCours }})</span>
+      <span class="sc-filters__type-count" *ngIf="f.value === 'expire'         && totalExpires     > 0">({{ totalExpires }})</span>
+    </button>
+  </div>
+
+  <button class="sc-filters__reset" *ngIf="hasActiveFilters" (click)="clearFilters()">
+    <i class="isax isax-refresh"></i> Réinitialiser
+  </button>
+</div>
+
+<!-- RÉSULTAT FILTRE -->
+<div class="sc-results-info" *ngIf="!loading && hasActiveFilters && filteredCatalogues.length > 0">
+  <i class="isax isax-filter"></i>
+  <span>{{ totalItems }} résultat{{ totalItems > 1 ? 's' : '' }}</span>
+  <button class="sc-results-info__clear" (click)="clearFilters()">Effacer les filtres</button>
+</div>
+
+<!-- LOADER -->
+
+<div class="qq-loading" *ngIf="loading">
+  <div class="qq-loading__ring">
+    <div></div><div></div><div></div><div></div>
+  </div>
+  <p>Chargement de vos catalogues...</p>
+</div>
+
+<!-- ERREUR -->
+<div class="sc-error" *ngIf="error && !loading">
+  <i class="isax isax-warning-2 sc-error__icon"></i>
+  <p>{{ error }}</p>
+  <button class="sc-error__retry" (click)="loadCatalogues()">
+    <i class="isax isax-refresh me-1"></i> Réessayer
+  </button>
+</div>
+
+<!-- GRILLE CATALOGUES -->
+<div class="row g-4" *ngIf="!loading && displayedCatalogues.length > 0">
+  <div class="col-xl-4 col-md-6" *ngFor="let catalogue of displayedCatalogues">
+    <div class="catalogue-card"
+         [class.catalogue-card--termine]="catalogue.est_termine"
+         [class.catalogue-card--expire]="isExpire(catalogue) && !catalogue.est_termine"
+         [class.catalogue-card--grayed]="catalogue.est_termine || isExpire(catalogue)"
+         (click)="goToCatalogue(catalogue.id)">
+
+      <!-- BANNIÈRE -->
+      <div class="catalogue-card__banner">
+        <div class="catalogue-card__banner-bg"
+             [style.background-image]="catalogue.image_couverture ? 'url(' + catalogue.image_couverture + ')' : 'none'"
+             [style.background-color]="!catalogue.image_couverture ? (catalogue.couleur || '#069b8f') : 'transparent'">
+        </div>
+        <div class="catalogue-card__banner-overlay"></div>
+        <i [class]="(catalogue.icone || 'isax isax-book-1') + ' catalogue-card__banner-icon'"></i>
+
+        <!-- Badge Complété (haut gauche) -->
+        <div class="catalogue-card__banner-termine" *ngIf="catalogue.est_termine">
+          <i class="isax isax-medal-star me-1"></i>Complété
+        </div>
+
+        <!-- Badge Expiré (haut gauche) -->
+        <div class="catalogue-card__banner-expire" *ngIf="isExpire(catalogue) && !catalogue.est_termine">
+          <i class="isax isax-calendar-remove me-1"></i>Expiré
+        </div>
+
+        <!-- Badge source (haut droite) -->
+        <span class="catalogue-card__banner-assigned"
+              [class.catalogue-card__banner-assigned--demande]="catalogue.source === 'demande'"
+              [class.catalogue-card__banner-assigned--termine]="catalogue.est_termine">
+          <i class="isax me-1"
+             [class.isax-medal-star]="catalogue.est_termine"
+             [class.isax-tick-circle]="!catalogue.est_termine && catalogue.source !== 'demande'"
+             [class.isax-send-2]="!catalogue.est_termine && catalogue.source === 'demande'"></i>
+          {{ catalogue.source === 'demande' ? 'Demande acceptée' : 'Assigné' }}
+        </span>
+
+        <!-- Badge type -->
+        <span class="catalogue-card__banner-badge"
+              [style.background-color]="getTypeColor(catalogue.type)">
+          {{ getTypeLabel(catalogue.type) }}
+        </span>
+      </div>
+
+      <!-- BODY -->
+      <div class="catalogue-card__body">
+        <h5 class="catalogue-card__title">{{ catalogue.titre }}</h5>
+        <p class="catalogue-card__description">
+          {{ catalogue.short_description || catalogue.description || 'Aucune description disponible' }}
+        </p>
+
+        <!-- Stats -->
+        <div class="catalogue-card__stats">
+          <div class="catalogue-card__stat">
+            <i class="isax isax-book-1"></i>
+            <span>{{ catalogue.nombre_formations }} formation{{ catalogue.nombre_formations > 1 ? 's' : '' }}</span>
+          </div>
+          <div class="catalogue-card__stat" *ngIf="catalogue.duree_totale">
+            <i class="isax isax-clock"></i>
+            <span>{{ catalogue.duree_totale }} h</span>
+          </div>
+          <div class="catalogue-card__stat catalogue-card__stat--done"
+               *ngIf="catalogue.formations_terminees > 0">
+            <i class="isax isax-tick-circle"></i>
+            <span>{{ catalogue.formations_terminees }}/{{ catalogue.total_formations }} terminées</span>
+          </div>
+        </div>
+
+        <!-- PROGRESSION -->
+        <div class="catalogue-card__progression" *ngIf="catalogue.total_formations > 0">
+          <!-- Badge terminé -->
+          <div class="catalogue-card__termine" *ngIf="catalogue.est_termine">
+            <i class="isax isax-medal-star me-1"></i>
+            Catalogue complété !
+          </div>
+          <!-- Barre progression -->
+          <div *ngIf="!catalogue.est_termine">
+            <div class="catalogue-card__prog-header">
+              <span class="catalogue-card__prog-label">Progression</span>
+              <span class="catalogue-card__prog-pct"
+                    [style.color]="isExpire(catalogue) ? '#9ca3af' : (catalogue.progression > 0 ? '#069b8f' : '#9ca3af')">
+                {{ catalogue.progression | number:'1.0-0' }}%
+              </span>
+            </div>
+            <div class="catalogue-card__prog-bar">
+              <div class="catalogue-card__prog-fill"
+                   [class.catalogue-card__prog-fill--expire]="isExpire(catalogue)"
+                   [style.width.%]="catalogue.progression">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assignation -->
+        <div class="catalogue-card__assignation">
+          <div class="catalogue-card__assignation-date" *ngIf="catalogue.date_assignation">
+            <i class="isax me-1"
+               [class.isax-calendar-add]="catalogue.source !== 'demande'"
+               [class.isax-tick-circle]="catalogue.source === 'demande'"></i>
+            {{ catalogue.source === 'demande' ? 'Validée le' : 'Assigné le' }}
+            {{ catalogue.date_assignation | date:'dd/MM/yyyy' }}
+          </div>
+
+          <!-- Accès permanent -->
+          <div class="catalogue-card__assignation-expiry catalogue-card__assignation-expiry--permanent"
+               *ngIf="!catalogue.date_expiration">
+            <i class="isax isax-infinity me-1"></i>Accès permanent
+          </div>
+
+          <!-- Expiré -->
+          <div class="catalogue-card__assignation-expiry catalogue-card__assignation-expiry--expired"
+               *ngIf="isExpire(catalogue)">
+            <i class="isax isax-calendar-remove me-1"></i>
+            Expiré le {{ catalogue.date_expiration | date:'dd/MM/yyyy' }}
+          </div>
+
+          <!-- Expire bientôt -->
+          <div class="catalogue-card__assignation-expiry catalogue-card__assignation-expiry--warning"
+               *ngIf="!isExpire(catalogue) && isExpiringSoon(catalogue.date_expiration)">
+            <i class="isax isax-warning-2 me-1"></i>
+            Expire dans {{ getJoursRestants(catalogue.date_expiration) }} jour(s) !
+          </div>
+
+          <!-- Date expiration normale -->
+          <div class="catalogue-card__assignation-expiry"
+               *ngIf="!isExpire(catalogue) && catalogue.date_expiration && !isExpiringSoon(catalogue.date_expiration)">
+            <i class="isax isax-calendar-remove me-1"></i>
+            Expire le {{ catalogue.date_expiration | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="catalogue-card__notes" *ngIf="catalogue.notes">
+          <i class="isax isax-note-text me-1"></i>
+          <em>{{ catalogue.notes }}</em>
+        </div>
+
+        <!-- Footer -->
+        <div class="catalogue-card__footer">
+          <button class="catalogue-card__btn"
+                  [class.catalogue-card__btn--done]="catalogue.est_termine"
+                  [class.catalogue-card__btn--expire]="isExpire(catalogue) && !catalogue.est_termine">
+            <ng-container *ngIf="catalogue.est_termine">Revoir le catalogue</ng-container>
+            <ng-container *ngIf="isExpire(catalogue) && !catalogue.est_termine">Consulter</ng-container>
+            <ng-container *ngIf="!catalogue.est_termine && !isExpire(catalogue)">Accéder aux formations</ng-container>
+            <i class="isax isax-arrow-right-3"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EMPTY — aucun catalogue -->
+<div class="sc-empty" *ngIf="!loading && !error && allCatalogues.length === 0">
+  <i class="isax isax-book-1 sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun catalogue disponible</h6>
+  <p>Vous n'avez pas encore de catalogues assignés ou de demandes acceptées.</p>
+</div>
+
+<!-- EMPTY — aucun résultat filtre -->
+<div class="sc-empty"
+     *ngIf="!loading && !error && allCatalogues.length > 0 && filteredCatalogues.length === 0">
+  <i class="isax isax-search-normal sc-empty__icon"></i>
+  <h6 class="sc-empty__title">Aucun résultat</h6>
+  <p>Aucun catalogue ne correspond à votre recherche.</p>
+
+</div>
+
+<!-- PAGINATION -->
+<div class="sc-pagination" *ngIf="!loading && totalPages > 1">
+  <span class="sc-pagination__info">
+    Page {{ currentPage }} / {{ totalPages }}
+    <span class="sc-pagination__info-total">({{ totalItems }} catalogues)</span>
+  </span>
+  <div class="sc-pagination__controls">
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(1)">
+      <i class="isax isax-arrow-left-3"></i>
+    </button>
+    <button class="sc-pagination__btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+      <i class="isax isax-arrow-left-2"></i>
+    </button>
+    <span class="sc-pagination__ellipsis" *ngIf="pages[0] > 1">…</span>
+    <button *ngFor="let p of pages"
+            class="sc-pagination__btn"
+            [class.sc-pagination__btn--active]="currentPage === p"
+            (click)="changePage(p)">{{ p }}</button>
+    <span class="sc-pagination__ellipsis" *ngIf="pages[pages.length - 1] < totalPages">…</span>
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+      <i class="isax isax-arrow-right-2"></i>
+    </button>
+    <button class="sc-pagination__btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+      <i class="isax isax-arrow-right-3"></i>
+    </button>
+  </div>
+</div>

@@ -65,8 +65,22 @@ export class InstructorComponent implements OnInit {
       next: (res) => {
         const formations = res.formations || [];
         this.headerStats.formations = formations.length;
-        this.headerStats.apprenants = formations.reduce((s: number, f: any) => s + (f.nb_participants ?? 0), 0);
+
+        // ✅ Compter les apprenants UNIQUES (déduplication par ID)
+        const apprenantsUniquesMap = new Map<number, boolean>();
+        formations.forEach((f: any) => {
+          const employes = f.employes || [];
+          employes.forEach((emp: any) => {
+            if (emp.id) {
+              apprenantsUniquesMap.set(emp.id, true);
+            }
+          });
+        });
+        this.headerStats.apprenants = apprenantsUniquesMap.size;
+
         this.headerStats.enDifficulte = formations.reduce((s: number, f: any) => s + (f.nb_en_difficulte ?? 0), 0);
+
+        console.log(`👥 [InstructorComponent] Apprenants uniques: ${this.headerStats.apprenants}`);
       },
       error: () => {}
     });

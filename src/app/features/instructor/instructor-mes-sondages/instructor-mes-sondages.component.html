@@ -3,56 +3,130 @@
 <!-- ══════════════════════════════════════════════════════ -->
 <ng-container *ngIf="vue === 'liste'">
 
+  <!-- Hero Header -->
   <div class="ms-hero">
-    <div class="ms-hero__icon"><i class="isax isax-message-question"></i></div>
-    <div>
-      <h4 class="ms-hero__title">Enquêtes à compléter</h4>
-      <p class="ms-hero__sub">Enquêtes publiées par votre organisation à votre intention</p>
+    <div class="ms-hero__left">
+      <div class="ms-hero__icon"><i class="isax isax-message-question"></i></div>
+      <div>
+        <h4 class="ms-hero__title">Enquêtes & Sondages</h4>
+        <p class="ms-hero__sub">Enquêtes publiées par votre organisation à votre intention</p>
+      </div>
+    </div>
+    <div class="ms-hero__stats">
+      <div class="ms-stat">
+        <span class="ms-stat__value">{{ aCompleter }}</span>
+        <span class="ms-stat__label">À compléter</span>
+      </div>
+      <div class="ms-stat">
+        <span class="ms-stat__value">{{ repondus }}</span>
+        <span class="ms-stat__label">Répondus</span>
+      </div>
+      <div class="ms-stat">
+        <span class="ms-stat__value">{{ clotures }}</span>
+        <span class="ms-stat__label">Clôturés</span>
+      </div>
     </div>
   </div>
 
+  <!-- Loader -->
   <div *ngIf="loading" class="ms-loader">
     <div class="ms-spinner"></div><span>Chargement…</span>
   </div>
 
+  <!-- Error -->
   <div *ngIf="error" class="ms-alert ms-alert--danger">
     <i class="isax isax-warning-2"></i> {{ error }}
   </div>
 
-  <div *ngIf="!loading && sondages.length === 0 && !error" class="ms-empty">
-    <div class="ms-empty__icon"><i class="isax isax-clipboard-tick"></i></div>
-    <h6 class="ms-empty__title">Aucune enquête en attente</h6>
-    <p class="ms-empty__sub">Vous n'avez aucune enquête à remplir pour le moment.</p>
-  </div>
+  <ng-container *ngIf="!loading && !error">
 
-  <div *ngIf="!loading && sondages.length > 0" class="ms-grid">
-    <div *ngFor="let s of sondages" class="ms-card" (click)="ouvrir(s)">
-      <div class="ms-card__accent" [style.background]="typeColor(s.type)"></div>
-      <div class="ms-card__body">
-        <div class="ms-card__header">
-          <span class="ms-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">
-            {{ typeLabel(s.type) }}
-          </span>
-          <span class="ms-badge ms-badge--new">Nouveau</span>
-        </div>
-        <h6 class="ms-card__title">{{ s.titre }}</h6>
-        <p class="ms-card__desc" *ngIf="s.description">{{ s.description }}</p>
-        <p class="ms-card__desc ms-text-muted" *ngIf="!s.description">Aucune description</p>
-        <div class="ms-card__meta">
-          <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
-          <span *ngIf="s.duree_estimee"><i class="isax isax-clock"></i> ~{{ s.duree_estimee }} min</span>
-          <span *ngIf="s.est_anonyme" class="ms-meta-badge ms-meta-badge--anon"><i class="isax isax-eye-slash"></i> Anonyme</span>
-        </div>
+    <!-- Section À compléter -->
+    <div class="ms-section-header">
+      <div class="ms-section-header__left">
+        <h5 class="ms-section-title">À compléter</h5>
+        <span class="ms-count-badge" *ngIf="sondages.length > 0">{{ sondages.length }} en attente</span>
       </div>
-      <div class="ms-card__footer">
-        <button class="ms-btn-repondre">
-          <i class="isax isax-edit-2"></i> Répondre à l'enquête
-          <i class="isax isax-arrow-right-3 ms-btn-arrow"></i>
-        </button>
+      <button type="button" class="ms-link-btn" (click)="showHistorique = !showHistorique">
+        <i class="isax isax-clock"></i> {{ showHistorique ? 'Masquer' : 'Voir' }} l'historique
+      </button>
+    </div>
+
+    <!-- Empty -->
+    <div *ngIf="sondages.length === 0" class="ms-empty">
+      <div class="ms-empty__icon"><i class="isax isax-clipboard-tick"></i></div>
+      <h6 class="ms-empty__title">Aucune enquête en attente</h6>
+      <p class="ms-empty__sub">Vous n'avez aucune enquête à remplir pour le moment.</p>
+    </div>
+
+    <!-- Grid -->
+    <div *ngIf="sondages.length > 0" class="ms-grid">
+      <div *ngFor="let s of sondages" class="ms-card" (click)="ouvrir(s)">
+        <div class="ms-card__accent" [style.background]="typeColor(s.type)"></div>
+        <div class="ms-card__body">
+          <div class="ms-card__header">
+            <span class="ms-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">
+              <i class="isax isax-clipboard-text"></i> {{ typeLabel(s.type) }}
+            </span>
+            <span class="ms-badge ms-badge--new">Nouveau</span>
+          </div>
+          <h6 class="ms-card__title">{{ s.titre }}</h6>
+          <p class="ms-card__desc" *ngIf="s.description">{{ s.description }}</p>
+          <p class="ms-card__desc ms-text-muted" *ngIf="!s.description"><em>Aucune description fournie</em></p>
+          <div class="ms-card__meta">
+            <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
+            <span *ngIf="s.duree_estimee"><i class="isax isax-clock"></i> ~{{ s.duree_estimee }} min</span>
+            <span><i class="isax isax-calendar-1"></i> Reçu aujourd'hui</span>
+          </div>
+          <div class="ms-card__progress">
+            <span class="ms-card__progress-label">Progression</span>
+            <span class="ms-card__progress-value">0%</span>
+            <div class="ms-card__progress-bar">
+              <div class="ms-card__progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="ms-card__footer">
+          <button type="button" class="ms-btn-repondre">
+            <i class="isax isax-edit-2"></i> Répondre à l'enquête
+            <i class="isax isax-arrow-right-3 ms-btn-arrow"></i>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
+    <!-- Section Déjà répondus -->
+    <div class="ms-section-header ms-section-header--secondary">
+      <div class="ms-section-header__left">
+        <h5 class="ms-section-title">Déjà répondus</h5>
+        <span class="ms-count-badge ms-count-badge--muted">{{ repondus }} clôturé</span>
+      </div>
+    </div>
+
+    <div *ngIf="sondagesRepondus.length === 0" class="ms-empty ms-empty--small">
+      <div class="ms-empty__icon"><i class="isax isax-clipboard-tick"></i></div>
+      <h6 class="ms-empty__title">Aucun sondage répondu pour l'instant</h6>
+      <p class="ms-empty__sub">Vos réponses passées s'afficheront ici</p>
+    </div>
+
+    <div *ngIf="sondagesRepondus.length > 0" class="ms-grid">
+      <div *ngFor="let s of sondagesRepondus" class="ms-card ms-card--done">
+        <div class="ms-card__accent" [style.background]="typeColor(s.type)"></div>
+        <div class="ms-card__body">
+          <div class="ms-card__header">
+            <span class="ms-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">
+              <i class="isax isax-clipboard-text"></i> {{ typeLabel(s.type) }}
+            </span>
+            <span class="ms-badge ms-badge--done"><i class="isax isax-tick-circle"></i> Répondu</span>
+          </div>
+          <h6 class="ms-card__title">{{ s.titre }}</h6>
+          <div class="ms-card__meta">
+            <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
 </ng-container>
 
 <!-- ══════════════════════════════════════════════════════ -->
@@ -64,13 +138,13 @@
     <div class="ms-success-icon"><i class="isax isax-tick-circle"></i></div>
     <h4 class="ms-success-title">Merci !</h4>
     <p class="ms-success-msg">{{ submitSuccess }}</p>
-    <button class="ms-btn-back" (click)="retour()"><i class="isax isax-arrow-left-2"></i> Retour aux enquêtes</button>
+    <button type="button" class="ms-btn-back" (click)="retour()"><i class="isax isax-arrow-left-2"></i> Retour aux enquêtes</button>
   </div>
 
   <ng-container *ngIf="!submitSuccess">
 
     <div class="ms-rep-header">
-      <button class="ms-back-btn" (click)="retour()"><i class="isax isax-arrow-left-2"></i></button>
+      <button type="button" class="ms-back-btn" (click)="retour()"><i class="isax isax-arrow-left-2"></i></button>
       <div>
         <h5 class="ms-rep-title">{{ selected.titre }}</h5>
         <p class="ms-rep-sub" *ngIf="selected.introduction">{{ selected.introduction }}</p>
@@ -143,7 +217,7 @@
 
       <ng-container *ngIf="isEchelle(currentQuestion.type)">
         <div class="ms-scale">
-          <button *ngFor="let v of echelleValues(currentQuestion)"
+          <button type="button" *ngFor="let v of echelleValues(currentQuestion)"
                   class="ms-scale-btn" [class.selected]="reponses[currentQuestion.id!] == v"
                   (click)="reponses[currentQuestion.id!] = v">
             <ng-container *ngIf="currentQuestion.type === 'notation'">
@@ -160,18 +234,18 @@
       </ng-container>
     </div>
 
-    <div *ngIf="submitError" class="ms-alert ms-alert--danger ms-alert--mb">
+    <div *ngIf="submitError" class="ms-alert ms-alert--danger">
       <i class="isax isax-warning-2"></i> {{ submitError }}
     </div>
 
     <div class="ms-nav">
-      <button class="ms-nav-btn ms-nav-btn--ghost" (click)="precedent()" [disabled]="currentStep === 0">
+      <button type="button" class="ms-nav-btn ms-nav-btn--ghost" (click)="precedent()" [disabled]="currentStep === 0">
         <i class="isax isax-arrow-left-2"></i> Précédent
       </button>
-      <button *ngIf="!isLast" class="ms-nav-btn ms-nav-btn--primary" (click)="suivant()">
+      <button type="button" *ngIf="!isLast" class="ms-nav-btn ms-nav-btn--primary" (click)="suivant()">
         Suivant <i class="isax isax-arrow-right-3"></i>
       </button>
-      <button *ngIf="isLast" class="ms-nav-btn ms-nav-btn--success" [disabled]="submitting" (click)="soumettre()">
+      <button type="button" *ngIf="isLast" class="ms-nav-btn ms-nav-btn--success" [disabled]="submitting" (click)="soumettre()">
         <span *ngIf="!submitting"><i class="isax isax-tick-circle"></i> Soumettre</span>
         <span *ngIf="submitting"><span class="ms-mini-spinner"></span> Envoi…</span>
       </button>

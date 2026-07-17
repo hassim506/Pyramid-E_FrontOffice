@@ -15,8 +15,10 @@ type Vue = 'liste' | 'repondre';
 export class InstructorMesSondagesComponent implements OnInit {
   vue: Vue = 'liste';
   sondages: Sondage[] = [];
+  sondagesRepondus: Sondage[] = [];
   loading = true;
   error = '';
+  showHistorique = false;
 
   selected: Sondage | null = null;
   reponses: Record<number, any> = {};
@@ -32,10 +34,19 @@ export class InstructorMesSondagesComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.sondageService.getMesSondagesRecus().subscribe({
-      next: (res: any) => { this.sondages = res.sondages ?? []; this.loading = false; },
+      next: (res: any) => {
+        const all: Sondage[] = res.sondages ?? [];
+        this.sondages = all.filter((s: any) => !s.deja_repondu);
+        this.sondagesRepondus = all.filter((s: any) => s.deja_repondu);
+        this.loading = false;
+      },
       error: () => { this.error = 'Impossible de charger les enquêtes.'; this.loading = false; },
     });
   }
+
+  get aCompleter(): number { return this.sondages.length; }
+  get repondus(): number { return this.sondagesRepondus.length; }
+  get clotures(): number { return 0; }
 
   ouvrir(s: Sondage): void {
     this.selected = s;
@@ -71,7 +82,7 @@ export class InstructorMesSondagesComponent implements OnInit {
     this.submitError = '';
     const reponses = Object.entries(this.reponses).map(([qId, val]) => {
       const q = this.questions.find(q => q.id === Number(qId));
-      const isNum   = q && ['echelle', 'notation', 'numero'].includes(q.type);
+      const isNum = q && ['echelle', 'notation', 'numero'].includes(q.type);
       const isMulti = q && q.type === 'checkbox';
       return {
         question_id: Number(qId),

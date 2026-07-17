@@ -80,13 +80,8 @@ export class ParcoursDetailsComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error   = '';
 
-    console.log(`📡 [ParcoursDetails #${this.parcoursId}] loadDetail() → getParcoursFormationsWithStatus()`);
-
-    // ✅ Charger les formations du parcours avec statut peut_demander et est_inscrit
     this.formationsService.getParcoursFormationsWithStatus(this.parcoursId).subscribe({
       next: (res: any) => {
-        console.log(`✅ [ParcoursDetails #${this.parcoursId}] getParcoursFormationsWithStatus réponse:`, res);
-
         this.parcours            = res.parcours             ?? null;
         this.formations          = res.formations           ?? [];
         this.progressionGlobale  = res.progression          ?? 0;
@@ -95,14 +90,14 @@ export class ParcoursDetailsComponent implements OnInit, OnDestroy {
         this.estTermine          = res.est_termine          ?? false;
         this.source              = res.source               ?? 'demande';
 
-        console.log(`📋 [ParcoursDetails #${this.parcoursId}] ${this.formations.length} formations chargées`);
-        console.log(`🔍 [ParcoursDetails #${this.parcoursId}] parcours:`, this.parcours);
+        if (this.parcours) {
+          this.parcours.nombre_formations = this.totalFormations;
+        }
 
         this._syncFormationsDepuisService();
         this.loading = false;
       },
-      error: (err) => {
-        console.error(`❌ [ParcoursDetails #${this.parcoursId}] Erreur getParcoursFormationsWithStatus:`, err);
+      error: () => {
         this.error   = 'Impossible de charger le parcours.';
         this.loading = false;
       }

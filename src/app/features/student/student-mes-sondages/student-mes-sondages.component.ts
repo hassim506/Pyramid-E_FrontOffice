@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SondageService, Sondage } from '../../../shared/service/sondage/sondage.service';
-import { routes } from '../../../shared/service/routes/routes';
 
 @Component({
   selector: 'app-student-mes-sondages',
@@ -13,33 +12,34 @@ import { routes } from '../../../shared/service/routes/routes';
 })
 export class StudentMesSondagesComponent implements OnInit {
 
-  public routes = routes;
   sondages: Sondage[] = [];
+  sondagesRepondus: Sondage[] = [];
   loading = true;
   error = '';
+  showHistorique = false;
 
   constructor(private sondageService: SondageService, private router: Router) {}
 
   ngOnInit(): void {
     this.sondageService.getMesSondages().subscribe({
-      next: (res) => { this.sondages = res.sondages ?? []; this.loading = false; },
+      next: (res: any) => {
+        const all: Sondage[] = res.sondages ?? [];
+        this.sondages = all.filter((s: any) => !s.deja_repondu);
+        this.sondagesRepondus = all.filter((s: any) => s.deja_repondu);
+        this.loading = false;
+      },
       error: () => { this.error = 'Impossible de charger les sondages.'; this.loading = false; },
     });
   }
+
+  get aCompleter(): number { return this.sondages.length; }
+  get repondus(): number { return this.sondagesRepondus.length; }
+  get clotures(): number { return 0; }
 
   openSondage(s: Sondage): void {
     this.router.navigate(['/student/student-sondage', s.id]);
   }
 
-  getDeclenchementLabel(d: string | undefined): string {
-    if (d === 'a_chaud') return 'À chaud';
-    if (d === 'a_froid') return 'À froid';
-    return 'Manuel';
-  }
-
-  getDeclenchementClass(d: string | undefined): string {
-    if (d === 'a_chaud') return 'badge-chaud';
-    if (d === 'a_froid') return 'badge-froid';
-    return 'badge-manuel';
-  }
+  typeLabel(type: string): string { return this.sondageService.getTypeLabel(type); }
+  typeColor(type: string): string { return this.sondageService.getTypeColor(type); }
 }

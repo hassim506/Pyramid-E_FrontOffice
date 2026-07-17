@@ -64,17 +64,14 @@ export class InstructorSidebarComponent implements OnInit {
         const formations = res.formations || [];
         this.formationsCount = formations.length;
 
-        let totalApprenants = 0;
         let totalCompletion = 0;
         let completionCount = 0;
 
         formations.forEach((f: any) => {
-          totalApprenants += f.nb_participants ?? 0;
           const pct = Math.round(f.taux_completion ?? f.completion ?? 0);
           if (pct > 0) { totalCompletion += pct; completionCount++; }
         });
 
-        this.apprenantCount = totalApprenants;
         this.completionRate = completionCount > 0 ? Math.round(totalCompletion / completionCount) : 0;
 
         this.progressBars = formations
@@ -84,9 +81,35 @@ export class InstructorSidebarComponent implements OnInit {
             name: f.titre || 'Formation',
             pct: Math.round(f.taux_completion ?? f.completion ?? 0),
           }));
+
+        // ✅ Compter les apprenants UNIQUES en récupérant tous les participants
+        this.loadApprenantsUniques(formations);
       },
       error: () => {}
     });
+  }
+
+  private loadApprenantsUniques(formations: any[]): void {
+    if (formations.length === 0) {
+      this.apprenantCount = 0;
+      return;
+    }
+
+    // ✅ Utiliser la même logique que students-list : déduplication via Map
+    const apprenantsMap = new Map<number, boolean>();
+
+    // Compter les apprenants depuis les données déjà chargées (relation employes)
+    formations.forEach((f: any) => {
+      const employes = f.employes || [];
+      employes.forEach((emp: any) => {
+        if (emp.id) {
+          apprenantsMap.set(emp.id, true); // Map déduplique automatiquement
+        }
+      });
+    });
+
+    this.apprenantCount = apprenantsMap.size;
+    console.log(`👥 [InstructorSidebar] Apprenants uniques: ${this.apprenantCount}`);
   }
 
   private loadSessionsAVenir(): void {

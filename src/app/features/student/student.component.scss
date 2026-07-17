@@ -139,44 +139,59 @@ app-student .content {
     flex-shrink: 0;
   }
 
-  a.emp-btn {
-    display: inline-flex;
+  a.emp-explorer-btn {
+    display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 9px 20px;
-    border-radius: 8px;
+    gap: 12px;
+    background: #1a3c34;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 12px;
     text-decoration: none;
-    transition: all .15s;
+    transition: background .2s;
     cursor: pointer;
-    line-height: 1.4;
-    border: 1px solid;
+    min-width: 240px;
 
-    i { font-size: 15px; }
+    &:hover {
+      background: #15322c;
+    }
 
-    &.emp-btn-outline {
-      background-color: transparent;
-      color: $text-dark;
-      border-color: #d1d5db;
+    .emp-explorer-btn__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #069b8f;
+      flex-shrink: 0;
 
-      &:hover {
-        border-color: #069b8f;
-        color: #069b8f;
-        background-color: transparent;
+      i { font-size: 18px; color: #fff; }
+    }
+
+    .emp-explorer-btn__text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+
+      strong {
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      small {
+        font-size: 11px;
+        color: rgba(255,255,255,.7);
+        font-weight: 400;
       }
     }
 
-    &.emp-btn-primary {
-      background-color: #069b8f;
-      color: #ffffff;
-      border-color: #069b8f;
-
-      &:hover {
-        background-color: #047a6f;
-        border-color: #047a6f;
-        color: #ffffff;
-      }
+    .emp-explorer-btn__arrow {
+      font-size: 16px;
+      color: rgba(255,255,255,.6);
+      flex-shrink: 0;
     }
   }
 

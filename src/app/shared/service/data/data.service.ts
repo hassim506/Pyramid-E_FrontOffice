@@ -1025,7 +1025,7 @@ export class DataService {
           showAsTab2: false,
           base:'student-dashboard',
           base1:'student-profile',
-          base2:'student-courses',
+          base2:'mes-catalogues',
           base3:'student-certificate',
           base4:'student-wishlist',
           base5:'student-reviews',
@@ -1054,7 +1054,7 @@ export class DataService {
             {
               menuValue: "Enrolled Course",
               route: routes.studentCourses,
-              page:'student-courses',
+              page:'mes-catalogues',
               hasSubRoute: false,
               showSubRoute: false,
               subMenus: [],

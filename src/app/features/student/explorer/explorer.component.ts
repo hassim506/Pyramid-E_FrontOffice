@@ -84,12 +84,30 @@ export class ExplorerComponent implements OnInit {
   // Modal demande
   demandeForm!: FormGroup;
   formationSelectionnee: Formation | null = null;
+  catalogueSelectionne: Catalogue | null = null;
+  parcoursSelectionne: Parcours | null = null;
+  typeDemandeActuelle: 'formation' | 'catalogue' | 'parcours' = 'formation';
   submitting = false;
   demandeModal: any;
 
   // Données filtrées
   get filteredFormations(): Formation[] {
     return this.applyFilters(this.formations);
+  }
+
+  // Getter pour l'élément actuellement sélectionné dans le modal
+  get elementSelectionne(): any {
+    if (this.typeDemandeActuelle === 'formation') return this.formationSelectionnee;
+    if (this.typeDemandeActuelle === 'catalogue') return this.catalogueSelectionne;
+    if (this.typeDemandeActuelle === 'parcours') return this.parcoursSelectionne;
+    return null;
+  }
+
+  get titreModal(): string {
+    if (this.typeDemandeActuelle === 'formation') return 'Demander une formation';
+    if (this.typeDemandeActuelle === 'catalogue') return 'Demander un catalogue';
+    if (this.typeDemandeActuelle === 'parcours') return 'Demander un parcours';
+    return 'Faire une demande';
   }
 
   get filteredCatalogues(): Catalogue[] {
@@ -387,6 +405,9 @@ export class ExplorerComponent implements OnInit {
   demanderFormation(formationId: number): void {
     // Trouver la formation
     this.formationSelectionnee = this.formations.find(f => f.id === formationId) || null;
+    this.catalogueSelectionne = null;
+    this.parcoursSelectionne = null;
+    this.typeDemandeActuelle = 'formation';
 
     if (!this.formationSelectionnee) return;
 
@@ -405,26 +426,46 @@ export class ExplorerComponent implements OnInit {
   }
 
   soumettreDemandeFormation(): void {
-    if (this.demandeForm.invalid || !this.formationSelectionnee) {
+    if (this.demandeForm.invalid) {
       Object.keys(this.demandeForm.controls).forEach(key => {
         this.demandeForm.get(key)?.markAsTouched();
       });
       return;
     }
 
+    // Vérifier qu'on a bien un élément sélectionné
+    if (!this.formationSelectionnee && !this.catalogueSelectionne && !this.parcoursSelectionne) {
+      return;
+    }
+
     this.submitting = true;
-    const payload = {
-      formation_id: this.formationSelectionnee.id,
+
+    // Construire le payload selon le type
+    let payload: any = {
+      type_demande: this.typeDemandeActuelle,
       ...this.demandeForm.value
     };
+
+    if (this.typeDemandeActuelle === 'formation' && this.formationSelectionnee) {
+      payload.formation_id = this.formationSelectionnee.id;
+    } else if (this.typeDemandeActuelle === 'catalogue' && this.catalogueSelectionne) {
+      payload.catalogue_id = this.catalogueSelectionne.id;
+    } else if (this.typeDemandeActuelle === 'parcours' && this.parcoursSelectionne) {
+      payload.parcours_id = this.parcoursSelectionne.id;
+    }
 
     this.demandeService.creerDemande(payload).subscribe({
       next: () => {
         this.submitting = false;
         this.demandeModal.hide();
-        alert('Demande de formation envoyée avec succès !');
-        // Recharger les formations pour mettre à jour le statut peut_demander
-        this.loadFormations();
+
+        const type = this.typeDemandeActuelle === 'formation' ? 'formation'
+                   : this.typeDemandeActuelle === 'catalogue' ? 'catalogue'
+                   : 'parcours';
+        alert(`Demande de ${type} envoyée avec succès !`);
+
+        // Recharger les données pour mettre à jour le statut peut_demander
+        this.loadData();
       },
       error: (err) => {
         this.submitting = false;
@@ -441,17 +482,49 @@ export class ExplorerComponent implements OnInit {
   }
 
   demanderCatalogue(catalogueId: number): void {
-    // Rediriger vers la page de demande de catalogue
-    this.router.navigate(['/student/students-catalogue'], {
-      queryParams: { catalogueId: catalogueId }
+    // Trouver le catalogue
+    this.catalogueSelectionne = this.catalogues.find(c => c.id === catalogueId) || null;
+    this.formationSelectionnee = null;
+    this.parcoursSelectionne = null;
+    this.typeDemandeActuelle = 'catalogue';
+
+    if (!this.catalogueSelectionne) return;
+
+    // Réinitialiser le formulaire
+    this.demandeForm.reset({
+      motif_demande: '',
+      objectifs_personnels: '',
+      priorite: 'normale',
+      date_souhaitee_debut: '',
+      commentaire_employe: ''
     });
+
+    // Ouvrir le modal
+    this.demandeModal = new bootstrap.Modal(document.getElementById('demandeFormationModal'));
+    this.demandeModal.show();
   }
 
   demanderParcours(parcoursId: number): void {
-    // Rediriger vers la page de demande de parcours
-    this.router.navigate(['/student/mes-parcours'], {
-      queryParams: { parcoursId: parcoursId }
+    // Trouver le parcours
+    this.parcoursSelectionne = this.parcours.find(p => p.id === parcoursId) || null;
+    this.formationSelectionnee = null;
+    this.catalogueSelectionne = null;
+    this.typeDemandeActuelle = 'parcours';
+
+    if (!this.parcoursSelectionne) return;
+
+    // Réinitialiser le formulaire
+    this.demandeForm.reset({
+      motif_demande: '',
+      objectifs_personnels: '',
+      priorite: 'normale',
+      date_souhaitee_debut: '',
+      commentaire_employe: ''
     });
+
+    // Ouvrir le modal
+    this.demandeModal = new bootstrap.Modal(document.getElementById('demandeFormationModal'));
+    this.demandeModal.show();
   }
 
   getImageUrl(path: string | null | undefined): string {

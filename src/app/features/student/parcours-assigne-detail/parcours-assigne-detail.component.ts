@@ -132,6 +132,13 @@ export class ParcoursAssigneDetailComponent implements OnInit, OnDestroy {
         this.totalFormations     = res.total_formations     ?? 0;
         this.formationsTerminees = res.formations_terminees ?? 0;
         this.estTermine          = res.est_termine          ?? false;
+
+        this.formations = this.formations.map(f => ({
+          ...f,
+          est_inscrit: true,
+          peut_demander: false
+        }));
+
         this._syncFormationsDepuisService();
       },
       error: () => {}

@@ -70,7 +70,11 @@ export class DemandeFormationService {
 
   // Créer une demande (Employé)
   creerDemande(payload: {
-    formation_id: number;
+    type_demande?: string;
+    formation_id?: number;
+    catalogue_id?: number;
+    parcours_id?: number;
+    session_formation_id?: number;
     motif_demande: string;
     objectifs_personnels: string;
     priorite: string;

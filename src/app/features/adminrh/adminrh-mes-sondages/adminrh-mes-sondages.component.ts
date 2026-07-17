@@ -15,10 +15,11 @@ type Vue = 'liste' | 'repondre';
 export class AdminrhMesSondagesComponent implements OnInit {
   vue: Vue = 'liste';
   sondages: Sondage[] = [];
+  sondagesRepondus: Sondage[] = [];
   loading = true;
   error = '';
+  showHistorique = false;
 
-  // Réponse
   selected: Sondage | null = null;
   reponses: Record<number, any> = {};
   submitting = false;
@@ -28,17 +29,24 @@ export class AdminrhMesSondagesComponent implements OnInit {
 
   constructor(private sondageService: SondageService) {}
 
-  ngOnInit(): void {
-    this.load();
-  }
+  ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading = true;
     this.sondageService.getMesSondagesRecus().subscribe({
-      next: (res: any) => { this.sondages = res.sondages ?? []; this.loading = false; },
+      next: (res: any) => {
+        const all: Sondage[] = res.sondages ?? [];
+        this.sondages = all.filter((s: any) => !s.deja_repondu);
+        this.sondagesRepondus = all.filter((s: any) => s.deja_repondu);
+        this.loading = false;
+      },
       error: () => { this.error = 'Impossible de charger les enquêtes.'; this.loading = false; },
     });
   }
+
+  get aCompleter(): number { return this.sondages.length; }
+  get repondus(): number { return this.sondagesRepondus.length; }
+  get clotures(): number { return 0; }
 
   ouvrir(s: Sondage): void {
     this.selected = s;
@@ -62,20 +70,16 @@ export class AdminrhMesSondagesComponent implements OnInit {
   toggleCheckbox(qId: number, val: string): void {
     const arr: string[] = this.reponses[qId] ?? [];
     const idx = arr.indexOf(val);
-    if (idx === -1) arr.push(val);
-    else arr.splice(idx, 1);
+    if (idx === -1) arr.push(val); else arr.splice(idx, 1);
     this.reponses[qId] = [...arr];
   }
 
-  isChecked(qId: number, val: string): boolean {
-    return (this.reponses[qId] ?? []).includes(val);
-  }
+  isChecked(qId: number, val: string): boolean { return (this.reponses[qId] ?? []).includes(val); }
 
   soumettre(): void {
     if (!this.selected) return;
     this.submitting = true;
     this.submitError = '';
-
     const reponses = Object.entries(this.reponses).map(([qId, val]) => {
       const q = this.questions.find(q => q.id === Number(qId));
       const isNum = q && ['echelle', 'notation', 'numero'].includes(q.type);
@@ -87,25 +91,15 @@ export class AdminrhMesSondagesComponent implements OnInit {
         reponse_numerique: isNum ? Number(val) : undefined,
       };
     });
-
     this.sondageService.respondSondage(this.selected.id, reponses).subscribe({
-      next: (res: any) => {
-        this.submitting = false;
-        this.submitSuccess = res.message ?? 'Merci pour votre réponse !';
-      },
-      error: (err: any) => {
-        this.submitting = false;
-        this.submitError = err?.error?.message ?? 'Une erreur est survenue.';
-      },
+      next: (res: any) => { this.submitting = false; this.submitSuccess = res.message ?? 'Merci pour votre réponse !'; },
+      error: (err: any) => { this.submitting = false; this.submitError = err?.error?.message ?? 'Une erreur est survenue.'; },
     });
   }
 
   typeColor(type: string): string { return this.sondageService.getTypeColor(type); }
   typeLabel(type: string): string { return this.sondageService.getTypeLabel(type); }
-
-  needsOptions(type: string): boolean { return ['radio', 'checkbox', 'select'].includes(type); }
   isEchelle(type: string): boolean { return ['echelle', 'notation'].includes(type); }
-
   echelleValues(q: QuestionSondage): number[] {
     const min = q.valeur_min ?? 1;
     const max = q.valeur_max ?? (q.type === 'notation' ? 5 : 10);

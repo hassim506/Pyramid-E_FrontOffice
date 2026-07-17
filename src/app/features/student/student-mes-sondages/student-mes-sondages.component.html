@@ -1,51 +1,126 @@
-<div class="sms-wrap">
-
-  <div class="sms-header">
-    <h4 class="sms-title">Mes Sondages</h4>
-    <p class="sms-sub">Participez aux sondages liés à vos formations</p>
+<!-- ══ HERO HEADER ══════════════════════════════════════════════════════════ -->
+<div class="sms-hero">
+  <div class="sms-hero__left">
+    <div class="sms-hero__icon"><i class="isax isax-message-question"></i></div>
+    <div>
+      <h4 class="sms-hero__title">Enquêtes & Sondages</h4>
+      <p class="sms-hero__sub">Enquêtes libres publiées par votre organisation</p>
+    </div>
   </div>
-
-  <!-- Loader -->
-  <div *ngIf="loading" class="sms-loader">
-    <div class="spinner-border" role="status"></div>
+  <div class="sms-hero__stats">
+    <div class="sms-stat">
+      <span class="sms-stat__value">{{ aCompleter }}</span>
+      <span class="sms-stat__label">À compléter</span>
+    </div>
+    <div class="sms-stat">
+      <span class="sms-stat__value">{{ repondus }}</span>
+      <span class="sms-stat__label">Répondus</span>
+    </div>
+    <div class="sms-stat">
+      <span class="sms-stat__value">{{ clotures }}</span>
+      <span class="sms-stat__label">Clôturés</span>
+    </div>
   </div>
+</div>
 
-  <!-- Error -->
-  <div *ngIf="!loading && error" class="alert alert-danger">{{ error }}</div>
+<!-- ══ LOADING ═══════════════════════════════════════════════════════════════ -->
+<div *ngIf="loading" class="sms-loader">
+  <div class="sms-spinner"></div>
+  <span>Chargement…</span>
+</div>
+
+<!-- ══ ERROR ══════════════════════════════════════════════════════════════════ -->
+<div *ngIf="!loading && error" class="sms-alert">
+  <i class="isax isax-warning-2"></i> {{ error }}
+</div>
+
+<!-- ══ SECTION À COMPLÉTER ═══════════════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && !error">
+
+  <div class="sms-section-header">
+    <div class="sms-section-header__left">
+      <h5 class="sms-section-title">À compléter</h5>
+      <span class="sms-count-badge" *ngIf="sondages.length > 0">{{ sondages.length }} en attente</span>
+    </div>
+    <button type="button" class="sms-link-btn" (click)="showHistorique = !showHistorique">
+      <i class="isax isax-clock"></i> {{ showHistorique ? 'Masquer' : 'Voir' }} l'historique
+    </button>
+  </div>
 
   <!-- Empty -->
-  <div *ngIf="!loading && !error && sondages.length === 0" class="sms-empty">
-    <i class="isax isax-note-21"></i>
-    <p>Aucun sondage disponible pour le moment.</p>
-    <span>Les sondages apparaissent après la fin d'une formation.</span>
+  <div *ngIf="sondages.length === 0" class="sms-empty">
+    <div class="sms-empty__icon"><i class="isax isax-clipboard-tick"></i></div>
+    <h6 class="sms-empty__title">Aucune enquête en attente</h6>
+    <p class="sms-empty__sub">Vous n'avez aucune enquête à remplir pour le moment.</p>
   </div>
 
   <!-- Grid -->
-  <div *ngIf="!loading && sondages.length > 0" class="sms-grid">
+  <div *ngIf="sondages.length > 0" class="sms-grid">
     <div *ngFor="let s of sondages" class="sms-card" (click)="openSondage(s)">
-
-      <div class="sms-card__top">
-        <span class="sms-badge" [class]="getDeclenchementClass(s.declenchement)">
-          {{ getDeclenchementLabel(s.declenchement) }}
-        </span>
-        <span *ngIf="s.est_obligatoire" class="sms-badge sms-badge--required">Obligatoire</span>
+      <div class="sms-card__accent" [style.background]="typeColor(s.type)"></div>
+      <div class="sms-card__body">
+        <div class="sms-card__header">
+          <span class="sms-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">
+            <i class="isax isax-clipboard-text"></i> {{ typeLabel(s.type) }}
+          </span>
+          <span class="sms-badge sms-badge--new">Nouveau</span>
+        </div>
+        <h6 class="sms-card__title">{{ s.titre }}</h6>
+        <p class="sms-card__desc" *ngIf="s.description">{{ s.description }}</p>
+        <p class="sms-card__desc sms-muted" *ngIf="!s.description"><em>Aucune description fournie</em></p>
+        <div class="sms-card__meta">
+          <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
+          <span *ngIf="s.duree_estimee"><i class="isax isax-clock"></i> ~{{ s.duree_estimee }} min</span>
+          <span><i class="isax isax-calendar-1"></i> Reçu aujourd'hui</span>
+        </div>
+        <div class="sms-card__progress">
+          <span class="sms-card__progress-label">Progression</span>
+          <span class="sms-card__progress-value">0%</span>
+          <div class="sms-card__progress-bar">
+            <div class="sms-card__progress-fill" style="width: 0%"></div>
+          </div>
+        </div>
       </div>
-
-      <h6 class="sms-card__title">{{ s.titre }}</h6>
-      <p class="sms-card__desc" *ngIf="s.description">{{ s.description }}</p>
-      <p class="sms-card__desc sms-muted" *ngIf="!s.description">Aucune description</p>
-
-      <div class="sms-card__meta">
-        <span *ngIf="s.formation"><i class="isax isax-book-1"></i> {{ s.formation.titre }}</span>
-        <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
-        <span *ngIf="s.duree_estimee"><i class="isax isax-clock"></i> ~{{ s.duree_estimee }} min</span>
+      <div class="sms-card__footer">
+        <button type="button" class="sms-btn-repondre">
+          <i class="isax isax-edit-2"></i> Répondre à l'enquête
+          <i class="isax isax-arrow-right-3 sms-btn-arrow"></i>
+        </button>
       </div>
-
-      <button class="sms-btn">
-        <i class="isax isax-play-circle me-2"></i> Répondre
-      </button>
-
     </div>
   </div>
 
-</div>
+  <!-- ══ SECTION DÉJÀ RÉPONDUS ═══════════════════════════════════════════════ -->
+  <div class="sms-section-header sms-section-header--secondary">
+    <div class="sms-section-header__left">
+      <h5 class="sms-section-title">Déjà répondus</h5>
+      <span class="sms-count-badge sms-count-badge--muted">{{ repondus }} clôturé</span>
+    </div>
+  </div>
+
+  <div *ngIf="sondagesRepondus.length === 0" class="sms-empty sms-empty--small">
+    <div class="sms-empty__icon"><i class="isax isax-clipboard-tick"></i></div>
+    <h6 class="sms-empty__title">Aucun sondage répondu pour l'instant</h6>
+    <p class="sms-empty__sub">Vos réponses passées s'afficheront ici</p>
+  </div>
+
+  <div *ngIf="sondagesRepondus.length > 0" class="sms-grid">
+    <div *ngFor="let s of sondagesRepondus" class="sms-card sms-card--done">
+      <div class="sms-card__accent" [style.background]="typeColor(s.type)"></div>
+      <div class="sms-card__body">
+        <div class="sms-card__header">
+          <span class="sms-badge" [style.background]="typeColor(s.type) + '18'" [style.color]="typeColor(s.type)">
+            <i class="isax isax-clipboard-text"></i> {{ typeLabel(s.type) }}
+          </span>
+          <span class="sms-badge sms-badge--done"><i class="isax isax-tick-circle"></i> Répondu</span>
+        </div>
+        <h6 class="sms-card__title">{{ s.titre }}</h6>
+        <p class="sms-card__desc" *ngIf="s.description">{{ s.description }}</p>
+        <div class="sms-card__meta">
+          <span><i class="isax isax-note-21"></i> {{ s.nombre_questions }} question{{ s.nombre_questions !== 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ng-container>

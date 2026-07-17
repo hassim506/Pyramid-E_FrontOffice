@@ -93,14 +93,14 @@ export const routes = {
   studentExplorer : '/student/students-explorer' ,
   // Demandes — alignées sur app.routes.ts
   student_DemandeSession:   '/student/students-session',
-  student_DemandeCatalogue: '/student/students-catalogue',
-  student_DemandeParcours:  '/student/students-parcours',
+  student_DemandeCatalogue: '/student/student-demande-catalogue',
+  student_DemandeParcours:  '/student/mes-demandes-parcours',
   studentCertificat: '/student/student-certificate',
 
 
   // Mes parcours et catalogues assignés
   student_CataloguesAssignes: '/student/mes-catalogues',
-  student_ParcoursAssignes:   '/student/mes-parcours-assignes',
+  student_ParcoursAssignes:   '/student/mes-parcours',
   student_SessionsAcceptees:  '/student/sessions-acceptees',
 
   // SuperAdmin Routes

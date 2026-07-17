@@ -73,29 +73,62 @@ export class StudentsListComponent implements OnInit {
 
         forkJoin(requests).subscribe({
           next: (results) => {
-            const seen = new Set<number>();
-            this.allApprenants = [];
+            // ✅ Map pour dédupliquer les apprenants (clé = apprenant.id)
+            const apprenantsMap = new Map<number, any>();
 
             results.forEach((r, idx) => {
               const formation = this.formations[idx];
               const participants = r.participants || r.data || [];
               participants.forEach((p: any) => {
-                const entry = {
-                  id: p.id,
-                  matricule: p.matricule || '—',
-                  nom: p.nom || p.name || '—',
-                  prenom: p.prenom || '',
-                  email: p.email || '—',
-                  avatar: p.avatar || p.photo || null,
-                  formation_id: formation.id,
-                  formation_titre: formation.titre,
+                const apprenantId = p.id;
+
+                if (!apprenantsMap.has(apprenantId)) {
+                  // ✅ Première fois qu'on voit cet apprenant → créer l'entrée
+                  apprenantsMap.set(apprenantId, {
+                    id: p.id,
+                    matricule: p.matricule || '—',
+                    nom: p.nom || p.name || '—',
+                    prenom: p.prenom || '',
+                    email: p.email || '—',
+                    avatar: p.avatar || p.photo || null,
+                    formations: [], // Liste des formations où il est inscrit
+                    progression_moyenne: 0,
+                    statut_formation: p.pivot?.statut_formation ?? p.statut_formation ?? 'Non commencé',
+                    date_inscription: p.pivot?.date_inscription ?? p.date_inscription ?? null,
+                  });
+                }
+
+                // ✅ Ajouter cette formation à la liste
+                const apprenant = apprenantsMap.get(apprenantId)!;
+                apprenant.formations.push({
+                  id: formation.id,
+                  titre: formation.titre,
                   progression: p.pivot?.progression ?? p.progression ?? 0,
-                  statut_formation: p.pivot?.statut_formation ?? p.statut_formation ?? '—',
-                  date_inscription: p.pivot?.date_inscription ?? p.date_inscription ?? null,
-                };
-                // One row per apprenant per formation (not deduped by apprenant)
-                this.allApprenants.push(entry);
+                  statut: p.pivot?.statut_formation ?? p.statut_formation ?? '—',
+                });
               });
+            });
+
+            // ✅ Calculer la progression moyenne et le statut global pour chaque apprenant
+            this.allApprenants = Array.from(apprenantsMap.values()).map(a => {
+              const totalFormations = a.formations.length;
+              const totalProgression = a.formations.reduce((sum: number, f: any) => sum + (f.progression || 0), 0);
+              const progressionMoyenne = totalFormations > 0 ? Math.round(totalProgression / totalFormations) : 0;
+
+              // Déterminer le statut global (priorité : en_cours > termine > non_commence)
+              const statuts = a.formations.map((f: any) => f.statut);
+              let statutGlobal = 'Non commencé';
+              if (statuts.includes('en_cours')) statutGlobal = 'En cours';
+              else if (statuts.includes('termine') && statuts.every((s: string) => s === 'termine')) statutGlobal = 'Terminé';
+
+              return {
+                ...a,
+                nombre_formations: totalFormations,
+                progression: progressionMoyenne,
+                statut_formation: statutGlobal,
+                formation_id: null, // Plus de formation unique
+                formation_titre: `${totalFormations} formation${totalFormations > 1 ? 's' : ''}`,
+              };
             });
 
             this.applyFilters();
@@ -123,19 +156,25 @@ export class StudentsListComponent implements OnInit {
         a.nom.toLowerCase().includes(q) ||
         a.prenom.toLowerCase().includes(q) ||
         a.email.toLowerCase().includes(q) ||
-        a.formation_titre.toLowerCase().includes(q)
+        a.matricule.toLowerCase().includes(q)
       );
     }
 
+    // ✅ Filtrer par formation : vérifier si l'apprenant est inscrit à cette formation
     if (this.selectedFormationId) {
-      filtered = filtered.filter(a => String(a.formation_id) === String(this.selectedFormationId));
+      filtered = filtered.filter(a =>
+        a.formations.some((f: any) => String(f.id) === String(this.selectedFormationId))
+      );
     }
 
+    this._filtered = filtered;
     this.totalData = filtered.length;
     this.currentPage = 1;
+
+    console.log(`📊 [StudentsListComponent] Pagination: totalData=${this.totalData}, pageSize=${this.pageSize}, totalPages=${Math.ceil(this.totalData / this.pageSize)}`);
+
     const start = 0;
     this.tableData = filtered.slice(start, start + this.pageSize);
-    this._filtered = filtered;
   }
 
   private _filtered: any[] = [];

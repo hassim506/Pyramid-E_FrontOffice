@@ -34,14 +34,28 @@
           </div>
         </div>
 
-        <!-- Droite : boutons -->
+        <!-- Droite : bouton contextuel -->
         <div class="emp-actions">
-          <a [routerLink]="routes.studentExplorer" class="emp-btn emp-btn-outline">
-            <i class="isax isax-search-normal-1"></i>Explorer
+          <a *ngIf="!isExplorerRoute" [routerLink]="routes.studentExplorer" target="_blank" class="emp-explorer-btn">
+            <span class="emp-explorer-btn__icon">
+              <i class="isax isax-search-normal-1"></i>
+            </span>
+            <span class="emp-explorer-btn__text">
+              <strong>Explorer</strong>
+              <small>Découvrir de nouvelles formations</small>
+            </span>
+            <i class="isax isax-arrow-right-3 emp-explorer-btn__arrow"></i>
           </a>
-          <!-- <a [routerLink]="routes.studentDemande" class="emp-btn emp-btn-primary">
-            <i class="isax isax-add"></i>Demander une formation
-          </a> -->
+          <a *ngIf="isExplorerRoute" routerLink="/student/mes-formations" class="emp-explorer-btn">
+            <span class="emp-explorer-btn__icon">
+              <i class="isax isax-book-1"></i>
+            </span>
+            <span class="emp-explorer-btn__text">
+              <strong>Mes formations</strong>
+              <small>Accéder à mes formations assignées</small>
+            </span>
+            <i class="isax isax-arrow-right-3 emp-explorer-btn__arrow"></i>
+          </a>
         </div>
       </div>
 
@@ -87,8 +101,8 @@
 
     <!-- Layout sidebar + contenu -->
     <div class="row">
-      <app-student-sidebar class="col-lg-3"></app-student-sidebar>
-      <div class="col-lg-9">
+      <app-student-sidebar *ngIf="!isExplorerRoute" class="col-lg-3"></app-student-sidebar>
+      <div [class]="isExplorerRoute ? 'col-lg-12' : 'col-lg-9'">
         <router-outlet></router-outlet>
       </div>
     </div>

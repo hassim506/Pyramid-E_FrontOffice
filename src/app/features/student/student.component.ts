@@ -25,6 +25,7 @@ interface FormationEnCours {
 export class StudentComponent implements OnInit {
   public routes = routes;
   public last = '';
+  public isExplorerRoute = false;
 
   // ── Profil ────────────────────────────────────────
   userName      = '';
@@ -47,17 +48,19 @@ export class StudentComponent implements OnInit {
     'student-profile':         'Mon profil',
     'mes-formations':          'Mes formations',
     'mes-cours':               'Mes formations',
-    'student-courses':         'Mes formations',
+    'student-courses':         'Mes catalogues',
     'mes-catalogues':          'Catalogues',
     'catalogue-detail':        'Détail catalogue',
     'mes-parcours':            'Mes parcours',
-    'mes-parcours-assignes':   'Mes parcours',
-    'parcours-assignes':       'Mes parcours',
-    'students-parcours':       'Mes parcours',
-    'students-session':        'Mes sessions',
-    'sessions-acceptees':      'Mes sessions',
-    'students-catalogue':      'Demandes catalogues',
-    'student-certificate':     'Mes certifications',
+    'mes-parcours-assignes':      'Mes parcours',
+    'parcours-assignes':          'Mes parcours',
+    'students-parcours':          'Mes parcours',
+    'mes-demandes-parcours':      'Demandes parcours',
+    'students-session':           'Mes sessions',
+    'sessions-acceptees':         'Mes sessions',
+    'students-catalogue':         'Demandes catalogues',
+    'student-demande-catalogue':  'Demandes catalogues',
+    'student-certificate':        'Mes certifications',
     'student-quiz':            'Mes quiz',
     'student-quiz-questions':  'Questions quiz',
     'student-settings':        'Paramètres',
@@ -82,6 +85,9 @@ export class StudentComponent implements OnInit {
     this.router.events.subscribe(data => {
       if (data instanceof NavigationEnd) {
         const segments = data.url.split('/').filter(s => s.length > 0);
+        this.isExplorerRoute = segments.includes('students-explorer') ||
+                               segments.includes('catalogue-detail') ||
+                               segments.includes('parcours-details');
         let label = '';
         for (let i = segments.length - 1; i >= 0; i--) {
           const seg = segments[i];
@@ -98,6 +104,10 @@ export class StudentComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const segments = this.router.url.split('/').filter(s => s.length > 0);
+    this.isExplorerRoute = segments.includes('students-explorer') ||
+                           segments.includes('catalogue-detail') ||
+                           segments.includes('parcours-details');
     this.loadProfile();
     this.loadData();
   }
