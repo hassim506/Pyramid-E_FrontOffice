@@ -376,28 +376,74 @@ parseToNumber(value: any): number {
   // USER ACTION METHODS
   // ================================
 
-  previewSection(section: any): void {
-    if (!section.ressources) {
-      this.error = 'Aucune ressource disponible pour cette section';
-      setTimeout(() => this.error = '', 3000);
-      return;
-    }
+  // ================================
+  // PREVIEW MODAL
+  // ================================
+  previewOpen = false;
+  previewSection_: any = null;
 
-    // Construire l'URL complète de la ressource
-    let resourceUrl = section.ressources;
-    if (!resourceUrl.startsWith('http')) {
-      resourceUrl = `${STORAGE_BASE}/${resourceUrl}`;
+  previewSection(section: any): void {
+    this.previewSection_ = section;
+    this.previewOpen = true;
+  }
+
+  closePreview(): void {
+    this.previewOpen = false;
+    this.previewSection_ = null;
+  }
+
+  resolveResourceUrl(raw: any): string {
+    if (!raw) return '';
+    if (typeof raw === 'string') return raw;
+    if (Array.isArray(raw)) return this.resolveResourceUrl(raw[0]);
+    if (typeof raw === 'object') return raw.url || raw.path || raw.src || raw.uri || '';
+    return String(raw);
+  }
+
+  getPreviewResourceUrl(): string {
+    const raw = this.previewSection_?.ressources;
+    const url = this.resolveResourceUrl(raw);
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${STORAGE_BASE}/${url}`;
+  }
+
+  getPreviewSafeUrl(): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.getPreviewResourceUrl());
+  }
+
+  getPreviewYouTubeEmbedUrl(): SafeResourceUrl | null {
+    const url = this.resolveResourceUrl(this.previewSection_?.ressources);
+    const videoId = this.getYouTubeVideoId(url);
+    if (!videoId) return null;
+    const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1&modestbranding=1`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+  }
+
+  isPreviewYouTube(): boolean {
+    const url = this.resolveResourceUrl(this.previewSection_?.ressources);
+    return this.isYouTubeUrl(url);
+  }
+
+  hasPreviewResource(): boolean {
+    return !!this.resolveResourceUrl(this.previewSection_?.ressources);
+  }
+
+  isPreviewViewableFile(): boolean {
+    const url = this.resolveResourceUrl(this.previewSection_?.ressources);
+    const ext = url.split('?')[0].split('.').pop()?.toLowerCase() || '';
+    return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
+  }
+
+  getPreviewFileViewerUrl(): SafeResourceUrl {
+    const full = this.getPreviewResourceUrl();
+    const ext = full.split('?')[0].split('.').pop()?.toLowerCase() || '';
+    if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://docs.google.com/viewer?url=${encodeURIComponent(full)}&embedded=true`
+      );
     }
-    
-    if (section.type === 'video') {
-      // Ouvrir la vidéo
-      window.open(resourceUrl, '_blank', 'width=800,height=600');
-      console.log('🎥 Ouverture de la section:', section.titre);
-    } else {
-      // Télécharger ou ouvrir la ressource
-      window.open(resourceUrl, '_blank');
-      console.log('📄 Ouverture de la ressource:', section.titre);
-    }
+    return this.sanitizer.bypassSecurityTrustResourceUrl(full);
   }
 
   shareFormation(): void {

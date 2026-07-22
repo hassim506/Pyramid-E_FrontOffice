@@ -110,13 +110,47 @@ export class AuditLogService {
     });
   }
 
-  getExportCsvUrl(filters: AuditLogFilters = {}): string {
-    const token = localStorage.getItem('pyramide_token');
+  deleteLogs(ids: number[]): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/audit-logs/destroy`, {
+      headers: this.getHeaders(),
+      body: { ids }
+    });
+  }
+
+  purgeAllLogs(): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/audit-logs/purge-all`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getLaravelLog(params: { lines?: number; level?: string; search?: string } = {}): Observable<any> {
+    let httpParams = new HttpParams();
+    if (params.lines)  httpParams = httpParams.set('lines', String(params.lines));
+    if (params.level)  httpParams = httpParams.set('level', params.level);
+    if (params.search) httpParams = httpParams.set('search', params.search);
+
+    return this.http.get<any>(`${this.apiUrl}/audit-logs/laravel-log`, {
+      headers: this.getHeaders(),
+      params: httpParams
+    });
+  }
+
+  purgeLaravelLog(): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/audit-logs/laravel-log`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  exportCsv(filters: AuditLogFilters = {}): Observable<Blob> {
     let params = new HttpParams();
     if (filters.date_debut) params = params.set('date_debut', filters.date_debut);
     if (filters.date_fin)   params = params.set('date_fin',   filters.date_fin);
     if (filters.severite)   params = params.set('severite',   filters.severite);
-    if (token)              params = params.set('token',      token);
-    return `${this.apiUrl}/audit-logs/export-csv?${params.toString()}`;
+
+    return this.http.get(`${this.apiUrl}/audit-logs/export-csv`, {
+      headers: this.getHeaders(),
+      params,
+      responseType: 'blob'
+    });
   }
 }

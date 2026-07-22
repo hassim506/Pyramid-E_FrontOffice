@@ -74,9 +74,25 @@ export class SuperadminAuditLogsComponent implements OnInit, OnDestroy {
   actionStats: ActionStat[]      = [];
   entreprises: { id: number; nom: string }[] = [];
 
+  // ── Sélection & suppression ──────────────────────────────────────────────────
+  selectedIds: Set<number> = new Set();
+  deleting = false;
+
   // ── Drawer détail ────────────────────────────────────────────────────────────
   selectedLog: AuditLog | null = null;
   drawerOpen = false;
+
+  // ── Laravel Log tab ─────────────────────────────────────────────────────────
+  activeTab: 'audit' | 'laravel' = 'audit';
+  laravelEntries: { timestamp: string; level: string; message: string }[] = [];
+  laravelLoading = false;
+  laravelError = '';
+  laravelFileSize = 0;
+  laravelTotalEntries = 0;
+  laravelSearch = '';
+  laravelLevel = '';
+  laravelLines = 200;
+  purging = false;
 
   private readonly STAT_LABELS: Record<string, { label: string; fillClass: string }> = {
     connexion:       { label: 'Connexions réussies',  fillClass: 'sf-g' },
@@ -326,16 +342,21 @@ export class SuperadminAuditLogsComponent implements OnInit, OnDestroy {
   // ── Export CSV ────────────────────────────────────────────────────────────────
 
   exportCSV(): void {
-    const url = this.auditLogService.getExportCsvUrl({
+    this.auditLogService.exportCsv({
       date_debut: this.dateFrom || undefined,
       date_fin:   this.dateTo   || undefined,
       severite:   this.filterSeverity || undefined,
+    }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => console.error('Export CSV failed:', err)
     });
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.target   = '_blank';
-    a.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
   }
 
   // ── Helpers affichage ────────────────────────────────────────────────────────
@@ -478,5 +499,143 @@ export class SuperadminAuditLogsComponent implements OnInit, OnDestroy {
 
   get tendanceClass(): string {
     return this.kpi.tendancePourcent >= 0 ? 'trend-up' : 'trend-down';
+  }
+
+  // ── Sélection & suppression logs d'audit ─────────────────────────────────────
+
+  toggleSelectLog(id: number): void {
+    if (this.selectedIds.has(id)) {
+      this.selectedIds.delete(id);
+    } else {
+      this.selectedIds.add(id);
+    }
+  }
+
+  isLogSelected(id: number): boolean {
+    return this.selectedIds.has(id);
+  }
+
+  get allSelected(): boolean {
+    return this.logs.length > 0 && this.logs.every(l => this.selectedIds.has(l.id));
+  }
+
+  toggleSelectAll(): void {
+    if (this.allSelected) {
+      this.logs.forEach(l => this.selectedIds.delete(l.id));
+    } else {
+      this.logs.forEach(l => this.selectedIds.add(l.id));
+    }
+  }
+
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  deleteSelectedLogs(): void {
+    if (this.selectedIds.size === 0) return;
+    if (!confirm(`Supprimer ${this.selectedIds.size} log(s) sélectionné(s) ?`)) return;
+    this.deleting = true;
+
+    this.auditLogService.deleteLogs(Array.from(this.selectedIds)).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        this.deleting = false;
+        this.selectedIds.clear();
+        this.loadAll();
+      },
+      error: (err) => {
+        this.deleting = false;
+        this.error = httpErrorMessage(err, 'Erreur lors de la suppression.');
+      }
+    });
+  }
+
+  purgeAllAuditLogs(): void {
+    if (!confirm('Purger TOUS les logs d\'audit ? Cette action est irréversible.')) return;
+    this.deleting = true;
+
+    this.auditLogService.purgeAllLogs().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        this.deleting = false;
+        this.selectedIds.clear();
+        this.loadAll();
+      },
+      error: (err) => {
+        this.deleting = false;
+        this.error = httpErrorMessage(err, 'Erreur lors de la purge.');
+      }
+    });
+  }
+
+  // ── Laravel Log ─────────────────────────────────────────────────────────────
+
+  switchTab(tab: 'audit' | 'laravel'): void {
+    this.activeTab = tab;
+    if (tab === 'laravel' && this.laravelEntries.length === 0) {
+      this.loadLaravelLog();
+    }
+  }
+
+  loadLaravelLog(): void {
+    this.laravelLoading = true;
+    this.laravelError = '';
+
+    this.auditLogService.getLaravelLog({
+      lines: this.laravelLines,
+      level: this.laravelLevel || undefined,
+      search: this.laravelSearch || undefined
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        this.laravelEntries = res.entries || [];
+        this.laravelFileSize = res.file_size || 0;
+        this.laravelTotalEntries = res.total_entries || 0;
+        this.laravelLoading = false;
+      },
+      error: (err) => {
+        this.laravelError = httpErrorMessage(err, 'Impossible de charger les logs Laravel.');
+        this.laravelLoading = false;
+      }
+    });
+  }
+
+  purgeLaravelLog(): void {
+    if (!confirm('Êtes-vous sûr de vouloir purger le fichier laravel.log ? Cette action est irréversible.')) return;
+    this.purging = true;
+
+    this.auditLogService.purgeLaravelLog().pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.purging = false;
+        this.laravelEntries = [];
+        this.laravelFileSize = 0;
+        this.laravelTotalEntries = 0;
+      },
+      error: (err) => {
+        this.purging = false;
+        this.laravelError = httpErrorMessage(err, 'Erreur lors de la purge.');
+      }
+    });
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' Mo';
+    if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' Ko';
+    return bytes + ' o';
+  }
+
+  getLevelClass(level: string): string {
+    const m: Record<string, string> = {
+      emergency: 'lvl-emergency',
+      alert: 'lvl-alert',
+      critical: 'lvl-critical',
+      error: 'lvl-error',
+      warning: 'lvl-warning',
+      notice: 'lvl-notice',
+      info: 'lvl-info',
+      debug: 'lvl-debug',
+    };
+    return m[level] || 'lvl-debug';
   }
 }

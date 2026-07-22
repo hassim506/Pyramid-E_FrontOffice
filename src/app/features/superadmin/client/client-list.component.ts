@@ -342,6 +342,12 @@ private getCompanyList() {
         return 'badge bg-warning';
       case 'suspendu':
         return 'badge bg-danger';
+      case 'renouvele':
+        return 'badge bg-primary';
+      case 'en_cours_renouvellement':
+        return 'badge bg-info';
+      case 'litigieux':
+        return 'badge bg-danger';
       default:
         return 'badge bg-secondary';
     }

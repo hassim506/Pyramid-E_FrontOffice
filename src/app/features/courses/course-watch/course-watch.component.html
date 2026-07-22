@@ -62,27 +62,14 @@
             <i class="isax isax-arrow-left-2 me-1"></i>Retour
           </button>
           <i class="isax isax-arrow-right-3 cw-breadcrumb__sep"></i>
-          <span class="cw-breadcrumb__module">{{ activeModule?.titre }}</span>
+          <span class="cw-breadcrumb__module">{{ formation.titre }}</span>
           <i class="isax isax-arrow-right-3 cw-breadcrumb__sep"></i>
-          <span class="cw-breadcrumb__current">{{ activeSection.titre }}</span>
+          <span class="cw-breadcrumb__current">{{ activeModule?.titre }}</span>
         </div>
 
-        <!-- Section header -->
-        <div class="cw-section-header">
-          <div class="cw-section-header__type-badge" [attr.data-type]="activeSection.type || 'texte'">
-            <i class="isax {{ getSectionIcon(activeSection.type) }}"></i>
-            <span>{{ activeSection.type || 'texte' }}</span>
-          </div>
-          <h2 class="cw-section-header__title">{{ activeSection.titre }}</h2>
-          <div class="cw-section-header__meta">
-            <span *ngIf="activeSection.duree_estimee" class="cw-meta-tag">
-              <i class="isax isax-clock me-1"></i>{{ formatDuration(activeSection.duree_estimee) }}
-            </span>
-            <span *ngIf="isSectionCompleted(activeSection.id)" class="cw-meta-tag cw-meta-tag--done">
-              <i class="isax isax-tick-circle me-1"></i>Complétée
-            </span>
-          </div>
-        </div>
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- MEDIA AREA (vidéo, image, fichier, pdf) -->
+        <!-- ══════════════════════════════════════════════════════ -->
 
         <!-- ── VIDÉO (YouTube) ── -->
         <ng-container *ngIf="(activeSection.type === 'video' || activeSection.type === 'lecture') && hasResource(activeSection) && isYouTube(activeSection.ressources)">
@@ -95,9 +82,6 @@
               </iframe>
             </div>
           </div>
-          <div class="cw-video-description" *ngIf="activeSection.description || activeSection.contenu">
-            <p>{{ activeSection.description || activeSection.contenu }}</p>
-          </div>
         </ng-container>
 
         <!-- ── VIDÉO (fichier local) ── -->
@@ -108,9 +92,6 @@
               Votre navigateur ne supporte pas la lecture vidéo.
             </video>
           </div>
-          <div class="cw-video-description" *ngIf="activeSection.description || activeSection.contenu">
-            <p>{{ activeSection.description || activeSection.contenu }}</p>
-          </div>
         </ng-container>
 
         <!-- ── VIDÉO sans ressource → image couverture ── -->
@@ -119,104 +100,247 @@
             <img [src]="getImageUrl(formation.image_couverture)"
                  class="cw-cover-fallback" [alt]="activeSection.titre">
           </div>
-          <div class="cw-video-description" *ngIf="activeSection.description || activeSection.contenu">
-            <p>{{ activeSection.description || activeSection.contenu }}</p>
-          </div>
         </ng-container>
 
         <!-- ── IMAGE ── -->
         <ng-container *ngIf="activeSection.type === 'image'">
-          <div class="cw-image-wrap">
-            <div *ngIf="hasResource(activeSection); else noImageSection">
+          <div class="cw-media-wrap">
+            <div *ngIf="hasResource(activeSection); else noImageMedia">
               <img [src]="getImageUrl(resolveResourceUrl(activeSection.ressources))"
-                   class="img-fluid rounded"
+                   class="cw-cover-fallback"
                    [alt]="activeSection.titre">
             </div>
-            <ng-template #noImageSection>
+            <ng-template #noImageMedia>
               <div class="cw-empty-media">
                 <i class="isax isax-gallery fs-36 d-block mb-2"></i>
                 <p>Image non disponible.</p>
               </div>
             </ng-template>
-            <div class="cw-text-card mt-3" *ngIf="activeSection.contenu || activeSection.description">
-              <div class="cw-text-body" [innerHTML]="activeSection.contenu || activeSection.description"></div>
-            </div>
           </div>
         </ng-container>
 
-        <!-- ── FICHIER À TÉLÉCHARGER ── -->
-        <ng-container *ngIf="activeSection.type === 'fichier'">
-          <div class="cw-file-wrap">
-            <ng-container *ngIf="hasResource(activeSection); else noFileSection">
-              <!-- En-tête avec bouton télécharger -->
+        <!-- ── PDF inline (dans zone media) ── -->
+        <ng-container *ngIf="activeSection.type === 'pdf' && hasResource(activeSection)">
+          <div class="cw-media-wrap">
+            <iframe [src]="getPdfUrl(activeSection.ressources)" class="cw-pdf-frame-inline"></iframe>
+          </div>
+        </ng-container>
+
+        <!-- ── FICHIER (zone media = aperçu intégré si possible) ── -->
+        <ng-container *ngIf="activeSection.type === 'fichier' && hasResource(activeSection) && isViewableFile(activeSection.ressources)">
+          <div class="cw-media-wrap">
+            <iframe [src]="getFileViewerUrl(activeSection.ressources)"
+                    class="cw-pdf-frame-inline"
+                    frameborder="0" allowfullscreen
+                    [title]="activeSection.titre">
+            </iframe>
+          </div>
+        </ng-container>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- DURATION BADGE (sous la vidéo) -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <div class="cw-duration-badge" *ngIf="activeSection.duree_estimee">
+          <i class="isax isax-clock"></i>
+          <span>{{ formatDuration(activeSection.duree_estimee) }}</span>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- ACTIONS BAR (Précédent / Complétée / Suivant) -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <div class="cw-actions-bar">
+          <button class="cw-btn cw-btn--prev" [disabled]="!hasPrev" (click)="navigatePrev()">
+            <i class="isax isax-arrow-left-2 me-1"></i>Précédent
+          </button>
+
+          <button class="cw-btn cw-btn--complete"
+                  *ngIf="!isSectionCompleted(activeSection.id)"
+                  [disabled]="markDoneLoading"
+                  (click)="markDone()">
+            <span *ngIf="markDoneLoading"
+                  class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <i *ngIf="!markDoneLoading" class="isax isax-tick-circle me-2"></i>
+            Marquer comme complété
+          </button>
+
+          <div class="cw-done-badge" *ngIf="isSectionCompleted(activeSection.id)">
+            <i class="isax isax-tick-circle me-2"></i>Section complétée
+          </div>
+
+          <button class="cw-btn cw-btn--next" [disabled]="!hasNext" (click)="navigateNext()">
+            Suivant<i class="isax isax-arrow-right-2 ms-1"></i>
+          </button>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- TABS (Description / Ressources / Mes notes) -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <div class="cw-tabs">
+          <button class="cw-tabs__item" [class.cw-tabs__item--active]="activeTab === 'overview'" (click)="setTab('overview')">
+            <i class="isax isax-document-text me-1"></i>Description
+          </button>
+          <button class="cw-tabs__item" [class.cw-tabs__item--active]="activeTab === 'faq'" (click)="setTab('faq')">
+            <i class="isax isax-folder-open me-1"></i>Ressources ({{ getResourceCount() }})
+          </button>
+          <button class="cw-tabs__item" [class.cw-tabs__item--active]="activeTab === 'notes'" (click)="setTab('notes')">
+            <i class="isax isax-note-2 me-1"></i>Mes notes
+          </button>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- TAB CONTENT: DESCRIPTION -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <div class="cw-tab-content" *ngIf="activeTab === 'overview'">
+
+          <!-- Section title + meta -->
+          <div class="cw-detail-header">
+            <h2 class="cw-detail-header__title">{{ activeSection.titre }}</h2>
+            <div class="cw-detail-header__meta">
+              <span class="cw-meta-tag" *ngIf="activeSection.duree_estimee">
+                <i class="isax isax-clock me-1"></i>{{ formatDuration(activeSection.duree_estimee) }}
+              </span>
+              <span class="cw-meta-tag">
+                <i class="isax {{ getSectionIcon(activeSection.type) }} me-1"></i>{{ activeSection.type || 'Texte' | titlecase }}
+              </span>
+              <span class="cw-meta-tag cw-meta-tag--done" *ngIf="isSectionCompleted(activeSection.id)">
+                <i class="isax isax-tick-circle me-1"></i>Complétée
+              </span>
+              <span class="cw-meta-tag">
+                <i class="isax isax-book-1 me-1"></i>Module {{ getModuleIndex() + 1 }} · {{ activeModule?.titre }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Formateur card -->
+          <div class="cw-formateur-card" *ngIf="formation.formateur_details || formation.formateur">
+            <div class="cw-formateur-card__avatar">
+              <span>{{ getFormateurInitials() }}</span>
+            </div>
+            <div class="cw-formateur-card__info">
+              <p class="cw-formateur-card__name">{{ formation.formateur_details?.nom || formation.formateur?.nom_complet || 'Formateur' }}</p>
+              <p class="cw-formateur-card__role">{{ formation.formateur_details?.fonction || 'Formateur' }} · {{ formation.formateur_details?.entreprise || 'Pyramide IT' }}</p>
+            </div>
+            <button class="cw-btn cw-btn--outline cw-formateur-card__btn">Voir le profil</button>
+          </div>
+
+          <!-- À propos de cette leçon -->
+          <div class="cw-about-section" *ngIf="activeSection.description || activeSection.contenu || activeModule?.description">
+            <h3 class="cw-about-section__title">À propos de cette leçon</h3>
+            <div class="cw-about-section__body" [innerHTML]="activeSection.description || activeSection.contenu || activeModule?.description"></div>
+          </div>
+
+          <!-- Description du module -->
+          <div class="cw-about-section" *ngIf="activeModule?.description && (activeSection.description || activeSection.contenu)">
+            <h3 class="cw-about-section__title">À propos du module</h3>
+            <div class="cw-about-section__body" [innerHTML]="activeModule.description"></div>
+          </div>
+
+          <!-- Objectifs du module -->
+          <div class="cw-about-section" *ngIf="activeModule?.objectifs">
+            <h3 class="cw-about-section__title">Objectifs du module</h3>
+            <div class="cw-about-section__body" [innerHTML]="activeModule.objectifs"></div>
+          </div>
+
+          <!-- Ce que vous allez apprendre (compétences / tags) -->
+          <div class="cw-skills-section" *ngIf="(formation.competences_acquises && formation.competences_acquises.length) || (formation.tags && formation.tags.length)">
+            <h3 class="cw-skills-section__title">Ce que vous allez apprendre</h3>
+            <div class="cw-skills-section__tags">
+              <span class="cw-skill-tag" *ngFor="let comp of formation.competences_acquises">{{ comp }}</span>
+              <span class="cw-skill-tag cw-skill-tag--secondary" *ngFor="let tag of formation.tags">{{ tag }}</span>
+            </div>
+          </div>
+
+          <!-- Objectifs pédagogiques de la formation -->
+          <div class="cw-about-section" *ngIf="formation.objectifs_pedagogiques">
+            <h3 class="cw-about-section__title">Objectifs pédagogiques</h3>
+            <ul class="cw-objectives-list">
+              <li *ngFor="let obj of getObjectifsList(formation.objectifs_pedagogiques)">{{ obj }}</li>
+            </ul>
+          </div>
+
+          <!-- Infos supplémentaires formation -->
+          <div class="cw-info-grid" *ngIf="formation.niveau || formation.duree_totale || formation.langue || formation.difficulte">
+            <div class="cw-info-item" *ngIf="formation.niveau">
+              <i class="isax isax-chart-2"></i>
+              <span class="cw-info-item__label">Niveau</span>
+              <span class="cw-info-item__value">{{ formation.niveau_display || formation.niveau }}</span>
+            </div>
+            <div class="cw-info-item" *ngIf="formation.duree_totale">
+              <i class="isax isax-clock"></i>
+              <span class="cw-info-item__label">Durée totale</span>
+              <span class="cw-info-item__value">{{ formatDuration(formation.duree_totale) }}</span>
+            </div>
+            <div class="cw-info-item" *ngIf="formation.langue">
+              <i class="isax isax-global"></i>
+              <span class="cw-info-item__label">Langue</span>
+              <span class="cw-info-item__value">{{ formation.langue }}</span>
+            </div>
+            <div class="cw-info-item" *ngIf="formation.est_certifiante">
+              <i class="isax isax-award"></i>
+              <span class="cw-info-item__label">Certifiante</span>
+              <span class="cw-info-item__value">Oui</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- TAB CONTENT: RESSOURCES -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <div class="cw-tab-content" *ngIf="activeTab === 'faq'">
+
+          <!-- Ressources de la section active -->
+          <div class="cw-resources-section">
+            <h3 class="cw-resources-section__title">Ressources de la section</h3>
+
+            <div *ngIf="hasResource(activeSection); else noResources">
+              <!-- Fichier téléchargeable -->
               <div class="cw-file-card">
                 <div class="cw-file-card__icon"><i class="isax isax-document-download"></i></div>
                 <div class="cw-file-card__info">
                   <p class="cw-file-card__name">{{ activeSection.titre }}</p>
-                  <p class="cw-file-card__hint">{{ activeSection.contenu || activeSection.description || 'Consultez et téléchargez le document ci-dessous.' }}</p>
+                  <p class="cw-file-card__hint">{{ activeSection.type || 'Document' }}</p>
                 </div>
                 <a [href]="getFileFullUrl(activeSection.ressources)"
-                   target="_blank"
-                   download
+                   target="_blank" download
                    class="cw-btn cw-btn--primary cw-file-card__btn">
                   <i class="isax isax-document-download me-2"></i>Télécharger
                 </a>
               </div>
-              <!-- Lecteur intégré -->
-              <div class="cw-file-viewer" *ngIf="isViewableFile(activeSection.ressources)">
-                <iframe [src]="getFileViewerUrl(activeSection.ressources)"
-                        class="cw-file-frame"
-                        frameborder="0"
-                        allowfullscreen
-                        [title]="activeSection.titre">
-                </iframe>
-              </div>
-            </ng-container>
-            <ng-template #noFileSection>
+            </div>
+
+            <ng-template #noResources>
               <div class="cw-empty-media">
-                <i class="isax isax-document fs-36 d-block mb-2"></i>
-                <p>Fichier non disponible.</p>
+                <i class="isax isax-folder-open fs-36 d-block mb-2"></i>
+                <p>Aucune ressource disponible pour cette section.</p>
               </div>
             </ng-template>
           </div>
-        </ng-container>
 
-        <!-- ── PDF ── -->
-        <ng-container *ngIf="activeSection.type === 'pdf'">
-          <div class="cw-pdf-wrap">
-            <div class="cw-pdf-header">
-              <div class="cw-pdf-header__icon"><i class="isax isax-document-text"></i></div>
-              <div>
-                <p class="cw-pdf-header__name">{{ activeSection.titre }}</p>
-                <p class="cw-pdf-header__hint">Consultez le document ci-dessous.</p>
-              </div>
-            </div>
-            <div class="cw-pdf-viewer" *ngIf="hasResource(activeSection)">
-              <iframe [src]="getPdfUrl(activeSection.ressources)" class="cw-pdf-frame"></iframe>
-            </div>
-            <div class="cw-empty-media" *ngIf="!hasResource(activeSection)">
-              <i class="isax isax-document fs-36 d-block mb-2"></i>
-              <p>Document non disponible.</p>
+          <!-- Outils requis -->
+          <div class="cw-about-section" *ngIf="formation.outils_requis && formation.outils_requis.length">
+            <h3 class="cw-about-section__title">Outils requis</h3>
+            <div class="cw-skills-section__tags">
+              <span class="cw-skill-tag cw-skill-tag--secondary" *ngFor="let outil of formation.outils_requis">{{ outil }}</span>
             </div>
           </div>
-        </ng-container>
+        </div>
 
-        <!-- ── TEXTE / LECTURE ── -->
-        <ng-container *ngIf="activeSection.type === 'texte' || activeSection.type === 'text' || activeSection.type === 'reading' || !activeSection.type">
-          <div class="cw-text-card">
-            <div class="cw-text-intro" *ngIf="activeSection.resume || activeSection.intro">
-              <i class="isax isax-info-circle cw-text-intro__icon"></i>
-              <p>{{ activeSection.resume || activeSection.intro }}</p>
-            </div>
-            <div class="cw-text-body" [innerHTML]="activeSection.contenu || activeSection.description"></div>
-            <div *ngIf="!(activeSection.contenu || activeSection.description)" class="cw-empty-media">
-              <i class="isax isax-document-text fs-36 d-block mb-2"></i>
-              <p>Aucun contenu disponible pour cette section.</p>
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- TAB CONTENT: NOTES -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <div class="cw-tab-content" *ngIf="activeTab === 'notes'">
+          <div class="cw-notes-section">
+            <div class="cw-empty-media">
+              <i class="isax isax-note-2 fs-36 d-block mb-2"></i>
+              <p>Les notes personnelles seront bientôt disponibles.</p>
             </div>
           </div>
-        </ng-container>
+        </div>
 
-        <!-- ── QUIZ ── -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- QUIZ (reste inchangé — affiché à la place de la media) -->
+        <!-- ══════════════════════════════════════════════════════ -->
         <ng-container *ngIf="activeSection.type === 'quiz' || activeSection.type === 'assignment'">
 
           <!-- Loading quiz -->
@@ -251,7 +375,6 @@
 
           <!-- Quiz en cours -->
           <div *ngIf="!quizLoading && quiz && quizStarted && !quizFinished && currentQuestion" class="cw-quiz-player">
-            <!-- Progress -->
             <div class="cw-quiz-progress">
               <div class="cw-quiz-progress__bar">
                 <div class="cw-quiz-progress__fill"
@@ -260,7 +383,6 @@
               <span class="cw-quiz-progress__label">Question {{ currentQuestionIndex + 1 }} / {{ quiz.questions?.length }}</span>
             </div>
 
-            <!-- Question -->
             <div class="cw-quiz-question">
               <div class="cw-quiz-question__num">Q{{ currentQuestionIndex + 1 }}</div>
               <h4 class="cw-quiz-question__text">{{ currentQuestion.question_text }}</h4>
@@ -270,7 +392,6 @@
               </p>
             </div>
 
-            <!-- Options -->
             <div class="cw-quiz-options">
               <button *ngFor="let opt of currentQuestion.reponses"
                       type="button"
@@ -285,7 +406,6 @@
               </button>
             </div>
 
-            <!-- Navigation quiz -->
             <div class="cw-quiz-nav">
               <button class="cw-btn cw-btn--outline" [disabled]="currentQuestionIndex === 0" (click)="prevQuestion()">
                 <i class="isax isax-arrow-left-2 me-1"></i>Précédent
@@ -310,13 +430,12 @@
                 {{ quizScore }}%
               </div>
               <div class="cw-quiz-results__label">
-                {{ quizScore >= (quiz.score_minimum || 50) ? '🎉 Réussi !' : 'Non validé' }}
+                {{ quizScore >= (quiz.score_minimum || 50) ? 'Réussi !' : 'Non validé' }}
               </div>
             </div>
             <p class="cw-quiz-results__detail">
               Score minimum requis : {{ quiz.score_minimum || 50 }}%
             </p>
-            <!-- Correction par question -->
             <div class="cw-quiz-correction" *ngFor="let q of quiz.questions; let qi = index">
               <div class="cw-quiz-correction__q">
                 <span class="cw-quiz-correction__num">Q{{ qi + 1 }}</span>
@@ -347,40 +466,30 @@
 
         </ng-container>
 
-        <!-- ── ACTIONS BAR ── -->
-        <div class="cw-actions-bar">
-          <button class="cw-btn cw-btn--complete"
-                  *ngIf="!isSectionCompleted(activeSection.id)"
-                  [disabled]="markDoneLoading"
-                  (click)="markDone()">
-            <span *ngIf="markDoneLoading"
-                  class="spinner-border spinner-border-sm me-2" role="status"></span>
-            <i *ngIf="!markDoneLoading" class="isax isax-tick-circle me-2"></i>
-            Marquer comme complété
-          </button>
-
-          <div class="cw-done-badge" *ngIf="isSectionCompleted(activeSection.id)">
-            <i class="isax isax-tick-circle me-2"></i>Section complétée
+        <!-- ── TEXTE / LECTURE (contenu inline sans media) ── -->
+        <ng-container *ngIf="(activeSection.type === 'texte' || activeSection.type === 'text' || activeSection.type === 'reading' || !activeSection.type) && activeTab === 'overview'">
+          <div class="cw-text-card" *ngIf="activeSection.contenu || activeSection.description">
+            <div class="cw-text-intro" *ngIf="activeSection.resume || activeSection.intro">
+              <i class="isax isax-info-circle cw-text-intro__icon"></i>
+              <p>{{ activeSection.resume || activeSection.intro }}</p>
+            </div>
+            <div class="cw-text-body" [innerHTML]="activeSection.contenu || activeSection.description"></div>
           </div>
+        </ng-container>
 
-          <div class="cw-nav-btns">
-            <button class="cw-btn cw-btn--prev" [disabled]="!hasPrev" (click)="navigatePrev()">
-              <i class="isax isax-arrow-left-2 me-1"></i>Précédent
-            </button>
-            <button class="cw-btn cw-btn--next" [disabled]="!hasNext" (click)="navigateNext()">
-              Suivant<i class="isax isax-arrow-right-2 ms-1"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Félicitations -->
+        <!-- Félicitations (formation terminée) -->
         <div class="cw-congrats" *ngIf="progressPercent === 100">
-          <div class="cw-congrats__sparkles">
-            <span>✦</span><span>✦</span><span>✦</span>
-          </div>
           <div class="cw-congrats__icon"><i class="isax isax-award"></i></div>
-          <h3 class="cw-congrats__title">Formation terminée !</h3>
-          <p class="cw-congrats__sub">Félicitations ! Vous avez complété toutes les sections.</p>
+          <h3 class="cw-congrats__title">Formation terminée — Félicitations !</h3>
+          <p class="cw-congrats__sub">Vous avez complété toutes les sections · Score moyen : —</p>
+          <div class="cw-congrats__actions">
+            <button class="cw-btn cw-btn--primary" *ngIf="formation.est_certifiante">
+              <i class="isax isax-award me-2"></i>Mon certificat
+            </button>
+            <a [routerLink]="routes.courseList" class="cw-btn cw-btn--outline">
+              Voir mes formations
+            </a>
+          </div>
         </div>
 
       </ng-container>
@@ -397,16 +506,17 @@
     <!-- ══ SIDEBAR ══ -->
     <aside class="cw-sidebar">
 
+      <div class="cw-sidebar__header">
+        <h3 class="cw-sidebar__header-title">Sommaire de la formation</h3>
+      </div>
+
       <div class="cw-sidebar__progress">
         <div class="cw-sidebar__progress-info">
           <span>Progression</span>
-          <strong>{{ progressPercent }}%</strong>
+          <strong>{{ progressPercent }}% · {{ completedIds.size }}/{{ totalSectionsCount }}</strong>
         </div>
         <div class="cw-sidebar__progress-bar">
           <div class="cw-sidebar__progress-fill" [style.width.%]="progressPercent"></div>
-        </div>
-        <div class="cw-sidebar__progress-count">
-          {{ completedIds.size }} / {{ totalSectionsCount }} sections
         </div>
       </div>
 
@@ -447,9 +557,12 @@
 
               <div class="cw-section-item__body">
                 <span class="cw-section-item__title">{{ section.titre }}</span>
-                <span *ngIf="section.duree_estimee" class="cw-section-item__duration">
-                  <i class="isax isax-clock me-1"></i>{{ formatDuration(section.duree_estimee) }}
-                </span>
+                <div class="cw-section-item__meta">
+                  <span *ngIf="section.duree_estimee" class="cw-section-item__duration">
+                    <i class="isax isax-clock me-1"></i>{{ formatDuration(section.duree_estimee) }}
+                  </span>
+                  <span *ngIf="section.type" class="cw-section-item__type">{{ section.type | titlecase }}</span>
+                </div>
               </div>
 
             </li>

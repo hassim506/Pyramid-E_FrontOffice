@@ -90,6 +90,7 @@ export const routes: Routes = [
                 {path:'instructor-course-grid',loadComponent:()=>import ('./features/instructor/instructor-course-grid/instructor-course-grid.component').then((m)=>m.InstructorCourseGridComponent)},
                 {path:'instructor-session',loadComponent:()=>import ('./features/instructor/instructor-session/instructor-session.component').then((m)=>m.InstructorSessionComponent)},
                 {path:'instructor-mes-sondages',loadComponent:()=>import ('./features/instructor/instructor-mes-sondages/instructor-mes-sondages.component').then((m)=>m.InstructorMesSondagesComponent)},
+                {path:'video-ressources',loadComponent:()=>import ('./features/instructor/video-ressources/video-ressources.component').then((m)=>m.VideoRessourcesComponent)},
 
                 {path:'instructor-message',loadComponent:()=>import ('./features/instructor/instructor-message/instructor-message.component').then((m)=>m.InstructorMessageComponent)},
                 {path:'instructor-assignment',loadComponent:()=>import ('./features/instructor/instructor-assignment/instructor-assignment.component').then((m)=>m.InstructorAssignmentComponent)},
@@ -143,6 +144,7 @@ export const routes: Routes = [
                 {path:'superadmin-course-grid',loadComponent:()=>import ('./features/superadmin/superadmin-course-grid/superadmin-course-grid.component').then((m)=>m.SuperadminCourseGridComponent)},
                 {path:'superadmin-session',loadComponent:()=>import ('./features/superadmin/superadmin-session/superadmin-session.component').then((m)=>m.SuperadminSessionComponent)},
                 {path:'superadmin-parcours',loadComponent:()=>import ('./features/superadmin/superadmin-parcours/superadmin-parcours.component').then((m)=>m.SuperadminParcoursComponent)},
+                {path:'superadmin-catalogue',loadComponent:()=>import ('./features/superadmin/superadmin-catalogue/superadmin-catalogue.component').then((m)=>m.SuperadminCatalogueComponent)},
                 {path:'superadmin-message',loadComponent:()=>import ('./features/superadmin/superadmin-message/superadmin-message.component').then((m)=>m.SuperadminMessageComponent)},
                 {path:'superadmin-audit-logs',loadComponent:()=>import ('./features/superadmin/superadmin-audit-logs/superadmin-audit-logs.component').then((m)=>m.SuperadminAuditLogsComponent)},
                 {path:'superadmin-sondage',loadComponent:()=>import ('./features/superadmin/superadmin-sondage/superadmin-sondage.component').then((m)=>m.SuperadminSondageComponent)},

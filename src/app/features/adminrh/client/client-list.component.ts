@@ -291,6 +291,12 @@ export class ClientListComponent {
     switch (status?.toLowerCase()) {
       case 'actif':
         return 'badge bg-success';
+      case 'renouvele':
+        return 'badge bg-primary';
+      case 'en_cours_renouvellement':
+        return 'badge bg-info';
+      case 'litigieux':
+        return 'badge bg-danger';
       case 'inactif':
         return 'badge bg-warning';
       case 'suspendu':

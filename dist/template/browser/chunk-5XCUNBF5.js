@@ -1,0 +1,1 @@
+import{fa as r,g as e}from"./chunk-3FZDVSC7.js";var t=class o{base=new e("");page=new e("");last=new e("");isuserHeader=new e(!0);isAdminHeader=new e(!1);isstudentHeader=new e(!1);mainFooter=new e(!0);static \u0275fac=function(a){return new(a||o)};static \u0275prov=r({token:o,factory:o.\u0275fac,providedIn:"root"})};export{t as a};

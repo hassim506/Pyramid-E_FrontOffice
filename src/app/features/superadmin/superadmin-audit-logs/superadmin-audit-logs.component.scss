@@ -849,3 +849,314 @@ $purple:   #534AB7;
   .al-filter-row   { flex-direction: column; align-items: stretch; }
   .al-search       { max-width: 100%; }
 }
+
+// ═══════════════════════════════════════════════
+// SELECTION BAR & ACTIONS
+// ═══════════════════════════════════════════════
+.al-selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e40af;
+    i { font-size: 15px; }
+  }
+}
+
+.al-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary, #185fa5);
+}
+
+.al-row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.al-del-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background: transparent;
+  color: #991b1b;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background .12s;
+
+  &:hover { background: #fef2f2; }
+}
+
+.row-selected td {
+  background: #eff6ff !important;
+}
+
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+.al-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 20px;
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+
+    i { font-size: 15px; }
+
+    &:hover { color: var(--color-text-primary); }
+    &.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+  }
+
+  &__badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// LARAVEL LOG TAB
+// ═══════════════════════════════════════════════
+.ll-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.ll-search {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+
+  i {
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 7px 10px 7px 30px;
+    font-size: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-primary);
+    outline: none;
+    color: var(--color-text-primary);
+    font-family: inherit;
+    transition: border-color .15s;
+
+    &:focus { border-color: var(--color-primary); }
+  }
+}
+
+.ll-select {
+  padding: 7px 10px;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+}
+
+.ll-spacer { flex: 1; }
+
+.ll-info {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.ll-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ll-spin .6s linear infinite;
+}
+
+@keyframes ll-spin { to { transform: rotate(360deg); } }
+
+.al-btn--danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  background: #dc2626;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity .15s;
+
+  &:hover { opacity: .9; }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+.ll-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 12px;
+
+  &--err {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+  }
+}
+
+.ll-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px;
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+
+  .ll-spinner {
+    border-color: var(--color-border);
+    border-top-color: var(--color-primary);
+  }
+}
+
+.ll-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--color-text-tertiary);
+
+  i { font-size: 2.5rem; display: block; margin-bottom: 10px; opacity: .5; }
+  p { font-size: 14px; margin: 0; }
+}
+
+.ll-entries {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #1e1e2e;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: #1e1e2e; }
+  &::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+}
+
+.ll-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 14px;
+  border-bottom: 1px solid #2a2a3c;
+  font-size: 11.5px;
+  line-height: 1.5;
+
+  &:last-child { border-bottom: none; }
+
+  &__time {
+    flex-shrink: 0;
+    color: #6b7280;
+    min-width: 140px;
+    font-size: 11px;
+  }
+
+  &__level {
+    flex-shrink: 0;
+    min-width: 70px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  &__msg {
+    flex: 1;
+    color: #d4d4d8;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+    font-size: 11px;
+    font-family: inherit;
+  }
+}
+
+// Level colors
+.lvl-emergency .ll-entry__level { background: #7f1d1d; color: #fca5a5; }
+.lvl-alert .ll-entry__level     { background: #7f1d1d; color: #fca5a5; }
+.lvl-critical .ll-entry__level  { background: #991b1b; color: #fecaca; }
+.lvl-error .ll-entry__level     { background: #dc2626; color: #fff; }
+.lvl-warning .ll-entry__level   { background: #92400e; color: #fde68a; }
+.lvl-notice .ll-entry__level    { background: #1e40af; color: #bfdbfe; }
+.lvl-info .ll-entry__level      { background: #065f46; color: #a7f3d0; }
+.lvl-debug .ll-entry__level     { background: #374151; color: #9ca3af; }
+
+.lvl-emergency, .lvl-alert, .lvl-critical {
+  background: #1c0f0f;
+  .ll-entry__msg { color: #fca5a5; }
+}
+.lvl-error {
+  background: #1f1010;
+  .ll-entry__msg { color: #fecaca; }
+}
+.lvl-warning {
+  background: #1a1708;
+  .ll-entry__msg { color: #fde68a; }
+}

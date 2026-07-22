@@ -22,6 +22,89 @@
     </div>
   </div>
 
+  <!-- ── TABS ── -->
+  <div class="al-tabs">
+    <button class="al-tabs__btn" [class.active]="activeTab === 'audit'" (click)="switchTab('audit')">
+      <i class="isax isax-clipboard-text"></i> Logs d'audit
+    </button>
+    <button class="al-tabs__btn" [class.active]="activeTab === 'laravel'" (click)="switchTab('laravel')">
+      <i class="isax isax-code"></i> Laravel Log
+      <span class="al-tabs__badge" *ngIf="laravelFileSize > 0">{{ formatFileSize(laravelFileSize) }}</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TAB: LARAVEL LOG
+  ══════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'laravel'">
+    <div class="ll-toolbar">
+      <div class="ll-search">
+        <i class="isax isax-search-normal-1"></i>
+        <input type="search" [(ngModel)]="laravelSearch" placeholder="Rechercher dans les logs…"
+               (keyup.enter)="loadLaravelLog()">
+      </div>
+      <select class="ll-select" [(ngModel)]="laravelLevel" (change)="loadLaravelLog()" title="Filtrer par niveau">
+        <option value="">Tous les niveaux</option>
+        <option value="emergency">Emergency</option>
+        <option value="alert">Alert</option>
+        <option value="critical">Critical</option>
+        <option value="error">Error</option>
+        <option value="warning">Warning</option>
+        <option value="notice">Notice</option>
+        <option value="info">Info</option>
+        <option value="debug">Debug</option>
+      </select>
+      <select class="ll-select" [(ngModel)]="laravelLines" (change)="loadLaravelLog()" title="Nombre d'entrées">
+        <option [ngValue]="100">100 dernières</option>
+        <option [ngValue]="200">200 dernières</option>
+        <option [ngValue]="500">500 dernières</option>
+        <option [ngValue]="1000">1000 dernières</option>
+      </select>
+      <button class="al-btn al-btn--outline" (click)="loadLaravelLog()" [disabled]="laravelLoading">
+        <i class="isax isax-refresh" [class.spinning]="laravelLoading"></i> Actualiser
+      </button>
+      <span class="ll-spacer"></span>
+      <span class="ll-info" *ngIf="laravelFileSize > 0">
+        {{ laravelTotalEntries }} entrées · {{ formatFileSize(laravelFileSize) }}
+      </span>
+      <button class="al-btn al-btn--danger" (click)="purgeLaravelLog()" [disabled]="purging || laravelEntries.length === 0">
+        <i class="isax isax-trash" *ngIf="!purging"></i>
+        <span class="ll-spinner" *ngIf="purging"></span>
+        Purger
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div class="ll-alert ll-alert--err" *ngIf="laravelError">
+      <i class="isax isax-warning-2"></i> {{ laravelError }}
+    </div>
+
+    <!-- Loading -->
+    <div class="ll-loading" *ngIf="laravelLoading">
+      <span class="ll-spinner"></span> Chargement des logs Laravel…
+    </div>
+
+    <!-- Empty -->
+    <div class="ll-empty" *ngIf="!laravelLoading && laravelEntries.length === 0 && !laravelError">
+      <i class="isax isax-document-text"></i>
+      <p>Fichier laravel.log vide</p>
+    </div>
+
+    <!-- Log entries -->
+    <div class="ll-entries" *ngIf="!laravelLoading && laravelEntries.length > 0">
+      <div *ngFor="let entry of laravelEntries" class="ll-entry" [ngClass]="getLevelClass(entry.level)">
+        <span class="ll-entry__time">{{ entry.timestamp }}</span>
+        <span class="ll-entry__level">{{ entry.level | uppercase }}</span>
+        <pre class="ll-entry__msg">{{ entry.message }}</pre>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TAB: AUDIT (existing content)
+  ══════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'audit'">
+
   <!-- ── KPI ROW ── -->
   <div class="al-kpi-row">
     <div class="al-kpi">
@@ -150,22 +233,51 @@
       </div>
 
       <!-- Table -->
+      <!-- Barre d'actions sélection -->
+      <div class="al-selection-bar" *ngIf="selectedCount > 0">
+        <span class="al-selection-bar__info">
+          <i class="isax isax-tick-square"></i> {{ selectedCount }} log(s) sélectionné(s)
+        </span>
+        <button class="al-btn al-btn--danger" (click)="deleteSelectedLogs()" [disabled]="deleting">
+          <i class="isax isax-trash" *ngIf="!deleting"></i>
+          <span class="ll-spinner" *ngIf="deleting"></span>
+          Supprimer la sélection
+        </button>
+        <button class="al-btn al-btn--outline" (click)="selectedIds.clear()">
+          <i class="isax isax-close-circle"></i> Désélectionner
+        </button>
+        <span style="flex:1"></span>
+        <button class="al-btn al-btn--danger" (click)="purgeAllAuditLogs()" [disabled]="deleting">
+          <i class="isax isax-trash"></i> Purger tout
+        </button>
+      </div>
+
       <div class="al-table-wrap" *ngIf="!loading && !error">
         <table class="al-table">
           <thead>
             <tr>
-              <th style="width:13%">Horodatage</th>
-              <th style="width:18%">Acteur</th>
-              <th style="width:13%">Action</th>
-              <th style="width:22%">Cible / Ressource</th>
+              <th style="width:3%">
+                <input type="checkbox" class="al-checkbox" [checked]="allSelected"
+                       (change)="toggleSelectAll()" title="Tout sélectionner">
+              </th>
+              <th style="width:12%">Horodatage</th>
+              <th style="width:17%">Acteur</th>
+              <th style="width:12%">Action</th>
+              <th style="width:20%">Cible / Ressource</th>
               <th style="width:8%">Sévérité</th>
-              <th style="width:13%">IP / Localisation</th>
+              <th style="width:12%">IP / Localisation</th>
               <th style="width:7%">Statut</th>
-              <th style="width:6%">Détail</th>
+              <th style="width:9%">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let log of logs" [ngClass]="getRowClass(log)">
+            <tr *ngFor="let log of logs" [ngClass]="getRowClass(log)" [class.row-selected]="isLogSelected(log.id)">
+
+              <!-- Checkbox -->
+              <td>
+                <input type="checkbox" class="al-checkbox" [checked]="isLogSelected(log.id)"
+                       (change)="toggleSelectLog(log.id)">
+              </td>
 
               <!-- Horodatage -->
               <td>
@@ -222,17 +334,22 @@
                 </span>
               </td>
 
-              <!-- Détail -->
+              <!-- Actions -->
               <td>
-                <button class="al-eye-btn" title="Voir détail" (click)="openDetail(log)">
-                  <i class="isax isax-eye"></i>
-                </button>
+                <div class="al-row-actions">
+                  <button class="al-eye-btn" title="Voir détail" (click)="openDetail(log)">
+                    <i class="isax isax-eye"></i>
+                  </button>
+                  <button class="al-del-btn" title="Supprimer" (click)="toggleSelectLog(log.id); deleteSelectedLogs()">
+                    <i class="isax isax-trash"></i>
+                  </button>
+                </div>
               </td>
             </tr>
 
             <!-- Aucun résultat -->
             <tr *ngIf="logs.length === 0 && !loading">
-              <td colspan="8" class="al-empty">
+              <td colspan="9" class="al-empty">
                 <i class="isax isax-search-status"></i>
                 <span>Aucun log trouvé pour les filtres sélectionnés</span>
               </td>
@@ -331,6 +448,9 @@
     </div>
 
   </div>
+
+  </ng-container><!-- /audit tab -->
+
 </div>
 
 <!-- ── OVERLAY + DRAWER DÉTAIL ── -->

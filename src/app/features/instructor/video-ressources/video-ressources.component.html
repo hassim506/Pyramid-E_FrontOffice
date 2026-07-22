@@ -1,0 +1,337 @@
+<div class="page" *ngIf="!loading">
+  <!-- Header -->
+  <div class="ph">
+    <div class="ph-icon"><i class="ti ti-files"></i></div>
+    <div class="ph-info">
+      <div class="ph-title">Vidéos & Ressources — Ma bibliothèque</div>
+      <div class="ph-sub">Tous vos contenus pédagogiques en un seul endroit</div>
+    </div>
+    <div class="ph-acts">
+      <button class="btn-o"><i class="ti ti-folder"></i> Organiser</button>
+      <button class="btn-p"><i class="ti ti-upload"></i> Importer un fichier</button>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="ki ki-a"><i class="ti ti-video"></i></div>
+      <div><div class="kpi-v">{{ stats.videos }}</div><div class="kpi-l">Vidéos</div></div>
+    </div>
+    <div class="kpi">
+      <div class="ki ki-b"><i class="ti ti-file-text"></i></div>
+      <div><div class="kpi-v">{{ stats.documents }}</div><div class="kpi-l">Documents</div></div>
+    </div>
+    <div class="kpi">
+      <div class="ki ki-r"><i class="ti ti-file-type-pdf"></i></div>
+      <div><div class="kpi-v">{{ stats.pdf }}</div><div class="kpi-l">PDF</div></div>
+    </div>
+    <div class="kpi">
+      <div class="ki ki-p"><i class="ti ti-link"></i></div>
+      <div><div class="kpi-v">{{ stats.liens }}</div><div class="kpi-l">Liens externes</div></div>
+    </div>
+    <div class="kpi">
+      <div class="ki ki-g"><i class="ti ti-database"></i></div>
+      <div><div class="kpi-v">{{ stats.stockage }}</div><div class="kpi-l">Stockage utilisé</div></div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab" [class.on]="activeTab === 'all'" (click)="switchTab('all')">
+      <i class="ti ti-layout-grid"></i> Tout <span class="tc tc-a">{{ totalCount }}</span>
+    </div>
+    <div class="tab" [class.on]="activeTab === 'videos'" (click)="switchTab('videos')">
+      <i class="ti ti-video"></i> Vidéos <span class="tc tc-a">{{ stats.videos }}</span>
+    </div>
+    <div class="tab" [class.on]="activeTab === 'docs'" (click)="switchTab('docs')">
+      <i class="ti ti-file-text"></i> Documents <span class="tc tc-b">{{ stats.documents + stats.pdf }}</span>
+    </div>
+    <div class="tab" [class.on]="activeTab === 'links'" (click)="switchTab('links')">
+      <i class="ti ti-link"></i> Liens <span class="tc tc-p">{{ stats.liens }}</span>
+    </div>
+    <div class="tab" [class.on]="activeTab === 'unused'" (click)="switchTab('unused')">
+      <i class="ti ti-alert-circle"></i> Non utilisés <span class="tc tc-a">{{ unusedCount }}</span>
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tv">
+    <!-- Upload Zone -->
+    <div class="upload-zone">
+      <div class="uz-icon"><i class="ti ti-cloud-upload"></i></div>
+      <div class="uz-title">Glissez vos fichiers ici ou cliquez pour importer</div>
+      <div class="uz-sub">Vidéos, PDF, présentations, images — max 500 Mo par fichier</div>
+      <div class="uz-formats">
+        <span class="fmt-tag">MP4 / MOV</span>
+        <span class="fmt-tag">PDF</span>
+        <span class="fmt-tag">DOCX / PPTX</span>
+        <span class="fmt-tag">PNG / JPG</span>
+        <span class="fmt-tag">ZIP</span>
+        <span class="fmt-tag">Lien YouTube / Vimeo</span>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <div class="ml-main">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search">
+            <i class="ti ti-search"></i>
+            <input type="text" [(ngModel)]="searchQuery" (input)="onSearch()" placeholder="Rechercher une ressource..." />
+          </div>
+          <select class="fsel" [(ngModel)]="filterType" (change)="onFilterChange()">
+            <option value="">Tous types</option>
+            <option value="video">Vidéo</option>
+            <option value="pdf">PDF</option>
+            <option value="ressource">Document</option>
+            <option value="image">Image</option>
+            <option value="fichier">Fichier</option>
+          </select>
+          <select class="fsel" [(ngModel)]="filterFormation" (change)="onFilterChange()">
+            <option value="">Toutes formations</option>
+            <option *ngFor="let f of formationNames" [value]="f">{{ f }}</option>
+          </select>
+          <select class="fsel" [(ngModel)]="sortBy" (change)="onFilterChange()">
+            <option value="recent">Plus récents</option>
+            <option value="ancien">Plus anciens</option>
+            <option value="alpha">Alphabétique</option>
+          </select>
+          <div class="ml"></div>
+          <div class="view-tog">
+            <button class="vt" [class.on]="viewMode === 'grid'" (click)="setView('grid')"><i class="ti ti-layout-grid"></i></button>
+            <button class="vt" [class.on]="viewMode === 'list'" (click)="setView('list')"><i class="ti ti-list"></i></button>
+          </div>
+        </div>
+
+        <!-- Videos Section -->
+        <ng-container *ngIf="videos.length > 0 && (activeTab === 'all' || activeTab === 'videos')">
+          <div class="section-head">
+            <span class="sh-title">Vidéos</span>
+            <span class="sh-badge shb-a">{{ videos.length }}</span>
+          </div>
+
+          <!-- Grid View -->
+          <div class="media-grid" *ngIf="viewMode === 'grid'">
+            <div class="media-card" *ngFor="let r of videos" [class.card-unused]="!isUsed(r)">
+              <div class="mc-thumb" [ngClass]="getThumbClass(r)">
+                <i class="ti ti-player-play mc-icon" [style.color]="getIconColor(r)"></i>
+                <span class="mc-duration" *ngIf="getDuration(r)">{{ getDuration(r) }}</span>
+                <span class="mc-formation-tag">{{ r.formationTitre }}</span>
+                <div class="mc-status" [class.ms-used]="isUsed(r)" [class.ms-unused]="!isUsed(r)"></div>
+              </div>
+              <div class="mc-body">
+                <div class="mc-title">{{ r.titre }}</div>
+                <div class="mc-meta">
+                  <i class="ti ti-video"></i> {{ getTypeLabel(r) }}
+                  <span *ngIf="getDuration(r)">· {{ getDuration(r) }}</span>
+                </div>
+                <div class="mc-tags">
+                  <span class="mc-tag">{{ r.moduleTitre }}</span>
+                  <span class="mc-tag" *ngIf="r.niveau && r.niveau !== 'Non défini'">{{ r.niveau }}</span>
+                </div>
+                <div class="mc-footer">
+                  <div class="mcf-btn mcf-primary"><i class="ti ti-eye"></i> Voir</div>
+                  <div class="mcf-btn"><i class="ti ti-edit"></i></div>
+                  <div class="mcf-btn"><i class="ti ti-link"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- List View -->
+          <div *ngIf="viewMode === 'list'">
+            <div class="list-item" *ngFor="let r of videos" [class.item-unused]="!isUsed(r)">
+              <div class="li-icon" [style.background]="getListIconBg(r)" [style.color]="getListIconColor(r)">
+                <i class="ti" [ngClass]="getTypeIcon(r)"></i>
+              </div>
+              <div class="li-info">
+                <div class="li-title">{{ r.titre }}</div>
+                <div class="li-meta">
+                  <i class="ti ti-book"></i> {{ r.formationTitre }} · {{ r.moduleTitre }}
+                  <span *ngIf="getDuration(r)"><i class="ti ti-clock"></i> {{ getDuration(r) }}</span>
+                </div>
+              </div>
+              <span class="li-badge" [class.lb-used]="isUsed(r)" [class.lb-unused]="!isUsed(r)">
+                {{ isUsed(r) ? 'Publié' : 'Brouillon' }}
+              </span>
+              <div class="li-acts">
+                <button class="la-btn" title="Aperçu"><i class="ti ti-eye"></i></button>
+                <button class="la-btn" title="Modifier"><i class="ti ti-edit"></i></button>
+                <button class="la-btn" title="Télécharger"><i class="ti ti-download"></i></button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Documents Section -->
+        <ng-container *ngIf="documents.length > 0 && (activeTab === 'all' || activeTab === 'docs')">
+          <div class="section-head" [style.margin-top.px]="videos.length > 0 ? 16 : 0">
+            <span class="sh-title">Documents & PDF</span>
+            <span class="sh-badge shb-b">{{ documents.length }}</span>
+          </div>
+
+          <!-- Grid View -->
+          <div class="media-grid" *ngIf="viewMode === 'grid'">
+            <div class="media-card" *ngFor="let r of documents" [class.card-unused]="!isUsed(r)">
+              <div class="mc-thumb" [ngClass]="getThumbClass(r)">
+                <i class="ti mc-icon" [ngClass]="getTypeIcon(r)" [style.color]="getIconColor(r)"></i>
+                <span class="mc-formation-tag">{{ r.formationTitre }}</span>
+                <div class="mc-status" [class.ms-used]="isUsed(r)" [class.ms-unused]="!isUsed(r)"></div>
+              </div>
+              <div class="mc-body">
+                <div class="mc-title">{{ r.titre }}</div>
+                <div class="mc-meta">
+                  <i class="ti" [ngClass]="getTypeIcon(r)"></i> {{ getTypeLabel(r) }}
+                </div>
+                <div class="mc-tags">
+                  <span class="mc-tag">{{ r.moduleTitre }}</span>
+                </div>
+                <div class="mc-footer">
+                  <div class="mcf-btn mcf-primary"><i class="ti ti-eye"></i> Voir</div>
+                  <div class="mcf-btn"><i class="ti ti-edit"></i></div>
+                  <div class="mcf-btn"><i class="ti ti-download"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- List View -->
+          <div *ngIf="viewMode === 'list'">
+            <div class="list-item" *ngFor="let r of documents" [class.item-unused]="!isUsed(r)">
+              <div class="li-icon" [style.background]="getListIconBg(r)" [style.color]="getListIconColor(r)">
+                <i class="ti" [ngClass]="getTypeIcon(r)"></i>
+              </div>
+              <div class="li-info">
+                <div class="li-title">{{ r.titre }}</div>
+                <div class="li-meta">
+                  <i class="ti ti-book"></i> {{ r.formationTitre }} · {{ r.moduleTitre }}
+                </div>
+              </div>
+              <span class="li-badge" [class.lb-used]="isUsed(r)" [class.lb-unused]="!isUsed(r)">
+                {{ isUsed(r) ? 'Publié' : 'Brouillon' }}
+              </span>
+              <div class="li-acts">
+                <button class="la-btn" title="Aperçu"><i class="ti ti-eye"></i></button>
+                <button class="la-btn" title="Modifier"><i class="ti ti-edit"></i></button>
+                <button class="la-btn" title="Télécharger"><i class="ti ti-download"></i></button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Liens Section -->
+        <ng-container *ngIf="liens.length > 0 && (activeTab === 'all' || activeTab === 'links')">
+          <div class="section-head" [style.margin-top.px]="16">
+            <span class="sh-title">Liens externes</span>
+            <span class="sh-badge shb-p">{{ liens.length }}</span>
+          </div>
+
+          <div *ngIf="viewMode === 'list' || viewMode === 'grid'">
+            <div class="list-item" *ngFor="let r of liens">
+              <div class="li-icon" style="background:#EEEDFE;color:#534AB7;">
+                <i class="ti ti-link"></i>
+              </div>
+              <div class="li-info">
+                <div class="li-title">{{ r.titre }}</div>
+                <div class="li-meta">
+                  <i class="ti ti-book"></i> {{ r.formationTitre }} · {{ r.moduleTitre }}
+                </div>
+              </div>
+              <span class="li-badge lb-used">Lien</span>
+              <div class="li-acts">
+                <button class="la-btn" title="Ouvrir"><i class="ti ti-external-link"></i></button>
+                <button class="la-btn" title="Modifier"><i class="ti ti-edit"></i></button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="filteredRessources.length === 0">
+          <i class="ti ti-folder-off"></i>
+          <p>Aucune ressource trouvée</p>
+          <span>Importez vos premiers contenus ou ajustez vos filtres</span>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="ml-side">
+        <!-- Storage Card -->
+        <div class="side-card">
+          <div class="sc-head">
+            <i class="ti ti-database"></i>
+            <span class="sc-title">Stockage utilisé</span>
+          </div>
+          <div class="storage-card">
+            <div class="storage-total">
+              <span class="st-lbl">{{ stats.stockage }} utilisés</span>
+              <span class="st-val">10 Go max</span>
+            </div>
+            <div class="st-bar"><div class="st-fill" [style.width.%]="getStoragePercent()"></div></div>
+            <div class="st-types">
+              <div class="st-type-row">
+                <div class="st-dot" style="background:#854F0B;"></div>
+                <span class="st-type-lbl">Vidéos</span>
+                <span class="st-type-val">{{ stats.videos }} fichiers</span>
+              </div>
+              <div class="st-type-row">
+                <div class="st-dot" style="background:#A32D2D;"></div>
+                <span class="st-type-lbl">PDF</span>
+                <span class="st-type-val">{{ stats.pdf }} fichiers</span>
+              </div>
+              <div class="st-type-row">
+                <div class="st-dot" style="background:#185FA5;"></div>
+                <span class="st-type-lbl">Documents</span>
+                <span class="st-type-val">{{ stats.documents }} fichiers</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Resources -->
+        <div class="side-card">
+          <div class="sc-head">
+            <i class="ti ti-trending-up"></i>
+            <span class="sc-title">Ressources principales</span>
+          </div>
+          <div class="usage-list">
+            <div class="usage-item" *ngFor="let r of topRessources; let i = index">
+              <span class="ui-rank">{{ i + 1 }}</span>
+              <div class="ui-info">
+                <div class="ui-name">{{ r.titre }}</div>
+                <div class="ui-type">{{ getTypeLabel(r) }} · {{ r.formationTitre }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Imports -->
+        <div class="side-card">
+          <div class="sc-head">
+            <i class="ti ti-clock"></i>
+            <span class="sc-title">Ajoutés récemment</span>
+          </div>
+          <div class="recent-list">
+            <div class="recent-item" *ngFor="let r of recentRessources">
+              <div class="ri-icon" [style.background]="getListIconBg(r)" [style.color]="getListIconColor(r)">
+                <i class="ti" [ngClass]="getTypeIcon(r)"></i>
+              </div>
+              <div class="ri-info">
+                <div class="ri-name">{{ r.titre }}</div>
+                <div class="ri-date">{{ r.formationTitre }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Chargement de vos ressources...</p>
+</div>

@@ -932,7 +932,9 @@ buildFormData(): any {
     prix: parseFloat(additionalInfo.prix) || 0,
     duree_totale: parseInt(additionalInfo.duree_totale) || null,
     public_cible: additionalInfo.public_cible?.trim() || null,
-    tags: additionalInfo.tags?.trim() || null,
+    tags: additionalInfo.tags?.trim()
+      ? additionalInfo.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t)
+      : [],
     date_debut: additionalInfo.date_debut || null,
     date_fin: additionalInfo.date_fin || null,
     inscription_ouverte: Boolean(additionalInfo.inscription_ouverte),

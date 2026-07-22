@@ -29,6 +29,8 @@ export class InstructorCourseGridComponent implements OnInit {
 
   private _filtered: any[] = [];
 
+  public selectedFormation: any = null;
+
   constructor(private formationService: FormationService) {}
 
   ngOnInit(): void {
@@ -147,6 +149,19 @@ export class InstructorCourseGridComponent implements OnInit {
   }
 
   trackByFormation(_: number, f: any): number { return f.id || _; }
+
+  togglePublishStatus(formation: any): void {
+    const isPublished = formation.est_publie === true || formation.est_publie === 1;
+    const action = isPublished
+      ? this.formationService.unpublishFormation(formation.id)
+      : this.formationService.publishFormation(formation.id);
+
+    action.subscribe({
+      next: () => {
+        formation.est_publie = !isPublished;
+      }
+    });
+  }
 
   archiveFormation(formation: any): void {
     if (!confirm(`Archiver la formation "${formation.titre}" ?`)) return;

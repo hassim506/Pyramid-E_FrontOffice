@@ -377,6 +377,149 @@
 
 </div><!-- /formation -->
 
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PREVIEW MODAL -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="cd-modal-overlay" *ngIf="previewOpen" (click)="closePreview()">
+  <div class="cd-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="cd-modal__header">
+      <div class="cd-modal__header-left">
+        <div class="cd-modal__type-badge" [attr.data-type]="previewSection_?.type || 'texte'">
+          <i class="isax" [ngClass]="{
+            'isax-video-play': previewSection_?.type === 'video' || previewSection_?.type === 'lecture',
+            'isax-document-text': previewSection_?.type === 'texte' || previewSection_?.type === 'text' || previewSection_?.type === 'reading' || !previewSection_?.type,
+            'isax-document': previewSection_?.type === 'pdf',
+            'isax-gallery': previewSection_?.type === 'image',
+            'isax-document-download': previewSection_?.type === 'fichier',
+            'isax-task-square': previewSection_?.type === 'quiz' || previewSection_?.type === 'assignment'
+          }"></i>
+          <span>{{ previewSection_?.type || 'texte' }}</span>
+        </div>
+        <h3 class="cd-modal__title">{{ previewSection_?.titre }}</h3>
+      </div>
+      <button class="cd-modal__close" (click)="closePreview()">
+        <i class="isax isax-close-circle"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="cd-modal__body">
+
+      <!-- VIDÉO YouTube -->
+      <ng-container *ngIf="(previewSection_?.type === 'video' || previewSection_?.type === 'lecture') && hasPreviewResource() && isPreviewYouTube()">
+        <div class="cd-modal__video-wrap">
+          <iframe [src]="getPreviewYouTubeEmbedUrl()"
+                  frameborder="0" allowfullscreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  [title]="previewSection_?.titre">
+          </iframe>
+        </div>
+      </ng-container>
+
+      <!-- VIDÉO fichier local -->
+      <ng-container *ngIf="(previewSection_?.type === 'video' || previewSection_?.type === 'lecture') && hasPreviewResource() && !isPreviewYouTube()">
+        <div class="cd-modal__video-wrap cd-modal__video-wrap--native">
+          <video controls autoplay class="cd-modal__video-native" [src]="getPreviewSafeUrl()">
+            Votre navigateur ne supporte pas la lecture vidéo.
+          </video>
+        </div>
+      </ng-container>
+
+      <!-- VIDÉO sans ressource -->
+      <ng-container *ngIf="(previewSection_?.type === 'video' || previewSection_?.type === 'lecture') && !hasPreviewResource()">
+        <div class="cd-modal__empty">
+          <i class="isax isax-video-play"></i>
+          <p>Vidéo non disponible pour l'aperçu.</p>
+        </div>
+      </ng-container>
+
+      <!-- IMAGE -->
+      <ng-container *ngIf="previewSection_?.type === 'image'">
+        <div *ngIf="hasPreviewResource(); else noPreviewImage" class="cd-modal__image-wrap">
+          <img [src]="getPreviewResourceUrl()" [alt]="previewSection_?.titre" class="cd-modal__image">
+        </div>
+        <ng-template #noPreviewImage>
+          <div class="cd-modal__empty">
+            <i class="isax isax-gallery"></i>
+            <p>Image non disponible.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+
+      <!-- PDF -->
+      <ng-container *ngIf="previewSection_?.type === 'pdf'">
+        <div *ngIf="hasPreviewResource(); else noPreviewPdf" class="cd-modal__pdf-wrap">
+          <iframe [src]="getPreviewSafeUrl()" class="cd-modal__pdf-frame"></iframe>
+        </div>
+        <ng-template #noPreviewPdf>
+          <div class="cd-modal__empty">
+            <i class="isax isax-document"></i>
+            <p>Document PDF non disponible.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+
+      <!-- FICHIER -->
+      <ng-container *ngIf="previewSection_?.type === 'fichier'">
+        <div *ngIf="hasPreviewResource()">
+          <div *ngIf="isPreviewViewableFile(); else fileDownloadOnly" class="cd-modal__pdf-wrap">
+            <iframe [src]="getPreviewFileViewerUrl()" class="cd-modal__pdf-frame"></iframe>
+          </div>
+          <ng-template #fileDownloadOnly>
+            <div class="cd-modal__file-card">
+              <div class="cd-modal__file-icon"><i class="isax isax-document-download"></i></div>
+              <div class="cd-modal__file-info">
+                <p class="cd-modal__file-name">{{ previewSection_?.titre }}</p>
+                <p class="cd-modal__file-hint">Cliquez sur télécharger pour accéder au fichier.</p>
+              </div>
+              <a [href]="getPreviewResourceUrl()" target="_blank" download class="cd-enroll-btn cd-enroll-btn--green" style="width:auto; padding:10px 20px;">
+                <i class="isax isax-document-download"></i> Télécharger
+              </a>
+            </div>
+          </ng-template>
+        </div>
+        <div *ngIf="!hasPreviewResource()" class="cd-modal__empty">
+          <i class="isax isax-document-download"></i>
+          <p>Fichier non disponible.</p>
+        </div>
+      </ng-container>
+
+      <!-- TEXTE / LECTURE -->
+      <ng-container *ngIf="previewSection_?.type === 'texte' || previewSection_?.type === 'text' || previewSection_?.type === 'reading' || !previewSection_?.type">
+        <div *ngIf="previewSection_?.contenu || previewSection_?.description; else noPreviewText" class="cd-modal__text-wrap">
+          <div class="cd-modal__text-body" [innerHTML]="previewSection_?.contenu || previewSection_?.description"></div>
+        </div>
+        <ng-template #noPreviewText>
+          <div class="cd-modal__empty">
+            <i class="isax isax-document-text"></i>
+            <p>Aucun contenu disponible pour l'aperçu.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+
+      <!-- QUIZ -->
+      <ng-container *ngIf="previewSection_?.type === 'quiz' || previewSection_?.type === 'assignment'">
+        <div class="cd-modal__empty">
+          <i class="isax isax-task-square"></i>
+          <p>Les quiz sont disponibles une fois inscrit à la formation.</p>
+        </div>
+      </ng-container>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="cd-modal__footer">
+      <div class="cd-modal__meta" *ngIf="previewSection_?.duree_estimee">
+        <i class="isax isax-clock"></i> {{ previewSection_?.duree_estimee }} min
+      </div>
+      <button class="cd-modal__close-btn" (click)="closePreview()">Fermer</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- Not found -->
 <div *ngIf="!formation && !loading && !error" class="container" style="padding:80px 0; text-align:center">
   <i class="isax isax-book-1" style="font-size:3rem; color:#9CA3AF; display:block; margin-bottom:16px;"></i>

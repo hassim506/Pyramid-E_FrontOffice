@@ -563,6 +563,27 @@ export class CourseWatchComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
   }
 
+  getResourceCount(): number {
+    if (!this.activeSection) return 0;
+    const res = this.activeSection.ressources;
+    if (!res) return 0;
+    if (Array.isArray(res)) return res.length;
+    if (typeof res === 'string' || typeof res === 'object') return 1;
+    return 0;
+  }
+
+  getFormateurInitials(): string {
+    const name = this.formation?.formateur_details?.nom
+              || this.formation?.formateur?.nom_complet
+              || 'F';
+    return name.split(' ').map((w: string) => w[0]?.toUpperCase() || '').slice(0, 2).join('');
+  }
+
+  getModuleIndex(): number {
+    if (!this.activeModule || !this.formation?.modules) return 0;
+    return this.formation.modules.findIndex((m: any) => m.id === this.activeModule.id);
+  }
+
   goBack(): void {
     if (this.fromPage === 'parcours' && this.parcoursId) {
       this.router.navigate(['/student/mes-parcours', this.parcoursId]);

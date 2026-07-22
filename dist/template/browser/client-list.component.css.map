@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/adminrh/client/client-list.component.scss"],
-  "sourcesContent": [".page-title {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.table-responsive.custom-table {\r\n  margin-top: 1rem;\r\n}\r\n.badge {\r\n  font-size: 0.85em;\r\n  padding: 0.4em 0.7em;\r\n}\r\n.input-icon-addon {\r\n  color: #888;\r\n}\r\n.action-icon {\r\n  color: #007bff;\r\n  cursor: pointer;\r\n}\r\n.action-icon:hover {\r\n  color: #0056b3;\r\n}\r\n"],
-  "mappings": ";AAAA,CAAA;AACE,iBAAA;;AAEF,CAAA,gBAAA,CAAA;AACE,cAAA;;AAEF,CAAA;AACE,aAAA;AACA,WAAA,MAAA;;AAEF,CAAA;AACE,SAAA;;AAEF,CAAA;AACE,SAAA;AACA,UAAA;;AAEF,CAJA,WAIA;AACE,SAAA;;",
-  "names": []
-}
