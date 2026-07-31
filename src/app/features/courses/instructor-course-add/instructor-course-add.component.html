@@ -167,19 +167,9 @@
                                             </div>
 
                                             <div class="col-md-12 mb-3">
-                                                <label class="form-label fw-semibold">Description courte<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" formControlName="short_description"
-                                                       placeholder="Résumé en une phrase"
-                                                       [class.is-invalid]="basicInfoForm.get('short_description')?.invalid && basicInfoForm.get('short_description')?.touched">
-                                                <div class="invalid-feedback">La description courte est requise</div>
-                                            </div>
-
-                                            <div class="col-md-12 mb-3">
-                                                <label class="form-label fw-semibold">Description complète<span class="text-danger">*</span></label>
+                                                <label class="form-label fw-semibold">Description</label>
                                                 <textarea class="form-control" formControlName="description" rows="5"
-                                                          placeholder="Description détaillée de la formation..."
-                                                          [class.is-invalid]="basicInfoForm.get('description')?.invalid && basicInfoForm.get('description')?.touched"></textarea>
-                                                <div class="invalid-feedback">La description est requise</div>
+                                                          placeholder="Description détaillée de la formation..."></textarea>
                                             </div>
 
                                             <!-- Objectifs pédagogiques -->

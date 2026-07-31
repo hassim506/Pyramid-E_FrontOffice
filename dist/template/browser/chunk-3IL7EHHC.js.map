@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/service/common/common.service.ts"],
+  "sourcesContent": ["import { Injectable, Renderer2, RendererFactory2 } from '@angular/core';\r\nimport { BehaviorSubject } from 'rxjs';\r\n\r\n@Injectable({\r\n  providedIn: 'root',\r\n})\r\nexport class CommonService {\r\n\r\n  public base: BehaviorSubject<string> = new BehaviorSubject<string>('');\r\n  public page: BehaviorSubject<string> = new BehaviorSubject<string>('');\r\n  public last: BehaviorSubject<string> = new BehaviorSubject<string>('');\r\n\r\n\r\n  public isuserHeader: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(\r\n    true\r\n  );\r\n  public isAdminHeader: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(\r\n    false\r\n  );\r\n \r\n  public isstudentHeader: BehaviorSubject<boolean> =\r\n    new BehaviorSubject<boolean>(false);\r\n  public mainFooter: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(\r\n    true\r\n  );\r\n\r\n\r\n}"],
+  "mappings": ";;;;;;;;AAMM,IAAO,gBAAP,MAAO,eAAa;EAEjB,OAAgC,IAAI,gBAAwB,EAAE;EAC9D,OAAgC,IAAI,gBAAwB,EAAE;EAC9D,OAAgC,IAAI,gBAAwB,EAAE;EAG9D,eAAyC,IAAI,gBAClD,IAAI;EAEC,gBAA0C,IAAI,gBACnD,KAAK;EAGA,kBACL,IAAI,gBAAyB,KAAK;EAC7B,aAAuC,IAAI,gBAChD,IAAI;;qCAjBK,gBAAa;EAAA;4EAAb,gBAAa,SAAb,eAAa,WAAA,YAFZ,OAAM,CAAA;;;sEAEP,eAAa,CAAA;UAHzB;WAAW;MACV,YAAY;KACb;;;",
+  "names": []
+}

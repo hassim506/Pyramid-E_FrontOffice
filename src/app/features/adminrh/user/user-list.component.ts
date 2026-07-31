@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { User } from '../../../shared/models/user.models';
 import { UserService } from '../../../shared/service/user/user.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
+import { sortRoleNames } from '../../../shared/utils/role-sort.utils';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { UserAddComponent } from '../user-add/user-add.component';
 import { AdminrhRoleComponent } from '../adminrh-role/adminrh-role.component';
@@ -48,7 +49,8 @@ export class UserListComponent implements OnInit {
     return new Set(this.actualData.map(u => u.entreprise_id).filter(Boolean)).size;
   }
   get availableRoles(): string[] {
-    return [...new Set(this.actualData.map(u => this.getRoleName(u)).filter(Boolean))];
+    const roles = [...new Set(this.actualData.map(u => this.getRoleName(u)).filter(Boolean))];
+    return sortRoleNames(roles);
   }
 
   // ── État ─────────────────────────────────────

@@ -158,8 +158,8 @@ export class InstructorCourseAddComponent implements OnInit {
       langue: ['fr', Validators.required],
       type: ['en_ligne', Validators.required],
       nb_max_participants: [25],
-      short_description: ['', Validators.required],
-      description: ['', Validators.required],
+      short_description: [''],
+      description: [''],
       est_certifiante: [false]
     });
 

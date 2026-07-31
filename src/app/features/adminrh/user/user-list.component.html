@@ -216,9 +216,9 @@
     <!-- Légende hiérarchique -->
     <div class="ul-matrix__hierarchy mb-3">
       <div class="ul-hier-chain">
-        <span class="ul-hier-badge ul-hier--rh">Responsable RH</span>
-        <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
         <span class="ul-hier-badge ul-hier--rh">Admin RH</span>
+        <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
+        <span class="ul-hier-badge ul-hier--rh">Responsable RH</span>
         <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
         <span class="ul-hier-badge ul-hier--mgr">Manager</span>
         <i class="isax isax-arrow-right-3 ul-hier-arrow"></i>
@@ -235,8 +235,8 @@
       <thead>
         <tr>
           <th style="min-width:200px">Permission</th>
-          <th title="Responsable RH"><span class="ul-mh-role ul-mh--rh">RRH</span></th>
           <th title="Admin RH"><span class="ul-mh-role ul-mh--rh">ARH</span></th>
+          <th title="Responsable RH"><span class="ul-mh-role ul-mh--rh">RRH</span></th>
           <th title="Manager"><span class="ul-mh-role ul-mh--mgr">MGR</span></th>
           <th title="Formateur"><span class="ul-mh-role ul-mh--form">FOR</span></th>
           <th title="Consultant"><span class="ul-mh-role ul-mh--form">CST</span></th>
@@ -244,8 +244,8 @@
         </tr>
         <tr class="ul-matrix__role-names">
           <td class="ul-matrix__group-label">Rôles (ordre hiérarchique ↓)</td>
-          <td class="small text-nowrap">Responsable RH</td>
           <td class="small text-nowrap">Admin RH</td>
+          <td class="small text-nowrap">Responsable RH</td>
           <td class="small text-nowrap">Manager</td>
           <td class="small text-nowrap">Formateur</td>
           <td class="small text-nowrap">Consultant</td>
@@ -292,11 +292,47 @@
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
         </tr>
+        <tr>
+          <td>Réinitialiser le mot de passe</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Modifier son propre profil</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Gérer les directions / départements</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
 
         <!-- Formations & contenus -->
         <tr><td class="ul-matrix__group" colspan="7">Formations & contenus</td></tr>
         <tr>
           <td>Créer / publier une formation</td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Modifier / archiver une formation</td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
@@ -323,7 +359,7 @@
           <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
-          <td>Créer / gérer les quiz</td>
+          <td>Créer / gérer les quiz & évaluations</td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
@@ -332,12 +368,78 @@
           <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
+          <td>Gérer le catalogue de formations</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Explorer le catalogue (lecture)</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+        <tr>
           <td>Accéder à ses formations assignées</td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Demander une formation (auto-inscription)</td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+
+        <!-- Parcours de formation -->
+        <tr><td class="ul-matrix__group" colspan="7">Parcours de formation</td></tr>
+        <tr>
+          <td>Créer / modifier un parcours</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Supprimer / archiver un parcours</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Assigner un parcours</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Suivre la progression d'un parcours</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-yes">✓</span></td>
         </tr>
 
@@ -353,11 +455,59 @@
           <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
+          <td>Supprimer / annuler une session</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
           <td>Inscrire des participants</td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Gérer l'émargement / présence</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+
+        <!-- Plans de formation -->
+        <tr><td class="ul-matrix__group" colspan="7">Plans de formation</td></tr>
+        <tr>
+          <td>Créer / modifier un plan de formation</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Valider / approuver un plan</td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Suivre le budget formation</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-no">—</span></td>
         </tr>
@@ -391,6 +541,24 @@
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
         </tr>
+        <tr>
+          <td>Exporter les rapports (PDF, Excel)</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Tableau de bord personnalisé</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
 
         <!-- Certifications -->
         <tr><td class="ul-matrix__group" colspan="7">Certifications</td></tr>
@@ -404,12 +572,90 @@
           <td><span class="ul-c-no">—</span></td>
         </tr>
         <tr>
+          <td>Révoquer un certificat</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
           <td>Télécharger son certificat</td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
           <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+
+        <!-- Notifications & communication -->
+        <tr><td class="ul-matrix__group" colspan="7">Notifications & communication</td></tr>
+        <tr>
+          <td>Envoyer des notifications</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Envoyer des emails en masse</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Recevoir des notifications</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+
+        <!-- Évaluations & feedback -->
+        <tr><td class="ul-matrix__group" colspan="7">Évaluations & feedback</td></tr>
+        <tr>
+          <td>Créer une évaluation à chaud / à froid</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Consulter les résultats d'évaluation</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-partial">◐</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+        </tr>
+        <tr>
+          <td>Répondre à une évaluation</td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Noter un formateur</td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-yes">✓</span></td>
+          <td><span class="ul-c-no">—</span></td>
+          <td><span class="ul-c-no">—</span></td>
           <td><span class="ul-c-yes">✓</span></td>
         </tr>
 
@@ -426,7 +672,7 @@
     <div class="ul-matrix__note mt-2">
       <i class="isax isax-info-circle me-1"></i>
       <small class="text-muted">
-        <strong>RRH</strong> = Responsable RH · <strong>ARH</strong> = Admin RH ·
+        <strong>ARH</strong> = Admin RH · <strong>RRH</strong> = Responsable RH ·
         <strong>MGR</strong> = Manager · <strong>FOR</strong> = Formateur ·
         <strong>CST</strong> = Consultant · <strong>EMP</strong> = Employé
       </small>

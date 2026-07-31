@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/home-list/home2/components/footer/footer.component.scss"],
+  "sourcesContent": [".footer-two {\r\n    i-feather {\r\n        width: 17px;\r\n    }\r\n}"],
+  "mappings": ";AACI,CAAA,WAAA;AACI,SAAA;;",
+  "names": []
+}

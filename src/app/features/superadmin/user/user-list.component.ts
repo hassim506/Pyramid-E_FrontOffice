@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../shared/models/user.models';
 import { UserService } from '../../../shared/service/user/user.service';
+import { sortRoles, sortRoleNames } from '../../../shared/utils/role-sort.utils';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { UserAddComponent } from '../user-add/user-add.component';
 import { SuperadminRoleComponent } from '../superadmin-role/superadmin-role.component';
@@ -55,7 +56,8 @@ export class UserListComponent implements OnInit {
     return new Set(this.actualData.map(u => u.entreprise_id).filter(Boolean)).size;
   }
   get availableRoles(): string[] {
-    return [...new Set(this.actualData.map(u => this.getRoleName(u)).filter(Boolean))];
+    const roles = [...new Set(this.actualData.map(u => this.getRoleName(u)).filter(Boolean))];
+    return sortRoleNames(roles);
   }
 
   // ── État ─────────────────────────────────────
@@ -98,8 +100,8 @@ export class UserListComponent implements OnInit {
   private loadRoles(): void {
     this.userService.getRoles().subscribe({
       next: (response: any) => {
-        // L'API retourne { status: true, roles: [...], system_roles: [...], total: X }
-        this.allRoles = response.roles || [];
+        const roles = response.roles || [];
+        this.allRoles = sortRoles(roles);
         console.log('Roles chargés:', this.allRoles);
       },
       error: (err) => {

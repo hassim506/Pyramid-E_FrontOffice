@@ -35,6 +35,8 @@
     </div>
   </div>
 
+
+
   <!-- ── Toolbar ── -->
   <div class="ac-toolbar">
     <div class="ac-search">
@@ -196,29 +198,26 @@
           </div>
 
           <div class="wz-field">
-            <label class="wz-label">Description <span class="wz-req">*</span></label>
+            <label class="wz-label">Description</label>
             <textarea class="wz-input wz-textarea" formControlName="description" placeholder="Description détaillée du parcours"></textarea>
-            <span class="wz-hint" *ngIf="parcoursForm.get('description')?.invalid && parcoursForm.get('description')?.touched">
-              Description requise (min. 10 caractères)
-            </span>
           </div>
 
           <div class="wz-row">
             <div class="wz-field" style="margin-bottom:0;">
-              <label class="wz-label">Niveau <span class="wz-req">*</span></label>
+              <label class="wz-label">Niveau</label>
               <select class="wz-input" title="Niveau du parcours" formControlName="niveau">
                 <option *ngFor="let n of niveaux" [value]="n.value">{{ n.label }}</option>
               </select>
             </div>
             <div class="wz-field" style="margin-bottom:0;">
-              <label class="wz-label">Durée estimée (heures) <span class="wz-req">*</span></label>
-              <input type="number" class="wz-input" formControlName="duree_estimee" min="1">
+              <label class="wz-label">Durée estimée (heures)</label>
+              <input type="number" class="wz-input" formControlName="duree_estimee" min="0">
             </div>
           </div>
 
           <div class="wz-row" style="margin-top:12px;">
             <div class="wz-field" style="margin-bottom:0;">
-              <label class="wz-label">Coût (XOF) <span class="wz-req">*</span></label>
+              <label class="wz-label">Coût (XOF)</label>
               <input type="number" class="wz-input" formControlName="prix" min="0" step="0.01">
             </div>
             <div class="wz-field" style="margin-bottom:0;">
@@ -283,7 +282,7 @@
           <!-- ── Formations du parcours ── -->
           <div style="margin-top:18px;">
             <div class="wz-label" style="margin-bottom:8px;">
-              Formations du parcours
+              Formations du parcours <span class="wz-req">*</span>
               <span *ngIf="selectedFormations.length > 0" style="font-weight:400;color:#185fa5;margin-left:4px;">({{ selectedFormations.length }} sélectionnée{{ selectedFormations.length > 1 ? 's' : '' }})</span>
             </div>
 
@@ -338,7 +337,7 @@
         <div class="wz-foot">
           <span class="wz-foot__info">{{ editMode ? 'Modification' : 'Création' }} en cours</span>
           <button type="button" class="wz-btn-ghost" data-bs-dismiss="modal">Annuler</button>
-          <button type="submit" class="wz-btn-primary" [disabled]="parcoursForm.invalid || saving">
+          <button type="submit" class="wz-btn-primary" [disabled]="parcoursForm.invalid || saving || selectedFormationIds.size === 0">
             <span *ngIf="saving" class="wz-spinner"></span>
             {{ editMode ? 'Modifier' : 'Créer' }}
           </button>
@@ -593,3 +592,7 @@
     </div>
   </div>
 </div>
+
+
+
+

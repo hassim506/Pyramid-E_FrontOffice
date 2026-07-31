@@ -18,7 +18,8 @@ export class RoleRedirectService {
   // on se base sur le champ `type` retourné par le backend au login.
   resolveConfig(roleId: number, roleType?: string, roleNames?: string[]): RoleRoutingConfig | null {
     // 1. Correspondance directe par role_id
-    const direct = ROLE_ROUTING.find(c => c.roleIds.includes(roleId));
+    const numericRoleId = Number(roleId);
+    const direct = ROLE_ROUTING.find(c => c.roleIds.includes(numericRoleId));
     if (direct) return direct;
 
     // 2. Rôle dynamique : se baser sur le type fourni par le backend

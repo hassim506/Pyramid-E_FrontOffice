@@ -52,7 +52,7 @@ export class InstructorComponent implements OnInit {
       const raw = localStorage.getItem('pyramide_user');
       if (raw) {
         const user: any = JSON.parse(raw);
-        if (!user.role && user.role_id === 3) user.role = 'Formateur';
+        if (!user.role && Number(user.role_id) === 3) user.role = 'Formateur';
         this.instructorProfile = user as User;
       }
     } catch (e) {

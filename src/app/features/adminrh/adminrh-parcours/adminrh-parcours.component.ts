@@ -78,10 +78,10 @@ export class AdminrhParcoursComponent implements OnInit {
   ) {
     this.parcoursForm = this.formBuilder.group({
       nom: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(10)]],
-      niveau: ['debutant', Validators.required],
-      duree_estimee: [0, [Validators.required, Validators.min(1)]],
-      prix: ['0', [Validators.required, Validators.min(0)]],
+      description: [''],
+      niveau: ['debutant'],
+      duree_estimee: [0],
+      prix: ['0'],
       actif: [true],
       image_url: [''],
       objectifs: this.formBuilder.array([this.createObjectifControl()]),
@@ -98,13 +98,13 @@ export class AdminrhParcoursComponent implements OnInit {
 
   createObjectifControl(): FormGroup {
     return this.formBuilder.group({
-      value: ['', Validators.required]
+      value: ['']
     });
   }
 
   createPrerequisControl(): FormGroup {
     return this.formBuilder.group({
-      value: ['', Validators.required]
+      value: ['']
     });
   }
 
@@ -214,14 +214,14 @@ export class AdminrhParcoursComponent implements OnInit {
     // Remplir les objectifs
     parcours.objectifs.forEach(objectif => {
       this.objectifs.push(this.formBuilder.group({
-        value: [objectif, Validators.required]
+        value: [objectif]
       }));
     });
-    
+
     // Remplir les prérequis
     parcours.prerequis.forEach(prerequis => {
       this.prerequis.push(this.formBuilder.group({
-        value: [prerequis, Validators.required]
+        value: [prerequis]
       }));
     });
     
@@ -302,15 +302,18 @@ buildParcoursData(): ParcoursRequest {
   const entrepriseId = this.parcoursService.getCurrentUserEntrepriseId();
   console.log('Entreprise ID utilisé pour création:', entrepriseId);
 
+  const duree = parseInt(formValue.duree_estimee) || 0;
+  const description = formValue.description?.trim() || '';
+
   return {
     nom: formValue.nom.trim(),
-    description: formValue.description.trim(),
-    niveau: formValue.niveau,
-    duree_estimee: parseInt(formValue.duree_estimee),
-    prix: parseFloat(formValue.prix).toFixed(2), // ou parseFloat(formValue.prix) selon le backend
+    description: description || undefined,
+    niveau: formValue.niveau || 'debutant',
+    duree_estimee: duree > 0 ? duree : undefined,
+    prix: parseFloat(formValue.prix) > 0 ? parseFloat(formValue.prix).toFixed(2) : undefined,
     actif: Boolean(formValue.actif),
-    objectifs: formValue.objectifs.map((obj: any) => obj.value.trim()).filter((v: string) => v),
-    prerequis: formValue.prerequis.map((pre: any) => pre.value.trim()).filter((v: string) => v),
+    objectifs: formValue.objectifs.map((obj: any) => obj.value?.trim()).filter((v: string) => v),
+    prerequis: formValue.prerequis.map((pre: any) => pre.value?.trim()).filter((v: string) => v),
     statut: Boolean(formValue.actif),
     entreprise_id: entrepriseId,
     image_url: formValue.image_url?.trim() || undefined,

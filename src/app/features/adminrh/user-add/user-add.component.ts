@@ -5,6 +5,7 @@ import { User } from '../../../shared/models/user.models';
 import { Client, Company } from '../../../shared/models/client-company.models';
 import { UserService } from '../../../shared/service/user/user.service';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
+import { sortRoles } from '../../../shared/utils/role-sort.utils';
 
 @Component({
   selector: 'app-user-add',
@@ -44,17 +45,18 @@ export class UserAddComponent implements OnInit, OnChanges {
   loadRoles(): void {
     this.userService.getRoles().subscribe({
       next: (response: any) => {
-        if (Array.isArray(response)) this.roles = response;
-        else if (response?.data) this.roles = response.data;
-        else if (response?.roles) this.roles = response.roles;
-        else this.roles = [];
+        let roles: any[] = [];
+        if (Array.isArray(response)) roles = response;
+        else if (response?.data) roles = response.data;
+        else if (response?.roles) roles = response.roles;
+        this.roles = sortRoles(roles);
       },
       error: () => {
         this.roles = [
-          { id: 2, name: 'Employé' },
-          { id: 3, name: 'Formateur' },
           { id: 4, name: 'Responsable RH' },
           { id: 5, name: 'Responsable RH Groupe' },
+          { id: 3, name: 'Formateur' },
+          { id: 2, name: 'Employé' },
         ];
       }
     });

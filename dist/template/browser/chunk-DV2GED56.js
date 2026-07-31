@@ -1,1 +1,0 @@
-import{xb as e}from"./chunk-3FZDVSC7.js";var p=class t{transform(i){return i?i.split("-").map(r=>r.charAt(0).toUpperCase()+r.slice(1)).join(" "):""}static \u0275fac=function(r){return new(r||t)};static \u0275pipe=e({name:"capitalizeWords",type:t,pure:!0})};export{p as a};

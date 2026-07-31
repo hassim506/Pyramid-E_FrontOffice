@@ -77,13 +77,13 @@ export interface Parcours {
 
 export interface ParcoursRequest {
   nom: string;
-  description: string;
-  niveau: string;
-  duree_estimee: number;
-  prix: string;
+  description?: string;
+  niveau?: string;
+  duree_estimee?: number;
+  prix?: string;
   actif: boolean;
-  objectifs: string[];
-  prerequis: string[];
+  objectifs?: string[];
+  prerequis?: string[];
   image_url?: string;
   entreprise_id: number;
   statut: boolean;
