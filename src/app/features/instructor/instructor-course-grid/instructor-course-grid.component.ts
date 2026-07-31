@@ -4,12 +4,14 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FormationService } from '../../../shared/service/formation/formation.service';
+import { UserService } from '../../../shared/service/user/user.service';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
 @Component({
   selector: 'app-instructor-course-grid',
   templateUrl: './instructor-course-grid.component.html',
   styleUrls: ['./instructor-course-grid.component.scss'],
-  imports: [CommonModule, FormsModule, RouterLink]
+  imports: [CommonModule, FormsModule, RouterLink, HasPermissionDirective]
 })
 export class InstructorCourseGridComponent implements OnInit {
   public routes = routes;
@@ -31,7 +33,23 @@ export class InstructorCourseGridComponent implements OnInit {
 
   public selectedFormation: any = null;
 
-  constructor(private formationService: FormationService) {}
+  // ── Modal participants ────────────────────────────────────────
+  participantsModalOpen = false;
+  participants: any[] = [];
+  participantsLoading = false;
+  participantsSearch = '';
+  availableUsers: any[] = [];
+  availableUsersFiltered: any[] = [];
+  usersSearch = '';
+  usersLoading = false;
+  inscriptionPending = false;
+  inscriptionSuccess = '';
+  inscriptionError = '';
+
+  constructor(
+    private formationService: FormationService,
+    private userService: UserService
+  ) {}
 
   ngOnInit(): void {
     this.loadFormations();
@@ -169,4 +187,117 @@ export class InstructorCourseGridComponent implements OnInit {
       next: () => this.loadFormations()
     });
   }
+
+  // ── PARTICIPANTS ──────────────────────────────────────────────
+  openParticipants(f: any): void {
+    this.selectedFormation = f;
+    this.participants = [];
+    this.availableUsers = [];
+    this.availableUsersFiltered = [];
+    this.participantsSearch = '';
+    this.usersSearch = '';
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+    this.participantsModalOpen = true;
+    this.loadParticipants(f.id);
+  }
+
+  closeParticipants(): void {
+    this.participantsModalOpen = false;
+    this.selectedFormation = null;
+  }
+
+  private loadParticipants(formationId: number): void {
+    this.participantsLoading = true;
+    this.formationService.getParticipantsFormation(formationId).subscribe({
+      next: (res: any) => {
+        this.participants = res.participants || [];
+        this.participantsLoading = false;
+        this.loadAvailableUsers();
+      },
+      error: () => { this.participantsLoading = false; }
+    });
+  }
+
+  private loadAvailableUsers(): void {
+    this.usersLoading = true;
+    this.userService.getMyUsers().subscribe({
+      next: (res: any) => {
+        const enrolled = new Set(this.participants.map((p: any) => p.id));
+        const all: any[] = res.users || res.data || [];
+        this.availableUsers = all.filter((u: any) => !enrolled.has(u.id));
+        this.applyUsersFilter();
+        this.usersLoading = false;
+      },
+      error: () => { this.usersLoading = false; }
+    });
+  }
+
+  applyUsersFilter(): void {
+    const q = this.usersSearch.toLowerCase();
+    this.availableUsersFiltered = this.availableUsers.filter((u: any) =>
+      !q || u.name?.toLowerCase().includes(q) || u.nom?.toLowerCase().includes(q)
+        || u.prenom?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
+    );
+  }
+
+  get participantsFiltered(): any[] {
+    const q = this.participantsSearch.toLowerCase();
+    return this.participants.filter((p: any) =>
+      !q || p.name?.toLowerCase().includes(q) || p.nom?.toLowerCase().includes(q)
+        || p.prenom?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q)
+    );
+  }
+
+  inscrireUser(user: any): void {
+    if (!this.selectedFormation || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.formationService.inscriptionDirecte({
+      formation_id: this.selectedFormation.id,
+      user_id: user.id
+    }).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été inscrit(e) avec succès.`;
+        this.participants.push(user);
+        this.availableUsers = this.availableUsers.filter((u: any) => u.id !== user.id);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de l\'inscription.';
+      }
+    });
+  }
+
+  desinscrireUser(user: any): void {
+    if (!this.selectedFormation || this.inscriptionPending) return;
+    this.inscriptionPending = true;
+    this.inscriptionSuccess = '';
+    this.inscriptionError = '';
+
+    this.formationService.desinscriptionDirecte({
+      formation_id: this.selectedFormation.id,
+      user_id: user.id
+    }).subscribe({
+      next: () => {
+        this.inscriptionPending = false;
+        const displayName = (user.prenom && user.nom) ? `${user.prenom} ${user.nom}` : (user.name || user.email);
+        this.inscriptionSuccess = `${displayName} a été désinscrit(e).`;
+        this.participants = this.participants.filter((p: any) => p.id !== user.id);
+        this.availableUsers.push(user);
+        this.applyUsersFilter();
+      },
+      error: (err: any) => {
+        this.inscriptionPending = false;
+        this.inscriptionError = err?.error?.message || 'Erreur lors de la désinscription.';
+      }
+    });
+  }
+
+  trackByUserId(_i: number, u: any): number { return u.id; }
 }

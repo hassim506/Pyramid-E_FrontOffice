@@ -263,8 +263,12 @@ export class StudentCertificateComponent implements OnInit {
 
   getEmployeeName(cert: Certificat): string {
     const e = cert.employe;
-    if (!e) return '—';
-    return [e.prenom, e.nom].filter(Boolean).join(' ') || e.name || '—';
+    if (e) {
+      const full = [e.prenom, e.nom].filter(Boolean).join(' ');
+      if (full) return full;
+      if (e.name) return e.name;
+    }
+    return this.userName || '—';
   }
 
   formatDate(dateStr: string | null | undefined): string {
