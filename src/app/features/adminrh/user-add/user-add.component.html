@@ -44,7 +44,12 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Direction</label>
-                            <input type="text" class="form-control" formControlName="direction">
+                            <select class="form-select" formControlName="direction_id">
+                                <option [ngValue]="null">— Aucune direction —</option>
+                                <option *ngFor="let d of directionOptions" [ngValue]="d.id">
+                                    {{ d.label }}
+                                </option>
+                            </select>
                         </div>
 
                         <div class="col-md-6 mb-3">

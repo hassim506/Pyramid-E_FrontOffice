@@ -1,0 +1,341 @@
+<!-- Notifications -->
+<div class="toast-container" *ngIf="successMessage || error">
+  <div class="toast toast-success" *ngIf="successMessage">
+    <i class="ti ti-check"></i> {{ successMessage }}
+  </div>
+  <div class="toast toast-error" *ngIf="error">
+    <i class="ti ti-alert-circle"></i> {{ error }}
+  </div>
+</div>
+
+<div class="page">
+  <!-- HEADER -->
+  <div class="ph">
+    <div class="ph-icon"><i class="ti ti-building"></i></div>
+    <div class="ph-info">
+      <div class="ph-title">Directions & Organisation — {{ entrepriseNom }}</div>
+      <div class="ph-sub">Structure hiérarchique : Direction → Département → Équipe</div>
+    </div>
+    <div class="ph-acts">
+      <button class="btn-p" (click)="openCreateModal('direction')">
+        <i class="ti ti-plus"></i> Nouvelle direction
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="ki ki-g"><i class="ti ti-building"></i></div>
+      <div><div class="kpi-v">{{ totalDirections }}</div><div class="kpi-l">Directions</div></div>
+    </div>
+    <div class="kpi">
+      <div class="ki ki-b"><i class="ti ti-layout-columns"></i></div>
+      <div><div class="kpi-v">{{ totalDepartements }}</div><div class="kpi-l">Départements</div></div>
+    </div>
+    <div class="kpi">
+      <div class="ki ki-a"><i class="ti ti-users-group"></i></div>
+      <div><div class="kpi-v">{{ totalEquipes }}</div><div class="kpi-l">Équipes</div></div>
+    </div>
+    <div class="kpi">
+      <div class="ki ki-p"><i class="ti ti-users"></i></div>
+      <div><div class="kpi-v">{{ totalEmployes }}</div><div class="kpi-l">Employés affectés</div></div>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Chargement de la structure...</span>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="layout" *ngIf="!loading">
+    <!-- ARBRE GAUCHE -->
+    <div class="tree-col">
+      <div class="tree-head">
+        <span class="th-title">Structure</span>
+        <div class="search-sm">
+          <i class="ti ti-search"></i>
+          <input type="text" [(ngModel)]="searchFilter" placeholder="Filtrer..." class="search-input" />
+        </div>
+      </div>
+      <div class="tree-scroll">
+        <ng-container *ngFor="let dir of filteredArborescence; let i = index">
+          <div class="dir-item">
+            <!-- Direction header -->
+            <div class="dir-header" [class.active]="isSelected(dir)" (click)="selectDirection(dir)">
+              <i class="ti ti-chevron-right dh-toggle" [class.open]="isDirectionExpanded(dir)" (click)="toggleDirection(dir, $event)"></i>
+              <div class="dh-icon" [ngClass]="getIconColor(i)">
+                <i class="ti" [ngClass]="getDirIcon(i)"></i>
+              </div>
+              <div class="dh-info">
+                <div class="dh-name">{{ dir.nom }}</div>
+                <div class="dh-count">{{ (dir.enfants || []).length }} départements · {{ dir.employes_count || 0 }} employés</div>
+              </div>
+              <span class="dh-badge">{{ dir.employes_count || 0 }}</span>
+            </div>
+
+            <!-- Départements (enfants level 2) -->
+            <div class="dept-list" *ngIf="isDirectionExpanded(dir) && dir.enfants?.length">
+              <div class="dept-item" *ngFor="let dept of dir.enfants; let j = index">
+                <div class="dept-header" [class.active-d]="isSelected(dept)" (click)="selectDepartement(dept)">
+                  <i class="ti ti-chevron-right dpt-toggle" [class.open]="isDepartementExpanded(dept)" (click)="toggleDepartement(dept, $event)"></i>
+                  <div class="dpt-dot" [style.background]="getDotColor(j)"></div>
+                  <span class="dpt-name">{{ dept.nom }}</span>
+                  <span class="dpt-count">{{ dept.employes_count || 0 }} emp.</span>
+                </div>
+
+                <!-- Équipes (enfants level 3) -->
+                <div class="team-list" *ngIf="isDepartementExpanded(dept) && dept.enfants?.length">
+                  <div class="team-item" *ngFor="let equipe of dept.enfants" [class.active-t]="isSelected(equipe)" (click)="selectEquipe(equipe)">
+                    <div class="ti-dot"></div>
+                    {{ equipe.nom }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Empty state -->
+        <div class="empty-tree" *ngIf="!filteredArborescence.length && !loading">
+          <i class="ti ti-building-community"></i>
+          <p>Aucune direction trouvée</p>
+          <button class="btn-p btn-sm" (click)="openCreateModal('direction')">
+            <i class="ti ti-plus"></i> Créer la première direction
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL DROITE -->
+    <div class="detail-col">
+      <!-- No selection -->
+      <div class="empty-detail" *ngIf="!selectedNode && !detailLoading">
+        <i class="ti ti-click"></i>
+        <p>Sélectionnez une direction dans l'arbre pour voir ses détails</p>
+      </div>
+
+      <!-- Detail loading -->
+      <div class="loading-state" *ngIf="detailLoading">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Detail content -->
+      <ng-container *ngIf="detailDirection && !detailLoading">
+        <!-- Header -->
+        <div class="detail-head">
+          <div class="dhead-icon"><i class="ti ti-users-group"></i></div>
+          <div class="dhead-info">
+            <div class="dhead-name">{{ detailDirection.nom }}</div>
+            <div class="dhead-path">
+              <ng-container *ngFor="let part of getBreadcrumb(); let last = last">
+                <span [class.dhead-current]="last">{{ part }}</span>
+                <i class="ti ti-chevron-right" *ngIf="!last"></i>
+              </ng-container>
+            </div>
+          </div>
+          <div class="dhead-acts">
+            <button class="act-btn" (click)="openEditModal(detailDirection)">
+              <i class="ti ti-edit"></i> Modifier
+            </button>
+            <button class="act-btn primary" (click)="openAffecterModal()">
+              <i class="ti ti-user-plus"></i> Affecter
+            </button>
+            <button class="act-btn" (click)="openCreateModal(detailDirection.type === 'direction' ? 'sous_direction' : 'departement', detailDirection.id)">
+              <i class="ti ti-plus"></i> Sous-structure
+            </button>
+            <button class="act-btn danger" (click)="confirmDelete()">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="sc-v">{{ detailDirection.employes_count || (detailDirection.employes || []).length }}</div>
+            <div class="sc-l">Membres</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-v">{{ (detailDirection.enfants || []).length }}</div>
+            <div class="sc-l">Sous-structures</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-v type-badge">{{ getTypeLabel(detailDirection.type) }}</div>
+            <div class="sc-l">Type</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-v" [class.status-active]="detailDirection.est_active" [class.status-inactive]="!detailDirection.est_active">
+              {{ detailDirection.est_active ? 'Actif' : 'Inactif' }}
+            </div>
+            <div class="sc-l">Statut</div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="detail-tabs">
+          <div class="dtab" [class.on]="detailTab === 'membres'" (click)="setDetailTab('membres')">
+            <i class="ti ti-users"></i> Membres ({{ (detailDirection.employes || []).length }})
+          </div>
+          <div class="dtab" [class.on]="detailTab === 'structure'" (click)="setDetailTab('structure')">
+            <i class="ti ti-sitemap"></i> Sous-structures
+          </div>
+        </div>
+
+        <!-- TAB: Membres -->
+        <div class="dtv" *ngIf="detailTab === 'membres'">
+          <table class="emp-table" *ngIf="detailDirection.employes?.length">
+            <thead>
+              <tr>
+                <th>Employé</th>
+                <th>Email</th>
+                <th>Fonction</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let emp of detailDirection.employes; let idx = index">
+                <td>
+                  <div class="emp-cell">
+                    <div class="emp-av" [ngClass]="getAvatarClass(idx)">{{ getInitials(emp) }}</div>
+                    <div>
+                      <div class="emp-name">{{ emp.prenom }} {{ emp.nom }}</div>
+                      <div class="emp-role">{{ emp.fonction || emp.matricule || '' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="emp-email">{{ emp.email }}</td>
+                <td class="emp-fonction">{{ emp.fonction || '—' }}</td>
+                <td>
+                  <div class="td-actions">
+                    <button class="tbl-act danger" title="Retirer" (click)="retirerEmploye(emp.id)">
+                      <i class="ti ti-x"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-tab" *ngIf="!detailDirection.employes?.length">
+            <i class="ti ti-users"></i>
+            <p>Aucun membre affecté</p>
+            <button class="btn-p btn-sm" (click)="openAffecterModal()">
+              <i class="ti ti-user-plus"></i> Affecter des employés
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB: Sous-structures -->
+        <div class="dtv" *ngIf="detailTab === 'structure'">
+          <div class="struct-grid" *ngIf="detailDirection.enfants?.length">
+            <div class="struct-card" *ngFor="let child of detailDirection.enfants; let ci = index" (click)="selectDepartement(child)">
+              <div class="sc-icon" [ngClass]="ci % 2 === 0 ? 'sci-g' : 'sci-b'">
+                <i class="ti" [ngClass]="child.type === 'departement' ? 'ti-layout-columns' : 'ti-users-group'"></i>
+              </div>
+              <div class="sc-info">
+                <div class="sc-name">{{ child.nom }}</div>
+                <div class="sc-meta">{{ getTypeLabel(child.type) }}</div>
+              </div>
+              <i class="ti ti-chevron-right sc-arr"></i>
+            </div>
+            <div class="struct-card add-card" (click)="openCreateModal(detailDirection.type === 'direction' ? 'sous_direction' : 'departement', detailDirection.id)">
+              <i class="ti ti-plus"></i>
+              <span>Ajouter une sous-structure</span>
+            </div>
+          </div>
+          <div class="empty-tab" *ngIf="!detailDirection.enfants?.length">
+            <i class="ti ti-sitemap"></i>
+            <p>Aucune sous-structure</p>
+            <button class="btn-p btn-sm" (click)="openCreateModal(detailDirection.type === 'direction' ? 'sous_direction' : 'departement', detailDirection.id)">
+              <i class="ti ti-plus"></i> Créer une sous-structure
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL CREATION / EDITION ═══ -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modalMode === 'create' ? 'Nouvelle structure' : 'Modifier' }}</h3>
+      <button class="modal-close" (click)="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <form [formGroup]="modalForm" (ngSubmit)="submitModal()">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nom *</label>
+          <input type="text" formControlName="nom" class="form-input" placeholder="Nom de la structure" />
+        </div>
+        <div class="form-group">
+          <label>Type *</label>
+          <select formControlName="type" class="form-input">
+            <option value="direction">Direction</option>
+            <option value="sous_direction">Département / Sous-direction</option>
+            <option value="departement">Équipe</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea formControlName="description" class="form-input" rows="3" placeholder="Description optionnelle"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Code</label>
+          <input type="text" formControlName="code" class="form-input" placeholder="Code interne (ex: DIR-TECH)" />
+        </div>
+        <div class="modal-error" *ngIf="modalError">{{ modalError }}</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-o" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn-p" [disabled]="modalForm.invalid || modalLoading">
+          <span *ngIf="modalLoading" class="spinner-sm"></span>
+          {{ modalMode === 'create' ? 'Créer' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ MODAL AFFECTER EMPLOYES ═══ -->
+<div class="modal-overlay" *ngIf="showAffecterModal" (click)="closeAffecterModal()">
+  <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Affecter des employés à « {{ selectedNode?.nom }} »</h3>
+      <button class="modal-close" (click)="closeAffecterModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="search-sm modal-search">
+        <i class="ti ti-search"></i>
+        <input type="text" [(ngModel)]="employeSearch" placeholder="Rechercher un employé..." class="search-input" />
+      </div>
+      <div class="employe-list" *ngIf="!affecterLoading">
+        <div class="employe-item" *ngFor="let emp of filteredEmployes" [class.selected]="isEmployeSelected(emp.id)" (click)="toggleEmployeSelection(emp.id)">
+          <div class="emp-check">
+            <i class="ti" [ngClass]="isEmployeSelected(emp.id) ? 'ti-checkbox' : 'ti-square'"></i>
+          </div>
+          <div class="emp-av av-g">{{ getInitials(emp) }}</div>
+          <div class="emp-info-line">
+            <span class="emp-name">{{ emp.prenom }} {{ emp.nom }}</span>
+            <span class="emp-email-sm">{{ emp.email }}</span>
+          </div>
+        </div>
+        <div class="empty-tab" *ngIf="!filteredEmployes.length">
+          <p>Aucun employé disponible</p>
+        </div>
+      </div>
+      <div class="loading-state" *ngIf="affecterLoading"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer">
+      <span class="selected-count">{{ selectedEmployeIds.length }} sélectionné(s)</span>
+      <button type="button" class="btn-o" (click)="closeAffecterModal()">Annuler</button>
+      <button type="button" class="btn-p" [disabled]="!selectedEmployeIds.length || affecterLoading" (click)="submitAffecter()">
+        <span *ngIf="affecterLoading" class="spinner-sm"></span>
+        Affecter
+      </button>
+    </div>
+  </div>
+</div>

@@ -4,7 +4,11 @@
       "Bash(npx ng *)",
       "Bash(grep -n \"^        <tr>$\" src/app/features/superadmin/user/user-list.component.html)",
       "Bash(grep -c \"^        <tr>$\" src/app/features/superadmin/user/user-list.component.html)",
-      "Bash(grep -n \"^        <tr>$\" src/app/features/adminrh/user/user-list.component.html)"
+      "Bash(grep -n \"^        <tr>$\" src/app/features/adminrh/user/user-list.component.html)",
+      "Bash(mkdir -p 'c:/Project/Pyramide/Dev/Front-end/angular/src/app/shared/service/direction')"
+    ],
+    "additionalDirectories": [
+      "c:\\Project\\Pyramide\\Dev\\Front-end\\angular\\src\\app\\shared\\service"
     ]
   }
 }

@@ -5,6 +5,7 @@ import { User } from '../../../shared/models/user.models';
 import { Client, Company } from '../../../shared/models/client-company.models';
 import { UserService } from '../../../shared/service/user/user.service';
 import { ClientCompanyService } from '../../../shared/service/client/client-company.service';
+import { DirectionService } from '../../../shared/service/direction/direction.service';
 import { sortRoles } from '../../../shared/utils/role-sort.utils';
 
 @Component({
@@ -28,11 +29,13 @@ export class UserAddComponent implements OnInit, OnChanges {
   companies: Company[] = [];
   roles: any[] = [];
   showPasswordFields = false;
+  directionOptions: { id: number; label: string; type: string }[] = [];
 
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private clientCompanyService: ClientCompanyService
+    private clientCompanyService: ClientCompanyService,
+    private directionService: DirectionService
   ) {}
 
   ngOnInit() {
@@ -40,6 +43,7 @@ export class UserAddComponent implements OnInit, OnChanges {
     this.loadClients();
     this.loadCompanies();
     this.loadRoles();
+    this.loadDirections();
   }
 
   loadRoles(): void {
@@ -85,6 +89,7 @@ export class UserAddComponent implements OnInit, OnChanges {
       numero: [''],
       matricule: [''],
       direction: [''],
+      direction_id: [null],
       fonction: [''],
       role_id: ['', Validators.required],
       entreprise_id: [''],
@@ -133,6 +138,25 @@ export class UserAddComponent implements OnInit, OnChanges {
     });
   }
 
+  loadDirections() {
+    this.directionService.getArborescence().subscribe({
+      next: (res) => {
+        this.directionOptions = [];
+        const arbo = res.arborescence || [];
+        for (const dir of arbo) {
+          this.directionOptions.push({ id: dir.id, label: dir.nom, type: 'direction' });
+          for (const dept of (dir.enfants || [])) {
+            this.directionOptions.push({ id: dept.id, label: `${dir.nom} → ${dept.nom}`, type: dept.type });
+            for (const equipe of (dept.enfants || [])) {
+              this.directionOptions.push({ id: equipe.id, label: `${dir.nom} → ${dept.nom} → ${equipe.nom}`, type: equipe.type });
+            }
+          }
+        }
+      },
+      error: () => {}
+    });
+  }
+
   populateForm() {
     if (this.userData) {
       const rawRoleId = this.userData.role
@@ -146,6 +170,7 @@ export class UserAddComponent implements OnInit, OnChanges {
         numero: this.userData.numero || '',
         matricule: this.userData.matricule || '',
         direction: this.userData.direction || '',
+        direction_id: this.userData.direction_id || null,
         fonction: this.userData.fonction || '',
         role_id: rawRoleId ? String(rawRoleId) : '',
         entreprise_id: this.userData.entreprise_id || '',
@@ -193,8 +218,12 @@ export class UserAddComponent implements OnInit, OnChanges {
   if (formData.entreprise_id) {
     formData.entreprise_id = parseInt(formData.entreprise_id);
   } else {
-    // Supprimer entreprise_id si vide
     delete formData.entreprise_id;
+  }
+  if (formData.direction_id) {
+    formData.direction_id = parseInt(formData.direction_id);
+  } else {
+    delete formData.direction_id;
   }
 
   // Ajouter created_by (supposons que c'est l'utilisateur connecté avec ID 1)

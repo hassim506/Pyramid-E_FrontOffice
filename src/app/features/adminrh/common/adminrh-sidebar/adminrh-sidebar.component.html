@@ -68,6 +68,11 @@
         <span *ngIf="employes > 0" class="sb-badge">{{ employes }}</span>
       </a>
 
+      <a [routerLink]="routes.adminrhDirection" routerLinkActive="active" class="sb-item">
+        <i class="isax isax-buildings-2"></i>
+        <span class="sb-item-label">Directions</span>
+      </a>
+
       <!-- Demandes avec sous-items -->
       <div *appHasPermission="'lister demandes formation'" class="sb-group">
         <div class="sb-group-header" [class.open]="openGroups['demandes']"

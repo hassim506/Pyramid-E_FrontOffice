@@ -6,6 +6,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../shared/models/user.models';
 import { UserService } from '../../../shared/service/user/user.service';
+import { DirectionService } from '../../../shared/service/direction/direction.service';
+import { PermissionService } from '../../../shared/service/permission/permission.service';
+import { RoleService } from '../../../shared/service/role/role.service';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
 import { sortRoleNames } from '../../../shared/utils/role-sort.utils';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
@@ -75,8 +78,34 @@ export class UserListComponent implements OnInit {
     rowErrors: { line: number; errors: string[] }[];
   } | null = null;
 
+  // ── Invitation en masse ───────────────────
+  showMassInviteDialog = false;
+  massInviteDirections: { id: number; label: string }[] = [];
+  selectedMassDirection: number | null = null;
+  selectedMassRole: number | null = null;
+  massInviteRoles: any[] = [];
+  isSendingMassInvite = false;
+  massInviteResult: { message: string; success: boolean } | null = null;
+  inactiveUsers: any[] = [];
+  filteredInactiveUsers: any[] = [];
+  selectedInactiveUserIds: number[] = [];
+  massInviteSelectAll = false;
+
+  // ── Matrice des habilitations ──────────────
+  matrixRoles: any[] = [];
+  matrixCategories: { name: string; permissions: any[] }[] = [];
+  matrixLoading = false;
+  matrixPageSize = 20;
+  matrixPageSizeOptions = [20, 40, 80, 100, 200];
+  matrixCurrentPage = 1;
+  matrixAllPermissions: { name: string; category: string }[] = [];
+  matrixTotalPermissions = 0;
+
   constructor(
     private userService: UserService,
+    private directionService: DirectionService,
+    private permissionService: PermissionService,
+    private roleService: RoleService,
     private authService: AuthService,
     private route: ActivatedRoute,
   ) {}
@@ -98,7 +127,12 @@ export class UserListComponent implements OnInit {
   // ════════════════════════════════════════════
   // TABS
   // ════════════════════════════════════════════
-  setTab(tab: 'users' | 'roles' | 'matrix'): void { this.activeTab = tab; }
+  setTab(tab: 'users' | 'roles' | 'matrix'): void {
+    this.activeTab = tab;
+    if (tab === 'matrix' && !this.matrixRoles.length) {
+      this.loadMatrix();
+    }
+  }
 
   // ════════════════════════════════════════════
   // CHARGEMENT
@@ -162,7 +196,10 @@ export class UserListComponent implements OnInit {
         u.fonction?.toLowerCase().includes(q)   ||
         u.numero?.toLowerCase().includes(q)     ||
         u.matricule?.toLowerCase().includes(q)  ||
-        u.direction?.toLowerCase().includes(q)
+        u.direction?.toLowerCase().includes(q)  ||
+        (u as any).direction_obj?.nom?.toLowerCase().includes(q) ||
+        (u as any).direction_obj?.parent?.nom?.toLowerCase().includes(q) ||
+        (u as any).direction_obj?.parent?.parent?.nom?.toLowerCase().includes(q)
       );
     }
 
@@ -309,7 +346,7 @@ export class UserListComponent implements OnInit {
       u.nom || '',
       u.prenom || '',
       u.email || '',
-      u.direction || '',
+      this.getDirectionPath(u),
       this.getRoleName(u),
       (u as any).entreprise?.nom || '',
       u.statut === 1 ? 'Actif' : 'Inactif',
@@ -321,6 +358,108 @@ export class UserListComponent implements OnInit {
     a.href = url; a.download = `utilisateurs_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  getDirectionPath(u: any): string {
+    if (!u.direction_obj) return u.direction || '';
+    const parts: string[] = [];
+    if (u.direction_obj.parent?.parent) parts.push(u.direction_obj.parent.parent.nom);
+    if (u.direction_obj.parent) parts.push(u.direction_obj.parent.nom);
+    parts.push(u.direction_obj.nom);
+    return parts.join(' → ');
+  }
+
+  // ════════════════════════════════════════════
+  // MATRICE DES HABILITATIONS
+  // ════════════════════════════════════════════
+  private loadMatrix(): void {
+    this.matrixLoading = true;
+    this.userService.getRoles().subscribe({
+      next: (response: any) => {
+        const roles = Array.isArray(response) ? response : (response.roles || response.data || []);
+        this.matrixRoles = roles
+          .filter((r: any) => r.role_level != null)
+          .sort((a: any, b: any) => (a.role_level || 99) - (b.role_level || 99));
+
+        this.permissionService.getAllPermissions().subscribe({
+          next: (permRes: any) => {
+            const permissions = permRes.permissions || [];
+            this.matrixAllPermissions = permissions
+              .map((p: any) => ({ ...p, category: p.category || 'Général' }))
+              .sort((a: any, b: any) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+            this.matrixTotalPermissions = this.matrixAllPermissions.length;
+            this.matrixCurrentPage = 1;
+            this.buildMatrixPage();
+            this.matrixLoading = false;
+          },
+          error: () => { this.matrixLoading = false; }
+        });
+      },
+      error: () => { this.matrixLoading = false; }
+    });
+  }
+
+  private buildMatrixPage(): void {
+    const start = (this.matrixCurrentPage - 1) * this.matrixPageSize;
+    const pagePerms = this.matrixAllPermissions.slice(start, start + this.matrixPageSize);
+    const categoryMap = new Map<string, any[]>();
+    for (const perm of pagePerms) {
+      const cat = perm.category || 'Général';
+      if (!categoryMap.has(cat)) categoryMap.set(cat, []);
+      categoryMap.get(cat)!.push(perm);
+    }
+    this.matrixCategories = Array.from(categoryMap.entries()).map(([name, perms]) => ({ name, permissions: perms }));
+  }
+
+  get matrixTotalPages(): number {
+    return Math.ceil(this.matrixTotalPermissions / this.matrixPageSize);
+  }
+
+  get matrixPageNumbers(): number[] {
+    return Array.from({ length: this.matrixTotalPages }, (_, i) => i + 1);
+  }
+
+  matrixChangePageSize(size: number): void {
+    this.matrixPageSize = size;
+    this.matrixCurrentPage = 1;
+    this.buildMatrixPage();
+  }
+
+  matrixGoToPage(page: number): void {
+    if (page < 1 || page > this.matrixTotalPages) return;
+    this.matrixCurrentPage = page;
+    this.buildMatrixPage();
+  }
+
+  roleHasPermission(role: any, permissionName: string): boolean {
+    if (!role.permissions) return false;
+    return role.permissions.some((p: any) => p.name === permissionName);
+  }
+
+  getRoleAbbrMatrix(role: any): string {
+    const map: Record<string, string> = {
+      'admin rh': 'ARH', 'responsable rh': 'RRH', 'manager': 'MGR',
+      'formateur': 'FOR', 'consultant': 'CST', 'employé': 'EMP',
+    };
+    return map[role.name?.toLowerCase()] || role.name?.substring(0, 3).toUpperCase() || '?';
+  }
+
+  getRoleColorClassMatrix(role: any): string {
+    const name = role.name?.toLowerCase() || '';
+    if (name.includes('admin rh') || name.includes('responsable rh')) return 'ul-mh--rh';
+    if (name.includes('manager')) return 'ul-mh--mgr';
+    if (name.includes('formateur') || name.includes('consultant')) return 'ul-mh--form';
+    if (name.includes('employé') || name.includes('employee')) return 'ul-mh--emp';
+    return 'ul-mh--default';
+  }
+
+  getHierBadgeClassMatrix(role: any): string {
+    const name = role.name?.toLowerCase() || '';
+    if (name.includes('admin rh') || name.includes('responsable rh')) return 'ul-hier--rh';
+    if (name.includes('manager')) return 'ul-hier--mgr';
+    if (name.includes('formateur') || name.includes('consultant')) return 'ul-hier--form';
+    if (name.includes('employé') || name.includes('employee')) return 'ul-hier--emp';
+    return 'ul-hier--default';
   }
 
   // ════════════════════════════════════════════
@@ -371,5 +510,139 @@ export class UserListComponent implements OnInit {
 
   getStatutBadgeClass(statut: number): string {
     return statut === 1 ? 'badge bg-success' : 'badge bg-warning';
+  }
+
+  // ════════════════════════════════════════════
+  // INVITATIONS
+  // ════════════════════════════════════════════
+  sendInvitation(user: User): void {
+    if (!confirm(`Envoyer l'invitation d'activation à ${user.email} ?`)) return;
+    this.userService.sendInvitation(user.id).subscribe({
+      next: (res) => alert(res.message || 'Invitation envoyée'),
+      error: (err) => alert(err.error?.message || 'Erreur lors de l\'envoi')
+    });
+  }
+
+  activateManual(user: User): void {
+    if (!confirm(`Activer manuellement le compte de ${user.email} ?`)) return;
+    this.userService.activateManual(user.id).subscribe({
+      next: () => this.refreshData(),
+      error: (err) => alert(err.error?.message || 'Erreur lors de l\'activation')
+    });
+  }
+
+  openMassInviteDialog(): void {
+    this.showMassInviteDialog = true;
+    this.selectedMassDirection = null;
+    this.selectedMassRole = null;
+    this.selectedInactiveUserIds = [];
+    this.massInviteSelectAll = false;
+    this.massInviteResult = null;
+    this.loadMassInviteDirections();
+    this.loadMassInviteRoles();
+    this.loadInactiveUsers();
+  }
+
+  closeMassInviteDialog(): void {
+    this.showMassInviteDialog = false;
+    this.isSendingMassInvite = false;
+    this.massInviteResult = null;
+  }
+
+  private loadMassInviteDirections(): void {
+    this.directionService.getArborescence().subscribe({
+      next: (res) => {
+        this.massInviteDirections = [];
+        const arbo = res.arborescence || [];
+        for (const dir of arbo) {
+          this.massInviteDirections.push({ id: dir.id, label: dir.nom });
+          for (const dept of (dir.enfants || [])) {
+            this.massInviteDirections.push({ id: dept.id, label: `${dir.nom} → ${dept.nom}` });
+            for (const equipe of (dept.enfants || [])) {
+              this.massInviteDirections.push({ id: equipe.id, label: `${dir.nom} → ${dept.nom} → ${equipe.nom}` });
+            }
+          }
+        }
+      }
+    });
+  }
+
+  private loadMassInviteRoles(): void {
+    this.roleService.getAllRoles().subscribe({
+      next: (res) => {
+        this.massInviteRoles = res.roles || res.data || res || [];
+      }
+    });
+  }
+
+  private loadInactiveUsers(): void {
+    this.inactiveUsers = this.actualData.filter(u => u.statut === 0);
+    this.filterInactiveUsers();
+  }
+
+  filterInactiveUsers(): void {
+    let users = [...this.inactiveUsers];
+    if (this.selectedMassDirection) {
+      users = users.filter(u => (u as any).direction_id === this.selectedMassDirection);
+    }
+    if (this.selectedMassRole) {
+      users = users.filter(u => (u as any).role_id === this.selectedMassRole || u.role?.id === this.selectedMassRole);
+    }
+    this.filteredInactiveUsers = users;
+    this.selectedInactiveUserIds = this.selectedInactiveUserIds.filter(
+      id => users.some(u => u.id === id)
+    );
+    this.massInviteSelectAll = this.filteredInactiveUsers.length > 0
+      && this.filteredInactiveUsers.every(u => this.selectedInactiveUserIds.includes(u.id!));
+  }
+
+  toggleInactiveUser(userId: number): void {
+    const idx = this.selectedInactiveUserIds.indexOf(userId);
+    if (idx > -1) {
+      this.selectedInactiveUserIds.splice(idx, 1);
+    } else {
+      this.selectedInactiveUserIds.push(userId);
+    }
+    this.massInviteSelectAll = this.filteredInactiveUsers.length > 0
+      && this.filteredInactiveUsers.every(u => this.selectedInactiveUserIds.includes(u.id!));
+  }
+
+  toggleSelectAllInactive(): void {
+    if (this.massInviteSelectAll) {
+      this.selectedInactiveUserIds = [];
+      this.massInviteSelectAll = false;
+    } else {
+      this.selectedInactiveUserIds = this.filteredInactiveUsers.map(u => u.id!);
+      this.massInviteSelectAll = true;
+    }
+  }
+
+  sendMassInvitation(): void {
+    const hasFilter = this.selectedMassDirection || this.selectedMassRole;
+    const hasSelection = this.selectedInactiveUserIds.length > 0;
+    if (!hasFilter && !hasSelection) return;
+
+    this.isSendingMassInvite = true;
+    this.massInviteResult = null;
+
+    const params: any = {};
+    if (hasSelection) {
+      params.user_ids = this.selectedInactiveUserIds;
+    } else {
+      if (this.selectedMassDirection) params.direction_id = this.selectedMassDirection;
+      if (this.selectedMassRole) params.role_id = this.selectedMassRole;
+    }
+
+    this.userService.sendMassInvitation(params).subscribe({
+      next: (res) => {
+        this.isSendingMassInvite = false;
+        this.massInviteResult = { message: res.message, success: true };
+        this.refreshData();
+      },
+      error: (err) => {
+        this.isSendingMassInvite = false;
+        this.massInviteResult = { message: err.error?.message || 'Erreur lors de l\'envoi', success: false };
+      }
+    });
   }
 }

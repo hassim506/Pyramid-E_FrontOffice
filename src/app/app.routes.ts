@@ -213,6 +213,7 @@ export const routes: Routes = [
                 {path:'adminrh-rapport',loadComponent:()=>import ('./features/adminrh/adminrh-statements/adminrh-statements.component').then((m)=>m.AdminrhStatementsComponent)},
                 {path:'adminrh-statements',loadComponent:()=>import ('./features/adminrh/adminrh-statements/adminrh-statements.component').then((m)=>m.AdminrhStatementsComponent)},
 
+                {path:'adminrh-direction',loadComponent:()=>import ('./features/adminrh/adminrh-direction/adminrh-direction.component').then((m)=>m.AdminrhDirectionComponent)},
                 {path:'adminrh-course',loadComponent:()=>import ('./features/adminrh/adminrh-course/adminrh-course.component').then((m)=>m.AdminrhCourseComponent)},
                 {path:'adminrh-course-grid',loadComponent:()=>import ('./features/adminrh/adminrh-course-grid/adminrh-course-grid.component').then((m)=>m.AdminrhCourseGridComponent)},
                 {path:'adminrh-session',loadComponent:()=>import ('./features/adminrh/adminrh-session/adminrh-session.component').then((m)=>m.AdminrhSessionComponent)},

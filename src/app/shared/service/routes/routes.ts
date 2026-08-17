@@ -200,6 +200,7 @@ export const routes = {
   adminrhDemandeParcours: '/adminrh/adminrh-demande-parcours',
   adminrhDemandeCatalogue: '/adminrh/adminrh-demande-catalogue',
   adminrhSession: '/adminrh/adminrh-session',  // ✅ lead
+  adminrhDirection: '/adminrh/adminrh-direction',
   adminrhCourse: '/adminrh/adminrh-course',
   adminrhCategorie: '/adminrh/adminrh-categorie',
   adminrhCatalogue: '/adminrh/adminrh-catalogue',

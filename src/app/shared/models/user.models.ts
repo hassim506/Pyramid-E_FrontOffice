@@ -21,6 +21,22 @@ export interface User {
   };
   matricule?: string;
   direction?: string;
+  direction_id?: number;
+  direction_obj?: {
+    id: number;
+    nom: string;
+    type: string;
+    parent?: {
+      id: number;
+      nom: string;
+      type: string;
+      parent?: {
+        id: number;
+        nom: string;
+        type: string;
+      };
+    };
+  };
   created_at?: string | Date;
   updated_at?: string | Date;
   client?: {

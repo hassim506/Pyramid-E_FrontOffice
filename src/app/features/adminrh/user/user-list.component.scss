@@ -149,6 +149,26 @@ $radius-lg: 12px;
   i { font-size: 13px; }
 }
 
+// ── Bouton Invitations ─────────────────────────
+.ul-invite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(30,64,175,.35);
+  transition: opacity .15s, transform .1s;
+
+  &:hover { opacity: .88; transform: translateY(-1px); }
+  i { font-size: 13px; }
+}
+
 // ── Bouton Importer ─────────────────────────
 .ul-import-btn {
   display: inline-flex;
@@ -698,6 +718,31 @@ $radius-lg: 12px;
   &--mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
 }
 
+// Direction hierarchy
+.ul-direction { line-height: 1.3; }
+.ul-dir-path {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.ul-dir-root {
+  color: $gray-600;
+  font-weight: 500;
+}
+.ul-dir-mid {
+  color: $gray-600;
+}
+.ul-dir-leaf {
+  color: $gray-900;
+  font-weight: 600;
+}
+.ul-dir-sep {
+  font-size: 10px;
+  color: $gray-400;
+}
+
 // ─────────────────────────────────────────
 // ACTIONS
 // ─────────────────────────────────────────
@@ -717,6 +762,7 @@ $radius-lg: 12px;
   &--warn       { color: #92400e; border-color: #fcd34d; &:hover { background: #fffbeb; } }
   &--ok         { color: #065f46; border-color: #6ee7b7; &:hover { background: #ecfdf5; } }
   &--del        { color: #991b1b; border-color: #fca5a5; &:hover { background: #fef2f2; } }
+  &--invite     { color: #1e40af; border-color: #93c5fd; &:hover { background: #eff6ff; } }
 }
 
 // ─────────────────────────────────────────
@@ -890,3 +936,89 @@ $radius-lg: 12px;
 .ul-c-yes     { color: #3b6d11; font-size: 15px; font-weight: 700; }
 .ul-c-no      { color: #d3d1c7; font-size: 15px; }
 .ul-c-partial { color: #ba7517; font-size: 15px; }
+
+// ─────────────────────────────────────────
+// MODAL INVITATION – version élargie
+// ─────────────────────────────────────────
+.ul-import-modal--wide {
+  width: 600px;
+  max-width: calc(100vw - 32px);
+}
+
+.ul-invite-list {
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: $gray-50;
+    border-bottom: 1px solid $gray-200;
+  }
+
+  &__check-all {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 12px;
+
+    input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; }
+  }
+
+  &__body {
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid $gray-100;
+    cursor: pointer;
+    transition: background .1s;
+
+    &:hover { background: $gray-50; }
+    &:last-child { border-bottom: none; }
+
+    input[type="checkbox"] { width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &__name {
+    font-size: 12px;
+    font-weight: 500;
+    color: $gray-900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__email {
+    font-size: 11px;
+    color: $gray-400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__role {
+    font-size: 11px;
+    color: $gray-600;
+    flex-shrink: 0;
+    background: $gray-100;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+}

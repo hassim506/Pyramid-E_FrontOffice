@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../shared/models/user.models';
 import { UserService } from '../../../shared/service/user/user.service';
+import { PermissionService } from '../../../shared/service/permission/permission.service';
 import { sortRoles, sortRoleNames } from '../../../shared/utils/role-sort.utils';
 import { CustomPaginationComponent } from '../../../shared/service/custom-pagination/custom-pagination.component';
 import { UserAddComponent } from '../user-add/user-add.component';
@@ -81,8 +82,19 @@ export class UserListComponent implements OnInit {
     rowErrors: { line: number; errors: string[] }[];
   } | null = null;
 
+  // ── Matrice des habilitations ──────────────
+  matrixRoles: any[] = [];
+  matrixCategories: { name: string; permissions: any[] }[] = [];
+  matrixLoading = false;
+  matrixPageSize = 20;
+  matrixPageSizeOptions = [20, 40, 80, 100, 200];
+  matrixCurrentPage = 1;
+  matrixAllPermissions: { name: string; category: string }[] = [];
+  matrixTotalPermissions = 0;
+
   constructor(
     private userService: UserService,
+    private permissionService: PermissionService,
     private route: ActivatedRoute,
   ) {}
 
@@ -156,7 +168,122 @@ export class UserListComponent implements OnInit {
   // ════════════════════════════════════════════
   // TABS
   // ════════════════════════════════════════════
-  setTab(tab: 'users' | 'roles' | 'matrix'): void { this.activeTab = tab; }
+  setTab(tab: 'users' | 'roles' | 'matrix'): void {
+    this.activeTab = tab;
+    if (tab === 'matrix' && !this.matrixRoles.length) {
+      this.loadMatrix();
+    }
+  }
+
+  // ════════════════════════════════════════════
+  // MATRICE DES HABILITATIONS
+  // ════════════════════════════════════════════
+  private loadMatrix(): void {
+    this.matrixLoading = true;
+    this.userService.getRoles().subscribe({
+      next: (response: any) => {
+        const roles = response.roles || [];
+        this.matrixRoles = roles
+          .filter((r: any) => r.role_level != null)
+          .sort((a: any, b: any) => (a.role_level || 99) - (b.role_level || 99));
+
+        this.permissionService.getAllPermissions().subscribe({
+          next: (permRes: any) => {
+            const permissions = permRes.permissions || [];
+            this.matrixAllPermissions = permissions
+              .map((p: any) => ({ ...p, category: p.category || 'Général' }))
+              .sort((a: any, b: any) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+            this.matrixTotalPermissions = this.matrixAllPermissions.length;
+            this.matrixCurrentPage = 1;
+            this.buildMatrixPage();
+            this.matrixLoading = false;
+          },
+          error: () => { this.matrixLoading = false; }
+        });
+      },
+      error: () => { this.matrixLoading = false; }
+    });
+  }
+
+  private buildMatrixPage(): void {
+    const start = (this.matrixCurrentPage - 1) * this.matrixPageSize;
+    const pagePerms = this.matrixAllPermissions.slice(start, start + this.matrixPageSize);
+
+    const categoryMap = new Map<string, any[]>();
+    for (const perm of pagePerms) {
+      const cat = perm.category || 'Général';
+      if (!categoryMap.has(cat)) categoryMap.set(cat, []);
+      categoryMap.get(cat)!.push(perm);
+    }
+    this.matrixCategories = Array.from(categoryMap.entries()).map(([name, perms]) => ({ name, permissions: perms }));
+  }
+
+  get matrixTotalPages(): number {
+    return Math.ceil(this.matrixTotalPermissions / this.matrixPageSize);
+  }
+
+  get matrixPageNumbers(): number[] {
+    return Array.from({ length: this.matrixTotalPages }, (_, i) => i + 1);
+  }
+
+  matrixChangePageSize(size: number): void {
+    this.matrixPageSize = size;
+    this.matrixCurrentPage = 1;
+    this.buildMatrixPage();
+  }
+
+  matrixGoToPage(page: number): void {
+    if (page < 1 || page > this.matrixTotalPages) return;
+    this.matrixCurrentPage = page;
+    this.buildMatrixPage();
+  }
+
+  roleHasPermission(role: any, permissionName: string): boolean {
+    if (!role.permissions) return false;
+    return role.permissions.some((p: any) => p.name === permissionName);
+  }
+
+  getRoleAbbr(role: any): string {
+    const map: Record<string, string> = {
+      'super admin': 'SA',
+      'superadmin holding': 'SH',
+      'admin rh holding': 'ARH-H',
+      'admin rh': 'ARH',
+      'admin it': 'AIT',
+      'responsable rh': 'RRH',
+      'manager': 'MGR',
+      'formateur': 'FOR',
+      'consultant': 'CST',
+      'employé': 'EMP',
+    };
+    return map[role.name?.toLowerCase()] || role.name?.substring(0, 3).toUpperCase() || '?';
+  }
+
+  getRoleColorClass(role: any): string {
+    const name = role.name?.toLowerCase() || '';
+    if (name.includes('super admin') && !name.includes('holding')) return 'ul-mh--sa';
+    if (name.includes('holding')) return 'ul-mh--holding';
+    if (name.includes('admin rh')) return 'ul-mh--rh';
+    if (name.includes('admin it')) return 'ul-mh--it';
+    if (name.includes('responsable rh')) return 'ul-mh--rh';
+    if (name.includes('manager')) return 'ul-mh--mgr';
+    if (name.includes('formateur') || name.includes('consultant')) return 'ul-mh--form';
+    if (name.includes('employé') || name.includes('employee')) return 'ul-mh--emp';
+    return 'ul-mh--default';
+  }
+
+  getHierBadgeClass(role: any): string {
+    const name = role.name?.toLowerCase() || '';
+    if (name.includes('super admin') && !name.includes('holding')) return 'ul-hier--sa';
+    if (name.includes('holding')) return 'ul-hier--holding';
+    if (name.includes('admin rh')) return 'ul-hier--rh';
+    if (name.includes('admin it')) return 'ul-hier--it';
+    if (name.includes('responsable rh')) return 'ul-hier--rh';
+    if (name.includes('manager')) return 'ul-hier--mgr';
+    if (name.includes('formateur') || name.includes('consultant')) return 'ul-hier--form';
+    if (name.includes('employé') || name.includes('employee')) return 'ul-hier--emp';
+    return 'ul-hier--default';
+  }
 
   // ════════════════════════════════════════════
   // CHARGEMENT

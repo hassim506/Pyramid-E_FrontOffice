@@ -83,6 +83,21 @@ export class UserService {
     });
   }
   
+  // Envoyer une invitation (activation) à un utilisateur
+  sendInvitation(userId: number): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/users/${userId}/send-invitation`, {}, { headers: this.getHeaders() });
+  }
+
+  // Activer manuellement un utilisateur
+  activateManual(userId: number): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/users/${userId}/activate-manual`, {}, { headers: this.getHeaders() });
+  }
+
+  // Envoyer des invitations en masse (par direction, rôle, ou sélection manuelle)
+  sendMassInvitation(params: { direction_id?: number | null; role_id?: number | null; user_ids?: number[] }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/users/mass-invitation`, params, { headers: this.getHeaders() });
+  }
+
   // Headers pour l'upload de fichier (sans Content-Type)
   private getHeadersForFileUpload(): HttpHeaders {
     const token = localStorage.getItem('pyramide_token');
