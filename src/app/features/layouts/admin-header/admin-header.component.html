@@ -224,7 +224,7 @@
                   <!-- Profile Footer -->
                   <div class="profile-menu-footer">
                     <!-- Mode employé -->
-                    <a *appHasPermission="'accéder mode employé'" class="learner-mode-btn" [routerLink]="routes.students_Dashboard">
+                    <a *appHasPermission="'acceder-mode-employe'" class="learner-mode-btn" [routerLink]="routes.students_Dashboard">
                       <span class="learner-mode-btn__icon"><i class="isax isax-user-octagon"></i></span>
                       <span class="learner-mode-btn__text">
                         <span class="learner-mode-btn__label">Mode employé</span>
@@ -234,7 +234,7 @@
                     </a>
 
                     <!-- Mode formateur -->
-                    <a *appHasPermission="'accéder mode formateur'" class="trainer-mode-btn" [routerLink]="routes.instructor_dashboard">
+                    <a *appHasPermission="'acceder-mode-formateur'" class="trainer-mode-btn" [routerLink]="routes.instructor_dashboard">
                       <span class="trainer-mode-btn__icon"><i class="isax isax-teacher"></i></span>
                       <span class="trainer-mode-btn__text">
                         <span class="trainer-mode-btn__label">Mode formateur</span>

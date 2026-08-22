@@ -254,11 +254,11 @@
       <i class="isax isax-user-square"></i> Mon profil
     </a>
     <!-- Mode employé : accède à l'espace employé sans re-login -->
-    <a *appHasPermission="'accéder mode employé'" [routerLink]="routes.students_Dashboard" class="sb-bottom-item sb-learner-switch">
+    <a *appHasPermission="'acceder-mode-employe'" [routerLink]="routes.students_Dashboard" class="sb-bottom-item sb-learner-switch">
       <i class="isax isax-user-octagon"></i> Mode employé
     </a>
     <!-- Mode formateur : accède à l'espace formateur sans re-login -->
-    <a *appHasPermission="'accéder mode formateur'" [routerLink]="routes.instructor_dashboard" class="sb-bottom-item sb-trainer-switch">
+    <a *appHasPermission="'acceder-mode-formateur'" [routerLink]="routes.instructor_dashboard" class="sb-bottom-item sb-trainer-switch">
       <i class="isax isax-teacher"></i> Mode formateur
     </a>
     <a [routerLink]="routes.login" class="sb-bottom-item logout">
