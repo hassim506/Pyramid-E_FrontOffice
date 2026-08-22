@@ -178,7 +178,7 @@
         </div>
         <div class="db-summary-item">
           <div class="db-summary-val db-summary-val--teal">{{ dashStats?.nb_apprenants_inscrits ?? apprenantsForms }}</div>
-          <div class="db-summary-lbl">Apprenants inscrits</div>
+          <div class="db-summary-lbl">Employés inscrits</div>
         </div>
         <div class="db-summary-item">
           <div class="db-summary-val db-summary-val--purple">{{ heuresRealisees }}h</div>
@@ -250,13 +250,13 @@
           <span class="db-metric-big__val">{{ dashStats!.nps_formation }}</span>
           <span class="db-metric-big__unit">/10</span>
         </div>
-        <small class="text-muted">Score satisfaction apprenant</small>
+        <small class="text-muted">Score satisfaction employé</small>
       } @else {
         <div class="db-empty db-empty--sm">Pas de données</div>
       }
     </div>
 
-    <!-- Feedbacks apprenants -->
+    <!-- Feedbacks employés -->
     <div class="db-card db-card--metric">
       <div class="db-card__head">
         <i class="isax isax-message text-info"></i>
@@ -373,7 +373,7 @@
             </span>
           </div>
           <div class="db-metric-item">
-            <span class="db-metric-lbl" style="font-size:11px;">Apprenants (sessions)</span>
+            <span class="db-metric-lbl" style="font-size:11px;">Employés (sessions)</span>
             <span class="db-metric-val" style="font-size:11px; color:#1D9CFD;">
               {{ dashStats?.nb_apprenants_sessions ?? 0 }}
             </span>

@@ -198,7 +198,7 @@ export class InstructorDashboardComponent implements OnInit {
   private buildKpis(): void {
     const d = this.dashStats;
     this.kpis = [
-      { icon: 'isax-profile-2user', color: 'teal',   label: 'Apprenants inscrits',      value: d?.nb_apprenants_inscrits ?? this.apprenantsForms, sub: 'toutes formations & sessions' },
+      { icon: 'isax-profile-2user', color: 'teal',   label: 'Employés inscrits',      value: d?.nb_apprenants_inscrits ?? this.apprenantsForms, sub: 'toutes formations & sessions' },
       { icon: 'isax-calendar-tick', color: 'blue',   label: 'Sessions animées',          value: d?.nb_sessions_animees ?? this.sessionsAnimees, sub: `${d?.nb_sessions_terminees ?? 0} terminées` },
       { icon: 'isax-clock',         color: 'purple', label: 'Heures réalisées',           value: `${this.heuresRealisees}h`, sub: 'sessions terminées' },
       { icon: 'isax-people',        color: 'orange', label: 'Participation live',         value: `${d?.taux_participation_live ?? this.tauxOccupation}%`, sub: 'sessions présentielles/distanciel', trend: (d?.taux_participation_live ?? 0) >= 70 ? 'up' : 'down' },

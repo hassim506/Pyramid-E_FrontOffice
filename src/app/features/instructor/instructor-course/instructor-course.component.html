@@ -35,7 +35,7 @@
     </div>
     <div class="ip-kpi">
       <div class="ip-kpi__icon ki-teal"><i class="isax isax-people"></i></div>
-      <div><div class="ip-kpi__val">{{ getTotalParticipants() }}</div><div class="ip-kpi__lbl">Apprenants</div></div>
+      <div><div class="ip-kpi__val">{{ getTotalParticipants() }}</div><div class="ip-kpi__lbl">Employés</div></div>
     </div>
   </div>
 
@@ -62,7 +62,7 @@
         <thead>
           <tr>
             <th>Formation</th>
-            <th>Apprenants</th>
+            <th>Employés</th>
             <th>Coût</th>
             <th>Durée</th>
             <th>Statut</th>
@@ -171,8 +171,8 @@
         <h4 class="mb-2">{{ selectedFormation?.est_publie ? 'Dépublier' : 'Publier' }} la formation</h4>
         <p class="mb-3">
           {{ selectedFormation?.est_publie ?
-              'Cette formation ne sera plus visible par les apprenants.' :
-              'Cette formation sera visible par tous les apprenants.' }}
+              'Cette formation ne sera plus visible par les employés.' :
+              'Cette formation sera visible par tous les employés.' }}
         </p>
         <div class="d-flex align-items-center justify-content-center gap-2">
           <button type="button" class="btn bg-gray-100 rounded-pill" data-bs-dismiss="modal">Annuler</button>

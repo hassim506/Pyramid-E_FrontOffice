@@ -216,7 +216,7 @@
                   </div>
                   <div class="cd-inst-stat">
                     <i class="isax isax-people"></i>
-                    <strong>{{ formation.nb_inscrits || 0 }}</strong> apprenants
+                    <strong>{{ formation.nb_inscrits || 0 }}</strong> employés
                   </div>
                   <div class="cd-inst-stat">
                     <i class="isax isax-star"></i>
@@ -267,7 +267,7 @@
           </div>
 
           <div class="cd-price-body">
-            <!-- Prix : uniquement pour les apprenants/employés (role 2) -->
+            <!-- Prix : uniquement pour les employés (role 2) -->
             <div class="cd-price-tag" *ngIf="currentUser?.role_id === 2">
               <!-- <span *ngIf="formation.prix == 0 || formation.prix == '0.00'" class="cd-price-free">GRATUIT</span> -->
               <!-- <span *ngIf="formation.prix > 0" class="cd-price-main">{{ formation.prix }} FCFA</span>
@@ -297,7 +297,7 @@
               <i class="isax isax-setting-2"></i> Gérer la formation
             </a>
 
-            <!-- Apprenant / Employé (2) : demande via l'organisation -->
+            <!-- Employé (2) : demande via l'organisation -->
             <button
               class="cd-enroll-btn cd-enroll-btn--green"
               *ngIf="currentUser?.role_id === 2"

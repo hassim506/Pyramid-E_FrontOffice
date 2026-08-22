@@ -145,7 +145,7 @@ export class AdminrhAssignmentComponent implements OnInit {
     const inactifs = this.employees.filter(e => e.formations_total > 0 && e.formations_en_cours === 0 && e.formations_terminees === 0).length;
     const difficulte = this.employees.filter(e => e.formations_en_cours > 0 && e.progression_moyenne < 30).length;
     const faibleScore = this.employees.filter(e => e.score_moyen > 0 && e.score_moyen < 50).length;
-    if (inactifs) alerts.push({ type: 'warning', icon: 'isax-clock', message: 'Apprenants inactifs', count: inactifs });
+    if (inactifs) alerts.push({ type: 'warning', icon: 'isax-clock', message: 'Employés inactifs', count: inactifs });
     if (difficulte) alerts.push({ type: 'danger',  icon: 'isax-danger', message: 'Progression < 30 %', count: difficulte });
     if (faibleScore) alerts.push({ type: 'info',  icon: 'isax-chart-fail', message: 'Score quiz < 50 %', count: faibleScore });
     return alerts;

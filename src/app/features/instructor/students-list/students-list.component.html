@@ -14,8 +14,8 @@
   <!-- Page header -->
   <div class="ip-page-head">
     <div>
-      <h5 class="ip-page-head__title">Mes apprenants <span class="ip-count">{{ totalData }}</span></h5>
-      <p class="ip-page-head__sub">Apprenants inscrits à vos formations</p>
+      <h5 class="ip-page-head__title">Mes employés <span class="ip-count">{{ totalData }}</span></h5>
+      <p class="ip-page-head__sub">Employés inscrits à vos formations</p>
     </div>
     <button type="button" class="ip-btn ip-btn--outline" (click)="loadData()">
       <i class="isax isax-refresh-2"></i> Actualiser
@@ -39,7 +39,7 @@
         <thead>
           <tr>
             <th>Matricule</th>
-            <th>Apprenant</th>
+            <th>Employé</th>
             <th>Formation</th>
             <th>Progression</th>
             <th>Statut</th>
@@ -85,7 +85,7 @@
           <tr *ngIf="tableData.length === 0">
             <td colspan="6" class="ip-empty">
               <i class="isax isax-profile-2user"></i>
-              <span>Aucun apprenant trouvé</span>
+              <span>Aucun employé trouvé</span>
             </td>
           </tr>
         </tbody>
@@ -94,7 +94,7 @@
 
     <!-- Pagination -->
     <div class="ip-pagination" *ngIf="totalData > pageSize">
-      <span class="pg-info">{{ totalData }} apprenant{{ totalData > 1 ? 's' : '' }}</span>
+      <span class="pg-info">{{ totalData }} employé{{ totalData > 1 ? 's' : '' }}</span>
       <div class="pg-controls">
         <button type="button" class="pg-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
           <i class="isax isax-arrow-left-2"></i>

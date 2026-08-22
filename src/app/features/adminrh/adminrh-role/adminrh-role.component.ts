@@ -63,7 +63,7 @@ export class AdminrhRoleComponent implements OnInit {
   readonly ROLE_TYPES = [
     { value: 'rh',        label: 'Administrateur RH',       description: 'Gestion RH, formations, validations',  color: 'primary' },
     { value: 'formateur', label: 'Formateur / Consultant',  description: 'Création de contenus, suivi',           color: 'purple' },
-    { value: 'employe',   label: 'Employé / Apprenant',     description: 'Accès formations et quiz',              color: 'success' },
+    { value: 'employe',   label: 'Employé',                 description: 'Accès formations et quiz',              color: 'success' },
     { value: 'manager',   label: 'Manager',                 description: 'Suivi équipe, rapports',                color: 'warning' },
   ];
 

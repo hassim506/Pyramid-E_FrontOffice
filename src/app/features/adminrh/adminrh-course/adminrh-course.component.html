@@ -39,7 +39,7 @@
         <div class="ac-kpi__delta neutral">non publiées</div>
       </div>
       <div class="ac-kpi">
-        <div class="ac-kpi__label"><i class="isax isax-people"></i> Apprenants</div>
+        <div class="ac-kpi__label"><i class="isax isax-people"></i> Employés</div>
         <div class="ac-kpi__val">{{ getTotalParticipants() }}</div>
         <div class="ac-kpi__delta neutral">inscrits total</div>
       </div>
@@ -80,7 +80,7 @@
       <thead>
         <tr>
           <th>Formation</th>
-          <th>Apprenants</th>
+          <th>Employés</th>
           <th>Coût</th>
           <th>Durée</th>
           <th>Statut</th>
@@ -181,8 +181,8 @@
       </div>
       <h4>{{ publishTarget?.est_publie ? 'Dépublier' : 'Publier' }} la formation</h4>
       <p>{{ publishTarget?.est_publie
-            ? 'Cette formation ne sera plus visible par les apprenants.'
-            : 'Cette formation sera visible par tous les apprenants.' }}</p>
+            ? 'Cette formation ne sera plus visible par les employés.'
+            : 'Cette formation sera visible par tous les employés.' }}</p>
       <div class="ac-confirm-btns">
         <button type="button" class="ac-btn-ghost" (click)="publishTarget = null">Annuler</button>
         <button type="button"
@@ -589,7 +589,7 @@
           <textarea class="wz-input wz-textarea" formControlName="description"
                     placeholder="Décrivez l'objectif pédagogique de ce parcours..."
                     [attr.readonly]="wizardMode === 'view' ? '' : null"></textarea>
-          <span class="wz-hint">Visible par les apprenants inscrits</span>
+          <span class="wz-hint">Visible par les employés inscrits</span>
         </div>
         <label class="wz-label" style="margin-bottom:8px">Domaine <span class="wz-req">*</span></label>
         <div class="wz-domain-grid">
@@ -676,7 +676,7 @@
           <div class="wz-toggle-row">
             <div class="wz-toggle-info">
               <div class="wz-toggle-title">Certificat à l'issue du parcours</div>
-              <div class="wz-toggle-sub">Génère automatiquement un certificat PDF pour les apprenants ayant réussi</div>
+              <div class="wz-toggle-sub">Génère automatiquement un certificat PDF pour les employés ayant réussi</div>
             </div>
             <div class="wz-toggle" [class.on]="wizardForm.value.certificat"
                  (click)="wizardMode !== 'view' && wizardForm.patchValue({certificat: !wizardForm.value.certificat})"></div>
@@ -684,7 +684,7 @@
           <div class="wz-toggle-row">
             <div class="wz-toggle-info">
               <div class="wz-toggle-title">Progression séquentielle obligatoire</div>
-              <div class="wz-toggle-sub">L'apprenant doit terminer chaque formation avant de passer à la suivante</div>
+              <div class="wz-toggle-sub">L'employé doit terminer chaque formation avant de passer à la suivante</div>
             </div>
             <div class="wz-toggle" [class.on]="wizardForm.value.sequentielle"
                  (click)="wizardMode !== 'view' && wizardForm.patchValue({sequentielle: !wizardForm.value.sequentielle})"></div>
@@ -692,7 +692,7 @@
           <div class="wz-toggle-row">
             <div class="wz-toggle-info">
               <div class="wz-toggle-title">Notifications de progression</div>
-              <div class="wz-toggle-sub">Envoie des rappels aux apprenants inactifs depuis plus de 7 jours</div>
+              <div class="wz-toggle-sub">Envoie des rappels aux employés inactifs depuis plus de 7 jours</div>
             </div>
             <div class="wz-toggle" [class.on]="wizardForm.value.notifications"
                  (click)="wizardMode !== 'view' && wizardForm.patchValue({notifications: !wizardForm.value.notifications})"></div>
@@ -805,7 +805,7 @@
         <input type="text" class="cw-input" formControlName="titre"
                placeholder="Ex. : Catalogue Management 2025"
                [attr.readonly]="catWizardMode === 'view' ? '' : null">
-        <span class="cw-hint">Ce titre sera visible par les apprenants</span>
+        <span class="cw-hint">Ce titre sera visible par les employés</span>
       </div>
 
       <!-- Short description -->
@@ -941,7 +941,7 @@
              (click)="catWizardMode !== 'view' && (catWizardVisibility = 'public')">
           <i class="isax isax-global"></i>
           <div class="cw-vis-card__label">Public</div>
-          <div class="cw-vis-card__sub">Visible par tous les apprenants</div>
+          <div class="cw-vis-card__sub">Visible par tous les employés</div>
         </div>
       </div>
 

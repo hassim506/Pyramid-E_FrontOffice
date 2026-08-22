@@ -211,7 +211,7 @@ export class DataService {
       content2: '',
       content3: 'Pyramide-e',
       content4: 'LMS',
-      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les apprenants à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
+      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les employés à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
     },
     {
       img: 'assets/img/auth/auth-1.svg',
@@ -219,7 +219,7 @@ export class DataService {
       content2: '',
       content3: 'Pyramide-e',
       content4: 'LMS',
-      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les apprenants à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
+      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les employés à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
     },
     {
       img: 'assets/img/auth/auth-1.svg',
@@ -227,7 +227,7 @@ export class DataService {
       content2: '',
       content3: 'Pyramide-e',
       content4: 'LMS',
-      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les apprenants à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
+      paragraph: "Pyramide-e LMS est conçue pour aider les organisations, les formateurs et les employés à gérer, diffuser et suivre efficacement les activités de formation et d'apprentissage.",
     },
   ];
 

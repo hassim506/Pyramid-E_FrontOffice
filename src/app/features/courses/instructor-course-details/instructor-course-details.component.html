@@ -23,7 +23,7 @@
       <div class="icd-head-sub">
         Formateur : {{ getDisplayName() }} &nbsp;·&nbsp;
         {{ formation.modules?.length || 0 }} modules &nbsp;·&nbsp;
-        {{ formation.nb_inscrits || 0 }} apprenants
+        {{ formation.nb_inscrits || 0 }} employés
       </div>
     </div>
     <button type="button" class="icd-pub-btn" (click)="publishFormation()">
@@ -118,7 +118,7 @@
           <div>
             <div class="icd-etb-title">{{ activeQuiz.titre }}</div>
             <div class="icd-etb-sub" *ngIf="activeQuiz.statistics">
-              Passé par {{ activeQuiz.statistics.total_participants }} apprenants
+              Passé par {{ activeQuiz.statistics.total_participants }} employés
               · Score moyen : {{ activeQuiz.statistics.note_moyenne }}%
             </div>
           </div>
@@ -220,7 +220,7 @@
                 <div class="icd-expl-row">
                   <label class="icd-expl-label">Explication :</label>
                   <input type="text" class="icd-expl-inp" [(ngModel)]="q.explication"
-                         placeholder="Affiché à l'apprenant après sa réponse…">
+                         placeholder="Affiché à l'employé après sa réponse…">
                 </div>
               </div>
             </div>
@@ -323,7 +323,7 @@
         <!-- KPI cards -->
         <div class="icd-stats-grid">
           <div class="icd-stat-card">
-            <div class="icd-sc-label">Apprenants ayant passé</div>
+            <div class="icd-sc-label">Employés ayant passé</div>
             <div class="icd-sc-val">{{ quizStats.total_participants || 0 }}/{{ formation.nb_inscrits || '?' }}</div>
             <div class="icd-sc-sub neutral">{{ getParticipationRate() }}% de participation</div>
           </div>
@@ -355,7 +355,7 @@
             <div class="icd-dist-bar">
               <div class="icd-dist-fill" [class]="band.color" [style.width.%]="band.pct"></div>
             </div>
-            <span class="icd-dist-count" [class]="band.textColor">{{ band.count }} apprenants</span>
+            <span class="icd-dist-count" [class]="band.textColor">{{ band.count }} employés</span>
           </div>
         </div>
 
@@ -415,7 +415,7 @@
         <h6 class="icd-info-h">Statistiques</h6>
         <table class="icd-info-table">
           <tr><td>Modules</td><td class="fw">{{ formation.modules?.length || 0 }}</td></tr>
-          <tr><td>Apprenants inscrits</td><td class="fw">{{ formation.nb_inscrits || 0 }}</td></tr>
+          <tr><td>Employés inscrits</td><td class="fw">{{ formation.nb_inscrits || 0 }}</td></tr>
           <tr><td>Taux de complétion</td><td class="fw">{{ formation.taux_completion || 0 }}%</td></tr>
           <tr><td>Créé le</td><td>{{ formatDate(formation.created_at) }}</td></tr>
           <tr><td>Mis à jour le</td><td>{{ formatDate(formation.updated_at) }}</td></tr>

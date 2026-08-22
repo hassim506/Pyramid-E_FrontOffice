@@ -24,11 +24,11 @@ export class InstructorStatementsComponent implements OnInit {
 
   selectedType = 'apprenants';
   readonly types = [
-    { key: 'apprenants',    icon: 'isax-profile-2user', color: 'blue',   label: 'Apprenants',      sub: 'Progression individuelle' },
+    { key: 'apprenants',    icon: 'isax-profile-2user', color: 'blue',   label: 'Employés',        sub: 'Progression individuelle' },
     { key: 'quiz',          icon: 'isax-award',         color: 'purple', label: 'Quiz & scores',   sub: 'Taux de réussite par question' },
     { key: 'formation',     icon: 'isax-book-1',        color: 'green',  label: 'Par formation',   sub: 'Complétion & engagement' },
     { key: 'sessions',      icon: 'isax-calendar-1',    color: 'orange', label: 'Sessions',        sub: 'Présences & participation' },
-    { key: 'difficulte',    icon: 'isax-danger',        color: 'red',    label: 'En difficulté',   sub: 'Apprenants à risque' },
+    { key: 'difficulte',    icon: 'isax-danger',        color: 'red',    label: 'En difficulté',   sub: 'Employés à risque' },
     { key: 'certifications',icon: 'isax-medal',         color: 'gold',   label: 'Certifications',  sub: 'Délivrés par mes formations' },
   ];
 
@@ -39,9 +39,9 @@ export class InstructorStatementsComponent implements OnInit {
   destinataire = '';
 
   schedules = [
-    { label: 'Résumé hebdomadaire apprenants', sub: 'Chaque vendredi · progression + alertes difficulté', on: true  },
+    { label: 'Résumé hebdomadaire employés', sub: 'Chaque vendredi · progression + alertes difficulté', on: true  },
     { label: 'Rapport après chaque session',   sub: 'Présences, durées, questions posées',               on: true  },
-    { label: 'Alerte quiz en échec',           sub: 'Si un apprenant échoue 2x au même quiz',            on: false },
+    { label: 'Alerte quiz en échec',           sub: 'Si un employé échoue 2x au même quiz',              on: false },
   ];
 
   // Preview
@@ -58,13 +58,13 @@ export class InstructorStatementsComponent implements OnInit {
   insights = [
     { color: '#A32D2D', text: 'La formation la plus abandonnée a un taux de complétion de 41%. Envisagez de la scinder en modules.' },
     { color: '#185FA5', text: 'Certifications délivrées ce trimestre. Le score moyen est de 76%.' },
-    { color: '#854F0B', text: 'Certains apprenants n\'ont pas eu d\'activité depuis plus de 7 jours. Un email de relance peut être déclenché.' },
+    { color: '#854F0B', text: 'Certains employés n\'ont pas eu d\'activité depuis plus de 7 jours. Un email de relance peut être déclenché.' },
   ];
 
   recents: RapportRecent[] = [
-    { nom: 'Rapport apprenants T1 2025',  meta: 'Toutes formations · PDF',          format: 'pdf',   date: '15 jan.' },
+    { nom: 'Rapport employés T1 2025',    meta: 'Toutes formations · PDF',          format: 'pdf',   date: '15 jan.' },
     { nom: 'Scores quiz déc. 2024',       meta: 'Excel · détail par question',       format: 'excel', date: '1 jan.' },
-    { nom: 'Présences sessions nov. 2024',meta: 'CSV · 183 apprenants',              format: 'csv',   date: '1 déc.' },
+    { nom: 'Présences sessions nov. 2024',meta: 'CSV · 183 employés',               format: 'csv',   date: '1 déc.' },
   ];
 
   private rawFormations: any[] = [];
@@ -150,7 +150,7 @@ export class InstructorStatementsComponent implements OnInit {
     }));
 
     const certRows = this.rawCerts.map((c: any) => ({
-      Apprenant:  c.employe_nom || c.user?.name || '',
+      Employé:    c.employe_nom || c.user?.name || '',
       Formation:  c.formation_titre || c.formation?.titre || '',
       Délivré:    c.date_emission || '',
       Expiration: c.date_expiration || '',

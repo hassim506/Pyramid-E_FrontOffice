@@ -7,12 +7,13 @@ import { SidebarItem } from '../../../shared/models/model';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/service/authentification/auth.service';
+import { HasPermissionDirective } from '../../../directive/has-permission-directive.directive';
 
 @Component({
     selector: 'app-admin-header',
     templateUrl: './admin-header.component.html',
     styleUrls: ['./admin-header.component.scss'],
-    imports: [CommonModule,RouterLink],
+    imports: [CommonModule, RouterLink, HasPermissionDirective],
     standalone: true
 })
 export class AdminHeaderComponent implements OnInit {

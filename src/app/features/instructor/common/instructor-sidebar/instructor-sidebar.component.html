@@ -26,7 +26,7 @@
       <div class="pstat-sep"></div>
       <div class="pstat">
         <div class="pstat-v">{{ apprenantCount }}</div>
-        <div class="pstat-l">Apprenants</div>
+        <div class="pstat-l">Employés</div>
       </div>
       <div class="pstat-sep"></div>
       <div class="pstat">
@@ -114,12 +114,12 @@
 
     <div class="sb-divider"></div>
 
-    <!-- MES APPRENANTS -->
-    <div class="sb-section-label">Mes apprenants</div>
+    <!-- MES EMPLOYÉS -->
+    <div class="sb-section-label">Mes employés</div>
 
     <a [routerLink]="routes.studentsList" routerLinkActive="active" class="sb-item">
       <i class="isax isax-profile-2user icon"></i>
-      <span class="sb-item-label">Liste des apprenants</span>
+      <span class="sb-item-label">Liste des employés</span>
       <span *ngIf="apprenantCount > 0" class="sb-badge sb-badge--gray">{{ apprenantCount }}</span>
     </a>
     <a [routerLink]="routes.instructorCertificate" routerLinkActive="active" class="sb-item">
