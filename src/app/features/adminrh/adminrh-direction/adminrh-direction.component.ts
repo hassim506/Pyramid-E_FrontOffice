@@ -332,9 +332,12 @@ export class AdminrhDirectionComponent implements OnInit {
     this.selectedEmployeIds = [];
     this.employeSearch = '';
     this.affecterLoading = true;
-    this.userService.getUsers().subscribe({
+    this.userService.getMyUsers().subscribe({
       next: (res: any) => {
-        this.availableEmployes = (res.users || res.data || []).filter((u: any) => !u.direction_id || u.direction_id !== this.selectedNode?.id);
+        this.availableEmployes = (res.users || res.data || []).filter((u: any) =>
+          u.statut !== false && u.statut !== 0 &&
+          (!u.direction_id || u.direction_id !== this.selectedNode?.id)
+        );
         this.affecterLoading = false;
       },
       error: () => {

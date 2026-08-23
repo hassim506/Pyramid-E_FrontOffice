@@ -141,7 +141,8 @@ export class AdminrhSidebarComponent implements OnInit, OnDestroy {
 
     this.userService.getMyUsers().subscribe({
       next: (res: any) => {
-        this.employes = res?.total ?? res?.users?.length ?? 0;
+        const users = res?.users || [];
+        this.employes = users.filter((u: any) => u.statut !== false && u.statut !== 0).length;
       },
       error: () => {}
     });

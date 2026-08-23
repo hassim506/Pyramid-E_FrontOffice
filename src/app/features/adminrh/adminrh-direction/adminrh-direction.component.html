@@ -222,7 +222,7 @@
             <i class="ti ti-users"></i>
             <p>Aucun membre affecté</p>
             <button class="btn-p btn-sm" (click)="openAffecterModal()">
-              <i class="ti ti-user-plus"></i> Affecter des employés
+              <i class="ti ti-user-plus"></i> Affecter collaborateur
             </button>
           </div>
         </div>
@@ -304,13 +304,13 @@
 <div class="modal-overlay" *ngIf="showAffecterModal" (click)="closeAffecterModal()">
   <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Affecter des employés à « {{ selectedNode?.nom }} »</h3>
+      <h3>Affecter collaborateurs à « {{ selectedNode?.nom }} »</h3>
       <button class="modal-close" (click)="closeAffecterModal()"><i class="ti ti-x"></i></button>
     </div>
     <div class="modal-body">
       <div class="search-sm modal-search">
         <i class="ti ti-search"></i>
-        <input type="text" [(ngModel)]="employeSearch" placeholder="Rechercher un employé..." class="search-input" />
+        <input type="text" [(ngModel)]="employeSearch" placeholder="Rechercher un collaborateur..." class="search-input" />
       </div>
       <div class="employe-list" *ngIf="!affecterLoading">
         <div class="employe-item" *ngFor="let emp of filteredEmployes" [class.selected]="isEmployeSelected(emp.id)" (click)="toggleEmployeSelection(emp.id)">
@@ -324,7 +324,7 @@
           </div>
         </div>
         <div class="empty-tab" *ngIf="!filteredEmployes.length">
-          <p>Aucun employé disponible</p>
+          <p>Aucun collaborateur disponible</p>
         </div>
       </div>
       <div class="loading-state" *ngIf="affecterLoading"><div class="spinner"></div></div>
